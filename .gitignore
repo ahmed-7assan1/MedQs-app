@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Production
+build/
+dist/
+
+# Debug / logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Env — never commit secrets (use .env.example as template)
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript (keep next-env.d.ts in git — Next references it)
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Prisma (keep schema & migrations; ignore local DB dumps if any)
+*.db
+*.db-journal
+
+# Misc
+*.pem
+.turbo

@@ -1,0 +1,5 @@
+/* Backface visibility utility — needed for flashcard 3D flip */
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
