@@ -1,6 +1,7 @@
 import { signIn } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { MedQsLogoLockup } from "@/components/branding/MedQsLogo";
 
 export default async function LoginPage() {
   const session = await auth();
@@ -17,13 +18,10 @@ export default async function LoginPage() {
         aria-hidden
       />
       <div className="relative w-full max-w-sm">
-        {/* Logo */}
+        {/* Logo (vector + wordmark; follows light/dark theme) */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/25 ring-2 ring-primary/20">
-            <span className="font-display text-2xl font-bold">M</span>
-          </div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/90">Medical education</p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">Welcome to MedQs</h1>
+          <MedQsLogoLockup className="mb-2" />
+          <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-foreground">Welcome to MedQs</h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Structured lectures, exam‑style practice, and AI study tools built for clinical trainees.
           </p>

@@ -39,6 +39,11 @@ export default async function QuizPage({ params }: { params: { paperId: string }
 
   if (!paper) notFound();
 
+  const siteConfig = await prisma.siteConfig
+    .findFirst({ select: { enableAI: true } })
+    .catch(() => null);
+  const siteAiEnabled = siteConfig?.enableAI !== false;
+
   // Flatten all questions from all lectures in this module
   const questions = paper.module.subjects
     .flatMap((s) => s.lectures)
@@ -53,6 +58,9 @@ export default async function QuizPage({ params }: { params: { paperId: string }
       paperTitle={paper.title}
       timeLimitMin={paper.timeLimitMin}
       questions={shuffled as any}
+      siteAiEnabled={siteAiEnabled}
+      paperAiExplanationEnabled={paper.aiExplanationEnabled !== false}
+      allowAiDuringQuiz={paper.allowAiDuringQuiz === true}
     />
   );
 }

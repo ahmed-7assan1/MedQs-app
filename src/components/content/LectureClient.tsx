@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Layers, HelpCircle, ChevronLeft, ChevronRight, RotateCcw, Lightbulb, Loader2 } from "lucide-react";
 import { MarkdownBody } from "@/components/ui/MarkdownBody";
+import { normalizeImageUrl } from "@/lib/markdown-helpers";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
@@ -146,7 +147,12 @@ function QuestionItem({ question, num }: { question: Question; num: number }) {
           {question.imageUrl ? (
             <div className="overflow-hidden rounded-lg border border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={question.imageUrl} alt="" className="max-h-52 w-full object-contain" />
+              <img
+                src={normalizeImageUrl(question.imageUrl)}
+                alt=""
+                className="max-h-52 w-full object-contain"
+                referrerPolicy="no-referrer"
+              />
             </div>
           ) : null}
           {question.body?.trim() ? (

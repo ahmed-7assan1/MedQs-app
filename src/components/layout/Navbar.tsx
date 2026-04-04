@@ -11,6 +11,7 @@ import { signOut } from "next-auth/react";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
 import { cn } from "@/lib/utils";
+import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 
 const navLinks = [
   { href: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
@@ -71,11 +72,7 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedQs
           {logoUrl ? (
             <img src={logoUrl} alt={siteName} className="h-8 w-8 rounded-lg object-contain" />
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="font-display text-sm font-bold text-primary-foreground">
-                {siteName?.[0]?.toUpperCase() ?? "M"}
-              </span>
-            </div>
+            <MedQsLogoMark title={siteName} className="h-8 w-8" />
           )}
           <span className="font-display text-lg font-bold tracking-tight">{siteName}</span>
         </Link>

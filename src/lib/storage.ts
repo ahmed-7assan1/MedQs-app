@@ -1,16 +1,23 @@
 /**
- * lib/storage.ts — S3-compatible file storage (AWS S3 or Cloudflare R2)
- * Uses the AWS SDK v3 with S3Client directly — no heavy framework needed.
+ * lib/storage.ts — file storage: S3/R2, or local disk (USE_LOCAL_FILE_UPLOAD).
  *
- * Required env vars:
- *   S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY
- *   S3_ENDPOINT  (for R2: https://<account-id>.r2.cloudflarestorage.com)
+ * Cloud (S3-compatible): S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY;
+ * optional S3_ENDPOINT (R2), S3_PUBLIC_URL.
+ *
+ * Local (no card): USE_LOCAL_FILE_UPLOAD=true → writes under public/uploads/
+ * (not for Vercel — use S3/R2/Uploadthing there).
  */
 
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 import path from "path";
+import { mkdir, writeFile, unlink } from "fs/promises";
+
+/** Dev / self-hosted: save under public/uploads — no S3, no card. Not supported on Vercel (ephemeral disk). */
+export function useLocalDiskUpload(): boolean {
+  return process.env.USE_LOCAL_FILE_UPLOAD === "true" && process.env.VERCEL !== "1";
+}
 
 function getClient(): S3Client {
   return new S3Client({
@@ -26,6 +33,14 @@ function getClient(): S3Client {
 }
 
 const BUCKET = process.env.S3_BUCKET ?? "medqs";
+
+function assertStorageConfigured(): void {
+  if (!process.env.S3_ACCESS_KEY?.trim() || !process.env.S3_SECRET_KEY?.trim()) {
+    throw new Error(
+      "Object storage is not configured (set S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET, and S3_PUBLIC_URL or S3_ENDPOINT)."
+    );
+  }
+}
 
 // ─── Allowed MIME types ────────────────────────────────────────────────────────
 
@@ -61,8 +76,21 @@ export async function uploadFile(
   mimeType: string,
   folder: string
 ): Promise<{ url: string; key: string }> {
-  const ext = path.extname(originalName).toLowerCase();
-  const key = `${folder}/${randomUUID()}${ext}`;
+  const ext = path.extname(originalName).toLowerCase() || ".bin";
+  const filename = `${randomUUID()}${ext}`;
+  const segments = folder.split(/[/\\]+/).filter(Boolean);
+
+  if (useLocalDiskUpload()) {
+    const dir = path.join(process.cwd(), "public", "uploads", ...segments);
+    await mkdir(dir, { recursive: true });
+    const fullPath = path.join(dir, filename);
+    await writeFile(fullPath, buffer);
+    const key = [...segments, filename].join("/");
+    return { url: `/uploads/${key}`, key };
+  }
+
+  assertStorageConfigured();
+  const key = `${folder}/${filename}`;
 
   const client = getClient();
   await client.send(
@@ -89,6 +117,12 @@ export async function getPresignedUploadUrl(
   mimeType: string,
   folder: string
 ): Promise<{ uploadUrl: string; publicUrl: string; key: string }> {
+  if (useLocalDiskUpload()) {
+    throw new Error(
+      "Presigned S3 upload is disabled when USE_LOCAL_FILE_UPLOAD=true. Use POST /api/v1/upload/direct instead."
+    );
+  }
+  assertStorageConfigured();
   const ext = path.extname(fileName).toLowerCase();
   const key = `${folder}/${randomUUID()}${ext}`;
 
@@ -112,6 +146,11 @@ export async function getPresignedUploadUrl(
 // ─── Delete a file ─────────────────────────────────────────────────────────────
 
 export async function deleteFile(key: string): Promise<void> {
+  if (useLocalDiskUpload()) {
+    const full = path.join(process.cwd(), "public", "uploads", ...key.split("/").filter(Boolean));
+    await unlink(full).catch(() => {});
+    return;
+  }
   const client = getClient();
   await client.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }

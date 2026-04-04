@@ -27,7 +27,21 @@ export async function POST(req: NextRequest) {
   if (role !== "ADMIN" && role !== "SUPER_ADMIN")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const data = await req.json();
-  const paper = await prisma.pastPaper.create({ data });
+  const body = await req.json();
+  const paper = await prisma.pastPaper.create({
+    data: {
+      title: String(body.title ?? "").trim(),
+      semesterId: String(body.semesterId ?? ""),
+      moduleId: String(body.moduleId ?? ""),
+      isInteractive: Boolean(body.isInteractive),
+      timeLimitMin:
+        body.timeLimitMin != null && body.timeLimitMin !== ""
+          ? Math.max(1, parseInt(String(body.timeLimitMin), 10))
+          : null,
+      pdfUrl: body.pdfUrl ? String(body.pdfUrl) : null,
+      aiExplanationEnabled: body.aiExplanationEnabled !== false,
+      allowAiDuringQuiz: Boolean(body.allowAiDuringQuiz),
+    },
+  });
   return NextResponse.json(paper, { status: 201 });
 }

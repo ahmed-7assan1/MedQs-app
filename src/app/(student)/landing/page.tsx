@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Stethoscope, Zap, Brain, Activity, Heart, Microscope, ArrowRight, CheckCircle2, BookOpen, Trophy, MessageSquare, Clock, ChevronRight, Play, Users, Star, Mail, Github } from "lucide-react";
+import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
+import { Zap, Brain, Activity, Heart, Microscope, ArrowRight, CheckCircle2, BookOpen, Trophy, MessageSquare, Clock, ChevronRight, Play, Users, Star, Mail, Github } from "lucide-react";
 
 export default async function LandingPage() {
   const [userCount, questionCount, moduleCount] = await Promise.all([
@@ -22,10 +23,8 @@ export default async function LandingPage() {
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Logo */}
           <Link href="/landing" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: "hsl(var(--primary))", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Stethoscope style={{ width: 20, height: 20, color: "white" }} />
-            </div>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, letterSpacing: "-.01em" }}>MedQs</span>
+            <MedQsLogoMark className="h-9 w-9 shrink-0" title="MedQs" />
+            <MedQsWordmark className="text-xl font-semibold" />
           </Link>
 
           {/* Links */}
@@ -163,10 +162,8 @@ export default async function LandingPage() {
             {/* Brand */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 9, background: "hsl(var(--primary))", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Stethoscope style={{ width: 18, height: 18, color: "white" }} />
-                </div>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>MedQs</span>
+                <MedQsLogoMark className="h-[34px] w-[34px] shrink-0" title="MedQs" />
+                <MedQsWordmark className="text-lg font-semibold" />
               </div>
               <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>AI-powered medical education. Study smarter, score higher.</p>
             </div>
@@ -175,9 +172,11 @@ export default async function LandingPage() {
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".07em", color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>Platform</p>
               {[["Browse content", "/modules"], ["Leaderboard", "/leaderboard"], ["Study Space", "/space"], ["Forum", "/forum"]].map(([l, h]) => (
-                <Link key={l} href={h} style={{ display: "block", fontSize: 13, color: "hsl(var(--muted-foreground))", textDecoration: "none", marginBottom: 8, transition: "color .12s" }}
-                  onMouseEnter={e => e.currentTarget.style.color = "hsl(var(--foreground))"}
-                  onMouseLeave={e => e.currentTarget.style.color = "hsl(var(--muted-foreground))"}>
+                <Link
+                  key={l}
+                  href={h}
+                  className="mb-2 block text-[13px] text-muted-foreground no-underline transition-colors hover:text-foreground"
+                >
                   {l}
                 </Link>
               ))}
@@ -187,9 +186,11 @@ export default async function LandingPage() {
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".07em", color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>Account</p>
               {[["Log in", "/login"], ["Sign up", "/register"], ["Guest browse", "/modules"]].map(([l, h]) => (
-                <Link key={l} href={h} style={{ display: "block", fontSize: 13, color: "hsl(var(--muted-foreground))", textDecoration: "none", marginBottom: 8, transition: "color .12s" }}
-                  onMouseEnter={e => e.currentTarget.style.color = "hsl(var(--foreground))"}
-                  onMouseLeave={e => e.currentTarget.style.color = "hsl(var(--muted-foreground))"}>
+                <Link
+                  key={l}
+                  href={h}
+                  className="mb-2 block text-[13px] text-muted-foreground no-underline transition-colors hover:text-foreground"
+                >
                   {l}
                 </Link>
               ))}

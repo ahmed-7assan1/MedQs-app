@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import type { QuestionWithChoices } from "@/types";
 import ReactMarkdown from "react-markdown";
 import { MarkdownBody } from "@/components/ui/MarkdownBody";
+import { normalizeImageUrl } from "@/lib/markdown-helpers";
 
 interface Props {
   question: QuestionWithChoices;
@@ -31,6 +32,10 @@ interface Props {
   questionSeconds?: number;
   /** When true, hide AI explain (e.g. exam mode — avoids spoilers). */
   examMode?: boolean;
+  /** When false, hide the AI explanation block (site/paper policy). Default true. */
+  showAiPanel?: boolean;
+  /** Passed to explain API so per-paper AI disable is enforced server-side */
+  explainPaperId?: string;
 }
 
 export function QuestionCard({
@@ -46,6 +51,8 @@ export function QuestionCard({
   onReport,
   questionSeconds = 0,
   examMode = false,
+  showAiPanel = true,
+  explainPaperId,
 }: Props) {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [loadingExplain, setLoadingExplain] = useState(false);
@@ -87,7 +94,10 @@ export function QuestionCard({
     }
     setLoadingExplain(true);
     try {
-      const res = await fetch(`/api/v1/questions/${question.id}/explain`);
+      const q = explainPaperId
+        ? `?paperId=${encodeURIComponent(explainPaperId)}`
+        : "";
+      const res = await fetch(`/api/v1/questions/${question.id}/explain${q}`);
       const data = await res.json();
       setExplanation(data.explanation);
       setExplainOpen(true);
@@ -181,9 +191,10 @@ export function QuestionCard({
             <figure className="overflow-hidden rounded-xl border border-border bg-muted/20">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={question.imageUrl}
+                src={normalizeImageUrl(question.imageUrl)}
                 alt={question.body?.trim() ? "Figure for this question" : "Clinical image for this question"}
                 className="max-h-80 w-full object-contain"
+                referrerPolicy="no-referrer"
               />
             </figure>
           ) : null}
@@ -277,7 +288,7 @@ export function QuestionCard({
           </section>
         )}
 
-        {!examMode && (
+        {showAiPanel && !examMode && (
           <div className="border-t border-border pt-4">
             <button
               type="button"

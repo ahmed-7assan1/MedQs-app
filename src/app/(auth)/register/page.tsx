@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Calendar, BookOpen, ChevronRight, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import toast from "react-hot-toast";
 
 interface University { id: string; name: string; logoUrl?: string }
@@ -96,8 +97,8 @@ export default function RegisterPage() {
       />
       {/* Logo */}
       <div className="relative mb-8 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 ring-2 ring-primary/15">
-          <span className="font-display text-xl font-bold">M</span>
+        <div className="mx-auto mb-3 flex justify-center">
+          <MedQsLogoMark className="h-12 w-12" title="MedQs" />
         </div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/90">Onboarding</p>
         <h1 className="mt-2 font-display text-2xl font-bold tracking-tight">Almost there</h1>

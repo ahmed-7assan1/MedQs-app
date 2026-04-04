@@ -44,7 +44,7 @@ export interface PostWithMeta {
     image?: string;
     rank?: { label: string; badge?: string };
   };
-  _count: { likes: number; comments: number };
+  _count?: { likes: number; comments: number };
   likedByMe?: boolean;
 }
 

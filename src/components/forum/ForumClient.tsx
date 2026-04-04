@@ -1,11 +1,24 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PostCard } from "./PostCard";
 import { MessageSquare, Send, Loader2, Globe, Users, PlusCircle, Type, Link2, ImagePlus, X, List, Quote, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import type { PostWithMeta } from "@/types";
 import ReactMarkdown from "react-markdown";
+import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
+import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
+import { uploadFiles } from "@/lib/uploadthing-react";
+
+function uploadthingPublicAppId(): string {
+  return (process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID ?? "").trim();
+}
+
+function fileUrlFromUt(file: { url?: string; ufsUrl?: string } | undefined): string | null {
+  if (!file) return null;
+  const u = file.url ?? file.ufsUrl;
+  return typeof u === "string" && u.length > 0 ? u : null;
+}
 
 interface Forum {
   id: string;
@@ -18,13 +31,25 @@ interface Forum {
 export function ForumClient({
   forums,
   currentUserId,
+  initialForumId = null,
+  initialPosts = [],
 }: {
   forums: Forum[];
   currentUserId: string;
+  /** SSR-loaded posts for the first forum (same path as API — works if client fetch fails) */
+  initialForumId?: string | null;
+  initialPosts?: PostWithMeta[];
 }) {
+  const fallbackRef = useRef({ forumId: initialForumId, posts: initialPosts });
+  fallbackRef.current = { forumId: initialForumId, posts: initialPosts };
+
   const [forumList, setForumList] = useState<Forum[]>(forums);
   const [activeForum, setActiveForum] = useState<Forum | null>(forums[0] ?? null);
-  const [posts, setPosts] = useState<PostWithMeta[]>([]);
+  const [posts, setPosts] = useState<PostWithMeta[]>(() => {
+    const f = forums[0];
+    if (f && initialForumId === f.id) return initialPosts;
+    return [];
+  });
   const [loading, setLoading] = useState(false);
   const [composing, setComposing] = useState(false);
   const [postContent, setPostContent] = useState("");
@@ -40,13 +65,52 @@ export function ForumClient({
   const [handlingInviteId, setHandlingInviteId] = useState<string | null>(null);
 
   async function loadPosts(forumId: string) {
+    if (!forumId) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/forums/${forumId}/posts`);
-      const data = await res.json();
+      const res = await fetch(`/api/v1/forums/${forumId}/posts`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+      const raw = await res.text();
+      let data: unknown = null;
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch {
+        data = null;
+      }
+      if (!res.ok) {
+        const body = data && typeof data === "object" && data !== null ? (data as Record<string, unknown>) : null;
+        const errText = body && typeof body.error === "string" ? body.error : null;
+        const details = body && typeof body.details === "string" ? body.details : null;
+        const code = body && typeof body.code === "string" ? body.code : null;
+        const msg =
+          errText ??
+          (res.status === 401
+            ? "Sign in again to view posts"
+            : res.status === 403
+              ? "You can’t view posts in this forum"
+              : `Could not load posts (${res.status})`);
+        let line = code ? `${msg} [${code}]` : msg;
+        if (details) {
+          const short = details.length > 200 ? `${details.slice(0, 200)}…` : details;
+          line = `${line} — ${short}`;
+        }
+        toast.error(line);
+        const fb = fallbackRef.current;
+        if (!(forumId === fb.forumId && fb.posts.length > 0)) setPosts([]);
+        return;
+      }
+      if (!Array.isArray(data)) {
+        toast.error("Invalid response from server");
+        const fb = fallbackRef.current;
+        if (!(forumId === fb.forumId && fb.posts.length > 0)) setPosts([]);
+        return;
+      }
       setPosts(data);
     } catch {
-      toast.error("Failed to load posts");
+      toast.error("Network error — could not load posts");
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -160,6 +224,18 @@ export function ForumClient({
   async function uploadForumImage(file: File) {
     setUploadingImage(true);
     try {
+      if (uploadthingPublicAppId()) {
+        const uploaded = await uploadFiles("forumImage", { files: [file] });
+        const url = fileUrlFromUt(uploaded[0]);
+        if (url) {
+          setPostImageUrl(url);
+          toast.success("Image uploaded");
+        } else {
+          toast.error("Upload finished but no URL returned");
+        }
+        return;
+      }
+
       const fd = new FormData();
       fd.append("file", file);
       fd.append("folder", "forum");
@@ -178,8 +254,9 @@ export function ForumClient({
       } else {
         toast.error("Invalid response from server");
       }
-    } catch {
-      toast.error("Image upload failed");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Image upload failed";
+      toast.error(msg);
     } finally {
       setUploadingImage(false);
     }
@@ -382,9 +459,11 @@ export function ForumClient({
                     Preview
                   </label>
                   <div className="min-h-[200px] rounded-xl border border-border bg-muted/40 px-3 py-2.5 dark:bg-muted/20">
-                    <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-p:leading-relaxed">
-                      <ReactMarkdown>
-                        {postContent.trim() ? postContent : "_Start typing to see formatting…_"}
+                    <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-p:leading-relaxed prose-img:my-3">
+                      <ReactMarkdown components={markdownComponentsWithImages}>
+                        {postContent.trim()
+                          ? enhancePlainImageUrls(postContent)
+                          : "_Start typing to see formatting…_"}
                       </ReactMarkdown>
                     </div>
                   </div>
@@ -424,7 +503,12 @@ export function ForumClient({
               {postImageUrl ? (
                 <div className="overflow-hidden rounded-lg border border-border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={postImageUrl} alt="" className="max-h-48 w-full object-cover" />
+                  <img
+                    src={normalizeImageUrl(postImageUrl)}
+                    alt=""
+                    className="max-h-48 w-full object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
               ) : null}
               <div className="flex flex-wrap items-center gap-2">

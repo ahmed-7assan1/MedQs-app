@@ -9,6 +9,21 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const site = await prisma.siteConfig.findFirst({ select: { enableAI: true } }).catch(() => null);
+  if (site?.enableAI === false) {
+    return NextResponse.json({ error: "AI explanations are disabled for this site" }, { status: 403 });
+  }
+
+  const paperId = req.nextUrl.searchParams.get("paperId")?.trim();
+  if (paperId) {
+    const paper = await prisma.pastPaper
+      .findUnique({ where: { id: paperId }, select: { aiExplanationEnabled: true } })
+      .catch(() => null);
+    if (paper?.aiExplanationEnabled === false) {
+      return NextResponse.json({ error: "AI explanations are disabled for this quiz" }, { status: 403 });
+    }
+  }
+
   const cacheKey = `explain:${params.id}`;
   const cached = await cacheGet(cacheKey);
   if (cached) return NextResponse.json({ explanation: cached, cached: true });

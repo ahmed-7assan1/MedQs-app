@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
+import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import toast from "react-hot-toast";
 
 type Item = {
@@ -58,15 +60,20 @@ export function UserPosts({ posts, isOwn }: { posts: Item[]; isOwn: boolean }) {
             )}
           </div>
           {post.content?.trim() ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown>{post.content}</ReactMarkdown>
+            <div className="prose prose-sm dark:prose-invert max-w-none prose-img:my-3">
+              <ReactMarkdown components={markdownComponentsWithImages}>
+                {enhancePlainImageUrls(post.content)}
+              </ReactMarkdown>
             </div>
           ) : null}
           {post.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={post.imageUrl}
+              src={normalizeImageUrl(post.imageUrl)}
               alt=""
-              className={`max-h-72 w-full rounded-lg object-cover ${post.content?.trim() ? "mt-3" : ""}`}
+              className={`max-h-72 w-full rounded-lg border border-border bg-muted/20 object-contain ${post.content?.trim() ? "mt-3" : ""}`}
+              loading="lazy"
+              referrerPolicy="no-referrer"
             />
           ) : null}
           {!post.content?.trim() && !post.imageUrl ? (

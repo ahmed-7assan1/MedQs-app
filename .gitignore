@@ -51,3 +51,7 @@ Thumbs.db
 # Misc
 *.pem
 .turbo
+
+# Local uploads (USE_LOCAL_FILE_UPLOAD) — keep folder, ignore contents
+public/uploads/**
+!public/uploads/.gitkeep

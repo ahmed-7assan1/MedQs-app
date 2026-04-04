@@ -190,6 +190,10 @@ model PastPaper {
   pdfUrl        String?
   isInteractive Boolean          @default(false)
   timeLimitMin  Int?
+  // Site-wide AI can still be off; when false, hide AI explain for this paper everywhere.
+  aiExplanationEnabled Boolean @default(true)
+  // When true, students can open AI during the quiz; when false, only after submit / on review page.
+  allowAiDuringQuiz    Boolean @default(false)
   semester      Semester         @relation(fields: [semesterId], references: [id])
   semesterId    String
   module        Module           @relation(fields: [moduleId], references: [id])

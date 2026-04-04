@@ -24,6 +24,7 @@ import {
 import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 
 interface NotifItem {
   id: string;
@@ -201,15 +202,7 @@ export function Sidebar({
     return logoUrl ? (
       <img src={logoUrl} alt={siteName} className={cn("h-8 w-8 rounded-lg object-contain", className)} />
     ) : (
-      <div
-        className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-primary-foreground shadow-md",
-          className
-        )}
-        style={{ background: "hsl(var(--primary))", fontFamily: "var(--font-display)" }}
-      >
-        {siteName[0]}
-      </div>
+      <MedQsLogoMark title={siteName} className={cn("h-8 w-8", className)} />
     );
   }
 

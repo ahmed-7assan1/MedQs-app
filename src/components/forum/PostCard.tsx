@@ -7,6 +7,8 @@ import { formatDistanceToNow } from "@/lib/utils";
 import { CommentThread } from "./CommentThread";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
+import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
+import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 
 interface Props {
   post: PostWithMeta;
@@ -23,7 +25,7 @@ const RANK_COLORS: Record<string, string> = {
 
 export function PostCard({ post, currentUserId }: Props) {
   const [liked, setLiked]       = useState(post.likedByMe ?? false);
-  const [likeCount, setLikeCount] = useState(post._count.likes);
+  const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
   const [liking, setLiking]     = useState(false);
 
   async function handleLike() {
@@ -87,12 +89,21 @@ export function PostCard({ post, currentUserId }: Props) {
 
       {/* Content */}
       <div className="px-5 pb-4">
-        <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
-          <ReactMarkdown>{post.content}</ReactMarkdown>
+        <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed prose-img:my-3">
+          <ReactMarkdown components={markdownComponentsWithImages}>
+            {enhancePlainImageUrls(post.content)}
+          </ReactMarkdown>
         </div>
-        {post.imageUrl && (
-          <img src={post.imageUrl} alt="" className="mt-3 w-full rounded-lg object-cover max-h-80" />
-        )}
+        {post.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={normalizeImageUrl(post.imageUrl)}
+            alt=""
+            className="mt-3 max-h-80 w-full rounded-lg border border-border bg-muted/20 object-contain"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+        ) : null}
       </div>
 
       {/* Interactions disabled */}
@@ -133,7 +144,7 @@ export function PostCard({ post, currentUserId }: Props) {
         <CommentThread
           postId={post.id}
           currentUserId={currentUserId}
-          initialCount={post._count.comments}
+          initialCount={post._count?.comments ?? 0}
         />
       )}
     </article>

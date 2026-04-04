@@ -43,6 +43,58 @@
   --sidebar-active-bg: 221 75% 48%;
 }
 
+/* ── MedQs vector logo (SVG) — light UI ── */
+.medqs-logo {
+  --ml-cyan: #38bdf8;
+  --ml-sky: #0ea5e9;
+  --ml-mid: #0284c7;
+  --ml-navy: #0c4a6e;
+  --ml-deep: #075985;
+  --ml-cross: #ffffff;
+  --ml-heart: #0369a1;
+  --ml-ring-hi: #7dd3fc;
+  --ml-ring-lo: #1e3a8a;
+  --ml-glass-fill: #e0f2fe;
+  --ml-text-med: #0c4a6e;
+  --ml-text-qs: #0284c7;
+  --ml-tagline: #0c4a6e;
+}
+
+/* Theme dark (class + data-theme for html) */
+.dark .medqs-logo,
+html[data-theme="dark"] .medqs-logo {
+  --ml-cyan: #7dd3fc;
+  --ml-sky: #38bdf8;
+  --ml-mid: #0ea5e9;
+  --ml-navy: #082f49;
+  --ml-deep: #0c4a6e;
+  --ml-cross: #f8fafc;
+  --ml-heart: #0369a1;
+  --ml-ring-hi: #bae6fd;
+  --ml-ring-lo: #1d4ed8;
+  --ml-glass-fill: #0c4a6e;
+  --ml-text-med: #e0f2fe;
+  --ml-text-qs: #38bdf8;
+  --ml-tagline: #bae6fd;
+}
+
+/* Force palette on always-dark surfaces (e.g. marketing hero) */
+.medqs-logo--on-dark {
+  --ml-cyan: #7dd3fc;
+  --ml-sky: #38bdf8;
+  --ml-mid: #22d3ee;
+  --ml-navy: #082f49;
+  --ml-deep: #0e7490;
+  --ml-cross: #ffffff;
+  --ml-heart: #0ea5e9;
+  --ml-ring-hi: #93c5fd;
+  --ml-ring-lo: #1d4ed8;
+  --ml-glass-fill: #0c4a6e;
+  --ml-text-med: #f0f9ff;
+  --ml-text-qs: #38bdf8;
+  --ml-tagline: #cbd5e1;
+}
+
 .dark {
   /* Blue + near-black */
   --background: 222 47% 5%;

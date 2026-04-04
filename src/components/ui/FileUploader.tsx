@@ -90,6 +90,27 @@ export function FileUploader({
       ]);
     };
 
+    const directFolders = ["forum", "question", "ad", "lecture", "pastpaper"] as const;
+    const canDirect = directFolders.includes(folder as (typeof directFolders)[number]);
+    /** Serverless hosts often cap request bodies ~4–5MB; direct upload goes through Next first */
+    const directFirstMaxBytes = 4 * 1024 * 1024;
+
+    if (canDirect && file.size <= directFirstMaxBytes) {
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("folder", folder);
+        const res = await fetch("/api/v1/upload/direct", { method: "POST", body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && typeof data.url === "string") {
+          markDone(data.url);
+          return;
+        }
+      } catch {
+        /* continue to presigned PUT */
+      }
+    }
+
     try {
       const presignRes = await fetch("/api/v1/upload/presign", {
         method: "POST",
@@ -133,8 +154,6 @@ export function FileUploader({
 
       markDone(publicUrl);
     } catch (err: any) {
-      const directFolders = ["forum", "question", "ad", "lecture", "pastpaper"] as const;
-      const canDirect = directFolders.includes(folder as (typeof directFolders)[number]);
       if (!canDirect) {
         setFiles((prev) =>
           prev.map((f, i) =>

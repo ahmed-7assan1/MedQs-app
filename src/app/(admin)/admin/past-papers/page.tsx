@@ -17,6 +17,8 @@ interface PastPaper {
   createdAt: string;
   module: { name: string };
   _count: { attempts: number };
+  aiExplanationEnabled?: boolean;
+  allowAiDuringQuiz?: boolean;
 }
 
 export default function AdminPastPapersPage() {
@@ -34,6 +36,8 @@ export default function AdminPastPapersPage() {
     isInteractive: false,
     timeLimitMin: "",
     pdfUrl: "",
+    aiExplanationEnabled: true,
+    allowAiDuringQuiz: false,
   });
 
   useEffect(() => {
@@ -62,19 +66,44 @@ export default function AdminPastPapersPage() {
         isInteractive: form.isInteractive,
         timeLimitMin: form.timeLimitMin ? parseInt(form.timeLimitMin) : null,
         pdfUrl: form.pdfUrl || null,
+        aiExplanationEnabled: form.aiExplanationEnabled,
+        allowAiDuringQuiz: form.allowAiDuringQuiz,
       }),
     });
 
     if (res.ok) {
       const paper = await res.json();
       setPapers(prev => [paper, ...prev]);
-      setForm({ title: "", semesterId: "", moduleId: "", isInteractive: false, timeLimitMin: "", pdfUrl: "" });
+      setForm({
+        title: "",
+        semesterId: "",
+        moduleId: "",
+        isInteractive: false,
+        timeLimitMin: "",
+        pdfUrl: "",
+        aiExplanationEnabled: true,
+        allowAiDuringQuiz: false,
+      });
       setShowForm(false);
       toast.success("Past paper created!");
     } else {
       toast.error("Failed to create");
     }
     setSaving(false);
+  }
+
+  async function patchPaper(id: string, patch: Partial<Pick<PastPaper, "aiExplanationEnabled" | "allowAiDuringQuiz">>) {
+    const res = await fetch(`/api/v1/past-papers/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) {
+      toast.error("Could not update paper");
+      return;
+    }
+    const updated = await res.json();
+    setPapers((prev) => prev.map((p) => (p.id === id ? { ...p, ...updated } : p)));
   }
 
   async function handleDelete(id: string, title: string) {
@@ -177,6 +206,54 @@ export default function AdminPastPapersPage() {
                 )} />
               </div>
             </div>
+
+            <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-3">
+              <div>
+                <p className="text-sm font-medium">AI explanations</p>
+                <p className="text-xs text-muted-foreground">Gemini “explain this question” on review / quiz</p>
+              </div>
+              <div
+                role="switch"
+                aria-checked={form.aiExplanationEnabled}
+                onClick={() => setForm((f) => ({ ...f, aiExplanationEnabled: !f.aiExplanationEnabled }))}
+                className={cn(
+                  "relative ml-auto flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                  form.aiExplanationEnabled ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <span
+                  className={cn(
+                    "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
+                    form.aiExplanationEnabled ? "translate-x-6" : "translate-x-1"
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-3">
+              <div>
+                <p className="text-sm font-medium">AI during quiz</p>
+                <p className="text-xs text-muted-foreground">
+                  If off, AI only after submit / on results page (recommended for exams)
+                </p>
+              </div>
+              <div
+                role="switch"
+                aria-checked={form.allowAiDuringQuiz}
+                onClick={() => setForm((f) => ({ ...f, allowAiDuringQuiz: !f.allowAiDuringQuiz }))}
+                className={cn(
+                  "relative ml-auto flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                  form.allowAiDuringQuiz ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <span
+                  className={cn(
+                    "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
+                    form.allowAiDuringQuiz ? "translate-x-6" : "translate-x-1"
+                  )}
+                />
+              </div>
+            </div>
           </div>
 
           {/* PDF upload */}
@@ -256,6 +333,16 @@ export default function AdminPastPapersPage() {
                         Interactive
                       </span>
                     )}
+                    {paper.aiExplanationEnabled === false && (
+                      <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                        No AI
+                      </span>
+                    )}
+                    {paper.allowAiDuringQuiz && (
+                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">
+                        AI in-quiz
+                      </span>
+                    )}
                     {paper.pdfUrl && (
                       <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer"
                         className="text-primary hover:underline">PDF</a>
@@ -263,12 +350,35 @@ export default function AdminPastPapersPage() {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => handleDelete(paper.id, paper.title)}
-                className="flex-shrink-0 rounded-lg p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <div className="flex flex-shrink-0 flex-col items-end gap-2">
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const on = paper.aiExplanationEnabled !== false;
+                      patchPaper(paper.id, { aiExplanationEnabled: !on });
+                    }}
+                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
+                  >
+                    {paper.aiExplanationEnabled === false ? "Enable AI" : "Disable AI"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      patchPaper(paper.id, { allowAiDuringQuiz: !Boolean(paper.allowAiDuringQuiz) })
+                    }
+                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
+                  >
+                    {paper.allowAiDuringQuiz ? "AI only after quiz" : "Allow AI in quiz"}
+                  </button>
+                </div>
+                <button
+                  onClick={() => handleDelete(paper.id, paper.title)}
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -30,6 +30,12 @@ interface QuizClientProps {
   paperTitle: string;
   timeLimitMin: number | null;
   questions: Question[];
+  /** Site-wide AI toggle (admin settings) */
+  siteAiEnabled?: boolean;
+  /** Per-paper: allow AI explain at all */
+  paperAiExplanationEnabled?: boolean;
+  /** Per-paper: allow AI during the quiz; if false, only after submit (brief) / on review page */
+  allowAiDuringQuiz?: boolean;
 }
 
 function metaStorageKey(paperId: string) {
@@ -40,7 +46,15 @@ function examModeKey(paperId: string) {
   return `medqs-quiz-exam-${paperId}`;
 }
 
-export function QuizClient({ paperId, paperTitle, timeLimitMin, questions }: QuizClientProps) {
+export function QuizClient({
+  paperId,
+  paperTitle,
+  timeLimitMin,
+  questions,
+  siteAiEnabled = true,
+  paperAiExplanationEnabled = true,
+  allowAiDuringQuiz = false,
+}: QuizClientProps) {
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
@@ -57,6 +71,11 @@ export function QuizClient({ paperId, paperTitle, timeLimitMin, questions }: Qui
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [examMode, setExamMode] = useState(false);
+
+  const showAiPanel =
+    siteAiEnabled &&
+    paperAiExplanationEnabled &&
+    (allowAiDuringQuiz || submitted);
 
   useEffect(() => {
     try {
@@ -317,6 +336,8 @@ export function QuizClient({ paperId, paperTitle, timeLimitMin, questions }: Qui
         onReport={() => setReportOpen(true)}
         questionSeconds={questionSeconds}
         examMode={examMode}
+        showAiPanel={showAiPanel}
+        explainPaperId={paperId}
       />
 
       <nav className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Question navigation">

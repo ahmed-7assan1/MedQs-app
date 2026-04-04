@@ -1,10 +1,30 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 
+const MarkdownImg: NonNullable<Components["img"]> = ({ src, alt, title }) => {
+  if (!src || typeof src !== "string") return null;
+  const url = normalizeImageUrl(src);
+  if (!url || /^javascript:/i.test(url)) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={url}
+      alt={alt ?? ""}
+      title={title ?? undefined}
+      className="my-3 max-h-[min(24rem,70vh)] w-full rounded-lg border border-border bg-muted/20 object-contain"
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+    />
+  );
+};
+
 const baseComponents: Components = {
+  img: MarkdownImg,
   strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
   a: ({ href, children }) => (
     <a
@@ -53,11 +73,12 @@ function toMarkdownSource(raw: string | null | undefined): string {
 
 export function MarkdownBody({ content, className, inline = false, as = "div" }: Props) {
   const Tag = as;
-  const src = toMarkdownSource(content);
+  const raw = toMarkdownSource(content);
+  const src = enhancePlainImageUrls(raw);
   return (
     <Tag
       className={cn(
-        "prose prose-sm max-w-none dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed",
+        "prose prose-sm max-w-none dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed prose-img:my-3",
         inline && "prose-p:my-0 prose-headings:my-0 prose-ul:my-1 prose-ol:my-1",
         className
       )}
@@ -66,3 +87,6 @@ export function MarkdownBody({ content, className, inline = false, as = "div" }:
     </Tag>
   );
 }
+
+/** Shared markdown render map (forum, profile posts, etc.) */
+export const markdownComponentsWithImages: Components = baseComponents;

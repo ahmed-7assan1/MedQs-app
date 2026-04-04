@@ -14,10 +14,22 @@ export default async function AttemptResultPage({
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
+  const siteConfig = await prisma.siteConfig
+    .findFirst({ select: { enableAI: true } })
+    .catch(() => null);
+  const siteAiEnabled = siteConfig?.enableAI !== false;
+
   const attempt = await prisma.quizAttempt.findUnique({
     where: { id: params.attemptId },
     include: {
-      pastPaper: { select: { id: true, title: true } },
+      pastPaper: {
+        select: {
+          id: true,
+          title: true,
+          aiExplanationEnabled: true,
+          allowAiDuringQuiz: true,
+        },
+      },
       items: {
         include: {
           question: {
@@ -49,6 +61,9 @@ export default async function AttemptResultPage({
     attempt.score >= 70 ? "bg-emerald-50 dark:bg-emerald-900/20" :
     attempt.score >= 50 ? "bg-amber-50 dark:bg-amber-900/20" :
     "bg-red-50 dark:bg-red-900/20";
+
+  const showAiOnReview =
+    siteAiEnabled && attempt.pastPaper.aiExplanationEnabled !== false;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
@@ -109,6 +124,8 @@ export default async function AttemptResultPage({
             index={i}
             showResult
             selectedAnswer={item.chosen ?? undefined}
+            showAiPanel={showAiOnReview}
+            explainPaperId={attempt.pastPaper.id}
           />
         ))}
       </div>

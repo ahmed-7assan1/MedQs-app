@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
 import { ChunkLoadRecovery } from "@/components/system/ChunkLoadRecovery";
 import { prisma } from "@/lib/prisma";
+import { ourFileRouter } from "@/lib/uploadthing";
 import "../styles/globals.css";
 
 // Fetch site config server-side — cached per request by Next.js
@@ -138,6 +141,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {config.faviconUrl && <link rel="icon" href={config.faviconUrl} />}
       </head>
       <body>
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <ChunkLoadRecovery />
         {children}
         <Toaster

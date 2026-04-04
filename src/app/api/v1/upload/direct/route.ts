@@ -73,10 +73,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url });
   } catch (e) {
     console.error("[upload/direct]", e);
-    return NextResponse.json(
-      { error: "Storage upload failed. Check S3/R2 credentials and bucket policy." },
-      { status: 500 }
-    );
+    const hint =
+      e instanceof Error && e.message.includes("Object storage")
+        ? e.message
+        : "Storage upload failed. For free local dev (no card): set USE_LOCAL_FILE_UPLOAD=true in .env (not on Vercel). Or set S3_* / R2 keys for cloud storage.";
+    return NextResponse.json({ error: hint }, { status: 500 });
   }
 }
 

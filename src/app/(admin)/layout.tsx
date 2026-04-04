@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
 import {
   LayoutDashboard, BookOpen, HelpCircle, Layers, Zap,
   MessageSquare, Users, Settings, ChevronRight,
@@ -31,10 +32,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="hidden w-56 flex-shrink-0 border-r border-border bg-card md:flex md:flex-col">
         {/* Logo */}
         <div className="flex h-14 items-center gap-2 border-b border-border px-4">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-            <span className="font-display text-xs font-bold text-primary-foreground">M</span>
-          </div>
-          <span className="font-display text-base font-bold">MedQs</span>
+          <MedQsLogoMark className="h-7 w-7 shrink-0" title="MedQs" />
+          <MedQsWordmark className="text-base" />
           <span className="ml-auto rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
             Admin
           </span>

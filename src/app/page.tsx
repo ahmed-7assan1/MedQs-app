@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
 
 export default async function RootPage() {
   const session = await auth();
@@ -13,6 +14,7 @@ export default async function RootPage() {
   }).catch(() => null);
 
   const siteName = siteConfig?.siteName ?? "MedQs";
+  const logoUrl = siteConfig?.logoUrl?.trim() || null;
 
   return (
     <div style={{
@@ -47,23 +49,52 @@ export default async function RootPage() {
         padding: "20px 40px",
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: "linear-gradient(135deg, #3b82f6, #6366f1)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: "'Fraunces', Georgia, serif",
-            fontWeight: 800, fontSize: 16, color: "white",
-          }}>
-            {siteName[0]}
-          </div>
-          <span style={{
-            fontFamily: "'Fraunces', Georgia, serif",
-            fontWeight: 700, fontSize: 18, color: "white", letterSpacing: "-0.02em",
-          }}>
-            {siteName}
-          </span>
-        </div>
+        <Link
+          href="/"
+          style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}
+        >
+          {logoUrl ? (
+            <>
+              <img
+                src={logoUrl}
+                alt={siteName}
+                width={32}
+                height={32}
+                style={{ borderRadius: 8, objectFit: "contain" }}
+              />
+              <span
+                style={{
+                  fontFamily: "'Sora', system-ui, sans-serif",
+                  fontWeight: 700,
+                  fontSize: 18,
+                  color: "white",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {siteName}
+              </span>
+            </>
+          ) : (
+            <>
+              <MedQsLogoMark variant="onDark" className="h-8 w-8 shrink-0" title={siteName} />
+              {siteName === "MedQs" ? (
+                <MedQsWordmark variant="onDark" className="text-lg" />
+              ) : (
+                <span
+                  style={{
+                    fontFamily: "'Sora', system-ui, sans-serif",
+                    fontWeight: 700,
+                    fontSize: 18,
+                    color: "white",
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {siteName}
+                </span>
+              )}
+            </>
+          )}
+        </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <Link href="/register" style={{
             fontSize: 13, color: "rgba(255,255,255,0.68)",

@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { ForumClient } from "@/components/forum/ForumClient";
+import { loadForumPostsForUser } from "@/lib/forum-posts";
+import type { PostWithMeta } from "@/types";
 
 export default async function ForumPage() {
   const session = await auth();
@@ -27,10 +29,26 @@ export default async function ForumPage() {
     },
   });
 
+  const first = forums[0];
+  let initialForumId: string | null = null;
+  let initialPosts: PostWithMeta[] = [];
+  if (first) {
+    initialForumId = first.id;
+    const loaded = await loadForumPostsForUser({
+      forumId: first.id,
+      userId: session.user.id,
+      page: 1,
+      limit: 20,
+    });
+    if (loaded.ok) initialPosts = loaded.posts as PostWithMeta[];
+  }
+
   return (
     <ForumClient
       forums={forums as any}
       currentUserId={session.user.id}
+      initialForumId={initialForumId}
+      initialPosts={initialPosts}
     />
   );
 }

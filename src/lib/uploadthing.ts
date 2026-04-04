@@ -4,7 +4,7 @@
  * Free tier: 2GB storage, no credit card required
  * Get API key: https://uploadthing.com → Create App → API Keys
  *
- * Env var: UPLOADTHING_SECRET
+ * Env var (v7): UPLOADTHING_TOKEN — dashboard → API Keys → V7 tab
  */
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { auth } from "@/lib/auth";
@@ -54,6 +54,13 @@ export const ourFileRouter = {
   adBanner: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
     .middleware(requireAdmin())
     .onUploadComplete(async ({ metadata, file }) => {
+      return { url: file.url };
+    }),
+
+  // Forum post images — any signed-in user
+  forumImage: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
+    .middleware(requireAuth)
+    .onUploadComplete(async ({ file }) => {
       return { url: file.url };
     }),
 } satisfies FileRouter;

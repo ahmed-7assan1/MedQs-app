@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NotificationsLoader } from "@/components/notifications/NotificationsLoader";
 import { AdBannerModal } from "@/components/ads/AdBannerModal";
+import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +57,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
         {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
         <main className="flex-1 pb-8">{children}</main>
+        {isAdmin && !isGuest ? <AdminStudentBar /> : null}
       </div>
     </div>
   );
