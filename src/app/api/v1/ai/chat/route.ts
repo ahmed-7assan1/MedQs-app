@@ -1,7 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { generateAIReplyWithFallback } from "@/lib/ai-router";
+import {
+  AIConfigurationError,
+  generateAIReplyWithFallback,
+  type ChatImagePart,
+} from "@/lib/ai-router";
+import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
+
+function sanitizeImages(raw: unknown): ChatImagePart[] {
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  const out: ChatImagePart[] = [];
+  for (const item of raw.slice(0, 2)) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const mimeType = typeof o.mimeType === "string" ? o.mimeType : "";
+    let data = typeof o.data === "string" ? o.data.trim() : "";
+    if (data.startsWith("data:")) {
+      const mid = data.indexOf(",");
+      if (mid > 0) data = data.slice(mid + 1);
+    }
+    if (!/^image\/(jpeg|png|webp|gif)$/i.test(mimeType)) continue;
+    const approxBytes = (data.length * 3) / 4;
+    if (approxBytes > 4 * 1024 * 1024) continue;
+    if (data) out.push({ mimeType: mimeType.toLowerCase(), data });
+  }
+  return out;
+}
 
 // Daily chat limits per rank (label → daily limit; -1 = unlimited)
 const RANK_LIMITS: Record<string, number> = {
@@ -16,8 +41,21 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { message, context } = await req.json();
-  if (!message?.trim()) return NextResponse.json({ error: "Message required" }, { status: 400 });
+  const site = await prisma.siteConfig.findFirst({ select: { enableAI: true } }).catch(() => null);
+  if (site?.enableAI === false) {
+    return NextResponse.json({ error: "AI chat is disabled for this site in admin settings." }, { status: 403 });
+  }
+
+  const body = await req.json();
+  const { message: rawMessage, context, images: rawImages } = body;
+  const images = sanitizeImages(rawImages);
+  const message =
+    typeof rawMessage === "string" && rawMessage.trim()
+      ? rawMessage.trim()
+      : images.length > 0
+        ? "(The student attached image(s) with no text. Describe what you see in a medical-education context and ask what they want to know.)"
+        : "";
+  if (!message) return NextResponse.json({ error: "Message or image required" }, { status: 400 });
 
   // Get user with rank
   const user = await prisma.user.findUnique({
@@ -54,14 +92,25 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const systemPrompt = `You are MedQs AI, a helpful medical education assistant for medical students.
-You help students understand medical concepts, explain topics, answer questions about their curriculum, and provide study tips.
-Be concise, accurate, and friendly. Use simple language appropriate for medical students.
-If asked about a specific medical topic, give a clear educational explanation.
-Do not provide personal medical advice or diagnoses — always remind students to consult their professors or clinical supervisors for patient care decisions.
-${context ? `\nCurrent context: The student is studying ${context}` : ""}`;
+  const systemPrompt = buildMedicalSystemPrompt(
+    context ? `Current context: the student is studying ${context}` : undefined
+  );
 
-  const aiResult = await generateAIReplyWithFallback(message, systemPrompt);
+  let aiResult: { provider: string; text: string };
+  try {
+    aiResult = await generateAIReplyWithFallback(message, systemPrompt, { images });
+  } catch (e) {
+    console.error("[ai/chat]", e);
+    if (e instanceof AIConfigurationError) {
+      return NextResponse.json({ error: e.message }, { status: 503 });
+    }
+    const detail = e instanceof Error ? e.message.trim() : "";
+    const safe =
+      detail && detail.length < 500
+        ? detail
+        : "The AI service did not respond. Set GEMINI_API_KEY, restart `npm run dev`, or try GEMINI_MODEL=gemini-1.5-flash in .env if the model is unavailable.";
+    return NextResponse.json({ error: safe }, { status: 503 });
+  }
   const reply = aiResult.text;
 
   // Increment usage counter

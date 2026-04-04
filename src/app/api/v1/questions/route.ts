@@ -7,6 +7,7 @@ const CreateSchema = z
   .object({
     body: z.string().default(""),
     imageUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+    stemLayout: z.enum(["STANDARD", "IMAGE_OVERLAY"]).optional(),
     choices: z.array(z.object({ key: z.string(), text: z.string() })).min(2),
     answer: z.string(),
     explanation: z.string().optional(),
@@ -17,10 +18,15 @@ const CreateSchema = z
     ...d,
     body: d.body.trim(),
     imageUrl: d.imageUrl === "" || d.imageUrl == null ? null : d.imageUrl,
+    stemLayout: d.stemLayout ?? "STANDARD",
   }))
   .refine((d) => d.body.length >= 1 || Boolean(d.imageUrl), {
     message: "Add question text and/or an image",
     path: ["body"],
+  })
+  .refine((d) => d.stemLayout !== "IMAGE_OVERLAY" || Boolean(d.imageUrl), {
+    message: "Overlay layout requires an image URL",
+    path: ["stemLayout"],
   });
 
 export async function GET(req: NextRequest) {
@@ -34,7 +40,7 @@ export async function GET(req: NextRequest) {
     where: lectureId ? { lectureId } : undefined,
     orderBy: { createdAt: "asc" },
     select: {
-      id: true, body: true, imageUrl: true, choices: true, answer: true,
+      id: true, body: true, imageUrl: true, stemLayout: true, choices: true, answer: true,
       explanation: true, difficulty: true, lectureId: true,
     },
   });

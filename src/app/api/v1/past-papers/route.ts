@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
       pdfUrl: body.pdfUrl ? String(body.pdfUrl) : null,
       aiExplanationEnabled: body.aiExplanationEnabled !== false,
       allowAiDuringQuiz: Boolean(body.allowAiDuringQuiz),
+      secureExamMode: Boolean(body.secureExamMode),
+      restrictCopyPaste: Boolean(body.restrictCopyPaste),
+      trackFocusLoss: Boolean(body.trackFocusLoss),
     },
   });
   return NextResponse.json(paper, { status: 201 });

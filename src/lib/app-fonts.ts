@@ -1,0 +1,22 @@
+import { Poppins, Tajawal } from "next/font/google";
+
+/**
+ * Site-wide text: Latin glyphs from Poppins only; Arabic glyphs from Tajawal (browser picks per codepoint).
+ * Do not inject a single --font-sans-runtime from DB — it breaks Arabic shaping.
+ */
+export const fontPoppins = Poppins({
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
+export const fontTajawal = Tajawal({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "700", "800"],
+  variable: "--font-tajawal",
+  display: "swap",
+});
+
+export const appFontVariableClassName = `${fontPoppins.variable} ${fontTajawal.variable}`.trim();

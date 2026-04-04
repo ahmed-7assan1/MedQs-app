@@ -25,6 +25,12 @@ export async function POST(req: NextRequest) {
   if (!body?.trim())
     return NextResponse.json({ error: "Question body required" }, { status: 400 });
 
-  const suggestion = await suggestQuestionDetails(body);
-  return NextResponse.json(suggestion);
+  try {
+    const suggestion = await suggestQuestionDetails(body);
+    return NextResponse.json(suggestion);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "AI suggestion failed";
+    console.error("[api/v1/ai/suggest]", e);
+    return NextResponse.json({ error: msg }, { status: 502 });
+  }
 }

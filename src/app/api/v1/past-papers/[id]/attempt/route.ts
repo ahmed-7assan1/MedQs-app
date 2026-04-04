@@ -7,7 +7,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { answers, timeTaken } = await req.json();
+  const { answers, timeTaken, focusLossCount } = await req.json();
+  const loss =
+    typeof focusLossCount === "number" && Number.isFinite(focusLossCount)
+      ? Math.max(0, Math.min(10_000, Math.floor(focusLossCount)))
+      : 0;
   // answers: { [questionId]: chosenKey }
 
   const paper = await prisma.pastPaper.findUnique({
@@ -38,6 +42,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       pastPaperId: params.id,
       score,
       timeTaken: timeTaken ?? 0,
+      focusLossCount: loss,
       items: { create: items },
     },
     include: { items: true },

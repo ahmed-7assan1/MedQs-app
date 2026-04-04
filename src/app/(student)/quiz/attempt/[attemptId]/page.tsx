@@ -34,8 +34,15 @@ export default async function AttemptResultPage({
         include: {
           question: {
             select: {
-              id: true, body: true, choices: true,
-              answer: true, explanation: true, difficulty: true, lectureId: true,
+              id: true,
+              body: true,
+              imageUrl: true,
+              stemLayout: true,
+              choices: true,
+              answer: true,
+              explanation: true,
+              difficulty: true,
+              lectureId: true,
             },
           },
         },
@@ -86,7 +93,7 @@ export default async function AttemptResultPage({
         <p className="text-sm text-muted-foreground mb-4">
           {correct} correct out of {total} questions
         </p>
-        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Trophy className="h-4 w-4 text-amber-500" />
             <span>{attempt.score >= 70 ? "Passed" : attempt.score >= 50 ? "Average" : "Needs work"}</span>
@@ -95,6 +102,13 @@ export default async function AttemptResultPage({
             <Clock className="h-4 w-4" />
             <span>{mins}m {secs.toString().padStart(2, "0")}s</span>
           </div>
+          {attempt.focusLossCount > 0 && (
+            <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+              <span className="text-xs font-medium">
+                Tab / window switches recorded: {attempt.focusLossCount}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

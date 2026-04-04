@@ -36,6 +36,8 @@ interface Props {
   showAiPanel?: boolean;
   /** Passed to explain API so per-paper AI disable is enforced server-side */
   explainPaperId?: string;
+  /** Anti-cheat: discourage copy/paste of stem and choices during live quiz */
+  protectContent?: boolean;
 }
 
 export function QuestionCard({
@@ -53,6 +55,7 @@ export function QuestionCard({
   examMode = false,
   showAiPanel = true,
   explainPaperId,
+  protectContent = false,
 }: Props) {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [loadingExplain, setLoadingExplain] = useState(false);
@@ -124,10 +127,21 @@ export function QuestionCard({
     if (i >= 0) rovingChoiceIndex = i;
   }
 
+  const layout = question.stemLayout === "IMAGE_OVERLAY" ? "IMAGE_OVERLAY" : "STANDARD";
+
   return (
     <article
-      className="rounded-2xl border border-border/90 bg-card shadow-[0_4px_24px_rgb(0_0_0/0.05)] dark:shadow-[0_8px_32px_rgb(0_0_0/0.25)]"
+      className={cn(
+        "rounded-2xl border border-border/90 bg-card shadow-[0_4px_24px_rgb(0_0_0/0.05)] dark:shadow-[0_8px_32px_rgb(0_0_0/0.25)]",
+        protectContent && "select-none"
+      )}
       aria-labelledby={stemId}
+      onCopy={(e) => {
+        if (protectContent) e.preventDefault();
+      }}
+      onContextMenu={(e) => {
+        if (protectContent) e.preventDefault();
+      }}
     >
       <div className="border-b border-border/80 bg-muted/20 px-5 py-3 md:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -187,25 +201,49 @@ export function QuestionCard({
 
       <div className="space-y-5 p-5 md:p-6">
         <div id={stemId} className="space-y-4">
-          {question.imageUrl ? (
-            <figure className="overflow-hidden rounded-xl border border-border bg-muted/20">
+          {layout === "IMAGE_OVERLAY" && question.imageUrl ? (
+            <figure className="relative overflow-hidden rounded-xl border border-border bg-black/5 dark:bg-black/40">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={normalizeImageUrl(question.imageUrl)}
-                alt={question.body?.trim() ? "Figure for this question" : "Clinical image for this question"}
-                className="max-h-80 w-full object-contain"
+                alt=""
+                className="max-h-[28rem] w-full object-contain"
                 referrerPolicy="no-referrer"
+                draggable={false}
               />
+              {question.body?.trim() ? (
+                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-4 pb-4 pt-16 text-white">
+                  <MarkdownBody
+                    content={question.body}
+                    className="text-[14px] font-medium leading-snug text-white prose-p:font-medium prose-headings:text-white"
+                  />
+                </figcaption>
+              ) : null}
             </figure>
-          ) : null}
-          {question.body?.trim() ? (
-            <MarkdownBody
-              content={question.body}
-              className="text-[15px] font-medium tracking-tight text-foreground md:text-base prose-p:font-medium"
-            />
-          ) : !question.imageUrl ? (
-            <p className="text-sm font-medium text-muted-foreground">(No stem text)</p>
-          ) : null}
+          ) : (
+            <>
+              {question.imageUrl ? (
+                <figure className="overflow-hidden rounded-xl border border-border bg-muted/20">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={normalizeImageUrl(question.imageUrl)}
+                    alt={question.body?.trim() ? "Figure for this question" : "Clinical image for this question"}
+                    className="max-h-80 w-full object-contain"
+                    referrerPolicy="no-referrer"
+                    draggable={false}
+                  />
+                </figure>
+              ) : null}
+              {question.body?.trim() ? (
+                <MarkdownBody
+                  content={question.body}
+                  className="text-[15px] font-medium tracking-tight text-foreground md:text-base prose-p:font-medium"
+                />
+              ) : !question.imageUrl ? (
+                <p className="text-sm font-medium text-muted-foreground">(No stem text)</p>
+              ) : null}
+            </>
+          )}
         </div>
 
         <div

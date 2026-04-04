@@ -2,11 +2,12 @@
 import { useState } from "react";
 import {
   Wand2, Upload, Loader2, CheckCircle2, AlertTriangle,
-  Plus, Trash2, Save, ChevronDown, ChevronUp, Sparkles
+  Trash2, Save, ChevronDown, ChevronUp, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { GeminiBanner } from "@/components/admin/GeminiInfo";
+import { AiQuestionPlacementPicker } from "@/components/admin/AiQuestionPlacementPicker";
 import type { ExtractedQuestion, AISuggestion } from "@/lib/gemini";
 
 // ─── Manual Assist ─────────────────────────────────────────────────────────────
@@ -16,6 +17,7 @@ function ManualAssistPanel() {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
   const [lectureId, setLectureId] = useState("");
+  const [placementKey, setPlacementKey] = useState(0);
 
   async function handleSuggest() {
     if (!body.trim()) return toast.error("Enter a question body first");
@@ -27,6 +29,11 @@ function ManualAssistPanel() {
         body: JSON.stringify({ body }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : "AI suggestion failed");
+        setSuggestion(null);
+        return;
+      }
       setSuggestion(data);
     } catch {
       toast.error("AI suggestion failed");
@@ -36,7 +43,7 @@ function ManualAssistPanel() {
   }
 
   async function handleSave() {
-    if (!suggestion || !lectureId) return toast.error("Select a lecture first");
+    if (!suggestion || !lectureId) return toast.error("اختر المديول، المادة، ثم المحاضرة أو كويز كامل للمادة");
     const res = await fetch("/api/v1/questions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,7 +51,10 @@ function ManualAssistPanel() {
     });
     if (res.ok) {
       toast.success("Question saved!");
-      setBody(""); setSuggestion(null);
+      setBody("");
+      setSuggestion(null);
+      setLectureId("");
+      setPlacementKey((k) => k + 1);
     } else {
       toast.error("Failed to save");
     }
@@ -113,22 +123,20 @@ function ManualAssistPanel() {
               <p className="text-sm text-foreground">{suggestion.explanation}</p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Lecture ID (required to save)"
-                value={lectureId}
-                onChange={(e) => setLectureId(e.target.value)}
-                className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
-              >
-                <Save className="h-4 w-4" />
-                Save
-              </button>
-            </div>
+            <AiQuestionPlacementPicker
+              key={`manual-${placementKey}`}
+              radioGroupName="ai-placement-manual"
+              onChange={setLectureId}
+              disabled={loading}
+            />
+            <button
+              onClick={handleSave}
+              disabled={!lectureId}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              Save
+            </button>
           </div>
         )}
       </div>
@@ -145,6 +153,7 @@ function PDFExtractPanel() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [issues, setIssues] = useState<{ index: number; issue: string }[]>([]);
   const [lectureId, setLectureId] = useState("");
+  const [placementKey, setPlacementKey] = useState(0);
   const [saving, setSaving] = useState(false);
 
   async function handleExtract() {
@@ -155,6 +164,12 @@ function PDFExtractPanel() {
     try {
       const res = await fetch("/api/v1/ai/extract", { method: "POST", body: form });
       const data = await res.json();
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : "Extraction failed");
+        setQuestions([]);
+        setIssues([]);
+        return;
+      }
       setQuestions(data.questions ?? []);
       setIssues(data.issues ?? []);
       if (data.questions?.length) {
@@ -183,7 +198,7 @@ function PDFExtractPanel() {
   }
 
   async function handleSaveAll() {
-    if (!lectureId) return toast.error("Enter a Lecture ID");
+    if (!lectureId) return toast.error("اختر المديول، المادة، ثم المحاضرة أو كويز كامل للمادة");
     setSaving(true);
     try {
       const res = await fetch("/api/v1/questions/bulk", {
@@ -193,7 +208,11 @@ function PDFExtractPanel() {
       });
       if (res.ok) {
         toast.success(`Saved ${questions.length} questions!`);
-        setQuestions([]); setIssues([]); setFile(null); setLectureId("");
+        setQuestions([]);
+        setIssues([]);
+        setFile(null);
+        setLectureId("");
+        setPlacementKey((k) => k + 1);
       } else {
         toast.error("Save failed");
       }
@@ -251,28 +270,27 @@ function PDFExtractPanel() {
 
       {/* Extracted questions list */}
       {questions.length > 0 && (
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between">
+        <div className="mt-4 space-y-3">
+          <AiQuestionPlacementPicker
+            key={`pdf-${placementKey}`}
+            radioGroupName="ai-placement-pdf"
+            onChange={setLectureId}
+            disabled={saving}
+          />
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm font-medium">{questions.length} questions extracted</span>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Lecture ID"
-                value={lectureId}
-                onChange={(e) => setLectureId(e.target.value)}
-                className="w-36 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <button
-                onClick={handleSaveAll}
-                disabled={saving}
-                className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
-              >
-                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                Save All
-              </button>
-            </div>
+            <button
+              onClick={handleSaveAll}
+              disabled={saving || !lectureId}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+            >
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+              Save All
+            </button>
           </div>
 
+          <div className="space-y-2">
           {questions.map((q, i) => {
             const hasIssue = issues.some((iss) => iss.index === i);
             return (
@@ -334,6 +352,7 @@ function PDFExtractPanel() {
               </div>
             );
           })}
+          </div>
         </div>
       )}
     </div>

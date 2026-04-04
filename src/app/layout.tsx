@@ -5,6 +5,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import { ChunkLoadRecovery } from "@/components/system/ChunkLoadRecovery";
 import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
+import { appFontVariableClassName } from "@/lib/app-fonts";
 import "../styles/globals.css";
 
 // Fetch site config server-side — cached per request by Next.js
@@ -20,8 +21,8 @@ async function getSiteConfig() {
       enableForum: true,
       enableAds: true,
       enableNotifs: true,
-      fontSans: "Inter",
-      fontArabic: "Cairo",
+      fontSans: "Poppins",
+      fontArabic: "Tajawal",
     };
   } catch {
     return {
@@ -33,8 +34,8 @@ async function getSiteConfig() {
       enableForum: true,
       enableAds: true,
       enableNotifs: true,
-      fontSans: "Inter",
-      fontArabic: "Cairo",
+      fontSans: "Poppins",
+      fontArabic: "Tajawal",
     };
   }
 }
@@ -112,7 +113,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   `.trim();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={appFontVariableClassName} suppressHydrationWarning>
       <head>
         {/* No-flicker theme script — runs before first paint */}
         <script
@@ -126,8 +127,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
                   if (isDark) document.documentElement.classList.add('dark');
                   else document.documentElement.classList.remove('dark');
-                  document.documentElement.style.setProperty('--font-sans-runtime', ${JSON.stringify(config.fontSans ?? "Inter")});
-                  document.documentElement.style.setProperty('--font-arabic-runtime', ${JSON.stringify(config.fontArabic ?? "Cairo")});
+                  // Fonts: Poppins (Latin) + Tajawal (Arabic) via next/font on <html> — do not override from DB
                   // Inject site config for JS access
                   window.__MEDQS_CONFIG__ = ${JSON.stringify({ siteName: config.siteName, logoUrl: config.logoUrl })};
                 } catch(e) {}

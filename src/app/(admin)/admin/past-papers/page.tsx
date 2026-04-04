@@ -19,6 +19,9 @@ interface PastPaper {
   _count: { attempts: number };
   aiExplanationEnabled?: boolean;
   allowAiDuringQuiz?: boolean;
+  secureExamMode?: boolean;
+  restrictCopyPaste?: boolean;
+  trackFocusLoss?: boolean;
 }
 
 export default function AdminPastPapersPage() {
@@ -38,6 +41,9 @@ export default function AdminPastPapersPage() {
     pdfUrl: "",
     aiExplanationEnabled: true,
     allowAiDuringQuiz: false,
+    secureExamMode: false,
+    restrictCopyPaste: false,
+    trackFocusLoss: false,
   });
 
   useEffect(() => {
@@ -68,6 +74,9 @@ export default function AdminPastPapersPage() {
         pdfUrl: form.pdfUrl || null,
         aiExplanationEnabled: form.aiExplanationEnabled,
         allowAiDuringQuiz: form.allowAiDuringQuiz,
+        secureExamMode: form.secureExamMode,
+        restrictCopyPaste: form.restrictCopyPaste,
+        trackFocusLoss: form.trackFocusLoss,
       }),
     });
 
@@ -83,6 +92,9 @@ export default function AdminPastPapersPage() {
         pdfUrl: "",
         aiExplanationEnabled: true,
         allowAiDuringQuiz: false,
+        secureExamMode: false,
+        restrictCopyPaste: false,
+        trackFocusLoss: false,
       });
       setShowForm(false);
       toast.success("Past paper created!");
@@ -92,7 +104,19 @@ export default function AdminPastPapersPage() {
     setSaving(false);
   }
 
-  async function patchPaper(id: string, patch: Partial<Pick<PastPaper, "aiExplanationEnabled" | "allowAiDuringQuiz">>) {
+  async function patchPaper(
+    id: string,
+    patch: Partial<
+      Pick<
+        PastPaper,
+        | "aiExplanationEnabled"
+        | "allowAiDuringQuiz"
+        | "secureExamMode"
+        | "restrictCopyPaste"
+        | "trackFocusLoss"
+      >
+    >
+  ) {
     const res = await fetch(`/api/v1/past-papers/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -254,6 +278,39 @@ export default function AdminPastPapersPage() {
                 />
               </div>
             </div>
+
+            <div className="sm:col-span-2 space-y-2 rounded-lg border border-amber-200/80 bg-amber-50/50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/20">
+              <p className="text-xs font-semibold text-amber-900 dark:text-amber-200">Exam integrity (interactive papers)</p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                <label className="flex cursor-pointer items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={form.secureExamMode}
+                    onChange={(e) => setForm((f) => ({ ...f, secureExamMode: e.target.checked }))}
+                    className="rounded border-border"
+                  />
+                  Secured exam (exam only, no tutor)
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={form.restrictCopyPaste}
+                    onChange={(e) => setForm((f) => ({ ...f, restrictCopyPaste: e.target.checked }))}
+                    className="rounded border-border"
+                  />
+                  Block copy / right-click on questions
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={form.trackFocusLoss}
+                    onChange={(e) => setForm((f) => ({ ...f, trackFocusLoss: e.target.checked }))}
+                    className="rounded border-border"
+                  />
+                  Track tab switches + warn
+                </label>
+              </div>
+            </div>
           </div>
 
           {/* PDF upload */}
@@ -343,6 +400,11 @@ export default function AdminPastPapersPage() {
                         AI in-quiz
                       </span>
                     )}
+                    {paper.secureExamMode && (
+                      <span className="rounded-full bg-amber-200 px-2 py-0.5 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200">
+                        Secured
+                      </span>
+                    )}
                     {paper.pdfUrl && (
                       <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer"
                         className="text-primary hover:underline">PDF</a>
@@ -370,6 +432,13 @@ export default function AdminPastPapersPage() {
                     className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
                   >
                     {paper.allowAiDuringQuiz ? "AI only after quiz" : "Allow AI in quiz"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => patchPaper(paper.id, { secureExamMode: !Boolean(paper.secureExamMode) })}
+                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
+                  >
+                    {paper.secureExamMode ? "Unsecure exam" : "Secure exam"}
                   </button>
                 </div>
                 <button

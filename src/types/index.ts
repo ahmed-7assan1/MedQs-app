@@ -21,10 +21,13 @@ export interface QuestionChoice {
   text: string;
 }
 
+export type QuestionStemLayout = "STANDARD" | "IMAGE_OVERLAY";
+
 export interface QuestionWithChoices {
   id: string;
   body: string;
   imageUrl?: string | null;
+  stemLayout?: QuestionStemLayout;
   choices: QuestionChoice[];
   answer: string;
   explanation?: string;

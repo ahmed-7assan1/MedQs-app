@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 
 // GET /api/v1/modules-all - all modules for admin tree view
 export async function GET() {
-  const modules = await prisma.module.findMany({ orderBy: { name: "asc" } });
+  const modules = await prisma.module.findMany({
+    orderBy: { name: "asc" },
+    include: { semester: { select: { id: true, name: true } } },
+  });
   return NextResponse.json(modules);
 }

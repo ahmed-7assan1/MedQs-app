@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { QuestionCard } from "@/components/quiz/QuestionCard";
 import {
@@ -18,6 +18,7 @@ interface Question {
   id: string;
   body: string;
   imageUrl?: string | null;
+  stemLayout?: "STANDARD" | "IMAGE_OVERLAY";
   choices: { key: string; text: string }[];
   answer: string;
   explanation?: string;
@@ -36,6 +37,12 @@ interface QuizClientProps {
   paperAiExplanationEnabled?: boolean;
   /** Per-paper: allow AI during the quiz; if false, only after submit (brief) / on review page */
   allowAiDuringQuiz?: boolean;
+  /** Force exam behaviour: no tutor mode, no instant feedback */
+  secureExamMode?: boolean;
+  /** Block copy / context menu on question card during secured exam */
+  restrictCopyPaste?: boolean;
+  /** Count tab/window hides and warn; sent with submit */
+  trackFocusLoss?: boolean;
 }
 
 function metaStorageKey(paperId: string) {
@@ -54,8 +61,13 @@ export function QuizClient({
   siteAiEnabled = true,
   paperAiExplanationEnabled = true,
   allowAiDuringQuiz = false,
+  secureExamMode = false,
+  restrictCopyPaste = false,
+  trackFocusLoss = false,
 }: QuizClientProps) {
   const router = useRouter();
+  const focusLossRef = useRef(0);
+  const wasHiddenRef = useRef(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -72,10 +84,36 @@ export function QuizClient({
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [examMode, setExamMode] = useState(false);
 
+  const examActive = examMode || secureExamMode;
+
   const showAiPanel =
     siteAiEnabled &&
     paperAiExplanationEnabled &&
     (allowAiDuringQuiz || submitted);
+
+  useEffect(() => {
+    if (secureExamMode) setExamMode(true);
+  }, [secureExamMode]);
+
+  useEffect(() => {
+    if (!trackFocusLoss || submitted) return;
+    const onVis = () => {
+      if (document.visibilityState === "hidden") {
+        focusLossRef.current += 1;
+        wasHiddenRef.current = true;
+      } else if (document.visibilityState === "visible" && wasHiddenRef.current) {
+        wasHiddenRef.current = false;
+        toast.error(
+          "Academic integrity: you left this quiz tab. This may be reported to your instructor when you submit.",
+          { duration: 7000 }
+        );
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [trackFocusLoss, submitted]);
+
+  const protectQuestion = restrictCopyPaste && examActive;
 
   useEffect(() => {
     try {
@@ -131,7 +169,11 @@ export function QuizClient({
       const res = await fetch(`/api/v1/past-papers/${paperId}/attempt`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, timeTaken }),
+        body: JSON.stringify({
+          answers,
+          timeTaken,
+          focusLossCount: trackFocusLoss ? focusLossRef.current : 0,
+        }),
       });
       if (!res.ok) throw new Error("Submit failed");
       const data = await res.json();
@@ -141,7 +183,7 @@ export function QuizClient({
       toast.error("Submission failed. Please try again.");
       setSubmitting(false);
     }
-  }, [answers, paperId, startTime, submitted, submitting, router]);
+  }, [answers, paperId, startTime, submitted, submitting, router, trackFocusLoss]);
 
   useEffect(() => {
     if (timeLeft === null) return;
@@ -246,36 +288,43 @@ export function QuizClient({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div
-            className="flex rounded-xl border border-border bg-muted/30 p-1"
-            role="group"
-            aria-label="Study mode"
-          >
-            <button
-              type="button"
-              onClick={() => setExamMode(false)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                !examMode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-pressed={!examMode}
+          {!secureExamMode ? (
+            <div
+              className="flex rounded-xl border border-border bg-muted/30 p-1"
+              role="group"
+              aria-label="Study mode"
             >
-              <BookOpen className="h-3.5 w-3.5" aria-hidden />
-              Tutor
-            </button>
-            <button
-              type="button"
-              onClick={() => setExamMode(true)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                examMode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-pressed={examMode}
-            >
+              <button
+                type="button"
+                onClick={() => setExamMode(false)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  !examMode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                )}
+                aria-pressed={!examMode}
+              >
+                <BookOpen className="h-3.5 w-3.5" aria-hidden />
+                Tutor
+              </button>
+              <button
+                type="button"
+                onClick={() => setExamMode(true)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  examMode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                )}
+                aria-pressed={examMode}
+              >
+                <GraduationCap className="h-3.5 w-3.5" aria-hidden />
+                Exam
+              </button>
+            </div>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
               <GraduationCap className="h-3.5 w-3.5" aria-hidden />
-              Exam
-            </button>
-          </div>
+              Secured exam
+            </span>
+          )}
           <div
             className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm tabular-nums text-muted-foreground"
             title="Time on this question"
@@ -306,9 +355,11 @@ export function QuizClient({
       </header>
 
       <div className="mb-6">
-        {examMode && (
+        {examActive && (
           <p className="mb-2 rounded-xl border border-dashed border-primary/25 bg-primary/[0.04] px-3 py-2 text-xs text-muted-foreground">
             <span className="font-semibold text-foreground">Exam mode:</span> no instant feedback or AI explain — results after you submit.
+            {trackFocusLoss ? " Tab switches may be recorded for integrity." : ""}
+            {restrictCopyPaste ? " Copying question text is disabled." : ""}
           </p>
         )}
         <div className="mb-1.5 flex justify-between text-xs text-muted-foreground">
@@ -338,6 +389,7 @@ export function QuizClient({
         examMode={examMode}
         showAiPanel={showAiPanel}
         explainPaperId={paperId}
+        protectContent={protectQuestion}
       />
 
       <nav className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Question navigation">

@@ -1,8 +1,9 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
-import { Sparkles, Send, Loader2, ChevronDown, RotateCcw } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Sparkles, Send, Loader2, ChevronDown, RotateCcw, ImagePlus, Mic, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import toast from "react-hot-toast";
 
 interface Message {
   role: "user" | "assistant";
@@ -13,6 +14,34 @@ interface UsageInfo {
   used: number;
   limit: number;
   rankLabel: string;
+}
+
+type ChatImage = { mimeType: string; data: string; preview: string };
+
+function fileToImagePart(file: File): Promise<ChatImage> {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Images only"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const s = String(reader.result);
+      const m = s.match(/^data:([^;]+);base64,(.+)$/);
+      if (!m) {
+        reject(new Error("Could not read image"));
+        return;
+      }
+      const approx = (m[2].length * 3) / 4;
+      if (approx > 3.5 * 1024 * 1024) {
+        reject(new Error("Image too large (max ~3.5MB)"));
+        return;
+      }
+      resolve({ mimeType: m[1], data: m[2], preview: s });
+    };
+    reader.onerror = () => reject(new Error("Read failed"));
+    reader.readAsDataURL(file);
+  });
 }
 
 export function AIAssistant() {
@@ -32,9 +61,16 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
-  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
+  const [lastFailedPayload, setLastFailedPayload] = useState<{
+    message: string;
+    images: { mimeType: string; data: string }[];
+  } | null>(null);
+  const [attachImages, setAttachImages] = useState<ChatImage[]>([]);
+  const [listening, setListening] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const recRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
     if (open && usage === null) {
@@ -49,11 +85,12 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  async function postChat(text: string) {
+  const postChat = useCallback(
+    async (text: string, images: { mimeType: string; data: string }[]) => {
     const res = await fetch("/api/v1/ai/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ message: text, images: images.length ? images : undefined }),
     });
     const data = await res.json().catch(() => ({}));
 
@@ -68,32 +105,48 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
         ]);
         return;
       }
-      throw new Error(typeof data.error === "string" ? data.error : "Request failed");
+      const errText =
+        typeof data.error === "string"
+          ? data.error
+          : `Request failed (${res.status})`;
+      throw new Error(errText);
     }
 
     setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
     if (data.used !== undefined) {
       setUsage((u) => (u ? { ...u, used: data.used } : null));
     }
-  }
+  },
+  []
+  );
 
   async function send() {
     const text = input.trim();
-    if (!text || loading) return;
+    const imgs = attachImages.map(({ mimeType, data }) => ({ mimeType, data }));
+    if ((!text && imgs.length === 0) || loading) return;
 
+    const userLine =
+      text +
+      (imgs.length ? `\n_[${imgs.length} image${imgs.length > 1 ? "s" : ""} attached]_` : "");
     setInput("");
-    setMessages((m) => [...m, { role: "user", content: text }]);
+    setAttachImages([]);
+    setMessages((m) => [...m, { role: "user", content: userLine }]);
     setLoading(true);
-    setLastFailedMessage(null);
+    setLastFailedPayload(null);
     try {
-      await postChat(text);
-    } catch {
-      setLastFailedMessage(text);
+      await postChat(text, imgs);
+    } catch (err) {
+      setLastFailedPayload({ message: text, images: imgs });
+      const detail =
+        err instanceof Error && err.message && err.message !== "Request failed"
+          ? err.message
+          : null;
       setMessages((m) => [
         ...m,
         {
           role: "assistant",
           content:
+            detail ??
             "We could not reach the AI service. Check your connection, then tap **Retry** below or try again in a moment.",
         },
       ]);
@@ -103,18 +156,22 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
   }
 
   async function retryLast() {
-    if (!lastFailedMessage || loading) return;
+    if (!lastFailedPayload || loading) return;
+    const { message, images } = lastFailedPayload;
     setMessages((m) => (m[m.length - 1]?.role === "assistant" ? m.slice(0, -1) : m));
     setLoading(true);
     try {
-      await postChat(lastFailedMessage);
-      setLastFailedMessage(null);
-    } catch {
+      await postChat(message, images);
+      setLastFailedPayload(null);
+    } catch (err) {
+      const detail = err instanceof Error && err.message ? err.message : null;
       setMessages((m) => [
         ...m,
         {
           role: "assistant",
-          content: "Still having trouble. Wait a few seconds and tap **Retry** again.",
+          content:
+            detail ??
+            "Still having trouble. Wait a few seconds and tap **Retry** again.",
         },
       ]);
     } finally {
@@ -124,6 +181,63 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
 
   const remaining = usage ? (usage.limit === -1 ? "∞" : Math.max(0, usage.limit - usage.used)) : null;
   const limitReached = usage && usage.limit !== -1 && usage.used >= usage.limit;
+
+  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const part = await fileToImagePart(file);
+      setAttachImages((prev) => (prev.length >= 2 ? prev : [...prev, part]));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not add image");
+    }
+  }
+
+  function toggleVoice() {
+    if (listening) {
+      recRef.current?.stop();
+      recRef.current = null;
+      setListening(false);
+      return;
+    }
+    if (typeof window === "undefined") return;
+    const w = window as unknown as {
+      SpeechRecognition?: new () => {
+        lang: string;
+        interimResults: boolean;
+        continuous: boolean;
+        start: () => void;
+        stop: () => void;
+        onresult: ((ev: { results: { [key: number]: { [key: number]: { transcript: string } } } }) => void) | null;
+        onerror: (() => void) | null;
+        onend: (() => void) | null;
+      };
+      webkitSpeechRecognition?: new () => InstanceType<NonNullable<(typeof w)["SpeechRecognition"]>>;
+    };
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!SR) {
+      toast.error("Voice typing needs Chrome or Edge (Web Speech API).");
+      return;
+    }
+    const recognition = new SR();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.onresult = (ev) => {
+      const said = ev.results[0]?.[0]?.transcript?.trim();
+      if (said) setInput((v) => (v ? `${v} ${said}` : said));
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    recognition.start();
+    setListening(true);
+    recRef.current = { stop: () => recognition.stop() };
+  }
+
+  useEffect(() => {
+    return () => recRef.current?.stop();
+  }, []);
 
   return (
     <>
@@ -196,7 +310,7 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
               <div>
                 <p className="text-sm font-semibold">Study assistant</p>
                 <p className="mt-1 max-w-[220px] text-xs leading-relaxed text-muted-foreground">
-                  Explain questions, simplify concepts, mnemonics, lecture summaries, and quiz ideas.
+                  Medical-only tutor. Attach up to 2 images or use the mic (Chrome/Edge) to dictate.
                 </p>
               </div>
               <div className="flex max-w-full flex-wrap justify-center gap-1.5 px-1">
@@ -254,7 +368,7 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
             </div>
           )}
 
-          {lastFailedMessage && !loading && (
+          {lastFailedPayload && !loading && (
             <div className="flex justify-center">
               <button
                 type="button"
@@ -276,7 +390,48 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
               Daily limit reached. Earn more points to unlock more messages.
             </div>
           ) : (
-            <div className="flex items-end gap-2">
+            <div className="space-y-2">
+              {attachImages.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {attachImages.map((im, idx) => (
+                    <div key={idx} className="relative h-14 w-14 overflow-hidden rounded-lg border border-border">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={im.preview} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        aria-label="Remove image"
+                        onClick={() => setAttachImages((p) => p.filter((_, i) => i !== idx))}
+                        className="absolute right-0 top-0 rounded-bl bg-black/60 p-0.5 text-white"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-end gap-2">
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={onPickImage} />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={attachImages.length >= 2 || loading}
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground hover:bg-muted disabled:opacity-40"
+                aria-label="Attach image"
+              >
+                <ImagePlus className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={toggleVoice}
+                disabled={loading}
+                className={cn(
+                  "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border text-muted-foreground hover:bg-muted disabled:opacity-40",
+                  listening ? "border-red-300 bg-red-50 text-red-600" : "border-border bg-background"
+                )}
+                aria-label={listening ? "Stop voice input" : "Voice input"}
+              >
+                <Mic className={cn("h-4 w-4", listening && "animate-pulse")} />
+              </button>
               <textarea
                 ref={inputRef}
                 value={input}
@@ -294,13 +449,14 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
               />
               <button
                 type="button"
-                onClick={send}
-                disabled={loading || !input.trim()}
+                onClick={() => void send()}
+                disabled={loading || (!input.trim() && attachImages.length === 0)}
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
                 aria-label="Send message"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
               </button>
+            </div>
             </div>
           )}
         </div>

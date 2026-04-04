@@ -29,13 +29,19 @@ export async function POST(req: NextRequest) {
   }
 
   const folder = folderRaw.trim();
-  const allowed = ["forum", "question", "ad", "lecture", "pastpaper"] as const;
+  const allowed = ["forum", "question", "ad", "lecture", "pastpaper", "site", "ai"] as const;
   if (!allowed.includes(folder as (typeof allowed)[number])) {
     return NextResponse.json({ error: "Invalid folder" }, { status: 400 });
   }
 
   const role = (session.user as { role?: string }).role;
-  if (folder !== "forum") {
+  if (folder === "site") {
+    if (role !== "SUPER_ADMIN") {
+      return NextResponse.json({ error: "Only super admins can upload the site logo file." }, { status: 403 });
+    }
+  } else if (folder === "ai") {
+    // Any signed-in student — images for Dr. Q (URL can be sent to model or used elsewhere)
+  } else if (folder !== "forum") {
     if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

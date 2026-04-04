@@ -57,6 +57,9 @@ export const ALLOWED_TYPES: Record<string, string[]> = {
   ad:        ["image/jpeg", "image/png", "image/webp"],
   forum:     ["image/jpeg", "image/png", "image/webp", "image/gif"],
   question:  ["image/jpeg", "image/png", "image/webp"],
+  // Site logo (navbar / branding) — SUPER_ADMIN upload only
+  site:      ["image/jpeg", "image/png", "image/webp", "image/gif"],
+  ai:        ["image/jpeg", "image/png", "image/webp", "image/gif"],
 };
 
 export const MAX_FILE_SIZE: Record<string, number> = {
@@ -66,6 +69,8 @@ export const MAX_FILE_SIZE: Record<string, number> = {
   ad:         10 * 1024 * 1024, // 10 MB
   forum:       8 * 1024 * 1024, // 8 MB
   question:   8 * 1024 * 1024, // 8 MB
+  site:        2 * 1024 * 1024, // 2 MB
+  ai:          4 * 1024 * 1024, // 4 MB — Dr. Q chat attachments
 };
 
 // ─── Direct server-side upload (for small files / PDFs) ────────────────────────

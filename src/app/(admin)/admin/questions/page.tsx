@@ -12,6 +12,7 @@ interface Question {
   id: string;
   body: string;
   imageUrl?: string | null;
+  stemLayout?: "STANDARD" | "IMAGE_OVERLAY";
   answer: string;
   difficulty: string;
   lectureId: string;
@@ -49,6 +50,7 @@ export default function AdminQuestionsPage() {
   const [answer, setAnswer] = useState("A");
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [stemLayout, setStemLayout] = useState<"STANDARD" | "IMAGE_OVERLAY">("STANDARD");
 
   useEffect(() => {
     fetch(`/api/v1/questions${lectureFilter ? `?lectureId=${lectureFilter}` : ""}`)
@@ -115,6 +117,8 @@ export default function AdminQuestionsPage() {
     if (validChoices.length < 2) return toast.error("Fill at least two answer choices");
     if (!pickLecture) return toast.error("Select module → subject → lecture");
     if (!body.trim() && !imageUrl.trim()) return toast.error("Add question text and/or an image");
+    if (stemLayout === "IMAGE_OVERLAY" && !imageUrl.trim())
+      return toast.error("Overlay layout requires an image");
     if (!validChoices.some((c) => c.key === answer)) return toast.error("Correct answer must match one of the choice keys");
 
     setSaving(true);
@@ -130,6 +134,7 @@ export default function AdminQuestionsPage() {
           answer,
           explanation: explanation.trim() || undefined,
           difficulty,
+          stemLayout,
         }),
       });
       if (!res.ok) {
@@ -147,6 +152,7 @@ export default function AdminQuestionsPage() {
         { key: "A", text: "" }, { key: "B", text: "" }, { key: "C", text: "" }, { key: "D", text: "" },
       ]);
       setAnswer("A");
+      setStemLayout("STANDARD");
       setAddOpen(false);
     } finally {
       setSaving(false);
@@ -292,6 +298,20 @@ export default function AdminQuestionsPage() {
                 <img src={imageUrl} alt="" className="max-h-40 w-full object-contain bg-muted/30" />
               </div>
             ) : null}
+            <div className="mt-2">
+              <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Stem + image layout</label>
+              <select
+                value={stemLayout}
+                onChange={(e) => setStemLayout(e.target.value as "STANDARD" | "IMAGE_OVERLAY")}
+                className="w-full max-w-md rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="STANDARD">Image above text (default)</option>
+                <option value="IMAGE_OVERLAY">Text overlaid on image (clinical slide)</option>
+              </select>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                Overlay works best when you have an image and a short line of stem text.
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">

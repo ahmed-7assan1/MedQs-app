@@ -19,6 +19,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (typeof body.pdfUrl === "string" || body.pdfUrl === null) data.pdfUrl = body.pdfUrl;
   if (typeof body.aiExplanationEnabled === "boolean") data.aiExplanationEnabled = body.aiExplanationEnabled;
   if (typeof body.allowAiDuringQuiz === "boolean") data.allowAiDuringQuiz = body.allowAiDuringQuiz;
+  if (typeof body.secureExamMode === "boolean") data.secureExamMode = body.secureExamMode;
+  if (typeof body.restrictCopyPaste === "boolean") data.restrictCopyPaste = body.restrictCopyPaste;
+  if (typeof body.trackFocusLoss === "boolean") data.trackFocusLoss = body.trackFocusLoss;
 
   if (Object.keys(data).length === 0)
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });

@@ -43,10 +43,15 @@ export async function POST(req: NextRequest) {
 
   if (!text.trim()) return NextResponse.json({ questions: [], issues: [] });
 
-  const questions = await extractQuestionsFromText(text);
-  const issues = await validateQuestions(
-    questions.map(q => ({ body: q.body, answer: q.answer }))
-  );
-
-  return NextResponse.json({ questions, issues });
+  try {
+    const questions = await extractQuestionsFromText(text);
+    const issues = await validateQuestions(
+      questions.map((q) => ({ body: q.body, answer: q.answer }))
+    );
+    return NextResponse.json({ questions, issues });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "AI extraction failed";
+    console.error("[api/v1/ai/extract]", e);
+    return NextResponse.json({ error: msg, questions: [], issues: [] }, { status: 502 });
+  }
 }

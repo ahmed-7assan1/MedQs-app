@@ -1,13 +1,19 @@
 /**
  * lib/gemini.ts — Google Gemini Flash AI client
  *
- * Uses gemini-2.0-flash-exp (free tier, 15 RPM, 1M TPM, 1500 req/day)
+ * Default model: gemini-1.5-flash (override with GEMINI_MODEL). Free tier limits apply.
  * Get API key: https://aistudio.google.com/app/apikey (free, no credit card)
  *
- * Env var: GEMINI_API_KEY
+ * Env: GEMINI_API_KEY, optional GEMINI_MODEL
  */
 
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+  type GenerativeModel,
+} from "@google/generative-ai";
+import { geminiModelChain } from "./gemini-model-chain";
 
 function getClient() {
   const key = process.env.GEMINI_API_KEY;
@@ -15,7 +21,47 @@ function getClient() {
   return new GoogleGenerativeAI(key);
 }
 
-const MODEL = "gemini-2.0-flash-exp";
+function isRetryableGeminiSdkError(e: unknown): boolean {
+  if (e && typeof e === "object" && "status" in e) {
+    const s = (e as { status?: number }).status;
+    if (s === 401 || s === 403 || s === 400) return false;
+    if (s === 404 || s === 429 || s === 503) return true;
+  }
+  const msg = (e instanceof Error ? e.message : String(e)).toLowerCase();
+  if (/401|403|invalid api key|api key not valid|permission denied|bad request/i.test(msg)) return false;
+  return /404|429|503|quota|resource exhausted|unavailable|not found|limit:\s*0|free_tier|not supported|fetch failed/i.test(
+    msg
+  );
+}
+
+/** Try each model in {@link geminiModelChain} until one succeeds (same strategy as student AI chat). */
+async function withGeminiModel<T>(
+  options: { jsonResponse?: boolean },
+  run: (model: GenerativeModel) => Promise<T>
+): Promise<T> {
+  const client = getClient();
+  const chain = geminiModelChain();
+  let lastErr: Error | undefined;
+  for (let i = 0; i < chain.length; i++) {
+    const modelId = chain[i]!;
+    try {
+      const model = client.getGenerativeModel({
+        model: modelId,
+        safetySettings: SAFETY,
+        ...(options.jsonResponse
+          ? { generationConfig: { responseMimeType: "application/json" as const } }
+          : {}),
+      });
+      return await run(model);
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      lastErr = err;
+      const canRetry = i < chain.length - 1 && isRetryableGeminiSdkError(e);
+      if (!canRetry) throw err;
+    }
+  }
+  throw lastErr ?? new Error("Gemini: all models failed");
+}
 
 // Relaxed safety settings for medical content
 const SAFETY = [
@@ -61,9 +107,6 @@ export async function generateExplanation(
   choices: { key: string; text: string }[],
   answer: string
 ): Promise<string> {
-  const client = getClient();
-  const model = client.getGenerativeModel({ model: MODEL, safetySettings: SAFETY });
-
   const choiceText = choices.map((c) => `${c.key}. ${c.text}`).join("\n");
 
   const prompt = `You are a medical education tutor. A student is studying for their exam and needs help understanding this MCQ.
@@ -82,8 +125,10 @@ Explain in 2-3 short paragraphs:
 
 Use simple language suitable for a medical student. Use **bold** for key medical terms. Do not use headers.`;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text() ?? "Explanation unavailable.";
+  return withGeminiModel({}, async (model) => {
+    const result = await model.generateContent(prompt);
+    return result.response.text() ?? "Explanation unavailable.";
+  });
 }
 
 // ─── 2. Admin: suggest choices + answer for a question body ──────────────────
@@ -91,13 +136,6 @@ Use simple language suitable for a medical student. Use **bold** for key medical
 export async function suggestQuestionDetails(
   questionBody: string
 ): Promise<AISuggestion> {
-  const client = getClient();
-  const model = client.getGenerativeModel({
-    model: MODEL,
-    safetySettings: SAFETY,
-    generationConfig: { responseMimeType: "application/json" },
-  });
-
   const prompt = `You are a medical exam question writer. Given this question stem, generate 4 plausible answer choices, identify the correct one, write a brief explanation, and assess difficulty.
 
 Question stem: "${questionBody}"
@@ -121,9 +159,10 @@ Rules:
 - difficulty is "EASY", "MEDIUM", or "HARD"
 - Return ONLY the JSON object, no extra text`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-  return parseJSON<AISuggestion>(text, {
+  return withGeminiModel({ jsonResponse: true }, async (model) => {
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    return parseJSON<AISuggestion>(text, {
     choices: [
       { key: "A", text: "Option A" },
       { key: "B", text: "Option B" },
@@ -134,6 +173,7 @@ Rules:
     explanation: "Could not generate suggestion. Please fill manually.",
     difficulty: "MEDIUM",
   });
+  });
 }
 
 // ─── 3. Admin: extract questions from raw text ────────────────────────────────
@@ -141,13 +181,6 @@ Rules:
 export async function extractQuestionsFromText(
   text: string
 ): Promise<ExtractedQuestion[]> {
-  const client = getClient();
-  const model = client.getGenerativeModel({
-    model: MODEL,
-    safetySettings: SAFETY,
-    generationConfig: { responseMimeType: "application/json" },
-  });
-
   const prompt = `You are a medical education assistant. Extract ALL multiple-choice questions from the following text.
 
 For each question return a JSON object. Return a JSON array called "questions".
@@ -179,10 +212,12 @@ Rules:
 TEXT TO PROCESS:
 ${text.slice(0, 15000)}`;
 
-  const result = await model.generateContent(prompt);
-  const raw = result.response.text();
-  const parsed = parseJSON<{ questions: ExtractedQuestion[] }>(raw, { questions: [] });
-  return parsed.questions ?? [];
+  return withGeminiModel({ jsonResponse: true }, async (model) => {
+    const result = await model.generateContent(prompt);
+    const raw = result.response.text();
+    const parsed = parseJSON<{ questions: ExtractedQuestion[] }>(raw, { questions: [] });
+    return parsed.questions ?? [];
+  });
 }
 
 // ─── 4. Admin: validate questions for quality issues ─────────────────────────
@@ -191,13 +226,6 @@ export async function validateQuestions(
   questions: { body: string; answer: string }[]
 ): Promise<{ index: number; issue: string }[]> {
   if (questions.length === 0) return [];
-
-  const client = getClient();
-  const model = client.getGenerativeModel({
-    model: MODEL,
-    safetySettings: SAFETY,
-    generationConfig: { responseMimeType: "application/json" },
-  });
 
   const prompt = `You are a quality reviewer for medical exam questions. Review these questions and flag any with issues.
 
@@ -220,16 +248,18 @@ Return ONLY JSON:
 
 If all questions are fine, return: {"issues": []}`;
 
-  const result = await model.generateContent(prompt);
-  const raw = result.response.text();
-  const parsed = parseJSON<{ issues: { index: number; issue: string }[] }>(raw, { issues: [] });
-  return parsed.issues ?? [];
+  return withGeminiModel({ jsonResponse: true }, async (model) => {
+    const result = await model.generateContent(prompt);
+    const raw = result.response.text();
+    const parsed = parseJSON<{ issues: { index: number; issue: string }[] }>(raw, { issues: [] });
+    return parsed.issues ?? [];
+  });
 }
 
 // ─── 5. Gemini rate limit info ────────────────────────────────────────────────
 
 export const GEMINI_LIMITS = {
-  model: MODEL,
+  model: geminiModelChain()[0] ?? "gemini-1.5-flash",
   rpm: 15,        // requests per minute (free tier)
   tpd: 1_000_000, // tokens per day (free tier)
   rpd: 1_500,     // requests per day (free tier)

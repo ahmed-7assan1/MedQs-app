@@ -1,8 +1,19 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Save, Loader2, Megaphone, Palette, ToggleRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload } from "lucide-react";
 import { ExportPanel } from "@/components/admin/ExportPanel";
+import { uploadFiles } from "@/lib/uploadthing-react";
 import toast from "react-hot-toast";
+
+function uploadthingAppId(): string {
+  return (process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID ?? "").trim();
+}
+
+function urlFromUt(file: { url?: string; ufsUrl?: string } | undefined): string | null {
+  if (!file) return null;
+  const u = file.url ?? file.ufsUrl;
+  return typeof u === "string" && u.length > 0 ? u : null;
+}
 
 interface SiteConfig {
   siteName: string; logoUrl: string; faviconUrl: string;
@@ -14,27 +25,95 @@ interface SiteConfig {
 const DEFAULTS: SiteConfig = {
   siteName: "MedQs", logoUrl: "", faviconUrl: "", primaryColor: "#1a7ef0",
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
-  fontSans: "Inter", fontArabic: "Cairo",
+  fontSans: "Poppins", fontArabic: "Tajawal",
 };
 
 export default function AdminSettingsPage() {
   const [config, setConfig] = useState<SiteConfig>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoFileRef = useRef<HTMLInputElement>(null);
   const [broadTitle, setBroadTitle] = useState("");
   const [broadBody, setBroadBody] = useState("");
   const [broadcasting, setBroadcasting] = useState(false);
 
   useEffect(() => {
-    fetch("/api/v1/admin/config").then((r) => r.json())
-      .then((d) => { if (d?.siteName) setConfig(d); }).finally(() => setLoading(false));
+    let cancelled = false;
+    (async () => {
+      try {
+        const [cfgRes, meRes] = await Promise.all([
+          fetch("/api/v1/admin/config"),
+          fetch("/api/v1/auth/me"),
+        ]);
+        const d = await cfgRes.json();
+        if (!cancelled && d?.siteName) setConfig(d);
+        if (meRes.ok) {
+          const me = await meRes.json();
+          if (!cancelled && me?.role === "SUPER_ADMIN") setIsSuperAdmin(true);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  async function persistConfig(payload: SiteConfig): Promise<boolean> {
+    const res = await fetch("/api/v1/admin/config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return res.ok;
+  }
 
   async function handleSave() {
     setSaving(true);
-    const res = await fetch("/api/v1/admin/config", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(config) });
+    const ok = await persistConfig(config);
     setSaving(false);
-    res.ok ? toast.success("Settings saved!") : toast.error("Failed to save");
+    ok ? toast.success("Settings saved!") : toast.error("Failed to save");
+  }
+
+  async function handleSiteLogoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !isSuperAdmin) return;
+    setLogoUploading(true);
+    try {
+      let url: string | null = null;
+      if (uploadthingAppId()) {
+        const uploaded = await uploadFiles("siteLogo", { files: [file] });
+        url = urlFromUt(uploaded[0]);
+      } else {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("folder", "site");
+        const res = await fetch("/api/v1/upload/direct", { method: "POST", body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast.error(typeof data?.error === "string" ? data.error : "Logo upload failed");
+          return;
+        }
+        url = typeof data.url === "string" ? data.url : null;
+      }
+      if (!url) {
+        toast.error("Upload finished but no URL was returned");
+        return;
+      }
+      const next = { ...config, logoUrl: url };
+      setConfig(next);
+      const saved = await persistConfig(next);
+      if (saved) toast.success("Site logo updated and saved");
+      else toast.error("Logo uploaded but saving settings failed — use Save");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Logo upload failed");
+    } finally {
+      setLogoUploading(false);
+    }
   }
 
   async function handleBroadcast() {
@@ -70,8 +149,51 @@ export default function AdminSettingsPage() {
               <input type="color" value={config.primaryColor} onChange={(e) => setConfig((c) => ({ ...c, primaryColor: e.target.value }))} className="h-9 w-12 cursor-pointer rounded-lg border border-border bg-background p-0.5" />
               <input type="text" value={config.primaryColor} onChange={(e) => setConfig((c) => ({ ...c, primaryColor: e.target.value }))} className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring" />
             </div></div>
-          <div><label className="mb-1.5 block text-xs font-medium text-muted-foreground">Logo URL</label>
-            <input type="url" value={config.logoUrl} onChange={(e) => setConfig((c) => ({ ...c, logoUrl: e.target.value }))} placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
+          <div className="sm:col-span-2 space-y-2">
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Logo</label>
+            <p className="text-[11px] text-muted-foreground -mt-1 mb-2">
+              Paste an image URL, or as super admin upload a file (JPEG, PNG, WebP, GIF — max 2MB). Upload uses Uploadthing if configured, otherwise server storage.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                type="url"
+                value={config.logoUrl}
+                onChange={(e) => setConfig((c) => ({ ...c, logoUrl: e.target.value }))}
+                placeholder="https://..."
+                className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              {isSuperAdmin ? (
+                <>
+                  <input
+                    ref={logoFileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleSiteLogoFile}
+                  />
+                  <button
+                    type="button"
+                    disabled={logoUploading}
+                    onClick={() => logoFileRef.current?.click()}
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60"
+                  >
+                    {logoUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {logoUploading ? "Uploading…" : "Upload from device"}
+                  </button>
+                </>
+              ) : null}
+            </div>
+            {config.logoUrl?.trim() ? (
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-[11px] text-muted-foreground">Preview</span>
+                <img
+                  src={config.logoUrl.trim()}
+                  alt=""
+                  className="h-10 w-10 rounded-lg border border-border object-contain bg-muted/30"
+                />
+              </div>
+            ) : null}
+          </div>
           <div><label className="mb-1.5 block text-xs font-medium text-muted-foreground">Favicon URL</label>
             <input type="url" value={config.faviconUrl} onChange={(e) => setConfig((c) => ({ ...c, faviconUrl: e.target.value }))} placeholder="https://..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
           <div><label className="mb-1.5 block text-xs font-medium text-muted-foreground">Primary site font</label>

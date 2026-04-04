@@ -15,7 +15,15 @@ export default async function QuizPage({ params }: { params: { paperId: string }
 
   const paper = await prisma.pastPaper.findUnique({
     where: { id: params.paperId },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      timeLimitMin: true,
+      aiExplanationEnabled: true,
+      allowAiDuringQuiz: true,
+      secureExamMode: true,
+      restrictCopyPaste: true,
+      trackFocusLoss: true,
       module: {
         include: {
           subjects: {
@@ -24,8 +32,15 @@ export default async function QuizPage({ params }: { params: { paperId: string }
                 include: {
                   questions: {
                     select: {
-                      id: true, body: true, imageUrl: true, choices: true,
-                      answer: true, explanation: true, difficulty: true, lectureId: true,
+                      id: true,
+                      body: true,
+                      imageUrl: true,
+                      stemLayout: true,
+                      choices: true,
+                      answer: true,
+                      explanation: true,
+                      difficulty: true,
+                      lectureId: true,
                     },
                   },
                 },
@@ -61,6 +76,9 @@ export default async function QuizPage({ params }: { params: { paperId: string }
       siteAiEnabled={siteAiEnabled}
       paperAiExplanationEnabled={paper.aiExplanationEnabled !== false}
       allowAiDuringQuiz={paper.allowAiDuringQuiz === true}
+      secureExamMode={paper.secureExamMode === true}
+      restrictCopyPaste={paper.restrictCopyPaste === true}
+      trackFocusLoss={paper.trackFocusLoss === true}
     />
   );
 }
