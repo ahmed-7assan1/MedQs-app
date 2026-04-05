@@ -37,7 +37,8 @@ const BUCKET = process.env.S3_BUCKET ?? "medqs";
 function assertStorageConfigured(): void {
   if (!process.env.S3_ACCESS_KEY?.trim() || !process.env.S3_SECRET_KEY?.trim()) {
     throw new Error(
-      "Object storage is not configured (set S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET, and S3_PUBLIC_URL or S3_ENDPOINT)."
+      "Object storage is not configured: set S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET, and S3_PUBLIC_URL (or S3_ENDPOINT for R2). " +
+        "For local development without S3, set USE_LOCAL_FILE_UPLOAD=true in .env (files go to public/uploads/) and restart the dev server."
     );
   }
 }

@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import {
   Plus, Trash2, Save, Loader2, ChevronDown, ChevronUp,
-  Clock, BookOpen, Users, Image, Layers, Check, X,
+  Clock, BookOpen, Users, Image, Layers, Check, X, Pencil, ImagePlus,
 } from "lucide-react";
+import { QuickDrawModal } from "@/components/draw/QuickDrawModal";
+import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
@@ -41,6 +43,8 @@ export default function AdminQuizCreatorPage() {
   }]);
 
   const [expandedQ, setExpandedQ] = useState<number | null>(0);
+  const [drawForQi, setDrawForQi] = useState<number | null>(null);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -67,6 +71,21 @@ export default function AdminQuizCreatorPage() {
 
   function updateQ(i: number, field: string, value: string) {
     setQuestions(qs => qs.map((q, idx) => idx === i ? { ...q, [field]: value } : q));
+  }
+
+  async function uploadQuestionImage(qi: number, file: File) {
+    setUploadingIdx(qi);
+    try {
+      const result = await uploadQuestionImageClient(file);
+      if (result.ok) {
+        updateQ(qi, "imageUrl", result.url);
+        toast.success("Image attached");
+      } else {
+        toast.error(result.error);
+      }
+    } finally {
+      setUploadingIdx(null);
+    }
   }
 
   function updateChoice(qi: number, ci: number, value: string) {
@@ -228,6 +247,34 @@ export default function AdminQuizCreatorPage() {
                   <label className="block text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
                     <Image className="h-3.5 w-3.5" /> Image URL <span className="opacity-60">(optional)</span>
                   </label>
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDrawForQi(qi)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Draw
+                    </button>
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted">
+                      {uploadingIdx === qi ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <ImagePlus className="h-3.5 w-3.5" />
+                      )}
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        disabled={uploadingIdx !== null}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void uploadQuestionImage(qi, file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
                   <input type="url" value={q.imageUrl ?? ""} onChange={e => updateQ(qi, "imageUrl", e.target.value)}
                     placeholder="https://..."
                     className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25" />
@@ -331,6 +378,18 @@ export default function AdminQuizCreatorPage() {
           </button>
         </div>
       </div>
+
+      <QuickDrawModal
+        open={drawForQi !== null}
+        onClose={() => setDrawForQi(null)}
+        onSaved={(url) => {
+          if (drawForQi === null) return;
+          updateQ(drawForQi, "imageUrl", url);
+          setDrawForQi(null);
+        }}
+        title="Draw for quiz question"
+        exportBackground="#ffffff"
+      />
     </div>
   );
 }

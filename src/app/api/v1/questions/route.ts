@@ -3,10 +3,27 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
+/** Accepts http(s), local `/uploads/...` from USE_LOCAL_FILE_UPLOAD, and data URLs (fallback). */
+function isValidQuestionImageUrl(s: string): boolean {
+  if (s.startsWith("/uploads/")) return true;
+  if (s.startsWith("data:image/")) return true;
+  try {
+    const u = new URL(s);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 const CreateSchema = z
   .object({
     body: z.string().default(""),
-    imageUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+    imageUrl: z
+      .preprocess(
+        (v) => (v === "" || v === undefined ? null : v),
+        z.union([z.null(), z.string().refine(isValidQuestionImageUrl, { message: "Invalid image URL" })])
+      )
+      .optional(),
     stemLayout: z.enum(["STANDARD", "IMAGE_OVERLAY"]).optional(),
     choices: z.array(z.object({ key: z.string(), text: z.string() })).min(2),
     answer: z.string(),

@@ -3,6 +3,17 @@ import { useState, useRef, useCallback } from "react";
 import { Upload, X, CheckCircle2, Loader2, FileText, Image, Film, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { uploadFiles } from "@/lib/uploadthing-react";
+
+function uploadthingPublicAppId(): string {
+  return (process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID ?? "").trim();
+}
+
+function fileUrlFromUt(file: { url?: string; ufsUrl?: string } | undefined): string | null {
+  if (!file) return null;
+  const u = file.url ?? file.ufsUrl;
+  return typeof u === "string" && u.length > 0 ? u : null;
+}
 
 function fileMatchesAccept(file: File, accept?: string): boolean {
   if (!accept || accept.trim() === "") return true;
@@ -89,6 +100,20 @@ export function FileUploader({
         },
       ]);
     };
+
+    if (folder === "ad" && uploadthingPublicAppId()) {
+      try {
+        const uploaded = await uploadFiles("adBanner", { files: [file] });
+        const url = fileUrlFromUt(uploaded[0]);
+        if (url) {
+          markDone(url);
+          return;
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "UploadThing failed";
+        console.warn("[FileUploader] adBanner:", msg);
+      }
+    }
 
     const directFolders = ["forum", "question", "ad", "lecture", "pastpaper"] as const;
     const canDirect = directFolders.includes(folder as (typeof directFolders)[number]);

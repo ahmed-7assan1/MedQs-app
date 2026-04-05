@@ -256,10 +256,64 @@ If all questions are fine, return: {"issues": []}`;
   });
 }
 
-// ─── 5. Gemini rate limit info ────────────────────────────────────────────────
+// ─── 5. Admin: lecture notes + flashcards (AI Tools) ──────────────────────────
+
+export async function generateLectureEnhancements(
+  lectureTitle: string,
+  subjectName: string,
+  moduleName: string,
+  instructions: string,
+  wantNotes: boolean,
+  wantFlashcards: boolean
+): Promise<{ notesMarkdown: string; flashcards: { front: string; back: string }[] }> {
+  const prompt = `You assist medical educators.
+
+Lecture title: ${lectureTitle}
+Subject: ${subjectName}
+Module: ${moduleName}
+
+Teacher instructions (what to focus on):
+${instructions.trim() || "Summarize high-yield exam-relevant concepts."}
+
+Return ONLY valid JSON:
+{
+  "notesMarkdown": "markdown string or empty",
+  "flashcards": [{"front":"...","back":"..."}]
+}
+
+Rules:
+- If the teacher does not need study notes, set notesMarkdown to "".
+- If the teacher does not need flashcards, set flashcards to [].
+- notesMarkdown: use ## headings, bullet lists, bold key terms; concise.
+- flashcards: 6–24 cards if requested, else []; short Q/A style; medically accurate.
+- wantNotes this run: ${wantNotes}
+- wantFlashcards this run: ${wantFlashcards}`;
+
+  return withGeminiModel({ jsonResponse: true }, async (model) => {
+    const result = await model.generateContent(prompt);
+    const raw = result.response.text();
+    const parsed = parseJSON<{ notesMarkdown?: string; flashcards?: { front: string; back: string }[] }>(raw, {
+      notesMarkdown: "",
+      flashcards: [],
+    });
+    const notes = wantNotes ? String(parsed.notesMarkdown ?? "").trim() : "";
+    const cards = wantFlashcards
+      ? (parsed.flashcards ?? [])
+          .filter((f) => f && String(f.front).trim() && String(f.back).trim())
+          .map((f) => ({
+            front: String(f.front).trim().slice(0, 500),
+            back: String(f.back).trim().slice(0, 1000),
+          }))
+          .slice(0, 40)
+      : [];
+    return { notesMarkdown: notes, flashcards: cards };
+  });
+}
+
+// ─── 6. Gemini rate limit info ────────────────────────────────────────────────
 
 export const GEMINI_LIMITS = {
-  model: geminiModelChain()[0] ?? "gemini-1.5-flash",
+  model: geminiModelChain()[0] ?? "gemini-2.5-flash",
   rpm: 15,        // requests per minute (free tier)
   tpd: 1_000_000, // tokens per day (free tier)
   rpd: 1_500,     // requests per day (free tier)

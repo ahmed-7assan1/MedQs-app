@@ -142,15 +142,17 @@ model Subject {
 }
 
 model Lecture {
-  id         String        @id @default(uuid())
-  title      String
-  videoUrl   String?
-  order      Int           @default(0)
-  subject    Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  subjectId  String
-  flashcards Flashcard[]
-  questions  Question[]
-  files      LectureFile[]
+  id            String        @id @default(uuid())
+  title         String
+  videoUrl      String?
+  order         Int           @default(0)
+  // AI/admin Notes section (markdown) on lecture hub
+  notesMarkdown String?       @db.Text
+  subject       Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId     String
+  flashcards    Flashcard[]
+  questions     Question[]
+  files         LectureFile[]
 }
 
 model Flashcard {
@@ -299,6 +301,22 @@ model User {
   accounts         Account[]
   sessions         Session[]
   questionReports  QuestionReport[]
+  dmSent           DirectMessage[] @relation("DmSent")
+  dmReceived       DirectMessage[] @relation("DmReceived")
+}
+
+model DirectMessage {
+  id         String   @id @default(uuid())
+  body       String   @db.Text
+  read       Boolean  @default(false)
+  senderId   String
+  receiverId String
+  sender     User     @relation("DmSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("DmReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([receiverId, read])
+  @@index([senderId, receiverId, createdAt])
 }
 
 // ─────────────────────────────────────────────

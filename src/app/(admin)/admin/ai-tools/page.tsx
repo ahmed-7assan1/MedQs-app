@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  Wand2, Upload, Loader2, CheckCircle2, AlertTriangle,
-  Trash2, Save, ChevronDown, ChevronUp, Sparkles
+  Wand2, Upload, Loader2, AlertTriangle,
+  Trash2, Save, ChevronDown, ChevronUp, Sparkles, BookOpen, Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -16,8 +16,20 @@ function ManualAssistPanel() {
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
+  const [edited, setEdited] = useState<AISuggestion | null>(null);
   const [lectureId, setLectureId] = useState("");
   const [placementKey, setPlacementKey] = useState(0);
+
+  useEffect(() => {
+    if (suggestion) {
+      setEdited({
+        ...suggestion,
+        choices: suggestion.choices.map((c) => ({ ...c })),
+      });
+    } else {
+      setEdited(null);
+    }
+  }, [suggestion]);
 
   async function handleSuggest() {
     if (!body.trim()) return toast.error("Enter a question body first");
@@ -43,16 +55,18 @@ function ManualAssistPanel() {
   }
 
   async function handleSave() {
-    if (!suggestion || !lectureId) return toast.error("اختر المديول، المادة، ثم المحاضرة أو كويز كامل للمادة");
+    const pack = edited ?? suggestion;
+    if (!pack || !lectureId) return toast.error("اختر المديول، المادة، ثم المحاضرة أو كويز كامل للمادة");
     const res = await fetch("/api/v1/questions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...suggestion, body, lectureId }),
+      body: JSON.stringify({ ...pack, body, lectureId }),
     });
     if (res.ok) {
       toast.success("Question saved!");
       setBody("");
       setSuggestion(null);
+      setEdited(null);
       setLectureId("");
       setPlacementKey((k) => k + 1);
     } else {
@@ -88,39 +102,65 @@ function ManualAssistPanel() {
           {loading ? "Generating..." : "Generate with AI"}
         </button>
 
-        {suggestion && (
+        {suggestion && edited && (
           <div className="mt-4 space-y-3 rounded-xl bg-muted/50 p-4 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI Suggestion</span>
-              <span className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                suggestion.difficulty === "EASY" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-                suggestion.difficulty === "MEDIUM" ? "bg-amber-100 text-amber-700" :
-                "bg-red-100 text-red-700"
-              )}>{suggestion.difficulty}</span>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Review & edit before save
+              </span>
+              <select
+                value={edited.difficulty}
+                onChange={(e) =>
+                  setEdited((prev) =>
+                    prev ? { ...prev, difficulty: e.target.value as AISuggestion["difficulty"] } : prev
+                  )
+                }
+                className="rounded-lg border border-border bg-background px-2 py-1 text-xs"
+              >
+                <option value="EASY">EASY</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HARD">HARD</option>
+              </select>
             </div>
 
-            <div className="space-y-1.5">
-              {suggestion.choices.map((c) => (
-                <div
-                  key={c.key}
-                  className={cn(
-                    "flex items-start gap-2 rounded-lg px-3 py-2 text-sm",
-                    c.key === suggestion.answer
-                      ? "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800"
-                      : "bg-background border border-border"
-                  )}
-                >
+            <div className="space-y-2">
+              {edited.choices.map((c, idx) => (
+                <div key={c.key} className="flex flex-col gap-1 rounded-lg border border-border bg-background px-3 py-2 sm:flex-row sm:items-center">
                   <span className="font-mono text-xs font-bold text-muted-foreground">{c.key}</span>
-                  <span className="flex-1">{c.text}</span>
-                  {c.key === suggestion.answer && <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green-500" />}
+                  <input
+                    value={c.text}
+                    onChange={(e) =>
+                      setEdited((prev) => {
+                        if (!prev) return prev;
+                        const choices = prev.choices.map((x, j) =>
+                          j === idx ? { ...x, text: e.target.value } : x
+                        );
+                        return { ...prev, choices };
+                      })
+                    }
+                    className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
+                  />
+                  <label className="flex items-center gap-1 text-xs whitespace-nowrap">
+                    <input
+                      type="radio"
+                      name="manual-correct"
+                      checked={edited.answer === c.key}
+                      onChange={() => setEdited((prev) => (prev ? { ...prev, answer: c.key } : prev))}
+                    />
+                    Correct
+                  </label>
                 </div>
               ))}
             </div>
 
-            <div className="rounded-lg bg-primary/5 border border-primary/20 px-3 py-2.5 text-sm">
-              <p className="mb-1 text-xs font-medium text-primary">Explanation</p>
-              <p className="text-sm text-foreground">{suggestion.explanation}</p>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Explanation</label>
+              <textarea
+                value={edited.explanation}
+                onChange={(e) => setEdited((prev) => (prev ? { ...prev, explanation: e.target.value } : prev))}
+                rows={4}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
             </div>
 
             <AiQuestionPlacementPicker
@@ -195,6 +235,23 @@ function PDFExtractPanel() {
   function removeQuestion(i: number) {
     setQuestions((q) => q.filter((_, idx) => idx !== i));
     setIssues((iss) => iss.filter((x) => x.index !== i).map((x) => ({ ...x, index: x.index > i ? x.index - 1 : x.index })));
+  }
+
+  function patchQuestion(i: number, patch: Partial<ExtractedQuestion>) {
+    setQuestions((qs) => qs.map((q, idx) => (idx === i ? { ...q, ...patch } : q)));
+  }
+
+  function patchChoice(qIndex: number, choiceIndex: number, text: string) {
+    setQuestions((qs) =>
+      qs.map((q, j) =>
+        j === qIndex
+          ? {
+              ...q,
+              choices: q.choices.map((c, k) => (k === choiceIndex ? { ...c, text } : c)),
+            }
+          : q
+      )
+    );
   }
 
   async function handleSaveAll() {
@@ -328,25 +385,70 @@ function PDFExtractPanel() {
                 </div>
 
                 {expanded.has(i) && (
-                  <div className="border-t border-border px-4 pb-4 pt-3 space-y-2 animate-fade-in">
-                    {q.choices.map((c) => (
-                      <div
-                        key={c.key}
-                        className={cn(
-                          "flex items-start gap-2 rounded-lg px-3 py-2 text-sm",
-                          c.key === q.answer
-                            ? "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800"
-                            : "bg-muted/50 border border-transparent"
-                        )}
-                      >
-                        <span className="font-mono text-xs text-muted-foreground">{c.key}</span>
-                        <span>{c.text}</span>
-                        {c.key === q.answer && <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />}
+                  <div className="border-t border-border px-4 pb-4 pt-3 space-y-3 animate-fade-in">
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Question</label>
+                      <textarea
+                        value={q.body}
+                        onChange={(e) => patchQuestion(i, { body: e.target.value })}
+                        rows={3}
+                        className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Choices</label>
+                      <div className="space-y-2">
+                        {q.choices.map((c, ci) => (
+                          <div key={c.key} className="flex flex-col gap-1 sm:flex-row sm:items-center">
+                            <span className="w-8 font-mono text-xs text-muted-foreground">{c.key}</span>
+                            <input
+                              value={c.text}
+                              onChange={(e) => patchChoice(i, ci, e.target.value)}
+                              className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <label className="flex items-center gap-1 text-xs whitespace-nowrap">
+                              <input
+                                type="radio"
+                                name={`pdf-q-${i}-answer`}
+                                checked={q.answer === c.key}
+                                onChange={() => patchQuestion(i, { answer: c.key })}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              Correct
+                            </label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                    {q.explanation && (
-                      <p className="text-xs text-muted-foreground italic px-1 pt-1">{q.explanation}</p>
-                    )}
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
+                        <select
+                          value={q.difficulty}
+                          onChange={(e) =>
+                            patchQuestion(i, { difficulty: e.target.value as ExtractedQuestion["difficulty"] })
+                          }
+                          className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <option value="EASY">EASY</option>
+                          <option value="MEDIUM">MEDIUM</option>
+                          <option value="HARD">HARD</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Explanation</label>
+                      <textarea
+                        value={q.explanation ?? ""}
+                        onChange={(e) => patchQuestion(i, { explanation: e.target.value })}
+                        rows={3}
+                        className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -355,6 +457,113 @@ function PDFExtractPanel() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Lecture notes + flashcards (admin) ──────────────────────────────────────
+
+function LectureEnhancePanel() {
+  const [lectureId, setLectureId] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [wantNotes, setWantNotes] = useState(true);
+  const [wantFlashcards, setWantFlashcards] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function run() {
+    if (!lectureId) return toast.error("Select a lecture first");
+    if (!wantNotes && !wantFlashcards) return toast.error("Choose notes and/or flashcards");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/v1/admin/ai/lecture-enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lectureId,
+          instructions,
+          notes: wantNotes,
+          flashcards: wantFlashcards,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : "Request failed");
+        return;
+      }
+      const parts: string[] = [];
+      if (data.notesAdded) parts.push("notes");
+      if (typeof data.flashcardsAdded === "number" && data.flashcardsAdded > 0) {
+        parts.push(`${data.flashcardsAdded} flashcards`);
+      }
+      toast.success(parts.length ? `Added: ${parts.join(", ")}` : "Done");
+    } catch {
+      toast.error("Request failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <BookOpen className="h-5 w-5 text-sky-600" />
+        <Layers className="h-5 w-5 text-emerald-600" />
+        <h2 className="font-display text-lg font-semibold">Lecture AI: notes & flashcards</h2>
+      </div>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Generates markdown notes (appended to the lecture &quot;Notes&quot; section) and/or flashcards on the selected
+        lecture. Students see notes under the lecture hub when content exists.
+      </p>
+
+      <AiQuestionPlacementPicker
+        radioGroupName="ai-lecture-enhance"
+        onChange={setLectureId}
+        disabled={loading}
+      />
+
+      <div className="mt-4 space-y-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            Focus / instructions for AI (optional)
+          </label>
+          <textarea
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            rows={3}
+            placeholder="e.g. Emphasize drug mechanisms and side effects for the exam…"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="flex flex-wrap gap-4 text-sm">
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={wantNotes}
+              onChange={(e) => setWantNotes(e.target.checked)}
+              className="rounded border-border"
+            />
+            Add / extend study notes (markdown)
+          </label>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={wantFlashcards}
+              onChange={(e) => setWantFlashcards(e.target.checked)}
+              className="rounded border-border"
+            />
+            Generate flashcards
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={run}
+          disabled={loading || !lectureId || (!wantNotes && !wantFlashcards)}
+          className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {loading ? "Working…" : "Run AI on lecture"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -372,6 +581,9 @@ export default function AIToolsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <ManualAssistPanel />
         <PDFExtractPanel />
+      </div>
+      <div className="mt-6">
+        <LectureEnhancePanel />
       </div>
     </div>
   );

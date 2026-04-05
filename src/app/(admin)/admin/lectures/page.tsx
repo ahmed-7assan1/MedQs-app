@@ -246,6 +246,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
   }
 
   async function deleteCard(cardId: string) {
+    if (!confirm("Delete this flashcard?")) return;
     const res = await fetch(`/api/v1/flashcards/${cardId}`, { method: "DELETE" });
     if (res.ok) {
       onFlashcardsChange(cards.filter(c => c.id !== cardId));

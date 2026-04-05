@@ -1,14 +1,24 @@
 "use client";
+
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sparkles, Send, Loader2, ChevronDown, RotateCcw, ImagePlus, Mic, X } from "lucide-react";
+import {
+  Sparkles,
+  Send,
+  Loader2,
+  ChevronDown,
+  RotateCcw,
+  ImagePlus,
+  X,
+  Plus,
+  MessageSquare,
+  FileText,
+  Paperclip,
+  PanelLeftClose,
+  PanelLeft,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
 
 interface UsageInfo {
   used: number;
@@ -16,7 +26,32 @@ interface UsageInfo {
   rankLabel: string;
 }
 
+/** Shown in thread; binary omitted when saving to localStorage */
+export type ChatAttachment = {
+  kind: "image";
+  preview: string;
+  name?: string;
+};
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  attachments?: ChatAttachment[];
+}
+
+export interface DrQThread {
+  id: string;
+  title: string;
+  updatedAt: number;
+  messages: ChatMessage[];
+}
+
+const THREADS_KEY = "medqs-dr-q-threads-v1";
+const ACTIVE_THREAD_KEY = "medqs-dr-q-active-thread-v1";
+
 type ChatImage = { mimeType: string; data: string; preview: string };
+type PendingPdf = { mimeType: "application/pdf"; data: string; name: string };
+type PendingText = { name: string; text: string };
 
 function fileToImagePart(file: File): Promise<ChatImage> {
   return new Promise((resolve, reject) => {
@@ -44,33 +79,174 @@ function fileToImagePart(file: File): Promise<ChatImage> {
   });
 }
 
+function fileToPdfPart(file: File): Promise<PendingPdf> {
+  return new Promise((resolve, reject) => {
+    if (file.type !== "application/pdf") {
+      reject(new Error("PDF only"));
+      return;
+    }
+    if (file.size > 4.5 * 1024 * 1024) {
+      reject(new Error("PDF too large (max ~4.5MB)"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const s = String(reader.result);
+      const m = s.match(/^data:([^;]+);base64,(.+)$/);
+      if (!m || m[1] !== "application/pdf") {
+        reject(new Error("Could not read PDF"));
+        return;
+      }
+      resolve({ mimeType: "application/pdf", data: m[2], name: file.name || "document.pdf" });
+    };
+    reader.onerror = () => reject(new Error("Read failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function fileToTextSnippet(file: File): Promise<PendingText> {
+  return new Promise((resolve, reject) => {
+    const ok =
+      file.type === "text/plain" ||
+      file.name.toLowerCase().endsWith(".md") ||
+      file.name.toLowerCase().endsWith(".txt");
+    if (!ok) {
+      reject(new Error("Use .txt or .md for text lecture files"));
+      return;
+    }
+    if (file.size > 400 * 1024) {
+      reject(new Error("Text file too large (max 400KB)"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result ?? "").trim();
+      if (!text) {
+        reject(new Error("Empty file"));
+        return;
+      }
+      const cap = 24_000;
+      resolve({
+        name: file.name || "notes.txt",
+        text: text.length > cap ? `${text.slice(0, cap)}\n\n…(truncated)` : text,
+      });
+    };
+    reader.onerror = () => reject(new Error("Read failed"));
+    reader.readAsText(file);
+  });
+}
+
+function loadThreads(): DrQThread[] {
+  try {
+    const raw = localStorage.getItem(THREADS_KEY);
+    if (!raw) return [];
+    const p = JSON.parse(raw) as unknown;
+    if (!Array.isArray(p)) return [];
+    return p.filter(
+      (t): t is DrQThread =>
+        !!t &&
+        typeof t === "object" &&
+        typeof (t as DrQThread).id === "string" &&
+        Array.isArray((t as DrQThread).messages)
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveThreads(threads: DrQThread[]) {
+  try {
+    localStorage.setItem(THREADS_KEY, JSON.stringify(threads.slice(0, 80)));
+  } catch {
+    toast.error("Could not save chat history (storage full). Start a new topic or clear old data.");
+  }
+}
+
+function loadActiveId(): string | null {
+  try {
+    return localStorage.getItem(ACTIVE_THREAD_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveActiveId(id: string | null) {
+  try {
+    if (id) localStorage.setItem(ACTIVE_THREAD_KEY, id);
+    else localStorage.removeItem(ACTIVE_THREAD_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function threadTitleFromMessages(msgs: ChatMessage[]): string {
+  const u = msgs.find((m) => m.role === "user" && m.content.trim());
+  if (!u) return "New topic";
+  const t = u.content.replace(/\s+/g, " ").trim();
+  return t.length <= 48 ? t : `${t.slice(0, 46)}…`;
+}
+
 export function AIAssistant() {
   return <AIAssistantPanel />;
 }
 
 const SUGGESTIONS = [
-  "Explain this question in simple terms",
+  "Explain this topic in simple terms",
   "Give me a mnemonic for cranial nerves",
   "Summarize key points from my last lecture",
   "Suggest a 10-question quiz on cardiology",
 ];
 
-export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
+export function AIAssistantPanel({
+  embedded = false,
+  fullPage = false,
+}: {
+  embedded?: boolean;
+  fullPage?: boolean;
+}) {
   const [open, setOpen] = useState(embedded);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [threads, setThreads] = useState<DrQThread[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [lastFailedPayload, setLastFailedPayload] = useState<{
     message: string;
     images: { mimeType: string; data: string }[];
+    pdfs: { mimeType: "application/pdf"; data: string }[];
+    history: { role: string; content: string }[];
   } | null>(null);
   const [attachImages, setAttachImages] = useState<ChatImage[]>([]);
-  const [listening, setListening] = useState(false);
+  const [attachPdf, setAttachPdf] = useState<PendingPdf | null>(null);
+  const [attachTexts, setAttachTexts] = useState<PendingText[]>([]);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const recRef = useRef<{ stop: () => void } | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const hydrateThreads = useCallback(() => {
+    let list = loadThreads();
+    if (list.length === 0) {
+      const id = `t-${Date.now()}`;
+      const row: DrQThread = { id, title: "New topic", updatedAt: Date.now(), messages: [] };
+      list = [row];
+      saveThreads(list);
+      saveActiveId(id);
+    }
+    setThreads(list);
+    const active = loadActiveId();
+    const pick = active && list.some((t) => t.id === active) ? active : list[0]?.id ?? null;
+    setActiveThreadId(pick);
+    const cur = list.find((t) => t.id === pick);
+    setMessages(cur?.messages ?? []);
+  }, []);
+
+  useEffect(() => {
+    hydrateThreads();
+  }, [hydrateThreads]);
 
   useEffect(() => {
     if (open && usage === null) {
@@ -85,58 +261,135 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const postChat = useCallback(
-    async (text: string, images: { mimeType: string; data: string }[]) => {
-    const res = await fetch("/api/v1/ai/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, images: images.length ? images : undefined }),
-    });
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      if (res.status === 429) {
-        setMessages((m) => [
-          ...m,
-          {
-            role: "assistant",
-            content: `You've reached your daily limit of ${data.limit} messages for your rank (${data.rankLabel}).\n\nEarn more points to reach a higher rank and unlock more messages.`,
-          },
-        ]);
-        return;
-      }
-      const errText =
-        typeof data.error === "string"
-          ? data.error
-          : `Request failed (${res.status})`;
-      throw new Error(errText);
-    }
-
-    setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
-    if (data.used !== undefined) {
-      setUsage((u) => (u ? { ...u, used: data.used } : null));
-    }
-  },
-  []
+  const persistCurrentThread = useCallback(
+    (nextMessages: ChatMessage[], tid: string | null) => {
+      if (!tid) return;
+      const list = loadThreads();
+      const title = threadTitleFromMessages(nextMessages);
+      const updatedAt = Date.now();
+      const others = list.filter((t) => t.id !== tid);
+      const row: DrQThread = { id: tid, title, updatedAt, messages: nextMessages };
+      const merged = [row, ...others].sort((a, b) => b.updatedAt - a.updatedAt);
+      saveThreads(merged);
+      setThreads(merged);
+    },
+    []
   );
+
+  useEffect(() => {
+    if (!activeThreadId) return;
+    const t = window.setTimeout(() => persistCurrentThread(messages, activeThreadId), 400);
+    return () => clearTimeout(t);
+  }, [messages, activeThreadId, persistCurrentThread]);
+
+  const postChat = useCallback(
+    async (
+      text: string,
+      images: { mimeType: string; data: string }[],
+      pdfs: { mimeType: "application/pdf"; data: string }[],
+      history: { role: string; content: string }[]
+    ) => {
+      const res = await fetch("/api/v1/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          images: images.length ? images : undefined,
+          pdfs: pdfs.length ? pdfs : undefined,
+          conversationHistory: history.length ? history : undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          setMessages((m) => [
+            ...m,
+            {
+              role: "assistant",
+              content: `You've reached your daily limit of ${data.limit} messages for your rank (${data.rankLabel}).\n\nEarn more points to reach a higher rank and unlock more messages.`,
+            },
+          ]);
+          return;
+        }
+        const errText =
+          typeof data.error === "string" ? data.error : `Request failed (${res.status})`;
+        throw new Error(errText);
+      }
+
+      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+      if (data.used !== undefined) {
+        setUsage((u) => (u ? { ...u, used: data.used } : null));
+      }
+    },
+    []
+  );
+
+  function newThread() {
+    const id = `t-${Date.now()}`;
+    const row: DrQThread = { id, title: "New topic", updatedAt: Date.now(), messages: [] };
+    const list = [row, ...loadThreads()];
+    saveThreads(list);
+    setThreads(list);
+    setActiveThreadId(id);
+    saveActiveId(id);
+    setMessages([]);
+    setInput("");
+    setAttachImages([]);
+    setAttachPdf(null);
+    setAttachTexts([]);
+    setLastFailedPayload(null);
+  }
+
+  function selectThread(id: string) {
+    setActiveThreadId(id);
+    saveActiveId(id);
+    const list = loadThreads();
+    setThreads(list);
+    const t = list.find((x) => x.id === id);
+    setMessages(t?.messages ?? []);
+    setLastFailedPayload(null);
+  }
 
   async function send() {
     const text = input.trim();
     const imgs = attachImages.map(({ mimeType, data }) => ({ mimeType, data }));
-    if ((!text && imgs.length === 0) || loading) return;
+    const pdfs = attachPdf ? [{ mimeType: attachPdf.mimeType, data: attachPdf.data }] : [];
+    const textExtras = attachTexts.map((t) => `_[File: ${t.name}]_\n${t.text}`).join("\n\n---\n\n");
+    const combined = [text, textExtras].filter(Boolean).join("\n\n");
+    if ((!combined && imgs.length === 0 && pdfs.length === 0) || loading) return;
+
+    const userAttachments: ChatAttachment[] = attachImages.map((im) => ({
+      kind: "image" as const,
+      preview: im.preview,
+    }));
 
     const userLine =
-      text +
-      (imgs.length ? `\n_[${imgs.length} image${imgs.length > 1 ? "s" : ""} attached]_` : "");
+      combined +
+      (attachPdf ? `\n_[PDF: ${attachPdf.name}]_` : "") +
+      (imgs.length ? `\n_[${imgs.length} image${imgs.length > 1 ? "s" : ""}]_` : "");
+
+    const history = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
     setInput("");
     setAttachImages([]);
-    setMessages((m) => [...m, { role: "user", content: userLine }]);
+    setAttachPdf(null);
+    setAttachTexts([]);
+    setMessages((m) => [...m, { role: "user", content: userLine, attachments: userAttachments }]);
     setLoading(true);
     setLastFailedPayload(null);
     try {
-      await postChat(text, imgs);
+      await postChat(combined || "(See attached materials.)", imgs, pdfs, history);
     } catch (err) {
-      setLastFailedPayload({ message: text, images: imgs });
+      setLastFailedPayload({
+        message: combined || "(See attached materials.)",
+        images: imgs,
+        pdfs,
+        history,
+      });
       const detail =
         err instanceof Error && err.message && err.message !== "Request failed"
           ? err.message
@@ -157,11 +410,11 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
 
   async function retryLast() {
     if (!lastFailedPayload || loading) return;
-    const { message, images } = lastFailedPayload;
+    const { message, images, pdfs, history } = lastFailedPayload;
     setMessages((m) => (m[m.length - 1]?.role === "assistant" ? m.slice(0, -1) : m));
     setLoading(true);
     try {
-      await postChat(message, images);
+      await postChat(message, images, pdfs, history);
       setLastFailedPayload(null);
     } catch (err) {
       const detail = err instanceof Error && err.message ? err.message : null;
@@ -194,50 +447,361 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
     }
   }
 
-  function toggleVoice() {
-    if (listening) {
-      recRef.current?.stop();
-      recRef.current = null;
-      setListening(false);
-      return;
+  async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      if (file.type === "application/pdf") {
+        const p = await fileToPdfPart(file);
+        setAttachPdf(p);
+        toast.success("PDF attached (sent with Gemini)");
+        return;
+      }
+      const t = await fileToTextSnippet(file);
+      setAttachTexts((prev) => [...prev, t].slice(0, 3));
+      toast.success("Text file added");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not read file");
     }
-    if (typeof window === "undefined") return;
-    const w = window as unknown as {
-      SpeechRecognition?: new () => {
-        lang: string;
-        interimResults: boolean;
-        continuous: boolean;
-        start: () => void;
-        stop: () => void;
-        onresult: ((ev: { results: { [key: number]: { [key: number]: { transcript: string } } } }) => void) | null;
-        onerror: (() => void) | null;
-        onend: (() => void) | null;
-      };
-      webkitSpeechRecognition?: new () => InstanceType<NonNullable<(typeof w)["SpeechRecognition"]>>;
-    };
-    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-    if (!SR) {
-      toast.error("Voice typing needs Chrome or Edge (Web Speech API).");
-      return;
-    }
-    const recognition = new SR();
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.continuous = false;
-    recognition.onresult = (ev) => {
-      const said = ev.results[0]?.[0]?.transcript?.trim();
-      if (said) setInput((v) => (v ? `${v} ${said}` : said));
-    };
-    recognition.onerror = () => setListening(false);
-    recognition.onend = () => setListening(false);
-    recognition.start();
-    setListening(true);
-    recRef.current = { stop: () => recognition.stop() };
   }
 
-  useEffect(() => {
-    return () => recRef.current?.stop();
-  }, []);
+  const panelShell = (inner: React.ReactNode) => (
+    <div
+      id="medqs-ai-panel"
+      className={cn(
+        embedded
+          ? fullPage
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-transparent shadow-none"
+            : "flex flex-col rounded-2xl border border-border bg-card shadow-sm"
+          : "fixed bottom-6 right-6 z-50 flex origin-bottom-right flex-col rounded-2xl border border-border bg-card shadow-2xl transition-all duration-300",
+        !embedded && (open ? "pointer-events-auto scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0")
+      )}
+      style={
+        embedded
+          ? fullPage
+            ? { width: "100%", height: "100%", minHeight: 0 }
+            : { width: "100%", height: 640 }
+          : { width: 360, height: 520 }
+      }
+      role="dialog"
+      aria-label="AI study assistant"
+    >
+      {inner}
+    </div>
+  );
+
+  const header = (
+    <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
+      {fullPage && embedded ? (
+        <button
+          type="button"
+          onClick={() => setSidebarOpen((s) => !s)}
+          className="rounded-lg border border-border p-2 text-muted-foreground hover:bg-muted"
+          aria-label={sidebarOpen ? "Hide topics" : "Show topics"}
+        >
+          {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+        </button>
+      ) : null}
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+        <Sparkles className="h-4 w-4 text-primary" aria-hidden />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold">Dr. Q</p>
+        {usage && (
+          <p className="text-[10px] text-muted-foreground">
+            {usage.limit === -1
+              ? `${usage.rankLabel} · Unlimited`
+              : `${usage.used}/${usage.limit} messages today · ${usage.rankLabel}`}
+          </p>
+        )}
+        {fullPage && embedded ? (
+          <p className="text-[10px] text-muted-foreground">Topics are stored on this device only</p>
+        ) : null}
+      </div>
+      {fullPage && embedded ? (
+        <button
+          type="button"
+          onClick={newThread}
+          className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-medium hover:bg-muted"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          New topic
+        </button>
+      ) : null}
+      {!embedded && (
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+          aria-label="Close assistant"
+        >
+          <ChevronDown className="h-4 w-4" aria-hidden />
+        </button>
+      )}
+    </div>
+  );
+
+  const messagesArea = (
+    <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+      {messages.length === 0 && (
+        <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+            <Sparkles className="h-6 w-6 text-primary" aria-hidden />
+          </div>
+          <div>
+            <p className="text-sm font-semibold">Study assistant</p>
+            <p className="mt-1 max-w-[280px] text-xs leading-relaxed text-muted-foreground">
+              Medical-only tutor. Attach images, a PDF (slides), or text notes. Your conversation topics are saved in
+              this browser — not on our servers.
+            </p>
+          </div>
+          <div className="flex max-w-full flex-wrap justify-center gap-1.5 px-1">
+            {SUGGESTIONS.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => {
+                  setInput(q);
+                  inputRef.current?.focus();
+                }}
+                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {messages.map((m, i) => (
+        <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+          <div
+            className={cn(
+              "max-w-[min(100%,520px)] rounded-2xl px-3 py-2.5 text-sm leading-relaxed",
+              m.role === "user"
+                ? "rounded-br-sm bg-primary text-primary-foreground"
+                : "rounded-bl-sm bg-muted text-foreground"
+            )}
+          >
+            {m.attachments && m.attachments.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-2">
+                {m.attachments.map((a, j) =>
+                  a.kind === "image" ? (
+                    <div
+                      key={j}
+                      className="overflow-hidden rounded-lg border border-white/20 bg-black/10"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={a.preview} alt="" className="max-h-40 max-w-[200px] object-contain" />
+                    </div>
+                  ) : null
+                )}
+              </div>
+            )}
+            {m.role === "assistant" ? (
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                  ul: ({ children }) => <ul className="my-1 list-inside list-disc space-y-0.5">{children}</ul>,
+                  li: ({ children }) => <li className="text-[13px]">{children}</li>,
+                }}
+              >
+                {m.content}
+              </ReactMarkdown>
+            ) : (
+              <p className="whitespace-pre-wrap break-words">{m.content}</p>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {loading && (
+        <div className="flex justify-start">
+          <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm bg-muted px-3 py-2.5">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-hidden />
+            <span className="text-xs text-muted-foreground">Thinking…</span>
+          </div>
+        </div>
+      )}
+
+      {lastFailedPayload && !loading && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={retryLast}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-primary transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+            Retry last message
+          </button>
+        </div>
+      )}
+
+      <div ref={bottomRef} />
+    </div>
+  );
+
+  const composer = (
+    <div className="border-t border-border p-3">
+      {limitReached ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-center text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+          Daily limit reached. Earn more points to unlock more messages.
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {(attachImages.length > 0 || attachPdf || attachTexts.length > 0) && (
+            <div className="flex flex-wrap gap-2">
+              {attachImages.map((im, idx) => (
+                <div key={idx} className="relative h-14 w-14 overflow-hidden rounded-lg border border-border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={im.preview} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    aria-label="Remove image"
+                    onClick={() => setAttachImages((p) => p.filter((_, i) => i !== idx))}
+                    className="absolute right-0 top-0 rounded-bl bg-black/60 p-0.5 text-white"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              {attachPdf ? (
+                <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 px-2 py-1 text-xs">
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  <span className="max-w-[140px] truncate">{attachPdf.name}</span>
+                  <button
+                    type="button"
+                    aria-label="Remove PDF"
+                    onClick={() => setAttachPdf(null)}
+                    className="rounded p-0.5 hover:bg-muted"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : null}
+              {attachTexts.map((t, idx) => (
+                <div
+                  key={`${t.name}-${idx}`}
+                  className="flex max-w-[200px] items-center gap-1 rounded-lg border border-border bg-muted/40 px-2 py-1 text-xs"
+                >
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{t.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachTexts((p) => p.filter((_, i) => i !== idx))}
+                    className="rounded p-0.5 hover:bg-muted"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex items-end gap-2">
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={onPickImage}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain,.md,.txt"
+              className="hidden"
+              onChange={onPickFile}
+            />
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              disabled={attachImages.length >= 2 || loading}
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground hover:bg-muted disabled:opacity-40"
+              aria-label="Attach image"
+            >
+              <ImagePlus className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground hover:bg-muted disabled:opacity-40"
+              aria-label="Attach file"
+              title="PDF or text file"
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void send();
+                }
+              }}
+              placeholder="Ask a medical question…"
+              rows={fullPage ? 2 : 1}
+              aria-label="Message to assistant"
+              className="max-h-32 min-h-[42px] flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <button
+              type="button"
+              onClick={() => void send()}
+              disabled={
+                loading ||
+                (!input.trim() && attachImages.length === 0 && !attachPdf && attachTexts.length === 0)
+              }
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+              aria-label="Send message"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const sidebar =
+    fullPage && embedded && sidebarOpen ? (
+      <aside className="flex w-60 min-w-[220px] flex-col border-r border-border bg-muted/20">
+        <div className="border-b border-border px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Your topics
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+          {threads.length === 0 ? (
+            <p className="px-2 py-4 text-center text-xs text-muted-foreground">No saved topics yet</p>
+          ) : (
+            threads.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => selectThread(t.id)}
+                className={cn(
+                  "mb-1 flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left text-xs transition-colors",
+                  t.id === activeThreadId ? "bg-primary/15 text-foreground" : "hover:bg-muted/80 text-muted-foreground"
+                )}
+              >
+                <MessageSquare className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-70" />
+                <span className="line-clamp-3">{t.title}</span>
+              </button>
+            ))
+          )}
+        </div>
+      </aside>
+    ) : null;
+
+  const mainColumn = (
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      {header}
+      {messagesArea}
+      {composer}
+    </div>
+  );
 
   return (
     <>
@@ -263,204 +827,16 @@ export function AIAssistantPanel({ embedded = false }: { embedded?: boolean }) {
         </button>
       )}
 
-      <div
-        id="medqs-ai-panel"
-        className={cn(
-          embedded
-            ? "flex flex-col rounded-2xl border border-border bg-card shadow-sm"
-            : "fixed bottom-6 right-6 z-50 flex origin-bottom-right flex-col rounded-2xl border border-border bg-card shadow-2xl transition-all duration-300",
-          open ? "pointer-events-auto scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0"
-        )}
-        style={{ width: embedded ? "100%" : 360, height: embedded ? 640 : 520 }}
-        role="dialog"
-        aria-label="AI study assistant"
-      >
-        <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-            <Sparkles className="h-4 w-4 text-primary" aria-hidden />
+      {panelShell(
+        fullPage && embedded ? (
+          <div className="flex min-h-0 flex-1">
+            {sidebar}
+            {mainColumn}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold">Dr. Q</p>
-            {usage && (
-              <p className="text-[10px] text-muted-foreground">
-                {usage.limit === -1
-                  ? `${usage.rankLabel} · Unlimited`
-                  : `${usage.used}/${usage.limit} messages today · ${usage.rankLabel}`}
-              </p>
-            )}
-          </div>
-          {!embedded && (
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
-              aria-label="Close assistant"
-            >
-              <ChevronDown className="h-4 w-4" aria-hidden />
-            </button>
-          )}
-        </div>
-
-        <div className="flex-1 space-y-3 overflow-y-auto p-4">
-          {messages.length === 0 && (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                <Sparkles className="h-6 w-6 text-primary" aria-hidden />
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Study assistant</p>
-                <p className="mt-1 max-w-[220px] text-xs leading-relaxed text-muted-foreground">
-                  Medical-only tutor. Attach up to 2 images or use the mic (Chrome/Edge) to dictate.
-                </p>
-              </div>
-              <div className="flex max-w-full flex-wrap justify-center gap-1.5 px-1">
-                {SUGGESTIONS.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => {
-                      setInput(q);
-                      inputRef.current?.focus();
-                    }}
-                    className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {messages.map((m, i) => (
-            <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-              <div
-                className={cn(
-                  "max-w-[85%] rounded-2xl px-3 py-2.5 text-sm leading-relaxed",
-                  m.role === "user"
-                    ? "rounded-br-sm bg-primary text-primary-foreground"
-                    : "rounded-bl-sm bg-muted text-foreground"
-                )}
-              >
-                {m.role === "assistant" ? (
-                  <ReactMarkdown
-                    components={{
-                      p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
-                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                      ul: ({ children }) => <ul className="my-1 list-inside list-disc space-y-0.5">{children}</ul>,
-                      li: ({ children }) => <li className="text-[13px]">{children}</li>,
-                    }}
-                  >
-                    {m.content}
-                  </ReactMarkdown>
-                ) : (
-                  m.content
-                )}
-              </div>
-            </div>
-          ))}
-
-          {loading && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm bg-muted px-3 py-2.5">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-hidden />
-                <span className="text-xs text-muted-foreground">Thinking…</span>
-              </div>
-            </div>
-          )}
-
-          {lastFailedPayload && !loading && (
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={retryLast}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-primary transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <RotateCcw className="h-3.5 w-3.5" aria-hidden />
-                Retry last message
-              </button>
-            </div>
-          )}
-
-          <div ref={bottomRef} />
-        </div>
-
-        <div className="border-t border-border p-3">
-          {limitReached ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-center text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
-              Daily limit reached. Earn more points to unlock more messages.
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {attachImages.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {attachImages.map((im, idx) => (
-                    <div key={idx} className="relative h-14 w-14 overflow-hidden rounded-lg border border-border">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={im.preview} alt="" className="h-full w-full object-cover" />
-                      <button
-                        type="button"
-                        aria-label="Remove image"
-                        onClick={() => setAttachImages((p) => p.filter((_, i) => i !== idx))}
-                        className="absolute right-0 top-0 rounded-bl bg-black/60 p-0.5 text-white"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex items-end gap-2">
-              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={onPickImage} />
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={attachImages.length >= 2 || loading}
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground hover:bg-muted disabled:opacity-40"
-                aria-label="Attach image"
-              >
-                <ImagePlus className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={toggleVoice}
-                disabled={loading}
-                className={cn(
-                  "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border text-muted-foreground hover:bg-muted disabled:opacity-40",
-                  listening ? "border-red-300 bg-red-50 text-red-600" : "border-border bg-background"
-                )}
-                aria-label={listening ? "Stop voice input" : "Voice input"}
-              >
-                <Mic className={cn("h-4 w-4", listening && "animate-pulse")} />
-              </button>
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    send();
-                  }
-                }}
-                placeholder="Ask a medical question…"
-                rows={1}
-                aria-label="Message to assistant"
-                className="max-h-24 min-h-[42px] flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <button
-                type="button"
-                onClick={() => void send()}
-                disabled={loading || (!input.trim() && attachImages.length === 0)}
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
-                aria-label="Send message"
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
-              </button>
-            </div>
-            </div>
-          )}
-        </div>
-      </div>
+        ) : (
+          mainColumn
+        )
+      )}
     </>
   );
 }

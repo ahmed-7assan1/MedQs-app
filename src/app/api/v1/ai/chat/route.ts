@@ -5,6 +5,7 @@ import {
   AIConfigurationError,
   generateAIReplyWithFallback,
   type ChatImagePart,
+  type ChatPdfPart,
 } from "@/lib/ai-router";
 import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
 
@@ -28,6 +29,53 @@ function sanitizeImages(raw: unknown): ChatImagePart[] {
   return out;
 }
 
+function sanitizePdfs(raw: unknown): ChatPdfPart[] {
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  const out: ChatPdfPart[] = [];
+  for (const item of raw.slice(0, 1)) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const mimeType = typeof o.mimeType === "string" ? o.mimeType.toLowerCase() : "";
+    let data = typeof o.data === "string" ? o.data.trim() : "";
+    if (data.startsWith("data:")) {
+      const mid = data.indexOf(",");
+      if (mid > 0) data = data.slice(mid + 1);
+    }
+    if (mimeType !== "application/pdf") continue;
+    const approxBytes = (data.length * 3) / 4;
+    if (approxBytes > 5 * 1024 * 1024) continue;
+    if (data) out.push({ mimeType: "application/pdf", data });
+  }
+  return out;
+}
+
+type HistoryTurn = { role: string; content: string };
+
+function clip(s: string, max: number) {
+  const t = s.trim();
+  return t.length <= max ? t : `${t.slice(0, max)}…`;
+}
+
+/** Fold recent thread into the text prompt (Gemini gets one user turn; PDFs/images are separate parts). */
+function applyConversationHistory(message: string, rawHistory: unknown): string {
+  if (!Array.isArray(rawHistory) || rawHistory.length === 0) return message;
+  const turns: HistoryTurn[] = [];
+  for (const item of rawHistory) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const role = typeof o.role === "string" ? o.role : "";
+    const content = typeof o.content === "string" ? o.content : "";
+    if ((role !== "user" && role !== "assistant") || !content.trim()) continue;
+    turns.push({ role, content: clip(content, 3500) });
+  }
+  const slice = turns.slice(-12);
+  if (slice.length === 0) return message;
+  const block = slice
+    .map((t) => (t.role === "user" ? `Student: ${t.content}` : `Dr. Q: ${t.content}`))
+    .join("\n\n");
+  return `Earlier in this same conversation (for context):\n${block}\n\n---\n\nCurrent message:\n${message}`;
+}
+
 // Daily chat limits per rank (label → daily limit; -1 = unlimited)
 const RANK_LIMITS: Record<string, number> = {
   Newbie:       5,
@@ -47,15 +95,17 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { message: rawMessage, context, images: rawImages } = body;
+  const { message: rawMessage, context, images: rawImages, pdfs: rawPdfs, conversationHistory } = body;
   const images = sanitizeImages(rawImages);
-  const message =
+  const pdfs = sanitizePdfs(rawPdfs);
+  let message =
     typeof rawMessage === "string" && rawMessage.trim()
       ? rawMessage.trim()
-      : images.length > 0
-        ? "(The student attached image(s) with no text. Describe what you see in a medical-education context and ask what they want to know.)"
+      : images.length > 0 || pdfs.length > 0
+        ? "(The student attached materials with no text. Summarize what is relevant for medical study and ask what they want to focus on.)"
         : "";
-  if (!message) return NextResponse.json({ error: "Message or image required" }, { status: 400 });
+  if (!message) return NextResponse.json({ error: "Message or attachment required" }, { status: 400 });
+  message = applyConversationHistory(message, conversationHistory);
 
   // Get user with rank
   const user = await prisma.user.findUnique({
@@ -98,7 +148,7 @@ export async function POST(req: NextRequest) {
 
   let aiResult: { provider: string; text: string };
   try {
-    aiResult = await generateAIReplyWithFallback(message, systemPrompt, { images });
+    aiResult = await generateAIReplyWithFallback(message, systemPrompt, { images, pdfs });
   } catch (e) {
     console.error("[ai/chat]", e);
     if (e instanceof AIConfigurationError) {

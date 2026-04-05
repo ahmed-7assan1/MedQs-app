@@ -1,7 +1,22 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { PostCard } from "./PostCard";
-import { MessageSquare, Send, Loader2, Globe, Users, PlusCircle, Type, Link2, ImagePlus, X, List, Quote, Code2 } from "lucide-react";
+import {
+  MessageSquare,
+  Send,
+  Loader2,
+  Globe,
+  Users,
+  PlusCircle,
+  Type,
+  Link2,
+  ImagePlus,
+  X,
+  List,
+  Quote,
+  Code2,
+  MoreVertical,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import type { PostWithMeta } from "@/types";
@@ -63,6 +78,8 @@ export function ForumClient({
   const [uploadingImage, setUploadingImage] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<{ id: string; forum: { id: string; name: string }; sender: { name: string; nickname?: string | null } }[]>([]);
   const [handlingInviteId, setHandlingInviteId] = useState<string | null>(null);
+  const [privateForumMenuOpen, setPrivateForumMenuOpen] = useState(false);
+  const [privateFormOpen, setPrivateFormOpen] = useState(false);
 
   async function loadPosts(forumId: string) {
     if (!forumId) return;
@@ -119,6 +136,15 @@ export function ForumClient({
   useEffect(() => {
     if (activeForum) loadPosts(activeForum.id);
   }, [activeForum?.id]);
+
+  useEffect(() => {
+    function onDocClick() {
+      setPrivateForumMenuOpen(false);
+    }
+    if (!privateForumMenuOpen) return;
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [privateForumMenuOpen]);
 
   useEffect(() => {
     fetch("/api/v1/forums/invites")
@@ -184,6 +210,7 @@ export function ForumClient({
       setActiveForum(forum);
       setNewForumName("");
       setInviteTokens("");
+      setPrivateFormOpen(false);
     } catch {
       toast.error("Could not create private forum");
     } finally {
@@ -306,8 +333,40 @@ export function ForumClient({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
-      <div className="mb-6">
+      <div className="mb-6 flex items-start justify-between gap-3">
         <h1 className="font-display text-3xl font-bold">Forum</h1>
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            aria-label="Forum options"
+            aria-expanded={privateForumMenuOpen}
+            onClick={(e) => {
+              e.stopPropagation();
+              setPrivateForumMenuOpen((o) => !o);
+            }}
+            className="rounded-lg border border-border bg-card p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <MoreVertical className="h-5 w-5" />
+          </button>
+          {privateForumMenuOpen && (
+            <div
+              className="absolute right-0 z-30 mt-1 min-w-[200px] rounded-lg border border-border bg-card py-1 shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => {
+                  setPrivateFormOpen(true);
+                  setPrivateForumMenuOpen(false);
+                }}
+              >
+                <Users className="h-4 w-4 opacity-70" />
+                Create private forum
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {pendingInvites.length > 0 && (
         <div className="mb-6 rounded-xl border border-amber-300/50 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
@@ -341,53 +400,64 @@ export function ForumClient({
         </div>
       )}
 
-      <div className="mb-6 rounded-xl border border-border bg-card p-4">
-        <p className="mb-3 text-sm font-semibold">Create private study forum</p>
-        <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-          <input
-            value={newForumName}
-            onChange={(e) => setNewForumName(e.target.value)}
-            placeholder="Forum name (e.g. Pharma Team A)"
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-          <div className="relative">
-            <input
-              value={inviteQuery}
-              onChange={(e) => setInviteQuery(e.target.value)}
-              placeholder="Search friends by username or ID"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            {inviteResults.length > 0 && (
-              <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-border bg-card p-1 shadow-lg">
-                {inviteResults.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => addInviteToken(u.studentId || u.nickname || u.name)}
-                    className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted"
-                  >
-                    <span>{u.name}</span>
-                    <span className="text-muted-foreground">@{u.nickname || u.studentId || "user"}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+      {privateFormOpen && (
+        <div className="mb-6 rounded-xl border border-border bg-card p-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold">Create private study forum</p>
+            <button
+              type="button"
+              onClick={() => setPrivateFormOpen(false)}
+              className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+            >
+              Close
+            </button>
           </div>
-          <button
-            onClick={handleCreateForum}
-            disabled={creatingForum || !newForumName.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
-          >
-            {creatingForum ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlusCircle className="h-4 w-4" />}
-            Create
-          </button>
+          <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+            <input
+              value={newForumName}
+              onChange={(e) => setNewForumName(e.target.value)}
+              placeholder="Forum name (e.g. Pharma Team A)"
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <div className="relative">
+              <input
+                value={inviteQuery}
+                onChange={(e) => setInviteQuery(e.target.value)}
+                placeholder="Search friends by username or ID"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              {inviteResults.length > 0 && (
+                <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-border bg-card p-1 shadow-lg">
+                  {inviteResults.map((u) => (
+                    <button
+                      key={u.id}
+                      onClick={() => addInviteToken(u.studentId || u.nickname || u.name)}
+                      className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted"
+                    >
+                      <span>{u.name}</span>
+                      <span className="text-muted-foreground">@{u.nickname || u.studentId || "user"}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={handleCreateForum}
+              disabled={creatingForum || !newForumName.trim()}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            >
+              {creatingForum ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlusCircle className="h-4 w-4" />}
+              Create
+            </button>
+          </div>
+          <input
+            value={inviteTokens}
+            onChange={(e) => setInviteTokens(e.target.value)}
+            placeholder="Selected invites (comma separated IDs/usernames)"
+            className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
         </div>
-        <input
-          value={inviteTokens}
-          onChange={(e) => setInviteTokens(e.target.value)}
-          placeholder="Selected invites (comma separated IDs/usernames)"
-          className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-      </div>
+      )}
 
       {/* Forum tabs */}
       <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
@@ -575,6 +645,7 @@ export function ForumClient({
               key={post.id}
               post={post}
               currentUserId={currentUserId}
+              forumName={activeForum?.name}
             />
           ))}
         </div>

@@ -72,6 +72,13 @@ export const ourFileRouter = {
       return { url: file.url };
     }),
 
+  // Quiz / question stem images — admin (same role check as /api/v1/questions POST)
+  questionImage: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
+    .middleware(requireAdmin())
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.url };
+    }),
+
   // Site logo — super admin only (stored URL goes to SiteConfig.logoUrl)
   siteLogo: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
     .middleware(requireSuperAdmin())

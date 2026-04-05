@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { getLectureInModule } from "@/lib/lecture-navigation";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Video, FileText, Layers, HelpCircle, ChevronRight } from "lucide-react";
+import { Video, FileText, Layers, HelpCircle, ChevronRight, NotebookPen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default async function LectureHubPage({
@@ -21,6 +21,7 @@ export default async function LectureHubPage({
   const nF = lecture.flashcards.length;
   const nFiles = lecture.files.length;
   const hasVideo = Boolean(lecture.videoUrl?.trim());
+  const hasNotes = Boolean(lecture.notesMarkdown?.trim());
 
   const items = [
     {
@@ -50,6 +51,13 @@ export default async function LectureHubPage({
       desc: nQ ? `${nQ} MCQs` : "No questions yet",
       icon: HelpCircle,
       available: nQ > 0,
+    },
+    {
+      href: `${base}/notes`,
+      label: "Notes",
+      desc: hasNotes ? "Study notes & highlights" : "No notes yet",
+      icon: NotebookPen,
+      available: hasNotes,
     },
   ];
 

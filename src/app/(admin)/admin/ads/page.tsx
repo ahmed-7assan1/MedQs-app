@@ -14,18 +14,31 @@ interface AdBanner {
   createdAt: string;
 }
 
+interface SemesterRow {
+  id: string;
+  name: string;
+}
+
 export default function AdminAdsPage() {
   const [ads, setAds] = useState<AdBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ imageUrl: "", linkUrl: "", semesterId: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [semesters, setSemesters] = useState<SemesterRow[]>([]);
 
   useEffect(() => {
     fetch("/api/v1/ads")
       .then((r) => r.json())
       .then(setAds)
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/v1/semesters")
+      .then((r) => r.json())
+      .then((d) => setSemesters(Array.isArray(d) ? d : []))
+      .catch(() => setSemesters([]));
   }, []);
 
   async function createAd() {
@@ -126,10 +139,21 @@ export default function AdminAdsPage() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Target semester ID <span className="opacity-60">(leave blank for all students)</span></label>
-            <input type="text" value={form.semesterId} onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
-              placeholder="Optional — semester UUID"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring" />
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              Target semester <span className="opacity-60">(optional — all students if empty)</span>
+            </label>
+            <select
+              value={form.semesterId}
+              onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">All students</option>
+              {semesters.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} — {s.id}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex justify-end">

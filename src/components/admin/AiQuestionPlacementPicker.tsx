@@ -160,8 +160,13 @@ export function AiQuestionPlacementPicker({
     onChange("");
   }
 
-  const moduleLabel = (m: ModuleWithSemester) =>
-    m.semester?.name ? `${m.name} · ${m.semester.name}` : m.name;
+  const moduleLabel = (m: ModuleWithSemester) => {
+    if (m.semester?.name && m.semester?.id) {
+      return `${m.name} · ${m.semester.name} — semester ${m.semester.id}`;
+    }
+    if (m.semesterId) return `${m.name} — semester ${m.semesterId}`;
+    return m.name;
+  };
 
   const busy = disabled || loadingSubjects || loadingLectures || (targetMode === "subject_full" && ensuringFullQuiz);
 
@@ -181,11 +186,14 @@ export function AiQuestionPlacementPicker({
             className="w-full rounded-lg border border-border bg-background px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">Select module</option>
-            {modules.map((m) => (
-              <option key={m.id} value={m.id}>
-                {moduleLabel(m)}
-              </option>
-            ))}
+            {modules.map((m) => {
+              const label = moduleLabel(m);
+              return (
+                <option key={m.id} value={m.id} title={label}>
+                  {label}
+                </option>
+              );
+            })}
           </select>
         </div>
         <div>

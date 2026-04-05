@@ -52,6 +52,73 @@ export default function AdminContentPage() {
   function startAdd(key: AddKey) { setAdding(key); setAddVal(""); }
   function cancelAdd() { setAdding(null); setAddVal(""); }
 
+  async function commitDelete(
+    kind: "uni" | "year" | "sem" | "mod" | "subj",
+    id: string,
+    label: string
+  ) {
+    if (!confirm(`Delete "${label}"? This removes all nested content (modules, lectures, forums tied to it, etc.). Cannot be undone.`))
+      return;
+    setDeleting(id);
+    try {
+      const paths: Record<"uni" | "year" | "sem" | "mod" | "subj", string> = {
+        uni: `/api/v1/universities/${id}`,
+        year: `/api/v1/years/${id}`,
+        sem: `/api/v1/semesters/${id}`,
+        mod: `/api/v1/modules/${id}`,
+        subj: `/api/v1/subjects/${id}`,
+      };
+      const res = await fetch(paths[kind], { method: "DELETE" });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        toast.error(typeof d.error === "string" ? d.error : "Delete failed");
+        return;
+      }
+      if (kind === "uni") setUniversities((u) => u.filter((x) => x.id !== id));
+      if (kind === "year") setYears((y) => y.filter((x) => x.id !== id));
+      if (kind === "sem") setSemesters((s) => s.filter((x) => x.id !== id));
+      if (kind === "mod") setModules((m) => m.filter((x) => x.id !== id));
+      if (kind === "subj") setSubjects((s) => s.filter((x) => x.id !== id));
+      toast.success("Deleted");
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+  function DeleteBtn({
+    kind,
+    id,
+    label,
+    alwaysShow,
+  }: {
+    kind: "uni" | "year" | "sem" | "mod" | "subj";
+    id: string;
+    label: string;
+    alwaysShow?: boolean;
+  }) {
+    return (
+      <button
+        type="button"
+        title="Delete"
+        disabled={deleting === id}
+        onClick={(e) => {
+          e.stopPropagation();
+          void commitDelete(kind, id, label);
+        }}
+        className={cn(
+          "rounded-lg p-1.5 text-muted-foreground transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20",
+          alwaysShow ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100"
+        )}
+      >
+        {deleting === id ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Trash2 className="h-3.5 w-3.5" />
+        )}
+      </button>
+    );
+  }
+
   async function commitAdd(key: AddKey) {
     if (!addVal.trim()) return;
     const parts = key.split("-");
@@ -166,7 +233,7 @@ export default function AdminContentPage() {
                 <div key={uni.id}>
                   {/* University row */}
                   <div
-                    className="flex cursor-pointer items-center gap-2 px-5 py-3 hover:bg-muted/20 transition-colors"
+                    className="group flex cursor-pointer items-center gap-2 px-5 py-3 hover:bg-muted/20 transition-colors"
                     onClick={() => toggle(uni.id)}
                   >
                     <span className="text-muted-foreground">
@@ -175,6 +242,7 @@ export default function AdminContentPage() {
                     <Building2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
                     <span className="flex-1 text-sm font-medium">{uni.name}</span>
                     <span className="text-xs text-muted-foreground">{uniYears.length} year{uniYears.length !== 1 ? "s" : ""}</span>
+                    <DeleteBtn kind="uni" id={uni.id} label={uni.name} />
                   </div>
 
                   {/* Years */}
@@ -192,7 +260,7 @@ export default function AdminContentPage() {
                           return (
                             <div key={year.id}>
                               <div
-                                className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
+                                className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
                                 onClick={() => toggle(year.id)}
                               >
                                 <span className="text-muted-foreground">
@@ -201,6 +269,7 @@ export default function AdminContentPage() {
                                 <Calendar className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
                                 <span className="flex-1 text-sm">Year {year.yearNumber}</span>
                                 <span className="text-xs text-muted-foreground">{yearSems.length} sem{yearSems.length !== 1 ? "s" : ""}</span>
+                                <DeleteBtn kind="year" id={year.id} label={`Year ${year.yearNumber}`} />
                               </div>
 
                               {/* Semesters */}
@@ -217,7 +286,7 @@ export default function AdminContentPage() {
                                     return (
                                       <div key={sem.id}>
                                         <div
-                                          className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted/40 transition-colors"
+                                          className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted/40 transition-colors"
                                           onClick={() => toggle(sem.id)}
                                         >
                                           <span className="text-muted-foreground">
@@ -226,6 +295,7 @@ export default function AdminContentPage() {
                                           <BookOpen className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
                                           <span className="flex-1 text-sm">{sem.name}</span>
                                           <span className="text-xs text-muted-foreground">{semMods.length} mod{semMods.length !== 1 ? "s" : ""}</span>
+                                          <DeleteBtn kind="sem" id={sem.id} label={sem.name} />
                                         </div>
 
                                         {/* Modules */}
@@ -242,7 +312,7 @@ export default function AdminContentPage() {
                                               return (
                                                 <div key={mod.id}>
                                                   <div
-                                                    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/40 transition-colors"
+                                                    className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/40 transition-colors"
                                                     onClick={() => toggle(mod.id)}
                                                   >
                                                     <span className="text-muted-foreground">
@@ -251,6 +321,7 @@ export default function AdminContentPage() {
                                                     <div className="h-2 w-2 rounded-full bg-emerald-400 flex-shrink-0" />
                                                     <span className="flex-1 text-sm">{mod.name}</span>
                                                     <span className="text-xs text-muted-foreground">{modSubjs.length} subj{modSubjs.length !== 1 ? "s" : ""}</span>
+                                                    <DeleteBtn kind="mod" id={mod.id} label={mod.name} />
                                                   </div>
 
                                                   {/* Subjects */}
@@ -264,9 +335,10 @@ export default function AdminContentPage() {
                                                         <p className="py-1.5 text-xs text-muted-foreground italic">No subjects yet</p>
                                                       ) : (
                                                         modSubjs.map(subj => (
-                                                          <div key={subj.id} className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30 transition-colors group">
+                                                          <div key={subj.id} className="group/sub flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30 transition-colors">
                                                             <FlaskConical className="h-3 w-3 text-pink-400 flex-shrink-0" />
                                                             <span className="flex-1 text-sm">{subj.name}</span>
+                                                            <DeleteBtn kind="subj" id={subj.id} label={subj.name} alwaysShow />
                                                           </div>
                                                         ))
                                                       )}

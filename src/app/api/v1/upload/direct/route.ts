@@ -22,9 +22,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const file = form.get("file");
+  const rawFile = form.get("file");
   const folderRaw = form.get("folder");
-  if (!(file instanceof File) || typeof folderRaw !== "string") {
+  /** `FormData` typing is File | string; runtime may still be a Blob-like body. */
+  const file: Blob | null =
+    rawFile != null && typeof rawFile !== "string" && typeof (rawFile as Blob).size === "number"
+      ? (rawFile as Blob).size > 0
+        ? (rawFile as Blob)
+        : null
+      : null;
+  if (!file || typeof folderRaw !== "string") {
     return NextResponse.json({ error: "Missing file or folder" }, { status: 400 });
   }
 
@@ -47,9 +54,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const origName =
+    typeof File !== "undefined" && file instanceof File && file.name ? file.name : "upload.bin";
+
   let mime = file.type || "application/octet-stream";
   if (!mime || mime === "application/octet-stream") {
-    const lower = file.name.toLowerCase();
+    const lower = origName.toLowerCase();
     if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) mime = "image/jpeg";
     else if (lower.endsWith(".png")) mime = "image/png";
     else if (lower.endsWith(".webp")) mime = "image/webp";
@@ -75,7 +85,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const { url } = await uploadFile(buffer, file.name, mime, folder);
+    const { url } = await uploadFile(buffer, origName, mime, folder);
     return NextResponse.json({ url });
   } catch (e) {
     console.error("[upload/direct]", e);

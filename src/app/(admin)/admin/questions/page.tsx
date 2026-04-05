@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import {
   HelpCircle, Plus, Trash2, Loader2,
-  CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen,
+  CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen, Pencil,
 } from "lucide-react";
+import { QuickDrawModal } from "@/components/draw/QuickDrawModal";
+import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -51,6 +53,7 @@ export default function AdminQuestionsPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [stemLayout, setStemLayout] = useState<"STANDARD" | "IMAGE_OVERLAY">("STANDARD");
+  const [drawOpen, setDrawOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/v1/questions${lectureFilter ? `?lectureId=${lectureFilter}` : ""}`)
@@ -83,18 +86,12 @@ export default function AdminQuestionsPage() {
   async function uploadQuestionImage(file: File) {
     setUploadingImage(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("folder", "question");
-      const res = await fetch("/api/v1/upload/direct", { method: "POST", body: fd });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        toast.error(typeof data?.error === "string" ? data.error : "Upload failed");
-        return;
-      }
-      if (typeof data.url === "string") {
-        setImageUrl(data.url);
+      const result = await uploadQuestionImageClient(file);
+      if (result.ok) {
+        setImageUrl(result.url);
         toast.success("Image attached");
+      } else {
+        toast.error(result.error);
       }
     } finally {
       setUploadingImage(false);
@@ -272,6 +269,14 @@ export default function AdminQuestionsPage() {
                 placeholder="https://…"
                 className="min-w-[200px] flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
               />
+              <button
+                type="button"
+                onClick={() => setDrawOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs hover:bg-muted"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Draw
+              </button>
               <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs hover:bg-muted">
                 {uploadingImage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
                 Upload
@@ -495,6 +500,14 @@ export default function AdminQuestionsPage() {
           })}
         </div>
       )}
+
+      <QuickDrawModal
+        open={drawOpen}
+        onClose={() => setDrawOpen(false)}
+        onSaved={(url) => setImageUrl(url)}
+        title="Draw figure for question"
+        exportBackground="#ffffff"
+      />
     </div>
   );
 }

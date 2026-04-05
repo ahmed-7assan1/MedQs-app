@@ -10,10 +10,12 @@ export const fontPoppins = Poppins({
   style: ["normal", "italic"],
   variable: "--font-poppins",
   display: "swap",
+  /** Next’s size-adjusted fallback can cover Arabic before Tajawal is used — keep Latin-only. */
+  adjustFontFallback: false,
 });
 
 export const fontTajawal = Tajawal({
-  subsets: ["arabic"],
+  subsets: ["arabic", "latin"],
   weight: ["300", "400", "500", "700", "800"],
   variable: "--font-tajawal",
   display: "swap",

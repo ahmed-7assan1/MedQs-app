@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
-import { Heart, Share2, MoreHorizontal, Lock } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { Heart, Share2, MoreHorizontal, Lock, Bookmark, BookmarkCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PostWithMeta } from "@/types";
 import { formatDistanceToNow } from "@/lib/utils";
@@ -9,10 +10,17 @@ import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
+import {
+  isPostSaved,
+  removeSavedPost,
+  savePostSnapshot,
+} from "@/lib/forum-saved-posts";
 
 interface Props {
   post: PostWithMeta;
   currentUserId?: string;
+  /** Current forum name (for saved-posts snapshot). */
+  forumName?: string | null;
 }
 
 const RANK_COLORS: Record<string, string> = {
@@ -23,10 +31,26 @@ const RANK_COLORS: Record<string, string> = {
   Elite:        "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
 
-export function PostCard({ post, currentUserId }: Props) {
+export function PostCard({ post, currentUserId, forumName }: Props) {
   const [liked, setLiked]       = useState(post.likedByMe ?? false);
   const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
   const [liking, setLiking]     = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [savedLocal, setSavedLocal] = useState(() => isPostSaved(post.id));
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSavedLocal(isPostSaved(post.id));
+  }, [post.id]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDoc(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [menuOpen]);
 
   async function handleLike() {
     if (!currentUserId) return toast.error("Sign in to like posts");
@@ -43,6 +67,31 @@ export function PostCard({ post, currentUserId }: Props) {
     } finally {
       setLiking(false);
     }
+  }
+
+  function toggleSave() {
+    if (!currentUserId) {
+      toast.error("Sign in to save posts");
+      return;
+    }
+    if (savedLocal) {
+      removeSavedPost(post.id);
+      setSavedLocal(false);
+      toast.success("Removed from saved");
+    } else {
+      savePostSnapshot({
+        id: post.id,
+        content: post.content,
+        imageUrl: post.imageUrl ?? null,
+        createdAt: post.createdAt,
+        authorId: post.author.id,
+        authorName: post.author.name,
+        forumName: forumName ?? null,
+      });
+      setSavedLocal(true);
+      toast.success("Saved to your profile");
+    }
+    setMenuOpen(false);
   }
 
   async function handleShare() {
@@ -72,7 +121,12 @@ export function PostCard({ post, currentUserId }: Props) {
           )}
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold">{post.author.name}</p>
+              <Link
+                href={`/profile/u/${post.author.id}`}
+                className="text-sm font-semibold hover:text-primary hover:underline"
+              >
+                {post.author.name}
+              </Link>
               <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-semibold", rankColor)}>
                 {post.author.rank?.badge ?? ""} {rankLabel}
               </span>
@@ -82,9 +136,37 @@ export function PostCard({ post, currentUserId }: Props) {
             </p>
           </div>
         </div>
-        <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted transition-colors">
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
+        <div className="relative" ref={menuRef}>
+          <button
+            type="button"
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+          {menuOpen ? (
+            <div
+              role="menu"
+              className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-xl border border-border bg-card py-1 shadow-lg"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={toggleSave}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+              >
+                {savedLocal ? (
+                  <BookmarkCheck className="h-4 w-4 text-primary" />
+                ) : (
+                  <Bookmark className="h-4 w-4" />
+                )}
+                {savedLocal ? "Unsave post" : "Save post"}
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {/* Content */}

@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { fetchUserForProfile } from "@/lib/fetch-user-for-profile";
 import { notFound, redirect } from "next/navigation";
 import { getUserRankInfo } from "@/lib/engagement";
-import { Trophy, BookOpen, MessageSquare, Calendar, Pencil, Phone } from "lucide-react";
+import { Trophy, BookOpen, MessageSquare, Calendar, Pencil, Phone, Mail } from "lucide-react";
 import Link from "next/link";
 import { UserPosts } from "@/components/profile/UserPosts";
+import { SavedPostsSection } from "@/components/profile/SavedPostsSection";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
 
 export async function ProfileServerView({ userIdSegment }: { userIdSegment: string }) {
@@ -161,15 +162,26 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
             </div>
           </div>
 
-          {isOwn && (
-            <Link
-              href="/profile/edit"
-              className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/60"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Edit
-            </Link>
-          )}
+          <div className="flex flex-shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-start">
+            {!isOwn && !isPrivateForViewer && (
+              <Link
+                href={`/messages/${targetId}`}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/60"
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Message
+              </Link>
+            )}
+            {isOwn && (
+              <Link
+                href="/profile/edit"
+                className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/60"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
@@ -226,6 +238,13 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
               Maximum rank achieved — you&apos;re Elite!
             </div>
           )}
+        </div>
+      )}
+
+      {isOwn && (
+        <div className="mt-6">
+          <h2 className="mb-3 font-display text-xl font-semibold">Saved from forum</h2>
+          <SavedPostsSection />
         </div>
       )}
 

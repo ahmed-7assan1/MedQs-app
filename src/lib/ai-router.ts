@@ -6,6 +6,7 @@ type ProviderResult = {
 };
 
 export type ChatImagePart = { mimeType: string; data: string };
+export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
 const FETCH_MS = 22_000;
 
@@ -29,7 +30,8 @@ function hasAnyAiKey(): boolean {
 async function callGemini(
   message: string,
   systemPrompt: string,
-  images: ChatImagePart[] = []
+  images: ChatImagePart[] = [],
+  pdfs: ChatPdfPart[] = []
 ): Promise<ProviderResult> {
   const key = process.env.GEMINI_API_KEY?.trim();
   if (!key) throw new Error("Gemini key missing");
@@ -42,6 +44,15 @@ async function callGemini(
       inline_data: {
         mime_type: img.mimeType,
         data: img.data,
+      },
+    });
+  }
+  for (const pdf of pdfs) {
+    if (!pdf.data) continue;
+    parts.push({
+      inline_data: {
+        mime_type: "application/pdf",
+        data: pdf.data,
       },
     });
   }
@@ -166,7 +177,7 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
 export async function generateAIReplyWithFallback(
   message: string,
   systemPrompt: string,
-  options?: { images?: ChatImagePart[] }
+  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[] }
 ): Promise<ProviderResult> {
   if (!hasAnyAiKey()) {
     throw new AIConfigurationError(
@@ -175,19 +186,20 @@ export async function generateAIReplyWithFallback(
   }
 
   const images = options?.images?.filter((i) => i.data && i.mimeType) ?? [];
+  const pdfs = options?.pdfs?.filter((p) => p.data && p.mimeType === "application/pdf") ?? [];
 
-  if (images.length > 0) {
+  if (images.length > 0 || pdfs.length > 0) {
     if (!process.env.GEMINI_API_KEY?.trim()) {
       throw new AIConfigurationError(
-        "Images in chat require **GEMINI_API_KEY** on the server (multimodal). Add it in Vercel env and redeploy."
+        "Images and PDFs in chat require **GEMINI_API_KEY** on the server (multimodal). Add it in Vercel env and redeploy."
       );
     }
-    return callGemini(message, systemPrompt, images);
+    return callGemini(message, systemPrompt, images, pdfs);
   }
 
   // Only call providers that have keys — avoids masking Gemini errors with “X key missing” from later providers.
   const runners: Array<() => Promise<ProviderResult>> = [];
-  if (process.env.GEMINI_API_KEY?.trim()) runners.push(() => callGemini(message, systemPrompt, []));
+  if (process.env.GEMINI_API_KEY?.trim()) runners.push(() => callGemini(message, systemPrompt, [], []));
   if (process.env.OPENAI_API_KEY?.trim()) runners.push(() => callOpenAI(message, systemPrompt));
   if (process.env.ANTHROPIC_API_KEY?.trim()) runners.push(() => callAnthropic(message, systemPrompt));
   if (process.env.DEEPSEEK_API_KEY?.trim()) runners.push(() => callDeepSeek(message, systemPrompt));
