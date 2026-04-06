@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 type ForumStatus = "OPEN" | "RESTRICTED" | "READ_ONLY" | "CLOSED";
 type ForumType = "GLOBAL" | "SEMESTER";
@@ -62,7 +63,7 @@ export default function AdminForumPage() {
       setNewName(""); setNewSemId("");
       toast.success("Forum created");
     } else {
-      toast.error("Failed to create forum");
+      toast.error(await apiErrorMessage(res, "Failed to create forum"));
     }
     setSubmitting(false);
   }
@@ -76,7 +77,7 @@ export default function AdminForumPage() {
     if (res.ok) {
       setForums((ff) => ff.map((f) => f.id === forumId ? { ...f, status } : f));
       toast.success("Status updated");
-    } else toast.error("Failed");
+    } else toast.error(await apiErrorMessage(res, "Failed to update status"));
   }
 
   async function deleteForum(forumId: string, name: string) {
@@ -85,7 +86,7 @@ export default function AdminForumPage() {
     if (res.ok) {
       setForums((ff) => ff.filter((f) => f.id !== forumId));
       toast.success("Forum deleted");
-    } else toast.error("Failed");
+    } else toast.error(await apiErrorMessage(res, "Failed to delete forum"));
   }
 
   return (

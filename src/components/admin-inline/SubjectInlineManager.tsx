@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 type SubjectItem = { id: string; name: string };
 
@@ -24,7 +25,7 @@ export function SubjectInlineManager({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName.trim() }),
     });
-    if (!res.ok) return toast.error("Failed to add subject");
+    if (!res.ok) return toast.error(await apiErrorMessage(res, "Failed to add subject"));
     const row = await res.json();
     setSubjects((prev) => [...prev, row]);
     setNewName("");
@@ -38,7 +39,7 @@ export function SubjectInlineManager({
       body: JSON.stringify({ name }),
     });
     if (!res.ok) {
-      toast.error("Rename failed");
+      toast.error(await apiErrorMessage(res, "Rename failed"));
       return;
     }
     setSubjects((prev) => prev.map((s) => (s.id === id ? { ...s, name } : s)));
@@ -49,7 +50,7 @@ export function SubjectInlineManager({
     if (!confirm("Delete this subject and all its lectures/questions?")) return;
     const res = await fetch(`/api/v1/subjects/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error(await apiErrorMessage(res, "Delete failed"));
       return;
     }
     setSubjects((prev) => prev.filter((s) => s.id !== id));

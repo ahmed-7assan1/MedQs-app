@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 interface Module   { id: string; name: string }
 interface Subject  { id: string; name: string; moduleId: string }
@@ -86,15 +87,19 @@ export default function AdminLecturesPage() {
         toast.success("Lecture created!");
         setTitle(""); setVideoUrl(""); setNewCards([{ front: "", back: "" }]);
         setShowForm(false);
-      } else { toast.error("Failed to create"); }
+      } else {
+        toast.error(await apiErrorMessage(res, "Failed to create"));
+      }
     } finally { setSaving(false); }
   }
 
   async function deleteLecture(id: string) {
     if (!confirm("Delete this lecture? All flashcards and questions inside will be lost.")) return;
     const res = await fetch(`/api/v1/lectures/${id}`, { method: "DELETE" });
-    if (res.ok) { setLectures(prev => prev.filter(l => l.id !== id)); toast.success("Deleted"); }
-    else toast.error("Failed to delete");
+    if (res.ok) {
+      setLectures((prev) => prev.filter((l) => l.id !== id));
+      toast.success("Deleted");
+    } else toast.error(await apiErrorMessage(res, "Failed to delete"));
   }
 
   return (
@@ -260,7 +265,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
       onFlashcardsChange(cards.map(c => c.id === cardId ? updated : c));
       setEditing(null);
       toast.success("Card updated");
-    } else toast.error("Failed to update");
+    } else toast.error(await apiErrorMessage(res, "Failed to update"));
   }
 
   async function deleteCard(cardId: string) {
@@ -269,7 +274,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
     if (res.ok) {
       onFlashcardsChange(cards.filter(c => c.id !== cardId));
       toast.success("Card deleted");
-    } else toast.error("Failed to delete");
+    } else toast.error(await apiErrorMessage(res, "Failed to delete"));
   }
 
   async function addCard() {
@@ -286,7 +291,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
       onFlashcardsChange([...cards, card]);
       setAddFront(""); setAddBack("");
       toast.success("Card added");
-    } else toast.error("Failed to add card");
+    } else toast.error(await apiErrorMessage(res, "Failed to add card"));
   }
 
   async function saveLectureMeta() {
@@ -306,7 +311,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
       onLecturePatch({ title: updated.title, videoUrl: updated.videoUrl });
       toast.success("Lecture updated");
     } else {
-      toast.error("Failed to update lecture");
+      toast.error(await apiErrorMessage(res, "Failed to update lecture"));
     }
   }
 
@@ -321,8 +326,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
       onLecturePatch({ files: [...files, created] });
       toast.success("File uploaded");
     } else {
-      const err = await res.json().catch(() => ({}));
-      toast.error(typeof err.error === "string" ? err.error : "Upload failed");
+      toast.error(await apiErrorMessage(res, "Upload failed"));
     }
   }
 
@@ -343,7 +347,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
       const updated = await res.json();
       onLecturePatch({ files: files.map((f) => (f.id === fileId ? updated : f)) });
       toast.success("File renamed");
-    } else toast.error("Rename failed");
+    } else toast.error(await apiErrorMessage(res, "Rename failed"));
   }
 
   async function deleteFile(fileId: string) {
@@ -352,7 +356,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
     if (res.ok) {
       onLecturePatch({ files: files.filter((f) => f.id !== fileId) });
       toast.success("File deleted");
-    } else toast.error("Delete failed");
+    } else toast.error(await apiErrorMessage(res, "Delete failed"));
   }
 
   return (

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Plus, Save, Trash2, Upload, Pencil, Video, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 import { AdminLectureAIAssistant } from "@/components/admin-inline/AdminLectureAIAssistant";
 
 type Flashcard = { id: string; front: string; back: string };
@@ -49,7 +50,7 @@ export function LectureContentInlineManager({
       body: JSON.stringify({ front: front.trim(), back: back.trim() }),
     });
     if (!res.ok) {
-      toast.error("Failed to add flashcard");
+      toast.error(await apiErrorMessage(res, "Failed to add flashcard"));
       return;
     }
     const row = await res.json();
@@ -62,7 +63,7 @@ export function LectureContentInlineManager({
   async function deleteCard(id: string) {
     const res = await fetch(`/api/v1/flashcards/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error(await apiErrorMessage(res, "Delete failed"));
       return;
     }
     setCards((prev) => prev.filter((c) => c.id !== id));
@@ -74,7 +75,7 @@ export function LectureContentInlineManager({
     form.append("file", file);
     const res = await fetch(`/api/v1/lectures/${lectureId}/files`, { method: "POST", body: form });
     if (!res.ok) {
-      toast.error("Upload failed");
+      toast.error(await apiErrorMessage(res, "Upload failed"));
       return;
     }
     const row = await res.json();
@@ -89,7 +90,7 @@ export function LectureContentInlineManager({
       body: JSON.stringify({ name: name.trim() }),
     });
     if (!res.ok) {
-      toast.error("Rename failed");
+      toast.error(await apiErrorMessage(res, "Rename failed"));
       return;
     }
     const row = await res.json();
@@ -100,7 +101,7 @@ export function LectureContentInlineManager({
   async function deleteFile(id: string) {
     const res = await fetch(`/api/v1/lectures/${lectureId}/files/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error(await apiErrorMessage(res, "Delete failed"));
       return;
     }
     setFiles((prev) => prev.filter((f) => f.id !== id));
@@ -114,7 +115,7 @@ export function LectureContentInlineManager({
       body: JSON.stringify({ notesMarkdown: notes }),
     });
     if (!res.ok) {
-      toast.error("Failed to save notes");
+      toast.error(await apiErrorMessage(res, "Failed to save notes"));
       return;
     }
     toast.success("Notes updated");
@@ -128,8 +129,7 @@ export function LectureContentInlineManager({
       body: JSON.stringify({ title: videoTitle.trim(), url: videoUrl.trim() }),
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      toast.error(typeof err.error === "string" ? err.error : "Failed to add video");
+      toast.error(await apiErrorMessage(res, "Failed to add video"));
       return;
     }
     const row = await res.json();
@@ -146,7 +146,7 @@ export function LectureContentInlineManager({
       body: JSON.stringify(patch),
     });
     if (!res.ok) {
-      toast.error("Video update failed");
+      toast.error(await apiErrorMessage(res, "Video update failed"));
       return;
     }
     const row = await res.json();
@@ -158,7 +158,7 @@ export function LectureContentInlineManager({
     if (!confirm("Delete this video?")) return;
     const res = await fetch(`/api/v1/lectures/${lectureId}/videos/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error(await apiErrorMessage(res, "Delete failed"));
       return;
     }
     setVideos((prev) => prev.filter((v) => v.id !== id));

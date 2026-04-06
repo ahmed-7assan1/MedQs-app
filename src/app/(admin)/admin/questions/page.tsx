@@ -8,6 +8,7 @@ import { QuickDrawModal } from "@/components/draw/QuickDrawModal";
 import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 import Link from "next/link";
 
 interface Question {
@@ -106,7 +107,7 @@ export default function AdminQuestionsPage() {
       setQuestions((q) => q.filter((x) => x.id !== id));
       toast.success("Deleted");
     } else {
-      toast.error("Failed to delete");
+      toast.error(await apiErrorMessage(res, "Failed to delete"));
     }
   }
 
@@ -143,7 +144,7 @@ export default function AdminQuestionsPage() {
       body: JSON.stringify(payload),
     });
     if (res.ok) toast.success("Question updated");
-    else toast.error("Failed to update question");
+    else toast.error(await apiErrorMessage(res, "Failed to update question"));
   }
 
   async function addManualQuestion() {

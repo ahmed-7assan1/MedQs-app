@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 interface University  { id: string; name: string }
 interface AcademicYear { id: string; yearNumber: number; universityId: string }
@@ -70,8 +71,7 @@ export default function AdminContentPage() {
       };
       const res = await fetch(paths[kind], { method: "DELETE" });
       if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        toast.error(typeof d.error === "string" ? d.error : "Delete failed");
+        toast.error(await apiErrorMessage(res, "Delete failed"));
         return;
       }
       if (kind === "uni") setUniversities((u) => u.filter((x) => x.id !== id));

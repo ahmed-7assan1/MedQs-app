@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 type ModuleItem = { id: string; name: string };
 
@@ -27,7 +28,7 @@ export function ModuleInlineManager({
       body: JSON.stringify({ name: newName.trim() }),
     });
     setSaving(false);
-    if (!res.ok) return toast.error("Failed to add module");
+    if (!res.ok) return toast.error(await apiErrorMessage(res, "Failed to add module"));
     const row = await res.json();
     setModules((prev) => [...prev, row]);
     setNewName("");
@@ -41,7 +42,7 @@ export function ModuleInlineManager({
       body: JSON.stringify({ name }),
     });
     if (!res.ok) {
-      toast.error("Rename failed");
+      toast.error(await apiErrorMessage(res, "Rename failed"));
       return;
     }
     setModules((prev) => prev.map((m) => (m.id === id ? { ...m, name } : m)));
@@ -52,7 +53,7 @@ export function ModuleInlineManager({
     if (!confirm("Delete this module and all nested content?")) return;
     const res = await fetch(`/api/v1/modules/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error(await apiErrorMessage(res, "Delete failed"));
       return;
     }
     setModules((prev) => prev.filter((m) => m.id !== id));

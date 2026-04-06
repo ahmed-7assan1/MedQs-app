@@ -7,6 +7,7 @@ import {
 import { FileUploader } from "@/components/ui/FileUploader";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 interface Module  { id: string; name: string }
 interface Semester { id: string; name: string }
@@ -99,7 +100,7 @@ export default function AdminPastPapersPage() {
       setShowForm(false);
       toast.success("Past paper created!");
     } else {
-      toast.error("Failed to create");
+      toast.error(await apiErrorMessage(res, "Failed to create"));
     }
     setSaving(false);
   }
@@ -123,7 +124,7 @@ export default function AdminPastPapersPage() {
       body: JSON.stringify(patch),
     });
     if (!res.ok) {
-      toast.error("Could not update paper");
+      toast.error(await apiErrorMessage(res, "Could not update paper"));
       return;
     }
     const updated = await res.json();
@@ -137,7 +138,7 @@ export default function AdminPastPapersPage() {
       setPapers(prev => prev.filter(p => p.id !== id));
       toast.success("Deleted");
     } else {
-      toast.error("Failed to delete");
+      toast.error(await apiErrorMessage(res, "Failed to delete"));
     }
   }
 

@@ -3,6 +3,25 @@ import type { Prisma } from "@prisma/client";
 type Tx = Prisma.TransactionClient;
 
 /** Delete semester and dependent rows (modules → subjects → lectures, forums, past papers, etc.). */
+/** Delete past papers tied to this module (and their quiz attempts), then the module. Subjects/lectures cascade via FK. */
+export async function deleteModuleCascade(tx: Tx, moduleId: string): Promise<void> {
+  const papers = await tx.pastPaper.findMany({ where: { moduleId }, select: { id: true } });
+  const paperIds = papers.map((p) => p.id);
+  if (paperIds.length > 0) {
+    const attempts = await tx.quizAttempt.findMany({
+      where: { pastPaperId: { in: paperIds } },
+      select: { id: true },
+    });
+    const attemptIds = attempts.map((a) => a.id);
+    if (attemptIds.length > 0) {
+      await tx.quizAttemptItem.deleteMany({ where: { attemptId: { in: attemptIds } } });
+      await tx.quizAttempt.deleteMany({ where: { id: { in: attemptIds } } });
+    }
+    await tx.pastPaper.deleteMany({ where: { moduleId } });
+  }
+  await tx.module.delete({ where: { id: moduleId } });
+}
+
 export async function deleteSemesterCascade(tx: Tx, semesterId: string): Promise<void> {
   await tx.user.updateMany({ where: { semesterId }, data: { semesterId: null } });
   await tx.adBanner.updateMany({ where: { semesterId }, data: { semesterId: null } });

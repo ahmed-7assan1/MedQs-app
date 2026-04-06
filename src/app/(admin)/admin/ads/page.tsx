@@ -4,6 +4,7 @@ import { Plus, Trash2, ToggleLeft, ToggleRight, Loader2, Megaphone, ExternalLink
 import { FileUploader } from "@/components/ui/FileUploader";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 interface AdBanner {
   id: string;
@@ -61,7 +62,7 @@ export default function AdminAdsPage() {
       setShowForm(false);
       toast.success("Ad created!");
     } else {
-      toast.error("Failed to create ad");
+      toast.error(await apiErrorMessage(res, "Failed to create ad"));
     }
     setSubmitting(false);
   }
@@ -75,7 +76,7 @@ export default function AdminAdsPage() {
     if (res.ok) {
       setAds((prev) => prev.map((a) => a.id === ad.id ? { ...a, active: !a.active } : a));
     } else {
-      toast.error("Failed to update");
+      toast.error(await apiErrorMessage(res, "Failed to update"));
     }
   }
 
@@ -86,7 +87,7 @@ export default function AdminAdsPage() {
       setAds((prev) => prev.filter((a) => a.id !== id));
       toast.success("Deleted");
     } else {
-      toast.error("Failed to delete");
+      toast.error(await apiErrorMessage(res, "Failed to delete"));
     }
   }
 

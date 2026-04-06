@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "@/lib/api-error-client";
 
 type LectureItem = { id: string; title: string; videoUrl?: string | null };
 
@@ -25,7 +26,7 @@ export function LectureInlineManager({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: title.trim(), videoUrl: videoUrl.trim() || undefined }),
     });
-    if (!res.ok) return toast.error("Failed to add lecture");
+    if (!res.ok) return toast.error(await apiErrorMessage(res, "Failed to add lecture"));
     const row = await res.json();
     setLectures((prev) => [...prev, row]);
     setTitle("");
@@ -40,7 +41,7 @@ export function LectureInlineManager({
       body: JSON.stringify({ title: nextTitle.trim(), videoUrl: nextVideoUrl.trim() || null }),
     });
     if (!res.ok) {
-      toast.error("Update failed");
+      toast.error(await apiErrorMessage(res, "Update failed"));
       return;
     }
     const row = await res.json();
@@ -52,7 +53,7 @@ export function LectureInlineManager({
     if (!confirm("Delete lecture and all its files/questions/cards?")) return;
     const res = await fetch(`/api/v1/lectures/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error(await apiErrorMessage(res, "Delete failed"));
       return;
     }
     setLectures((prev) => prev.filter((l) => l.id !== id));
