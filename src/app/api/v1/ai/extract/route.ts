@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { extractQuestionsFromText, validateQuestions } from "@/lib/gemini";
+import { prisma } from "@/lib/prisma";
+import { extractQuestionsFromTextWithMeta, validateQuestionsWithMeta } from "@/lib/gemini";
 import { redisIncrWithExpire } from "@/lib/redis";
 
 const RATE_LIMIT = 5; // PDF extractions per hour — each can be large
+
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+  if (typeof raw !== "string") return undefined;
+  const s = raw.trim().toLowerCase();
+  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  return undefined;
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -23,6 +31,10 @@ export async function POST(req: NextRequest) {
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
+  const preferredProvider = String(formData.get("preferredProvider") ?? "").trim() || undefined;
+  const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
+  const effectiveProvider =
+    normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
   if (!file) return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
 
   if (file.size > 20 * 1024 * 1024)
@@ -44,11 +56,17 @@ export async function POST(req: NextRequest) {
   if (!text.trim()) return NextResponse.json({ questions: [], issues: [] });
 
   try {
-    const questions = await extractQuestionsFromText(text);
-    const issues = await validateQuestions(
-      questions.map((q) => ({ body: q.body, answer: q.answer }))
+    const extracted = await extractQuestionsFromTextWithMeta(text, { preferredProvider: effectiveProvider });
+    const reviewed = await validateQuestionsWithMeta(
+      extracted.data.map((q) => ({ body: q.body, answer: q.answer })),
+      { preferredProvider: effectiveProvider }
     );
-    return NextResponse.json({ questions, issues });
+    return NextResponse.json({
+      questions: extracted.data,
+      issues: reviewed.data,
+      provider: extracted.meta.provider,
+      fallbackFrom: extracted.meta.fallbackFrom,
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "AI extraction failed";
     console.error("[api/v1/ai/extract]", e);

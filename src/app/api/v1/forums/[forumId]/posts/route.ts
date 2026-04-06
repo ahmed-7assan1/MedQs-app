@@ -25,6 +25,7 @@ const POST_SCHEMA = z
         },
         z.union([z.string().url("Invalid image URL"), z.literal("")]).optional()
       ),
+    audience: z.enum(["UNIVERSITY", "FOLLOWERS"]).optional(),
   })
   .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()), {
     message: "Post cannot be empty",
@@ -88,6 +89,8 @@ export async function POST(
   const forum = await prisma.forum.findUnique({ where: { id: forumId } });
   if (!forum)
     return NextResponse.json({ error: "Forum not found" }, { status: 404 });
+  const universityId = forum.universityId;
+  if (!universityId) return NextResponse.json({ error: "Forum misconfigured (missing university)" }, { status: 500 });
   if (forum.type === "PRIVATE") {
     const member = await prisma.privateForumMember.findUnique({
       where: { forumId_userId: { forumId, userId: session.user.id } },
@@ -117,6 +120,7 @@ export async function POST(
   }
 
   const { content, imageUrl } = parsed.data;
+  const audience = parsed.data.audience ?? "UNIVERSITY";
 
   const post = await prisma.post.create({
     data: {
@@ -124,6 +128,8 @@ export async function POST(
       imageUrl: imageUrl?.trim() || undefined,
       authorId: session.user.id,
       forumId,
+      universityId,
+      audience,
     },
     include: {
       author: {

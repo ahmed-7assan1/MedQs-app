@@ -8,6 +8,7 @@ import Link from "next/link";
 import { UserPosts } from "@/components/profile/UserPosts";
 import { SavedPostsSection } from "@/components/profile/SavedPostsSection";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
+import { FollowButton } from "@/components/profile/FollowButton";
 
 export async function ProfileServerView({ userIdSegment }: { userIdSegment: string }) {
   const session = await auth();
@@ -171,6 +172,9 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                 <Mail className="h-3.5 w-3.5" />
                 Message
               </Link>
+            )}
+            {!isOwn && (
+              <FollowButton userId={targetId} />
             )}
             {isOwn && (
               <Link

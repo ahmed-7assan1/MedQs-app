@@ -53,11 +53,18 @@ export async function loadForumPostsForUser(options: {
   if (!forumId) return { ok: false, status: 400, error: "Missing forum id" };
 
   try {
+    const viewer = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { universityId: true },
+    });
+    if (!viewer?.universityId) return { ok: false, status: 400, error: "Set your university in profile first" };
+
     const forum = await prisma.forum.findUnique({
       where: { id: forumId },
-      select: { type: true },
+      select: { type: true, universityId: true },
     });
     if (!forum) return { ok: false, status: 404, error: "Forum not found" };
+    if (forum.universityId !== viewer.universityId) return { ok: false, status: 403, error: "Forbidden" };
     if (forum.type === "PRIVATE") {
       const member = await prisma.privateForumMember.findUnique({
         where: { forumId_userId: { forumId, userId } },
@@ -72,7 +79,20 @@ export async function loadForumPostsForUser(options: {
 
     try {
       posts = (await prisma.post.findMany({
-        where: { forumId },
+        where: {
+          forumId,
+          universityId: viewer.universityId,
+          OR: [
+            { audience: "UNIVERSITY" },
+            {
+              audience: "FOLLOWERS",
+              OR: [
+                { authorId: userId },
+                { author: { followers: { some: { followerId: userId } } } },
+              ],
+            },
+          ],
+        },
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
@@ -92,7 +112,20 @@ export async function loadForumPostsForUser(options: {
       console.error("[forum-posts] full query failed, retrying without rank", inner);
       try {
         posts = (await prisma.post.findMany({
-          where: { forumId },
+          where: {
+            forumId,
+            universityId: viewer.universityId,
+            OR: [
+              { audience: "UNIVERSITY" },
+              {
+                audience: "FOLLOWERS",
+                OR: [
+                  { authorId: userId },
+                  { author: { followers: { some: { followerId: userId } } } },
+                ],
+              },
+            ],
+          },
           orderBy: { createdAt: "desc" },
           skip,
           take: limit,
@@ -106,7 +139,20 @@ export async function loadForumPostsForUser(options: {
       } catch (inner2) {
         console.error("[forum-posts] retry without rank failed, retrying without _count", inner2);
         const bare = await prisma.post.findMany({
-          where: { forumId },
+          where: {
+            forumId,
+            universityId: viewer.universityId,
+            OR: [
+              { audience: "UNIVERSITY" },
+              {
+                audience: "FOLLOWERS",
+                OR: [
+                  { authorId: userId },
+                  { author: { followers: { some: { followerId: userId } } } },
+                ],
+              },
+            ],
+          },
           orderBy: { createdAt: "desc" },
           skip,
           take: limit,

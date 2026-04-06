@@ -12,6 +12,7 @@ type User = {
   role: string;
   points: number;
   createdAt: string;
+  universityId?: string | null;
   rank?: { label: string } | null;
   university?: { name: string } | null;
   semester?: { name: string } | null;
@@ -28,11 +29,15 @@ export function UsersTable({
   total,
   page,
   limit,
+  viewerRole,
+  universities = [],
 }: {
   users: User[];
   total: number;
   page: number;
   limit: number;
+  viewerRole: string;
+  universities?: Array<{ id: string; name: string }>;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState(useSearchParams().get("q") ?? "");
@@ -68,6 +73,20 @@ export function UsersTable({
       router.refresh();
     } else {
       toast.error("Failed to delete user");
+    }
+  }
+
+  async function setUniversity(userId: string, universityId: string) {
+    const res = await fetch(`/api/v1/admin/users/${userId}/university`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ universityId: universityId || null }),
+    });
+    if (res.ok) {
+      toast.success("University updated");
+      router.refresh();
+    } else {
+      toast.error("Failed to update university");
     }
   }
 
@@ -118,6 +137,23 @@ export function UsersTable({
                     <p>{user.university?.name ?? "—"}</p>
                     <p className="opacity-70">{user.semester?.name ?? ""}</p>
                   </div>
+                  {viewerRole === "SUPER_ADMIN" && user.role === "ADMIN" && universities.length > 0 ? (
+                    <div className="mt-2">
+                      <select
+                        className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                        value={user.universityId ?? ""}
+                        onChange={(e) => void setUniversity(user.id, e.target.value)}
+                        title="Assign admin to a university"
+                      >
+                        <option value="">—</option>
+                        {universities.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : null}
                 </td>
                 <td className="px-4 py-3 text-xs">{user.rank?.label ?? "Newbie"}</td>
                 <td className="px-4 py-3 text-xs font-mono">{user.points}</td>

@@ -10,9 +10,11 @@ import toast from "react-hot-toast";
 interface Module   { id: string; name: string }
 interface Subject  { id: string; name: string; moduleId: string }
 interface Flashcard { id: string; front: string; back: string }
+interface LectureFile { id: string; name: string; url: string; mimeType: string }
 interface Lecture  {
   id: string; title: string; videoUrl?: string; subjectId: string; order: number;
   flashcards?: Flashcard[];
+  files?: LectureFile[];
 }
 
 export default function AdminLecturesPage() {
@@ -56,7 +58,13 @@ export default function AdminLecturesPage() {
     if (existing?.flashcards) return;
     const res = await fetch(`/api/v1/lectures/${lecId}`);
     const data = await res.json();
-    setLectures(prev => prev.map(l => l.id === lecId ? { ...l, flashcards: data.flashcards ?? [] } : l));
+    setLectures(prev =>
+      prev.map(l =>
+        l.id === lecId
+          ? { ...l, flashcards: data.flashcards ?? [], files: data.files ?? [], title: data.title ?? l.title, videoUrl: data.videoUrl ?? l.videoUrl }
+          : l
+      )
+    );
   }
 
   async function createLecture() {
@@ -198,6 +206,9 @@ export default function AdminLecturesPage() {
               onFlashcardsChange={(cards) =>
                 setLectures(prev => prev.map(l => l.id === lec.id ? { ...l, flashcards: cards } : l))
               }
+              onLecturePatch={(patch) =>
+                setLectures((prev) => prev.map((l) => (l.id === lec.id ? { ...l, ...patch } : l)))
+              }
             />
           ))}
         </div>
@@ -208,10 +219,11 @@ export default function AdminLecturesPage() {
 
 // ─── LectureRow with inline flashcard CRUD ────────────────────────────────────
 
-function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcardsChange }: {
+function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcardsChange, onLecturePatch }: {
   lecture: Lecture; index: number; expanded: boolean;
   onExpand: () => void; onDelete: () => void;
   onFlashcardsChange: (cards: Flashcard[]) => void;
+  onLecturePatch: (patch: Partial<Lecture>) => void;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [editFront, setEditFront] = useState("");
@@ -220,8 +232,14 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
   const [addFront, setAddFront] = useState("");
   const [addBack,  setAddBack]  = useState("");
   const [addingCard, setAddingCard] = useState(false);
+  const [editTitle, setEditTitle] = useState(lecture.title);
+  const [editVideo, setEditVideo] = useState(lecture.videoUrl ?? "");
+  const [savingLecture, setSavingLecture] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [renamingFileId, setRenamingFileId] = useState<string | null>(null);
 
   const cards = lecture.flashcards ?? [];
+  const files = lecture.files ?? [];
 
   function startEdit(card: Flashcard) {
     setEditing(card.id);
@@ -271,6 +289,72 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
     } else toast.error("Failed to add card");
   }
 
+  async function saveLectureMeta() {
+    if (!editTitle.trim()) {
+      toast.error("Lecture title is required");
+      return;
+    }
+    setSavingLecture(true);
+    const res = await fetch(`/api/v1/lectures/${lecture.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: editTitle.trim(), videoUrl: editVideo.trim() || null }),
+    });
+    setSavingLecture(false);
+    if (res.ok) {
+      const updated = await res.json();
+      onLecturePatch({ title: updated.title, videoUrl: updated.videoUrl });
+      toast.success("Lecture updated");
+    } else {
+      toast.error("Failed to update lecture");
+    }
+  }
+
+  async function uploadLectureFile(file: File) {
+    setUploadingFile(true);
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`/api/v1/lectures/${lecture.id}/files`, { method: "POST", body: form });
+    setUploadingFile(false);
+    if (res.ok) {
+      const created = await res.json();
+      onLecturePatch({ files: [...files, created] });
+      toast.success("File uploaded");
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toast.error(typeof err.error === "string" ? err.error : "Upload failed");
+    }
+  }
+
+  async function renameFile(fileId: string, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast.error("File name is required");
+      return;
+    }
+    setRenamingFileId(fileId);
+    const res = await fetch(`/api/v1/lectures/${lecture.id}/files/${fileId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: trimmed }),
+    });
+    setRenamingFileId(null);
+    if (res.ok) {
+      const updated = await res.json();
+      onLecturePatch({ files: files.map((f) => (f.id === fileId ? updated : f)) });
+      toast.success("File renamed");
+    } else toast.error("Rename failed");
+  }
+
+  async function deleteFile(fileId: string) {
+    if (!confirm("Delete this file?")) return;
+    const res = await fetch(`/api/v1/lectures/${lecture.id}/files/${fileId}`, { method: "DELETE" });
+    if (res.ok) {
+      onLecturePatch({ files: files.filter((f) => f.id !== fileId) });
+      toast.success("File deleted");
+    } else toast.error("Delete failed");
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors" onClick={onExpand}>
@@ -292,6 +376,64 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
       {/* Flashcards inline editor */}
       {expanded && (
         <div className="border-t border-border px-4 pb-4 pt-3 animate-fade-in">
+          <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lecture details</p>
+            <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Lecture title"
+                className="rounded border border-border bg-background px-2 py-2 text-sm"
+              />
+              <input
+                value={editVideo}
+                onChange={(e) => setEditVideo(e.target.value)}
+                placeholder="Video URL (optional)"
+                className="rounded border border-border bg-background px-2 py-2 text-sm"
+              />
+              <button
+                onClick={saveLectureMeta}
+                disabled={savingLecture}
+                className="rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+              >
+                {savingLecture ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-4 rounded-lg border border-border bg-muted/20 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lecture files</p>
+              <label className="cursor-pointer rounded border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted">
+                {uploadingFile ? "Uploading..." : "Upload file"}
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (file) void uploadLectureFile(file);
+                  }}
+                />
+              </label>
+            </div>
+            {files.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No files uploaded yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {files.map((file) => (
+                  <LectureFileRow
+                    key={file.id}
+                    file={file}
+                    renaming={renamingFileId === file.id}
+                    onRename={renameFile}
+                    onDelete={deleteFile}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="mb-3 flex items-center gap-2">
             <Layers className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Flashcards ({cards.length})</span>
@@ -347,6 +489,45 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function LectureFileRow({
+  file,
+  renaming,
+  onRename,
+  onDelete,
+}: {
+  file: LectureFile;
+  renaming: boolean;
+  onRename: (fileId: string, name: string) => Promise<void>;
+  onDelete: (fileId: string) => Promise<void>;
+}) {
+  const [name, setName] = useState(file.name);
+  return (
+    <div className="flex items-center gap-2 rounded border border-border bg-background px-2 py-1.5">
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-xs"
+      />
+      <a href={file.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">
+        Open
+      </a>
+      <button
+        onClick={() => void onRename(file.id, name)}
+        disabled={renaming}
+        className="rounded border border-border px-2 py-1 text-xs hover:bg-muted disabled:opacity-60"
+      >
+        Save
+      </button>
+      <button
+        onClick={() => void onDelete(file.id)}
+        className="rounded border border-border px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+      >
+        Delete
+      </button>
     </div>
   );
 }

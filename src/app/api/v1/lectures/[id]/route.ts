@@ -19,6 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       flashcards: true,
       questions: { select: { id: true, body: true, difficulty: true, answer: true, choices: true } },
       files: true,
+      videos: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
     },
   });
   if (!lecture) return NextResponse.json({ error: "Not found" }, { status: 404 });

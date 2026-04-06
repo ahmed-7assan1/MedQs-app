@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { generateLectureEnhancements } from "@/lib/gemini";
+import { generateLectureEnhancementsWithMeta } from "@/lib/gemini";
+
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+  if (typeof raw !== "string") return undefined;
+  const s = raw.trim().toLowerCase();
+  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  return undefined;
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -12,6 +19,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}));
   const lectureId = typeof body.lectureId === "string" ? body.lectureId.trim() : "";
+  const preferredProvider = typeof body.preferredProvider === "string" ? body.preferredProvider.trim() : "";
   const instructions = typeof body.instructions === "string" ? body.instructions : "";
   const wantNotes = Boolean(body.notes);
   const wantFlashcards = Boolean(body.flashcards);
@@ -26,16 +34,21 @@ export async function POST(req: NextRequest) {
     },
   });
   if (!lecture) return NextResponse.json({ error: "Lecture not found" }, { status: 404 });
+  const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
+  const effectiveProvider =
+    normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
 
   try {
-    const { notesMarkdown, flashcards } = await generateLectureEnhancements(
+    const out = await generateLectureEnhancementsWithMeta(
       lecture.title,
       lecture.subject.name,
       lecture.subject.module.name,
       instructions,
       wantNotes,
-      wantFlashcards
+      wantFlashcards,
+      { preferredProvider: effectiveProvider }
     );
+    const { notesMarkdown, flashcards } = out.data;
 
     await prisma.$transaction(async (tx) => {
       if (wantNotes && notesMarkdown) {
@@ -64,6 +77,8 @@ export async function POST(req: NextRequest) {
       ok: true,
       notesAdded: wantNotes && Boolean(notesMarkdown),
       flashcardsAdded: wantFlashcards ? flashcards.length : 0,
+      provider: out.meta.provider,
+      fallbackFrom: out.meta.fallbackFrom,
     });
   } catch (e) {
     console.error("[lecture-enhance]", e);

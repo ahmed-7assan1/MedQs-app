@@ -195,12 +195,25 @@ async function main() {
   await prisma.forum.upsert({
     where: { id: "forum-global" },
     update: {},
-    create: { id: "forum-global", name: "General Discussion", type: "GLOBAL", status: "OPEN" },
+    create: {
+      id: "forum-global",
+      name: "General Discussion",
+      type: "GLOBAL",
+      status: "OPEN",
+      universityId: university.id,
+    },
   });
   await prisma.forum.upsert({
     where: { id: "forum-sem1" },
     update: {},
-    create: { id: "forum-sem1", name: "Year 1 – Semester 1", type: "SEMESTER", status: "OPEN", semesterId: sem1.id },
+    create: {
+      id: "forum-sem1",
+      name: "Year 1 – Semester 1",
+      type: "SEMESTER",
+      status: "OPEN",
+      semesterId: sem1.id,
+      universityId: university.id,
+    },
   });
   console.log("✅ 2 forums (Global + Semester)");
 

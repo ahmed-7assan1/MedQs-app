@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :where(a, button, input, textarea, select, summary):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
 /* Tajawal + Poppins via next/font on <html> (--font-tajawal first for Arabic). */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..900;1,9..144,200..900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;500;700&family=Cairo:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;700&family=Almarai:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -18,12 +30,12 @@
   --primary-foreground: 0 0% 100%;
   --ring: 217 72% 42%;
 
-  /* Surfaces — white mode */
-  --background: 0 0% 100%;
+  /* Surfaces — soft off-white (simplicity + hierarchy vs. pure #fff cards) */
+  --background: 220 24% 97%;
   --foreground: 222 47% 11%;
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
-  --muted: 220 14% 96%;
+  --muted: 220 16% 95%;
   --muted-foreground: 220 9% 46%;
   --secondary: 220 14% 96%;
   --secondary-foreground: 222 47% 11%;
@@ -34,7 +46,7 @@
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
   --success: 152 60% 38%;
-  --radius: 0.75rem;
+  --radius: 1rem;
 
   /* Mobile drawer (dark rail) */
   --sidebar-bg: 222 32% 8%;
@@ -122,6 +134,7 @@ html[data-theme="dark"] .medqs-logo {
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    scroll-padding-top: 4.5rem;
   }
   body {
     @apply bg-background text-foreground;
@@ -129,6 +142,8 @@ html[data-theme="dark"] .medqs-logo {
     font-size: 15px;
     line-height: 1.65;
     letter-spacing: -0.01em;
+    min-height: 100dvh;
+    min-height: 100vh; /* fallback */
   }
   /* Explicit Arabic / RTL: Tajawal first */
   :lang(ar),
@@ -263,12 +278,14 @@ html[data-theme="dark"] body {
 /* ── App shell (top nav layout) ── */
 .app-shell {
   display: block;
+  min-height: 100dvh;
   min-height: 100vh;
   position: relative;
 }
 
 .main-content {
   margin-left: 0 !important;
+  min-height: 100dvh;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -283,16 +300,50 @@ html[data-theme="dark"] body {
   width: 100%;
 }
 
+/* Logged-in mobile: reserve space for fixed bottom primary nav + safe area */
+.app-shell--tabbar .main-content {
+  padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767px) {
+  html:has(.app-shell--tabbar) {
+    scroll-padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Accessibility: skip to main (keyboard / screen reader) */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  inset-inline-start: 0.75rem;
+  z-index: 100000;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 4px 20px hsl(var(--primary) / 0.35);
+  transform: translateY(-200%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
 /* Card surfaces — plain CSS only (Tailwind @apply cannot use arbitrary opacity like ring-black/[0.04]) */
 @layer components {
   .surface-card {
-    border-radius: 1rem;
+    border-radius: var(--radius);
     border: 1px solid hsl(var(--border) / 0.85);
     background-color: hsl(var(--card));
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
     box-shadow:
-      0 1px 0 rgb(0 0 0 / 0.04),
-      0 4px 14px rgb(0 0 0 / 0.06);
+      0 1px 0 rgb(0 0 0 / 0.03),
+      0 8px 24px rgb(0 0 0 / 0.055);
   }
   .dark .surface-card {
     box-shadow:
@@ -300,10 +351,10 @@ html[data-theme="dark"] body {
       0 4px 20px rgb(0 0 0 / 0.35);
   }
   .surface-card-subtle {
-    border-radius: 0.75rem;
+    border-radius: calc(var(--radius) - 2px);
     border: 1px solid hsl(var(--border) / 0.75);
     background-color: hsl(var(--card));
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
   }
   .dark .surface-card-subtle {
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
@@ -324,6 +375,62 @@ html[data-theme="dark"] body {
 .medqs-drawer .sb-user-info {
   opacity: 1 !important;
   transform: none !important;
+}
+
+/* Mobile menu: light mode = same surfaces as the app (not always-dark rail) */
+.medqs-drawer {
+  background-color: hsl(var(--card));
+  border-right: 1px solid hsl(var(--border));
+}
+.medqs-drawer .sb-rail-glow {
+  opacity: 0.35;
+}
+html:not(.dark) .medqs-drawer .sb-rail-glow {
+  opacity: 0;
+  pointer-events: none;
+}
+.dark .medqs-drawer {
+  background-color: hsl(222 32% 7%);
+  border-right-color: rgb(255 255 255 / 0.1);
+}
+.dark .medqs-drawer .sb-rail-glow {
+  opacity: 0.8;
+}
+
+html:not(.dark) .medqs-drawer .sb-section-label {
+  color: hsl(var(--muted-foreground));
+}
+html:not(.dark) .medqs-drawer .sb-link {
+  color: hsl(var(--foreground));
+}
+html:not(.dark) .medqs-drawer .sb-link:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  transform: none;
+}
+html:not(.dark) .medqs-drawer .sb-link.active {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 4px 14px hsl(var(--primary) / 0.28);
+}
+html:not(.dark) .medqs-drawer .sb-link.active::before {
+  background: hsl(var(--primary-foreground));
+  opacity: 0.4;
+}
+html:not(.dark) .medqs-drawer .sb-link-icon {
+  color: hsl(var(--muted-foreground));
+}
+html:not(.dark) .medqs-drawer .sb-link:hover .sb-link-icon {
+  color: hsl(var(--foreground));
+}
+html:not(.dark) .medqs-drawer .sb-link.active .sb-link-icon {
+  color: hsl(var(--primary-foreground));
+}
+html:not(.dark) .medqs-drawer .sb-footer {
+  border-top-color: hsl(var(--border));
+}
+html:not(.dark) .medqs-drawer .sb-user:hover {
+  background: hsl(var(--muted));
 }
 
 /* Legacy mobile-topbar — replaced by medqs-mobile-bar in Sidebar */

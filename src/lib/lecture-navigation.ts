@@ -42,6 +42,9 @@ export async function getLectureInModule(moduleId: string, lectureId: string) {
         },
       },
       files: true,
+      videos: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      },
     },
   });
 }

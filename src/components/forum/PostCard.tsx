@@ -15,6 +15,7 @@ import {
   removeSavedPost,
   savePostSnapshot,
 } from "@/lib/forum-saved-posts";
+import { ForumAuthorAvatar } from "./ForumAuthorAvatar";
 
 interface Props {
   post: PostWithMeta;
@@ -113,7 +114,7 @@ export function PostCard({ post, currentUserId, forumName }: Props) {
       <div className="flex items-start justify-between px-5 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
           {post.author.image ? (
-            <img src={post.author.image} alt={post.author.name} className="h-9 w-9 rounded-full object-cover" />
+            <ForumAuthorAvatar src={post.author.image} alt={post.author.name} sizePx={36} className="h-9 w-9" />
           ) : (
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
               {post.author.name[0]?.toUpperCase()}

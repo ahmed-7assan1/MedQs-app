@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Video, FileQuestion, Layers, FileText, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LectureInlineManager } from "@/components/admin-inline/LectureInlineManager";
 
 export default async function SubjectLecturesPage({
   params,
@@ -12,6 +13,8 @@ export default async function SubjectLecturesPage({
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const role = (session.user as { role?: string } | undefined)?.role;
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -54,6 +57,13 @@ export default async function SubjectLecturesPage({
 
       <h1 className="mb-2 font-display text-2xl font-bold md:text-3xl">{subject.name}</h1>
       <p className="mb-8 text-sm text-muted-foreground">Choose a lecture, then pick video, files, flashcards, or questions.</p>
+
+      {isAdmin ? (
+        <LectureInlineManager
+          subjectId={subject.id}
+          initialLectures={subject.lectures.map((l) => ({ id: l.id, title: l.title, videoUrl: l.videoUrl }))}
+        />
+      ) : null}
 
       <div className="grid gap-2 sm:grid-cols-2">
         {subject.lectures.map((lecture) => (

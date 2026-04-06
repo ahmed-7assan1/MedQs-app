@@ -1,22 +1,47 @@
 import { auth } from "@/lib/auth";
-import { getLectureInModule, getVideoEmbedInfo } from "@/lib/lecture-navigation";
+import { getLectureInModule } from "@/lib/lecture-navigation";
+import { trackLectureView } from "@/lib/lecture-activity";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Video, ExternalLink } from "lucide-react";
+import { Video } from "lucide-react";
+import { LectureVideoStudio } from "@/components/content/LectureVideoStudio";
 
 export default async function LectureVideoPage({
   params,
+  searchParams,
 }: {
   params: { moduleId: string; lectureId: string };
+  searchParams?: { v?: string };
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
   const lecture = await getLectureInModule(params.moduleId, params.lectureId);
   if (!lecture) notFound();
+  await trackLectureView(session.user.id, params.lectureId, "video");
 
   const hub = `/modules/${params.moduleId}/lectures/${params.lectureId}`;
-  const videoEmbed = lecture.videoUrl ? getVideoEmbedInfo(lecture.videoUrl) : null;
+  const selected = searchParams?.v;
+  const videos = lecture.videos.length
+    ? lecture.videos
+    : lecture.videoUrl
+      ? [
+          {
+            id: "legacy-single",
+            title: "Main lecture video",
+            url: lecture.videoUrl,
+            sourceType: "external",
+            sharingEnabled: true,
+            likesCount: 0,
+            commentsCount: 0,
+            sharesCount: 0,
+            sortOrder: 1,
+            lectureId: lecture.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ]
+      : [];
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
@@ -40,40 +65,26 @@ export default async function LectureVideoPage({
 
       <h1 className="mb-6 font-display text-xl font-bold md:text-2xl">Video — {lecture.title}</h1>
 
-      {videoEmbed ? (
-        <div className="overflow-hidden rounded-2xl border border-border bg-black shadow-lg">
-          <div style={{ position: "relative", paddingTop: "56.25%" }}>
-            <iframe
-              src={videoEmbed.embedUrl}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowFullScreen
-              loading="lazy"
-              className="border-0"
-            />
-          </div>
-          <div className="flex items-center justify-between border-t border-white/5 bg-black/40 px-4 py-2.5">
-            <div className="flex items-center gap-2">
-              <Video className="h-3.5 w-3.5 text-white/30" />
-              <span className="text-xs text-white/40">{videoEmbed.type}</span>
-            </div>
-            {lecture.videoUrl && (
-              <a
-                href={lecture.videoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white/60"
-              >
-                <ExternalLink className="h-3 w-3" /> Open original
-              </a>
-            )}
-          </div>
-        </div>
+      {videos.length > 0 ? (
+        <LectureVideoStudio
+          lectureId={lecture.id}
+          initialVideos={videos.map((v) => ({
+            id: v.id,
+            title: v.title,
+            url: v.url,
+            sourceType: v.sourceType,
+            sharingEnabled: v.sharingEnabled,
+            likesCount: v.likesCount,
+            commentsCount: v.commentsCount,
+            sharesCount: v.sharesCount,
+          }))}
+          selectedVideoId={selected}
+        />
       ) : (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20 py-16">
           <Video className="h-10 w-10 text-muted-foreground opacity-25" />
-          <p className="text-sm text-muted-foreground">No video for this lecture</p>
-          <p className="text-xs text-muted-foreground opacity-70">YouTube, Drive, Telegram, or direct video URL</p>
+          <p className="text-sm text-muted-foreground">No videos for this lecture</p>
+          <p className="text-xs text-muted-foreground opacity-70">Admin can add multiple videos from lecture hub inline edit.</p>
         </div>
       )}
 

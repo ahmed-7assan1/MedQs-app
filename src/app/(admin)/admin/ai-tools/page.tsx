@@ -10,9 +10,11 @@ import { GeminiBanner } from "@/components/admin/GeminiInfo";
 import { AiQuestionPlacementPicker } from "@/components/admin/AiQuestionPlacementPicker";
 import type { ExtractedQuestion, AISuggestion } from "@/lib/gemini";
 
+type AIProviderChoice = "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
+
 // ─── Manual Assist ─────────────────────────────────────────────────────────────
 
-function ManualAssistPanel() {
+function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
@@ -38,7 +40,10 @@ function ManualAssistPanel() {
       const res = await fetch("/api/v1/ai/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
+        body: JSON.stringify({
+          body,
+          preferredProvider: providerChoice === "auto" ? undefined : providerChoice,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -47,6 +52,9 @@ function ManualAssistPanel() {
         return;
       }
       setSuggestion(data);
+      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
+        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
+      }
     } catch {
       toast.error("AI suggestion failed");
     } finally {
@@ -186,7 +194,7 @@ function ManualAssistPanel() {
 
 // ─── PDF/DOCX Extractor ────────────────────────────────────────────────────────
 
-function PDFExtractPanel() {
+function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<ExtractedQuestion[]>([]);
@@ -201,6 +209,7 @@ function PDFExtractPanel() {
     setLoading(true);
     const form = new FormData();
     form.append("file", file);
+    if (providerChoice !== "auto") form.append("preferredProvider", providerChoice);
     try {
       const res = await fetch("/api/v1/ai/extract", { method: "POST", body: form });
       const data = await res.json();
@@ -212,6 +221,9 @@ function PDFExtractPanel() {
       }
       setQuestions(data.questions ?? []);
       setIssues(data.issues ?? []);
+      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
+        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
+      }
       if (data.questions?.length) {
         toast.success(`Extracted ${data.questions.length} questions`);
       } else {
@@ -463,7 +475,7 @@ function PDFExtractPanel() {
 
 // ─── Lecture notes + flashcards (admin) ──────────────────────────────────────
 
-function LectureEnhancePanel() {
+function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
   const [lectureId, setLectureId] = useState("");
   const [instructions, setInstructions] = useState("");
   const [wantNotes, setWantNotes] = useState(true);
@@ -483,6 +495,7 @@ function LectureEnhancePanel() {
           instructions,
           notes: wantNotes,
           flashcards: wantFlashcards,
+          preferredProvider: providerChoice === "auto" ? undefined : providerChoice,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -496,6 +509,9 @@ function LectureEnhancePanel() {
         parts.push(`${data.flashcardsAdded} flashcards`);
       }
       toast.success(parts.length ? `Added: ${parts.join(", ")}` : "Done");
+      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
+        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
+      }
     } catch {
       toast.error("Request failed");
     } finally {
@@ -571,19 +587,37 @@ function LectureEnhancePanel() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AIToolsPage() {
+  const [providerChoice, setProviderChoice] = useState<AIProviderChoice>("auto");
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold">AI Tools</h1>
         <p className="mt-1 text-muted-foreground">Generate, extract, and validate questions with AI</p>
       </div>
+      <div className="mb-4 rounded-xl border border-border bg-card p-4">
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Preferred AI provider</label>
+        <select
+          value={providerChoice}
+          onChange={(e) => setProviderChoice(e.target.value as AIProviderChoice)}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="auto">Auto (best available + fallback)</option>
+          <option value="gemini">Gemini</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="deepseek">DeepSeek</option>
+        </select>
+        <p className="mt-2 text-xs text-muted-foreground">
+          If your selected provider fails or quota ends, the request automatically switches to the next configured provider.
+        </p>
+      </div>
       <GeminiBanner />
       <div className="grid gap-6 md:grid-cols-2">
-        <ManualAssistPanel />
-        <PDFExtractPanel />
+        <ManualAssistPanel providerChoice={providerChoice} />
+        <PDFExtractPanel providerChoice={providerChoice} />
       </div>
       <div className="mt-6">
-        <LectureEnhancePanel />
+        <LectureEnhancePanel providerChoice={providerChoice} />
       </div>
     </div>
   );

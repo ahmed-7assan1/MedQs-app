@@ -1,3 +1,18 @@
+const withPWA = require("@ducanh2912/next-pwa").default({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  scope: "/",
+  reloadOnOnline: true,
+  cacheStartUrl: true,
+  fallbacks: {
+    document: "/offline",
+  },
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Bundle next-auth through Next’s compiler (can reduce broken vendor-chunk paths on Windows after partial .next deletes).
@@ -8,6 +23,10 @@ const nextConfig = {
       { protocol: "https", hostname: "graph.facebook.com" },
       { protocol: "https", hostname: "*.r2.cloudflarestorage.com" },
       { protocol: "https", hostname: "*.s3.amazonaws.com" },
+      { protocol: "https", hostname: "utfs.io" },
+      { protocol: "https", hostname: "*.ufs.sh" },
+      { protocol: "https", hostname: "uploadthing.com" },
+      { protocol: "https", hostname: "*.uploadthing.com" },
     ],
   },
   experimental: {
@@ -32,4 +51,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

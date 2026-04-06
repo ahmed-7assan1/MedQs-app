@@ -17,6 +17,7 @@ interface Question {
   stemLayout?: "STANDARD" | "IMAGE_OVERLAY";
   answer: string;
   difficulty: string;
+  explanation?: string | null;
   lectureId: string;
   choices: { key: string; text: string }[];
 }
@@ -107,6 +108,42 @@ export default function AdminQuestionsPage() {
     } else {
       toast.error("Failed to delete");
     }
+  }
+
+  function patchQuestion(id: string, patch: Partial<Question>) {
+    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, ...patch } : q)));
+  }
+
+  function patchChoice(questionId: string, idx: number, text: string) {
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.id === questionId
+          ? { ...q, choices: q.choices.map((c, i) => (i === idx ? { ...c, text } : c)) }
+          : q
+      )
+    );
+  }
+
+  async function saveQuestion(id: string) {
+    const current = questions.find((q) => q.id === id);
+    if (!current) return;
+    const payload = {
+      body: current.body,
+      imageUrl: current.imageUrl ?? null,
+      stemLayout: current.stemLayout ?? "STANDARD",
+      answer: current.answer,
+      difficulty: current.difficulty,
+      explanation: current.explanation ?? "",
+      lectureId: current.lectureId,
+      choices: current.choices,
+    };
+    const res = await fetch(`/api/v1/questions/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) toast.success("Question updated");
+    else toast.error("Failed to update question");
   }
 
   async function addManualQuestion() {
@@ -475,24 +512,71 @@ export default function AdminQuestionsPage() {
                         <img src={q.imageUrl} alt="" className="max-h-56 w-full object-contain bg-muted/20" />
                       </div>
                     ) : null}
-                    {q.choices.map((c) => (
-                      <div
-                        key={c.key}
-                        className={cn(
-                          "flex items-start gap-2 rounded-lg px-3 py-2 text-sm",
-                          c.key === q.answer
-                            ? "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800"
-                            : "bg-muted/40 border border-transparent"
-                        )}
-                      >
-                        <span className="font-mono text-xs text-muted-foreground flex-shrink-0">{c.key}</span>
-                        <span className="flex-1">{c.text}</span>
-                        {c.key === q.answer && <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />}
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Question text</label>
+                      <textarea
+                        value={q.body}
+                        onChange={(e) => patchQuestion(q.id, { body: e.target.value })}
+                        rows={3}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {q.choices.map((c, idx) => (
+                        <div key={c.key} className="flex items-center gap-2 rounded border border-border bg-background px-2 py-1.5">
+                          <span className="w-6 text-xs font-mono text-muted-foreground">{c.key}</span>
+                          <input
+                            value={c.text}
+                            onChange={(e) => patchChoice(q.id, idx, e.target.value)}
+                            className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
+                          />
+                          <label className="text-xs">
+                            <input
+                              type="radio"
+                              name={`answer-${q.id}`}
+                              checked={q.answer === c.key}
+                              onChange={() => patchQuestion(q.id, { answer: c.key })}
+                            />{" "}
+                            Correct
+                          </label>
+                          {c.key === q.answer && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
+                        <select
+                          value={q.difficulty}
+                          onChange={(e) => patchQuestion(q.id, { difficulty: e.target.value })}
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                        >
+                          <option value="EASY">EASY</option>
+                          <option value="MEDIUM">MEDIUM</option>
+                          <option value="HARD">HARD</option>
+                        </select>
                       </div>
-                    ))}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Lecture: <code className="font-mono">{q.lectureId}</code>
-                    </p>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Explanation</label>
+                        <input
+                          value={q.explanation ?? ""}
+                          onChange={(e) => patchQuestion(q.id, { explanation: e.target.value })}
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        Lecture: <code className="font-mono">{q.lectureId}</code>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => void saveQuestion(q.id)}
+                        className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                      >
+                        Save edits
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

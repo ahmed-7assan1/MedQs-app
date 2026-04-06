@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { getLectureInModule } from "@/lib/lecture-navigation";
+import { trackLectureView } from "@/lib/lecture-activity";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Paperclip, FileText } from "lucide-react";
@@ -14,6 +15,7 @@ export default async function LectureAttachmentsPage({
 
   const lecture = await getLectureInModule(params.moduleId, params.lectureId);
   if (!lecture) notFound();
+  await trackLectureView(session.user.id, params.lectureId, "attachments");
 
   const hub = `/modules/${params.moduleId}/lectures/${params.lectureId}`;
 

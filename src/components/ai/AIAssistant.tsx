@@ -317,7 +317,11 @@ export function AIAssistantPanel({
         throw new Error(errText);
       }
 
-      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+      const fallbackNote =
+        typeof data.fallbackFrom === "string" && data.fallbackFrom
+          ? `\n\n_Provider switched automatically: ${data.fallbackFrom} -> ${data.provider}_`
+          : "";
+      setMessages((m) => [...m, { role: "assistant", content: `${data.reply}${fallbackNote}` }]);
       if (data.used !== undefined) {
         setUsage((u) => (u ? { ...u, used: data.used } : null));
       }
@@ -518,6 +522,9 @@ export function AIAssistantPanel({
         {fullPage && embedded ? (
           <p className="text-[10px] text-muted-foreground">Topics are stored on this device only</p>
         ) : null}
+        <p className="line-clamp-2 text-[9px] leading-snug text-amber-800/95 dark:text-amber-400/95">
+          Study aid only — not diagnosis or treatment.
+        </p>
       </div>
       {fullPage && embedded ? (
         <button

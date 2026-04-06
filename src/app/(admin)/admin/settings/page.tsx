@@ -19,12 +19,14 @@ interface SiteConfig {
   siteName: string; logoUrl: string; faviconUrl: string;
   primaryColor: string; enableAI: boolean; enableForum: boolean;
   enableAds: boolean; enableNotifs: boolean; enableLeaderboard: boolean;
+  aiPreferredProvider: "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
   fontSans: string; fontArabic: string;
 }
 
 const DEFAULTS: SiteConfig = {
   siteName: "MedQs", logoUrl: "", faviconUrl: "", primaryColor: "#1a7ef0",
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
+  aiPreferredProvider: "auto",
   fontSans: "Poppins", fontArabic: "Tajawal",
 };
 
@@ -129,7 +131,7 @@ export default function AdminSettingsPage() {
 
   const toggles: { key: keyof SiteConfig; label: string; desc: string }[] = [
     { key: "enableAI",          label: "AI Features",   desc: "Student explain button & admin AI tools" },
-    { key: "enableForum",       label: "Forum",          desc: "Global and semester forums" },
+    { key: "enableForum",       label: "Community",      desc: "Global and semester discussions" },
     { key: "enableAds",         label: "Advertisements", desc: "Show ad banners to students" },
     { key: "enableNotifs",      label: "Notifications",  desc: "In-app notifications" },
     { key: "enableLeaderboard", label: "Leaderboard",    desc: "Student rankings and points board" },
@@ -211,6 +213,28 @@ export default function AdminSettingsPage() {
 
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="mb-5 flex items-center gap-2"><ToggleRight className="h-5 w-5 text-primary" /><h2 className="font-display text-lg font-semibold">Feature Toggles</h2></div>
+        <div className="mb-4 rounded-lg border border-border bg-background p-4">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Global AI provider preference</label>
+          <select
+            value={config.aiPreferredProvider}
+            onChange={(e) =>
+              setConfig((c) => ({
+                ...c,
+                aiPreferredProvider: e.target.value as SiteConfig["aiPreferredProvider"],
+              }))
+            }
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="auto">Auto (recommended)</option>
+            <option value="gemini">Gemini</option>
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="deepseek">DeepSeek</option>
+          </select>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Applied across all AI features. If unavailable or rate-limited, the app falls back automatically.
+          </p>
+        </div>
         <div className="space-y-3">
           {toggles.map(({ key, label, desc }) => {
             const enabled = config[key] as boolean;

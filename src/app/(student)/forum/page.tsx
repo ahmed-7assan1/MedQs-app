@@ -4,21 +4,22 @@ import { redirect } from "next/navigation";
 import { ForumClient } from "@/components/forum/ForumClient";
 import { loadForumPostsForUser } from "@/lib/forum-posts";
 import type { PostWithMeta } from "@/types";
+import { getSessionScope } from "@/lib/tenant";
 
 export default async function ForumPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { semesterId: true },
-  });
+  const scope = await getSessionScope(session);
+  if (!scope) redirect("/login");
+  if (!scope.universityId) redirect("/profile/edit");
 
   const forums = await prisma.forum.findMany({
     where: {
+      universityId: scope.universityId,
       OR: [
         { type: "GLOBAL" },
-        { type: "SEMESTER", semesterId: user?.semesterId ?? undefined },
+        { type: "SEMESTER", semesterId: scope.semesterId ?? undefined },
         { type: "PRIVATE", members: { some: { userId: session.user.id } } },
       ],
       NOT: { status: "CLOSED" },

@@ -59,6 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id         = user.id;
         token.role       = (user as any).role;
         token.semesterId = (user as any).semesterId;
+        token.universityId = (user as any).universityId;
         token.studentId  = (user as any).studentId;
         token.nickname   = (user as any).nickname;
         token.hideRank   = (user as any).hideRank;
@@ -69,6 +70,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       if (trigger === "update" && session) {
         if (session.semesterId) token.semesterId = session.semesterId;
+        if ((session as any).universityId) token.universityId = (session as any).universityId;
         if (session.nickname !== undefined) token.nickname = session.nickname;
         if (session.hideRank !== undefined) token.hideRank = session.hideRank;
       }
@@ -77,13 +79,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
-            role: true, semesterId: true, nickname: true, hideRank: true,
+            role: true, semesterId: true, universityId: true, nickname: true, hideRank: true,
             name: true, image: true,
           },
         }).catch(() => null);
         if (dbUser) {
           token.role       = dbUser.role;
           token.semesterId = dbUser.semesterId;
+          token.universityId = dbUser.universityId;
           token.nickname   = dbUser.nickname;
           token.hideRank   = dbUser.hideRank;
           if (dbUser.name) token.name = dbUser.name;
@@ -98,6 +101,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (uid) session.user.id = uid;
         (session.user as any).role       = token.role;
         (session.user as any).semesterId = token.semesterId;
+        (session.user as any).universityId = (token as any).universityId;
         (session.user as any).studentId  = token.studentId;
         (session.user as any).nickname   = token.nickname;
         (session.user as any).hideRank   = token.hideRank;

@@ -12,6 +12,8 @@ const CreatePrivateForumSchema = z.object({
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const universityId = (session.user as any)?.universityId as string | undefined;
+  if (!universityId) return NextResponse.json({ error: "Set your university in profile first" }, { status: 400 });
 
   const body = await req.json();
   const parsed = CreatePrivateForumSchema.safeParse(body);
@@ -25,6 +27,7 @@ export async function POST(req: NextRequest) {
       name,
       type: "PRIVATE",
       status: "OPEN",
+      universityId,
       createdBy: session.user.id,
       members: {
         create: { userId: session.user.id }, // owner is automatically a member

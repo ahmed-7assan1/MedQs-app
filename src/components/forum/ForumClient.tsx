@@ -23,6 +23,7 @@ import type { PostWithMeta } from "@/types";
 import ReactMarkdown from "react-markdown";
 import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
+import { ForumPostListSkeleton } from "@/components/ui/skeleton";
 import { uploadFiles } from "@/lib/uploadthing-react";
 
 function uploadthingPublicAppId(): string {
@@ -80,15 +81,20 @@ export function ForumClient({
   const [handlingInviteId, setHandlingInviteId] = useState<string | null>(null);
   const [privateForumMenuOpen, setPrivateForumMenuOpen] = useState(false);
   const [privateFormOpen, setPrivateFormOpen] = useState(false);
+  const [tab, setTab] = useState<"feed" | "discussions">("feed");
+  const [discussionScope, setDiscussionScope] = useState<"global" | "semester">("semester");
+  const [feedMode, setFeedMode] = useState<"university" | "following">("university");
+  const [postAudience, setPostAudience] = useState<"UNIVERSITY" | "FOLLOWERS">("UNIVERSITY");
 
   async function loadPosts(forumId: string) {
     if (!forumId) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/forums/${forumId}/posts`, {
-        credentials: "include",
-        cache: "no-store",
-      });
+      const endpoint =
+        tab === "feed"
+          ? `/api/v1/feed?forumId=${encodeURIComponent(forumId)}&mode=${encodeURIComponent(feedMode)}`
+          : `/api/v1/forums/${forumId}/posts`;
+      const res = await fetch(endpoint, { credentials: "include", cache: "no-store" });
       const raw = await res.text();
       let data: unknown = null;
       try {
@@ -135,7 +141,15 @@ export function ForumClient({
 
   useEffect(() => {
     if (activeForum) loadPosts(activeForum.id);
-  }, [activeForum?.id]);
+  }, [activeForum?.id, tab, discussionScope, feedMode]);
+
+  useEffect(() => {
+    const globalForum = forumList.find((f) => f.type === "GLOBAL") ?? forumList[0] ?? null;
+    const semesterForum = forumList.find((f) => f.type === "SEMESTER") ?? globalForum;
+    if (tab === "feed") setActiveForum(globalForum);
+    else setActiveForum(discussionScope === "semester" ? semesterForum : globalForum);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, discussionScope, forumList.length]);
 
   useEffect(() => {
     function onDocClick() {
@@ -165,6 +179,7 @@ export function ForumClient({
         body: JSON.stringify({
           content: postContent.trim(),
           imageUrl: postImageUrl.trim() || undefined,
+          audience: postAudience,
         }),
       });
       if (res.ok) {
@@ -334,7 +349,10 @@ export function ForumClient({
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
       <div className="mb-6 flex items-start justify-between gap-3">
-        <h1 className="font-display text-3xl font-bold">Forum</h1>
+        <div>
+          <h1 className="font-display text-3xl font-bold">Community</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your university feed and semester discussions.</p>
+        </div>
         <div className="relative shrink-0">
           <button
             type="button"
@@ -367,6 +385,62 @@ export function ForumClient({
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex rounded-xl border border-border bg-background p-1 text-sm">
+          <button
+            onClick={() => setTab("feed")}
+            className={cn(
+              "rounded-lg px-3 py-1.5 font-semibold",
+              tab === "feed" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+            )}
+          >
+            Feed
+          </button>
+          <button
+            onClick={() => setTab("discussions")}
+            className={cn(
+              "rounded-lg px-3 py-1.5 font-semibold",
+              tab === "discussions" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+            )}
+          >
+            Discussions
+          </button>
+        </div>
+
+        {tab === "feed" ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={feedMode}
+              onChange={(e) => setFeedMode(e.target.value as any)}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="university">University</option>
+              <option value="following">Following</option>
+            </select>
+            <select
+              value={postAudience}
+              onChange={(e) => setPostAudience(e.target.value as any)}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              title="Who can see your post?"
+            >
+              <option value="UNIVERSITY">Audience: University</option>
+              <option value="FOLLOWERS">Audience: Followers</option>
+            </select>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={discussionScope}
+              onChange={(e) => setDiscussionScope(e.target.value as any)}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="semester">Semester</option>
+              <option value="global">University</option>
+            </select>
+          </div>
+        )}
       </div>
       {pendingInvites.length > 0 && (
         <div className="mb-6 rounded-xl border border-amber-300/50 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
@@ -629,9 +703,7 @@ export function ForumClient({
 
       {/* Posts */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <ForumPostListSkeleton count={4} />
       ) : posts.length === 0 ? (
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-12 text-center">
           <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />

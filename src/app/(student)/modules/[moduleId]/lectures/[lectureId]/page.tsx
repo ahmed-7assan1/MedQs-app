@@ -1,9 +1,12 @@
 import { auth } from "@/lib/auth";
 import { getLectureInModule } from "@/lib/lecture-navigation";
+import { trackLectureView } from "@/lib/lecture-activity";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Video, FileText, Layers, HelpCircle, ChevronRight, NotebookPen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LectureContentInlineManager } from "@/components/admin-inline/LectureContentInlineManager";
+import { AdminToolsDrawer } from "@/components/admin-inline/AdminToolsDrawer";
 
 export default async function LectureHubPage({
   params,
@@ -12,22 +15,26 @@ export default async function LectureHubPage({
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const role = (session.user as { role?: string } | undefined)?.role;
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   const lecture = await getLectureInModule(params.moduleId, params.lectureId);
   if (!lecture) notFound();
+  await trackLectureView(session.user.id, params.lectureId, "hub");
 
   const base = `/modules/${params.moduleId}/lectures/${params.lectureId}`;
   const nQ = lecture.questions.length;
   const nF = lecture.flashcards.length;
   const nFiles = lecture.files.length;
-  const hasVideo = Boolean(lecture.videoUrl?.trim());
+  const nVideos = lecture.videos.length;
+  const hasVideo = nVideos > 0 || Boolean(lecture.videoUrl?.trim());
   const hasNotes = Boolean(lecture.notesMarkdown?.trim());
 
   const items = [
     {
       href: `${base}/video`,
       label: "Video",
-      desc: hasVideo ? "Watch the lesson" : "No video linked yet",
+      desc: hasVideo ? `${nVideos || 1} video(s)` : "No video linked yet",
       icon: Video,
       available: hasVideo,
     },
@@ -84,6 +91,26 @@ export default async function LectureHubPage({
 
       <h1 className="mb-2 font-display text-2xl font-bold md:text-3xl">{lecture.title}</h1>
       <p className="mb-8 text-sm text-muted-foreground">Choose what you want to study in this lecture.</p>
+
+      {isAdmin ? (
+        <AdminToolsDrawer title="Admin tools (this lecture)">
+          <LectureContentInlineManager
+            lectureId={lecture.id}
+            initialFlashcards={lecture.flashcards.map((f) => ({ id: f.id, front: f.front, back: f.back }))}
+            initialFiles={lecture.files.map((f) => ({ id: f.id, name: f.name, url: f.url, mimeType: f.mimeType }))}
+            initialNotes={lecture.notesMarkdown ?? ""}
+            initialVideos={lecture.videos.map((v) => ({
+              id: v.id,
+              title: v.title,
+              url: v.url,
+              sharingEnabled: v.sharingEnabled,
+              likesCount: v.likesCount,
+              commentsCount: v.commentsCount,
+              sharesCount: v.sharesCount,
+            }))}
+          />
+        </AdminToolsDrawer>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map((item) => {

@@ -61,6 +61,7 @@ export async function POST(req: NextRequest, { params }: { params: { postId: str
   const post = await prisma.post.findUnique({ where: { id: params.postId } });
   if (!post) return NextResponse.json({ error: "Post not found" }, { status: 404 });
   if (post.interactionsDisabled) return NextResponse.json({ error: "Interactions disabled" }, { status: 403 });
+  const universityId = post.universityId;
 
   // Rate limit
   const rlKey = `ratelimit:forum:comment:${userId}:${new Date().getHours()}`;
@@ -81,6 +82,7 @@ export async function POST(req: NextRequest, { params }: { params: { postId: str
       authorId: userId,
       postId:   params.postId,
       parentId: parsed.data.parentId ?? null,
+      universityId,
     },
     include: {
       author: {

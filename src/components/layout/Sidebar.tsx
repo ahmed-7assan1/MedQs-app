@@ -16,6 +16,7 @@ import {
   X,
   Sparkles,
   HelpCircle,
+  Library,
   User,
   Sun,
   Moon,
@@ -25,6 +26,7 @@ import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 interface NotifItem {
   id: string;
@@ -49,8 +51,9 @@ interface SidebarProps {
 const NAV = [
   { href: "/dashboard-app", label: "Dashboard", icon: LayoutDashboard },
   { href: "/modules", label: "Lectures", icon: BookOpen },
+  { href: "/study-tools", label: "Study tools", icon: Library },
   { href: "/past-papers", label: "Quizzes", icon: HelpCircle },
-  { href: "/forum", label: "Forum", icon: MessageSquare },
+  { href: "/forum", label: "Community", icon: MessageSquare },
   { href: "/space", label: "Student Space", icon: Clock },
 ];
 
@@ -212,13 +215,13 @@ export function Sidebar({
       <Link
         href={href}
         className={cn(
-          "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+          "flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-[color,background,box-shadow,transform] duration-150 active:scale-[0.98]",
           active
-            ? "bg-primary text-primary-foreground shadow-sm"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+            : "text-muted-foreground hover:bg-muted/90 hover:text-foreground"
         )}
       >
-        <Icon className="h-4 w-4 opacity-90" />
+        <Icon className="h-4 w-4 shrink-0 opacity-95" aria-hidden />
         <span className="hidden lg:inline">{label}</span>
       </Link>
     );
@@ -277,7 +280,7 @@ export function Sidebar({
   return (
     <>
       {/* ── Desktop: top bar ── */}
-      <header className="fixed top-0 left-0 right-0 z-[120] hidden h-14 items-center overflow-visible border-b border-border/80 bg-card/90 shadow-sm backdrop-blur-md md:flex">
+      <header className="fixed top-0 left-0 right-0 z-[120] hidden h-14 items-center overflow-visible border-b border-border/70 bg-card/88 shadow-sm backdrop-blur-xl md:flex">
         <div className="mx-auto flex h-full w-full max-w-[1600px] items-center gap-4 px-4 lg:gap-6">
           <Link href="/dashboard-app" className="flex shrink-0 items-center gap-2.5">
             <BrandMark />
@@ -419,7 +422,7 @@ export function Sidebar({
       </header>
 
       {/* ── Mobile: top bar + h-opens drawer ── */}
-      <div className="medqs-mobile-bar fixed top-0 left-0 right-0 z-[125] flex h-14 items-center justify-between border-b border-border bg-card/95 px-3 backdrop-blur-md md:hidden">
+      <div className="medqs-mobile-bar fixed top-0 left-0 right-0 z-[125] flex h-14 items-center justify-between border-b border-border/80 bg-card/92 px-3 backdrop-blur-xl md:hidden">
         <button
           type="button"
           className="icon-btn flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted"
@@ -470,20 +473,19 @@ export function Sidebar({
       {/* ── Mobile drawer ── */}
       <aside
         className={cn(
-          "medqs-drawer fixed bottom-0 left-0 top-14 z-[115] flex w-[min(280px,88vw)] flex-col border-r border-white/10 shadow-2xl transition-transform duration-300 ease-out md:hidden",
-          "bg-[hsl(222_32%_7%)]",
+          "medqs-drawer fixed bottom-0 left-0 top-14 z-[115] flex w-[min(280px,88vw)] flex-col shadow-2xl transition-transform duration-300 ease-out md:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         )}
         aria-hidden={!mobileOpen}
       >
         <div className="sb-rail-glow" aria-hidden />
 
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-white/10 px-3">
-          <span className="font-display text-sm font-semibold text-white">{siteName}</span>
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3 dark:border-white/10">
+          <span className="font-display text-sm font-semibold text-foreground dark:text-white">{siteName}</span>
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="rounded-lg p-1.5 text-white/70 hover:bg-white/10"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted dark:text-white/70 dark:hover:bg-white/10"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -531,8 +533,10 @@ export function Sidebar({
             <button
               type="button"
               className={cn(
-                "flex-1 rounded-lg py-2 text-xs font-medium text-white/90 transition-colors",
-                theme === "light" ? "bg-white/20" : "bg-white/5 hover:bg-white/10"
+                "flex-1 rounded-lg py-2 text-xs font-semibold transition-colors",
+                theme === "light"
+                  ? "bg-primary text-primary-foreground shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
+                  : "bg-muted/90 text-muted-foreground hover:bg-muted dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
               )}
               onClick={() => setTheme("light")}
             >
@@ -541,8 +545,10 @@ export function Sidebar({
             <button
               type="button"
               className={cn(
-                "flex-1 rounded-lg py-2 text-xs font-medium text-white/90 transition-colors",
-                theme === "dark" ? "bg-white/20" : "bg-white/5 hover:bg-white/10"
+                "flex-1 rounded-lg py-2 text-xs font-semibold transition-colors",
+                theme === "dark"
+                  ? "bg-primary text-primary-foreground shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
+                  : "bg-muted/90 text-muted-foreground hover:bg-muted dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
               )}
               onClick={() => setTheme("dark")}
             >
@@ -563,31 +569,24 @@ export function Sidebar({
                   <img
                     src={userImage}
                     alt={userName}
-                    className="h-8 w-8 flex-shrink-0 rounded-full object-cover ring-1 ring-white/10"
+                    className="h-8 w-8 flex-shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
                   />
                 ) : (
                   <div
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-primary-foreground"
                     style={{ background: "hsl(var(--primary))" }}
                   >
                     {initial}
                   </div>
                 )}
                 <div className="sb-user-info">
-                  <p className="truncate text-xs font-semibold text-white/80">{userName}</p>
-                  <p className="truncate text-[10px] text-white/35">Student</p>
+                  <p className="truncate text-xs font-semibold text-foreground dark:text-white/80">{userName}</p>
+                  <p className="truncate text-[10px] text-muted-foreground dark:text-white/35">Student</p>
                 </div>
               </button>
 
               {userMenuOpen && (
-                <div
-                  className="animate-notif-pop absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-xl border"
-                  style={{
-                    background: "hsl(222 24% 12%)",
-                    borderColor: "hsl(222 18% 18%)",
-                    boxShadow: "0 -8px 32px rgba(0,0,0,.4)",
-                  }}
-                >
+                <div className="animate-notif-pop absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-xl border border-border bg-card shadow-xl dark:border-[hsl(222_18%_18%)] dark:bg-[hsl(222_24%_12%)] dark:shadow-[0_-8px_32px_rgba(0,0,0,.4)]">
                   <div className="space-y-0.5 p-1.5">
                     {[
                       { href: "/profile/me", label: "View Profile", icon: User },
@@ -600,20 +599,19 @@ export function Sidebar({
                           setUserMenuOpen(false);
                           setMobileOpen(false);
                         }}
-                        className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+                        className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:text-white/60 dark:hover:bg-white/5 dark:hover:text-white"
                       >
-                        <Icon style={{ width: 13, height: 13 }} /> {label}
+                        <Icon className="h-3.5 w-3.5 shrink-0" /> {label}
                       </Link>
                     ))}
                   </div>
-                  <div className="border-t p-1.5" style={{ borderColor: "hsl(222 18% 18%)" }}>
+                  <div className="border-t border-border p-1.5 dark:border-[hsl(222_18%_18%)]">
                     <button
                       type="button"
                       onClick={() => signOut({ callbackUrl: "/login" })}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors"
-                      style={{ color: "hsl(0 65% 60%)" }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-destructive transition-colors hover:bg-destructive/10 dark:hover:bg-white/5"
                     >
-                      <LogOut style={{ width: 13, height: 13 }} /> Sign out
+                      <LogOut className="h-3.5 w-3.5 shrink-0" /> Sign out
                     </button>
                   </div>
                 </div>
@@ -627,7 +625,7 @@ export function Sidebar({
 
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-[110] bg-black/50 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-[110] bg-black/35 backdrop-blur-sm dark:bg-black/50 md:hidden"
           role="presentation"
           aria-hidden
           onClick={() => setMobileOpen(false)}
@@ -635,6 +633,8 @@ export function Sidebar({
       )}
 
       {notifPanel}
+
+      {!isGuest ? <MobileBottomNav /> : null}
     </>
   );
 }

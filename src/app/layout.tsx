@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
@@ -80,12 +80,63 @@ function clampPct(n: number): number {
   return Math.max(0, Math.min(100, Math.round(n)));
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+function safeMetadataBase(): URL | undefined {
+  const raw = process.env.NEXTAUTH_URL?.trim();
+  if (!raw) return undefined;
+  try {
+    return new URL(raw);
+  } catch {
+    return undefined;
+  }
+}
+
+export async function generateViewport(): Promise<Viewport> {
   const config = await getSiteConfig();
   return {
-    title: `${config.siteName} — Medical Education Platform`,
-    description: "AI-powered medical education with quizzes, forums, and adaptive learning.",
-    icons: config.faviconUrl ? { icon: config.faviconUrl } : undefined,
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+    themeColor: sanitizeHex(config.primaryColor),
+    colorScheme: "light dark",
+  };
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig();
+  const title = `${config.siteName} — Medical Education`;
+  const description =
+    "Medical quizzes, lectures, forums, and AI study tools for university students. Built for learning — not clinical advice.";
+  const pwaIcons = {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+  };
+  return {
+    metadataBase: safeMetadataBase(),
+    title: { default: title, template: `%s | ${config.siteName}` },
+    description,
+    applicationName: config.siteName,
+    appleWebApp: {
+      capable: true,
+      title: config.siteName,
+      statusBarStyle: "default",
+    },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: config.siteName,
+    },
+    twitter: { card: "summary_large_image", title, description },
+    robots: { index: true, follow: true },
+    icons: config.faviconUrl
+      ? {
+          icon: [{ url: config.faviconUrl }],
+          apple: [{ url: config.faviconUrl }],
+        }
+      : pwaIcons,
   };
 }
 
@@ -145,7 +196,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ChunkLoadRecovery />
         {children}
         <Toaster
-          position="bottom-right"
+          position="top-center"
+          containerStyle={{
+            top: "max(1rem, env(safe-area-inset-top, 0px))",
+          }}
           toastOptions={{
             className:
               "!bg-card !text-card-foreground !border !border-border !shadow-lg !rounded-xl !font-sans !text-sm",

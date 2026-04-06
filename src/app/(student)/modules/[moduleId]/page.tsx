@@ -4,10 +4,13 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ChevronRight, Layers, FileText, Clock, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SubjectInlineManager } from "@/components/admin-inline/SubjectInlineManager";
 
 export default async function ModuleDetailPage({ params }: { params: { moduleId: string } }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const role = (session.user as { role?: string } | undefined)?.role;
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -70,6 +73,13 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
 
       <h1 className="mb-2 font-display text-3xl font-bold tracking-tight">{mod.name}</h1>
       <p className="mb-8 text-sm text-muted-foreground">Pick a subject, then a lecture.</p>
+
+      {isAdmin ? (
+        <SubjectInlineManager
+          moduleId={mod.id}
+          initialSubjects={mod.subjects.map((s) => ({ id: s.id, name: s.name }))}
+        />
+      ) : null}
 
       <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Subjects</div>
       <div className="space-y-2">

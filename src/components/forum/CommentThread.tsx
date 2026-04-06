@@ -4,6 +4,7 @@ import { Loader2, Send, Trash2, MessageSquare, Heart, CornerDownRight } from "lu
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { ForumAuthorAvatar } from "./ForumAuthorAvatar";
 
 interface Comment {
   id: string;
@@ -66,8 +67,12 @@ function CommentItem({
     <div className="space-y-2">
       <div className="flex items-start gap-2.5">
         {comment.author.image ? (
-          <img src={comment.author.image} alt={displayName}
-            className="h-7 w-7 flex-shrink-0 rounded-full object-cover" />
+          <ForumAuthorAvatar
+            src={comment.author.image}
+            alt={displayName}
+            sizePx={28}
+            className="h-7 w-7 flex-shrink-0"
+          />
         ) : (
           <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
             {displayName[0]?.toUpperCase()}

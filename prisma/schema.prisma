@@ -35,6 +35,11 @@ enum ForumStatus {
   READ_ONLY
 }
 
+enum PostAudience {
+  UNIVERSITY
+  FOLLOWERS
+}
+
 enum NotifChannel {
   SYSTEM
   FORUM
@@ -63,6 +68,7 @@ model SiteConfig {
   logoUrl           String?
   faviconUrl        String?
   primaryColor      String   @default("#2563EB")
+  aiPreferredProvider String @default("auto")
   enableAI          Boolean  @default(true)
   enableForum       Boolean  @default(true)
   enableAds         Boolean  @default(true)
@@ -88,6 +94,9 @@ model University {
   users         User[]
   adBanners     AdBanner[]
   yearIdFormats UniversityYearIdFormat[]
+  forums        Forum[]
+  posts         Post[]
+  comments      Comment[]
 }
 
 model UniversityYearIdFormat {
@@ -150,6 +159,8 @@ model Lecture {
   notesMarkdown String?       @db.Text
   subject       Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectId     String
+  activities    UserLectureActivity[]
+  videos        LectureVideo[]
   flashcards    Flashcard[]
   questions     Question[]
   files         LectureFile[]
@@ -170,6 +181,50 @@ model LectureFile {
   mimeType  String
   lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   lectureId String
+}
+
+model LectureVideo {
+  id             String              @id @default(uuid())
+  title          String
+  url            String
+  sourceType     String              @default("external")
+  sharingEnabled Boolean             @default(true)
+  likesCount     Int                 @default(0)
+  commentsCount  Int                 @default(0)
+  sharesCount    Int                 @default(0)
+  sortOrder      Int                 @default(0)
+  lecture        Lecture             @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId      String
+  comments       LectureVideoComment[]
+  likes          LectureVideoLike[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([lectureId, sortOrder])
+}
+
+model LectureVideoComment {
+  id        String       @id @default(uuid())
+  content   String       @db.Text
+  video     LectureVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  videoId   String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime     @default(now())
+
+  @@index([videoId, createdAt])
+  @@index([userId])
+}
+
+model LectureVideoLike {
+  id      String       @id @default(uuid())
+  video   LectureVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  videoId String
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+
+  @@unique([videoId, userId])
+  @@index([userId])
 }
 
 // ─────────────────────────────────────────────
@@ -293,6 +348,9 @@ model User {
   notifMutes       NotificationMute[]
   engagementLogs   EngagementLog[]
   aiUsageLogs      AIUsageLog[]
+  lectureActivities UserLectureActivity[]
+  videoComments    LectureVideoComment[]
+  videoLikes       LectureVideoLike[]
   forumMemberships PrivateForumMember[]
   sentInvites      PrivateForumInvite[] @relation("InviteSender")
   receivedInvites  PrivateForumInvite[] @relation("InviteReceiver")
@@ -303,6 +361,22 @@ model User {
   questionReports  QuestionReport[]
   dmSent           DirectMessage[] @relation("DmSent")
   dmReceived       DirectMessage[] @relation("DmReceived")
+  following        UserFollow[]    @relation("UserFollows")
+  followers        UserFollow[]    @relation("UserFollowers")
+}
+
+model UserLectureActivity {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  lecture      Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId    String
+  source       String?
+  lastViewedAt DateTime @default(now())
+
+  @@unique([userId, lectureId])
+  @@index([userId, lastViewedAt])
+  @@index([lectureId])
 }
 
 model DirectMessage {
@@ -328,6 +402,8 @@ model Forum {
   name       String
   type       ForumType
   status     ForumStatus          @default(OPEN)
+  university   University          @relation(fields: [universityId], references: [id])
+  universityId String
   semester   Semester?            @relation(fields: [semesterId], references: [id])
   semesterId String?
   createdBy  String?
@@ -335,6 +411,8 @@ model Forum {
   members    PrivateForumMember[]
   invites    PrivateForumInvite[]
   createdAt  DateTime             @default(now())
+
+  @@index([universityId, type, status])
 }
 
 model PrivateForumMember {
@@ -366,14 +444,21 @@ model Post {
   content              String    @db.Text
   imageUrl             String?
   interactionsDisabled Boolean   @default(false)
+  audience             PostAudience @default(UNIVERSITY)
   author               User      @relation(fields: [authorId], references: [id])
   authorId             String
   forum                Forum     @relation(fields: [forumId], references: [id])
   forumId              String
+  university           University @relation(fields: [universityId], references: [id])
+  universityId         String
   comments             Comment[]
   likes                Like[]
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+
+  @@index([universityId, createdAt])
+  @@index([forumId, createdAt])
+  @@index([audience, createdAt])
 }
 
 model Comment {
@@ -383,11 +468,28 @@ model Comment {
   authorId  String
   post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
+  university   University @relation(fields: [universityId], references: [id])
+  universityId String
   parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
   parentId  String?
   replies   Comment[]     @relation("CommentReplies")
   likes     CommentLike[]
   createdAt DateTime      @default(now())
+
+  @@index([universityId, createdAt])
+}
+
+model UserFollow {
+  id           String   @id @default(uuid())
+  follower     User     @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId   String
+  following    User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId  String
+  createdAt    DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId, createdAt])
+  @@index([followerId, createdAt])
 }
 
 model Like {

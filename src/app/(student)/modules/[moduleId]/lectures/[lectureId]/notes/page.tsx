@@ -1,9 +1,10 @@
 import { auth } from "@/lib/auth";
 import { getLectureInModule } from "@/lib/lecture-navigation";
+import { trackLectureView } from "@/lib/lecture-activity";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
+import { markdownComponentsWithImages } from "@/components/ui/markdown-components";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 import { NotebookPen } from "lucide-react";
 
@@ -18,6 +19,7 @@ export default async function LectureNotesPage({
   const lecture = await getLectureInModule(params.moduleId, params.lectureId);
   const baseHub = `/modules/${params.moduleId}/lectures/${params.lectureId}`;
   if (!lecture) redirect(baseHub);
+  await trackLectureView(session.user.id, params.lectureId, "notes");
 
   const md = lecture.notesMarkdown?.trim();
   if (!md) redirect(baseHub);

@@ -4,11 +4,18 @@ type ProviderResult = {
   provider: string;
   text: string;
 };
+export type AIProviderId = "gemini" | "openai" | "anthropic" | "deepseek";
+
+export type AIFallbackMeta = {
+  provider: string;
+  fallbackFrom?: string;
+  triedProviders: string[];
+};
 
 export type ChatImagePart = { mimeType: string; data: string };
 export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
-const FETCH_MS = 22_000;
+const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 75_000;
 
 /** Thrown when no provider API keys are set (e.g. missing GEMINI_API_KEY on Vercel). */
 export class AIConfigurationError extends Error {
@@ -25,6 +32,35 @@ function hasAnyAiKey(): boolean {
     process.env.ANTHROPIC_API_KEY?.trim() ||
     process.env.DEEPSEEK_API_KEY?.trim()
   );
+}
+
+function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
+  if (typeof raw !== "string") return undefined;
+  const s = raw.trim().toLowerCase();
+  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  return undefined;
+}
+
+function hasProviderKey(provider: AIProviderId): boolean {
+  if (provider === "gemini") return !!process.env.GEMINI_API_KEY?.trim();
+  if (provider === "openai") return !!process.env.OPENAI_API_KEY?.trim();
+  if (provider === "anthropic") return !!process.env.ANTHROPIC_API_KEY?.trim();
+  return !!process.env.DEEPSEEK_API_KEY?.trim();
+}
+
+function providerDisplayName(provider: AIProviderId): string {
+  if (provider === "openai") return "OpenAI";
+  if (provider === "anthropic") return "Anthropic";
+  if (provider === "deepseek") return "DeepSeek";
+  return "Gemini";
+}
+
+function buildProviderOrder(preferred?: AIProviderId): AIProviderId[] {
+  const base: AIProviderId[] = ["gemini", "openai", "anthropic", "deepseek"];
+  const withKeys = base.filter((p) => hasProviderKey(p));
+  if (!preferred) return withKeys;
+  if (!withKeys.includes(preferred)) return withKeys;
+  return [preferred, ...withKeys.filter((p) => p !== preferred)];
 }
 
 async function callGemini(
@@ -177,8 +213,8 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
 export async function generateAIReplyWithFallback(
   message: string,
   systemPrompt: string,
-  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[] }
-): Promise<ProviderResult> {
+  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string }
+): Promise<ProviderResult & AIFallbackMeta> {
   if (!hasAnyAiKey()) {
     throw new AIConfigurationError(
       "AI is not configured on the server. In Vercel: Project → Settings → Environment Variables → add **GEMINI_API_KEY** (free key: https://aistudio.google.com/app/apikey), then redeploy. You can also set OPENAI_API_KEY, ANTHROPIC_API_KEY, or DEEPSEEK_API_KEY."
@@ -187,6 +223,7 @@ export async function generateAIReplyWithFallback(
 
   const images = options?.images?.filter((i) => i.data && i.mimeType) ?? [];
   const pdfs = options?.pdfs?.filter((p) => p.data && p.mimeType === "application/pdf") ?? [];
+  const preferred = normalizePreferredProvider(options?.preferredProvider);
 
   if (images.length > 0 || pdfs.length > 0) {
     if (!process.env.GEMINI_API_KEY?.trim()) {
@@ -194,15 +231,22 @@ export async function generateAIReplyWithFallback(
         "Images and PDFs in chat require **GEMINI_API_KEY** on the server (multimodal). Add it in Vercel env and redeploy."
       );
     }
-    return callGemini(message, systemPrompt, images, pdfs);
+    const row = await callGemini(message, systemPrompt, images, pdfs);
+    return { ...row, provider: row.provider, triedProviders: ["gemini"] };
   }
 
-  // Only call providers that have keys — avoids masking Gemini errors with “X key missing” from later providers.
-  const runners: Array<() => Promise<ProviderResult>> = [];
-  if (process.env.GEMINI_API_KEY?.trim()) runners.push(() => callGemini(message, systemPrompt, [], []));
-  if (process.env.OPENAI_API_KEY?.trim()) runners.push(() => callOpenAI(message, systemPrompt));
-  if (process.env.ANTHROPIC_API_KEY?.trim()) runners.push(() => callAnthropic(message, systemPrompt));
-  if (process.env.DEEPSEEK_API_KEY?.trim()) runners.push(() => callDeepSeek(message, systemPrompt));
+  const order = buildProviderOrder(preferred);
+  const runners: Array<{ id: AIProviderId; run: () => Promise<ProviderResult> }> = order.map((id) => ({
+    id,
+    run:
+      id === "gemini"
+        ? () => callGemini(message, systemPrompt, [], [])
+        : id === "openai"
+          ? () => callOpenAI(message, systemPrompt)
+          : id === "anthropic"
+            ? () => callAnthropic(message, systemPrompt)
+            : () => callDeepSeek(message, systemPrompt),
+  }));
 
   if (runners.length === 0) {
     throw new AIConfigurationError(
@@ -211,9 +255,16 @@ export async function generateAIReplyWithFallback(
   }
 
   let lastError: unknown = null;
-  for (const run of runners) {
+  const triedProviders: string[] = [];
+  for (const row of runners) {
+    triedProviders.push(row.id);
     try {
-      return await run();
+      const out = await row.run();
+      return {
+        ...out,
+        fallbackFrom: preferred && preferred !== row.id ? providerDisplayName(preferred) : undefined,
+        triedProviders,
+      };
     } catch (err) {
       lastError = err;
     }
@@ -221,4 +272,23 @@ export async function generateAIReplyWithFallback(
 
   const hint = lastError instanceof Error ? lastError.message : "All configured AI providers failed";
   throw new Error(hint);
+}
+
+export async function generateJsonWithFallback<T>(
+  prompt: string,
+  fallback: T,
+  options?: { preferredProvider?: AIProviderId | string; systemPrompt?: string }
+): Promise<{ data: T } & AIFallbackMeta> {
+  const systemPrompt =
+    options?.systemPrompt ??
+    "You are a precise assistant. Return only valid JSON matching the requested schema.";
+  const out = await generateAIReplyWithFallback(prompt, systemPrompt, {
+    preferredProvider: options?.preferredProvider,
+  });
+  const clean = out.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+  try {
+    return { data: JSON.parse(clean) as T, provider: out.provider, fallbackFrom: out.fallbackFrom, triedProviders: out.triedProviders };
+  } catch {
+    return { data: fallback, provider: out.provider, fallbackFrom: out.fallbackFrom, triedProviders: out.triedProviders };
+  }
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
+import { Home } from "lucide-react";
 
 /** Catches runtime errors in student pages (not the layout). Shows UI instead of a blank screen. */
 export default function StudentSegmentError({
@@ -25,13 +27,22 @@ export default function StudentSegmentError({
           {error.message}
         </pre>
       ) : null}
-      <button
-        type="button"
-        onClick={reset}
-        className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-      >
-        إعادة المحاولة
-      </button>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={reset}
+          className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          إعادة المحاولة
+        </button>
+        <Link
+          href="/dashboard-app"
+          className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Home className="h-4 w-4" aria-hidden />
+          Dashboard
+        </Link>
+      </div>
     </div>
   );
 }

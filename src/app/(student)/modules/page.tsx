@@ -5,6 +5,7 @@ import { BookOpen, Lock, ChevronRight, Clock, Signal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
 import { MedqsCard } from "@/components/ui/MedqsCard";
+import { ModuleInlineManager } from "@/components/admin-inline/ModuleInlineManager";
 
 function moduleDifficultyLabel(
   questions: { difficulty: string }[]
@@ -28,6 +29,8 @@ export default async function ModulesPage() {
   const session = await auth();
   const isGuest = !session?.user?.id;
   const userId = session?.user?.id;
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   const user = userId
     ? await prisma.user.findUnique({ where: { id: userId }, select: { semesterId: true } })
@@ -100,6 +103,13 @@ export default async function ModulesPage() {
           </p>
         </div>
       )}
+
+      {!isGuest && isAdmin && user?.semesterId ? (
+        <ModuleInlineManager
+          semesterId={user.semesterId}
+          initialModules={modules.map((m) => ({ id: m.id, name: m.name }))}
+        />
+      ) : null}
 
       {modules.length === 0 && !isGuest ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">

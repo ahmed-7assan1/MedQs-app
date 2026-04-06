@@ -1,75 +1,10 @@
-/**
- * lib/gemini.ts — Google Gemini Flash AI client
- *
- * Default model: gemini-1.5-flash (override with GEMINI_MODEL). Free tier limits apply.
- * Get API key: https://aistudio.google.com/app/apikey (free, no credit card)
- *
- * Env: GEMINI_API_KEY, optional GEMINI_MODEL
- */
-
 import {
-  GoogleGenerativeAI,
-  HarmCategory,
-  HarmBlockThreshold,
-  type GenerativeModel,
-} from "@google/generative-ai";
+  type AIProviderId,
+  generateAIReplyWithFallback,
+  generateJsonWithFallback,
+  type AIFallbackMeta,
+} from "./ai-router";
 import { geminiModelChain } from "./gemini-model-chain";
-
-function getClient() {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error("GEMINI_API_KEY is not set. Get a free key at https://aistudio.google.com/app/apikey");
-  return new GoogleGenerativeAI(key);
-}
-
-function isRetryableGeminiSdkError(e: unknown): boolean {
-  if (e && typeof e === "object" && "status" in e) {
-    const s = (e as { status?: number }).status;
-    if (s === 401 || s === 403 || s === 400) return false;
-    if (s === 404 || s === 429 || s === 503) return true;
-  }
-  const msg = (e instanceof Error ? e.message : String(e)).toLowerCase();
-  if (/401|403|invalid api key|api key not valid|permission denied|bad request/i.test(msg)) return false;
-  return /404|429|503|quota|resource exhausted|unavailable|not found|limit:\s*0|free_tier|not supported|fetch failed/i.test(
-    msg
-  );
-}
-
-/** Try each model in {@link geminiModelChain} until one succeeds (same strategy as student AI chat). */
-async function withGeminiModel<T>(
-  options: { jsonResponse?: boolean },
-  run: (model: GenerativeModel) => Promise<T>
-): Promise<T> {
-  const client = getClient();
-  const chain = geminiModelChain();
-  let lastErr: Error | undefined;
-  for (let i = 0; i < chain.length; i++) {
-    const modelId = chain[i]!;
-    try {
-      const model = client.getGenerativeModel({
-        model: modelId,
-        safetySettings: SAFETY,
-        ...(options.jsonResponse
-          ? { generationConfig: { responseMimeType: "application/json" as const } }
-          : {}),
-      });
-      return await run(model);
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      lastErr = err;
-      const canRetry = i < chain.length - 1 && isRetryableGeminiSdkError(e);
-      if (!canRetry) throw err;
-    }
-  }
-  throw lastErr ?? new Error("Gemini: all models failed");
-}
-
-// Relaxed safety settings for medical content
-const SAFETY = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,       threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -90,23 +25,27 @@ export interface AISuggestion {
 
 // ─── Helper: safe JSON parse from Gemini response ─────────────────────────────
 
-function parseJSON<T>(text: string, fallback: T): T {
-  try {
-    // Gemini sometimes wraps in ```json ... ```
-    const clean = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
-    return JSON.parse(clean) as T;
-  } catch {
-    return fallback;
-  }
-}
+export type AIRequestOptions = { preferredProvider?: AIProviderId | string };
+export type AIWithMeta<T> = { data: T; meta: AIFallbackMeta };
 
 // ─── 1. Student: explain a question ──────────────────────────────────────────
 
 export async function generateExplanation(
   questionBody: string,
   choices: { key: string; text: string }[],
-  answer: string
+  answer: string,
+  options?: AIRequestOptions
 ): Promise<string> {
+  const out = await generateExplanationWithMeta(questionBody, choices, answer, options);
+  return out.data;
+}
+
+export async function generateExplanationWithMeta(
+  questionBody: string,
+  choices: { key: string; text: string }[],
+  answer: string,
+  options?: AIRequestOptions
+): Promise<AIWithMeta<string>> {
   const choiceText = choices.map((c) => `${c.key}. ${c.text}`).join("\n");
 
   const prompt = `You are a medical education tutor. A student is studying for their exam and needs help understanding this MCQ.
@@ -125,17 +64,29 @@ Explain in 2-3 short paragraphs:
 
 Use simple language suitable for a medical student. Use **bold** for key medical terms. Do not use headers.`;
 
-  return withGeminiModel({}, async (model) => {
-    const result = await model.generateContent(prompt);
-    return result.response.text() ?? "Explanation unavailable.";
+  const row = await generateAIReplyWithFallback(prompt, "You are a medical education tutor.", {
+    preferredProvider: options?.preferredProvider,
   });
+  return {
+    data: row.text || "Explanation unavailable.",
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
 }
 
 // ─── 2. Admin: suggest choices + answer for a question body ──────────────────
 
 export async function suggestQuestionDetails(
-  questionBody: string
+  questionBody: string,
+  options?: AIRequestOptions
 ): Promise<AISuggestion> {
+  const out = await suggestQuestionDetailsWithMeta(questionBody, options);
+  return out.data;
+}
+
+export async function suggestQuestionDetailsWithMeta(
+  questionBody: string,
+  options?: AIRequestOptions
+): Promise<AIWithMeta<AISuggestion>> {
   const prompt = `You are a medical exam question writer. Given this question stem, generate 4 plausible answer choices, identify the correct one, write a brief explanation, and assess difficulty.
 
 Question stem: "${questionBody}"
@@ -159,10 +110,7 @@ Rules:
 - difficulty is "EASY", "MEDIUM", or "HARD"
 - Return ONLY the JSON object, no extra text`;
 
-  return withGeminiModel({ jsonResponse: true }, async (model) => {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    return parseJSON<AISuggestion>(text, {
+  const fallback: AISuggestion = {
     choices: [
       { key: "A", text: "Option A" },
       { key: "B", text: "Option B" },
@@ -172,15 +120,27 @@ Rules:
     answer: "A",
     explanation: "Could not generate suggestion. Please fill manually.",
     difficulty: "MEDIUM",
+  };
+  const row = await generateJsonWithFallback<AISuggestion>(prompt, fallback, {
+    preferredProvider: options?.preferredProvider,
   });
-  });
+  return { data: row.data, meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders } };
 }
 
 // ─── 3. Admin: extract questions from raw text ────────────────────────────────
 
 export async function extractQuestionsFromText(
-  text: string
+  text: string,
+  options?: AIRequestOptions
 ): Promise<ExtractedQuestion[]> {
+  const out = await extractQuestionsFromTextWithMeta(text, options);
+  return out.data;
+}
+
+export async function extractQuestionsFromTextWithMeta(
+  text: string,
+  options?: AIRequestOptions
+): Promise<AIWithMeta<ExtractedQuestion[]>> {
   const prompt = `You are a medical education assistant. Extract ALL multiple-choice questions from the following text.
 
 For each question return a JSON object. Return a JSON array called "questions".
@@ -212,20 +172,32 @@ Rules:
 TEXT TO PROCESS:
 ${text.slice(0, 15000)}`;
 
-  return withGeminiModel({ jsonResponse: true }, async (model) => {
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text();
-    const parsed = parseJSON<{ questions: ExtractedQuestion[] }>(raw, { questions: [] });
-    return parsed.questions ?? [];
+  const row = await generateJsonWithFallback<{ questions: ExtractedQuestion[] }>(prompt, { questions: [] }, {
+    preferredProvider: options?.preferredProvider,
   });
+  return {
+    data: row.data.questions ?? [],
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
 }
 
 // ─── 4. Admin: validate questions for quality issues ─────────────────────────
 
 export async function validateQuestions(
-  questions: { body: string; answer: string }[]
+  questions: { body: string; answer: string }[],
+  options?: AIRequestOptions
 ): Promise<{ index: number; issue: string }[]> {
-  if (questions.length === 0) return [];
+  const out = await validateQuestionsWithMeta(questions, options);
+  return out.data;
+}
+
+export async function validateQuestionsWithMeta(
+  questions: { body: string; answer: string }[],
+  options?: AIRequestOptions
+): Promise<AIWithMeta<{ index: number; issue: string }[]>> {
+  if (questions.length === 0) {
+    return { data: [], meta: { provider: "local:none", triedProviders: [] } };
+  }
 
   const prompt = `You are a quality reviewer for medical exam questions. Review these questions and flag any with issues.
 
@@ -248,12 +220,13 @@ Return ONLY JSON:
 
 If all questions are fine, return: {"issues": []}`;
 
-  return withGeminiModel({ jsonResponse: true }, async (model) => {
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text();
-    const parsed = parseJSON<{ issues: { index: number; issue: string }[] }>(raw, { issues: [] });
-    return parsed.issues ?? [];
+  const row = await generateJsonWithFallback<{ issues: { index: number; issue: string }[] }>(prompt, { issues: [] }, {
+    preferredProvider: options?.preferredProvider,
   });
+  return {
+    data: row.data.issues ?? [],
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
 }
 
 // ─── 5. Admin: lecture notes + flashcards (AI Tools) ──────────────────────────
@@ -264,8 +237,30 @@ export async function generateLectureEnhancements(
   moduleName: string,
   instructions: string,
   wantNotes: boolean,
-  wantFlashcards: boolean
+  wantFlashcards: boolean,
+  options?: AIRequestOptions
 ): Promise<{ notesMarkdown: string; flashcards: { front: string; back: string }[] }> {
+  const out = await generateLectureEnhancementsWithMeta(
+    lectureTitle,
+    subjectName,
+    moduleName,
+    instructions,
+    wantNotes,
+    wantFlashcards,
+    options
+  );
+  return out.data;
+}
+
+export async function generateLectureEnhancementsWithMeta(
+  lectureTitle: string,
+  subjectName: string,
+  moduleName: string,
+  instructions: string,
+  wantNotes: boolean,
+  wantFlashcards: boolean,
+  options?: AIRequestOptions
+): Promise<AIWithMeta<{ notesMarkdown: string; flashcards: { front: string; back: string }[] }>> {
   const prompt = `You assist medical educators.
 
 Lecture title: ${lectureTitle}
@@ -289,25 +284,81 @@ Rules:
 - wantNotes this run: ${wantNotes}
 - wantFlashcards this run: ${wantFlashcards}`;
 
-  return withGeminiModel({ jsonResponse: true }, async (model) => {
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text();
-    const parsed = parseJSON<{ notesMarkdown?: string; flashcards?: { front: string; back: string }[] }>(raw, {
-      notesMarkdown: "",
-      flashcards: [],
-    });
-    const notes = wantNotes ? String(parsed.notesMarkdown ?? "").trim() : "";
-    const cards = wantFlashcards
-      ? (parsed.flashcards ?? [])
-          .filter((f) => f && String(f.front).trim() && String(f.back).trim())
-          .map((f) => ({
-            front: String(f.front).trim().slice(0, 500),
-            back: String(f.back).trim().slice(0, 1000),
-          }))
-          .slice(0, 40)
-      : [];
-    return { notesMarkdown: notes, flashcards: cards };
-  });
+  const row = await generateJsonWithFallback<{ notesMarkdown?: string; flashcards?: { front: string; back: string }[] }>(
+    prompt,
+    { notesMarkdown: "", flashcards: [] },
+    { preferredProvider: options?.preferredProvider }
+  );
+  const parsed = row.data;
+  const notes = wantNotes ? String(parsed.notesMarkdown ?? "").trim() : "";
+  const cards = wantFlashcards
+    ? (parsed.flashcards ?? [])
+        .filter((f) => f && String(f.front).trim() && String(f.back).trim())
+        .map((f) => ({
+          front: String(f.front).trim().slice(0, 500),
+          back: String(f.back).trim().slice(0, 1000),
+        }))
+        .slice(0, 40)
+    : [];
+  return {
+    data: { notesMarkdown: notes, flashcards: cards },
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
+}
+
+// ─── 5b. Student: flashcards from pasted notes (preview / export — not saved to DB) ─
+
+export async function generateFlashcardsFromPastedText(
+  text: string,
+  focusHint: string,
+  options?: AIRequestOptions
+): Promise<{ front: string; back: string }[]> {
+  const out = await generateFlashcardsFromPastedTextWithMeta(text, focusHint, options);
+  return out.data;
+}
+
+export async function generateFlashcardsFromPastedTextWithMeta(
+  text: string,
+  focusHint: string,
+  options?: AIRequestOptions
+): Promise<AIWithMeta<{ front: string; back: string }[]>> {
+  const body = text.trim().slice(0, 12_000);
+  const focus = (focusHint || "").trim().slice(0, 500);
+
+  const prompt = `You help medical students turn their own study notes into flashcards.
+
+RULES:
+- Use ONLY information that appears in the STUDY MATERIAL below. Do not add facts, doses, or protocols that are not supported by that text.
+- If the text is short, produce fewer cards (minimum 4 if there is enough content, otherwise as many as justified).
+- Maximum 20 cards.
+- Front: short question, prompt, or term (one line).
+- Back: concise answer (1–3 sentences).
+- Match the language of the study material (e.g. Arabic notes → Arabic cards).
+
+STUDY MATERIAL:
+${body}
+
+${focus ? `Student asked to emphasize: ${focus}\n` : ""}
+
+Return ONLY valid JSON:
+{"flashcards":[{"front":"...","back":"..."}]}`;
+
+  const row = await generateJsonWithFallback<{ flashcards?: { front: string; back: string }[] }>(
+    prompt,
+    { flashcards: [] },
+    { preferredProvider: options?.preferredProvider }
+  );
+  const cards = (row.data.flashcards ?? [])
+    .filter((f) => f && String(f.front).trim() && String(f.back).trim())
+    .map((f) => ({
+      front: String(f.front).trim().slice(0, 500),
+      back: String(f.back).trim().slice(0, 1200),
+    }))
+    .slice(0, 20);
+  return {
+    data: cards,
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
 }
 
 // ─── 6. Gemini rate limit info ────────────────────────────────────────────────

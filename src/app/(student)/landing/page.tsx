@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
-import { Zap, Brain, Activity, Heart, Microscope, ArrowRight, CheckCircle2, BookOpen, Trophy, MessageSquare, Clock, ChevronRight, Play, Users, Star, Mail, Github } from "lucide-react";
+import { Zap, Brain, Activity, Heart, Microscope, ArrowRight, CheckCircle2, BookOpen, Trophy, MessageSquare, Clock, ChevronRight, Play, Users, Star, Mail, Github, Layers, Sparkles, ClipboardList, Library } from "lucide-react";
 
 export default async function LandingPage() {
   const [userCount, questionCount, moduleCount] = await Promise.all([
@@ -155,6 +155,52 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── LEARNING STACK (Gizmo-style workflows, MedQs-grounded) ── */}
+      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px 80px" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p style={{ fontSize: 13, fontWeight: 500, color: "hsl(var(--primary))", marginBottom: 10 }}>All-in-one study loop</p>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, letterSpacing: "-.02em", margin: "0 0 12px" }}>
+            Flashcards, quizzes &amp; AI—without losing your curriculum
+          </h2>
+          <p style={{ color: "hsl(var(--muted-foreground))", maxWidth: 520, margin: "0 auto 8px", lineHeight: 1.65 }}>
+            The same ideas students love in dedicated study apps: spaced-style review, game-like quizzes, an AI tutor, and leaderboards—
+            mapped to your real modules, lectures, and faculty content.
+          </p>
+          <Link
+            href="/study-tools"
+            className="btn btn-secondary mt-4 inline-flex"
+            style={{ fontSize: 14, padding: "10px 20px", borderRadius: 10 }}
+          >
+            <Library style={{ width: 16, height: 16 }} />
+            Explore study tools
+            <ArrowRight style={{ width: 14, height: 14 }} />
+          </Link>
+          <p style={{ marginTop: 14, fontSize: 13, color: "hsl(var(--muted-foreground))" }}>
+            Signed in?{" "}
+            <Link href="/study-tools/generate" className="font-medium text-primary hover:underline">
+              Turn pasted notes into flashcards with AI
+            </Link>
+          </p>
+        </div>
+
+        <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
+          {[
+            { icon: Layers, color: "#0ea5e9", bg: "#0ea5e908", title: "Flip cards & active recall", desc: "Per-lecture decks with mastery marks as you go." },
+            { icon: ClipboardList, color: "#8b5cf6", bg: "#8b5cf608", title: "Past papers & exam mode", desc: "Timed quizzes, secure options, full review with AI explain." },
+            { icon: Sparkles, color: "#f59e0b", bg: "#f59e0b08", title: "Dr. Q AI tutor", desc: "Files, threads, and medical Q&A for deep study sessions." },
+            { icon: Trophy, color: "#f43f5e", bg: "#f43f5e08", title: "Ranks & leaderboard", desc: "Points, badges, global or semester scope." },
+          ].map(({ icon: Icon, color, bg, title, desc }) => (
+            <div key={title} className="card-hover rounded-2xl border border-border bg-card/80 p-5 backdrop-blur-sm">
+              <div style={{ display: "inline-flex", borderRadius: 10, padding: 10, background: bg, marginBottom: 12 }}>
+                <Icon style={{ width: 20, height: 20, color }} />
+              </div>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 600, margin: "0 0 6px" }}>{title}</h3>
+              <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", margin: 0, lineHeight: 1.55 }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── FOOTER ── */}
       <footer style={{ borderTop: "1px solid hsl(var(--border))", padding: "48px 0 32px" }} id="contact">
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
@@ -171,7 +217,7 @@ export default async function LandingPage() {
             {/* Platform */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".07em", color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>Platform</p>
-              {[["Browse content", "/modules"], ["Leaderboard", "/leaderboard"], ["Study Space", "/space"], ["Forum", "/forum"]].map(([l, h]) => (
+              {[["Browse content", "/modules"], ["Study tools", "/study-tools"], ["Leaderboard", "/leaderboard"], ["Study Space", "/space"], ["Forum", "/forum"]].map(([l, h]) => (
                 <Link
                   key={l}
                   href={h}
@@ -209,7 +255,7 @@ export default async function LandingPage() {
           </div>
 
           <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-            <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", margin: 0 }}>© 2025 MedQs. Built for medical students.</p>
+            <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", margin: 0 }}>© 2026 MedQs. Built for medical students.</p>
             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
               Made with
               <Heart style={{ width: 12, height: 12, color: "#ef4444" }} className="animate-heartbeat" />

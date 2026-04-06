@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -8,6 +9,137 @@ import {
   type ChatPdfPart,
 } from "@/lib/ai-router";
 import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
+
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+  if (typeof raw !== "string") return undefined;
+  const s = raw.trim().toLowerCase();
+  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  return undefined;
+}
+
+function short(s: string, n = 140) {
+  const t = s.replace(/\s+/g, " ").trim();
+  return t.length <= n ? t : `${t.slice(0, n)}…`;
+}
+
+async function buildStudentStudyContext(userId: string): Promise<string> {
+  const now = Date.now();
+  const since = new Date(now - 90 * 24 * 60 * 60 * 1000);
+
+  const [lastViewRows, lastAttemptItem, wrongItems] = await Promise.all([
+    prisma.$queryRaw<
+      Array<{
+        lastViewedAt: Date;
+        source: string | null;
+        lectureId: string;
+        lectureTitle: string;
+        subjectName: string;
+        moduleName: string;
+      }>
+    >(
+      Prisma.sql`
+        SELECT
+          a."lastViewedAt",
+          a."source",
+          l."id" as "lectureId",
+          l."title" as "lectureTitle",
+          s."name" as "subjectName",
+          m."name" as "moduleName"
+        FROM "UserLectureActivity" a
+        JOIN "Lecture" l ON l."id" = a."lectureId"
+        JOIN "Subject" s ON s."id" = l."subjectId"
+        JOIN "Module" m ON m."id" = s."moduleId"
+        WHERE a."userId" = ${userId}
+        ORDER BY a."lastViewedAt" DESC
+        LIMIT 1
+      `
+    ),
+    prisma.quizAttemptItem.findFirst({
+      where: { attempt: { userId } },
+      orderBy: { attempt: { createdAt: "desc" } },
+      select: {
+        attempt: { select: { createdAt: true } },
+        question: {
+          select: {
+            lecture: {
+              select: {
+                id: true,
+                title: true,
+                subject: { select: { name: true, module: { select: { name: true } } } },
+              },
+            },
+          },
+        },
+      },
+    }),
+    prisma.quizAttemptItem.findMany({
+      where: {
+        attempt: { userId, createdAt: { gte: since } },
+        isCorrect: false,
+      },
+      take: 200,
+      orderBy: { attempt: { createdAt: "desc" } },
+      select: {
+        chosen: true,
+        question: {
+          select: {
+            body: true,
+            answer: true,
+            lecture: {
+              select: {
+                id: true,
+                title: true,
+                subject: { select: { name: true, module: { select: { name: true } } } },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const lines: string[] = [];
+  const lastView = lastViewRows[0];
+  if (lastView) {
+    lines.push(
+      `Latest viewed lecture: ${lastView.lectureTitle} (${lastView.moduleName} / ${lastView.subjectName}) via ${lastView.source ?? "unknown"}`
+    );
+  } else if (lastAttemptItem) {
+    const lec = lastAttemptItem.question.lecture;
+    lines.push(
+      `Latest attempted lecture: ${lec.title} (${lec.subject.module.name} / ${lec.subject.name})`
+    );
+  }
+
+  if (wrongItems.length > 0) {
+    type Bucket = { count: number; lectureTitle: string; moduleName: string; subjectName: string; sample: string[] };
+    const byLecture = new Map<string, Bucket>();
+    for (const item of wrongItems) {
+      const lec = item.question.lecture;
+      const key = lec.id;
+      const row = byLecture.get(key) ?? {
+        count: 0,
+        lectureTitle: lec.title,
+        moduleName: lec.subject.module.name,
+        subjectName: lec.subject.name,
+        sample: [],
+      };
+      row.count += 1;
+      if (row.sample.length < 2) {
+        row.sample.push(`Q: ${short(item.question.body, 90)} | correct=${item.question.answer}${item.chosen ? ` | chosen=${item.chosen}` : ""}`);
+      }
+      byLecture.set(key, row);
+    }
+    const top = [...byLecture.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+    lines.push("Weak areas from wrong answers (last 90 days):");
+    for (const t of top) {
+      lines.push(`- ${t.lectureTitle} (${t.moduleName}/${t.subjectName}) -> ${t.count} mistakes`);
+      for (const s of t.sample) lines.push(`  ${s}`);
+    }
+  }
+
+  return lines.join("\n");
+}
 
 function sanitizeImages(raw: unknown): ChatImagePart[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];
@@ -89,13 +221,21 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const site = await prisma.siteConfig.findFirst({ select: { enableAI: true } }).catch(() => null);
+  const site = await prisma.siteConfig.findFirst({ select: { enableAI: true, aiPreferredProvider: true } }).catch(() => null);
   if (site?.enableAI === false) {
     return NextResponse.json({ error: "AI chat is disabled for this site in admin settings." }, { status: 403 });
   }
 
   const body = await req.json();
-  const { message: rawMessage, context, images: rawImages, pdfs: rawPdfs, conversationHistory } = body;
+  const {
+    message: rawMessage,
+    context,
+    images: rawImages,
+    pdfs: rawPdfs,
+    conversationHistory,
+    preferredProvider,
+  } = body;
+  const effectiveProvider = normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
   const images = sanitizeImages(rawImages);
   const pdfs = sanitizePdfs(rawPdfs);
   let message =
@@ -145,10 +285,18 @@ export async function POST(req: NextRequest) {
   const systemPrompt = buildMedicalSystemPrompt(
     context ? `Current context: the student is studying ${context}` : undefined
   );
+  const personalContext = await buildStudentStudyContext(session.user.id).catch(() => "");
+  const enhancedPrompt = personalContext
+    ? `${systemPrompt}\n\nPersonal learning context (use this to personalize explanation and revision focus):\n${personalContext}`
+    : systemPrompt;
 
-  let aiResult: { provider: string; text: string };
+  let aiResult: { provider: string; text: string; fallbackFrom?: string };
   try {
-    aiResult = await generateAIReplyWithFallback(message, systemPrompt, { images, pdfs });
+    aiResult = await generateAIReplyWithFallback(message, enhancedPrompt, {
+      images,
+      pdfs,
+      preferredProvider: effectiveProvider,
+    });
   } catch (e) {
     console.error("[ai/chat]", e);
     if (e instanceof AIConfigurationError) {
@@ -178,6 +326,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     reply,
     provider: aiResult.provider,
+    fallbackFrom: aiResult.fallbackFrom,
     used: updatedUsage?.count ?? 1,
     limit: dailyLimit,
     rankLabel,

@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { suggestQuestionDetails } from "@/lib/gemini";
+import { prisma } from "@/lib/prisma";
+import { suggestQuestionDetailsWithMeta } from "@/lib/gemini";
 import { redisIncrWithExpire } from "@/lib/redis";
 
 const RATE_LIMIT = 20; // requests per hour per admin user
+
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+  if (typeof raw !== "string") return undefined;
+  const s = raw.trim().toLowerCase();
+  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  return undefined;
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -21,13 +29,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { body } = await req.json();
+  const { body, preferredProvider } = await req.json();
+  const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
+  const effectiveProvider =
+    normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
   if (!body?.trim())
     return NextResponse.json({ error: "Question body required" }, { status: 400 });
 
   try {
-    const suggestion = await suggestQuestionDetails(body);
-    return NextResponse.json(suggestion);
+    const out = await suggestQuestionDetailsWithMeta(body, { preferredProvider: effectiveProvider });
+    return NextResponse.json({
+      ...out.data,
+      provider: out.meta.provider,
+      fallbackFrom: out.meta.fallbackFrom,
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "AI suggestion failed";
     console.error("[api/v1/ai/suggest]", e);
