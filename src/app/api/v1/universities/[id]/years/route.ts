@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertSameUniversity, requireAdminWriter } from "@/lib/admin-scope";
 
 // ─── /api/v1/universities/[id]/years ─────────────────────────────────────────
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  req: NextRequest,
+  ctx: { params: Promise<{ id: string }> | { id: string } }
+) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { id } = await Promise.resolve(ctx.params);
+  const boundary = await assertSameUniversity(w.scope, id);
+  if (boundary) return boundary;
 
   const { yearNumber } = await req.json();
   const year = await prisma.academicYear.create({
-    data: { yearNumber: Number(yearNumber), universityId: params.id },
+    data: { yearNumber: Number(yearNumber), universityId: id },
   });
   return NextResponse.json(year, { status: 201 });
 }

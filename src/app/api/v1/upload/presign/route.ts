@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getPresignedUploadUrl, ALLOWED_TYPES, MAX_FILE_SIZE } from "@/lib/storage";
+import { requireAdminWriter } from "@/lib/admin-scope";
 
 /**
  * POST /api/v1/upload/presign
@@ -23,9 +24,8 @@ export async function POST(req: NextRequest) {
 
   // Admins only for non-avatar uploads
   if (folder !== "avatar" && folder !== "forum") {
-    const role = (session.user as any)?.role;
-    if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const w = await requireAdminWriter(session);
+    if (!w.ok) return w.response;
   }
 
   // Validate MIME type

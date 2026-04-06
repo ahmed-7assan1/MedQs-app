@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-function isAdmin(role: unknown) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
-}
+import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string; videoId: string } }
+  ctx: { params: Promise<{ id: string; videoId: string }> | { id: string; videoId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
-  if (!isAdmin(role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const params = await Promise.resolve(ctx.params);
+  const boundary = await assertLecture(w.scope, params.id);
+  if (boundary) return boundary;
 
   const payload = await req.json().catch(() => ({}));
   const data: {
@@ -39,11 +39,14 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string; videoId: string } }
+  ctx: { params: Promise<{ id: string; videoId: string }> | { id: string; videoId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
-  if (!isAdmin(role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const params = await Promise.resolve(ctx.params);
+  const boundary = await assertLecture(w.scope, params.id);
+  if (boundary) return boundary;
 
   const existing = await prisma.lectureVideo.findFirst({
     where: { id: params.videoId, lectureId: params.id },

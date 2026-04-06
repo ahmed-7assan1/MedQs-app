@@ -2,18 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteSemesterCascade } from "@/lib/admin-delete-structure";
+import { assertSemester, requireAdminWriter } from "@/lib/admin-scope";
 
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { semesterId: string } | Promise<{ semesterId: string }> }
 ) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   const { semesterId } = await Promise.resolve(params);
   if (!semesterId?.trim()) return NextResponse.json({ error: "Missing semesterId" }, { status: 400 });
+
+  const boundary = await assertSemester(w.scope, semesterId.trim());
+  if (boundary) return boundary;
 
   try {
     await prisma.$transaction((tx) => deleteSemesterCascade(tx, semesterId.trim()));

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSessionScope, isAdminRole, isSuperAdmin } from "@/lib/tenant";
+import { assertSemester, requireAdminWriter } from "@/lib/admin-scope";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -39,13 +40,37 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  const scope = await getSessionScope(session);
-  if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!isAdminRole(scope.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!scope.universityId) return NextResponse.json({ error: "Set your university in profile first" }, { status: 400 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   const data = await req.json();
-  // Force tenant boundary
-  const forum = await prisma.forum.create({ data: { ...data, universityId: scope.universityId } });
+  const { universityId: bodyUniversityId, ...rest } = data as Record<string, unknown> & {
+    universityId?: string;
+  };
+
+  let universityId: string;
+  if (w.isSuper) {
+    const fromBody = typeof bodyUniversityId === "string" ? bodyUniversityId.trim() : "";
+    universityId = fromBody || w.scope.universityId || "";
+    if (!universityId)
+      return NextResponse.json({ error: "universityId required for super admin" }, { status: 400 });
+    const uni = await prisma.university.findUnique({
+      where: { id: universityId },
+      select: { id: true },
+    });
+    if (!uni) return NextResponse.json({ error: "University not found" }, { status: 404 });
+  } else {
+    if (!w.scope.universityId)
+      return NextResponse.json({ error: "Admin must be assigned to a university" }, { status: 403 });
+    universityId = w.scope.universityId;
+  }
+
+  const semesterIdRaw = rest.semesterId;
+  if (!w.isSuper && typeof semesterIdRaw === "string" && semesterIdRaw.trim()) {
+    const se = await assertSemester(w.scope, semesterIdRaw.trim());
+    if (se) return se;
+  }
+
+  const forum = await prisma.forum.create({ data: { ...rest, universityId } as any });
   return NextResponse.json(forum, { status: 201 });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { assertFlashcard, requireAdminWriter } from "@/lib/admin-scope";
 
 const FlashcardSchema = z.object({
   front: z.string().min(1).max(500).trim(),
@@ -10,12 +11,14 @@ const FlashcardSchema = z.object({
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { flashcardId: string } }
+  ctx: { params: Promise<{ flashcardId: string }> | { flashcardId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { flashcardId } = await Promise.resolve(ctx.params);
+  const boundary = await assertFlashcard(w.scope, flashcardId);
+  if (boundary) return boundary;
 
   const body = await req.json();
   const parsed = FlashcardSchema.safeParse(body);
@@ -23,7 +26,7 @@ export async function PUT(
     return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
 
   const flashcard = await prisma.flashcard.update({
-    where: { id: params.flashcardId },
+    where: { id: flashcardId },
     data: parsed.data,
   });
   return NextResponse.json(flashcard);
@@ -31,13 +34,15 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { flashcardId: string } }
+  ctx: { params: Promise<{ flashcardId: string }> | { flashcardId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { flashcardId } = await Promise.resolve(ctx.params);
+  const boundary = await assertFlashcard(w.scope, flashcardId);
+  if (boundary) return boundary;
 
-  await prisma.flashcard.delete({ where: { id: params.flashcardId } });
+  await prisma.flashcard.delete({ where: { id: flashcardId } });
   return NextResponse.json({ ok: true });
 }

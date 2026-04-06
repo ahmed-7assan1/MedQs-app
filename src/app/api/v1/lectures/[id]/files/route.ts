@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadFile, ALLOWED_TYPES, MAX_FILE_SIZE } from "@/lib/storage";
+import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 
 // POST /api/v1/lectures/:id/files  (multipart/form-data, field "file")
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { id } = await Promise.resolve(ctx.params);
+  const boundary = await assertLecture(w.scope, id);
+  if (boundary) return boundary;
 
   const form = await req.formData();
   const file = form.get("file") as File | null;
@@ -25,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const lectureFile = await prisma.lectureFile.create({
     data: {
-      lectureId: params.id,
+      lectureId: id,
       name: file.name,
       url,
       mimeType: file.type,
@@ -35,7 +38,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json(lectureFile, { status: 201 });
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const files = await prisma.lectureFile.findMany({ where: { lectureId: params.id } });
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
+  const { id } = await Promise.resolve(ctx.params);
+  const files = await prisma.lectureFile.findMany({ where: { lectureId: id } });
   return NextResponse.json(files);
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAdminWriter } from "@/lib/admin-scope";
 import { extractQuestionsFromTextWithMeta, validateQuestionsWithMeta } from "@/lib/gemini";
 import { redisIncrWithExpire } from "@/lib/redis";
 
@@ -15,9 +16,8 @@ function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthro
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   // Rate limit: 5 extractions per hour per admin
   const key = `ratelimit:ai:extract:${session!.user!.id}:${new Date().getHours()}`;

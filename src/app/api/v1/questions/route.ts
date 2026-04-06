@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 
 /** Accepts http(s), local `/uploads/...` from USE_LOCAL_FILE_UPLOAD, and data URLs (fallback). */
 function isValidQuestionImageUrl(s: string): boolean {
@@ -67,12 +68,15 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if ((session?.user as any)?.role !== "ADMIN" && (session?.user as any)?.role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   const body = await req.json();
   const parsed = CreateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+
+  const boundary = await assertLecture(w.scope, parsed.data.lectureId);
+  if (boundary) return boundary;
 
   const question = await prisma.question.create({ data: parsed.data });
   return NextResponse.json(question, { status: 201 });

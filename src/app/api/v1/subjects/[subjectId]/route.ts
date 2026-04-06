@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertSubject, requireAdminWriter } from "@/lib/admin-scope";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { subjectId: string } }
+  ctx: { params: Promise<{ subjectId: string }> | { subjectId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { subjectId } = await Promise.resolve(ctx.params);
+  const boundary = await assertSubject(w.scope, subjectId);
+  if (boundary) return boundary;
 
   const { name } = await req.json();
   if (!name?.trim())
     return NextResponse.json({ error: "Name required" }, { status: 400 });
 
   const subject = await prisma.subject.update({
-    where: { id: params.subjectId },
+    where: { id: subjectId },
     data: { name: name.trim() },
   });
   return NextResponse.json(subject);
@@ -24,14 +27,16 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { subjectId: string } }
+  ctx: { params: Promise<{ subjectId: string }> | { subjectId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { subjectId } = await Promise.resolve(ctx.params);
+  const boundary = await assertSubject(w.scope, subjectId);
+  if (boundary) return boundary;
 
   // Cascade: deletes lectures, questions, flashcards inside
-  await prisma.subject.delete({ where: { id: params.subjectId } });
+  await prisma.subject.delete({ where: { id: subjectId } });
   return NextResponse.json({ ok: true });
 }

@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertLectureIdsInScope, requireAdminWriter } from "@/lib/admin-scope";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if ((session?.user as any)?.role !== "ADMIN" && (session?.user as any)?.role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   const { questions } = await req.json();
   if (!Array.isArray(questions) || questions.length === 0)
     return NextResponse.json({ error: "No questions provided" }, { status: 400 });
+
+  const lectureIds = questions.map((q: { lectureId?: string }) => q.lectureId).filter(Boolean) as string[];
+  const boundary = await assertLectureIdsInScope(w.scope, lectureIds);
+  if (boundary) return boundary;
 
   const created = await prisma.question.createMany({
     data: questions.map((q: any) => ({

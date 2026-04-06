@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertModule, requireAdminWriter } from "@/lib/admin-scope";
 
 export async function GET(
   req: NextRequest,
@@ -15,19 +16,21 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { moduleId: string } }
+  ctx: { params: Promise<{ moduleId: string }> | { moduleId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { moduleId } = await Promise.resolve(ctx.params);
+  const boundary = await assertModule(w.scope, moduleId);
+  if (boundary) return boundary;
 
   const { name } = await req.json();
   if (!name?.trim())
     return NextResponse.json({ error: "Name required" }, { status: 400 });
 
   const subject = await prisma.subject.create({
-    data: { name, moduleId: params.moduleId },
+    data: { name, moduleId },
   });
   return NextResponse.json(subject, { status: 201 });
 }

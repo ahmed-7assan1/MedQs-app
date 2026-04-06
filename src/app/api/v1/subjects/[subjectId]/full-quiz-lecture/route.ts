@@ -1,21 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertSubject, requireAdminWriter } from "@/lib/admin-scope";
 
 /** One lecture per subject for “entire subject” AI / bulk questions (visible in curriculum like any lecture). */
 const FULL_SUBJECT_QUIZ_LECTURE_TITLE = "— Full subject quiz | كويز كامل للمادة —";
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { subjectId: string } }
+  ctx: { params: Promise<{ subjectId: string }> | { subjectId: string } }
 ) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-  const subjectId = params.subjectId?.trim();
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const raw = await Promise.resolve(ctx.params);
+  const subjectId = raw.subjectId?.trim();
   if (!subjectId) return NextResponse.json({ error: "Missing subject" }, { status: 400 });
+
+  const boundary = await assertSubject(w.scope, subjectId);
+  if (boundary) return boundary;
 
   const subject = await prisma.subject.findUnique({
     where: { id: subjectId },

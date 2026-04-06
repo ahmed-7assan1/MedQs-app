@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { uploadFile, ALLOWED_TYPES, MAX_FILE_SIZE } from "@/lib/storage";
+import { requireAdminWriter } from "@/lib/admin-scope";
 
 /**
  * Server-side upload to S3/R2 (avoids browser CORS issues with presigned PUT).
@@ -49,9 +50,8 @@ export async function POST(req: NextRequest) {
   } else if (folder === "ai") {
     // Any signed-in student — images for Dr. Q (URL can be sent to model or used elsewhere)
   } else if (folder !== "forum") {
-    if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const w = await requireAdminWriter(session);
+    if (!w.ok) return w.response;
   }
 
   const origName =

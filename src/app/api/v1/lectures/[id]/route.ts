@@ -1,20 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  ctx: { params: Promise<{ id: string }> | { id: string } }
+) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { id } = await Promise.resolve(ctx.params);
+  const boundary = await assertLecture(w.scope, id);
+  if (boundary) return boundary;
 
-  await prisma.lecture.delete({ where: { id: params.id } });
+  await prisma.lecture.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
+  const { id } = await Promise.resolve(ctx.params);
   const lecture = await prisma.lecture.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       flashcards: true,
       questions: { select: { id: true, body: true, difficulty: true, answer: true, choices: true } },
@@ -26,11 +33,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(lecture);
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
+  const { id } = await Promise.resolve(ctx.params);
+  const boundary = await assertLecture(w.scope, id);
+  if (boundary) return boundary;
 
   const body = await req.json().catch(() => ({}));
   const data: { title?: string; videoUrl?: string | null; notesMarkdown?: string | null } = {};
@@ -42,7 +51,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });
 
   const lecture = await prisma.lecture.update({
-    where: { id: params.id },
+    where: { id },
     data,
   });
   return NextResponse.json(lecture);

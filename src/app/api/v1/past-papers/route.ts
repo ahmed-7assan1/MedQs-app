@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertPastPaperCreatePayload, requireAdminWriter } from "@/lib/admin-scope";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -23,11 +24,15 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   const body = await req.json();
+  const semesterId = String(body.semesterId ?? "");
+  const moduleId = String(body.moduleId ?? "");
+  const payloadErr = await assertPastPaperCreatePayload(w.scope, semesterId, moduleId);
+  if (payloadErr) return payloadErr;
+
   const paper = await prisma.pastPaper.create({
     data: {
       title: String(body.title ?? "").trim(),

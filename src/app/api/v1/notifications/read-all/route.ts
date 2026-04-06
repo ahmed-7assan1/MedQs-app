@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { broadcastNotification } from "@/lib/redis";
+import { assertSemester, requireAdminWriter } from "@/lib/admin-scope";
 
 // PUT /api/v1/notifications/read-all
 export async function PUT(req: NextRequest) {
@@ -19,14 +20,24 @@ export async function PUT(req: NextRequest) {
 // POST /api/v1/notifications/broadcast  (admin only)
 export async function POST(req: NextRequest) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   const { title, body, semesterId } = await req.json();
 
+  let userWhere: { semesterId?: string; universityId?: string } = {};
+  if (semesterId) {
+    const err = await assertSemester(w.scope, String(semesterId));
+    if (err) return err;
+    userWhere = { semesterId: String(semesterId) };
+  } else if (!w.isSuper) {
+    if (!w.scope.universityId)
+      return NextResponse.json({ error: "Admin must be assigned to a university" }, { status: 403 });
+    userWhere = { universityId: w.scope.universityId };
+  }
+
   const users = await prisma.user.findMany({
-    where: semesterId ? { semesterId } : undefined,
+    where: Object.keys(userWhere).length ? userWhere : undefined,
     select: { id: true },
   });
 

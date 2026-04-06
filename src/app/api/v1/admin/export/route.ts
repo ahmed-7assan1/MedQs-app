@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { exportToSheets } from "@/lib/sheets";
+import { requireAdminWriter } from "@/lib/admin-scope";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const w = await requireAdminWriter(session);
+  if (!w.ok) return w.response;
 
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") ?? "quiz";
@@ -15,6 +15,13 @@ export async function GET(req: NextRequest) {
   try {
     if (type === "quiz") {
       const attempts = await prisma.quizAttempt.findMany({
+        where: w.isSuper
+          ? undefined
+          : {
+              pastPaper: {
+                semester: { academicYear: { universityId: w.scope.universityId! } },
+              },
+            },
         orderBy: { createdAt: "desc" },
         take: 1000,
         include: {
@@ -38,6 +45,7 @@ export async function GET(req: NextRequest) {
 
     if (type === "users") {
       const users = await prisma.user.findMany({
+        where: w.isSuper ? undefined : { universityId: w.scope.universityId! },
         orderBy: { createdAt: "desc" },
         select: {
           name: true, email: true, points: true, role: true, createdAt: true,

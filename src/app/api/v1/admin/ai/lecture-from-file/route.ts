@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { generateJsonWithFallback } from "@/lib/ai-router";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
-
-function isAdmin(role: unknown) {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
-}
 
 async function fileToText(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -30,8 +27,8 @@ async function fileToText(file: File): Promise<string> {
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
-    const role = (session?.user as { role?: string } | undefined)?.role;
-    if (!isAdmin(role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const w = await requireAdminWriter(session);
+    if (!w.ok) return w.response;
 
     const site = await prisma.siteConfig.findFirst({ select: { enableAI: true } });
     if (site && site.enableAI === false) {
@@ -54,6 +51,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Select at least one output" }, { status: 400 });
     }
     if (file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "Max file size 20MB" }, { status: 400 });
+
+    const boundary = await assertLecture(w.scope, lectureId);
+    if (boundary) return boundary;
 
     const lecture = await prisma.lecture.findUnique({
       where: { id: lectureId },
