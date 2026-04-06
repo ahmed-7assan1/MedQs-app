@@ -19,6 +19,7 @@ import {
 import { getUserRankInfo } from "@/lib/engagement";
 import { cn } from "@/lib/utils";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
+import { DashboardDrQFab } from "@/components/dashboard/DashboardDrQFab";
 import { MedqsCard } from "@/components/ui/MedqsCard";
 import {
   bucketItemsByLocalDay,
@@ -472,6 +473,7 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
+      <DashboardDrQFab />
     </StudentPageShell>
   );
 }

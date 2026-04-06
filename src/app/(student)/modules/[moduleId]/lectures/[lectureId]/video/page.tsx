@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { getLectureInModule } from "@/lib/lecture-navigation";
 import { trackLectureView } from "@/lib/lecture-activity";
 import Link from "next/link";
@@ -43,6 +44,16 @@ export default async function LectureVideoPage({
         ]
       : [];
 
+  const videoIds = videos.map((v) => v.id);
+  const likedRows =
+    videoIds.length > 0
+      ? await prisma.lectureVideoLike.findMany({
+          where: { userId: session.user.id, videoId: { in: videoIds } },
+          select: { videoId: true },
+        })
+      : [];
+  const likedSet = new Set(likedRows.map((r) => r.videoId));
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
       <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -77,6 +88,7 @@ export default async function LectureVideoPage({
             likesCount: v.likesCount,
             commentsCount: v.commentsCount,
             sharesCount: v.sharesCount,
+            likedByMe: likedSet.has(v.id),
           }))}
           selectedVideoId={selected}
         />

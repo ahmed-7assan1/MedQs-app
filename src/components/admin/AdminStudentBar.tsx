@@ -37,7 +37,7 @@ export function AdminStudentBar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="pointer-events-none fixed bottom-0 right-0 z-[130] p-4 md:p-6">
+    <div className="pointer-events-none fixed bottom-0 right-0 z-[132] p-4 max-md:bottom-[calc(5.85rem+env(safe-area-inset-bottom,0px))] md:p-6">
       <div className="pointer-events-auto flex flex-col items-end gap-2">
         {open ? (
           <div

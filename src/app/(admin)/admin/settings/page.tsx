@@ -4,6 +4,7 @@ import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload } from "lucide-r
 import { ExportPanel } from "@/components/admin/ExportPanel";
 import { uploadFiles } from "@/lib/uploadthing-react";
 import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 function uploadthingAppId(): string {
   return (process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID ?? "").trim();
@@ -154,7 +155,7 @@ export default function AdminSettingsPage() {
           <div className="sm:col-span-2 space-y-2">
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Logo</label>
             <p className="text-[11px] text-muted-foreground -mt-1 mb-2">
-              Paste an image URL, or as super admin upload a file (JPEG, PNG, WebP, GIF — max 2MB). Upload uses Uploadthing if configured, otherwise server storage.
+              Only a <strong className="font-medium text-foreground">super admin</strong> can set or upload the site logo. Upload supports JPEG, PNG, WebP, GIF (max 2MB) via Uploadthing or server storage.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <input
@@ -162,7 +163,12 @@ export default function AdminSettingsPage() {
                 value={config.logoUrl}
                 onChange={(e) => setConfig((c) => ({ ...c, logoUrl: e.target.value }))}
                 placeholder="https://..."
-                className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                readOnly={!isSuperAdmin}
+                title={!isSuperAdmin ? "Only super admin can change the logo" : undefined}
+                className={cn(
+                  "min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  !isSuperAdmin && "cursor-not-allowed bg-muted/40 text-muted-foreground"
+                )}
               />
               {isSuperAdmin ? (
                 <>

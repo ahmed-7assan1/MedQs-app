@@ -301,13 +301,14 @@ html[data-theme="dark"] body {
 }
 
 /* Logged-in mobile: reserve space for fixed bottom primary nav + safe area */
+/* Floating pill tab bar needs a bit more vertical room */
 .app-shell--tabbar .main-content {
-  padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(5.85rem + env(safe-area-inset-bottom, 0px));
 }
 
 @media (max-width: 767px) {
   html:has(.app-shell--tabbar) {
-    scroll-padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    scroll-padding-bottom: calc(5.85rem + env(safe-area-inset-bottom, 0px));
   }
 }
 

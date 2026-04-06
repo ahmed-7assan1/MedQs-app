@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   LayoutDashboard,
@@ -110,10 +110,22 @@ export function Sidebar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [desktopUserOpen, setDesktopUserOpen] = useState(false);
+  const [desktopUserPlacement, setDesktopUserPlacement] = useState<{ top: number; right: number } | null>(null);
   const [mounted, setMounted] = useState(false);
 
   const notifTriggerRef = useRef<HTMLElement | null>(null);
   const desktopUserRef = useRef<HTMLDivElement | null>(null);
+  const desktopMenuTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  function updateDesktopUserMenuPlacement() {
+    const el = desktopMenuTriggerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setDesktopUserPlacement({
+      top: r.bottom + 8,
+      right: Math.max(12, window.innerWidth - r.right),
+    });
+  }
 
   useEffect(() => setMounted(true), []);
 
@@ -144,12 +156,32 @@ export function Sidebar({
     return () => document.removeEventListener("mousedown", handler);
   }, [notifOpen]);
 
+  useLayoutEffect(() => {
+    if (!desktopUserOpen || !mounted) return;
+    updateDesktopUserMenuPlacement();
+  }, [desktopUserOpen, mounted]);
+
+  useEffect(() => {
+    if (!desktopUserOpen) return;
+    function reposition() {
+      updateDesktopUserMenuPlacement();
+    }
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
+    return () => {
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
+    };
+  }, [desktopUserOpen]);
+
   useEffect(() => {
     if (!desktopUserOpen) return;
     function handler(e: MouseEvent) {
-      if (desktopUserRef.current && !desktopUserRef.current.contains(e.target as Node)) {
-        setDesktopUserOpen(false);
-      }
+      const t = e.target as HTMLElement;
+      if (desktopUserRef.current?.contains(t)) return;
+      if (t.closest("[data-desktop-user-menu]")) return;
+      setDesktopUserOpen(false);
+      setDesktopUserPlacement(null);
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -159,6 +191,7 @@ export function Sidebar({
     setMobileOpen(false);
     setUserMenuOpen(false);
     setDesktopUserOpen(false);
+    setDesktopUserPlacement(null);
   }, [pathname]);
 
   async function loadNotifs() {
@@ -179,6 +212,7 @@ export function Sidebar({
     e.stopPropagation();
     setUserMenuOpen(false);
     setDesktopUserOpen(false);
+    setDesktopUserPlacement(null);
     if (notifOpen) {
       setNotifOpen(false);
       setNotifPlacement(null);
@@ -202,10 +236,25 @@ export function Sidebar({
     href === "/dashboard-app" ? pathname === href || pathname === "/dashboard" : pathname?.startsWith(href);
 
   function BrandMark({ className }: { className?: string }) {
-    return logoUrl ? (
-      <img src={logoUrl} alt={siteName} className={cn("h-8 w-8 rounded-lg object-contain", className)} />
-    ) : (
-      <MedQsLogoMark title={siteName} className={cn("h-8 w-8", className)} />
+    return (
+      <span
+        className={cn(
+          "flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/35 ring-1 ring-border/70",
+          "h-8 w-8",
+          className
+        )}
+      >
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt=""
+            className="h-full w-full object-contain p-1"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <MedQsLogoMark title={siteName} className="h-[1.45rem] w-[1.45rem]" />
+        )}
+      </span>
     );
   }
 
@@ -257,6 +306,61 @@ export function Sidebar({
     );
   }
 
+  /** Clearly interactive (not “disabled”): bordered chip + foreground icon */
+  const headerControlBtnClass =
+    "relative flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border/80 bg-background/85 text-foreground shadow-sm transition-[background,border-color,transform,box-shadow] hover:bg-muted hover:border-border active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+  const desktopUserMenuPanel =
+    mounted && desktopUserOpen && desktopUserPlacement
+      ? createPortal(
+          <div
+            data-desktop-user-menu
+            role="menu"
+            aria-label="Account"
+            className="animate-fade-in w-52 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-xl"
+            style={{
+              position: "fixed",
+              top: desktopUserPlacement.top,
+              right: desktopUserPlacement.right,
+              zIndex: 99998,
+            }}
+          >
+            <Link
+              href="/profile/me"
+              role="menuitem"
+              onClick={() => {
+                setDesktopUserOpen(false);
+                setDesktopUserPlacement(null);
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted"
+            >
+              <User className="h-4 w-4 text-muted-foreground" aria-hidden /> Profile
+            </Link>
+            <Link
+              href="/settings"
+              role="menuitem"
+              onClick={() => {
+                setDesktopUserOpen(false);
+                setDesktopUserPlacement(null);
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted"
+            >
+              <Settings className="h-4 w-4 text-muted-foreground" aria-hidden /> Settings
+            </Link>
+            <div className="my-1 h-px bg-border" />
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
+            >
+              <LogOut className="h-4 w-4 shrink-0" aria-hidden /> Sign out
+            </button>
+          </div>,
+          document.body
+        )
+      : null;
+
   const notifPanel =
     mounted && notifOpen && notifPlacement
       ? createPortal(
@@ -275,16 +379,14 @@ export function Sidebar({
         )
       : null;
 
-  const notifBtnClass = "icon-btn relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-transparent hover:bg-muted";
-
   return (
     <>
       {/* ── Desktop: top bar ── */}
       <header className="fixed top-0 left-0 right-0 z-[120] hidden h-14 items-center overflow-visible border-b border-border/70 bg-card/88 shadow-sm backdrop-blur-xl md:flex">
         <div className="mx-auto flex h-full w-full max-w-[1600px] items-center gap-4 px-4 lg:gap-6">
-          <Link href="/dashboard-app" className="flex shrink-0 items-center gap-2.5">
+          <Link href="/dashboard-app" className="flex shrink-0 items-center gap-2.5 text-foreground">
             <BrandMark />
-            <span className="font-display text-base font-bold tracking-tight text-foreground">{siteName}</span>
+            <span className="font-display text-base font-bold leading-none tracking-tight">{siteName}</span>
           </Link>
 
           <nav className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto py-1 lg:gap-1">
@@ -301,13 +403,13 @@ export function Sidebar({
             {!isGuest && (
               <button
                 type="button"
-                className={notifBtnClass}
+                className={headerControlBtnClass}
                 data-notif-trigger
                 onClick={openNotifPanel}
                 aria-expanded={notifOpen}
                 aria-haspopup="dialog"
               >
-                <Bell className="h-[18px] w-[18px] text-muted-foreground" />
+                <Bell className="h-[18px] w-[18px]" aria-hidden />
                 {totalUnread > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
                     {totalUnread > 9 ? "9+" : totalUnread}
@@ -318,18 +420,18 @@ export function Sidebar({
 
             <button
               type="button"
-              className={notifBtnClass}
+              className={headerControlBtnClass}
               onClick={toggleAppearance}
               title="Switch light / dark mode"
               aria-label="Switch light / dark mode"
             >
               {!mounted ? (
-                <Moon className="h-[18px] w-[18px] text-muted-foreground opacity-40" />
+                <Moon className="h-[18px] w-[18px] opacity-80" aria-hidden />
               ) : theme === "dark" ||
                 (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
-                <Sun className="h-[18px] w-[18px] text-muted-foreground" />
+                <Sun className="h-[18px] w-[18px]" aria-hidden />
               ) : (
-                <Moon className="h-[18px] w-[18px] text-muted-foreground" />
+                <Moon className="h-[18px] w-[18px]" aria-hidden />
               )}
             </button>
 
@@ -360,54 +462,27 @@ export function Sidebar({
                 </Link>
                 <button
                   type="button"
+                  ref={desktopMenuTriggerRef}
                   onClick={() => {
+                    setNotifOpen(false);
+                    setNotifPlacement(null);
+                    notifTriggerRef.current = null;
                     setDesktopUserOpen((p) => !p);
                     setUserMenuOpen(false);
                   }}
-                  className="icon-btn flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 hover:bg-muted"
+                  className={cn(headerControlBtnClass, desktopUserOpen && "border-primary/40 bg-primary/5")}
                   aria-expanded={desktopUserOpen}
                   aria-haspopup="menu"
                   aria-label="Account menu"
                 >
                   <ChevronDown
                     className={cn(
-                      "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                      "h-4 w-4 transition-transform duration-200",
                       desktopUserOpen && "rotate-180"
                     )}
+                    aria-hidden
                   />
                 </button>
-                {desktopUserOpen && (
-                  <div
-                    className="absolute right-0 top-full z-[200] mt-1.5 w-52 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-xl animate-fade-in"
-                    role="menu"
-                  >
-                    <Link
-                      href="/profile/me"
-                      role="menuitem"
-                      onClick={() => setDesktopUserOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
-                    >
-                      <User className="h-4 w-4 text-muted-foreground" /> Profile
-                    </Link>
-                    <Link
-                      href="/settings"
-                      role="menuitem"
-                      onClick={() => setDesktopUserOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
-                    >
-                      <Settings className="h-4 w-4 text-muted-foreground" /> Settings
-                    </Link>
-                    <div className="my-1 h-px bg-border" />
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => signOut({ callbackUrl: "/login" })}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted"
-                    >
-                      <LogOut className="h-4 w-4" /> Sign out
-                    </button>
-                  </div>
-                )}
               </div>
             ) : (
               <Link
@@ -431,35 +506,39 @@ export function Sidebar({
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
-        <Link href="/dashboard-app" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-          <BrandMark className="!h-7 !w-7" />
-          <span className="font-display text-sm font-semibold">{siteName}</span>
+        <Link
+          href="/dashboard-app"
+          className="flex min-w-0 items-center gap-2 text-foreground"
+          onClick={() => setMobileOpen(false)}
+        >
+          <BrandMark className="!h-8 !w-8" />
+          <span className="truncate font-display text-sm font-semibold leading-none">{siteName}</span>
         </Link>
         <div className="flex shrink-0 items-center justify-end gap-0.5">
           <button
             type="button"
-            className={notifBtnClass}
+            className={headerControlBtnClass}
             onClick={toggleAppearance}
             aria-label="Switch light / dark mode"
           >
             {!mounted ? (
-              <Moon className="h-[18px] w-[18px] opacity-40" />
+              <Moon className="h-[18px] w-[18px] opacity-80" aria-hidden />
             ) : theme === "dark" ||
               (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
-              <Sun className="h-[18px] w-[18px]" />
+              <Sun className="h-[18px] w-[18px]" aria-hidden />
             ) : (
-              <Moon className="h-[18px] w-[18px]" />
+              <Moon className="h-[18px] w-[18px]" aria-hidden />
             )}
           </button>
           {!isGuest ? (
             <button
               type="button"
-              className={notifBtnClass}
+              className={headerControlBtnClass}
               data-notif-trigger
               onClick={openNotifPanel}
               aria-expanded={notifOpen}
             >
-              <Bell className="h-[18px] w-[18px]" />
+              <Bell className="h-[18px] w-[18px]" aria-hidden />
               {totalUnread > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                   {totalUnread > 9 ? "9+" : totalUnread}
@@ -473,26 +552,21 @@ export function Sidebar({
       {/* ── Mobile drawer ── */}
       <aside
         className={cn(
-          "medqs-drawer fixed bottom-0 left-0 top-14 z-[115] flex w-[min(280px,88vw)] flex-col shadow-2xl transition-transform duration-300 ease-out md:hidden",
+          "medqs-drawer fixed left-0 z-[127] flex w-[min(300px,92vw)] flex-col overflow-hidden shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden",
+          "top-14 border-r border-border dark:border-white/10",
+          "bottom-[calc(5.85rem+env(safe-area-inset-bottom,0px))]",
           mobileOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         )}
         aria-hidden={!mobileOpen}
       >
         <div className="sb-rail-glow" aria-hidden />
 
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3 dark:border-white/10">
-          <span className="font-display text-sm font-semibold text-foreground dark:text-white">{siteName}</span>
-          <button
-            type="button"
-            onClick={() => setMobileOpen(false)}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted dark:text-white/70 dark:hover:bg-white/10"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        <div className="shrink-0 border-b border-border px-3 py-2.5 dark:border-white/10">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Menu</p>
+          <p className="mt-0.5 truncate font-display text-sm font-semibold text-foreground dark:text-white">{siteName}</p>
         </div>
 
-        <nav className="sb-nav">
+        <nav className="sb-nav min-h-0 flex-1">
           <div className="sb-section-label">Main</div>
           {NAV.map(({ href, label, icon }) => (
             <DrawerLink key={href} href={href} label={label} icon={icon} />
@@ -557,7 +631,7 @@ export function Sidebar({
           </div>
         </nav>
 
-        <div className="sb-footer">
+        <div className="sb-footer shrink-0 border-t border-border/80 bg-card/50 pb-1 dark:border-white/10">
           {!isGuest && (
             <DrawerLink href="/settings" label="Settings" icon={Settings} />
           )}
@@ -625,13 +699,14 @@ export function Sidebar({
 
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-[110] bg-black/35 backdrop-blur-sm dark:bg-black/50 md:hidden"
+          className="fixed inset-x-0 bottom-[calc(5.85rem+env(safe-area-inset-bottom,0px))] top-14 z-[119] bg-black/40 backdrop-blur-[2px] dark:bg-black/55 md:hidden"
           role="presentation"
           aria-hidden
           onClick={() => setMobileOpen(false)}
         />
       )}
 
+      {desktopUserMenuPanel}
       {notifPanel}
 
       {!isGuest ? <MobileBottomNav /> : null}

@@ -3,7 +3,7 @@
 import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, MessageSquare, Sparkles, User } from "lucide-react";
+import { LayoutDashboard, BookOpen, MessageSquare, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS: {
@@ -31,12 +31,6 @@ const TABS: {
     match: (p) => p.startsWith("/forum"),
   },
   {
-    href: "/ai-chat",
-    label: "Dr. Q",
-    icon: Sparkles,
-    match: (p) => p.startsWith("/ai-chat"),
-  },
-  {
     href: "/profile/me",
     label: "Profile",
     icon: User,
@@ -51,12 +45,15 @@ export function MobileBottomNav() {
   const pathname = usePathname() ?? "";
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-[118] border-t border-border/70 bg-card/90 px-1 pt-1 shadow-[0_-6px_28px_rgb(0_0_0/0.06)] backdrop-blur-xl md:hidden dark:shadow-[0_-6px_28px_rgb(0_0_0/0.35)]"
-      aria-label="Primary navigation"
-      style={{ paddingBottom: "max(0.35rem, env(safe-area-inset-bottom, 0px))" }}
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[118] flex justify-center md:hidden"
+      style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom, 0px))" }}
     >
-      <ul className="mx-auto flex max-w-lg items-stretch justify-between gap-0.5">
+    <nav
+      className="pointer-events-auto mx-3 mb-2 w-full max-w-md rounded-[2rem] border border-border/80 bg-card/95 px-1.5 py-1.5 shadow-[0_8px_32px_rgb(0_0_0/0.12),0_2px_8px_rgb(0_0_0/0.06)] backdrop-blur-xl dark:border-border/60 dark:bg-card/92 dark:shadow-[0_8px_36px_rgb(0_0_0/0.45)]"
+      aria-label="Primary navigation"
+    >
+      <ul className="flex items-stretch justify-between gap-0.5">
         {TABS.map(({ href, label, icon: Icon, match }) => {
           const active = match(pathname);
           return (
@@ -85,5 +82,6 @@ export function MobileBottomNav() {
         })}
       </ul>
     </nav>
+    </div>
   );
 }

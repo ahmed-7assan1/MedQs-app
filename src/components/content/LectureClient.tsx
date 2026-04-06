@@ -276,7 +276,14 @@ export function LectureClient({ flashcards, questions, mode = "both" }: Props) {
           <FlashcardDeck flashcards={flashcards} />
         )}
         {tab === "questions" && questions.length > 0 && (
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+          <div
+            className={cn(
+              "space-y-4 overflow-y-auto pr-1",
+              single === "questions"
+                ? "max-h-[min(92vh,960px)] min-h-[42vh] md:min-h-[50vh]"
+                : "max-h-[600px]"
+            )}
+          >
             {questions.map((q, i) => (
               <QuestionItem key={q.id} question={q} num={i + 1} />
             ))}

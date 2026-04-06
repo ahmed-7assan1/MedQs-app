@@ -20,7 +20,7 @@ export default async function LectureQuestionsPage({
   const hub = `/modules/${params.moduleId}/lectures/${params.lectureId}`;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Link href="/modules">Modules</Link>
         <span>/</span>
