@@ -36,7 +36,13 @@ export async function DELETE(
   const boundary = await assertSubject(w.scope, subjectId);
   if (boundary) return boundary;
 
-  // Cascade: deletes lectures, questions, flashcards inside
-  await prisma.subject.delete({ where: { id: subjectId } });
-  return NextResponse.json({ ok: true });
+  try {
+    // DB must allow deleting questions still referenced by QuizAttemptItem (see schema onDelete: Cascade)
+    await prisma.subject.delete({ where: { id: subjectId } });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("[DELETE subject]", e);
+    const msg = e instanceof Error ? e.message : "Delete failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

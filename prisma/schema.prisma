@@ -304,9 +304,9 @@ model QuizAttemptItem {
   id         String      @id @default(uuid())
   chosen     String?
   isCorrect  Boolean
-  attempt    QuizAttempt @relation(fields: [attemptId], references: [id])
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   attemptId  String
-  question   Question    @relation(fields: [questionId], references: [id])
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId String
 }
 

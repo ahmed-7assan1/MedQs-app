@@ -14,8 +14,14 @@ export async function DELETE(
   const boundary = await assertLecture(w.scope, id);
   if (boundary) return boundary;
 
-  await prisma.lecture.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.lecture.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("[DELETE lecture]", e);
+    const msg = e instanceof Error ? e.message : "Delete failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
