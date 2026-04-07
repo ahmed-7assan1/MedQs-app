@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2, Calendar, BookOpen, FlaskConical,
   Plus, ChevronDown, ChevronRight,
@@ -30,16 +30,56 @@ export default function AdminContentPage() {
   const [deleting,     setDeleting]       = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/v1/universities").then(r => r.json()),
-      fetch("/api/v1/academic-years").then(r => r.json()),
-      fetch("/api/v1/semesters").then(r => r.json()),
-      fetch("/api/v1/modules-all").then(r => r.json()),
-      fetch("/api/v1/subjects-all").then(r => r.json()),
-    ]).then(([u, y, s, m, sub]) => {
-      setUniversities(u); setYears(y); setSemesters(s); setModules(m); setSubjects(sub);
-      setLoading(false);
-    });
+    let cancelled = false;
+    async function parseArray(res: Response): Promise<unknown[]> {
+      if (!res.ok) return [];
+      try {
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch {
+        return [];
+      }
+    }
+    (async () => {
+      try {
+        const [uRes, yRes, sRes, mRes, subRes] = await Promise.all([
+          fetch("/api/v1/universities"),
+          fetch("/api/v1/academic-years"),
+          fetch("/api/v1/semesters"),
+          fetch("/api/v1/modules-all"),
+          fetch("/api/v1/subjects-all"),
+        ]);
+        const [u, y, s, m, sub] = await Promise.all([
+          parseArray(uRes),
+          parseArray(yRes),
+          parseArray(sRes),
+          parseArray(mRes),
+          parseArray(subRes),
+        ]);
+        if (!cancelled) {
+          setUniversities(u as University[]);
+          setYears(y as AcademicYear[]);
+          setSemesters(s as Semester[]);
+          setModules(m as Module[]);
+          setSubjects(sub as Subject[]);
+        }
+      } catch (e) {
+        console.error("[admin/content] load", e);
+        if (!cancelled) {
+          toast.error("تعذّر تحميل هيكل المحتوى. تحقق من الجلسة والشبكة.");
+          setUniversities([]);
+          setYears([]);
+          setSemesters([]);
+          setModules([]);
+          setSubjects([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function toggle(id: string) {
@@ -151,7 +191,7 @@ export default function AdminContentPage() {
       // Auto-expand parent
       if (parentId) setExpanded(prev => { const n = new Set(prev); n.add(parentId); return n; });
     } else {
-      toast.error("Failed to add");
+      toast.error(await apiErrorMessage(res, "Failed to add"));
     }
     cancelAdd();
   }
