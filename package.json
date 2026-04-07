@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "prisma generate",
     "clean": "node -e \"const fs=require('fs'); for (const p of ['.next','node_modules/.cache']) { try { fs.rmSync(p,{recursive:true,force:true}); console.log('Removed', p); } catch (_) {} }\"",
+    "rebuild": "npm run clean && next build",
     "dev:clean": "npm run clean && next dev",
     "dev:turbo": "next dev --turbo",
     "dev": "next dev",
