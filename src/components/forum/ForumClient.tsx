@@ -81,7 +81,7 @@ export function ForumClient({
   const [handlingInviteId, setHandlingInviteId] = useState<string | null>(null);
   const [privateForumMenuOpen, setPrivateForumMenuOpen] = useState(false);
   const [privateFormOpen, setPrivateFormOpen] = useState(false);
-  const [tab, setTab] = useState<"feed" | "discussions">("feed");
+  const [tab, setTab] = useState<"feed" | "discussions">("discussions");
   const [discussionScope, setDiscussionScope] = useState<"global" | "semester">("semester");
   const [feedMode, setFeedMode] = useState<"university" | "following">("university");
   const [postAudience, setPostAudience] = useState<"UNIVERSITY" | "FOLLOWERS">("UNIVERSITY");
@@ -392,6 +392,14 @@ export function ForumClient({
   }
 
   const isChatTab = tab === "discussions";
+  const [mobileThreadsOpen, setMobileThreadsOpen] = useState(false);
+  const [threadQuery, setThreadQuery] = useState("");
+
+  const filteredForums = useMemo(() => {
+    const q = threadQuery.trim().toLowerCase();
+    if (!q) return forumList;
+    return forumList.filter((f) => f.name.toLowerCase().includes(q));
+  }, [threadQuery, forumList]);
 
   return (
     <div
@@ -411,7 +419,9 @@ export function ForumClient({
               bottom).
             </p>
           ) : (
-            <p className="mt-0.5 text-xs text-muted-foreground">Full-height group chat — newest messages at the bottom.</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Simple chat layout — pick a group on the left. Newest messages at the bottom.
+            </p>
           )}
         </div>
         <div className="relative shrink-0">
@@ -466,7 +476,7 @@ export function ForumClient({
               tab === "discussions" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
             )}
           >
-            Discussions (chat)
+            Chat
           </button>
         </div>
 
@@ -491,11 +501,19 @@ export function ForumClient({
             </select>
           </div>
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileThreadsOpen(true)}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+            >
+              Groups
+            </button>
             <select
               value={discussionScope}
               onChange={(e) => setDiscussionScope(e.target.value as any)}
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              title="Discussion scope"
             >
               <option value="semester">Semester</option>
               <option value="global">University</option>
@@ -599,36 +617,224 @@ export function ForumClient({
         </div>
       )}
 
-      {/* Forum tabs */}
-      <div className={cn("mb-6 flex gap-2 overflow-x-auto pb-1", isChatTab && "mb-3 shrink-0")}>
-        {forumList.map((forum) => (
-          <button
-            key={forum.id}
-            onClick={() => setActiveForum(forum)}
-            className={cn(
-              "flex flex-shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all",
-              activeForum?.id === forum.id
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-border/80"
-            )}
-          >
-            {forum.type === "GLOBAL" ? (
-              <Globe className="h-3.5 w-3.5" />
+      {/* Telegram-style threads list (desktop) + chat (right) */}
+      {isChatTab ? (
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 md:grid-cols-[320px_1fr] md:gap-4">
+          {/* Left: threads */}
+          <aside className="hidden min-h-0 flex-col overflow-hidden rounded-xl border border-border/80 bg-card/60 backdrop-blur-sm md:flex">
+            <div className="border-b border-border/70 p-3">
+              <input
+                value={threadQuery}
+                onChange={(e) => setThreadQuery(e.target.value)}
+                placeholder="Search groups…"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {filteredForums.map((forum) => {
+                const active = activeForum?.id === forum.id;
+                return (
+                  <button
+                    key={forum.id}
+                    type="button"
+                    onClick={() => setActiveForum(forum)}
+                    className={cn(
+                      "flex w-full items-center gap-3 border-b border-border/60 px-3 py-3 text-left transition-colors",
+                      active ? "bg-primary/10" : "hover:bg-muted/50"
+                    )}
+                  >
+                    <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+                      {forum.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={cn("truncate text-sm font-semibold", active ? "text-foreground" : "text-foreground")}>
+                        {forum.name}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {forum.status === "READ_ONLY" ? "Read-only" : "Tap to open"}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
+                      {forum._count.posts}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+
+          {/* Mobile: threads drawer */}
+          {mobileThreadsOpen ? (
+            <div className="fixed inset-0 z-[200] md:hidden">
+              <div className="absolute inset-0 bg-black/40" onClick={() => setMobileThreadsOpen(false)} />
+              <div className="absolute left-0 top-0 h-full w-[min(360px,92vw)] border-r border-border bg-background">
+                <div className="flex items-center justify-between border-b border-border p-3">
+                  <p className="text-sm font-semibold">Groups</p>
+                  <button
+                    type="button"
+                    onClick={() => setMobileThreadsOpen(false)}
+                    className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs hover:bg-muted"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div className="p-3">
+                  <input
+                    value={threadQuery}
+                    onChange={(e) => setThreadQuery(e.target.value)}
+                    placeholder="Search groups…"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div className="min-h-0 overflow-y-auto">
+                  {filteredForums.map((forum) => {
+                    const active = activeForum?.id === forum.id;
+                    return (
+                      <button
+                        key={forum.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveForum(forum);
+                          setMobileThreadsOpen(false);
+                        }}
+                        className={cn(
+                          "flex w-full items-center gap-3 border-b border-border/60 px-3 py-3 text-left transition-colors",
+                          active ? "bg-primary/10" : "hover:bg-muted/50"
+                        )}
+                      >
+                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+                          {forum.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold">{forum.name}</p>
+                          <p className="truncate text-xs text-muted-foreground">{forum.status === "READ_ONLY" ? "Read-only" : "Tap to open"}</p>
+                        </div>
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
+                          {forum._count.posts}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Right: chat */}
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/80 bg-muted/10 shadow-sm dark:bg-muted/5">
+            <div className="flex items-center justify-between gap-3 border-b border-border bg-background/70 px-3 py-2.5 backdrop-blur-md">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{activeForum?.name ?? "Chat"}</p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {activeForum?.status === "READ_ONLY" ? "Read-only" : "Online · messages sync instantly"}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMobileThreadsOpen(true)}
+                  className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+                >
+                  Groups
+                </button>
+              </div>
+            </div>
+
+            {/* Chat timeline + composer (existing block) */}
+            {/* Posts + discussion chat layout */}
+            {loading ? (
+              <div className="flex min-h-0 flex-1 flex-col">
+                <ForumPostListSkeleton count={4} />
+              </div>
+            ) : activeForum ? (
+              <>
+                <div
+                  ref={chatScrollRef}
+                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3 sm:px-4 sm:py-4"
+                >
+                  <div className="mx-auto w-full max-w-4xl space-y-5">
+                    {discussionPostsChronological.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <MessageSquare className="mb-2 h-10 w-10 text-muted-foreground opacity-30" />
+                        <p className="text-sm font-medium text-muted-foreground">No messages yet</p>
+                        <p className="text-xs text-muted-foreground">Say hello using the box below.</p>
+                      </div>
+                    ) : (
+                      discussionPostsChronological.map((post) => (
+                        <PostCard
+                          key={post.id}
+                          post={post}
+                          currentUserId={currentUserId}
+                          forumName={activeForum.name}
+                          variant="chat"
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
+                {activeForum.status !== "READ_ONLY" ? (
+                  <div className="shrink-0 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] backdrop-blur-md md:pb-3">
+                    <div className="mx-auto flex max-w-4xl items-end gap-2">
+                      <label className="mb-1 flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border bg-muted/40 transition-colors hover:bg-muted">
+                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) uploadForumImage(file);
+                            e.currentTarget.value = "";
+                          }}
+                        />
+                      </label>
+                      <textarea
+                        ref={discussionInputRef}
+                        value={discussionDraft}
+                        onChange={(e) => setDiscussionDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            void handleDiscussionSend();
+                          }
+                        }}
+                        rows={1}
+                        placeholder="Message…"
+                        className="max-h-40 min-h-[44px] flex-1 resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-relaxed shadow-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleDiscussionSend()}
+                        disabled={posting || (!discussionDraft.trim() && !postImageUrl.trim())}
+                        className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                      >
+                        {posting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                      </button>
+                    </div>
+                    {postImageUrl ? (
+                      <div className="mx-auto mt-2 flex max-w-4xl items-center gap-2 text-xs text-muted-foreground">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={normalizeImageUrl(postImageUrl)}
+                          alt=""
+                          className="h-12 w-12 rounded-lg border object-cover"
+                        />
+                        <button type="button" onClick={() => setPostImageUrl("")} className="text-primary hover:underline">
+                          Remove image
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </>
             ) : (
-              <Users className="h-3.5 w-3.5" />
+              <div className="flex flex-1 items-center justify-center p-8 text-sm text-muted-foreground">
+                Select a group to start chatting.
+              </div>
             )}
-            {forum.name}
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-mono">
-              {forum._count.posts}
-            </span>
-            {forum.status === "READ_ONLY" && (
-              <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                read-only
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+          </section>
+        </div>
+      ) : null}
 
       {/* Feed composer (rich post) — Discussions uses chat bar below the message list */}
       {activeForum && activeForum.status !== "READ_ONLY" && tab === "feed" && (
@@ -772,98 +978,16 @@ export function ForumClient({
         </div>
       )}
 
-      {/* Posts + discussion chat layout */}
-      {loading ? (
-        <div className={cn(tab === "discussions" && "flex min-h-0 flex-1 flex-col")}>
-          <ForumPostListSkeleton count={4} />
-        </div>
-      ) : tab === "discussions" && activeForum ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/80 bg-muted/10 shadow-sm dark:bg-muted/5">
-          <div
-            ref={chatScrollRef}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3 sm:px-4 sm:py-4"
-          >
-            <div className="mx-auto w-full max-w-4xl space-y-5">
-            {discussionPostsChronological.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <MessageSquare className="mb-2 h-10 w-10 text-muted-foreground opacity-30" />
-                <p className="text-sm font-medium text-muted-foreground">No messages yet</p>
-                <p className="text-xs text-muted-foreground">Say hello using the box below.</p>
-              </div>
-            ) : (
-              discussionPostsChronological.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  currentUserId={currentUserId}
-                  forumName={activeForum.name}
-                  variant="chat"
-                />
-              ))
-            )}
-            </div>
-          </div>
-          {activeForum.status !== "READ_ONLY" && (
-            <div className="shrink-0 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur-md dark:shadow-[0_-8px_24px_rgba(0,0,0,0.25)] md:pb-3">
-              <div className="mx-auto flex max-w-4xl items-end gap-2">
-                <label className="mb-1 flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border bg-muted/40 transition-colors hover:bg-muted">
-                  {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) uploadForumImage(file);
-                      e.currentTarget.value = "";
-                    }}
-                  />
-                </label>
-                <textarea
-                  ref={discussionInputRef}
-                  value={discussionDraft}
-                  onChange={(e) => setDiscussionDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      void handleDiscussionSend();
-                    }
-                  }}
-                  rows={1}
-                  placeholder="Message the group…"
-                  className="max-h-40 min-h-[44px] flex-1 resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-relaxed shadow-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-                />
-                <button
-                  type="button"
-                  onClick={() => void handleDiscussionSend()}
-                  disabled={posting || (!discussionDraft.trim() && !postImageUrl.trim())}
-                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  {posting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                </button>
-              </div>
-              {postImageUrl ? (
-                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={normalizeImageUrl(postImageUrl)} alt="" className="h-12 w-12 rounded-lg border object-cover" />
-                  <button type="button" onClick={() => setPostImageUrl("")} className="text-primary hover:underline">
-                    Remove image
-                  </button>
-                </div>
-              ) : null}
-              <p className="mx-auto mt-1.5 max-w-4xl text-[10px] text-muted-foreground">
-                Enter to send · Shift+Enter new line · Markdown still works in messages
-              </p>
-            </div>
-          )}
-        </div>
-      ) : posts.length === 0 ? (
+      {/* Feed layout */}
+      {tab === "feed" && loading ? (
+        <ForumPostListSkeleton count={4} />
+      ) : tab === "feed" && posts.length === 0 ? (
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-12 text-center">
           <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
           <p className="font-medium">No posts yet</p>
           <p className="text-sm text-muted-foreground">Be the first to post!</p>
         </div>
-      ) : (
+      ) : tab === "feed" ? (
         <div className="space-y-4">
           {posts.map((post) => (
             <PostCard
@@ -875,7 +999,7 @@ export function ForumClient({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

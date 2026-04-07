@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export function getVideoEmbedInfo(url: string): { embedUrl: string; type: string } | null {
@@ -13,7 +14,7 @@ export function getVideoEmbedInfo(url: string): { embedUrl: string; type: string
 
 /** Lecture must belong to the module in the URL (single query, avoids relation bugs). */
 export async function getLectureInModule(moduleId: string, lectureId: string) {
-  return prisma.lecture.findFirst({
+  const lecture = await prisma.lecture.findFirst({
     where: {
       id: lectureId,
       subject: { moduleId },
@@ -47,4 +48,15 @@ export async function getLectureInModule(moduleId: string, lectureId: string) {
       },
     },
   });
+  if (!lecture) return null;
+
+  // Prisma client may not be regenerated on Windows; fetch JSON columns via raw SQL.
+  const rows = await prisma
+    .$queryRaw<Array<{ uiConfig: any; extras: any }>>(
+      Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${lectureId} LIMIT 1`
+    )
+    .catch(() => []);
+  const uiConfig = rows?.[0]?.uiConfig ?? null;
+  const extras = rows?.[0]?.extras ?? null;
+  return Object.assign(lecture as any, { uiConfig, extras });
 }

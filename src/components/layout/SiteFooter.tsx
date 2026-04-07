@@ -7,7 +7,7 @@ export function SiteFooter({ siteName = "MedQs" }: { siteName?: string }) {
   const year = new Date().getFullYear();
   return (
     <footer
-      className="mt-auto border-t border-border/80 bg-muted/20 px-4 py-8 md:px-8"
+      className="mt-auto hidden border-t border-border/80 bg-muted/20 px-4 py-8 md:block md:px-8"
       role="contentinfo"
     >
       <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">

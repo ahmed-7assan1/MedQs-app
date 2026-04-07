@@ -157,6 +157,12 @@ model Lecture {
   order         Int           @default(0)
   // AI/admin Notes section (markdown) on lecture hub
   notesMarkdown String?       @db.Text
+  // Per-lecture UI options (tabs, header badge/subtitle, etc.)
+  // Kept as JSON so doctors can evolve the experience without migrations.
+  uiConfig      Json?
+  // Optional interactive extras (mnemonics, cases, mind maps, etc.)
+  // Stored as JSON; the lecture page renders what is enabled + present.
+  extras        Json?
   subject       Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectId     String
   activities    UserLectureActivity[]

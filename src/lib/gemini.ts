@@ -306,6 +306,160 @@ Rules:
   };
 }
 
+// ─── 5c. Doctor hub: lecture interactive extras (mnemonics / cases / mind maps) ──
+
+export type LectureExtras = {
+  overviewCards: { title: string; body: string; tags?: string[] }[];
+  mnemonics: { title: string; word: string; topic: string; items: { l: string; t: string }[] }[];
+  cases: { title: string; vignette: string }[];
+  mindMapsMarkdown: string;
+  mindMapGraph?: {
+    nodes: { id: string; label: string; detail?: string; level?: number; shape?: "hex" | "circle" | "card" }[];
+    edges: { from: string; to: string }[];
+  };
+};
+
+export async function generateLectureExtrasWithMeta(
+  lectureTitle: string,
+  subjectName: string,
+  moduleName: string,
+  sourceText: string,
+  wantOverviewCards: boolean,
+  wantMnemonics: boolean,
+  wantCases: boolean,
+  wantMindMaps: boolean,
+  options?: AIRequestOptions
+): Promise<AIWithMeta<LectureExtras>> {
+  const src = sourceText.trim().slice(0, 14_000);
+  const prompt = `You assist medical doctors building interactive lecture pages for students.
+
+Lecture title: ${lectureTitle}
+Subject: ${subjectName}
+Module: ${moduleName}
+
+SOURCE MATERIAL (use ONLY this, do NOT invent facts, doses, or guidelines):
+${src || "(No source provided)"}
+
+Return ONLY valid JSON with this shape:
+{
+  "overviewCards": [{"title":"...","body":"...","tags":["High-yield","Exam"]}],
+  "mnemonics": [{"title":"...","word":"...","topic":"...","items":[{"l":"A","t":"..."}]}],
+  "cases": [{"title":"...","vignette":"..."}],
+  "mindMapsMarkdown": "markdown string",
+  "mindMapGraph": {
+    "nodes":[{"id":"root","label":"...","detail":"...","level":0,"shape":"hex"}],
+    "edges":[{"from":"root","to":"n1"}]
+  }
+}
+
+Rules:
+- Keep it concise, exam-relevant, and medically accurate.
+- If source material is insufficient for a requested section, return it as empty (or \"\" for markdown).
+- overviewCards: 6–12 cards max; short titles; 2–4 sentence bodies.
+- mnemonics: 0–6; items 4–10 each; use memorable but professional words (no childish jokes).
+- cases: 0–6; short vignette only (no answers), 3–6 lines.
+- mindMapsMarkdown: if requested, use ## headings and bullet trees; no ASCII art.
+- mindMapGraph: if requested, include a simple directed graph representation suitable for a geometric interactive mind map UI.
+  - 12–40 nodes max, short labels (2–6 words), optional detail (1–2 sentences).
+  - levels: 0 for the central topic, 1/2/3 for branches.
+  - shapes: use "hex" for the center, "circle" for branch nodes, "card" for detail nodes.
+- wantOverviewCards: ${wantOverviewCards}
+- wantMnemonics: ${wantMnemonics}
+- wantCases: ${wantCases}
+- wantMindMaps: ${wantMindMaps}`;
+
+  const row = await generateJsonWithFallback<Partial<LectureExtras>>(
+    prompt,
+    { overviewCards: [], mnemonics: [], cases: [], mindMapsMarkdown: "", mindMapGraph: { nodes: [], edges: [] } },
+    { preferredProvider: options?.preferredProvider }
+  );
+
+  const data: LectureExtras = {
+    overviewCards: Array.isArray(row.data.overviewCards)
+      ? row.data.overviewCards
+          .filter((c: any) => c && String(c.title ?? "").trim() && String(c.body ?? "").trim())
+          .map((c: any) => ({
+            title: String(c.title).trim().slice(0, 120),
+            body: String(c.body).trim().slice(0, 800),
+            tags: Array.isArray(c.tags) ? c.tags.map((t: any) => String(t).trim().slice(0, 40)).filter(Boolean).slice(0, 6) : undefined,
+          }))
+          .slice(0, 12)
+      : [],
+    mnemonics: Array.isArray(row.data.mnemonics)
+      ? row.data.mnemonics
+          .filter((m: any) => m && String(m.word ?? "").trim())
+          .map((m: any) => ({
+            title: String(m.title ?? "Mnemonic").trim().slice(0, 120),
+            word: String(m.word).trim().slice(0, 60),
+            topic: String(m.topic ?? "").trim().slice(0, 200),
+            items: Array.isArray(m.items)
+              ? m.items
+                  .filter((it: any) => it && String(it.l ?? "").trim() && String(it.t ?? "").trim())
+                  .map((it: any) => ({
+                    l: String(it.l).trim().slice(0, 6),
+                    t: String(it.t).trim().slice(0, 160),
+                  }))
+                  .slice(0, 12)
+              : [],
+          }))
+          .slice(0, 6)
+      : [],
+    cases: Array.isArray(row.data.cases)
+      ? row.data.cases
+          .filter((c: any) => c && String(c.vignette ?? "").trim())
+          .map((c: any) => ({
+            title: String(c.title ?? "Clinical case").trim().slice(0, 160),
+            vignette: String(c.vignette).trim().slice(0, 1600),
+          }))
+          .slice(0, 6)
+      : [],
+    mindMapsMarkdown: wantMindMaps ? String((row.data as any).mindMapsMarkdown ?? "").trim().slice(0, 10_000) : "",
+    mindMapGraph: wantMindMaps && (row.data as any)?.mindMapGraph && typeof (row.data as any).mindMapGraph === "object"
+      ? {
+          nodes: Array.isArray((row.data as any).mindMapGraph.nodes)
+            ? (row.data as any).mindMapGraph.nodes
+                .filter((n: any) => n && String(n.id ?? "").trim() && String(n.label ?? "").trim())
+                .map((n: any) => ({
+                  id: String(n.id).trim().slice(0, 40),
+                  label: String(n.label).trim().slice(0, 80),
+                  detail: String(n.detail ?? "").trim().slice(0, 240) || undefined,
+                  level: typeof n.level === "number" ? Math.max(0, Math.min(6, n.level)) : undefined,
+                  shape:
+                    String(n.shape ?? "").trim() === "hex"
+                      ? "hex"
+                      : String(n.shape ?? "").trim() === "circle"
+                        ? "circle"
+                        : String(n.shape ?? "").trim() === "card"
+                          ? "card"
+                          : undefined,
+                }))
+                .slice(0, 48)
+            : [],
+          edges: Array.isArray((row.data as any).mindMapGraph.edges)
+            ? (row.data as any).mindMapGraph.edges
+                .filter((e: any) => e && String(e.from ?? "").trim() && String(e.to ?? "").trim())
+                .map((e: any) => ({
+                  from: String(e.from).trim().slice(0, 40),
+                  to: String(e.to).trim().slice(0, 40),
+                }))
+                .slice(0, 120)
+            : [],
+        }
+      : undefined,
+  };
+
+  return {
+    data: {
+      overviewCards: wantOverviewCards ? data.overviewCards : [],
+      mnemonics: wantMnemonics ? data.mnemonics : [],
+      cases: wantCases ? data.cases : [],
+      mindMapsMarkdown: wantMindMaps ? data.mindMapsMarkdown : "",
+      mindMapGraph: wantMindMaps ? data.mindMapGraph : { nodes: [], edges: [] },
+    },
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
+}
+
 // ─── 5b. Student: flashcards from pasted notes (preview / export — not saved to DB) ─
 
 export async function generateFlashcardsFromPastedText(

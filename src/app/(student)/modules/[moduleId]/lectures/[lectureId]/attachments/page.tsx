@@ -48,7 +48,7 @@ export default async function LectureAttachmentsPage({
             <span className="text-sm font-medium">{lecture.files.length} file(s)</span>
           </div>
           <div className="space-y-1.5">
-            {lecture.files.map((file) => (
+            {lecture.files.map((file: any) => (
               <a
                 key={file.id}
                 href={file.url}

@@ -44,7 +44,7 @@ export default async function LectureVideoPage({
         ]
       : [];
 
-  const videoIds = videos.map((v) => v.id);
+  const videoIds = videos.map((v: any) => v.id);
   const likedRows =
     videoIds.length > 0
       ? await prisma.lectureVideoLike.findMany({
@@ -79,7 +79,7 @@ export default async function LectureVideoPage({
       {videos.length > 0 ? (
         <LectureVideoStudio
           lectureId={lecture.id}
-          initialVideos={videos.map((v) => ({
+          initialVideos={videos.map((v: any) => ({
             id: v.id,
             title: v.title,
             url: v.url,

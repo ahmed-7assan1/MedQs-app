@@ -1,19 +1,20 @@
-import { auth } from "@/lib/auth";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
-import { FlashcardFromTextClient } from "@/components/study-tools/FlashcardFromTextClient";
+import { UnderConstruction } from "@/components/ui/UnderConstruction";
 
 export default async function StudyToolsGeneratePage() {
-  const session = await auth();
-  const signedIn = Boolean(session?.user?.id);
-
   return (
     <StudentPageShell
       maxWidthClass="max-w-3xl"
-      eyebrow="AI helper"
-      title="Flashcards from your notes"
-      subtitle="Paste study text and get a draft deck to flip through. Export with one click, or cross-check against your official lecture flashcards in Modules."
+      eyebrow="Study tools"
+      title="Under construction"
+      subtitle="This area will reopen soon."
     >
-      <FlashcardFromTextClient signedIn={signedIn} />
+      <UnderConstruction
+        title="Study tools are under construction"
+        message="This feature is temporarily closed while we rebuild the study tools experience."
+        backHref="/dashboard-app"
+        backLabel="Back to dashboard"
+      />
     </StudentPageShell>
   );
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
@@ -36,7 +37,12 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     },
   });
   if (!lecture) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(lecture);
+  const rows = await prisma
+    .$queryRaw<Array<{ uiConfig: any; extras: any }>>(
+      Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${id} LIMIT 1`
+    )
+    .catch(() => []);
+  return NextResponse.json({ ...(lecture as any), uiConfig: rows?.[0]?.uiConfig ?? null, extras: rows?.[0]?.extras ?? null });
 }
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
@@ -53,12 +59,41 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (body.videoUrl === null || typeof body.videoUrl === "string") data.videoUrl = body.videoUrl?.trim() || null;
   if (typeof body.notesMarkdown === "string") data.notesMarkdown = body.notesMarkdown;
 
-  if (Object.keys(data).length === 0)
+  // uiConfig / extras are stored as JSON and updated via raw SQL so this works even if Prisma Client wasn't regenerated.
+  const uiConfig = body && typeof body.uiConfig === "object" && body.uiConfig !== null ? body.uiConfig : null;
+  const extrasDeleteKeys = Array.isArray(body.extrasDeleteKeys) ? body.extrasDeleteKeys : null;
+
+  if (Object.keys(data).length === 0 && !uiConfig && !extrasDeleteKeys)
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });
 
-  const lecture = await prisma.lecture.update({
-    where: { id },
-    data,
-  });
-  return NextResponse.json(lecture);
+  if (uiConfig || extrasDeleteKeys) {
+    // Load current JSON blobs
+    const rows = await prisma.$queryRaw<Array<{ uiConfig: any; extras: any }>>(
+      Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${id} LIMIT 1`
+    );
+    const prevUi = (rows?.[0]?.uiConfig ?? {}) as any;
+    const prevExtras = (rows?.[0]?.extras ?? {}) as any;
+    const nextUi = uiConfig ? { ...prevUi, ...(uiConfig as any) } : prevUi;
+    let nextExtras = prevExtras;
+    if (extrasDeleteKeys) {
+      nextExtras = { ...(prevExtras as any) };
+      for (const k of extrasDeleteKeys) {
+        if (typeof k === "string" && k.trim()) delete (nextExtras as any)[k.trim()];
+      }
+    }
+    const uiJson = JSON.stringify(nextUi);
+    const extrasJson = JSON.stringify(nextExtras);
+    await prisma.$executeRaw(
+      Prisma.sql`UPDATE "Lecture" SET "uiConfig" = ${uiJson}::jsonb, "extras" = ${extrasJson}::jsonb WHERE "id" = ${id}`
+    );
+  }
+
+  if (Object.keys(data).length > 0) {
+    const lecture = await prisma.lecture.update({
+      where: { id },
+      data,
+    });
+    return NextResponse.json(lecture);
+  }
+  return NextResponse.json({ ok: true });
 }
