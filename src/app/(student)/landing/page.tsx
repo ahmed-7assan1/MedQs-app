@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
-import { Zap, Brain, Activity, Heart, Microscope, ArrowRight, CheckCircle2, BookOpen, Trophy, MessageSquare, Clock, ChevronRight, Play, Users, Star, Mail, Github, Layers, Sparkles, ClipboardList, Library } from "lucide-react";
+import { Zap, Brain, Activity, Heart, Microscope, ArrowRight, CheckCircle2, BookOpen, Trophy, MessageSquare, Clock, ChevronRight, Play, Users, Star, Mail, Github, Layers, Sparkles, ClipboardList, Library, Stethoscope } from "lucide-react";
+import { PLATFORM_COPY } from "@/lib/platform-copy";
 
 export default async function LandingPage() {
   const [userCount, questionCount, moduleCount] = await Promise.all([
@@ -201,6 +202,87 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── DOCTORS & FACULTY ── */}
+      <section
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          padding: "0 24px 80px",
+        }}
+      >
+        <div
+          className="card-hover rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-card to-card p-8 md:p-10"
+          style={{ boxShadow: "0 24px 80px hsl(var(--primary) / .12)" }}
+        >
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 24 }}>
+            <div style={{ maxWidth: 560 }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  borderRadius: 999,
+                  border: "1px solid hsl(var(--primary) / .25)",
+                  background: "hsl(var(--primary) / .1)",
+                  padding: "6px 14px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "hsl(var(--primary))",
+                  marginBottom: 16,
+                }}
+              >
+                <Stethoscope style={{ width: 14, height: 14 }} aria-hidden />
+                {PLATFORM_COPY.landingForDoctorsEyebrow}
+              </div>
+              <h2
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(24px, 3.5vw, 34px)",
+                  fontWeight: 700,
+                  letterSpacing: "-.02em",
+                  margin: "0 0 12px",
+                  lineHeight: 1.15,
+                }}
+              >
+                {PLATFORM_COPY.landingForDoctorsTitle}
+              </h2>
+              <p style={{ fontSize: 15, color: "hsl(var(--muted-foreground))", margin: "0 0 10px", lineHeight: 1.65 }}>
+                {PLATFORM_COPY.landingForDoctorsBody}
+              </p>
+              <p
+                dir="rtl"
+                style={{
+                  fontSize: 14,
+                  color: "hsl(var(--muted-foreground))",
+                  margin: 0,
+                  lineHeight: 1.7,
+                  opacity: 0.95,
+                }}
+              >
+                {PLATFORM_COPY.landingForDoctorsArabic}
+              </p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, minWidth: 220 }}>
+              <Link
+                href="/login"
+                className="btn btn-primary"
+                style={{ fontSize: 15, padding: "12px 22px", justifyContent: "center", boxShadow: "0 8px 28px hsl(var(--primary) / .35)" }}
+              >
+                Sign in — Doctor hub
+                <ArrowRight style={{ width: 16, height: 16 }} />
+              </Link>
+              <p style={{ margin: 0, fontSize: 12, color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>
+                After you are signed in, bookmark{" "}
+                <Link href="/doctor" className="font-mono text-primary hover:underline">
+                  /doctor
+                </Link>{" "}
+                for quick access to the overview.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── FOOTER ── */}
       <footer style={{ borderTop: "1px solid hsl(var(--border))", padding: "48px 0 32px" }} id="contact">
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
@@ -231,7 +313,7 @@ export default async function LandingPage() {
             {/* Account */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".07em", color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>Account</p>
-              {[["Log in", "/login"], ["Sign up", "/register"], ["Guest browse", "/modules"]].map(([l, h]) => (
+              {[["Log in", "/login"], ["Sign up", "/register"], ["Doctor hub", "/doctor"], ["Guest browse", "/modules"]].map(([l, h]) => (
                 <Link
                   key={l}
                   href={h}

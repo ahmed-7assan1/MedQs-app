@@ -167,7 +167,7 @@ export function LectureContentInlineManager({
 
   return (
     <div className="mb-6 rounded-xl border border-primary/25 bg-primary/[0.04] p-4">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-primary">Admin inline: Lecture content</p>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-primary">Doctor inline: Lecture content</p>
       <div className="mb-4 flex flex-wrap gap-2">
         <button onClick={() => setSectionOpen(sectionOpen === "notes" ? null : "notes")} className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs hover:bg-muted">
           <Pencil className="h-3.5 w-3.5" /> Edit notes

@@ -3,7 +3,7 @@
 import { ReactNode, useState } from "react";
 import { Shield, X } from "lucide-react";
 
-export function AdminToolsDrawer({ title = "Admin tools", children }: { title?: string; children: ReactNode }) {
+export function AdminToolsDrawer({ title = "Doctor tools", children }: { title?: string; children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,7 +27,7 @@ export function AdminToolsDrawer({ title = "Admin tools", children }: { title?: 
               <button
                 onClick={() => setOpen(false)}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background hover:bg-muted"
-                aria-label="Close admin tools"
+                aria-label="Close doctor tools"
               >
                 <X className="h-4 w-4" />
               </button>

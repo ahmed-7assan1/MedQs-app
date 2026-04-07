@@ -18,7 +18,8 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-foreground">Educational use</h2>
           <p>
             MedQs is intended for learning and assessment practice. Content and AI-generated explanations may
-            contain errors; always verify critical information with official course materials and instructors.
+            contain errors; always verify critical information with official course materials and your doctors
+            or faculty.
           </p>
         </section>
         <section>

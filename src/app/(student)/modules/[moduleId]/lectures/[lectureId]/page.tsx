@@ -93,7 +93,7 @@ export default async function LectureHubPage({
       <p className="mb-8 text-sm text-muted-foreground">Choose what you want to study in this lecture.</p>
 
       {isAdmin ? (
-        <AdminToolsDrawer title="Admin tools (this lecture)">
+        <AdminToolsDrawer title="Doctor tools (this lecture)">
           <LectureContentInlineManager
             lectureId={lecture.id}
             initialFlashcards={lecture.flashcards.map((f) => ({ id: f.id, front: f.front, back: f.back }))}

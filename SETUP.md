@@ -42,7 +42,13 @@ cp .env.example .env.local
 ### Google OAuth Setup
 1. Go to Google Cloud Console → APIs & Services → Credentials
 2. Create OAuth 2.0 Client ID (Web application)
-3. Add Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
+3. Under **Authorized redirect URIs**, add **every** origin you actually use (each line must match character-for-character what Google receives):
+   - Local: `http://localhost:3000/api/auth/callback/google`
+   - If you ever open the site as `127.0.0.1`, add separately: `http://127.0.0.1:3000/api/auth/callback/google` (Google does **not** treat `localhost` and `127.0.0.1` as the same.)
+   - Production: `https://your-domain.com/api/auth/callback/google` (no trailing slash after `google`)
+4. Set `NEXTAUTH_URL` in `.env.local` to that same origin (e.g. `http://localhost:3000` or your production `https://...`).
+
+**Error `redirect_uri_mismatch`:** The URI in step 3 does not include the exact redirect URL your app is sending. Fix by adding the missing URI in Google Console or by using the same host/port as in `NEXTAUTH_URL` (and in the browser address bar).
 
 ### Facebook OAuth Setup
 1. Go to Facebook Developers → Create App

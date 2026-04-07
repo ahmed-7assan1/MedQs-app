@@ -139,7 +139,7 @@ export default function StudyToolsPage() {
               <h2 className="font-display text-lg font-semibold text-foreground">Curriculum-first, not random decks</h2>
               <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted-foreground">
                 Instead of importing scattered Quizlet sets, you work inside{" "}
-                <strong className="font-medium text-foreground">your semester modules</strong>. Admins can enrich lectures with notes and
+                <strong className="font-medium text-foreground">your semester modules</strong>. Your doctors can enrich lectures with notes and
                 flashcards using AI tools—so your cards and questions stay consistent with what you are taught.
               </p>
             </div>

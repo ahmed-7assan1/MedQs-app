@@ -14,8 +14,8 @@ export function SiteFooter({ siteName = "MedQs" }: { siteName?: string }) {
         <div>
           <p className="text-sm font-medium text-foreground">{siteName}</p>
           <p className="mt-1 max-w-md text-xs leading-relaxed text-muted-foreground">
-            Medical education platform for students. AI answers are for study only — not a substitute for
-            instructors or clinical supervision.
+            Medical education platform for students and doctors. AI answers are for study only — not a substitute for
+            your course doctors or clinical supervision.
           </p>
         </div>
         <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm" aria-label="Legal">

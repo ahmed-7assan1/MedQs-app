@@ -27,6 +27,7 @@ import { useNotificationStore, useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { PLATFORM_COPY } from "@/lib/platform-copy";
 
 interface NotifItem {
   id: string;
@@ -394,7 +395,7 @@ export function Sidebar({
               <TopNavLink key={href} href={href} label={label} icon={icon} />
             ))}
             {isAdmin && (
-              <TopNavLink href="/admin/dashboard" label="Admin" icon={ShieldCheck} />
+              <TopNavLink href="/admin/dashboard" label={PLATFORM_COPY.doctorHubNav} icon={ShieldCheck} />
             )}
             {!isGuest && <TopNavLink href="/ai-chat" label="Dr. Q" icon={Sparkles} />}
           </nav>
@@ -574,8 +575,8 @@ export function Sidebar({
 
           {isAdmin && (
             <>
-              <div className="sb-section-label">Admin</div>
-              <DrawerLink href="/admin/dashboard" label="Admin Panel" icon={ShieldCheck} />
+              <div className="sb-section-label">{PLATFORM_COPY.doctorHub}</div>
+              <DrawerLink href="/admin/dashboard" label={PLATFORM_COPY.doctorPanel} icon={ShieldCheck} />
             </>
           )}
 

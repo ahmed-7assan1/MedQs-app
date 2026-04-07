@@ -96,7 +96,7 @@ export default async function LectureVideoPage({
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20 py-16">
           <Video className="h-10 w-10 text-muted-foreground opacity-25" />
           <p className="text-sm text-muted-foreground">No videos for this lecture</p>
-          <p className="text-xs text-muted-foreground opacity-70">Admin can add multiple videos from lecture hub inline edit.</p>
+          <p className="text-xs text-muted-foreground opacity-70">Doctors can add multiple videos from the lecture hub or inline edit.</p>
         </div>
       )}
 

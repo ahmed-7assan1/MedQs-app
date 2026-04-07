@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
+import { PLATFORM_COPY } from "@/lib/platform-copy";
 import { ChevronRight } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -10,20 +11,28 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const role = (session?.user as any)?.role;
   if (role !== "ADMIN" && role !== "SUPER_ADMIN") redirect("/dashboard");
 
+  const hubBadge = role === "SUPER_ADMIN" ? "Platform" : "Doctor";
+
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-56 shrink-0 border-r border-border bg-card/75 backdrop-blur-md md:flex md:flex-col">
         <div className="flex h-14 items-center gap-2 border-b border-border/80 bg-card/50 px-4 backdrop-blur-sm">
           <MedQsLogoMark className="h-7 w-7 shrink-0" title="MedQs" />
           <MedQsWordmark className="text-base" />
-          <span className="ml-auto rounded-lg bg-primary/12 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-            Admin
+          <span
+            className="ml-auto rounded-lg bg-primary/12 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+            title={PLATFORM_COPY.doctorHub}
+          >
+            {hubBadge}
           </span>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4" aria-label="Admin">
+        <nav
+          className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4"
+          aria-label={PLATFORM_COPY.doctorHub}
+        >
           <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Management
+            {PLATFORM_COPY.teachingWorkspace}
           </p>
           <AdminSidebarNav />
         </nav>
@@ -34,7 +43,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            Student view
+            {PLATFORM_COPY.studentView}
           </Link>
         </div>
       </aside>

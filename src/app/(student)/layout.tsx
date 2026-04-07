@@ -63,7 +63,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <div className="main-content">
           {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
           {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
-          <main id="main-content" className="flex flex-1 flex-col pb-8 outline-none">
+          <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-8 outline-none">
             {children}
           </main>
           <SiteFooter siteName={siteConfig?.siteName ?? "MedQs"} />

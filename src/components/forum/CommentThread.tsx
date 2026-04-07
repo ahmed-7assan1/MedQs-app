@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Loader2, Send, Trash2, MessageSquare, Heart, CornerDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "@/lib/utils";
@@ -35,16 +35,18 @@ interface CommentThreadProps {
   postId: string;
   currentUserId?: string;
   initialCount: number;
+  variant?: "default" | "chat";
 }
 
 function CommentItem({
-  comment, currentUserId, postId, onDelete, onReply,
+  comment, currentUserId, postId, onDelete, onReply, variant = "default",
 }: {
   comment: Comment;
   currentUserId?: string;
   postId: string;
   onDelete: (id: string) => void;
   onReply: (parentId: string, name: string) => void;
+  variant?: "default" | "chat";
 }) {
   const [liked, setLiked] = useState(comment.likedByMe ?? false);
   const [likeCount, setLikeCount] = useState(comment._count?.likes ?? 0);
@@ -63,6 +65,11 @@ function CommentItem({
     });
   }
 
+  const bubble =
+    variant === "chat"
+      ? "rounded-2xl border border-border/70 bg-background/90 px-3 py-2 shadow-sm"
+      : "";
+
   return (
     <div className="space-y-2">
       <div className="flex items-start gap-2.5">
@@ -70,28 +77,35 @@ function CommentItem({
           <ForumAuthorAvatar
             src={comment.author.image}
             alt={displayName}
-            sizePx={28}
-            className="h-7 w-7 flex-shrink-0"
+            sizePx={variant === "chat" ? 24 : 28}
+            className={cn("flex-shrink-0", variant === "chat" ? "h-6 w-6" : "h-7 w-7")}
           />
         ) : (
-          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+          <div
+            className={cn(
+              "flex flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary",
+              variant === "chat" ? "h-6 w-6 text-[10px]" : "h-7 w-7"
+            )}
+          >
             {displayName[0]?.toUpperCase()}
           </div>
         )}
 
-        <div className="flex-1 min-w-0">
+        <div className={cn("min-w-0 flex-1", bubble)}>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs font-semibold">{displayName}</span>
-            {!comment.author.hideRank && comment.author.rank && (
+            <span className={cn("font-semibold", variant === "chat" ? "text-[11px]" : "text-xs")}>{displayName}</span>
+            {!comment.author.hideRank && comment.author.rank && variant !== "chat" && (
               <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-semibold", RANK_COLORS[rankLabel])}>
                 {comment.author.rank.badge} {rankLabel}
               </span>
             )}
-            <span className="text-[10px] text-muted-foreground ml-auto">
+            <span className={cn("ml-auto text-muted-foreground", variant === "chat" ? "text-[9px]" : "text-[10px]")}>
               {formatDistanceToNow(new Date(comment.createdAt))}
             </span>
           </div>
-          <p className="mt-0.5 text-xs leading-relaxed text-foreground">{comment.content}</p>
+          <p className={cn("leading-relaxed text-foreground", variant === "chat" ? "mt-0.5 text-[11px]" : "mt-0.5 text-xs")}>
+            {comment.content}
+          </p>
 
           {/* Actions */}
           <div className="mt-1.5 flex items-center gap-3">
@@ -126,11 +140,11 @@ function CommentItem({
       </div>
 
       {/* Nested replies */}
-      {showReplies && comment.replies && comment.replies.length > 0 && (
-        <div className="ml-9 space-y-2 border-l-2 border-border pl-3">
+          {showReplies && comment.replies && comment.replies.length > 0 && (
+        <div className={cn("ml-9 space-y-2 border-l-2 border-border pl-3", variant === "chat" && "ml-7 border-primary/15")}>
           {comment.replies.map(reply => (
             <CommentItem key={reply.id} comment={reply} currentUserId={currentUserId}
-              postId={postId} onDelete={onDelete} onReply={onReply} />
+              postId={postId} onDelete={onDelete} onReply={onReply} variant={variant} />
           ))}
         </div>
       )}
@@ -138,14 +152,23 @@ function CommentItem({
   );
 }
 
-export function CommentThread({ postId, currentUserId, initialCount }: CommentThreadProps) {
-  const [open, setOpen] = useState(false);
+export function CommentThread({ postId, currentUserId, initialCount, variant = "default" }: CommentThreadProps) {
+  const [open, setOpen] = useState(variant === "chat");
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
   const [posting, setPosting] = useState(false);
   const [count, setCount] = useState(initialCount);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (variant === "chat" && open && textareaRef.current) {
+      const el = textareaRef.current;
+      el.style.height = "0px";
+      el.style.height = `${Math.min(120, el.scrollHeight)}px`;
+    }
+  }, [text, open, variant]);
 
   async function loadComments() {
     if (comments.length > 0) return;
@@ -157,6 +180,12 @@ export function CommentThread({ postId, currentUserId, initialCount }: CommentTh
     } catch { toast.error("Could not load comments"); }
     finally { setLoading(false); }
   }
+
+  // Chat variant opens expanded by default — still need an initial fetch (toggle() is not run on mount).
+  useEffect(() => {
+    if (variant === "chat" && open) void loadComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadComments guards on comments.length
+  }, [variant, postId, open]);
 
   function toggle() {
     const next = !open;
@@ -208,32 +237,60 @@ export function CommentThread({ postId, currentUserId, initialCount }: CommentTh
     } else toast.error("Could not delete");
   }
 
+  const isChat = variant === "chat";
+
   return (
-    <div className="border-t border-border">
-      <button onClick={toggle}
+    <div className={cn(!isChat && "border-t border-border")}>
+      <button
+        type="button"
+        onClick={toggle}
         className={cn(
-          "flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium transition-colors",
-          open ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-        )}>
+          "flex w-full items-center gap-2 text-xs font-medium transition-colors",
+          isChat
+            ? cn(
+                "mt-2 rounded-full px-3 py-1.5",
+                open ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/80"
+              )
+            : cn("px-4 py-2.5", open ? "bg-primary/5 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")
+        )}
+      >
         <MessageSquare className="h-3.5 w-3.5" />
-        {count === 0 ? "Add comment" : `${count} comment${count !== 1 ? "s" : ""}`}
-        <span className={cn("ml-auto transition-transform text-[10px]", open && "rotate-180")}>▾</span>
+        {isChat
+          ? count === 0
+            ? "Thread chat"
+            : `Chat · ${count} message${count !== 1 ? "s" : ""}`
+          : count === 0
+            ? "Add comment"
+            : `${count} comment${count !== 1 ? "s" : ""}`}
+        {!isChat && <span className={cn("ml-auto transition-transform text-[10px]", open && "rotate-180")}>▾</span>}
       </button>
 
       {open && (
-        <div className="border-t border-border/50 bg-muted/10 px-4 pb-3 pt-3 animate-fade-in space-y-3">
+        <div
+          className={cn(
+            "animate-fade-in space-y-3",
+            isChat ? "mt-2 rounded-2xl border border-border/60 bg-muted/20 px-3 py-3 dark:bg-muted/10" : "border-t border-border/50 bg-muted/10 px-4 pb-3 pt-3"
+          )}
+        >
           {loading ? (
             <div className="flex justify-center py-3">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <div className="space-y-3">
-              {comments.map(c => (
-                <CommentItem key={c.id} comment={c} currentUserId={currentUserId}
-                  postId={postId} onDelete={handleDelete} onReply={handleReply} />
+            <div className="space-y-2">
+              {comments.map((c) => (
+                <CommentItem
+                  key={c.id}
+                  comment={c}
+                  currentUserId={currentUserId}
+                  postId={postId}
+                  onDelete={handleDelete}
+                  onReply={handleReply}
+                  variant={variant}
+                />
               ))}
               {comments.length === 0 && (
-                <p className="text-center text-xs text-muted-foreground py-2">No comments yet</p>
+                <p className="py-2 text-center text-[11px] text-muted-foreground">No messages yet — say hi below.</p>
               )}
             </div>
           )}
@@ -241,28 +298,55 @@ export function CommentThread({ postId, currentUserId, initialCount }: CommentTh
           {currentUserId && (
             <div className="space-y-1.5">
               {replyTo && (
-                <div className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/15 px-2.5 py-1.5">
-                  <CornerDownRight className="h-3 w-3 text-primary" />
-                  <span className="text-xs text-primary flex-1">Replying to {replyTo.name}</span>
-                  <button onClick={() => setReplyTo(null)} className="text-muted-foreground hover:text-foreground">
+                <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-2.5 py-1.5">
+                  <CornerDownRight className="h-3 w-3 shrink-0 text-primary" />
+                  <span className="flex-1 text-[11px] text-primary">Replying to {replyTo.name}</span>
+                  <button type="button" onClick={() => setReplyTo(null)} className="text-muted-foreground hover:text-foreground">
                     <span className="text-xs">✕</span>
                   </button>
                 </div>
               )}
-              <div className="flex gap-2">
-                <input
-                  type="text" value={text}
-                  onChange={e => setText(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && !e.shiftKey && handlePost()}
-                  placeholder={replyTo ? `Reply to ${replyTo.name}...` : "Write a comment..."}
-                  maxLength={1000}
-                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-                />
-                <button onClick={handlePost} disabled={posting || !text.trim()}
-                  className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors">
-                  {posting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              <div className="flex items-end gap-2">
+                {isChat ? (
+                  <textarea
+                    ref={textareaRef}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        void handlePost();
+                      }
+                    }}
+                    rows={1}
+                    placeholder={replyTo ? `Reply to ${replyTo.name}…` : "Type a message…"}
+                    maxLength={1000}
+                    className="max-h-[120px] min-h-[40px] flex-1 resize-none rounded-2xl border border-border bg-background px-3 py-2.5 text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && void handlePost()}
+                    placeholder={replyTo ? `Reply to ${replyTo.name}...` : "Write a comment..."}
+                    maxLength={1000}
+                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => void handlePost()}
+                  disabled={posting || !text.trim()}
+                  className={cn(
+                    "flex shrink-0 items-center justify-center rounded-xl bg-primary font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60",
+                    isChat ? "h-10 w-10" : "gap-1.5 px-3 py-2 text-xs"
+                  )}
+                >
+                  {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className={cn("h-4 w-4", !isChat && "h-3.5 w-3.5")} />}
                 </button>
               </div>
+              {isChat && <p className="text-[10px] text-muted-foreground">Enter to send · Shift+Enter for new line</p>}
             </div>
           )}
         </div>

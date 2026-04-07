@@ -12,6 +12,7 @@ import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { PLATFORM_COPY } from "@/lib/platform-copy";
 
 const navLinks = [
   { href: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
@@ -177,7 +178,7 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedQs
                   {isAdmin && (
                     <Link href="/admin/dashboard" onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-muted transition-colors">
-                      <ShieldCheck className="h-4 w-4 text-violet-500" /> Admin Panel
+                      <ShieldCheck className="h-4 w-4 text-violet-500" /> {PLATFORM_COPY.doctorPanel}
                     </Link>
                   )}
                 </div>

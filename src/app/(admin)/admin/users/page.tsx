@@ -54,7 +54,9 @@ export default async function AdminUsersPage({
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
       <div className="mb-6">
         <h1 className="font-display text-3xl font-bold">Users</h1>
-        <p className="text-sm text-muted-foreground">{total.toLocaleString()} total students</p>
+        <p className="text-sm text-muted-foreground">
+          {total.toLocaleString()} total accounts (students & doctors)
+        </p>
       </div>
       <UsersTable users={users as any} total={total} page={page} limit={limit} viewerRole={role ?? "STUDENT"} universities={universities as any} />
     </div>

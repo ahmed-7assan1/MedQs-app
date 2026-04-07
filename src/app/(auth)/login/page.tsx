@@ -2,6 +2,8 @@ import { signIn } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { MedQsLogoLockup } from "@/components/branding/MedQsLogo";
+import { PLATFORM_COPY } from "@/lib/platform-copy";
+import Link from "next/link";
 
 export default async function LoginPage() {
   const session = await auth();
@@ -79,6 +81,14 @@ export default async function LoginPage() {
             <a href="/terms" className="text-primary hover:underline">Terms of Service</a>
             {" "}and{" "}
             <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+          </p>
+
+          <p className="mt-4 rounded-xl border border-border/60 bg-muted/30 px-3 py-2.5 text-center text-[11px] leading-relaxed text-muted-foreground">
+            {PLATFORM_COPY.loginDoctorHint}{" "}
+            <Link href="/doctor" className="font-medium text-primary hover:underline">
+              {PLATFORM_COPY.landingForDoctorsCta}
+            </Link>
+            .
           </p>
         </div>
 

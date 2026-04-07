@@ -6,6 +6,7 @@ import {
   Users, BookOpen, HelpCircle, FileText,
   MessageSquare, TrendingUp, Megaphone, Zap, Video,
 } from "lucide-react";
+import { PLATFORM_COPY } from "@/lib/platform-copy";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -42,7 +43,7 @@ export default async function AdminDashboardPage() {
   ];
 
   const quickLinks = [
-    { href: "/admin/content",      label: "Content Structure", icon: BookOpen,     desc: "Universities, semesters, modules" },
+    { href: "/admin/content",      label: "Courses & curriculum", icon: BookOpen,     desc: "University → semester → module → subject tree" },
     { href: "/admin/lectures",     label: "Lectures",          icon: Video,        desc: "Videos, flashcards, files" },
     { href: "/admin/past-papers",  label: "Past Papers",       icon: FileText,     desc: "Upload + manage exam papers" },
     { href: "/admin/questions",    label: "Questions",         icon: HelpCircle,   desc: "CRUD + bulk import" },
@@ -55,8 +56,11 @@ export default async function AdminDashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
       <div className="mb-8">
-        <p className="text-sm text-muted-foreground">Admin Panel</p>
-        <h1 className="font-display text-3xl font-bold">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">{PLATFORM_COPY.doctorHub}</p>
+        <h1 className="font-display text-3xl font-bold">Overview</h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Manage curriculum, assessments, forums, and AI tools for your students — all in one place.
+        </p>
       </div>
 
       {/* Stats */}

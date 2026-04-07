@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 const adminLinks: { href: string; label: string; icon: ElementType }[] = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/content", label: "Structure", icon: BookOpen },
+  { href: "/admin/content", label: "Courses", icon: BookOpen },
   { href: "/admin/lectures", label: "Lectures", icon: Video },
   { href: "/admin/past-papers", label: "Past Papers", icon: FileText },
   { href: "/admin/questions", label: "Questions", icon: HelpCircle },

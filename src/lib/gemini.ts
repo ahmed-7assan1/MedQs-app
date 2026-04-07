@@ -267,7 +267,7 @@ Lecture title: ${lectureTitle}
 Subject: ${subjectName}
 Module: ${moduleName}
 
-Teacher instructions (what to focus on):
+Doctor / faculty instructions (what to focus on):
 ${instructions.trim() || "Summarize high-yield exam-relevant concepts."}
 
 Return ONLY valid JSON:
@@ -277,8 +277,8 @@ Return ONLY valid JSON:
 }
 
 Rules:
-- If the teacher does not need study notes, set notesMarkdown to "".
-- If the teacher does not need flashcards, set flashcards to [].
+- If the doctor does not need study notes, set notesMarkdown to "".
+- If the doctor does not need flashcards, set flashcards to [].
 - notesMarkdown: use ## headings, bullet lists, bold key terms; concise.
 - flashcards: 6–24 cards if requested, else []; short Q/A style; medically accurate.
 - wantNotes this run: ${wantNotes}

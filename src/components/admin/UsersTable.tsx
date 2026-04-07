@@ -24,6 +24,13 @@ const ROLE_COLORS: Record<string, string> = {
   SUPER_ADMIN: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
 
+/** Faculty-facing label in UI (DB role remains ADMIN). */
+function roleDisplayLabel(role: string) {
+  if (role === "ADMIN") return "Doctor";
+  if (role === "SUPER_ADMIN") return "Platform";
+  return role;
+}
+
 export function UsersTable({
   users,
   total,
@@ -143,7 +150,7 @@ export function UsersTable({
                         className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
                         value={user.universityId ?? ""}
                         onChange={(e) => void setUniversity(user.id, e.target.value)}
-                        title="Assign admin to a university"
+                        title="Assign doctor (faculty) to a university"
                       >
                         <option value="">—</option>
                         {universities.map((u) => (
@@ -159,7 +166,7 @@ export function UsersTable({
                 <td className="px-4 py-3 text-xs font-mono">{user.points}</td>
                 <td className="px-4 py-3">
                   <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", ROLE_COLORS[user.role] ?? ROLE_COLORS.STUDENT)}>
-                    {user.role}
+                    {roleDisplayLabel(user.role)}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
@@ -169,7 +176,7 @@ export function UsersTable({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => changeRole(user.id, user.role === "STUDENT" ? "ADMIN" : "STUDENT")}
-                      title="Toggle admin"
+                      title="Toggle doctor hub access (student ↔ doctor)"
                       className="rounded p-1.5 text-muted-foreground hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
                     >
                       <Shield className="h-3.5 w-3.5" />

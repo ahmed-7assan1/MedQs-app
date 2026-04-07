@@ -17,12 +17,13 @@ import {
   Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PLATFORM_COPY } from "@/lib/platform-copy";
 
 const LINKS = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/settings", label: "Site settings", icon: Settings },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/content", label: "Structure", icon: BookOpen },
+  { href: "/admin/content", label: "Courses", icon: BookOpen },
   { href: "/admin/lectures", label: "Lectures", icon: Video },
   { href: "/admin/past-papers", label: "Past papers / quizzes", icon: FileText },
   { href: "/admin/questions", label: "Questions", icon: HelpCircle },
@@ -32,7 +33,7 @@ const LINKS = [
   { href: "/admin/ads", label: "Ads", icon: Megaphone },
 ];
 
-/** Floating admin menu on student pages (same routes as /admin). */
+/** Floating doctor hub menu on student pages (same routes as /admin). */
 export function AdminStudentBar() {
   const [open, setOpen] = useState(false);
 
@@ -43,10 +44,13 @@ export function AdminStudentBar() {
           <div
             className="mb-1 max-h-[min(70vh,440px)] w-[min(calc(100vw-2rem),15rem)] overflow-y-auto rounded-xl border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
             role="menu"
-            aria-label="Admin shortcuts"
+            aria-label={PLATFORM_COPY.doctorShortcutsMenu}
           >
             <p className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Admin (student view)
+              {PLATFORM_COPY.doctorHub}
+            </p>
+            <p className="px-2 pb-1.5 text-[10px] text-muted-foreground/90">
+              {PLATFORM_COPY.doctorShortcutsSubtitle}
             </p>
             {LINKS.map(({ href, label, icon: Icon }) => (
               <Link
@@ -71,7 +75,7 @@ export function AdminStudentBar() {
           aria-expanded={open}
         >
           <ShieldCheck className="h-4 w-4" aria-hidden />
-          Admin
+          {PLATFORM_COPY.floatingDoctorButton}
         </button>
       </div>
     </div>

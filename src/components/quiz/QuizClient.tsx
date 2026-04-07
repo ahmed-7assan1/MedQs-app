@@ -104,7 +104,7 @@ export function QuizClient({
       } else if (document.visibilityState === "visible" && wasHiddenRef.current) {
         wasHiddenRef.current = false;
         toast.error(
-          "Academic integrity: you left this quiz tab. This may be reported to your instructor when you submit.",
+          "Academic integrity: you left this quiz tab. This may be reported to your course doctor when you submit.",
           { duration: 7000 }
         );
       }

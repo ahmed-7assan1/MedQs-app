@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { PostCard } from "./PostCard";
 import {
   MessageSquare,
@@ -85,6 +85,28 @@ export function ForumClient({
   const [discussionScope, setDiscussionScope] = useState<"global" | "semester">("semester");
   const [feedMode, setFeedMode] = useState<"university" | "following">("university");
   const [postAudience, setPostAudience] = useState<"UNIVERSITY" | "FOLLOWERS">("UNIVERSITY");
+  const [discussionDraft, setDiscussionDraft] = useState("");
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  const discussionInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const discussionPostsChronological = useMemo(() => {
+    if (tab !== "discussions") return posts;
+    return [...posts].reverse();
+  }, [tab, posts]);
+
+  useEffect(() => {
+    if (tab !== "discussions") return;
+    const el = chatScrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [tab, posts.length, loading]);
+
+  useEffect(() => {
+    if (tab !== "discussions" || !discussionInputRef.current) return;
+    const el = discussionInputRef.current;
+    el.style.height = "0px";
+    el.style.height = `${Math.min(160, Math.max(44, el.scrollHeight))}px`;
+  }, [discussionDraft, tab]);
 
   async function loadPosts(forumId: string) {
     if (!forumId) return;
@@ -167,33 +189,56 @@ export function ForumClient({
       .catch(() => {});
   }, []);
 
-  async function handlePost() {
-    if (!activeForum) return;
-    if (!postContent.trim() && !postImageUrl.trim()) return;
-    if (activeForum.status === "READ_ONLY") return toast.error("This forum is read-only");
+  async function submitPost(content: string, imageUrl: string): Promise<boolean> {
+    if (!activeForum) return false;
+    const trimmed = content.trim();
+    const img = imageUrl.trim();
+    if (!trimmed && !img) return false;
+    if (activeForum.status === "READ_ONLY") {
+      toast.error("This forum is read-only");
+      return false;
+    }
     setPosting(true);
     try {
       const res = await fetch(`/api/v1/forums/${activeForum.id}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: postContent.trim(),
-          imageUrl: postImageUrl.trim() || undefined,
+          content: trimmed,
+          imageUrl: img || undefined,
           audience: postAudience,
         }),
       });
       if (res.ok) {
         const newPost = await res.json();
         setPosts((p) => [newPost, ...p]);
-        setPostContent("");
-        setPostImageUrl("");
-        setComposing(false);
-        toast.success("Post published!");
-      } else {
-        toast.error("Failed to post");
+        toast.success(tab === "discussions" ? "Sent" : "Post published!");
+        return true;
       }
+      toast.error("Failed to post");
+      return false;
+    } catch {
+      toast.error("Network error — could not send");
+      return false;
     } finally {
       setPosting(false);
+    }
+  }
+
+  async function handlePost() {
+    const ok = await submitPost(postContent, postImageUrl);
+    if (ok) {
+      setPostContent("");
+      setPostImageUrl("");
+      setComposing(false);
+    }
+  }
+
+  async function handleDiscussionSend() {
+    const ok = await submitPost(discussionDraft, postImageUrl);
+    if (ok) {
+      setDiscussionDraft("");
+      setPostImageUrl("");
     }
   }
 
@@ -346,12 +391,28 @@ export function ForumClient({
     );
   }
 
+  const isChatTab = tab === "discussions";
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
-      <div className="mb-6 flex items-start justify-between gap-3">
+    <div
+      className={cn(
+        "flex w-full flex-col",
+        isChatTab
+          ? "min-h-0 flex-1 px-2 pb-0 pt-3 sm:px-4 md:pt-4"
+          : "mx-auto max-w-3xl px-4 py-8 md:px-6"
+      )}
+    >
+      <div className={cn("mb-6 flex items-start justify-between gap-3", isChatTab && "mb-3 shrink-0")}>
         <div>
-          <h1 className="font-display text-3xl font-bold">Community</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your university feed and semester discussions.</p>
+          <h1 className={cn("font-display font-bold", isChatTab ? "text-2xl md:text-3xl" : "text-3xl")}>Community</h1>
+          {!isChatTab ? (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Feed for updates · <strong className="font-medium text-foreground">Discussions</strong> is a group chat layout (newest at the
+              bottom).
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs text-muted-foreground">Full-height group chat — newest messages at the bottom.</p>
+          )}
         </div>
         <div className="relative shrink-0">
           <button
@@ -387,7 +448,7 @@ export function ForumClient({
         </div>
       </div>
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className={cn("mb-5 flex flex-wrap items-center justify-between gap-3", isChatTab && "mb-3 shrink-0")}>
         <div className="inline-flex rounded-xl border border-border bg-background p-1 text-sm">
           <button
             onClick={() => setTab("feed")}
@@ -405,7 +466,7 @@ export function ForumClient({
               tab === "discussions" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
             )}
           >
-            Discussions
+            Discussions (chat)
           </button>
         </div>
 
@@ -443,7 +504,12 @@ export function ForumClient({
         )}
       </div>
       {pendingInvites.length > 0 && (
-        <div className="mb-6 rounded-xl border border-amber-300/50 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
+        <div
+          className={cn(
+            "mb-6 rounded-xl border border-amber-300/50 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-900/20",
+            isChatTab && "shrink-0"
+          )}
+        >
           <p className="mb-2 text-sm font-semibold">Pending private forum invites</p>
           <div className="space-y-2">
             {pendingInvites.map((invite) => (
@@ -475,7 +541,7 @@ export function ForumClient({
       )}
 
       {privateFormOpen && (
-        <div className="mb-6 rounded-xl border border-border bg-card p-4">
+        <div className={cn("mb-6 rounded-xl border border-border bg-card p-4", isChatTab && "shrink-0")}>
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="text-sm font-semibold">Create private study forum</p>
             <button
@@ -534,7 +600,7 @@ export function ForumClient({
       )}
 
       {/* Forum tabs */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
+      <div className={cn("mb-6 flex gap-2 overflow-x-auto pb-1", isChatTab && "mb-3 shrink-0")}>
         {forumList.map((forum) => (
           <button
             key={forum.id}
@@ -564,18 +630,19 @@ export function ForumClient({
         ))}
       </div>
 
-      {/* Compose */}
-      {activeForum && activeForum.status !== "READ_ONLY" && (
+      {/* Feed composer (rich post) — Discussions uses chat bar below the message list */}
+      {activeForum && activeForum.status !== "READ_ONLY" && tab === "feed" && (
         <div className="mb-6 rounded-xl border border-border bg-card p-4">
           {!composing ? (
             <button
+              type="button"
               onClick={() => setComposing(true)}
               className="flex w-full items-center gap-3 text-sm text-muted-foreground"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                 <MessageSquare className="h-4 w-4" />
               </div>
-              <span className="flex-1 rounded-lg bg-muted px-3 py-2 text-left hover:bg-muted/80 transition-colors">
+              <span className="flex-1 rounded-lg bg-muted px-3 py-2 text-left transition-colors hover:bg-muted/80">
                 Share something with your peers...
               </span>
             </button>
@@ -681,16 +748,20 @@ export function ForumClient({
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => { setComposing(false); setPostContent(""); setPostImageUrl(""); }}
-                  className="rounded-lg px-4 py-2 text-sm hover:bg-muted transition-colors"
+                  onClick={() => {
+                    setComposing(false);
+                    setPostContent("");
+                    setPostImageUrl("");
+                  }}
+                  className="rounded-lg px-4 py-2 text-sm transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={handlePost}
+                  onClick={() => void handlePost()}
                   disabled={posting || (!postContent.trim() && !postImageUrl.trim())}
-                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors"
+                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
                 >
                   {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   {posting ? "Posting..." : "Post"}
@@ -701,9 +772,91 @@ export function ForumClient({
         </div>
       )}
 
-      {/* Posts */}
+      {/* Posts + discussion chat layout */}
       {loading ? (
-        <ForumPostListSkeleton count={4} />
+        <div className={cn(tab === "discussions" && "flex min-h-0 flex-1 flex-col")}>
+          <ForumPostListSkeleton count={4} />
+        </div>
+      ) : tab === "discussions" && activeForum ? (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/80 bg-muted/10 shadow-sm dark:bg-muted/5">
+          <div
+            ref={chatScrollRef}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3 sm:px-4 sm:py-4"
+          >
+            <div className="mx-auto w-full max-w-4xl space-y-5">
+            {discussionPostsChronological.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <MessageSquare className="mb-2 h-10 w-10 text-muted-foreground opacity-30" />
+                <p className="text-sm font-medium text-muted-foreground">No messages yet</p>
+                <p className="text-xs text-muted-foreground">Say hello using the box below.</p>
+              </div>
+            ) : (
+              discussionPostsChronological.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  currentUserId={currentUserId}
+                  forumName={activeForum.name}
+                  variant="chat"
+                />
+              ))
+            )}
+            </div>
+          </div>
+          {activeForum.status !== "READ_ONLY" && (
+            <div className="shrink-0 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur-md dark:shadow-[0_-8px_24px_rgba(0,0,0,0.25)] md:pb-3">
+              <div className="mx-auto flex max-w-4xl items-end gap-2">
+                <label className="mb-1 flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border bg-muted/40 transition-colors hover:bg-muted">
+                  {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) uploadForumImage(file);
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+                <textarea
+                  ref={discussionInputRef}
+                  value={discussionDraft}
+                  onChange={(e) => setDiscussionDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      void handleDiscussionSend();
+                    }
+                  }}
+                  rows={1}
+                  placeholder="Message the group…"
+                  className="max-h-40 min-h-[44px] flex-1 resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-relaxed shadow-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleDiscussionSend()}
+                  disabled={posting || (!discussionDraft.trim() && !postImageUrl.trim())}
+                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {posting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                </button>
+              </div>
+              {postImageUrl ? (
+                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={normalizeImageUrl(postImageUrl)} alt="" className="h-12 w-12 rounded-lg border object-cover" />
+                  <button type="button" onClick={() => setPostImageUrl("")} className="text-primary hover:underline">
+                    Remove image
+                  </button>
+                </div>
+              ) : null}
+              <p className="mx-auto mt-1.5 max-w-4xl text-[10px] text-muted-foreground">
+                Enter to send · Shift+Enter new line · Markdown still works in messages
+              </p>
+            </div>
+          )}
+        </div>
       ) : posts.length === 0 ? (
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-12 text-center">
           <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
@@ -718,6 +871,7 @@ export function ForumClient({
               post={post}
               currentUserId={currentUserId}
               forumName={activeForum?.name}
+              variant="card"
             />
           ))}
         </div>

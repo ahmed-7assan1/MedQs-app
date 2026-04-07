@@ -241,9 +241,12 @@ export default function AdminContentPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold">Content Structure</h1>
+        <h1 className="font-display text-3xl font-bold">Courses & curriculum</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage universities → years → semesters → modules → subjects
+          This tree is your course map: university → year → semester → module → subject. Add lectures, videos, and
+          questions under <strong className="font-medium text-foreground">Lectures</strong> and{" "}
+          <strong className="font-medium text-foreground">Questions</strong> in the Doctor hub — students see it in{" "}
+          <strong className="font-medium text-foreground">Lectures</strong> on their side.
         </p>
       </div>
 

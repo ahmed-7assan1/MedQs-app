@@ -63,7 +63,7 @@ export function ModuleInlineManager({
   return (
     <div className="mb-6 rounded-xl border border-primary/25 bg-primary/[0.04] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Admin inline: Modules</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Doctor inline: Modules</p>
         <button onClick={() => setOpen((v) => !v)} className="rounded-lg border border-border bg-background px-3 py-1 text-xs hover:bg-muted">
           {open ? "Close" : "Edit"}
         </button>

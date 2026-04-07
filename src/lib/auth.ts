@@ -14,6 +14,8 @@ const CredentialsSchema = z.object({
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Use the incoming Host when building OAuth redirect_uri (needed on Vercel etc. if URL env drifts).
+  trustHost: true,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   providers: [

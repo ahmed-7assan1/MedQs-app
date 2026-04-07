@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { redirectIncompleteStudentToRegister } from "@/lib/student-onboarding";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -32,6 +33,7 @@ import {
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  await redirectIncompleteStudentToRegister(session);
 
   const userId = session.user.id;
   const dayStart = startOfLocalDay();
