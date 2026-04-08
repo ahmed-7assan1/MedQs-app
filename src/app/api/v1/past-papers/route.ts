@@ -9,15 +9,34 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const semesterId = searchParams.get("semesterId");
+  const where = semesterId ? { semesterId } : {};
 
-  const papers = await prisma.pastPaper.findMany({
-    where: semesterId ? { semesterId } : undefined,
-    orderBy: { createdAt: "desc" },
-    include: {
-      module: { select: { name: true } },
-      _count: { select: { attempts: true } },
-    },
-  });
+  let papers: any[] = [];
+  try {
+    papers = await prisma.pastPaper.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        module: { select: { name: true } },
+        _count: { select: { attempts: true } },
+      },
+    });
+  } catch {
+    // Backward-compat when DB is not migrated yet.
+    const legacy = await prisma.pastPaper.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        module: { select: { name: true } },
+        _count: { select: { attempts: true } },
+      },
+    });
+    papers = legacy.map((p) => ({
+      ...p,
+      googleSheetsSyncEnabled: false,
+      _count: { ...p._count },
+    }));
+  }
 
   return NextResponse.json(papers);
 }
@@ -33,23 +52,61 @@ export async function POST(req: NextRequest) {
   const payloadErr = await assertPastPaperCreatePayload(w.scope, semesterId, moduleId);
   if (payloadErr) return payloadErr;
 
-  const paper = await prisma.pastPaper.create({
-    data: {
-      title: String(body.title ?? "").trim(),
-      semesterId: String(body.semesterId ?? ""),
-      moduleId: String(body.moduleId ?? ""),
-      isInteractive: Boolean(body.isInteractive),
-      timeLimitMin:
-        body.timeLimitMin != null && body.timeLimitMin !== ""
-          ? Math.max(1, parseInt(String(body.timeLimitMin), 10))
-          : null,
-      pdfUrl: body.pdfUrl ? String(body.pdfUrl) : null,
-      aiExplanationEnabled: body.aiExplanationEnabled !== false,
-      allowAiDuringQuiz: Boolean(body.allowAiDuringQuiz),
-      secureExamMode: Boolean(body.secureExamMode),
-      restrictCopyPaste: Boolean(body.restrictCopyPaste),
-      trackFocusLoss: Boolean(body.trackFocusLoss),
-    },
+  const kindRaw = typeof body.kind === "string" ? body.kind.trim() : "";
+  const isAdminQuiz = kindRaw === "ADMIN_AUTHORED_QUIZ";
+
+  const paper = await prisma.$transaction(async (tx) => {
+    const created = await tx.pastPaper.create({
+      data: {
+        title: String(body.title ?? "").trim(),
+        semesterId,
+        moduleId,
+        // Admin-authored quizzes are interactive by default.
+        isInteractive: isAdminQuiz ? true : Boolean(body.isInteractive),
+        kind: isAdminQuiz ? "ADMIN_AUTHORED_QUIZ" : "MODULE_QUESTION_BANK",
+        timeLimitMin:
+          body.timeLimitMin != null && body.timeLimitMin !== ""
+            ? Math.max(1, parseInt(String(body.timeLimitMin), 10))
+            : null,
+        pdfUrl: body.pdfUrl ? String(body.pdfUrl) : null,
+        aiExplanationEnabled: body.aiExplanationEnabled !== false,
+        allowAiDuringQuiz: Boolean(body.allowAiDuringQuiz),
+        secureExamMode: Boolean(body.secureExamMode),
+        restrictCopyPaste: Boolean(body.restrictCopyPaste),
+        trackFocusLoss: Boolean(body.trackFocusLoss),
+        googleSheetsSyncEnabled: Boolean(body.googleSheetsSyncEnabled),
+      },
+      select: { id: true, title: true, moduleId: true, semesterId: true, quizLectureId: true, kind: true },
+    });
+
+    if (!isAdminQuiz) return created;
+
+    // Ensure a “Quizzes” subject in this module to host quiz-specific lectures.
+    const subj =
+      (await tx.subject.findFirst({
+        where: { moduleId, isQuizSystemBank: true },
+        select: { id: true },
+      })) ??
+      (await tx.subject.create({
+        data: { moduleId, name: "Quizzes", isQuizSystemBank: true },
+        select: { id: true },
+      }));
+
+    const lecture = await tx.lecture.create({
+      data: {
+        subjectId: subj.id,
+        title: `— Quiz: ${created.title} —`,
+        order: 10_000, // keep quiz lectures after curriculum by default
+      },
+      select: { id: true },
+    });
+
+    return tx.pastPaper.update({
+      where: { id: created.id },
+      data: { quizLectureId: lecture.id },
+      select: { id: true, title: true, moduleId: true, semesterId: true, quizLectureId: true, kind: true },
+    });
   });
+
   return NextResponse.json(paper, { status: 201 });
 }

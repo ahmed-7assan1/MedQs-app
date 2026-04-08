@@ -76,9 +76,14 @@ export default async function RootPage() {
               <img
                 src={logoUrl}
                 alt={siteName}
-                width={32}
-                height={32}
-                style={{ borderRadius: 8, objectFit: "contain" }}
+                width={180}
+                height={48}
+                style={{
+                  maxHeight: 48,
+                  width: "auto",
+                  maxWidth: "min(42vw, 200px)",
+                  objectFit: "contain",
+                }}
               />
               <span
                 style={{

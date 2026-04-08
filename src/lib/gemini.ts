@@ -359,10 +359,13 @@ Rules:
 - mnemonics: 0–6; items 4–10 each; use memorable but professional words (no childish jokes).
 - cases: 0–6; short vignette only (no answers), 3–6 lines.
 - mindMapsMarkdown: if requested, use ## headings and bullet trees; no ASCII art.
-- mindMapGraph: if requested, include a simple directed graph representation suitable for a geometric interactive mind map UI.
-  - 12–40 nodes max, short labels (2–6 words), optional detail (1–2 sentences).
-  - levels: 0 for the central topic, 1/2/3 for branches.
-  - shapes: use "hex" for the center, "circle" for branch nodes, "card" for detail nodes.
+- mindMapGraph: if requested, a clean tree-like graph for the interactive map (students read details in the outline panel).
+  - Use id "root" for exactly ONE central node (level 0, shape "hex"). All other nodes must be reachable from "root" via edges.
+  - 12–28 nodes total (not more). Every node id must be unique alphanumeric (e.g. root, n1, n2).
+  - Every edge "from" and "to" MUST reference existing node ids. No dangling edges. No self-loops.
+  - Labels: 2–7 words. Every node MUST include "detail": 1–3 short sentences grounded in the source (exam-style, no invented doses).
+  - levels: 0 = root only; 1 = main branches; 2–3 = sub-branches. shapes: "hex" root, "circle" main branches, "card" for leaf/detail-heavy nodes.
+  - Prefer a tree: each non-root node has exactly one parent edge incoming (avoid random cross-links unless clearly justified).
 - wantOverviewCards: ${wantOverviewCards}
 - wantMnemonics: ${wantMnemonics}
 - wantCases: ${wantCases}
@@ -422,7 +425,7 @@ Rules:
                 .map((n: any) => ({
                   id: String(n.id).trim().slice(0, 40),
                   label: String(n.label).trim().slice(0, 80),
-                  detail: String(n.detail ?? "").trim().slice(0, 240) || undefined,
+                  detail: String(n.detail ?? "").trim().slice(0, 420) || undefined,
                   level: typeof n.level === "number" ? Math.max(0, Math.min(6, n.level)) : undefined,
                   shape:
                     String(n.shape ?? "").trim() === "hex"
@@ -433,7 +436,7 @@ Rules:
                           ? "card"
                           : undefined,
                 }))
-                .slice(0, 48)
+                .slice(0, 32)
             : [],
           edges: Array.isArray((row.data as any).mindMapGraph.edges)
             ? (row.data as any).mindMapGraph.edges
@@ -442,11 +445,18 @@ Rules:
                   from: String(e.from).trim().slice(0, 40),
                   to: String(e.to).trim().slice(0, 40),
                 }))
-                .slice(0, 120)
+                .filter((e: any) => e.from !== e.to)
+                .slice(0, 80)
             : [],
         }
       : undefined,
   };
+
+  // Drop edges that reference missing node ids (common model mistake).
+  if (data.mindMapGraph?.nodes?.length && data.mindMapGraph?.edges?.length) {
+    const ids = new Set(data.mindMapGraph.nodes.map((n) => n.id));
+    data.mindMapGraph.edges = data.mindMapGraph.edges.filter((e) => ids.has(e.from) && ids.has(e.to));
+  }
 
   return {
     data: {

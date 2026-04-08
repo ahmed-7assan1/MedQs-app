@@ -101,18 +101,31 @@ export async function generateViewport(): Promise<Viewport> {
   };
 }
 
+function appIconsFromConfig(faviconUrl: string | null | undefined): NonNullable<Metadata["icons"]> {
+  const u = faviconUrl?.trim();
+  if (!u) {
+    return {
+      icon: [
+        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    };
+  }
+  return {
+    icon: [
+      { url: u, sizes: "192x192" },
+      { url: u, sizes: "512x512" },
+    ],
+    apple: [{ url: u }],
+  };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getSiteConfig();
   const title = `${config.siteName} — Medical Education`;
   const description =
     "Medical quizzes, lectures, forums, and AI study tools for university students. Built for learning — not clinical advice.";
-  const pwaIcons = {
-    icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
-  };
   return {
     metadataBase: safeMetadataBase(),
     title: { default: title, template: `%s | ${config.siteName}` },
@@ -131,12 +144,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
-    icons: config.faviconUrl
-      ? {
-          icon: [{ url: config.faviconUrl }],
-          apple: [{ url: config.faviconUrl }],
-        }
-      : pwaIcons,
+    icons: appIconsFromConfig(config.faviconUrl),
   };
 }
 
@@ -188,8 +196,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
         {/* Dynamic primary color CSS variables */}
         <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />
-        {/* Dynamic favicon */}
-        {config.faviconUrl && <link rel="icon" href={config.faviconUrl} />}
       </head>
       <body>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />

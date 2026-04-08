@@ -28,9 +28,7 @@ export function SiteFooter({ siteName = "MedQs" }: { siteName?: string }) {
           <Link href="/dashboard-app" className="text-muted-foreground transition-colors hover:text-primary">
             Dashboard
           </Link>
-          <Link href="/study-tools" className="text-muted-foreground transition-colors hover:text-primary">
-            Study tools
-          </Link>
+        {/* Hidden until ready */}
         </nav>
       </div>
       <p className="mx-auto mt-6 max-w-6xl text-center text-[11px] text-muted-foreground/80 sm:text-left">

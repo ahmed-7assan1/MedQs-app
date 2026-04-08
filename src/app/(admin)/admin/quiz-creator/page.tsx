@@ -1,9 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Plus, Trash2, Save, Loader2, ChevronDown, ChevronUp,
-  Clock, BookOpen, Users, Image, Layers, Check, X, Pencil, ImagePlus,
+  Clock, BookOpen, Image, Check, X, Pencil, ImagePlus,
 } from "lucide-react";
+import { apiErrorMessage } from "@/lib/api-error-client";
 import { QuickDrawModal } from "@/components/draw/QuickDrawModal";
 import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
@@ -11,8 +13,15 @@ import toast from "react-hot-toast";
 
 interface Module   { id: string; name: string }
 interface Semester { id: string; name: string }
+interface CreatedPaper {
+  id: string;
+  title: string;
+  quizLectureId?: string | null;
+  kind?: string;
+}
 
 interface QuizQuestion {
+  id?: string;
   body: string;
   imageUrl?: string;
   choices: { key: string; text: string }[];
@@ -25,14 +34,20 @@ const CHOICE_KEYS = ["A", "B", "C", "D", "E"];
 const DIFF_COLORS = { EASY: "text-emerald-600", MEDIUM: "text-amber-600", HARD: "text-red-500" };
 
 export default function AdminQuizCreatorPage() {
+  const search = useSearchParams();
+  const editingPaperId = (search?.get("paperId") ?? "").trim() || null;
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [modules, setModules]     = useState<Module[]>([]);
   const [saving, setSaving]       = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
+  const [removedQuestionIds, setRemovedQuestionIds] = useState<string[]>([]);
 
   const [form, setForm] = useState({
     title: "", semesterId: "", moduleId: "",
     timeLimitMin: "", isInteractive: true,
+    googleSheetsSyncEnabled: false,
   });
+  const [quizLectureId, setQuizLectureId] = useState<string>("");
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([{
     body: "", choices: [
@@ -53,6 +68,11 @@ export default function AdminQuizCreatorPage() {
     ]).then(([s, m]) => { setSemesters(s); setModules(m); });
   }, []);
 
+  useEffect(() => {
+    // reset quiz lecture when switching module
+    setQuizLectureId("");
+  }, [form.moduleId]);
+
   function addQuestion() {
     setQuestions(qs => [...qs, {
       body: "", choices: [
@@ -65,7 +85,11 @@ export default function AdminQuizCreatorPage() {
   }
 
   function removeQuestion(i: number) {
-    setQuestions(qs => qs.filter((_, idx) => idx !== i));
+    setQuestions(qs => {
+      const q = qs[i];
+      if (q?.id) setRemovedQuestionIds((prev) => [...prev, q.id!]);
+      return qs.filter((_, idx) => idx !== i);
+    });
     setExpandedQ(null);
   }
 
@@ -112,6 +136,70 @@ export default function AdminQuizCreatorPage() {
     }));
   }
 
+  const activeModuleName = useMemo(() => {
+    const m = modules.find((x) => x.id === form.moduleId);
+    return m?.name ?? "";
+  }, [modules, form.moduleId]);
+
+  useEffect(() => {
+    if (!editingPaperId) return;
+    let cancelled = false;
+    (async () => {
+      setLoadingEdit(true);
+      try {
+        const paperRes = await fetch(`/api/v1/past-papers/${editingPaperId}`);
+        const paper = await paperRes.json().catch(() => ({}));
+        if (!paperRes.ok) {
+          toast.error(await apiErrorMessage(paperRes, "Could not load quiz"));
+          return;
+        }
+        const lectureId = typeof paper.quizLectureId === "string" ? paper.quizLectureId : "";
+        if (!lectureId) {
+          toast.error("This quiz has no quiz lecture. Re-create it from Quiz Creator.");
+          return;
+        }
+        const qsRes = await fetch(`/api/v1/questions?lectureId=${encodeURIComponent(lectureId)}`);
+        const qs = await qsRes.json().catch(() => []);
+        if (!cancelled) {
+          setForm((f) => ({
+            ...f,
+            title: typeof paper.title === "string" ? paper.title : f.title,
+            semesterId: typeof paper.semesterId === "string" ? paper.semesterId : f.semesterId,
+            moduleId: typeof paper.moduleId === "string" ? paper.moduleId : f.moduleId,
+            timeLimitMin: paper.timeLimitMin != null ? String(paper.timeLimitMin) : "",
+            googleSheetsSyncEnabled: Boolean(paper.googleSheetsSyncEnabled),
+          }));
+          setQuizLectureId(lectureId);
+          setRemovedQuestionIds([]);
+          setQuestions(
+            Array.isArray(qs) && qs.length > 0
+              ? qs.map((q: any) => ({
+                  id: q.id,
+                  body: q.body ?? "",
+                  imageUrl: q.imageUrl ?? undefined,
+                  choices: Array.isArray(q.choices) ? q.choices : (q.choices ?? []),
+                  answer: q.answer ?? "A",
+                  explanation: q.explanation ?? "",
+                  difficulty: q.difficulty ?? "MEDIUM",
+                }))
+              : [{
+                  body: "",
+                  choices: [{ key: "A", text: "" }, { key: "B", text: "" }, { key: "C", text: "" }, { key: "D", text: "" }],
+                  answer: "A",
+                  explanation: "",
+                  difficulty: "MEDIUM",
+                }]
+          );
+        }
+      } finally {
+        if (!cancelled) setLoadingEdit(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [editingPaperId]);
+
   async function handleSave() {
     if (!form.title || !form.semesterId || !form.moduleId)
       return toast.error("Fill in title, semester, and module");
@@ -119,24 +207,89 @@ export default function AdminQuizCreatorPage() {
     const emptyQ = questions.findIndex(q => !q.body.trim());
     if (emptyQ !== -1) return toast.error(`Question ${emptyQ + 1} is empty`);
 
+    // For admin-authored quizzes, questions must be stored under the quiz's dedicated lecture.
+    // The API will create that lecture automatically when kind=ADMIN_AUTHORED_QUIZ.
+
     setSaving(true);
     try {
-      // 1. Create past paper record
-      const paperRes = await fetch("/api/v1/past-papers", {
-        method: "POST",
+      const paperRes = await fetch(editingPaperId ? `/api/v1/past-papers/${editingPaperId}` : "/api/v1/past-papers", {
+        method: editingPaperId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: form.title,
           semesterId: form.semesterId,
           moduleId: form.moduleId,
-          isInteractive: form.isInteractive,
-          timeLimitMin: form.timeLimitMin ? parseInt(form.timeLimitMin) : null,
+          kind: "ADMIN_AUTHORED_QUIZ",
+          timeLimitMin: form.timeLimitMin ? parseInt(form.timeLimitMin, 10) : null,
+          googleSheetsSyncEnabled: form.googleSheetsSyncEnabled,
         }),
       });
 
-      if (!paperRes.ok) { toast.error("Failed to create quiz"); return; }
-      toast.success(`Quiz "${form.title}" saved with ${questions.length} questions!`);
-      setForm({ title: "", semesterId: "", moduleId: "", timeLimitMin: "", isInteractive: true });
+      const paper = (await paperRes.json().catch(() => ({}))) as any;
+      if (!paperRes.ok) {
+        toast.error(await apiErrorMessage(paperRes, "Failed to create quiz"));
+        return;
+      }
+      const qLectureId = editingPaperId ? quizLectureId : (typeof paper.quizLectureId === "string" ? paper.quizLectureId : "");
+      if (!qLectureId) {
+        toast.error("Quiz was created, but no quiz lecture was returned. Check server logs.");
+        return;
+      }
+      setQuizLectureId(qLectureId);
+
+      const questionRows = questions.filter((q) => q.body.trim());
+      const createdIds: string[] = [];
+
+      if (questionRows.length > 0) {
+        for (const q of questionRows) {
+          const isUpdate = typeof q.id === "string" && q.id.length > 0;
+          const qRes = await fetch(isUpdate ? `/api/v1/questions/${q.id}` : "/api/v1/questions", {
+            method: isUpdate ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              body: q.body.trim(),
+              imageUrl: q.imageUrl?.trim() || null,
+              choices: q.choices.map((c) => ({ key: c.key, text: c.text })),
+              answer: q.answer,
+              explanation: q.explanation?.trim() || "",
+              difficulty: q.difficulty,
+              lectureId: qLectureId,
+            }),
+          });
+          const row = await qRes.json().catch(() => ({}));
+          if (!qRes.ok) {
+            toast.error(typeof row?.error === "string" ? row.error : "Failed to save a question");
+            return;
+          }
+          if (typeof row?.id === "string") createdIds.push(row.id);
+        }
+      }
+
+      // “Delete” questions safely: move removed questions to an archive lecture (so attempts remain valid).
+      if (editingPaperId && removedQuestionIds.length > 0) {
+        const arcRes = await fetch(`/api/v1/modules/${form.moduleId}/ensure-quiz-archive-lecture`, { method: "POST" });
+        const arc = await arcRes.json().catch(() => ({}));
+        const archiveLectureId = typeof arc?.lectureId === "string" ? arc.lectureId : "";
+        if (!arcRes.ok || !archiveLectureId) {
+          toast.error(await apiErrorMessage(arcRes, "Could not archive removed questions"));
+          return;
+        }
+        for (const id of removedQuestionIds) {
+          await fetch(`/api/v1/questions/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lectureId: archiveLectureId }),
+          }).catch(() => {});
+        }
+      }
+
+      toast.success(editingPaperId ? "Quiz updated" : `Quiz saved — ${createdIds.length} question(s) in this quiz`);
+      setForm({
+        title: "", semesterId: "", moduleId: "",
+        timeLimitMin: "", isInteractive: true,
+        googleSheetsSyncEnabled: false,
+      });
+      setQuizLectureId("");
       setQuestions([{ body: "", choices: [{ key:"A",text:"" }, { key:"B",text:"" }, { key:"C",text:"" }, { key:"D",text:"" }], answer: "A", explanation: "", difficulty: "MEDIUM" }]);
     } finally { setSaving(false); }
   }
@@ -181,6 +334,41 @@ export default function AdminQuizCreatorPage() {
               {modules.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
             </select>
           </div>
+
+          <div className="sm:col-span-2 rounded-xl border border-border bg-muted/20 px-4 py-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              This quiz will have its <span className="text-foreground/80">own questions only</span> (separate from lecture questions).
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              A dedicated “quiz lecture” is created automatically on save.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl border border-emerald-200/80 bg-emerald-50/40 px-4 py-3 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+            <div>
+              <p className="text-sm font-medium">Google Sheets (this quiz)</p>
+              <p className="text-xs text-muted-foreground">
+                Append each result to tab <code className="rounded bg-muted px-1 text-[10px]">QuizLive</code> (set{" "}
+                <code className="rounded bg-muted px-1 text-[10px]">GOOGLE_SHEETS_*</code> on the server).
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, googleSheetsSyncEnabled: !f.googleSheetsSyncEnabled }))}
+              className={cn(
+                "relative h-6 w-11 flex-shrink-0 rounded-full transition-colors",
+                form.googleSheetsSyncEnabled ? "bg-primary" : "bg-muted"
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform",
+                  form.googleSheetsSyncEnabled ? "translate-x-6" : "translate-x-1"
+                )}
+              />
+            </button>
+          </div>
+
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">
               Time limit <span className="text-muted-foreground/60">(minutes, optional)</span>

@@ -87,7 +87,7 @@ export default async function DashboardPage() {
         })
       : null;
 
-  const [modules, attemptItems] = await Promise.all([
+  const [modules, attemptItems, lastLectureActivity] = await Promise.all([
     user?.semesterId != null
       ? prisma.module.findMany({
           where: { semesterId: user.semesterId },
@@ -119,6 +119,25 @@ export default async function DashboardPage() {
             lecture: {
               select: {
                 subject: { select: { moduleId: true } },
+              },
+            },
+          },
+        },
+      },
+    }),
+    prisma.userLectureActivity.findFirst({
+      where: { userId },
+      orderBy: { lastViewedAt: "desc" },
+      select: {
+        lastViewedAt: true,
+        lecture: {
+          select: {
+            id: true,
+            title: true,
+            subject: {
+              select: {
+                moduleId: true,
+                name: true,
               },
             },
           },
@@ -221,6 +240,27 @@ export default async function DashboardPage() {
           </MedqsCard>
         ))}
       </div>
+
+      {lastLectureActivity?.lecture?.subject?.moduleId ? (
+        <MedqsCard className="mb-8 border-primary/20 bg-gradient-to-r from-primary/[0.07] to-transparent">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">Continue where you left off</p>
+              <p className="mt-1 truncate font-display text-lg font-semibold text-foreground">
+                {lastLectureActivity.lecture.title}
+              </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{lastLectureActivity.lecture.subject.name}</p>
+            </div>
+            <Link
+              href={`/modules/${lastLectureActivity.lecture.subject.moduleId}/lectures/${lastLectureActivity.lecture.id}`}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Resume lecture
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+        </MedqsCard>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -421,8 +461,6 @@ export default async function DashboardPage() {
               {[
                 { href: "/modules", label: "Browse modules", icon: BookOpen },
                 { href: "/past-papers", label: "Practice papers", icon: FileText },
-                { href: "/forum", label: "Forum", icon: Zap },
-                { href: "/space", label: "Study space", icon: Clock },
               ].map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}

@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { loadQuestionsForPastPaper } from "@/lib/past-paper-quiz";
 import { notFound, redirect } from "next/navigation";
 import { QuizSkeleton } from "@/components/ui/skeletons";
 
@@ -24,31 +25,6 @@ export default async function QuizPage({ params }: { params: { paperId: string }
       secureExamMode: true,
       restrictCopyPaste: true,
       trackFocusLoss: true,
-      module: {
-        include: {
-          subjects: {
-            include: {
-              lectures: {
-                include: {
-                  questions: {
-                    select: {
-                      id: true,
-                      body: true,
-                      imageUrl: true,
-                      stemLayout: true,
-                      choices: true,
-                      answer: true,
-                      explanation: true,
-                      difficulty: true,
-                      lectureId: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
     },
   });
 
@@ -59,13 +35,8 @@ export default async function QuizPage({ params }: { params: { paperId: string }
     .catch(() => null);
   const siteAiEnabled = siteConfig?.enableAI !== false;
 
-  // Flatten all questions from all lectures in this module
-  const questions = paper.module.subjects
-    .flatMap((s) => s.lectures)
-    .flatMap((l) => l.questions);
-
-  // Shuffle questions for variety
-  const shuffled = questions.sort(() => Math.random() - 0.5);
+  const questions = await loadQuestionsForPastPaper(paper.id);
+  const shuffled = [...questions].sort(() => Math.random() - 0.5);
 
   return (
     <QuizClient

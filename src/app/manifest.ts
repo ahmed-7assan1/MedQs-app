@@ -9,21 +9,37 @@ function safeThemeColor(hex: string | null | undefined): string {
   return /^#[0-9A-Fa-f]{6}$/.test(t) ? t : DEFAULT_PRIMARY;
 }
 
+function iconMime(src: string): string {
+  const s = src.toLowerCase();
+  if (s.includes(".webp")) return "image/webp";
+  if (s.includes(".png")) return "image/png";
+  if (s.includes(".jpg") || s.includes(".jpeg")) return "image/jpeg";
+  if (s.includes(".gif")) return "image/gif";
+  return "image/png";
+}
+
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   let siteName = "MedQs";
   let themeColor = DEFAULT_PRIMARY;
 
+  let pwaIcon: string | null = null;
   try {
     const row = await prisma.siteConfig.findFirst({
-      select: { siteName: true, primaryColor: true },
+      select: { siteName: true, primaryColor: true, faviconUrl: true },
     });
     if (row?.siteName?.trim()) siteName = row.siteName.trim();
     themeColor = safeThemeColor(row?.primaryColor);
+    const u = row?.faviconUrl?.trim();
+    if (u) pwaIcon = u;
   } catch {
     /* DB unavailable — defaults */
   }
 
   const fullName = `${siteName} — Medical Education`;
+  const icon192 = pwaIcon ?? "/icons/icon-192.png";
+  const icon512 = pwaIcon ?? "/icons/icon-512.png";
+  const mime192 = iconMime(icon192);
+  const mime512 = iconMime(icon512);
 
   return {
     name: fullName,
@@ -37,21 +53,21 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     theme_color: themeColor,
     icons: [
       {
-        src: "/icons/icon-192.png",
+        src: icon192,
         sizes: "192x192",
-        type: "image/png",
+        type: mime192,
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: icon512,
         sizes: "512x512",
-        type: "image/png",
+        type: mime512,
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: icon512,
         sizes: "512x512",
-        type: "image/png",
+        type: mime512,
         purpose: "maskable",
       },
     ],

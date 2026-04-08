@@ -11,6 +11,8 @@ import {
   NotebookPen,
   Search,
   Sparkles,
+  ListTree,
+  CircleDot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
@@ -40,11 +42,25 @@ function hexClip() {
   return "polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%)";
 }
 
-function MindMapCanvas({ graph }: { graph: MindMapGraph }) {
-  const nodes = Array.isArray(graph?.nodes) ? graph.nodes : [];
-  const edges = Array.isArray(graph?.edges) ? graph.edges : [];
-  const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
+function sanitizeMindMapGraph(graph: MindMapGraph): MindMapGraph {
+  const rawNodes = Array.isArray(graph?.nodes) ? graph.nodes : [];
+  const nodes = rawNodes.filter((n) => n && String(n.id ?? "").trim() && String(n.label ?? "").trim());
+  const ids = new Set(nodes.map((n) => n.id));
+  const rawEdges = Array.isArray(graph?.edges) ? graph.edges : [];
+  const edges = rawEdges.filter((e) => e && ids.has(e.from) && ids.has(e.to) && e.from !== e.to);
+  return { nodes, edges };
+}
 
+function MindMapCanvas({
+  graph,
+  selectedId,
+  onSelectId,
+}: {
+  graph: MindMapGraph;
+  selectedId: string | null;
+  onSelectId: (id: string) => void;
+}) {
+  const { nodes, edges } = useMemo(() => sanitizeMindMapGraph(graph), [graph]);
   // Derive levels if missing, based on edges from a root-ish node.
   const levelById = useMemo(() => {
     const m = new Map<string, number>();
@@ -97,7 +113,6 @@ function MindMapCanvas({ graph }: { graph: MindMapGraph }) {
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState<null | { x: number; y: number; px: number; py: number }>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -112,13 +127,10 @@ function MindMapCanvas({ graph }: { graph: MindMapGraph }) {
     return () => el.removeEventListener("wheel", onWheel as any);
   }, [scale]);
 
-  const sel = selectedId ? byId.get(selectedId) : null;
-
   return (
-    <div className="grid min-h-[520px] gap-3 lg:grid-cols-[1fr_320px]">
-      <div
-        ref={containerRef}
-        className="relative overflow-hidden rounded-2xl border border-border bg-background/40"
+    <div
+      ref={containerRef}
+      className="relative min-h-[min(52vh,520px)] w-full overflow-hidden rounded-2xl bg-muted/25 ring-1 ring-border/50"
         onPointerDown={(e) => {
           if ((e.target as HTMLElement)?.closest?.("[data-node]")) return;
           (e.currentTarget as any).setPointerCapture?.(e.pointerId);
@@ -128,8 +140,8 @@ function MindMapCanvas({ graph }: { graph: MindMapGraph }) {
           if (!dragging) return;
           setPan({ x: dragging.px + (e.clientX - dragging.x), y: dragging.py + (e.clientY - dragging.y) });
         }}
-        onPointerUp={() => setDragging(null)}
-      >
+          onPointerUp={() => setDragging(null)}
+        >
         <div
           className="absolute left-1/2 top-1/2 will-change-transform"
           style={{ transform: `translate(${pan.x}px,${pan.y}px) translate(-50%,-50%) scale(${scale})` }}
@@ -166,7 +178,7 @@ function MindMapCanvas({ graph }: { graph: MindMapGraph }) {
                 key={n.id}
                 type="button"
                 data-node
-                onClick={() => setSelectedId(n.id)}
+                onClick={() => onSelectId(n.id)}
                 className={cn(
                   "absolute flex items-center justify-center border px-4 text-left",
                   baseCls,
@@ -188,25 +200,164 @@ function MindMapCanvas({ graph }: { graph: MindMapGraph }) {
           })}
         </div>
 
-        <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="rounded-full border border-border bg-card/70 px-2 py-1">Drag to pan</span>
-          <span className="rounded-full border border-border bg-card/70 px-2 py-1">Ctrl + wheel to zoom</span>
+          <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Drag to pan</span>
+            <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Ctrl + wheel to zoom</span>
+          </div>
         </div>
-      </div>
+  );
+}
 
-      <div className="rounded-2xl border border-border bg-card/60 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Node details</p>
-        {sel ? (
-          <>
-            <p className="mt-2 text-lg font-bold">{sel.label}</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {sel.detail?.trim() ? sel.detail : "Select a node to see details."}
-            </p>
-          </>
-        ) : (
-          <p className="mt-3 text-sm text-muted-foreground">Tap a node on the map.</p>
-        )}
+function MindMapOutline({
+  graph,
+  selectedId,
+  onSelect,
+}: {
+  graph: MindMapGraph;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  const { nodes, edges } = useMemo(() => sanitizeMindMapGraph(graph), [graph]);
+  const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
+
+  const { rootId, childrenMap } = useMemo(() => {
+    const incoming = new Map<string, number>();
+    for (const e of edges) incoming.set(e.to, (incoming.get(e.to) ?? 0) + 1);
+    const root =
+      nodes.find((n) => n.id === "root") ||
+      nodes.find((n) => typeof n.level === "number" && n.level === 0) ||
+      nodes.find((n) => (incoming.get(n.id) ?? 0) === 0) ||
+      nodes[0];
+    const rootId = root?.id ?? "";
+    const childrenMap = new Map<string, string[]>();
+    for (const e of edges) {
+      if (!childrenMap.has(e.from)) childrenMap.set(e.from, []);
+      childrenMap.get(e.from)!.push(e.to);
+    }
+    for (const [, arr] of childrenMap) arr.sort();
+    return { rootId, childrenMap };
+  }, [nodes, edges]);
+
+  function Row({ id, depth }: { id: string; depth: number }) {
+    const n = byId.get(id);
+    if (!n) return null;
+    const kids = childrenMap.get(id) ?? [];
+    const active = selectedId === id;
+    return (
+      <li className="list-none">
+        <button
+          type="button"
+          onClick={() => onSelect(id)}
+          className={cn(
+            "w-full rounded-xl px-3 py-2.5 text-left transition-colors",
+            depth > 0 && "ml-3 border-l border-border/80 pl-4",
+            active ? "bg-primary/12 ring-1 ring-primary/25" : "hover:bg-muted/60"
+          )}
+        >
+          <span className="block text-sm font-semibold text-foreground">{n.label}</span>
+          {n.detail?.trim() ? (
+            <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{n.detail}</span>
+          ) : null}
+        </button>
+        {kids.length > 0 ? (
+          <ul className="mt-1 space-y-1">
+            {kids.map((cid) => (
+              <Row key={cid} id={cid} depth={depth + 1} />
+            ))}
+          </ul>
+        ) : null}
+      </li>
+    );
+  }
+
+  if (!rootId) {
+    return (
+      <div className="rounded-xl bg-muted/30 p-4 text-sm text-muted-foreground ring-1 ring-border/40">
+        Map data could not be laid out as a tree. Use the graphic above.
       </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl bg-muted/20 p-4 ring-1 ring-border/40">
+      <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <ListTree className="h-4 w-4 text-primary" aria-hidden />
+        Outline (same order as branches)
+      </div>
+      <ul className="space-y-1">
+        <Row id={rootId} depth={0} />
+      </ul>
+    </div>
+  );
+}
+
+function MindMapFocusCard({ graph, selectedId }: { graph: MindMapGraph; selectedId: string | null }) {
+  const byId = useMemo(() => {
+    const { nodes } = sanitizeMindMapGraph(graph);
+    return new Map(nodes.map((n) => [n.id, n]));
+  }, [graph]);
+  const sel = selectedId ? byId.get(selectedId) : null;
+  return (
+    <div className="flex h-full min-h-[200px] flex-col gap-3 rounded-2xl bg-muted/20 p-4 ring-1 ring-border/40">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <CircleDot className="h-4 w-4 text-primary" aria-hidden />
+        Selected topic
+      </div>
+      {sel ? (
+        <>
+          <p className="font-display text-lg font-bold leading-snug text-foreground">{sel.label}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {sel.detail?.trim() ? sel.detail : "Open the outline or tap the map to explore subtopics."}
+          </p>
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground">Choose a branch from the outline or a node on the map.</p>
+      )}
+    </div>
+  );
+}
+
+function MindMapSection({ graph, markdown }: { graph: MindMapGraph; markdown: string }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const safe = useMemo(() => sanitizeMindMapGraph(graph), [graph]);
+
+  useEffect(() => {
+    if (safe.nodes.length && selectedId == null) {
+      const root =
+        safe.nodes.find((n) => n.id === "root") ||
+        safe.nodes.find((n) => n.level === 0) ||
+        safe.nodes[0];
+      if (root) setSelectedId(root.id);
+    }
+  }, [safe.nodes, selectedId]);
+
+  const hasGraph = safe.nodes.length > 0;
+  const md = safeString(markdown).trim();
+
+  return (
+    <div className="flex flex-col gap-8">
+      {hasGraph ? (
+        <>
+          <MindMapCanvas graph={safe} selectedId={selectedId} onSelectId={setSelectedId} />
+          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+            <MindMapOutline graph={safe} selectedId={selectedId} onSelect={setSelectedId} />
+            <MindMapFocusCard graph={safe} selectedId={selectedId} />
+          </div>
+        </>
+      ) : null}
+
+      {md ? (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Written outline</p>
+          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-p:leading-relaxed">
+            <ReactMarkdown components={markdownComponentsWithImages}>{enhancePlainImageUrls(md)}</ReactMarkdown>
+          </div>
+        </div>
+      ) : null}
+
+      {!hasGraph && !md ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">No mind map content yet.</p>
+      ) : null}
     </div>
   );
 }
@@ -227,7 +378,11 @@ function getTabs(lecture: LectureLike) {
   const hasNotes = Boolean(safeString(lecture?.notesMarkdown).trim());
 
   const extras = (lecture?.extras ?? {}) as any;
-  const hasMindmaps = Boolean(safeString(extras?.mindMapsMarkdown).trim());
+  const hasMindMapGraph =
+    extras?.mindMapGraph &&
+    Array.isArray(extras.mindMapGraph.nodes) &&
+    extras.mindMapGraph.nodes.length > 0;
+  const hasMindmaps = Boolean(safeString(extras?.mindMapsMarkdown).trim()) || Boolean(hasMindMapGraph);
   const hasCases = Array.isArray(extras?.cases) && extras.cases.length > 0;
   const hasMnemonics = Array.isArray(extras?.mnemonics) && extras.mnemonics.length > 0;
 
@@ -537,21 +692,25 @@ export function LectureExperienceClient({
           ) : null}
 
           {active === "flashcards" ? (
-            <div className="rounded-2xl border border-border bg-card/70 p-4">
+            <div className="border-0 bg-transparent p-0">
               {Array.isArray(lecture?.flashcards) && lecture.flashcards.length > 0 ? (
                 <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" />
               ) : (
-                <p className="py-10 text-center text-sm text-muted-foreground">No flashcards yet.</p>
+                <p className="rounded-2xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+                  No flashcards yet.
+                </p>
               )}
             </div>
           ) : null}
 
           {active === "questions" ? (
-            <div className="rounded-2xl border border-border bg-card/70 p-4">
+            <div className="border-0 bg-transparent p-0">
               {Array.isArray(lecture?.questions) && lecture.questions.length > 0 ? (
                 <LectureClient flashcards={[]} questions={lecture.questions} mode="questions" />
               ) : (
-                <p className="py-10 text-center text-sm text-muted-foreground">No questions yet.</p>
+                <p className="rounded-2xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+                  No questions yet.
+                </p>
               )}
             </div>
           ) : null}
@@ -571,18 +730,11 @@ export function LectureExperienceClient({
           ) : null}
 
           {active === "mindmaps" ? (
-            <div className="rounded-2xl border border-border bg-card/70 p-5 md:p-7">
-              {extras?.mindMapGraph && Array.isArray(extras.mindMapGraph.nodes) && extras.mindMapGraph.nodes.length > 0 ? (
-                <MindMapCanvas graph={extras.mindMapGraph as MindMapGraph} />
-              ) : safeString(extras?.mindMapsMarkdown).trim() ? (
-                <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display">
-                  <ReactMarkdown components={markdownComponentsWithImages}>
-                    {enhancePlainImageUrls(safeString(extras?.mindMapsMarkdown))}
-                  </ReactMarkdown>
-                </div>
-              ) : (
-                <p className="py-10 text-center text-sm text-muted-foreground">No mind maps yet.</p>
-              )}
+            <div className="border-0 bg-transparent p-0">
+              <MindMapSection
+                graph={(extras?.mindMapGraph as MindMapGraph) ?? { nodes: [], edges: [] }}
+                markdown={safeString(extras?.mindMapsMarkdown)}
+              />
             </div>
           ) : null}
 

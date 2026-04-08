@@ -2,12 +2,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { FileText, Clock, BarChart3, ChevronRight, Eye } from "lucide-react";
+import { FileText, Clock, BarChart3, ChevronRight, Eye, Plus, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default async function PastPapersPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const role = (session.user as { role?: string } | undefined)?.role;
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -31,11 +33,22 @@ export default async function PastPapersPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold">Past Papers</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {papers.length} paper{papers.length !== 1 ? "s" : ""} available
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold">Quizzes</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {papers.length} quiz{papers.length !== 1 ? "zes" : ""} available
+          </p>
+        </div>
+        {isAdmin ? (
+          <Link
+            href="/admin/quiz-creator"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-95 active:scale-[0.98] transition"
+          >
+            <Plus className="h-4 w-4" aria-hidden />
+            Create quiz
+          </Link>
+        ) : null}
       </div>
 
       {papers.length === 0 ? (
@@ -81,6 +94,16 @@ export default async function PastPapersPage() {
                   </div>
 
                   <div className="flex flex-shrink-0 items-center gap-2">
+                    {isAdmin ? (
+                      <Link
+                        href={`/admin/quiz-creator?paperId=${paper.id}`}
+                        className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted active:scale-[0.98] transition"
+                        title="Manage this quiz"
+                      >
+                        <Settings2 className="h-4 w-4 text-muted-foreground" aria-hidden />
+                        Manage
+                      </Link>
+                    ) : null}
                     {bestScore !== undefined && (
                       <span className={cn(
                         "rounded-full px-3 py-1 text-xs font-semibold",

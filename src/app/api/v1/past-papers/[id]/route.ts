@@ -25,6 +25,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (typeof body.secureExamMode === "boolean") data.secureExamMode = body.secureExamMode;
   if (typeof body.restrictCopyPaste === "boolean") data.restrictCopyPaste = body.restrictCopyPaste;
   if (typeof body.trackFocusLoss === "boolean") data.trackFocusLoss = body.trackFocusLoss;
+  if (typeof body.googleSheetsSyncEnabled === "boolean") data.googleSheetsSyncEnabled = body.googleSheetsSyncEnabled;
 
   if (Object.keys(data).length === 0)
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });
@@ -39,20 +40,55 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   boundary = await assertPastPaperCreatePayload(w.scope, nextSem, nextMod);
   if (boundary) return boundary;
 
-  const paper = await prisma.pastPaper.update({
-    where: { id },
-    data: data as any,
-    include: { module: { select: { name: true } }, _count: { select: { attempts: true } } },
-  });
+  let paper: any;
+  try {
+    paper = await prisma.pastPaper.update({
+      where: { id },
+      data: data as any,
+      include: {
+        module: { select: { name: true } },
+        _count: { select: { attempts: true } },
+      },
+    });
+  } catch {
+    const legacyData = { ...(data as any) };
+    delete legacyData.googleSheetsSyncEnabled;
+    paper = await prisma.pastPaper.update({
+      where: { id },
+      data: legacyData,
+      include: {
+        module: { select: { name: true } },
+        _count: { select: { attempts: true } },
+      },
+    });
+    paper = { ...paper, googleSheetsSyncEnabled: false, _count: { ...paper._count } };
+  }
   return NextResponse.json(paper);
 }
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
   const { id } = await Promise.resolve(ctx.params);
-  const paper = await prisma.pastPaper.findUnique({
-    where: { id },
-    include: { module: { select: { name: true } }, _count: { select: { attempts: true } } },
-  });
+  let paper: any;
+  try {
+    paper = await prisma.pastPaper.findUnique({
+      where: { id },
+      include: {
+        module: { select: { name: true } },
+        _count: { select: { attempts: true } },
+      },
+    });
+  } catch {
+    paper = await prisma.pastPaper.findUnique({
+      where: { id },
+      include: {
+        module: { select: { name: true } },
+        _count: { select: { attempts: true } },
+      },
+    });
+    if (paper) {
+      paper = { ...paper, googleSheetsSyncEnabled: false, _count: { ...paper._count } };
+    }
+  }
   if (!paper) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(paper);
 }
@@ -65,6 +101,41 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   const boundary = await assertPastPaper(w.scope, id);
   if (boundary) return boundary;
 
-  await prisma.pastPaper.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Delete quiz attempts + items for this paper
+      const attempts = await tx.quizAttempt.findMany({
+        where: { pastPaperId: id },
+        select: { id: true },
+      });
+      const attemptIds = attempts.map((a) => a.id);
+      if (attemptIds.length > 0) {
+        await tx.quizAttemptItem.deleteMany({ where: { attemptId: { in: attemptIds } } });
+        await tx.quizAttempt.deleteMany({ where: { id: { in: attemptIds } } });
+      }
+
+      // Question reports that reference this paper
+      await tx.questionReport.deleteMany({ where: { pastPaperId: id } });
+
+      // Explicit linked questions (if schema is migrated)
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const anyTx = tx as any;
+        if (anyTx.pastPaperQuestion?.deleteMany) {
+          await anyTx.pastPaperQuestion.deleteMany({ where: { pastPaperId: id } });
+        }
+      } catch {
+        // Ignore if model/table does not exist yet (pre-migration).
+      }
+
+      await tx.pastPaper.delete({ where: { id } });
+    });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("[past-papers DELETE]", e);
+    return NextResponse.json(
+      { error: "Failed to delete past paper. Check DB constraints or migrations." },
+      { status: 500 }
+    );
+  }
 }

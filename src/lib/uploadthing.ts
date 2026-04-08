@@ -25,14 +25,6 @@ function requireAdmin() {
   };
 }
 
-function requireSuperAdmin() {
-  return async () => {
-    const { role, userId } = await requireAuth();
-    if (role !== "SUPER_ADMIN") throw new Error("Forbidden");
-    return { userId };
-  };
-}
-
 export const ourFileRouter = {
   // Profile avatars — any authenticated user
   avatar: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
@@ -79,9 +71,9 @@ export const ourFileRouter = {
       return { url: file.url };
     }),
 
-  // Site logo — super admin only (stored URL goes to SiteConfig.logoUrl)
+  // Site branding images — admin / super (URLs go to SiteConfig.logoUrl / faviconUrl)
   siteLogo: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
-    .middleware(requireSuperAdmin())
+    .middleware(requireAdmin())
     .onUploadComplete(async ({ file }) => {
       return { url: file.url };
     }),

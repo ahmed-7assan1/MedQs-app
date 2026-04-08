@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { loadQuestionAnswerKeysForPastPaper } from "@/lib/past-paper-quiz";
+import { appendQuizResultRow } from "@/lib/sheets";
 
 // POST /api/v1/past-papers/:id/attempt
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -16,25 +18,20 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const paper = await prisma.pastPaper.findUnique({
     where: { id: params.id },
-    include: { attempts: { where: { userId: session.user.id } } },
+    select: { id: true, title: true, googleSheetsSyncEnabled: true },
   });
   if (!paper) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  // Get questions for this paper's module
-  const questions = await prisma.question.findMany({
-    where: { lecture: { subject: { moduleId: paper.moduleId } } },
-    select: { id: true, answer: true },
-  });
+  const keys = await loadQuestionAnswerKeysForPastPaper(params.id);
 
-  const items = questions.map((q) => ({
+  const items = keys.map((q) => ({
     questionId: q.id,
     chosen: answers[q.id] ?? "",
     isCorrect: answers[q.id] === q.answer,
   }));
 
-  const score = questions.length > 0
-    ? Math.round((items.filter((i) => i.isCorrect).length / questions.length) * 100)
-    : 0;
+  const score =
+    keys.length > 0 ? Math.round((items.filter((i) => i.isCorrect).length / keys.length) * 100) : 0;
 
   const attempt = await prisma.quizAttempt.create({
     data: {
@@ -48,5 +45,26 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     include: { items: true },
   });
 
-  return NextResponse.json({ attemptId: attempt.id, score, total: questions.length }, { status: 201 });
+  if (paper.googleSheetsSyncEnabled) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, email: true },
+      });
+      await appendQuizResultRow({
+        timestamp: new Date().toISOString(),
+        paperId: paper.id,
+        paperTitle: paper.title,
+        studentName: user?.name ?? "",
+        email: user?.email ?? "",
+        score,
+        total: keys.length,
+        timeSeconds: typeof timeTaken === "number" && Number.isFinite(timeTaken) ? Math.max(0, Math.floor(timeTaken)) : 0,
+      });
+    } catch (e) {
+      console.warn("[past-papers/attempt] Google Sheets append skipped:", e);
+    }
+  }
+
+  return NextResponse.json({ attemptId: attempt.id, score, total: keys.length }, { status: 201 });
 }

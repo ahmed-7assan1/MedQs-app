@@ -42,15 +42,33 @@ export default async function AdminDashboardPage() {
     { label: "Quiz Attempts",value: attemptCount,  icon: TrendingUp,    color: "text-amber-500",   bg: "bg-amber-50 dark:bg-amber-900/20" },
   ];
 
-  const quickLinks = [
-    { href: "/admin/content",      label: "Courses & curriculum", icon: BookOpen,     desc: "University → semester → module → subject tree" },
-    { href: "/admin/lectures",     label: "Lectures",          icon: Video,        desc: "Videos, flashcards, files" },
-    { href: "/admin/past-papers",  label: "Past Papers",       icon: FileText,     desc: "Upload + manage exam papers" },
-    { href: "/admin/questions",    label: "Questions",         icon: HelpCircle,   desc: "CRUD + bulk import" },
-    { href: "/admin/ai-tools",     label: "AI Tools",          icon: Zap,          desc: "Extract & generate questions" },
-    { href: "/admin/forum",        label: "Forum",             icon: MessageSquare,desc: "Open, close, moderate" },
-    { href: "/admin/users",        label: "Users",             icon: Users,        desc: "Roles, bans, data" },
-    { href: "/admin/ads",          label: "Ads",               icon: Megaphone,    desc: "Create & target banners" },
+  const linkGroups: {
+    title: string;
+    items: { href: string; label: string; icon: typeof BookOpen; desc: string }[];
+  }[] = [
+    {
+      title: "Curriculum & lectures",
+      items: [
+        { href: "/admin/content", label: "Courses & curriculum", icon: BookOpen, desc: "University → semester → module → subject" },
+        { href: "/admin/lectures", label: "Lectures", icon: Video, desc: "Videos, flashcards, files" },
+        { href: "/admin/past-papers", label: "Past papers", icon: FileText, desc: "Upload and manage exam papers" },
+      ],
+    },
+    {
+      title: "Assessment & AI",
+      items: [
+        { href: "/admin/questions", label: "Questions", icon: HelpCircle, desc: "Create, edit, and import items" },
+        { href: "/admin/ai-tools", label: "AI tools", icon: Zap, desc: "Extract and generate from material" },
+      ],
+    },
+    {
+      title: "Community & platform",
+      items: [
+        { href: "/admin/forum", label: "Forum", icon: MessageSquare, desc: "Moderation and status" },
+        { href: "/admin/users", label: "Users", icon: Users, desc: "Roles, access, and safety" },
+        { href: "/admin/ads", label: "Ads", icon: Megaphone, desc: "Banners and targeting" },
+      ],
+    },
   ];
 
   return (
@@ -76,31 +94,34 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Quick links */}
-        <div className="rounded-xl border border-border bg-card p-5">
-          <h2 className="mb-4 font-display text-lg font-semibold">Quick Navigation</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {quickLinks.map(({ href, label, icon: Icon, desc }) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex flex-col gap-1 rounded-lg border border-border p-3 hover:bg-muted hover:border-primary/30 transition-all"
-              >
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">{label}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">{desc}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
+      <div className="grid gap-6 lg:grid-cols-4">
+        {linkGroups.map((group) => (
+          <section key={group.title} className="rounded-xl border border-border bg-card p-5">
+            <h2 className="mb-3 font-display text-xs font-semibold uppercase tracking-wider text-muted-foreground">{group.title}</h2>
+            <div className="flex flex-col gap-2">
+              {group.items.map(({ href, label, icon: Icon, desc }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="rounded-lg border border-border/80 bg-background/50 p-3 transition-all hover:border-primary/35 hover:bg-muted/60"
+                >
+                  <div className="flex items-start gap-2">
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium leading-snug">{label}</span>
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{desc}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
 
         {/* Recent users */}
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-border bg-card p-5 lg:col-span-1">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold">Recent Sign-ups</h2>
+            <h2 className="font-display text-xs font-semibold uppercase tracking-wider text-muted-foreground">Recent sign-ups</h2>
             <Link href="/admin/users" className="text-xs text-primary hover:underline">
               View all
             </Link>

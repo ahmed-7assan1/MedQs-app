@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   HelpCircle, Plus, Trash2, Loader2,
   CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen, Pencil,
@@ -28,6 +28,7 @@ interface SubjectT { id: string; name: string; moduleId: string }
 interface LectureT { id: string; title: string; subjectId: string }
 
 const DEFAULT_KEYS = ["A", "B", "C", "D"] as const;
+const PAGE_SIZE = 18;
 
 export default function AdminQuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -35,6 +36,7 @@ export default function AdminQuestionsPage() {
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [lectureFilter, setLectureFilter] = useState("");
+  const [listPage, setListPage] = useState(0);
 
   const [modules, setModules] = useState<ModuleT[]>([]);
   const [subjects, setSubjects] = useState<SubjectT[]>([]);
@@ -198,6 +200,17 @@ export default function AdminQuestionsPage() {
     const blob = `${q.body} ${q.imageUrl ?? ""}`.toLowerCase();
     return blob.includes(search.toLowerCase());
   });
+
+  useEffect(() => {
+    setListPage(0);
+  }, [search, lectureFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safeListPage = Math.min(listPage, totalPages - 1);
+  const paged = useMemo(
+    () => filtered.slice(safeListPage * PAGE_SIZE, (safeListPage + 1) * PAGE_SIZE),
+    [filtered, safeListPage]
+  );
 
   const filteredSubjects = subjects.filter((s) => s.moduleId === pickModule);
 
@@ -463,9 +476,11 @@ export default function AdminQuestionsPage() {
           <p className="text-sm text-muted-foreground">Add one manually above or use AI tools with a lecture PDF.</p>
         </div>
       ) : (
+        <>
         <div className="space-y-2">
-          {filtered.map((q, i) => {
+          {paged.map((q, i) => {
             const open = expanded.has(q.id);
+            const rowNum = safeListPage * PAGE_SIZE + i + 1;
             return (
               <div key={q.id} className="rounded-xl border border-border bg-card overflow-hidden">
                 <div
@@ -478,7 +493,7 @@ export default function AdminQuestionsPage() {
                     })
                   }
                 >
-                  <span className="flex-shrink-0 text-xs font-mono text-muted-foreground w-8">{i + 1}</span>
+                  <span className="flex-shrink-0 text-xs font-mono text-muted-foreground w-8">{rowNum}</span>
                   <div className="flex-1 min-w-0">
                     {q.imageUrl ? (
                       <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -584,6 +599,37 @@ export default function AdminQuestionsPage() {
             );
           })}
         </div>
+
+        {filtered.length > PAGE_SIZE ? (
+          <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-border pt-4 sm:flex-row">
+            <p className="text-xs text-muted-foreground">
+              Showing {safeListPage * PAGE_SIZE + 1}–{Math.min((safeListPage + 1) * PAGE_SIZE, filtered.length)} of{" "}
+              {filtered.length}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={safeListPage <= 0}
+                onClick={() => setListPage((p) => Math.max(0, p - 1))}
+                className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-sm tabular-nums text-muted-foreground">
+                Page {safeListPage + 1} / {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={safeListPage >= totalPages - 1}
+                onClick={() => setListPage((p) => Math.min(totalPages - 1, p + 1))}
+                className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        ) : null}
+        </>
       )}
 
       <QuickDrawModal

@@ -17,12 +17,13 @@ interface PastPaper {
   semesterId: string; moduleId: string;
   createdAt: string;
   module: { name: string };
-  _count: { attempts: number };
+  _count: { attempts: number; paperQuestions?: number };
   aiExplanationEnabled?: boolean;
   allowAiDuringQuiz?: boolean;
   secureExamMode?: boolean;
   restrictCopyPaste?: boolean;
   trackFocusLoss?: boolean;
+  googleSheetsSyncEnabled?: boolean;
 }
 
 export default function AdminPastPapersPage() {
@@ -45,17 +46,42 @@ export default function AdminPastPapersPage() {
     secureExamMode: false,
     restrictCopyPaste: false,
     trackFocusLoss: false,
+    googleSheetsSyncEnabled: false,
   });
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/v1/past-papers").then(r => r.json()),
-      fetch("/api/v1/semesters").then(r => r.json()),
-      fetch("/api/v1/modules-all").then(r => r.json()),
-    ]).then(([pp, s, m]) => {
-      setPapers(pp); setSemesters(s); setModules(m);
-      setLoading(false);
-    });
+    let cancelled = false;
+    async function load() {
+      try {
+        const [ppRes, sRes, mRes] = await Promise.all([
+          fetch("/api/v1/past-papers"),
+          fetch("/api/v1/semesters"),
+          fetch("/api/v1/modules-all"),
+        ]);
+
+        const pp = ppRes.ok ? await ppRes.json().catch(() => []) : [];
+        const s = sRes.ok ? await sRes.json().catch(() => []) : [];
+        const m = mRes.ok ? await mRes.json().catch(() => []) : [];
+
+        if (!cancelled) {
+          setPapers(Array.isArray(pp) ? pp : []);
+          setSemesters(Array.isArray(s) ? s : []);
+          setModules(Array.isArray(m) ? m : []);
+        }
+
+        if (!ppRes.ok && !cancelled) {
+          toast.error("Could not load papers. Check server/DB migration then refresh.");
+        }
+      } catch {
+        if (!cancelled) toast.error("Failed to load page data");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleCreate() {
@@ -78,6 +104,7 @@ export default function AdminPastPapersPage() {
         secureExamMode: form.secureExamMode,
         restrictCopyPaste: form.restrictCopyPaste,
         trackFocusLoss: form.trackFocusLoss,
+        googleSheetsSyncEnabled: form.googleSheetsSyncEnabled,
       }),
     });
 
@@ -96,6 +123,7 @@ export default function AdminPastPapersPage() {
         secureExamMode: false,
         restrictCopyPaste: false,
         trackFocusLoss: false,
+        googleSheetsSyncEnabled: false,
       });
       setShowForm(false);
       toast.success("Past paper created!");
@@ -115,6 +143,7 @@ export default function AdminPastPapersPage() {
         | "secureExamMode"
         | "restrictCopyPaste"
         | "trackFocusLoss"
+        | "googleSheetsSyncEnabled"
       >
     >
   ) {
@@ -216,7 +245,9 @@ export default function AdminPastPapersPage() {
             <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-3">
               <div>
                 <p className="text-sm font-medium">Interactive quiz</p>
-                <p className="text-xs text-muted-foreground">Uses questions from the module</p>
+                <p className="text-xs text-muted-foreground">
+                  Linked question set (Quiz Creator) or all module questions if none linked
+                </p>
               </div>
               <div
                 onClick={() => setForm(f => ({ ...f, isInteractive: !f.isInteractive }))}
@@ -229,6 +260,31 @@ export default function AdminPastPapersPage() {
                   "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
                   form.isInteractive ? "translate-x-6" : "translate-x-1"
                 )} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg border border-emerald-200/70 bg-emerald-50/30 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/15">
+              <div>
+                <p className="text-sm font-medium">Google Sheets sync</p>
+                <p className="text-xs text-muted-foreground">
+                  Append each attempt to the live tab (server env <code className="rounded bg-muted px-1">GOOGLE_SHEETS_*</code>)
+                </p>
+              </div>
+              <div
+                role="switch"
+                aria-checked={form.googleSheetsSyncEnabled}
+                onClick={() => setForm((f) => ({ ...f, googleSheetsSyncEnabled: !f.googleSheetsSyncEnabled }))}
+                className={cn(
+                  "relative ml-auto flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                  form.googleSheetsSyncEnabled ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <span
+                  className={cn(
+                    "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
+                    form.googleSheetsSyncEnabled ? "translate-x-6" : "translate-x-1"
+                  )}
+                />
               </div>
             </div>
 
@@ -391,6 +447,16 @@ export default function AdminPastPapersPage() {
                         Interactive
                       </span>
                     )}
+                    {paper.isInteractive && (paper._count?.paperQuestions ?? 0) > 0 && (
+                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+                        {paper._count?.paperQuestions} linked Q
+                      </span>
+                    )}
+                    {paper.googleSheetsSyncEnabled && (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                        Sheets
+                      </span>
+                    )}
                     {paper.aiExplanationEnabled === false && (
                       <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                         No AI
@@ -440,6 +506,15 @@ export default function AdminPastPapersPage() {
                     className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
                   >
                     {paper.secureExamMode ? "Unsecure exam" : "Secure exam"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      patchPaper(paper.id, { googleSheetsSyncEnabled: !Boolean(paper.googleSheetsSyncEnabled) })
+                    }
+                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
+                  >
+                    {paper.googleSheetsSyncEnabled ? "Sheets off" : "Sheets on"}
                   </button>
                 </div>
                 <button

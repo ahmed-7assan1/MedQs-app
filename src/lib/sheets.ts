@@ -83,3 +83,47 @@ export async function exportToSheets(
     spreadsheetUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`,
   };
 }
+
+/** Append one row (per quiz attempt). Tab defaults to `QuizLive`; create that sheet tab in the spreadsheet or set GOOGLE_SHEETS_QUIZ_LIVE_TAB. */
+export async function appendQuizResultRow(row: {
+  timestamp: string;
+  paperId: string;
+  paperTitle: string;
+  studentName: string;
+  email: string;
+  score: number;
+  total: number;
+  timeSeconds: number;
+}): Promise<void> {
+  const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+  if (!spreadsheetId) throw new Error("GOOGLE_SHEETS_SPREADSHEET_ID not set");
+
+  const tab = (process.env.GOOGLE_SHEETS_QUIZ_LIVE_TAB ?? "QuizLive").trim();
+  const token = await getAccessToken();
+  const values = [
+    [
+      row.timestamp,
+      row.paperId,
+      row.paperTitle,
+      row.studentName,
+      row.email,
+      row.score,
+      row.total,
+      row.timeSeconds,
+    ],
+  ];
+
+  const range = `${tab}!A:A`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ values }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Sheets append failed: ${err}`);
+  }
+}

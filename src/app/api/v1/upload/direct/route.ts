@@ -42,11 +42,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid folder" }, { status: 400 });
   }
 
-  const role = (session.user as { role?: string }).role;
   if (folder === "site") {
-    if (role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Only super admins can upload the site logo file." }, { status: 403 });
-    }
+    const w = await requireAdminWriter(session);
+    if (!w.ok) return w.response;
   } else if (folder === "ai") {
     // Any signed-in student — images for Dr. Q (URL can be sent to model or used elsewhere)
   } else if (folder !== "forum") {
