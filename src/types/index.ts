@@ -22,14 +22,17 @@ export interface QuestionChoice {
 }
 
 export type QuestionStemLayout = "STANDARD" | "IMAGE_OVERLAY";
+export type QuestionType = "MCQ" | "ESSAY";
 
 export interface QuestionWithChoices {
   id: string;
+  questionType?: QuestionType;
   body: string;
   imageUrl?: string | null;
   stemLayout?: QuestionStemLayout;
   choices: QuestionChoice[];
   answer: string;
+  essayReference?: string | null;
   explanation?: string;
   difficulty: Difficulty;
   lectureId: string;

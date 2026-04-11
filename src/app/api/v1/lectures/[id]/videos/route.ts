@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
+import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
   const session = await auth();
-  const userId = session?.user?.id;
+  const scope = await getSessionScope(session);
+  if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = scope.userId;
   const { id } = await Promise.resolve(ctx.params);
+  if (!isSuperAdmin(scope.role)) {
+    const boundary = await assertLecture(scope as any, id);
+    if (boundary) return boundary;
+  }
   const videos = await prisma.lectureVideo.findMany({
     where: { lectureId: id },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],

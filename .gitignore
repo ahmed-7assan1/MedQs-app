@@ -55,6 +55,8 @@ Thumbs.db
 # Prisma (keep schema & migrations; ignore local DB dumps if any)
 *.db
 *.db-journal
+# Prisma client partial writes on Windows (failed rename during generate)
+src/generated/prisma/query_engine*.tmp*
 
 # Misc
 *.pem

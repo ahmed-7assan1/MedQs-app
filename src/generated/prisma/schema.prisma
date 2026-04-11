@@ -1,0 +1,703 @@
+generator client {
+  provider = "prisma-client-js"
+  // Avoid Windows EPERM when replacing node_modules/.prisma/client/query_engine-*.dll
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum ForumType {
+  GLOBAL
+  SEMESTER
+  PRIVATE
+}
+
+enum ForumStatus {
+  OPEN
+  CLOSED
+  READ_ONLY
+}
+
+enum PostAudience {
+  UNIVERSITY
+  FOLLOWERS
+}
+
+enum NotifChannel {
+  SYSTEM
+  FORUM
+  BROADCAST
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// How stem text relates to the figure (admin / quiz creator)
+enum QuestionStemLayout {
+  STANDARD // image (if any), then text — default
+  IMAGE_OVERLAY // text overlaid on bottom of image (clinical-style)
+}
+
+enum PastPaperKind {
+  MODULE_QUESTION_BANK
+  ADMIN_AUTHORED_QUIZ
+}
+
+// ─────────────────────────────────────────────
+// SITE CONFIG
+// ─────────────────────────────────────────────
+
+model SiteConfig {
+  id                  String   @id @default(uuid())
+  siteName            String   @default("MedQs")
+  logoUrl             String?
+  faviconUrl          String?
+  primaryColor        String   @default("#2563EB")
+  aiPreferredProvider String   @default("auto")
+  enableAI            Boolean  @default(true)
+  enableForum         Boolean  @default(true)
+  enableAds           Boolean  @default(true)
+  enableNotifs        Boolean  @default(true)
+  enableLeaderboard   Boolean  @default(true)
+  fontSans            String?
+  fontArabic          String?
+  updatedAt           DateTime @updatedAt
+}
+
+model FeatureFlag {
+  id           String      @id @default(uuid())
+  key          String
+  enabled      Boolean     @default(false)
+  payload      Json?
+  // Optional scoping: when set, applies only to this university.
+  university   University? @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  universityId String?
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([universityId, key])
+  @@index([key])
+}
+
+// ─────────────────────────────────────────────
+// ACADEMIC STRUCTURE
+// ─────────────────────────────────────────────
+
+model University {
+  id            String                   @id @default(uuid())
+  name          String
+  logoUrl       String?
+  idMinLength   Int                      @default(6)
+  idMaxLength   Int                      @default(10)
+  createdAt     DateTime                 @default(now())
+  academicYears AcademicYear[]
+  users         User[]
+  adBanners     AdBanner[]
+  yearIdFormats UniversityYearIdFormat[]
+  featureFlags  FeatureFlag[]
+  forums        Forum[]
+  posts         Post[]
+  comments      Comment[]
+}
+
+model UniversityYearIdFormat {
+  id           String     @id @default(uuid())
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  universityId String
+  yearNumber   Int
+  minLength    Int        @default(6)
+  maxLength    Int        @default(10)
+  prefix       String?
+
+  @@unique([universityId, yearNumber])
+}
+
+model AcademicYear {
+  id           String     @id @default(uuid())
+  yearNumber   Int
+  university   University @relation(fields: [universityId], references: [id])
+  universityId String
+  semesters    Semester[]
+
+  @@unique([universityId, yearNumber])
+}
+
+model Semester {
+  id             String       @id @default(uuid())
+  name           String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId String
+  modules        Module[]
+  users          User[]
+  pastPapers     PastPaper[]
+  forums         Forum[]
+  adBanners      AdBanner[]
+}
+
+model Module {
+  id         String      @id @default(uuid())
+  name       String
+  semester   Semester    @relation(fields: [semesterId], references: [id])
+  semesterId String
+  subjects   Subject[]
+  pastPapers PastPaper[]
+}
+
+model Subject {
+  id               String    @id @default(uuid())
+  name             String
+  module           Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId         String
+  // Built-in question bank subject for the module (Quiz Creator / similar).
+  isQuizSystemBank Boolean   @default(false)
+  lectures         Lecture[]
+
+  @@index([moduleId, isQuizSystemBank])
+}
+
+model Lecture {
+  id            String                @id @default(uuid())
+  title         String
+  videoUrl      String?
+  order         Int                   @default(0)
+  // AI/admin Notes section (markdown) on lecture hub
+  notesMarkdown String?               @db.Text
+  // Per-lecture UI options (tabs, header badge/subtitle, etc.)
+  // Kept as JSON so doctors can evolve the experience without migrations.
+  uiConfig      Json?
+  // Optional interactive extras (mnemonics, cases, mind maps, etc.)
+  // Stored as JSON; the lecture page renders what is enabled + present.
+  extras        Json?
+  subject       Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId     String
+  activities    UserLectureActivity[]
+  videos        LectureVideo[]
+  flashcards    Flashcard[]
+  questions     Question[]
+  files         LectureFile[]
+  PastPaper     PastPaper?
+}
+
+model Flashcard {
+  id        String  @id @default(uuid())
+  front     String
+  back      String
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId String
+}
+
+model LectureFile {
+  id        String  @id @default(uuid())
+  name      String
+  url       String
+  mimeType  String
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId String
+}
+
+model LectureVideo {
+  id             String                @id @default(uuid())
+  title          String
+  url            String
+  sourceType     String                @default("external")
+  sharingEnabled Boolean               @default(true)
+  likesCount     Int                   @default(0)
+  commentsCount  Int                   @default(0)
+  sharesCount    Int                   @default(0)
+  sortOrder      Int                   @default(0)
+  lecture        Lecture               @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId      String
+  comments       LectureVideoComment[]
+  likes          LectureVideoLike[]
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([lectureId, sortOrder])
+}
+
+model LectureVideoComment {
+  id        String       @id @default(uuid())
+  content   String       @db.Text
+  video     LectureVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  videoId   String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime     @default(now())
+
+  @@index([videoId, createdAt])
+  @@index([userId])
+}
+
+model LectureVideoLike {
+  id      String       @id @default(uuid())
+  video   LectureVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  videoId String
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+
+  @@unique([videoId, userId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// QUESTIONS & QUIZ
+// ─────────────────────────────────────────────
+
+model Question {
+  id             String             @id @default(uuid())
+  questionType   String             @default("MCQ")
+  body           String             @db.Text
+  imageUrl       String?
+  stemLayout     QuestionStemLayout @default(STANDARD)
+  choices        Json
+  answer         String
+  essayReference String?            @db.Text
+  explanation    String?            @db.Text
+  aiExplanation  String?            @db.Text
+  difficulty     Difficulty         @default(MEDIUM)
+  lecture        Lecture            @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId      String
+  reports        QuestionReport[]
+  attemptItems   QuizAttemptItem[]
+  createdAt      DateTime           @default(now())
+}
+
+model PastPaper {
+  id                      String           @id @default(uuid())
+  title                   String
+  kind                    PastPaperKind    @default(MODULE_QUESTION_BANK)
+  pdfUrl                  String?
+  isInteractive           Boolean          @default(false)
+  timeLimitMin            Int?
+  // Site-wide AI can still be off; when false, hide AI explain for this paper everywhere.
+  aiExplanationEnabled    Boolean          @default(true)
+  // When true, students can open AI during the quiz; when false, only after submit / on review page.
+  allowAiDuringQuiz       Boolean          @default(false)
+  // Secure exam: force exam mode (no tutor / instant feedback), optional integrity UI
+  secureExamMode          Boolean          @default(false)
+  restrictCopyPaste       Boolean          @default(false)
+  trackFocusLoss          Boolean          @default(false)
+  // Append each submitted attempt as a row to Google Sheets (needs GOOGLE_SHEETS_* env).
+  googleSheetsSyncEnabled Boolean          @default(false)
+  quizLectureId           String?          @unique
+  semester                Semester         @relation(fields: [semesterId], references: [id])
+  semesterId              String
+  module                  Module           @relation(fields: [moduleId], references: [id])
+  moduleId                String
+  quizLecture             Lecture?         @relation(fields: [quizLectureId], references: [id])
+  attempts                QuizAttempt[]
+  questionReports         QuestionReport[]
+  createdAt               DateTime         @default(now())
+}
+
+model QuestionReport {
+  id          String     @id @default(uuid())
+  question    Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId  String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  note        String?    @db.Text
+  pastPaper   PastPaper? @relation(fields: [pastPaperId], references: [id], onDelete: SetNull)
+  pastPaperId String?
+  createdAt   DateTime   @default(now())
+
+  @@index([questionId])
+  @@index([userId, createdAt])
+}
+
+model GuestQuizUser {
+  id                String        @id @default(uuid())
+  displayName       String
+  externalStudentId String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  quizAttempts      QuizAttempt[]
+
+  @@unique([externalStudentId])
+  @@index([createdAt])
+}
+
+model QuizAttempt {
+  id              String            @id @default(uuid())
+  score           Int
+  timeTaken       Int               @default(0)
+  // Tab / window focus losses during the attempt (if paper.trackFocusLoss)
+  focusLossCount  Int               @default(0)
+  user            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String?
+  guestQuizUser   GuestQuizUser?    @relation(fields: [guestQuizUserId], references: [id], onDelete: Cascade)
+  guestQuizUserId String?
+  pastPaper       PastPaper         @relation(fields: [pastPaperId], references: [id], onDelete: Cascade)
+  pastPaperId     String
+  items           QuizAttemptItem[]
+  createdAt       DateTime          @default(now())
+
+  @@index([userId])
+  @@index([guestQuizUserId])
+  @@index([pastPaperId])
+}
+
+model StudyAssistantProfile {
+  id                String   @id @default(uuid())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String   @unique
+  scheduleText      String?  @db.Text
+  hobbies           String?  @db.Text
+  dailyStudyMinutes Int      @default(120)
+  worshipMinutes    Int      @default(30)
+  otherRoutines     String?  @db.Text
+  currentPlanJson   Json?
+  progressJson      Json?
+  weekStartIso      String?
+  updatedAt         DateTime @updatedAt
+}
+
+model QuizAttemptItem {
+  id         String      @id @default(uuid())
+  chosen     String?
+  isCorrect  Boolean
+  /// AI rubric for ESSAY: scorePercent, stagesMet/Total, feedback, stageNotes
+  essayGrade Json?
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  attemptId  String
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+}
+
+// ─────────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────────
+
+model User {
+  id                    String                 @id @default(uuid())
+  name                  String
+  nickname              String?
+  email                 String                 @unique
+  emailVerified         DateTime?
+  image                 String?
+  bio                   String?
+  phone                 String?
+  phoneVisible          Boolean                @default(false)
+  isPrivate             Boolean                @default(false)
+  hideRank              Boolean                @default(false)
+  instagramUrl          String?
+  facebookUrl           String?
+  theme                 Theme                  @default(SYSTEM)
+  role                  Role                   @default(STUDENT)
+  points                Int                    @default(0)
+  password              String?
+  studentId             String?
+  university            University?            @relation(fields: [universityId], references: [id])
+  universityId          String?
+  semester              Semester?              @relation(fields: [semesterId], references: [id])
+  semesterId            String?
+  rank                  Rank?                  @relation(fields: [rankId], references: [id])
+  rankId                String?
+  quizAttempts          QuizAttempt[]
+  studyAssistantProfile StudyAssistantProfile?
+  posts                 Post[]
+  comments              Comment[]
+  likes                 Like[]
+  commentLikes          CommentLike[]
+  notifications         Notification[]
+  notifMutes            NotificationMute[]
+  engagementLogs        EngagementLog[]
+  aiUsageLogs           AIUsageLog[]
+  lectureActivities     UserLectureActivity[]
+  videoComments         LectureVideoComment[]
+  videoLikes            LectureVideoLike[]
+  forumMemberships      PrivateForumMember[]
+  sentInvites           PrivateForumInvite[]   @relation("InviteSender")
+  receivedInvites       PrivateForumInvite[]   @relation("InviteReceiver")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  questionReports       QuestionReport[]
+  dmSent                DirectMessage[]        @relation("DmSent")
+  dmReceived            DirectMessage[]        @relation("DmReceived")
+  following             UserFollow[]           @relation("UserFollows")
+  followers             UserFollow[]           @relation("UserFollowers")
+}
+
+model UserLectureActivity {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  lecture      Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId    String
+  source       String?
+  lastViewedAt DateTime @default(now())
+
+  @@unique([userId, lectureId])
+  @@index([userId, lastViewedAt])
+  @@index([lectureId])
+}
+
+model DirectMessage {
+  id         String   @id @default(uuid())
+  body       String   @db.Text
+  read       Boolean  @default(false)
+  senderId   String
+  receiverId String
+  sender     User     @relation("DmSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("DmReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([receiverId, read])
+  @@index([senderId, receiverId, createdAt])
+}
+
+// ─────────────────────────────────────────────
+// FORUM
+// ─────────────────────────────────────────────
+
+model Forum {
+  id           String               @id @default(uuid())
+  name         String
+  type         ForumType
+  status       ForumStatus          @default(OPEN)
+  university   University           @relation(fields: [universityId], references: [id])
+  universityId String
+  semester     Semester?            @relation(fields: [semesterId], references: [id])
+  semesterId   String?
+  createdBy    String?
+  posts        Post[]
+  members      PrivateForumMember[]
+  invites      PrivateForumInvite[]
+  createdAt    DateTime             @default(now())
+
+  @@index([universityId, type, status])
+}
+
+model PrivateForumMember {
+  id      String @id @default(uuid())
+  forum   Forum  @relation(fields: [forumId], references: [id], onDelete: Cascade)
+  forumId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+
+  @@unique([forumId, userId])
+}
+
+model PrivateForumInvite {
+  id         String   @id @default(uuid())
+  forum      Forum    @relation(fields: [forumId], references: [id], onDelete: Cascade)
+  forumId    String
+  sender     User     @relation("InviteSender", fields: [senderId], references: [id])
+  senderId   String
+  receiver   User     @relation("InviteReceiver", fields: [receiverId], references: [id])
+  receiverId String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  @@unique([forumId, receiverId])
+}
+
+model Post {
+  id                   String       @id @default(uuid())
+  content              String       @db.Text
+  imageUrl             String?
+  interactionsDisabled Boolean      @default(false)
+  audience             PostAudience @default(UNIVERSITY)
+  author               User         @relation(fields: [authorId], references: [id])
+  authorId             String
+  forum                Forum        @relation(fields: [forumId], references: [id])
+  forumId              String
+  university           University   @relation(fields: [universityId], references: [id])
+  universityId         String
+  comments             Comment[]
+  likes                Like[]
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  @@index([universityId, createdAt])
+  @@index([forumId, createdAt])
+  @@index([audience, createdAt])
+}
+
+model Comment {
+  id           String        @id @default(uuid())
+  content      String        @db.Text
+  author       User          @relation(fields: [authorId], references: [id])
+  authorId     String
+  post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId       String
+  university   University    @relation(fields: [universityId], references: [id])
+  universityId String
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId     String?
+  replies      Comment[]     @relation("CommentReplies")
+  likes        CommentLike[]
+  createdAt    DateTime      @default(now())
+
+  @@index([universityId, createdAt])
+}
+
+model UserFollow {
+  id          String   @id @default(uuid())
+  follower    User     @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  String
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId String
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId, createdAt])
+  @@index([followerId, createdAt])
+}
+
+model Like {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  @@unique([userId, postId])
+}
+
+model CommentLike {
+  id        String  @id @default(uuid())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String
+
+  @@unique([userId, commentId])
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────
+
+model Notification {
+  id        String       @id @default(uuid())
+  title     String
+  body      String
+  channel   NotifChannel @default(SYSTEM)
+  read      Boolean      @default(false)
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime     @default(now())
+}
+
+model NotificationMute {
+  id         String  @id @default(uuid())
+  muteAll    Boolean @default(false)
+  muteForum  Boolean @default(false)
+  mutePostId String?
+  user       User    @relation(fields: [userId], references: [id])
+  userId     String  @unique
+}
+
+// ─────────────────────────────────────────────
+// RANKS & ENGAGEMENT
+// ─────────────────────────────────────────────
+
+model Rank {
+  id        String  @id
+  label     String
+  minPoints Int
+  badge     String?
+  users     User[]
+}
+
+model EngagementLog {
+  id        String   @id @default(uuid())
+  action    String
+  points    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+// AI USAGE
+// ─────────────────────────────────────────────
+
+model AIUsageLog {
+  id     String @id @default(uuid())
+  type   String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  date   String
+  count  Int    @default(1)
+
+  @@unique([userId, type, date])
+}
+
+// ─────────────────────────────────────────────
+// ADVERTISEMENTS
+// ─────────────────────────────────────────────
+
+model AdBanner {
+  id           String      @id @default(uuid())
+  imageUrl     String
+  linkUrl      String?
+  active       Boolean     @default(true)
+  university   University? @relation(fields: [universityId], references: [id])
+  universityId String?
+  semester     Semester?   @relation(fields: [semesterId], references: [id])
+  semesterId   String?
+  createdAt    DateTime    @default(now())
+}
+
+// ─────────────────────────────────────────────
+// NEXTAUTH
+// ─────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

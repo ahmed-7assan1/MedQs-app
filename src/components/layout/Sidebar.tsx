@@ -26,8 +26,8 @@ import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
-import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
 
 interface NotifItem {
   id: string;
@@ -237,19 +237,22 @@ export function Sidebar({
     href === "/dashboard-app" ? pathname === href || pathname === "/dashboard" : pathname?.startsWith(href);
 
   function BrandMark({ className }: { className?: string }) {
+    const custom = Boolean(logoUrl?.trim());
     return (
       <span
         className={cn(
-          "flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/35 ring-1 ring-border/70",
-          "h-8 w-8",
+          "flex shrink-0 items-center justify-center overflow-hidden",
+          custom
+            ? "h-9 w-9 rounded-md"
+            : "h-8 w-8 rounded-xl bg-muted/35 ring-1 ring-border/70",
           className
         )}
       >
-        {logoUrl ? (
+        {custom ? (
           <img
             src={logoUrl}
             alt=""
-            className="h-full w-full object-contain p-1"
+            className="max-h-full max-w-full object-contain object-center"
             referrerPolicy="no-referrer"
           />
         ) : (
@@ -383,7 +386,7 @@ export function Sidebar({
   return (
     <>
       {/* ── Desktop: top bar ── */}
-      <header className="fixed top-0 left-0 right-0 z-[120] hidden h-14 items-center overflow-visible border-b border-border/70 bg-card/88 shadow-sm backdrop-blur-xl md:flex">
+      <header className="fixed top-0 left-0 right-0 z-[1000] hidden h-14 items-center overflow-visible border-b border-border/70 bg-card/88 shadow-sm backdrop-blur-xl md:flex">
         <div className="mx-auto flex h-full w-full max-w-[1600px] items-center gap-4 px-4 lg:gap-6">
           <Link href="/dashboard-app" className="flex shrink-0 items-center gap-2.5 text-foreground">
             <BrandMark />
@@ -399,6 +402,8 @@ export function Sidebar({
             )}
             {!isGuest && <TopNavLink href="/ai-chat" label="Dr. Q" icon={Sparkles} />}
           </nav>
+
+          <GlobalSearch isGuest={isGuest} />
 
           <div className="flex shrink-0 items-center gap-2">
             {!isGuest && (
@@ -498,7 +503,7 @@ export function Sidebar({
       </header>
 
       {/* ── Mobile: top bar + h-opens drawer ── */}
-      <div className="medqs-mobile-bar fixed top-0 left-0 right-0 z-[125] flex h-14 items-center justify-between border-b border-border/80 bg-card/92 px-3 backdrop-blur-xl md:hidden">
+      <div className="medqs-mobile-bar fixed top-0 left-0 right-0 z-[1002] flex h-14 items-center justify-between border-b border-border/80 bg-card/92 px-3 backdrop-blur-xl md:hidden">
         <button
           type="button"
           className="icon-btn flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted"
@@ -509,13 +514,14 @@ export function Sidebar({
         </button>
         <Link
           href="/dashboard-app"
-          className="flex min-w-0 items-center gap-2 text-foreground"
+          className="flex min-w-0 items-center gap-2.5 text-foreground"
           onClick={() => setMobileOpen(false)}
         >
-          <BrandMark className="!h-8 !w-8" />
-          <span className="truncate font-display text-sm font-semibold leading-none">{siteName}</span>
+          <BrandMark />
+          <span className="truncate font-display text-sm font-semibold leading-tight">{siteName}</span>
         </Link>
-        <div className="flex shrink-0 items-center justify-end gap-0.5">
+        <div className="flex shrink-0 items-center justify-end gap-1">
+          <GlobalSearch isGuest={isGuest} />
           <button
             type="button"
             className={headerControlBtnClass}
@@ -553,18 +559,16 @@ export function Sidebar({
       {/* ── Mobile drawer ── */}
       <aside
         className={cn(
-          "medqs-drawer fixed left-0 z-[127] flex w-[min(300px,92vw)] flex-col overflow-hidden shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden",
-          "top-14 border-r border-border dark:border-white/10",
-          "bottom-[calc(5.85rem+env(safe-area-inset-bottom,0px))]",
+          "medqs-drawer fixed left-0 z-[1001] flex w-[min(320px,94vw)] flex-col overflow-hidden shadow-2xl transition-transform duration-300 ease-out md:hidden",
+          "top-14 h-[calc(100dvh-3.5rem)] max-h-[calc(100dvh-3.5rem)] border-r border-border dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]",
           mobileOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         )}
         aria-hidden={!mobileOpen}
       >
         <div className="sb-rail-glow" aria-hidden />
 
-        <div className="shrink-0 border-b border-border px-3 py-2.5 dark:border-white/10">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Menu</p>
-          <p className="mt-0.5 truncate font-display text-sm font-semibold text-foreground dark:text-white">{siteName}</p>
+        <div className="shrink-0 border-b border-border px-4 py-3.5 dark:border-white/10">
+          <p className="font-display text-base font-semibold leading-snug text-foreground dark:text-white">{siteName}</p>
         </div>
 
         <nav className="sb-nav min-h-0 flex-1">
@@ -602,34 +606,6 @@ export function Sidebar({
           )}
 
           {!isGuest && <DrawerLink href="/ai-chat" label="Study with Dr. Q" icon={Sparkles} />}
-
-          <div className="sb-section-label">Appearance</div>
-          <div className="flex gap-2 px-2 pb-2">
-            <button
-              type="button"
-              className={cn(
-                "flex-1 rounded-lg py-2 text-xs font-semibold transition-colors",
-                theme === "light"
-                  ? "bg-primary text-primary-foreground shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
-                  : "bg-muted/90 text-muted-foreground hover:bg-muted dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
-              )}
-              onClick={() => setTheme("light")}
-            >
-              Light
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "flex-1 rounded-lg py-2 text-xs font-semibold transition-colors",
-                theme === "dark"
-                  ? "bg-primary text-primary-foreground shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
-                  : "bg-muted/90 text-muted-foreground hover:bg-muted dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
-              )}
-              onClick={() => setTheme("dark")}
-            >
-              Dark
-            </button>
-          </div>
         </nav>
 
         <div className="sb-footer shrink-0 border-t border-border/80 bg-card/50 pb-1 dark:border-white/10">
@@ -700,7 +676,7 @@ export function Sidebar({
 
       {mobileOpen && (
         <div
-          className="fixed inset-x-0 bottom-[calc(5.85rem+env(safe-area-inset-bottom,0px))] top-14 z-[119] bg-black/40 backdrop-blur-[2px] dark:bg-black/55 md:hidden"
+          className="fixed inset-x-0 bottom-0 top-14 z-[999] bg-black/40 backdrop-blur-[2px] dark:bg-black/55 md:hidden"
           role="presentation"
           aria-hidden
           onClick={() => setMobileOpen(false)}
@@ -710,7 +686,6 @@ export function Sidebar({
       {desktopUserMenuPanel}
       {notifPanel}
 
-      {!isGuest ? <MobileBottomNav /> : null}
     </>
   );
 }

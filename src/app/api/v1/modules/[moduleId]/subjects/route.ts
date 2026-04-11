@@ -2,11 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertModule, requireAdminWriter } from "@/lib/admin-scope";
+import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { moduleId: string } }
 ) {
+  const session = await auth();
+  const scope = await getSessionScope(session);
+  if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isSuperAdmin(scope.role) && !scope.universityId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  if (!isSuperAdmin(scope.role)) {
+    const modErr = await assertModule(scope as any, params.moduleId);
+    if (modErr) return modErr;
+  }
+
   const subjects = await prisma.subject.findMany({
     where: { moduleId: params.moduleId },
     orderBy: { name: "asc" },

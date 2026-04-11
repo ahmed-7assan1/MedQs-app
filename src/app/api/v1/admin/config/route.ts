@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const config = await prisma.siteConfig.findFirst();
   return NextResponse.json(config ?? {});
@@ -12,6 +14,7 @@ const BRANDING_KEYS = new Set([
   "siteName",
   "logoUrl",
   "faviconUrl",
+  "pwaIconUrl",
   "primaryColor",
   "fontSans",
   "fontArabic",
@@ -54,6 +57,10 @@ export async function PUT(req: NextRequest) {
           merged.faviconUrl === null || typeof merged.faviconUrl === "string"
             ? merged.faviconUrl
             : existing.faviconUrl,
+        pwaIconUrl:
+          merged.pwaIconUrl === null || typeof merged.pwaIconUrl === "string"
+            ? merged.pwaIconUrl
+            : existing.pwaIconUrl,
         primaryColor: typeof merged.primaryColor === "string" ? merged.primaryColor : existing.primaryColor,
         fontSans: typeof merged.fontSans === "string" ? merged.fontSans : existing.fontSans,
         fontArabic: typeof merged.fontArabic === "string" ? merged.fontArabic : existing.fontArabic,

@@ -5,6 +5,7 @@ import { QuestionCard } from "@/components/quiz/QuestionCard";
 import { ArrowLeft, Trophy, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { parseEssayGrade } from "@/lib/essay-grade";
 
 export default async function AttemptResultPage({
   params,
@@ -40,6 +41,8 @@ export default async function AttemptResultPage({
               stemLayout: true,
               choices: true,
               answer: true,
+              questionType: true,
+              essayReference: true,
               explanation: true,
               difficulty: true,
               lectureId: true,
@@ -91,7 +94,7 @@ export default async function AttemptResultPage({
           {attempt.score}%
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          {correct} correct out of {total} questions
+          {correct} pass on rubric • {total} questions • Essays count as partial credit in the % score
         </p>
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
@@ -138,6 +141,7 @@ export default async function AttemptResultPage({
             index={i}
             showResult
             selectedAnswer={item.chosen ?? undefined}
+            essayReview={parseEssayGrade(item.essayGrade)}
             showAiPanel={showAiOnReview}
             explainPaperId={attempt.pastPaper.id}
           />

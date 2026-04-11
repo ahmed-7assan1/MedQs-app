@@ -49,7 +49,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      <div className={cn("app-shell", !isGuest && "app-shell--tabbar")}>
+      <div className={cn("app-shell")}>
         <Sidebar
           userName={isGuest ? "Guest" : displayName}
           userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}

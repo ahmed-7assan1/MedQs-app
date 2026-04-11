@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
+import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
 
 export async function DELETE(
   req: NextRequest,
@@ -26,6 +27,13 @@ export async function DELETE(
 }
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
+  const session = await auth();
+  const scope = await getSessionScope(session);
+  if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isSuperAdmin(scope.role) && !scope.universityId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const { id } = await Promise.resolve(ctx.params);
   const lecture = await prisma.lecture.findUnique({
     where: { id },
@@ -37,6 +45,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     },
   });
   if (!lecture) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!isSuperAdmin(scope.role)) {
+    const inScope = await prisma.lecture.findFirst({
+      where: {
+        id,
+        subject: { module: { semester: { academicYear: { universityId: scope.universityId! } } } },
+      },
+      select: { id: true },
+    });
+    if (!inScope) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   const rows = await prisma
     .$queryRaw<Array<{ uiConfig: any; extras: any }>>(
       Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${id} LIMIT 1`

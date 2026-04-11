@@ -92,6 +92,14 @@ export default async function LoginPage() {
           </p>
         </div>
 
+        <p className="mt-5 text-center text-sm text-muted-foreground">
+          Invited for a quiz only?{" "}
+          <Link href="/guest/past-papers" className="font-medium text-primary hover:underline">
+            Open guest quizzes
+          </Link>{" "}
+          (name + ID, no account).
+        </p>
+
         {/* Features */}
         <div className="mt-8 grid grid-cols-3 gap-3 text-center">
           {[

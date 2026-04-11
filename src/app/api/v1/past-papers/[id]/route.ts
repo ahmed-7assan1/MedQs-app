@@ -103,7 +103,14 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
 
   try {
     await prisma.$transaction(async (tx) => {
-      // Delete quiz attempts + items for this paper
+      const paper = await tx.pastPaper.findUnique({
+        where: { id },
+        select: { quizLectureId: true },
+      });
+      if (!paper) {
+        throw new Error("PAST_PAPER_NOT_FOUND");
+      }
+
       const attempts = await tx.quizAttempt.findMany({
         where: { pastPaperId: id },
         select: { id: true },
@@ -114,24 +121,41 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
         await tx.quizAttempt.deleteMany({ where: { id: { in: attemptIds } } });
       }
 
-      // Question reports that reference this paper
       await tx.questionReport.deleteMany({ where: { pastPaperId: id } });
 
-      // Explicit linked questions (if schema is migrated)
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const anyTx = tx as any;
-        if (anyTx.pastPaperQuestion?.deleteMany) {
-          await anyTx.pastPaperQuestion.deleteMany({ where: { pastPaperId: id } });
+        const txExt = tx as typeof tx & {
+          pastPaperQuestion?: { deleteMany: (args: { where: { pastPaperId: string } }) => Promise<unknown> };
+        };
+        if (txExt.pastPaperQuestion?.deleteMany) {
+          await txExt.pastPaperQuestion.deleteMany({ where: { pastPaperId: id } });
         }
       } catch {
         // Ignore if model/table does not exist yet (pre-migration).
       }
 
+      const quizLectureId = paper.quizLectureId;
+      // Break FK PastPaper → Lecture before removing the dedicated quiz lecture (questions, etc.).
+      await tx.pastPaper.update({
+        where: { id },
+        data: { quizLectureId: null },
+      });
+
+      if (quizLectureId) {
+        try {
+          await tx.lecture.delete({ where: { id: quizLectureId } });
+        } catch (lecErr) {
+          console.warn("[past-papers DELETE] quiz lecture row not removed (may be shared or already gone)", lecErr);
+        }
+      }
+
       await tx.pastPaper.delete({ where: { id } });
     });
     return NextResponse.json({ ok: true });
-  } catch (e) {
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "PAST_PAPER_NOT_FOUND") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     console.error("[past-papers DELETE]", e);
     return NextResponse.json(
       { error: "Failed to delete past paper. Check DB constraints or migrations." },

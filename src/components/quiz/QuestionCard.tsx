@@ -17,12 +17,15 @@ import type { QuestionWithChoices } from "@/types";
 import ReactMarkdown from "react-markdown";
 import { MarkdownBody } from "@/components/ui/MarkdownBody";
 import { normalizeImageUrl } from "@/lib/markdown-helpers";
+import type { EssayGradeStored } from "@/lib/essay-grade";
 
 interface Props {
   question: QuestionWithChoices;
   index: number;
   showResult?: boolean;
   selectedAnswer?: string;
+  /** AI rubric for essay questions (from attempt item). */
+  essayReview?: EssayGradeStored | null;
   onAnswer?: (key: string) => void;
   flagged?: boolean;
   bookmarked?: boolean;
@@ -45,6 +48,7 @@ export function QuestionCard({
   index,
   showResult,
   selectedAnswer,
+  essayReview,
   onAnswer,
   flagged,
   bookmarked,
@@ -126,6 +130,7 @@ export function QuestionCard({
     const i = question.choices.findIndex((c) => c.key === selectedAnswer);
     if (i >= 0) rovingChoiceIndex = i;
   }
+  const isEssay = question.questionType === "ESSAY";
 
   const layout = question.stemLayout === "IMAGE_OVERLAY" ? "IMAGE_OVERLAY" : "STANDARD";
 
@@ -246,6 +251,7 @@ export function QuestionCard({
           )}
         </div>
 
+        {!isEssay ? (
         <div
           role="radiogroup"
           aria-labelledby={stemId}
@@ -309,6 +315,56 @@ export function QuestionCard({
             );
           })}
         </div>
+        ) : (
+          <div className="space-y-3">
+            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Essay answer</label>
+            <textarea
+              value={selectedAnswer ?? ""}
+              onChange={(e) => onAnswer?.(e.target.value)}
+              disabled={showResult}
+              rows={6}
+              className={cn(
+                "w-full rounded-xl border border-border bg-background px-3.5 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/25 md:text-[15px]",
+                showResult && "opacity-90"
+              )}
+              placeholder="Write your answer in your own words. AI compares it to the model answer and awards partial credit by concept stages."
+            />
+            {showResult && essayReview ? (
+              <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">AI grading</span>
+                  <span className="font-display text-lg font-bold tabular-nums text-primary">{essayReview.scorePercent}%</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Concepts covered:{" "}
+                  <span className="font-semibold text-foreground">
+                    {essayReview.stagesMet} / {essayReview.stagesTotal}
+                  </span>{" "}
+                  stages
+                </p>
+                {essayReview.stageNotes.length > 0 ? (
+                  <ul className="list-inside list-disc space-y-1 text-xs text-muted-foreground">
+                    {essayReview.stageNotes.map((line, idx) => (
+                      <li key={idx}>{line}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {essayReview.feedback ? (
+                  <div className="border-t border-border/60 pt-2 text-sm leading-relaxed text-foreground">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                      }}
+                    >
+                      {essayReview.feedback}
+                    </ReactMarkdown>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        )}
 
         {showResult && question.explanation?.trim() && (
           <section className="rounded-xl border border-border/80 bg-muted/25 px-4 py-3" aria-label="Author explanation">

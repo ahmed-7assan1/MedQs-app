@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { loadQuestionAnswerKeysForPastPaper } from "@/lib/past-paper-quiz";
 import { appendQuizResultRow } from "@/lib/sheets";
+import { buildQuizAttemptItems } from "@/lib/quiz-attempt-items";
+import { computeWeightedQuizPercent } from "@/lib/quiz-attempt-score";
 
 // POST /api/v1/past-papers/:id/attempt
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -14,7 +16,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     typeof focusLossCount === "number" && Number.isFinite(focusLossCount)
       ? Math.max(0, Math.min(10_000, Math.floor(focusLossCount)))
       : 0;
-  // answers: { [questionId]: chosenKey }
 
   const paper = await prisma.pastPaper.findUnique({
     where: { id: params.id },
@@ -22,16 +23,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   });
   if (!paper) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
+  const { aiOptionsFromSiteProvider } = await import("@/lib/site-ai-options");
+  const aiOpts = aiOptionsFromSiteProvider(site?.aiPreferredProvider);
+
   const keys = await loadQuestionAnswerKeysForPastPaper(params.id);
-
-  const items = keys.map((q) => ({
-    questionId: q.id,
-    chosen: answers[q.id] ?? "",
-    isCorrect: answers[q.id] === q.answer,
-  }));
-
-  const score =
-    keys.length > 0 ? Math.round((items.filter((i) => i.isCorrect).length / keys.length) * 100) : 0;
+  const items = await buildQuizAttemptItems(keys, answers, aiOpts);
+  const score = computeWeightedQuizPercent(
+    keys.map((k) => ({ id: k.id, questionType: k.questionType })),
+    items
+  );
 
   const attempt = await prisma.quizAttempt.create({
     data: {

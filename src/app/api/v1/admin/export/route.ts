@@ -26,13 +26,18 @@ export async function GET(req: NextRequest) {
         take: 1000,
         include: {
           user: { select: { name: true, email: true } },
+          guestQuizUser: { select: { displayName: true, externalStudentId: true } },
           pastPaper: { select: { title: true } },
         },
       });
 
       const rows = attempts.map((a) => ({
-        Student:    a.user.name,
-        Email:      a.user.email,
+        Student:
+          a.user?.name ??
+          (a.guestQuizUser
+            ? `${a.guestQuizUser.displayName} (guest ${a.guestQuizUser.externalStudentId})`
+            : "—"),
+        Email: a.user?.email ?? "",
         Paper:      a.pastPaper.title,
         Score:      a.score,
         TimeTaken:  a.timeTaken,

@@ -420,7 +420,7 @@ export default function AdminPastPapersPage() {
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-16 text-center">
           <FileText className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
           <p className="font-medium">No past papers yet</p>
-          <p className="text-sm text-muted-foreground">Click "Add Paper" to upload the first one.</p>
+          <p className="text-sm text-muted-foreground">Click &quot;Add Paper&quot; to upload the first one.</p>
         </div>
       ) : (
         <div className="space-y-3">

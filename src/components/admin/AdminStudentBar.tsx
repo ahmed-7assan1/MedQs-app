@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -36,9 +37,11 @@ const LINKS = [
 /** Floating doctor hub menu on student pages (same routes as /admin). */
 export function AdminStudentBar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  if (pathname?.startsWith("/ai-chat")) return null;
 
   return (
-    <div className="pointer-events-none fixed bottom-0 right-0 z-[132] p-4 max-md:bottom-[calc(5.85rem+env(safe-area-inset-bottom,0px))] md:p-6">
+    <div className="pointer-events-none fixed bottom-0 right-0 z-[132] p-4 max-md:bottom-[max(1rem,env(safe-area-inset-bottom,0px))] md:p-6">
       <div className="pointer-events-auto flex flex-col items-end gap-2">
         {open ? (
           <div

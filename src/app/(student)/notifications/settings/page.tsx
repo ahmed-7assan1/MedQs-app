@@ -109,7 +109,7 @@ export default function NotificationSettingsPage() {
 
       {settings.muteAll && (
         <div className="mt-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
-          All notifications are muted. You won't see any alerts until you turn this off.
+          All notifications are muted. You won&apos;t see any alerts until you turn this off.
         </div>
       )}
 

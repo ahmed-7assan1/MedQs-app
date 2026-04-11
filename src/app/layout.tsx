@@ -15,6 +15,7 @@ async function getSiteConfig() {
     return config ?? {
       siteName: "MedQs",
       logoUrl: null,
+      pwaIconUrl: null,
       faviconUrl: null,
       primaryColor: "#1a7ef0",
       enableAI: true,
@@ -28,6 +29,7 @@ async function getSiteConfig() {
     return {
       siteName: "MedQs",
       logoUrl: null,
+      pwaIconUrl: null,
       faviconUrl: null,
       primaryColor: "#1a7ef0",
       enableAI: true,
@@ -101,8 +103,12 @@ export async function generateViewport(): Promise<Viewport> {
   };
 }
 
-function appIconsFromConfig(faviconUrl: string | null | undefined): NonNullable<Metadata["icons"]> {
-  const u = faviconUrl?.trim();
+/** Install / touch icon: prefer square PWA asset, else favicon, else bundled defaults. */
+function appIconsFromConfig(
+  faviconUrl: string | null | undefined,
+  pwaIconUrl: string | null | undefined
+): NonNullable<Metadata["icons"]> {
+  const u = pwaIconUrl?.trim() || faviconUrl?.trim();
   if (!u) {
     return {
       icon: [
@@ -144,7 +150,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
-    icons: appIconsFromConfig(config.faviconUrl),
+    icons: appIconsFromConfig(config.faviconUrl, "pwaIconUrl" in config ? config.pwaIconUrl : null),
   };
 }
 
@@ -172,24 +178,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   `.trim();
 
   return (
-    <html lang="en" className={appFontVariableClassName} suppressHydrationWarning>
+    <html lang="en" className={appFontVariableClassName} data-theme="light" suppressHydrationWarning>
       <head>
         {/* No-flicker theme script — runs before first paint */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
+                function applyTheme(isDark) {
+                  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                  document.documentElement.classList.toggle('dark', isDark);
+                }
                 try {
                   var theme = localStorage.getItem('medqs-theme') || 'light';
                   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   var isDark = theme === 'dark' || (theme === 'system' && prefersDark);
-                  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-                  if (isDark) document.documentElement.classList.add('dark');
-                  else document.documentElement.classList.remove('dark');
-                  // Fonts: Poppins (Latin) + Tajawal (Arabic) via next/font on <html> — do not override from DB
-                  // Inject site config for JS access
+                  applyTheme(isDark);
                   window.__MEDQS_CONFIG__ = ${JSON.stringify({ siteName: config.siteName, logoUrl: config.logoUrl })};
-                } catch(e) {}
+                } catch (e) {
+                  applyTheme(false);
+                  try {
+                    window.__MEDQS_CONFIG__ = ${JSON.stringify({ siteName: config.siteName, logoUrl: config.logoUrl })};
+                  } catch (_) {}
+                }
               })();
             `,
           }}
@@ -197,7 +208,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Dynamic primary color CSS variables */}
         <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />
       </head>
-      <body>
+      <body className="font-sans antialiased">
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <ChunkLoadRecovery />
         {children}

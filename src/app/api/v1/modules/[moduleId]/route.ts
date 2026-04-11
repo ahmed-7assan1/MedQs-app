@@ -19,11 +19,11 @@ export async function PUT(
   if (!name?.trim())
     return NextResponse.json({ error: "Name required" }, { status: 400 });
 
-  const module = await prisma.module.update({
+  const updatedModule = await prisma.module.update({
     where: { id: moduleId },
     data: { name: name.trim() },
   });
-  return NextResponse.json(module);
+  return NextResponse.json(updatedModule);
 }
 
 export async function DELETE(

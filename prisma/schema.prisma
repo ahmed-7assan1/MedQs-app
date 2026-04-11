@@ -1,5 +1,7 @@
 generator client {
   provider = "prisma-client-js"
+  // Avoid Windows EPERM when replacing node_modules/.prisma/client/query_engine-*.dll
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -71,6 +73,8 @@ model SiteConfig {
   id                  String   @id @default(uuid())
   siteName            String   @default("MedQs")
   logoUrl             String?
+  /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
+  pwaIconUrl          String?
   faviconUrl          String?
   primaryColor        String   @default("#2563EB")
   aiPreferredProvider String   @default("auto")
@@ -82,6 +86,20 @@ model SiteConfig {
   fontSans            String?
   fontArabic          String?
   updatedAt           DateTime @updatedAt
+}
+
+model FeatureFlag {
+  id           String      @id @default(uuid())
+  key          String
+  enabled      Boolean     @default(false)
+  payload      Json?
+  // Optional scoping: when set, applies only to this university.
+  university   University? @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  universityId String?
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([universityId, key])
+  @@index([key])
 }
 
 // ─────────────────────────────────────────────
@@ -99,6 +117,7 @@ model University {
   users         User[]
   adBanners     AdBanner[]
   yearIdFormats UniversityYearIdFormat[]
+  featureFlags  FeatureFlag[]
   forums        Forum[]
   posts         Post[]
   comments      Comment[]
@@ -249,11 +268,13 @@ model LectureVideoLike {
 
 model Question {
   id            String             @id @default(uuid())
+  questionType  String             @default("MCQ")
   body          String             @db.Text
   imageUrl      String?
   stemLayout    QuestionStemLayout @default(STANDARD)
   choices       Json
   answer        String
+  essayReference String?           @db.Text
   explanation   String?            @db.Text
   aiExplanation String?            @db.Text
   difficulty    Difficulty         @default(MEDIUM)
@@ -307,24 +328,59 @@ model QuestionReport {
   @@index([userId, createdAt])
 }
 
+model GuestQuizUser {
+  id                String        @id @default(uuid())
+  displayName       String
+  externalStudentId String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  quizAttempts      QuizAttempt[]
+
+  @@unique([externalStudentId])
+  @@index([createdAt])
+}
+
 model QuizAttempt {
   id             String            @id @default(uuid())
   score          Int
   timeTaken      Int               @default(0)
   // Tab / window focus losses during the attempt (if paper.trackFocusLoss)
   focusLossCount Int               @default(0)
-  user           User              @relation(fields: [userId], references: [id])
-  userId         String
+  user           User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?
+  guestQuizUser  GuestQuizUser?    @relation(fields: [guestQuizUserId], references: [id], onDelete: Cascade)
+  guestQuizUserId String?
   pastPaper      PastPaper         @relation(fields: [pastPaperId], references: [id], onDelete: Cascade)
   pastPaperId    String
   items          QuizAttemptItem[]
   createdAt      DateTime          @default(now())
+
+  @@index([userId])
+  @@index([guestQuizUserId])
+  @@index([pastPaperId])
+}
+
+model StudyAssistantProfile {
+  id               String   @id @default(uuid())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String   @unique
+  scheduleText     String?  @db.Text
+  hobbies          String?  @db.Text
+  dailyStudyMinutes Int     @default(120)
+  worshipMinutes   Int      @default(30)
+  otherRoutines    String?  @db.Text
+  currentPlanJson  Json?
+  progressJson     Json?
+  weekStartIso     String?
+  updatedAt        DateTime @updatedAt
 }
 
 model QuizAttemptItem {
   id         String      @id @default(uuid())
   chosen     String?
   isCorrect  Boolean
+  /// AI rubric for ESSAY: scorePercent, stagesMet/Total, feedback, stageNotes
+  essayGrade Json?
   attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   attemptId  String
   question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -360,7 +416,8 @@ model User {
   semesterId        String?
   rank              Rank?                 @relation(fields: [rankId], references: [id])
   rankId            String?
-  quizAttempts      QuizAttempt[]
+  quizAttempts           QuizAttempt[]
+  studyAssistantProfile  StudyAssistantProfile?
   posts             Post[]
   comments          Comment[]
   likes             Like[]

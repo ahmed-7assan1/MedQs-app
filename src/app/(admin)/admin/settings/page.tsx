@@ -18,7 +18,12 @@ function urlFromUt(file: { url?: string; ufsUrl?: string } | undefined): string 
 }
 
 interface SiteConfig {
-  siteName: string; logoUrl: string; faviconUrl: string;
+  siteName: string;
+  logoUrl: string;
+  /** Browser tab / bookmark (small). */
+  faviconUrl: string;
+  /** Square asset for PWA install & Apple touch; falls back to favicon if empty. */
+  pwaIconUrl: string;
   primaryColor: string; enableAI: boolean; enableForum: boolean;
   enableAds: boolean; enableNotifs: boolean; enableLeaderboard: boolean;
   aiPreferredProvider: "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
@@ -26,7 +31,7 @@ interface SiteConfig {
 }
 
 const DEFAULTS: SiteConfig = {
-  siteName: "MedQs", logoUrl: "", faviconUrl: "", primaryColor: "#1a7ef0",
+  siteName: "MedQs", logoUrl: "", faviconUrl: "", pwaIconUrl: "", primaryColor: "#1a7ef0",
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
   aiPreferredProvider: "auto",
   fontSans: "Poppins", fontArabic: "Tajawal",
@@ -39,9 +44,11 @@ export default function AdminSettingsPage() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [iconUploading, setIconUploading] = useState(false);
+  const [pwaIconUploading, setPwaIconUploading] = useState(false);
   const [colorFromFileBusy, setColorFromFileBusy] = useState(false);
   const logoFileRef = useRef<HTMLInputElement>(null);
   const iconFileRef = useRef<HTMLInputElement>(null);
+  const pwaIconFileRef = useRef<HTMLInputElement>(null);
   const colorPickFileRef = useRef<HTMLInputElement>(null);
   const [broadTitle, setBroadTitle] = useState("");
   const [broadBody, setBroadBody] = useState("");
@@ -56,7 +63,13 @@ export default function AdminSettingsPage() {
           fetch("/api/v1/auth/me"),
         ]);
         const d = await cfgRes.json();
-        if (!cancelled && d?.siteName) setConfig(d);
+        if (!cancelled && d?.siteName) {
+          setConfig({
+            ...DEFAULTS,
+            ...d,
+            pwaIconUrl: typeof d.pwaIconUrl === "string" ? d.pwaIconUrl : "",
+          });
+        }
         if (meRes.ok) {
           const me = await meRes.json();
           if (!cancelled && typeof me?.role === "string") setUserRole(me.role);
@@ -142,12 +155,35 @@ export default function AdminSettingsPage() {
       const next = { ...config, faviconUrl: url, ...(hex ? { primaryColor: hex } : {}) };
       setConfig(next);
       const saved = await persistConfig(next);
-      if (saved) toast.success(hex ? "App icon saved — primary color updated from image" : "App / PWA icon updated and saved");
+      if (saved) toast.success(hex ? "Favicon saved — primary color updated from image" : "Favicon updated and saved");
       else toast.error("Icon uploaded but saving failed — use Save");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Icon upload failed");
     } finally {
       setIconUploading(false);
+    }
+  }
+
+  async function handlePwaIconFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !canManageBranding) return;
+    setPwaIconUploading(true);
+    try {
+      const url = await uploadSiteImage(file);
+      if (!url) {
+        toast.error("Upload finished but no URL was returned");
+        return;
+      }
+      const next = { ...config, pwaIconUrl: url };
+      setConfig(next);
+      const saved = await persistConfig(next);
+      if (saved) toast.success("PWA / home screen icon saved");
+      else toast.error("Upload OK but save failed — click Save");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "PWA icon upload failed");
+    } finally {
+      setPwaIconUploading(false);
     }
   }
 
@@ -275,9 +311,9 @@ export default function AdminSettingsPage() {
             ) : null}
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">App / PWA icon (square)</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Favicon (browser tab)</label>
             <p className="text-[11px] text-muted-foreground -mt-1 mb-2">
-              Used for the browser tab, bookmarks, and <strong className="font-medium text-foreground">install to home screen</strong> (same asset in the web app manifest). Use a <strong className="font-medium text-foreground">square</strong> image, ideally <strong className="font-medium text-foreground">512×512</strong> PNG.
+              Small icon for tabs and bookmarks. Optional if you only set the PWA icon below.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <input
@@ -307,16 +343,62 @@ export default function AdminSettingsPage() {
                     className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60"
                   >
                     {iconUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    {iconUploading ? "Uploading…" : "Upload icon"}
+                    {iconUploading ? "Uploading…" : "Upload favicon"}
                   </button>
                 </>
               ) : null}
             </div>
             {config.faviconUrl?.trim() ? (
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-[11px] text-muted-foreground">Preview (app icon)</span>
+                <span className="text-[11px] text-muted-foreground">Preview</span>
+                <img src={config.faviconUrl.trim()} alt="" className="h-8 w-8 rounded border border-border object-cover bg-muted/30" />
+              </div>
+            ) : null}
+          </div>
+          <div className="sm:col-span-2 space-y-2">
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">PWA / install icon (square)</label>
+            <p className="text-[11px] text-muted-foreground -mt-1 mb-2">
+              Used for <strong className="font-medium text-foreground">Add to Home Screen</strong>, Apple touch icon, and manifest. Prefer{" "}
+              <strong className="font-medium text-foreground">512×512</strong> PNG with safe padding (maskable).
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                type="url"
+                value={config.pwaIconUrl}
+                onChange={(e) => setConfig((c) => ({ ...c, pwaIconUrl: e.target.value }))}
+                placeholder="https://..."
+                readOnly={!canManageBranding}
+                className={cn(
+                  "min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  !canManageBranding && "cursor-not-allowed bg-muted/40 text-muted-foreground"
+                )}
+              />
+              {canManageBranding ? (
+                <>
+                  <input
+                    ref={pwaIconFileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handlePwaIconFile}
+                  />
+                  <button
+                    type="button"
+                    disabled={pwaIconUploading}
+                    onClick={() => pwaIconFileRef.current?.click()}
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60"
+                  >
+                    {pwaIconUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {pwaIconUploading ? "Uploading…" : "Upload PWA icon"}
+                  </button>
+                </>
+              ) : null}
+            </div>
+            {(config.pwaIconUrl || config.faviconUrl)?.trim() ? (
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-[11px] text-muted-foreground">Install preview</span>
                 <img
-                  src={config.faviconUrl.trim()}
+                  src={(config.pwaIconUrl || config.faviconUrl).trim()}
                   alt=""
                   className="h-16 w-16 rounded-2xl border border-border object-cover bg-muted/30"
                 />

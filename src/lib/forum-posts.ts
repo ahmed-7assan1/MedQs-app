@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 
 /** JSON shape returned by GET /api/v1/forums/[forumId]/posts and SSR forum feed */

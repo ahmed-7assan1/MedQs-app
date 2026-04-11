@@ -25,11 +25,11 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   let pwaIcon: string | null = null;
   try {
     const row = await prisma.siteConfig.findFirst({
-      select: { siteName: true, primaryColor: true, faviconUrl: true },
+      select: { siteName: true, primaryColor: true, faviconUrl: true, pwaIconUrl: true },
     });
     if (row?.siteName?.trim()) siteName = row.siteName.trim();
     themeColor = safeThemeColor(row?.primaryColor);
-    const u = row?.faviconUrl?.trim();
+    const u = row?.pwaIconUrl?.trim() || row?.faviconUrl?.trim();
     if (u) pwaIcon = u;
   } catch {
     /* DB unavailable — defaults */

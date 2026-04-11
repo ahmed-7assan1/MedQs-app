@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -208,12 +208,12 @@ function applyConversationHistory(message: string, rawHistory: unknown): string 
   return `Earlier in this same conversation (for context):\n${block}\n\n---\n\nCurrent message:\n${message}`;
 }
 
-// Daily chat limits per rank (label → daily limit; -1 = unlimited)
+// Daily chat limits per rank (label → daily limit; -1 = unlimited). ×20 vs original caps.
 const RANK_LIMITS: Record<string, number> = {
-  Newbie:       5,
-  Active:       15,
-  Contributor:  30,
-  Expert:       60,
+  Newbie:       100,
+  Active:       300,
+  Contributor:  600,
+  Expert:       1200,
   Elite:        -1, // unlimited
 };
 

@@ -15,7 +15,7 @@ import path from "path";
 import { mkdir, writeFile, unlink } from "fs/promises";
 
 /** Dev / self-hosted: save under public/uploads — no S3, no card. Not supported on Vercel (ephemeral disk). */
-export function useLocalDiskUpload(): boolean {
+export function localDiskUploadEnabled(): boolean {
   return process.env.USE_LOCAL_FILE_UPLOAD === "true" && process.env.VERCEL !== "1";
 }
 
@@ -86,7 +86,7 @@ export async function uploadFile(
   const filename = `${randomUUID()}${ext}`;
   const segments = folder.split(/[/\\]+/).filter(Boolean);
 
-  if (useLocalDiskUpload()) {
+  if (localDiskUploadEnabled()) {
     const dir = path.join(process.cwd(), "public", "uploads", ...segments);
     await mkdir(dir, { recursive: true });
     const fullPath = path.join(dir, filename);
@@ -123,7 +123,7 @@ export async function getPresignedUploadUrl(
   mimeType: string,
   folder: string
 ): Promise<{ uploadUrl: string; publicUrl: string; key: string }> {
-  if (useLocalDiskUpload()) {
+  if (localDiskUploadEnabled()) {
     throw new Error(
       "Presigned S3 upload is disabled when USE_LOCAL_FILE_UPLOAD=true. Use POST /api/v1/upload/direct instead."
     );
@@ -152,7 +152,7 @@ export async function getPresignedUploadUrl(
 // ─── Delete a file ─────────────────────────────────────────────────────────────
 
 export async function deleteFile(key: string): Promise<void> {
-  if (useLocalDiskUpload()) {
+  if (localDiskUploadEnabled()) {
     const full = path.join(process.cwd(), "public", "uploads", ...key.split("/").filter(Boolean));
     await unlink(full).catch(() => {});
     return;

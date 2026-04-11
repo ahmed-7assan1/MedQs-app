@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlatformRole {
+  SUPER_ADMIN
+  FACULTY_ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum CourseVisibility {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Tenant {
+  id            String         @id @default(uuid())
+  key           String         @unique
+  displayName   String
+  status        String         @default("ACTIVE")
+  defaultDomain String?
+  config        TenantConfig?
+  domains       TenantDomain[]
+  users         UserRoleAssignment[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model TenantDomain {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  domain    String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model TenantConfig {
+  id                     String   @id @default(uuid())
+  tenantId               String   @unique
+  tenant                 Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  aiPreferredProvider    String   @default("auto")
+  aiDailyStudentQuota    Int      @default(25)
+  aiAdminGenerationLimit Int      @default(200)
+  featureFlagsJson       Json?
+  updatedAt              DateTime @updatedAt
+}
+
+model Role {
+  id          String               @id @default(uuid())
+  key         String               @unique
+  title       String
+  assignments UserRoleAssignment[]
+}
+
+model Permission {
+  id          String @id @default(uuid())
+  key         String @unique
+  description String?
+}
+
+model UserRoleAssignment {
+  id         String       @id @default(uuid())
+  userId     String
+  tenantId   String
+  roleId     String
+  scopeJson  Json?
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role       Role         @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@unique([userId, tenantId, roleId])
+  @@index([tenantId, roleId])
+}
+
+model IdentityProvider {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider     String
+  providerUid  String
+  accountEmail String?
+  createdAt    DateTime @default(now())
+
+  @@unique([provider, providerUid])
+  @@index([userId])
+}
+
+model User {
+  id                 String               @id @default(uuid())
+  email              String?              @unique
+  name               String?
+  image              String?
+  passwordHash       String?
+  status             String               @default("ACTIVE")
+  identityProviders  IdentityProvider[]
+  roleAssignments    UserRoleAssignment[]
+  teacherProfile     TeacherProfile?
+  courseEnrollments  CourseEnrollment[]
+  auditLogs          AuditLog[]
+  outboxEvents       OutboxEvent[]        @relation("OutboxActor")
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+model TeacherProfile {
+  id              String       @id @default(uuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio             String?
+  verified        Boolean      @default(false)
+  ratingAvg       Float        @default(0)
+  ratingCount     Int          @default(0)
+  totalStudents   Int          @default(0)
+  courses         CourseCatalog[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model CourseCatalog {
+  id              String           @id @default(uuid())
+  tenantId        String
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  teacherProfileId String
+  teacherProfile  TeacherProfile   @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  title           String
+  slug            String
+  description     String?
+  visibility      CourseVisibility @default(DRAFT)
+  tagsJson        Json?
+  pricing         CoursePricing?
+  enrollments     CourseEnrollment[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, visibility])
+}
+
+model CoursePricing {
+  id            String       @id @default(uuid())
+  courseId      String       @unique
+  course        CourseCatalog @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  currency      String       @default("USD")
+  amountCents   Int
+  compareAtCents Int?
+  updatedAt     DateTime     @updatedAt
+}
+
+model CourseEnrollment {
+  id          String       @id @default(uuid())
+  courseId    String
+  course      CourseCatalog @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      String       @default("ACTIVE")
+  enrolledAt  DateTime     @default(now())
+  completedAt DateTime?
+
+  @@unique([courseId, userId])
+  @@index([userId, status])
+}
+
+model FeatureFlag {
+  id         String   @id @default(uuid())
+  tenantId   String?
+  key        String
+  enabled    Boolean  @default(false)
+  payload    Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([tenantId, key])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  tenantKey   String?
+  actorUserId String?
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  action      String
+  resource    String
+  resourceId  String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantKey, createdAt])
+  @@index([actorUserId, createdAt])
+}
+
+model NotificationTemplate {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  channel   String
+  subject   String?
+  body      String
+  active    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model OutboxEvent {
+  id            String   @id @default(uuid())
+  tenantKey     String?
+  topic         String
+  payload       Json
+  actorUserId   String?
+  actor         User?    @relation("OutboxActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  occurredAt    DateTime @default(now())
+  publishedAt   DateTime?
+  retryCount    Int      @default(0)
+  lastError     String?
+
+  @@index([publishedAt, occurredAt])
+  @@index([tenantKey, occurredAt])
+}

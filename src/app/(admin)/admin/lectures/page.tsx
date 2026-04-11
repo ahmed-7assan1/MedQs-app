@@ -196,7 +196,7 @@ export default function AdminLecturesPage() {
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-12 text-center">
           <BookOpen className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
           <p className="text-sm font-medium">No lectures yet</p>
-          <p className="text-xs text-muted-foreground">Click "Add Lecture" to create the first one.</p>
+          <p className="text-xs text-muted-foreground">Click &quot;Add Lecture&quot; to create the first one.</p>
         </div>
       ) : (
         <div className="space-y-2">

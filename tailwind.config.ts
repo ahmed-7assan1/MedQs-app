@@ -10,8 +10,11 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-tajawal)", "var(--font-poppins)", "system-ui", "sans-serif"],
-        display: ["var(--font-tajawal)", "var(--font-poppins)", "system-ui", "sans-serif"],
+        /** Poppins ثم Tajawal — الواجهة الافتراضية */
+        sans: ["var(--font-poppins)", "var(--font-tajawal)", "system-ui", "sans-serif"],
+        display: ["var(--font-poppins)", "var(--font-tajawal)", "system-ui", "sans-serif"],
+        /** Tajawal ثم Poppins — فقرات عربية صريحة */
+        arabic: ["var(--font-tajawal)", "var(--font-poppins)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
       colors: {

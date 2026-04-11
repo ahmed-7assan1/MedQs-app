@@ -9,9 +9,11 @@ import { geminiModelChain } from "./gemini-model-chain";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ExtractedQuestion {
+  questionType?: "MCQ" | "ESSAY";
   body: string;
   choices: { key: string; text: string }[];
   answer: string;
+  essayReference?: string;
   explanation: string;
   difficulty: "EASY" | "MEDIUM" | "HARD";
 }
@@ -141,6 +143,31 @@ export async function extractQuestionsFromTextWithMeta(
   text: string,
   options?: AIRequestOptions
 ): Promise<AIWithMeta<ExtractedQuestion[]>> {
+  return extractQuestionsFromTextByModeWithMeta(text, "mcq", options);
+}
+
+export async function extractQuestionsFromTextByModeWithMeta(
+  text: string,
+  mode: "mcq" | "essay" | "mixed",
+  options?: AIRequestOptions
+): Promise<AIWithMeta<ExtractedQuestion[]>> {
+  const modeRule =
+    mode === "essay"
+      ? `Generate ONLY essay questions.
+- questionType must be "ESSAY"
+- choices must be []
+- answer can be short ideal answer
+- essayReference should contain key points expected from student answer`
+      : mode === "mixed"
+        ? `Generate mixed question types.
+- For MCQ: questionType="MCQ", choices with A-D, single correct answer in answer
+- For essay: questionType="ESSAY", choices=[]
+- essayReference should contain key points for essay grading`
+        : `Generate ONLY MCQ questions.
+- questionType must be "MCQ"
+- choices with keys A-D
+- one correct answer in "answer"`;
+
   const prompt = `You are a medical education assistant. Extract ALL multiple-choice questions from the following text.
 
 For each question return a JSON object. Return a JSON array called "questions".
@@ -149,6 +176,7 @@ Format:
 {
   "questions": [
     {
+      "questionType": "MCQ",
       "body": "The question text here",
       "choices": [
         {"key": "A", "text": "First option"},
@@ -157,6 +185,7 @@ Format:
         {"key": "D", "text": "Fourth option"}
       ],
       "answer": "A",
+      "essayReference": "",
       "explanation": "Brief explanation of the correct answer",
       "difficulty": "EASY"
     }
@@ -167,6 +196,7 @@ Rules:
 - Extract every question you find
 - If the answer is not stated, infer the most likely correct medical answer
 - difficulty must be "EASY", "MEDIUM", or "HARD"
+- ${modeRule}
 - Return ONLY the JSON, no extra text
 
 TEXT TO PROCESS:
@@ -176,7 +206,120 @@ ${text.slice(0, 15000)}`;
     preferredProvider: options?.preferredProvider,
   });
   return {
-    data: row.data.questions ?? [],
+    data: (row.data.questions ?? []).map((q) => ({
+      ...q,
+      questionType: q.questionType === "ESSAY" ? "ESSAY" : "MCQ",
+      essayReference: typeof q.essayReference === "string" ? q.essayReference : "",
+      choices: Array.isArray(q.choices) ? q.choices : [],
+    })),
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
+}
+
+export type EssayAutoGrade = {
+  isCorrect: boolean;
+  confidence: number;
+  feedback: string;
+  scorePercent: number;
+  stagesMet: number;
+  stagesTotal: number;
+  stageNotes: string[];
+};
+
+export async function gradeEssayAnswerWithMeta(
+  params: {
+    question: string;
+    studentAnswer: string;
+    referenceAnswer: string;
+  },
+  options?: AIRequestOptions
+): Promise<AIWithMeta<EssayAutoGrade>> {
+  const prompt = `You are a strict but fair medical examiner.
+Compare the student's essay answer to the reference answer (semantic meaning, not verbatim match).
+
+Question:
+${params.question}
+
+Reference answer (source truth — from the instructor/model answer file):
+${params.referenceAnswer}
+
+Student answer:
+${params.studentAnswer}
+
+Grading rules:
+- If the student writes in Arabic and the reference is in English (or the reverse), compare clinical/medical meaning.
+- Award partial credit when the answer is close to the reference even if wording differs.
+- Penalize major omissions or dangerous inaccuracies.
+
+Return ONLY valid JSON:
+{
+  "isCorrect": true,
+  "confidence": 0.82,
+  "feedback": "2–4 sentences: what was strong / missing",
+  "scorePercent": 78,
+  "stagesTotal": 4,
+  "stagesMet": 3,
+  "stageNotes": ["Stage 1 short note", "Stage 2 short note", "Stage 3 short note", "Stage 4 short note"]
+}
+
+Rules:
+- stagesTotal: break the reference into 4–6 conceptual stages (pathophys → presentation → diagnosis → management, etc.); use the same count in stagesTotal and stageNotes array length.
+- stagesMet: how many stages the student adequately covered (integer 0..stagesTotal).
+- scorePercent: 0–100 holistic score aligned with stagesMet and clinical accuracy (not only keyword match).
+- isCorrect: true if scorePercent >= 65 OR answer is substantially correct.
+- confidence: 0–1 how sure you are of the score.
+- stageNotes: one line per stage (met or not).`;
+
+  const fallback: EssayAutoGrade = {
+    isCorrect: false,
+    confidence: 0,
+    feedback: "Could not auto-grade answer.",
+    scorePercent: 0,
+    stagesMet: 0,
+    stagesTotal: 4,
+    stageNotes: [],
+  };
+
+  const row = await generateJsonWithFallback<{
+    isCorrect: boolean;
+    confidence: number;
+    feedback: string;
+    scorePercent?: number;
+    stagesMet?: number;
+    stagesTotal?: number;
+    stageNotes?: string[];
+  }>(prompt, fallback, { preferredProvider: options?.preferredProvider });
+
+  const c = Number(row.data.confidence);
+  const stagesTotal = Math.max(1, Math.min(8, Math.floor(Number(row.data.stagesTotal) || 4)));
+  let stagesMet = Math.max(0, Math.floor(Number(row.data.stagesMet) || 0));
+  stagesMet = Math.min(stagesTotal, stagesMet);
+  let stageNotes = Array.isArray(row.data.stageNotes)
+    ? row.data.stageNotes.filter((x): x is string => typeof x === "string").slice(0, 12)
+    : [];
+  while (stageNotes.length < stagesTotal) {
+    stageNotes.push(`Stage ${stageNotes.length + 1}`);
+  }
+  stageNotes = stageNotes.slice(0, stagesTotal);
+
+  let scorePercent = Math.round(Number(row.data.scorePercent));
+  if (!Number.isFinite(scorePercent)) {
+    scorePercent = Math.round((stagesMet / stagesTotal) * 100);
+  }
+  scorePercent = Math.max(0, Math.min(100, scorePercent));
+
+  const isCorrect = Boolean(row.data.isCorrect) || scorePercent >= 65;
+
+  return {
+    data: {
+      isCorrect,
+      confidence: Number.isFinite(c) ? Math.max(0, Math.min(1, c)) : 0,
+      feedback: String(row.data.feedback ?? "").slice(0, 900),
+      scorePercent,
+      stagesMet,
+      stagesTotal,
+      stageNotes,
+    },
     meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
   };
 }
@@ -525,7 +668,139 @@ Return ONLY valid JSON:
   };
 }
 
-// ─── 6. Gemini rate limit info ────────────────────────────────────────────────
+// ─── 6. Personal study assistant (weekly plan + review) ─────────────────────────
+
+export type StudyDayPlan = {
+  dayName: string;
+  blocks: { start: string; end: string; label: string; detail?: string }[];
+  focusTip?: string;
+};
+
+export type WeeklyStudyPlanPayload = {
+  days: StudyDayPlan[];
+  weeklyGoals: string[];
+  balanceSummary: string;
+};
+
+export async function generateWeeklyStudyPlanWithMeta(
+  params: {
+    scheduleText: string;
+    hobbies: string;
+    dailyStudyMinutes: number;
+    worshipMinutes: number;
+    otherRoutines: string;
+  },
+  options?: AIRequestOptions
+): Promise<AIWithMeta<WeeklyStudyPlanPayload>> {
+  const schedule = params.scheduleText.trim().slice(0, 12_000);
+  const prompt = `You are a professional academic coach for medical/university students.
+
+The student pasted their timetable / course schedule (classes, labs, clinics). Build a realistic 7-day weekly study plan that fits around fixed commitments.
+
+Constraints:
+- Target about ${params.dailyStudyMinutes} minutes of focused study per day on average (can vary slightly by day).
+- Reserve at least ${params.worshipMinutes} minutes daily for worship / spiritual routine as its own block (label clearly).
+- Include short breaks between long blocks.
+- Hobbies / sport / social: ${params.hobbies.trim() || "(none specified)"} — protect time for these if mentioned.
+- Other fixed routines the student mentioned: ${params.otherRoutines.trim() || "(none)"}
+
+Return ONLY valid JSON:
+{
+  "days": [
+    {
+      "dayName": "Saturday",
+      "blocks": [
+        {"start":"07:00","end":"07:30","label":"Worship / quiet time","detail":"optional"},
+        {"start":"09:00","end":"11:00","label":"Topic — active recall","detail":"optional"}
+      ],
+      "focusTip": "One line tip"
+    }
+  ],
+  "weeklyGoals": ["3 short bullets for the week"],
+  "balanceSummary": "2-3 sentences on balance (study, rest, worship, hobbies)"
+}
+
+Rules:
+- Provide exactly 7 consecutive days starting from the first day name that makes sense for the student's schedule (use Arabic or English day names matching the schedule language if obvious, else English).
+- Blocks must be plausible times (24h HH:MM).
+- Do not invent exam dates not implied by the schedule text.
+
+STUDENT SCHEDULE / NOTES:
+${schedule || "(empty — create a balanced generic medical-student week template)"}`;
+
+  const fallback: WeeklyStudyPlanPayload = { days: [], weeklyGoals: [], balanceSummary: "" };
+  const row = await generateJsonWithFallback<WeeklyStudyPlanPayload>(prompt, fallback, {
+    preferredProvider: options?.preferredProvider,
+  });
+  const days = Array.isArray(row.data.days)
+    ? row.data.days
+        .filter((d) => d && String(d.dayName).trim())
+        .map((d) => ({
+          dayName: String(d.dayName).trim().slice(0, 40),
+          focusTip: typeof d.focusTip === "string" ? d.focusTip.trim().slice(0, 300) : undefined,
+          blocks: Array.isArray(d.blocks)
+            ? d.blocks
+                .filter((b) => b && String(b.label).trim())
+                .map((b) => ({
+                  start: String(b.start ?? "").trim().slice(0, 8),
+                  end: String(b.end ?? "").trim().slice(0, 8),
+                  label: String(b.label).trim().slice(0, 200),
+                  detail: typeof b.detail === "string" ? b.detail.trim().slice(0, 400) : undefined,
+                }))
+                .slice(0, 16)
+            : [],
+        }))
+        .slice(0, 7)
+    : [];
+  return {
+    data: {
+      days,
+      weeklyGoals: Array.isArray(row.data.weeklyGoals)
+        ? row.data.weeklyGoals.map((g) => String(g).trim()).filter(Boolean).slice(0, 8)
+        : [],
+      balanceSummary: String(row.data.balanceSummary ?? "").trim().slice(0, 1200),
+    },
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
+}
+
+export async function generateStudyWeekReviewWithMeta(
+  params: { planJson: string; progressJson: string },
+  options?: AIRequestOptions
+): Promise<AIWithMeta<{ feedback: string; gaps: string[]; nextWeekFocus: string[] }>> {
+  const prompt = `You are a supportive study coach. The student had a weekly plan and logged daily completion (0-1 scale per day).
+
+Plan (JSON excerpt):
+${params.planJson.slice(0, 8000)}
+
+Progress log (JSON: date -> completion 0-1 and optional notes):
+${params.progressJson.slice(0, 4000)}
+
+Return ONLY JSON:
+{
+  "feedback": "2-4 sentences encouraging, specific",
+  "gaps": ["2-5 short bullets what was weak or missing"],
+  "nextWeekFocus": ["2-5 actionable priorities for next week"]
+}`;
+
+  const row = await generateJsonWithFallback<{ feedback: string; gaps: string[]; nextWeekFocus: string[] }>(
+    prompt,
+    { feedback: "", gaps: [], nextWeekFocus: [] },
+    { preferredProvider: options?.preferredProvider }
+  );
+  return {
+    data: {
+      feedback: String(row.data.feedback ?? "").trim().slice(0, 2000),
+      gaps: Array.isArray(row.data.gaps) ? row.data.gaps.map((x) => String(x).trim()).filter(Boolean).slice(0, 8) : [],
+      nextWeekFocus: Array.isArray(row.data.nextWeekFocus)
+        ? row.data.nextWeekFocus.map((x) => String(x).trim()).filter(Boolean).slice(0, 8)
+        : [],
+    },
+    meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
+  };
+}
+
+// ─── 7. Gemini rate limit info ────────────────────────────────────────────────
 
 export const GEMINI_LIMITS = {
   model: geminiModelChain()[0] ?? "gemini-2.5-flash",

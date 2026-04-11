@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertPastPaperCreatePayload, requireAdminWriter } from "@/lib/admin-scope";
+import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
+import { wantsV2OrgContentAssessment } from "@/platform/v2-toggle";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const scope = await getSessionScope(session);
+  if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isSuperAdmin(scope.role) && !scope.universityId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
   const semesterId = searchParams.get("semesterId");
@@ -14,7 +18,12 @@ export async function GET(req: NextRequest) {
   let papers: any[] = [];
   try {
     papers = await prisma.pastPaper.findMany({
-      where,
+      where: isSuperAdmin(scope.role)
+        ? where
+        : {
+            ...where,
+            semester: { academicYear: { universityId: scope.universityId! } },
+          },
       orderBy: { createdAt: "desc" },
       include: {
         module: { select: { name: true } },
@@ -24,7 +33,12 @@ export async function GET(req: NextRequest) {
   } catch {
     // Backward-compat when DB is not migrated yet.
     const legacy = await prisma.pastPaper.findMany({
-      where,
+      where: isSuperAdmin(scope.role)
+        ? where
+        : {
+            ...where,
+            semester: { academicYear: { universityId: scope.universityId! } },
+          },
       orderBy: { createdAt: "desc" },
       include: {
         module: { select: { name: true } },
@@ -54,8 +68,37 @@ export async function POST(req: NextRequest) {
 
   const kindRaw = typeof body.kind === "string" ? body.kind.trim() : "";
   const isAdminQuiz = kindRaw === "ADMIN_AUTHORED_QUIZ";
+  const useV2 = await wantsV2OrgContentAssessment(req, w.scope.universityId);
 
   const paper = await prisma.$transaction(async (tx) => {
+    // V2 toggle: allow attaching admin-authored quiz to a specific existing lecture.
+    const v2LectureId =
+      useV2 && typeof body.lectureId === "string" && body.lectureId.trim() ? body.lectureId.trim() : null;
+
+    if (v2LectureId) {
+      const lecture = await tx.lecture.findUnique({
+        where: { id: v2LectureId },
+        select: { id: true, subject: { select: { moduleId: true, module: { select: { semesterId: true } } } } },
+      });
+      if (!lecture) throw new Error("Lecture not found");
+      // Attach quiz to that lecture question bank.
+      return tx.pastPaper.create({
+        data: {
+          title: String(body.title ?? "").trim(),
+          semesterId: lecture.subject.module.semesterId,
+          moduleId: lecture.subject.moduleId,
+          isInteractive: true,
+          kind: "ADMIN_AUTHORED_QUIZ",
+          quizLectureId: lecture.id,
+          timeLimitMin:
+            body.timeLimitMin != null && body.timeLimitMin !== ""
+              ? Math.max(1, parseInt(String(body.timeLimitMin), 10))
+              : null,
+        },
+        select: { id: true, title: true, moduleId: true, semesterId: true, quizLectureId: true, kind: true },
+      });
+    }
+
     const created = await tx.pastPaper.create({
       data: {
         title: String(body.title ?? "").trim(),

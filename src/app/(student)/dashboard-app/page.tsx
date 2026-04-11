@@ -40,111 +40,126 @@ export default async function DashboardPage() {
   const weekStart = new Date(dayStart);
   weekStart.setDate(weekStart.getDate() - 6);
 
-  const [user, rankInfo, recentAttempts, weekItems, todayItemCount, recentAttemptsForStreak] =
-    await Promise.all([
-      prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          name: true,
-          semesterId: true,
-          university: { select: { name: true } },
-          semester: { select: { name: true } },
-        },
-      }),
-      getUserRankInfo(userId),
-      prisma.quizAttempt.findMany({
-        where: { userId },
-        orderBy: { createdAt: "desc" },
-        take: 4,
-        select: {
-          id: true,
-          score: true,
-          createdAt: true,
-          pastPaper: { select: { title: true } },
-        },
-      }),
-      prisma.quizAttemptItem.findMany({
-        where: { attempt: { userId, createdAt: { gte: weekStart } } },
-        select: { attempt: { select: { createdAt: true } } },
-      }),
-      prisma.quizAttemptItem.count({
-        where: { attempt: { userId, createdAt: { gte: dayStart } } },
-      }),
-      prisma.quizAttempt.findMany({
-        where: { userId },
-        select: { createdAt: true },
-        orderBy: { createdAt: "desc" },
-        take: 400,
-      }),
-    ]);
+  let user: any = null;
+  let rankInfo: any = null;
+  let recentAttempts: any[] = [];
+  let weekItems: Array<{ attempt: { createdAt: Date } }> = [];
+  let todayItemCount = 0;
+  let recentAttemptsForStreak: Array<{ createdAt: Date }> = [];
+  let quickPaperResolved: { id: string; title: string } | null = null;
+  let modules: any[] = [];
+  let attemptItems: any[] = [];
+  let lastLectureActivity: any = null;
 
-  const quickPaperResolved =
-    user?.semesterId != null
-      ? await prisma.pastPaper.findFirst({
-          where: { semesterId: user.semesterId },
-          orderBy: { title: "asc" },
-          select: { id: true, title: true },
-        })
-      : null;
+  try {
+    [user, rankInfo, recentAttempts, weekItems, todayItemCount, recentAttemptsForStreak] =
+      await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            name: true,
+            semesterId: true,
+            university: { select: { name: true } },
+            semester: { select: { name: true } },
+          },
+        }),
+        getUserRankInfo(userId),
+        prisma.quizAttempt.findMany({
+          where: { userId },
+          orderBy: { createdAt: "desc" },
+          take: 4,
+          select: {
+            id: true,
+            score: true,
+            createdAt: true,
+            pastPaper: { select: { title: true } },
+          },
+        }),
+        prisma.quizAttemptItem.findMany({
+          where: { attempt: { userId, createdAt: { gte: weekStart } } },
+          select: { attempt: { select: { createdAt: true } } },
+        }),
+        prisma.quizAttemptItem.count({
+          where: { attempt: { userId, createdAt: { gte: dayStart } } },
+        }),
+        prisma.quizAttempt.findMany({
+          where: { userId },
+          select: { createdAt: true },
+          orderBy: { createdAt: "desc" },
+          take: 400,
+        }),
+      ]);
 
-  const [modules, attemptItems, lastLectureActivity] = await Promise.all([
-    user?.semesterId != null
-      ? prisma.module.findMany({
-          where: { semesterId: user.semesterId },
-          orderBy: { name: "asc" },
-          include: {
-            subjects: {
-              include: {
-                lectures: {
-                  include: {
-                    _count: { select: { questions: true } },
-                    questions: { select: { id: true } },
+    quickPaperResolved =
+      user?.semesterId != null
+        ? await prisma.pastPaper.findFirst({
+            where: { semesterId: user.semesterId },
+            orderBy: { title: "asc" },
+            select: { id: true, title: true },
+          })
+        : null;
+
+    [modules, attemptItems, lastLectureActivity] = await Promise.all([
+      user?.semesterId != null
+        ? prisma.module.findMany({
+            where: { semesterId: user.semesterId },
+            orderBy: { name: "asc" },
+            include: {
+              subjects: {
+                include: {
+                  lectures: {
+                    include: {
+                      _count: { select: { questions: true } },
+                      questions: { select: { id: true } },
+                    },
                   },
                 },
               },
             },
-          },
-        })
-      : Promise.resolve([]),
-    prisma.quizAttemptItem.findMany({
-      where: {
-        attempt: { userId },
-        isCorrect: true,
-      },
-      select: {
-        questionId: true,
-        question: {
-          select: {
-            lectureId: true,
-            lecture: {
-              select: {
-                subject: { select: { moduleId: true } },
+          })
+        : Promise.resolve([]),
+      prisma.quizAttemptItem.findMany({
+        where: {
+          attempt: { userId },
+          isCorrect: true,
+        },
+        select: {
+          questionId: true,
+          question: {
+            select: {
+              lectureId: true,
+              lecture: {
+                select: {
+                  subject: { select: { moduleId: true } },
+                },
               },
             },
           },
         },
-      },
-    }),
-    prisma.userLectureActivity.findFirst({
-      where: { userId },
-      orderBy: { lastViewedAt: "desc" },
-      select: {
-        lastViewedAt: true,
-        lecture: {
-          select: {
-            id: true,
-            title: true,
-            subject: {
-              select: {
-                moduleId: true,
-                name: true,
+      }),
+      prisma.userLectureActivity.findFirst({
+        where: { userId },
+        orderBy: { lastViewedAt: "desc" },
+        select: {
+          lastViewedAt: true,
+          lecture: {
+            select: {
+              id: true,
+              title: true,
+              subject: {
+                select: {
+                  moduleId: true,
+                  name: true,
+                },
               },
             },
           },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } catch (err) {
+    console.warn("[dashboard-app] DB unavailable, rendering fallback dashboard:", err instanceof Error ? err.message : err);
+  }
 
   const correctByModule: Record<string, Set<string>> = {};
   for (const item of attemptItems) {
@@ -154,11 +169,11 @@ export default async function DashboardPage() {
   }
 
   const moduleProgress = modules.map((mod) => {
-    const allQuestions = mod.subjects.flatMap((s) => s.lectures).flatMap((l) => l.questions);
+    const allQuestions = mod.subjects.flatMap((s: any) => s.lectures).flatMap((l: any) => l.questions);
     const total = allQuestions.length;
     const correct = correctByModule[mod.id]?.size ?? 0;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
-    const lectures = mod.subjects.reduce((a, s) => a + s.lectures.length, 0);
+    const lectures = mod.subjects.reduce((a: number, s: any) => a + s.lectures.length, 0);
     return { id: mod.id, name: mod.name, total, correct, pct, lectures };
   });
 
@@ -230,7 +245,7 @@ export default async function DashboardPage() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className="mt-1 font-display text-2xl font-bold tabular-nums">{value}</p>
+                <p className="mt-1 font-display text-2xl font-bold">{value}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
               </div>
               <div className={cn("rounded-xl bg-muted/80 p-2.5", tone)}>

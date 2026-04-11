@@ -35,15 +35,18 @@ export default function AdminQuestionsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [lectureFilter, setLectureFilter] = useState("");
   const [listPage, setListPage] = useState(0);
 
   const [modules, setModules] = useState<ModuleT[]>([]);
   const [subjects, setSubjects] = useState<SubjectT[]>([]);
   const [lectures, setLectures] = useState<LectureT[]>([]);
+  const [filterLectures, setFilterLectures] = useState<LectureT[]>([]);
   const [pickModule, setPickModule] = useState("");
   const [pickSubject, setPickSubject] = useState("");
   const [pickLecture, setPickLecture] = useState("");
+  const [filterModule, setFilterModule] = useState("");
+  const [filterSubject, setFilterSubject] = useState("");
+  const [filterLecture, setFilterLecture] = useState("");
 
   const [addOpen, setAddOpen] = useState(false);
   const [body, setBody] = useState("");
@@ -60,11 +63,12 @@ export default function AdminQuestionsPage() {
   const [drawOpen, setDrawOpen] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/v1/questions${lectureFilter ? `?lectureId=${lectureFilter}` : ""}`)
+    setLoading(true);
+    fetch(`/api/v1/questions${filterLecture ? `?lectureId=${filterLecture}` : ""}`)
       .then((r) => r.json())
       .then((data) => setQuestions(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
-  }, [lectureFilter]);
+  }, [filterLecture]);
 
   useEffect(() => {
     Promise.all([
@@ -86,6 +90,17 @@ export default function AdminQuestionsPage() {
       .then((r) => r.json())
       .then((data) => setLectures(Array.isArray(data) ? data : []));
   }, [pickSubject]);
+
+  useEffect(() => {
+    if (!filterSubject) {
+      setFilterLectures([]);
+      setFilterLecture("");
+      return;
+    }
+    fetch(`/api/v1/subjects/${filterSubject}/lectures`)
+      .then((r) => r.json())
+      .then((data) => setFilterLectures(Array.isArray(data) ? data : []));
+  }, [filterSubject]);
 
   async function uploadQuestionImage(file: File) {
     setUploadingImage(true);
@@ -203,7 +218,7 @@ export default function AdminQuestionsPage() {
 
   useEffect(() => {
     setListPage(0);
-  }, [search, lectureFilter]);
+  }, [search, filterLecture]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safeListPage = Math.min(listPage, totalPages - 1);
@@ -213,6 +228,7 @@ export default function AdminQuestionsPage() {
   );
 
   const filteredSubjects = subjects.filter((s) => s.moduleId === pickModule);
+  const filterSubjectsByModule = subjects.filter((s) => s.moduleId === filterModule);
 
   const diffColor: Record<string, string> = {
     EASY:   "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -444,7 +460,70 @@ export default function AdminQuestionsPage() {
         </div>
       )}
 
-      {/* Search */}
+      {/* List scope: exact lecture (module → subject → lecture) */}
+      <div className="mb-4 rounded-xl border border-border bg-muted/15 p-4">
+        <p className="mb-3 text-sm font-semibold text-foreground">Show questions from…</p>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Choose the lecture whose bank you want to edit. Leave lecture empty to load all questions (may be slow on large sites).
+        </p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Module</label>
+            <select
+              value={filterModule}
+              onChange={(e) => {
+                setFilterModule(e.target.value);
+                setFilterSubject("");
+                setFilterLecture("");
+              }}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Any</option>
+              {modules.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Subject</label>
+            <select
+              value={filterSubject}
+              onChange={(e) => {
+                setFilterSubject(e.target.value);
+                setFilterLecture("");
+              }}
+              disabled={!filterModule}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+            >
+              <option value="">Any</option>
+              {filterSubjectsByModule.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Lecture</label>
+            <select
+              value={filterLecture}
+              onChange={(e) => setFilterLecture(e.target.value)}
+              disabled={!filterSubject}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+            >
+              <option value="">All in site (no lecture filter)</option>
+              {filterLectures.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-4 flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -452,17 +531,10 @@ export default function AdminQuestionsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search questions..."
+            placeholder="Search in loaded list…"
             className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
-        <input
-          type="text"
-          value={lectureFilter}
-          onChange={(e) => setLectureFilter(e.target.value)}
-          placeholder="Filter by Lecture ID"
-          className="w-48 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        />
       </div>
 
       {loading ? (

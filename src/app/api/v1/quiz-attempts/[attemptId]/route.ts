@@ -31,8 +31,11 @@ export async function GET(
 
   // Students can only see their own attempts; admins see all
   const role = (session.user as any)?.role;
-  if (attempt.userId !== session.user.id && role !== "ADMIN" && role !== "SUPER_ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
+  if (!isAdmin) {
+    if (attempt.guestQuizUserId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (attempt.userId !== session.user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   return NextResponse.json(attempt);
 }

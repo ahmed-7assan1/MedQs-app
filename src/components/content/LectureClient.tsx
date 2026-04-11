@@ -66,7 +66,7 @@ function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Flashcard</p>
-            <p className="font-display text-lg font-bold tabular-nums text-foreground md:text-xl">
+            <p className="font-display text-lg font-bold text-foreground md:text-xl">
               {idx + 1} <span className="text-muted-foreground">/</span> {total}
             </p>
           </div>
@@ -418,7 +418,7 @@ function QuestionsStepper({ questions }: { questions: Question[] }) {
         <div className="flex items-baseline justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Question</p>
-            <p className="font-display text-lg font-bold tabular-nums text-foreground md:text-xl">
+            <p className="font-display text-lg font-bold text-foreground md:text-xl">
               {idx + 1} <span className="text-muted-foreground">/</span> {total}
             </p>
           </div>

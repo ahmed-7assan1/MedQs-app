@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadFile, ALLOWED_TYPES, MAX_FILE_SIZE } from "@/lib/storage";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
+import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
 
 // POST /api/v1/lectures/:id/files  (multipart/form-data, field "file")
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
@@ -39,7 +40,16 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 }
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
+  const session = await auth();
+  const scope = await getSessionScope(session);
+  if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isSuperAdmin(scope.role) && !scope.universityId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   const { id } = await Promise.resolve(ctx.params);
+  if (!isSuperAdmin(scope.role)) {
+    const lErr = await assertLecture(scope as any, id);
+    if (lErr) return lErr;
+  }
   const files = await prisma.lectureFile.findMany({ where: { lectureId: id } });
   return NextResponse.json(files);
 }

@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* Always paint body (avoids blank white if theme script / data-theme fails) */
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
   :where(a, button, input, textarea, select, summary):focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
@@ -14,16 +19,15 @@
   }
 }
 
-/* Tajawal + Poppins via next/font on <html> (--font-tajawal first for Arabic). */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..900;1,9..144,200..900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;500;700&family=Cairo:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;700&family=Almarai:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Fonts are injected via next/font in layout; avoid runtime @import external fonts. */
 
 :root {
-  /* Tajawal first so Arabic always uses it; Poppins follows for Latin where Tajawal has no glyph */
-  --font-ui: var(--font-tajawal), var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  /* Poppins + Tajawal (MedQs): Latin → Poppins; Arabic → Tajawal (fallback in stack + :lang(ar)) */
+  --font-ui: var(--font-poppins), var(--font-tajawal), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-ui);
   --font-arabic: var(--font-tajawal), var(--font-poppins), ui-sans-serif, sans-serif;
-  --font-display: var(--font-ui);
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: var(--font-poppins), var(--font-tajawal), ui-sans-serif, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* Brand — deep medical blue (primary still overridden by admin in layout) */
   --primary: 217 72% 42%;
@@ -156,6 +160,21 @@ html[data-theme="dark"] .medqs-logo {
     font-family: var(--font-display);
     @apply tracking-tight font-semibold;
   }
+  /* Arabic / RTL headings: Tajawal first */
+  :lang(ar) h1,
+  :lang(ar) h2,
+  :lang(ar) h3,
+  :lang(ar) h4,
+  :lang(ar) h5,
+  :lang(ar) h6,
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
+    font-family: var(--font-arabic);
+  }
 }
 
 /* ── Root marketing page (/) — animated grid + motion (fonts stay on-page inline) ── */
@@ -284,6 +303,8 @@ html[data-theme="dark"] body {
 }
 
 .main-content {
+  position: relative;
+  z-index: 0;
   margin-left: 0 !important;
   min-height: 100dvh;
   min-height: 100vh;
@@ -434,6 +455,28 @@ html:not(.dark) .medqs-drawer .sb-footer {
 }
 html:not(.dark) .medqs-drawer .sb-user:hover {
   background: hsl(var(--muted));
+}
+
+/* Mobile drawer: roomier tap targets, multi-line labels */
+.medqs-drawer .sb-nav {
+  gap: 4px;
+  padding: 12px 12px;
+}
+.medqs-drawer .sb-link {
+  height: auto;
+  min-height: 48px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  align-items: flex-start;
+  white-space: normal;
+}
+.medqs-drawer .sb-link-icon {
+  margin-top: 2px;
+}
+.medqs-drawer .sb-link-label {
+  white-space: normal;
+  line-height: 1.4;
+  padding-top: 1px;
 }
 
 /* Legacy mobile-topbar — replaced by medqs-mobile-bar in Sidebar */
@@ -835,7 +878,7 @@ html[data-theme="light"]{ color-scheme:light; }
 .prose-sm,
 .prose-base,
 .prose-lg {
-  font-family: var(--font-tajawal), var(--font-poppins), sans-serif !important;
+  font-family: var(--font-poppins), var(--font-tajawal), sans-serif !important;
 }
 
 .prose code,
@@ -854,7 +897,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 textarea,
 select,
 [role="textbox"] {
-  font-family: var(--font-tajawal), var(--font-poppins), sans-serif;
+  font-family: var(--font-poppins), var(--font-tajawal), sans-serif;
 }
 
 /* Study Space — animated gradient background */
@@ -866,4 +909,45 @@ select,
 .study-space-aurora {
   background-size: 220% 220% !important;
   animation: study-space-gradient 20s ease infinite;
+}
+
+/* Landing — scroll-driven blocks */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(6px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.55s ease;
+}
+.scroll-reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+@keyframes landing-mesh-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(3%, -2%) scale(1.06);
+  }
+}
+.landing-mesh-drift {
+  animation: landing-mesh-drift 22s ease-in-out infinite;
+}
+.landing-mesh-drift--delayed {
+  animation: landing-mesh-drift 26s ease-in-out infinite;
+  animation-delay: -9s;
 }

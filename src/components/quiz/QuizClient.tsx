@@ -16,11 +16,13 @@ import toast from "react-hot-toast";
 
 interface Question {
   id: string;
+  questionType?: "MCQ" | "ESSAY";
   body: string;
   imageUrl?: string | null;
   stemLayout?: "STANDARD" | "IMAGE_OVERLAY";
   choices: { key: string; text: string }[];
   answer: string;
+  essayReference?: string | null;
   explanation?: string;
   difficulty: "EASY" | "MEDIUM" | "HARD";
   lectureId: string;
@@ -43,6 +45,8 @@ interface QuizClientProps {
   restrictCopyPaste?: boolean;
   /** Count tab/window hides and warn; sent with submit */
   trackFocusLoss?: boolean;
+  /** No login: submit via guest API and open result under /guest/attempt/... */
+  guestQuiz?: boolean;
 }
 
 function metaStorageKey(paperId: string) {
@@ -64,6 +68,7 @@ export function QuizClient({
   secureExamMode = false,
   restrictCopyPaste = false,
   trackFocusLoss = false,
+  guestQuiz = false,
 }: QuizClientProps) {
   const router = useRouter();
   const focusLossRef = useRef(0);
@@ -166,7 +171,10 @@ export function QuizClient({
     setSubmitting(true);
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     try {
-      const res = await fetch(`/api/v1/past-papers/${paperId}/attempt`, {
+      const url = guestQuiz
+        ? `/api/v1/guest-quiz/past-papers/${paperId}/attempt`
+        : `/api/v1/past-papers/${paperId}/attempt`;
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -178,12 +186,12 @@ export function QuizClient({
       if (!res.ok) throw new Error("Submit failed");
       const data = await res.json();
       setSubmitted(true);
-      router.push(`/quiz/attempt/${data.attemptId}`);
+      router.push(guestQuiz ? `/guest/attempt/${data.attemptId}` : `/quiz/attempt/${data.attemptId}`);
     } catch {
       toast.error("Submission failed. Please try again.");
       setSubmitting(false);
     }
-  }, [answers, paperId, startTime, submitted, submitting, router, trackFocusLoss]);
+  }, [answers, guestQuiz, paperId, startTime, submitted, submitting, router, trackFocusLoss]);
 
   useEffect(() => {
     if (timeLeft === null) return;
@@ -205,7 +213,12 @@ export function QuizClient({
   const onSelectAnswer = useCallback(
     (key: string) => {
       if (!q) return;
+      const isEssay = q.questionType === "ESSAY";
       if (examMode) {
+        setAnswers((a) => ({ ...a, [q.id]: key }));
+        return;
+      }
+      if (isEssay) {
         setAnswers((a) => ({ ...a, [q.id]: key }));
         return;
       }

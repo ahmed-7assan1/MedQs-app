@@ -189,6 +189,15 @@ export function ForumClient({
       .catch(() => {});
   }, []);
 
+  const isChatTab = tab === "discussions";
+  const [mobileThreadsOpen, setMobileThreadsOpen] = useState(false);
+  const [threadQuery, setThreadQuery] = useState("");
+  const filteredForums = useMemo(() => {
+    const q = threadQuery.trim().toLowerCase();
+    if (!q) return forumList;
+    return forumList.filter((f) => f.name.toLowerCase().includes(q));
+  }, [threadQuery, forumList]);
+
   async function submitPost(content: string, imageUrl: string): Promise<boolean> {
     if (!activeForum) return false;
     const trimmed = content.trim();
@@ -390,16 +399,6 @@ export function ForumClient({
       </div>
     );
   }
-
-  const isChatTab = tab === "discussions";
-  const [mobileThreadsOpen, setMobileThreadsOpen] = useState(false);
-  const [threadQuery, setThreadQuery] = useState("");
-
-  const filteredForums = useMemo(() => {
-    const q = threadQuery.trim().toLowerCase();
-    if (!q) return forumList;
-    return forumList.filter((f) => f.name.toLowerCase().includes(q));
-  }, [threadQuery, forumList]);
 
   return (
     <div

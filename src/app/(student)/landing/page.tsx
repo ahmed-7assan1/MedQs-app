@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
 import { Zap, Brain, Activity, Heart, Microscope, ArrowRight, CheckCircle2, BookOpen, Trophy, MessageSquare, Clock, ChevronRight, Play, Users, Star, Mail, Github, Layers, Sparkles, ClipboardList, Library, Stethoscope } from "lucide-react";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
+import { ScrollReveal } from "@/components/landing/ScrollReveal";
 
 export default async function LandingPage() {
   const [userCount, questionCount, moduleCount] = await Promise.all([
@@ -81,10 +82,17 @@ export default async function LandingPage() {
           </div>
 
           {/* Gradient orbs */}
-          <div style={{ position: "absolute", top: -60, left: "20%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, hsl(var(--primary) / .08), transparent)", filter: "blur(60px)" }} />
-          <div style={{ position: "absolute", top: -40, right: "20%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, hsl(240 80% 65% / .06), transparent)", filter: "blur(60px)" }} />
+          <div
+            className="landing-mesh-drift"
+            style={{ position: "absolute", top: -60, left: "20%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, hsl(var(--primary) / .12), transparent 55%)", filter: "blur(56px)" }}
+          />
+          <div
+            className="landing-mesh-drift--delayed"
+            style={{ position: "absolute", top: -40, right: "20%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, hsl(280 70% 58% / .1), transparent 55%)", filter: "blur(56px)" }}
+          />
         </div>
 
+        <ScrollReveal>
         {/* Badge */}
         <div className="animate-fade-in" style={{ display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 20, border: "1px solid hsl(var(--primary) / .25)", background: "hsl(var(--primary) / .07)", padding: "5px 14px", fontSize: 12, fontWeight: 500, color: "hsl(var(--primary))", marginBottom: 32 }}>
           <Zap style={{ width: 13, height: 13 }} />
@@ -126,16 +134,20 @@ export default async function LandingPage() {
             </div>
           ))}
         </div>
+        </ScrollReveal>
       </section>
 
       {/* ── FEATURES ── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px 80px" }}>
+        <ScrollReveal>
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p style={{ fontSize: 13, fontWeight: 500, color: "hsl(var(--primary))", marginBottom: 10 }}>Everything you need</p>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 700, letterSpacing: "-.02em", margin: "0 0 12px" }}>Built for medical students</h2>
           <p style={{ color: "hsl(var(--muted-foreground))", maxWidth: 440, margin: "0 auto" }}>Every feature designed around how you actually study medicine.</p>
         </div>
+        </ScrollReveal>
 
+        <ScrollReveal delayMs={100} className="block">
         <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
           {[
             { icon: BookOpen,     color: "#3b82f6", bg: "#3b82f608", title: "Structured curriculum",    desc: "University → Year → Semester → Module → Subject → Lecture. Find anything instantly." },
@@ -154,10 +166,12 @@ export default async function LandingPage() {
             </div>
           ))}
         </div>
+        </ScrollReveal>
       </section>
 
       {/* ── LEARNING STACK (Gizmo-style workflows, MedQs-grounded) ── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px 80px" }}>
+        <ScrollReveal>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p style={{ fontSize: 13, fontWeight: 500, color: "hsl(var(--primary))", marginBottom: 10 }}>All-in-one study loop</p>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, letterSpacing: "-.02em", margin: "0 0 12px" }}>
@@ -183,7 +197,9 @@ export default async function LandingPage() {
             </Link>
           </p>
         </div>
+        </ScrollReveal>
 
+        <ScrollReveal delayMs={90} className="block">
         <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
           {[
             { icon: Layers, color: "#0ea5e9", bg: "#0ea5e908", title: "Flip cards & active recall", desc: "Per-lecture decks with mastery marks as you go." },
@@ -200,6 +216,7 @@ export default async function LandingPage() {
             </div>
           ))}
         </div>
+        </ScrollReveal>
       </section>
 
       {/* ── DOCTORS & FACULTY ── */}
@@ -210,6 +227,7 @@ export default async function LandingPage() {
           padding: "0 24px 80px",
         }}
       >
+        <ScrollReveal>
         <div
           className="card-hover rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-card to-card p-8 md:p-10"
           style={{ boxShadow: "0 24px 80px hsl(var(--primary) / .12)" }}
@@ -281,6 +299,7 @@ export default async function LandingPage() {
             </div>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* ── FOOTER ── */}

@@ -1,8 +1,11 @@
 import { Poppins, Tajawal } from "next/font/google";
 
 /**
- * Site-wide text: Latin glyphs from Poppins only; Arabic glyphs from Tajawal (browser picks per codepoint).
- * Do not inject a single --font-sans-runtime from DB — it breaks Arabic shaping.
+ * Official UI pair: **Poppins** (Latin) + **Tajawal** (Arabic).
+ * Loaded via next/font on `<html>` as CSS variables `--font-poppins` / `--font-tajawal`.
+ * Default stack: Poppins → Tajawal (Arabic letters fall through to Tajawal).
+ * For RTL blocks use `font-arabic` or `dir="rtl"` / `:lang(ar)` (see globals.css).
+ * Do not replace with a single DB font — it breaks Arabic shaping.
  */
 export const fontPoppins = Poppins({
   subsets: ["latin", "latin-ext"],

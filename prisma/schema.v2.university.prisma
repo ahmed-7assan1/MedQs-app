@@ -1,0 +1,476 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum QuestionTypeV2 {
+  MCQ
+  MULTI_SELECT
+  TRUE_FALSE
+  CASE_BASED
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuizAttemptState {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_GRADED
+  REVIEWED
+}
+
+model Faculty {
+  id          String    @id @default(uuid())
+  tenantKey   String
+  code        String
+  name        String
+  programs    Program[]
+  communities Community[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([tenantKey, code])
+}
+
+model Program {
+  id            String        @id @default(uuid())
+  tenantKey     String
+  facultyId     String
+  faculty       Faculty       @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  code          String
+  name          String
+  curriculums   Curriculum[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([tenantKey, facultyId, code])
+}
+
+model Curriculum {
+  id              String            @id @default(uuid())
+  tenantKey       String
+  programId       String
+  program         Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  code            String
+  title           String
+  levels          CurriculumLevel[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([tenantKey, programId, code])
+}
+
+model CurriculumLevel {
+  id              String       @id @default(uuid())
+  tenantKey       String
+  curriculumId    String
+  curriculum      Curriculum   @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  levelNumber     Int
+  name            String
+  terms           Term[]
+
+  @@unique([curriculumId, levelNumber])
+  @@index([tenantKey, levelNumber])
+}
+
+model Term {
+  id              String          @id @default(uuid())
+  tenantKey       String
+  levelId         String
+  level           CurriculumLevel @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  name            String
+  modules         Module[]
+  enrollments     StudentEnrollment[]
+
+  @@index([tenantKey, name])
+}
+
+model Module {
+  id              String      @id @default(uuid())
+  tenantKey       String
+  termId          String
+  term            Term        @relation(fields: [termId], references: [id], onDelete: Cascade)
+  code            String
+  name            String
+  isOptional      Boolean     @default(false)
+  subjects        Subject[]
+  quizzes         Quiz[]
+
+  @@unique([tenantKey, termId, code])
+}
+
+model Subject {
+  id              String      @id @default(uuid())
+  tenantKey       String
+  moduleId        String
+  module          Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  code            String
+  name            String
+  lectures        Lecture[]
+  questionBanks   QuestionBank[]
+
+  @@unique([tenantKey, moduleId, code])
+}
+
+model Lecture {
+  id              String                @id @default(uuid())
+  tenantKey       String
+  subjectId       String
+  subject         Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  slug            String
+  title           String
+  status          String                @default("DRAFT")
+  componentToggle LectureComponentToggle[]
+  files           LectureFile[]
+  notes           LectureNote[]
+  videos          LectureVideo[]
+  flashcardSets   LectureFlashcardSet[]
+  quizzes         Quiz[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@unique([tenantKey, subjectId, slug])
+}
+
+model LectureComponentToggle {
+  id         String   @id @default(uuid())
+  lectureId  String
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  component  String
+  enabled    Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([lectureId, component])
+}
+
+model LectureFile {
+  id         String   @id @default(uuid())
+  lectureId  String
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  fileUrl    String
+  title      String?
+  createdAt  DateTime @default(now())
+}
+
+model LectureNote {
+  id         String   @id @default(uuid())
+  lectureId  String
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  authorUserId String
+  body       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model LectureVideo {
+  id         String   @id @default(uuid())
+  lectureId  String
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  videoUrl   String
+  title      String
+  sortOrder  Int      @default(0)
+}
+
+model LectureFlashcardSet {
+  id         String   @id @default(uuid())
+  lectureId  String
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  title      String
+  source     String   @default("MANUAL")
+  cardsJson  Json
+  createdAt  DateTime @default(now())
+}
+
+model QuestionBank {
+  id         String      @id @default(uuid())
+  tenantKey  String
+  subjectId  String
+  subject    Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title      String
+  questions  Question[]
+}
+
+model Question {
+  id               String          @id @default(uuid())
+  tenantKey        String
+  questionBankId   String
+  questionBank     QuestionBank    @relation(fields: [questionBankId], references: [id], onDelete: Cascade)
+  stem             String
+  type             QuestionTypeV2
+  difficulty       DifficultyLevel
+  explanation      String?
+  options          QuestionOption[]
+  tags             QuestionTag[]
+  versions         QuestionVersion[]
+  createdAt        DateTime        @default(now())
+}
+
+model QuestionOption {
+  id           String   @id @default(uuid())
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  key          String
+  content      String
+  isCorrect    Boolean
+
+  @@unique([questionId, key])
+}
+
+model QuestionTag {
+  id           String   @id @default(uuid())
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag          String
+
+  @@index([tag])
+}
+
+model QuestionVersion {
+  id           String   @id @default(uuid())
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  version      Int
+  snapshotJson Json
+  createdAt    DateTime @default(now())
+
+  @@unique([questionId, version])
+}
+
+model Quiz {
+  id              String       @id @default(uuid())
+  tenantKey       String
+  moduleId        String
+  module          Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lectureId       String?
+  lecture         Lecture?     @relation(fields: [lectureId], references: [id], onDelete: SetNull)
+  title           String
+  timeLimitSec    Int?
+  aiExplanation   Boolean      @default(false)
+  questions       QuizQuestion[]
+  attempts        QuizAttempt[]
+  publishedAt     DateTime?
+  createdAt       DateTime     @default(now())
+}
+
+model QuizQuestion {
+  id          String    @id @default(uuid())
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  orderNo     Int
+  points      Float     @default(1)
+
+  @@unique([quizId, questionId])
+  @@unique([quizId, orderNo])
+}
+
+model QuizAttempt {
+  id            String           @id @default(uuid())
+  tenantKey     String
+  quizId         String
+  quiz          Quiz             @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  studentUserId String
+  startedAt     DateTime         @default(now())
+  submittedAt   DateTime?
+  state         QuizAttemptState @default(IN_PROGRESS)
+  scorePercent  Float?
+  answers       QuizAttemptAnswer[]
+}
+
+model QuizAttemptAnswer {
+  id             String      @id @default(uuid())
+  attemptId      String
+  attempt        QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  answerJson     Json
+  isCorrect      Boolean?
+  earnedPoints   Float?
+
+  @@unique([attemptId, questionId])
+}
+
+model QuizAnalyticsSnapshot {
+  id               String   @id @default(uuid())
+  tenantKey        String
+  quizId           String
+  generatedAt      DateTime @default(now())
+  participantCount Int
+  metricsJson      Json
+
+  @@index([tenantKey, quizId, generatedAt])
+}
+
+model StudentEnrollment {
+  id             String   @id @default(uuid())
+  tenantKey      String
+  studentUserId  String
+  termId         String
+  term           Term     @relation(fields: [termId], references: [id], onDelete: Cascade)
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+
+  @@unique([studentUserId, termId])
+}
+
+model StudentProgress {
+  id             String   @id @default(uuid())
+  tenantKey      String
+  studentUserId  String
+  subjectId      String
+  subject        Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  completionPct  Float    @default(0)
+  lastActivityAt DateTime?
+
+  @@unique([studentUserId, subjectId])
+}
+
+model StudySession {
+  id            String   @id @default(uuid())
+  tenantKey     String
+  studentUserId String
+  lectureId     String?
+  lecture       Lecture? @relation(fields: [lectureId], references: [id], onDelete: SetNull)
+  startedAt     DateTime @default(now())
+  endedAt       DateTime?
+  durationSec   Int?
+}
+
+model SavedLecture {
+  id            String   @id @default(uuid())
+  tenantKey     String
+  studentUserId String
+  lectureId     String
+  lecture       Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@unique([studentUserId, lectureId])
+}
+
+model Community {
+  id           String   @id @default(uuid())
+  tenantKey    String
+  facultyId    String
+  faculty      Faculty  @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  name         String
+  posts        Post[]
+  groups       Group[]
+}
+
+model Post {
+  id           String    @id @default(uuid())
+  communityId  String
+  community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  authorUserId String
+  title        String
+  body         String
+  comments     Comment[]
+  reactions    Reaction[]
+  createdAt    DateTime  @default(now())
+}
+
+model Comment {
+  id           String   @id @default(uuid())
+  postId       String
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorUserId String
+  body         String
+  parentId     String?
+  createdAt    DateTime @default(now())
+}
+
+model Reaction {
+  id           String   @id @default(uuid())
+  postId       String
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId       String
+  type         String
+
+  @@unique([postId, userId, type])
+}
+
+model Group {
+  id            String            @id @default(uuid())
+  communityId   String
+  community     Community         @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  title         String
+  memberships   GroupMembership[]
+  messages      Message[]
+}
+
+model GroupMembership {
+  id            String   @id @default(uuid())
+  groupId       String
+  group         Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId        String
+  role          String   @default("MEMBER")
+  createdAt     DateTime @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model Message {
+  id            String   @id @default(uuid())
+  groupId       String
+  group         Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  senderUserId  String
+  body          String
+  createdAt     DateTime @default(now())
+}
+
+model Workspace {
+  id             String          @id @default(uuid())
+  tenantKey      String
+  ownerUserId    String
+  title          String          @default("My Study Space")
+  background     String?
+  widgets        WidgetInstance[]
+  updatedAt      DateTime        @updatedAt
+}
+
+model WidgetInstance {
+  id             String        @id @default(uuid())
+  workspaceId    String
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  type           String
+  configJson     Json?
+  layout         WidgetLayout?
+}
+
+model WidgetLayout {
+  id               String         @id @default(uuid())
+  widgetInstanceId String         @unique
+  widgetInstance   WidgetInstance @relation(fields: [widgetInstanceId], references: [id], onDelete: Cascade)
+  x                Int
+  y                Int
+  w                Int
+  h                Int
+}
+
+model PomodoroSession {
+  id             String   @id @default(uuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  ownerUserId    String
+  durationMin    Int
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+}
+
+model WhiteboardDocument {
+  id             String   @id @default(uuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  ownerUserId    String
+  title          String
+  contentJson    Json
+  updatedAt      DateTime @updatedAt
+}

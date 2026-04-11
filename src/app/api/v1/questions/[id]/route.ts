@@ -19,6 +19,10 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (boundary) return boundary;
 
   const data = await req.json();
+  if (data?.questionType === "ESSAY") {
+    data.choices = [];
+    if (!data.answer) data.answer = "ESSAY";
+  }
   if (typeof data?.lectureId === "string") {
     const lb = await assertLecture(w.scope, data.lectureId);
     if (lb) return lb;

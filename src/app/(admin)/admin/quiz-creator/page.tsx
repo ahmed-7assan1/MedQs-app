@@ -22,16 +22,26 @@ interface CreatedPaper {
 
 interface QuizQuestion {
   id?: string;
+  questionType?: "MCQ" | "ESSAY";
   body: string;
   imageUrl?: string;
   choices: { key: string; text: string }[];
   answer: string;
+  essayReference?: string;
   explanation: string;
   difficulty: "EASY" | "MEDIUM" | "HARD";
 }
 
 const CHOICE_KEYS = ["A", "B", "C", "D", "E"];
 const DIFF_COLORS = { EASY: "text-emerald-600", MEDIUM: "text-amber-600", HARD: "text-red-500" };
+
+function normalizeArrayPayload<T>(payload: unknown): T[] {
+  if (Array.isArray(payload)) return payload as T[];
+  if (payload && typeof payload === "object" && Array.isArray((payload as { result?: unknown[] }).result)) {
+    return (payload as { result: T[] }).result;
+  }
+  return [];
+}
 
 export default function AdminQuizCreatorPage() {
   const search = useSearchParams();
@@ -60,12 +70,17 @@ export default function AdminQuizCreatorPage() {
   const [expandedQ, setExpandedQ] = useState<number | null>(0);
   const [drawForQi, setDrawForQi] = useState<number | null>(null);
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+  const [aiFileBusy, setAiFileBusy] = useState(false);
+  const [aiQuestionMode, setAiQuestionMode] = useState<"mcq" | "essay" | "mixed">("mcq");
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/v1/semesters").then(r => r.json()),
-      fetch("/api/v1/modules-all").then(r => r.json()),
-    ]).then(([s, m]) => { setSemesters(s); setModules(m); });
+      fetch("/api/v1/semesters").then((r) => r.json()),
+      fetch("/api/v1/modules-all").then((r) => r.json()),
+    ]).then(([s, m]) => {
+      setSemesters(normalizeArrayPayload<Semester>(s));
+      setModules(normalizeArrayPayload<Module>(m));
+    });
   }, []);
 
   useEffect(() => {
@@ -75,6 +90,7 @@ export default function AdminQuizCreatorPage() {
 
   function addQuestion() {
     setQuestions(qs => [...qs, {
+      questionType: "MCQ",
       body: "", choices: [
         { key: "A", text: "" }, { key: "B", text: "" },
         { key: "C", text: "" }, { key: "D", text: "" },
@@ -159,7 +175,8 @@ export default function AdminQuizCreatorPage() {
           return;
         }
         const qsRes = await fetch(`/api/v1/questions?lectureId=${encodeURIComponent(lectureId)}`);
-        const qs = await qsRes.json().catch(() => []);
+        const qsRaw = await qsRes.json().catch(() => []);
+        const qs = normalizeArrayPayload<any>(qsRaw);
         if (!cancelled) {
           setForm((f) => ({
             ...f,
@@ -175,17 +192,21 @@ export default function AdminQuizCreatorPage() {
             Array.isArray(qs) && qs.length > 0
               ? qs.map((q: any) => ({
                   id: q.id,
+                  questionType: q.questionType === "ESSAY" ? "ESSAY" : "MCQ",
                   body: q.body ?? "",
                   imageUrl: q.imageUrl ?? undefined,
                   choices: Array.isArray(q.choices) ? q.choices : (q.choices ?? []),
                   answer: q.answer ?? "A",
+                  essayReference: q.essayReference ?? "",
                   explanation: q.explanation ?? "",
                   difficulty: q.difficulty ?? "MEDIUM",
                 }))
               : [{
+                  questionType: "MCQ",
                   body: "",
                   choices: [{ key: "A", text: "" }, { key: "B", text: "" }, { key: "C", text: "" }, { key: "D", text: "" }],
                   answer: "A",
+                  essayReference: "",
                   explanation: "",
                   difficulty: "MEDIUM",
                 }]
@@ -199,6 +220,62 @@ export default function AdminQuizCreatorPage() {
       cancelled = true;
     };
   }, [editingPaperId]);
+
+  async function ensureQuizBankLecture(moduleId: string): Promise<string> {
+    const res = await fetch(`/api/v1/modules/${encodeURIComponent(moduleId)}/ensure-quiz-bank-lecture`, {
+      method: "POST",
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || typeof data?.lectureId !== "string" || !data.lectureId) {
+      throw new Error(await apiErrorMessage(res, "Could not prepare quiz storage"));
+    }
+    return data.lectureId;
+  }
+
+  async function importQuestionsFromFile(file: File) {
+    setAiFileBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("questionMode", aiQuestionMode);
+      const res = await fetch("/api/v1/ai/extract", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(typeof data?.error === "string" ? data.error : "AI extraction failed");
+        return;
+      }
+      const rows = Array.isArray(data?.questions) ? data.questions : [];
+      if (!rows.length) {
+        toast.error("No questions extracted from file.");
+        return;
+      }
+      const mapped: QuizQuestion[] = rows.map((q: any) => {
+        const qt = q?.questionType === "ESSAY" ? "ESSAY" : "MCQ";
+        return {
+          questionType: qt,
+          body: String(q?.body ?? "").trim(),
+          imageUrl: q?.imageUrl ? String(q.imageUrl) : undefined,
+          choices:
+            qt === "ESSAY"
+              ? []
+              : (Array.isArray(q?.choices) ? q.choices : []).map((c: any, i: number) => ({
+                  key: String(c?.key ?? CHOICE_KEYS[i] ?? "A"),
+                  text: String(c?.text ?? ""),
+                })),
+          answer: qt === "ESSAY" ? "ESSAY" : String(q?.answer ?? "A"),
+          essayReference: qt === "ESSAY" ? String(q?.essayReference ?? q?.answer ?? "") : "",
+          explanation: String(q?.explanation ?? ""),
+          difficulty: q?.difficulty === "EASY" || q?.difficulty === "HARD" ? q.difficulty : "MEDIUM",
+        };
+      });
+      setQuestions((prev) => [...prev.filter((q) => q.body.trim()), ...mapped]);
+      toast.success(`AI imported ${mapped.length} question(s) from file`);
+    } catch {
+      toast.error("Upload/extraction took too long. Try a smaller file or split it into parts.");
+    } finally {
+      setAiFileBusy(false);
+    }
+  }
 
   async function handleSave() {
     if (!form.title || !form.semesterId || !form.moduleId)
@@ -230,37 +307,57 @@ export default function AdminQuizCreatorPage() {
         toast.error(await apiErrorMessage(paperRes, "Failed to create quiz"));
         return;
       }
-      const qLectureId = editingPaperId ? quizLectureId : (typeof paper.quizLectureId === "string" ? paper.quizLectureId : "");
-      if (!qLectureId) {
-        toast.error("Quiz was created, but no quiz lecture was returned. Check server logs.");
-        return;
+      let qLectureId = editingPaperId ? quizLectureId : (typeof paper.quizLectureId === "string" ? paper.quizLectureId : "");
+      const questionRows = questions.filter((q) => q.body.trim());
+      // Do not block quiz creation if lecture link is absent; lazily ensure hidden storage only when needed.
+      if (!qLectureId && questionRows.length > 0) {
+        qLectureId = await ensureQuizBankLecture(form.moduleId);
       }
       setQuizLectureId(qLectureId);
 
-      const questionRows = questions.filter((q) => q.body.trim());
       const createdIds: string[] = [];
 
-      if (questionRows.length > 0) {
-        for (const q of questionRows) {
+      if (questionRows.length > 0 && qLectureId) {
+        for (let idx = 0; idx < questionRows.length; idx++) {
+          const q = questionRows[idx]!;
+          const isEssay = (q.questionType ?? "MCQ") === "ESSAY";
+          const normalizedChoices = isEssay
+            ? []
+            : (q.choices ?? [])
+                .map((c) => ({ key: String(c.key ?? ""), text: String(c.text ?? "").trim() }))
+                .filter((c) => c.key && c.text);
+          if (!isEssay) {
+            if (normalizedChoices.length < 2) {
+              toast.error(`Question ${idx + 1}: add at least 2 non-empty choices`);
+              return;
+            }
+            const answerKey = String(q.answer ?? "A");
+            if (!normalizedChoices.some((c) => c.key === answerKey)) {
+              toast.error(`Question ${idx + 1}: selected answer key is not in choices`);
+              return;
+            }
+          }
           const isUpdate = typeof q.id === "string" && q.id.length > 0;
           const qRes = await fetch(isUpdate ? `/api/v1/questions/${q.id}` : "/api/v1/questions", {
             method: isUpdate ? "PUT" : "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               body: q.body.trim(),
+              questionType: q.questionType ?? "MCQ",
               imageUrl: q.imageUrl?.trim() || null,
-              choices: q.choices.map((c) => ({ key: c.key, text: c.text })),
-              answer: q.answer,
+              choices: normalizedChoices,
+              answer: q.questionType === "ESSAY" ? "ESSAY" : q.answer,
+              essayReference: q.questionType === "ESSAY" ? q.essayReference?.trim() || q.answer : undefined,
               explanation: q.explanation?.trim() || "",
               difficulty: q.difficulty,
               lectureId: qLectureId,
             }),
           });
-          const row = await qRes.json().catch(() => ({}));
           if (!qRes.ok) {
-            toast.error(typeof row?.error === "string" ? row.error : "Failed to save a question");
+            toast.error(await apiErrorMessage(qRes, `Question ${idx + 1}: failed to save`));
             return;
           }
+          const row = await qRes.json().catch(() => ({}));
           if (typeof row?.id === "string") createdIds.push(row.id);
         }
       }
@@ -290,7 +387,7 @@ export default function AdminQuizCreatorPage() {
         googleSheetsSyncEnabled: false,
       });
       setQuizLectureId("");
-      setQuestions([{ body: "", choices: [{ key:"A",text:"" }, { key:"B",text:"" }, { key:"C",text:"" }, { key:"D",text:"" }], answer: "A", explanation: "", difficulty: "MEDIUM" }]);
+      setQuestions([{ questionType: "MCQ", body: "", choices: [{ key:"A",text:"" }, { key:"B",text:"" }, { key:"C",text:"" }, { key:"D",text:"" }], answer: "A", essayReference: "", explanation: "", difficulty: "MEDIUM" }]);
     } finally { setSaving(false); }
   }
 
@@ -392,6 +489,40 @@ export default function AdminQuizCreatorPage() {
         </div>
       </div>
 
+      {/* AI import from file */}
+      <div className="rounded-2xl border border-border bg-card p-5 mb-6">
+        <h2 className="font-semibold mb-3">AI Assistant (File → Questions)</h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          Upload PDF/DOCX/image. Assistant can OCR and generate MCQ, essay, or mixed questions.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={aiQuestionMode}
+            onChange={(e) => setAiQuestionMode(e.target.value as any)}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm"
+          >
+            <option value="mcq">Multiple choice only</option>
+            <option value="essay">Essay only</option>
+            <option value="mixed">Mixed (MCQ + Essay)</option>
+          </select>
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm hover:bg-muted">
+            {aiFileBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+            Upload file for AI
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,image/png,image/jpeg,image/webp"
+              className="hidden"
+              disabled={aiFileBusy}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void importQuestionsFromFile(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+      </div>
+
       {/* Questions */}
       <div className="space-y-3 mb-6">
         {questions.map((q, qi) => (
@@ -428,6 +559,33 @@ export default function AdminQuizCreatorPage() {
                     placeholder="Type your question here..."
                     rows={3}
                     className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 resize-none" />
+                </div>
+
+                {/* Question type */}
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">Question type</label>
+                  <select
+                    value={q.questionType ?? "MCQ"}
+                    onChange={(e) => {
+                      const t = e.target.value === "ESSAY" ? "ESSAY" : "MCQ";
+                      setQuestions((qs) =>
+                        qs.map((item, idx) =>
+                          idx !== qi
+                            ? item
+                            : {
+                                ...item,
+                                questionType: t,
+                                choices: t === "ESSAY" ? [] : item.choices.length ? item.choices : [{ key: "A", text: "" }, { key: "B", text: "" }],
+                                answer: t === "ESSAY" ? "ESSAY" : item.answer || "A",
+                              }
+                        )
+                      );
+                    }}
+                    className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25"
+                  >
+                    <option value="MCQ">Multiple choice</option>
+                    <option value="ESSAY">Essay</option>
+                  </select>
                 </div>
 
                 {/* Image URL */}
@@ -473,7 +631,8 @@ export default function AdminQuizCreatorPage() {
                   )}
                 </div>
 
-                {/* Choices */}
+                {/* Choices (MCQ only) */}
+                {(q.questionType ?? "MCQ") === "MCQ" ? (
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-xs font-medium text-muted-foreground">
@@ -515,6 +674,21 @@ export default function AdminQuizCreatorPage() {
                     Click a letter to mark as correct answer
                   </p>
                 </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">Essay reference answer (AI grading)</label>
+                    <textarea
+                      value={q.essayReference ?? ""}
+                      onChange={(e) => updateQ(qi, "essayReference", e.target.value)}
+                      placeholder="Paste the key answer points extracted from file..."
+                      rows={3}
+                      className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 resize-none"
+                    />
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      Student answer does not need exact wording. AI checks semantic closeness to this reference.
+                    </p>
+                  </div>
+                )}
 
                 {/* Explanation + Difficulty */}
                 <div className="grid sm:grid-cols-3 gap-3">

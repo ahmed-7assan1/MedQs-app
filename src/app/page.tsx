@@ -209,7 +209,7 @@ export default async function RootPage() {
             animationDelay: "0.18s",
           }}
         >
-          Your university's complete medical education platform.
+          Your university&apos;s complete medical education platform.
           Lectures, practice questions, AI explanations, and study tools — all in one place.
         </p>
 

@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -16,7 +17,7 @@ const CredentialsSchema = z.object({
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Use the incoming Host when building OAuth redirect_uri (needed on Vercel etc. if URL env drifts).
   trustHost: true,
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma as unknown as PrismaClient),
   session: { strategy: "jwt" },
   providers: [
     Google({

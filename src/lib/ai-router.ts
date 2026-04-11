@@ -15,7 +15,7 @@ export type AIFallbackMeta = {
 export type ChatImagePart = { mimeType: string; data: string };
 export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
-const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 75_000;
+const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 150_000;
 
 /** Thrown when no provider API keys are set (e.g. missing GEMINI_API_KEY on Vercel). */
 export class AIConfigurationError extends Error {
