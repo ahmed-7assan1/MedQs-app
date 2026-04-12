@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { GeminiBanner } from "@/components/admin/GeminiInfo";
 import { AiQuestionPlacementPicker } from "@/components/admin/AiQuestionPlacementPicker";
 import type { ExtractedQuestion, AISuggestion } from "@/lib/gemini";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 type AIProviderChoice = "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
 
@@ -116,19 +117,19 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Review & edit before save
               </span>
-              <select
+              <MedqsSelect
                 value={edited.difficulty}
                 onChange={(e) =>
                   setEdited((prev) =>
                     prev ? { ...prev, difficulty: e.target.value as AISuggestion["difficulty"] } : prev
                   )
                 }
-                className="rounded-lg border border-border bg-background px-2 py-1 text-xs"
+                className="h-9 min-w-[6rem] text-xs"
               >
                 <option value="EASY">EASY</option>
                 <option value="MEDIUM">MEDIUM</option>
                 <option value="HARD">HARD</option>
-              </select>
+              </MedqsSelect>
             </div>
 
             <div className="space-y-2">
@@ -437,18 +438,18 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
-                        <select
+                        <MedqsSelect
                           value={q.difficulty}
                           onChange={(e) =>
                             patchQuestion(i, { difficulty: e.target.value as ExtractedQuestion["difficulty"] })
                           }
-                          className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+                          className="w-full"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <option value="EASY">EASY</option>
                           <option value="MEDIUM">MEDIUM</option>
                           <option value="HARD">HARD</option>
-                        </select>
+                        </MedqsSelect>
                       </div>
                     </div>
                     <div>
@@ -596,17 +597,17 @@ export default function AIToolsPage() {
       </div>
       <div className="mb-4 rounded-xl border border-border bg-card p-4">
         <label className="mb-1 block text-xs font-medium text-muted-foreground">Preferred AI provider</label>
-        <select
+        <MedqsSelect
           value={providerChoice}
           onChange={(e) => setProviderChoice(e.target.value as AIProviderChoice)}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full"
         >
           <option value="auto">Auto (best available + fallback)</option>
           <option value="gemini">Gemini</option>
           <option value="openai">OpenAI</option>
           <option value="anthropic">Anthropic</option>
           <option value="deepseek">DeepSeek</option>
-        </select>
+        </MedqsSelect>
         <p className="mt-2 text-xs text-muted-foreground">
           If your selected provider fails or quota ends, the request automatically switches to the next configured provider.
         </p>

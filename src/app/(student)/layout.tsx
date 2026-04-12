@@ -5,6 +5,7 @@ import { AdBannerModal } from "@/components/ads/AdBannerModal";
 import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
+import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 
@@ -45,32 +46,39 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const sessionUserId = session?.user?.id ?? "";
 
   return (
-    <>
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
-      <div className={cn("app-shell")}>
-        <Sidebar
-          userName={isGuest ? "Guest" : displayName}
-          userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
-          userId={isGuest ? "" : sessionUserId}
-          isAdmin={isAdmin}
-          siteName={siteConfig?.siteName ?? "MedQs"}
-          logoUrl={siteConfig?.logoUrl ?? undefined}
-          isGuest={isGuest}
-          unreadCount={unreadCount}
-        />
-        <div className="main-content">
-          {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
-          {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
-          <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-8 outline-none">
-            {children}
-          </main>
-          <SiteFooter siteName={siteConfig?.siteName ?? "MedQs"} />
-          {isAdmin && !isGuest ? <AdminStudentBar /> : null}
-          <CookieConsentBanner />
+    <SiteConfigProvider
+      initial={{
+        siteName: siteConfig?.siteName ?? "MedQs",
+        logoUrl: siteConfig?.logoUrl ?? null,
+      }}
+    >
+      <>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <div className={cn("app-shell")}>
+          <Sidebar
+            userName={isGuest ? "Guest" : displayName}
+            userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+            userId={isGuest ? "" : sessionUserId}
+            isAdmin={isAdmin}
+            siteName={siteConfig?.siteName ?? "MedQs"}
+            logoUrl={siteConfig?.logoUrl ?? undefined}
+            isGuest={isGuest}
+            unreadCount={unreadCount}
+          />
+          <div className="main-content">
+            {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
+            {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
+            <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-8 outline-none">
+              {children}
+            </main>
+            <SiteFooter siteName={siteConfig?.siteName ?? "MedQs"} />
+            {isAdmin && !isGuest ? <AdminStudentBar /> : null}
+            <CookieConsentBanner />
+          </div>
         </div>
-      </div>
-    </>
+      </>
+    </SiteConfigProvider>
   );
 }

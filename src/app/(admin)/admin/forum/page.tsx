@@ -7,6 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 type ForumStatus = "OPEN" | "RESTRICTED" | "READ_ONLY" | "CLOSED";
 type ForumType = "GLOBAL" | "SEMESTER";
@@ -122,14 +123,14 @@ export default function AdminForumPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Type</label>
-              <select
+              <MedqsSelect
                 value={newType}
                 onChange={(e) => setNewType(e.target.value as ForumType)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full"
               >
                 <option value="GLOBAL">Global (all users)</option>
                 <option value="SEMESTER">Semester (filtered)</option>
-              </select>
+              </MedqsSelect>
             </div>
             {newType === "SEMESTER" && (
               <div className="sm:col-span-2">
@@ -196,16 +197,16 @@ export default function AdminForumPage() {
 
                   <div className="flex items-center gap-2">
                     {/* Status quick-change */}
-                    <select
+                    <MedqsSelect
                       value={forum.status}
                       onChange={(e) => changeStatus(forum.id, e.target.value as ForumStatus)}
-                      className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="h-9 min-w-[9.5rem] py-0 text-xs"
                     >
                       <option value="OPEN">Open</option>
                       <option value="RESTRICTED">Restricted</option>
                       <option value="READ_ONLY">Read-only</option>
                       <option value="CLOSED">Closed</option>
-                    </select>
+                    </MedqsSelect>
                     <button
                       onClick={() => deleteForum(forum.id, forum.name)}
                       className="rounded-lg p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

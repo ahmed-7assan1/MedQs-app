@@ -9,7 +9,7 @@ async function main() {
     where: { id: "default" },
     update: {},
     create: {
-      id: "default", siteName: "MedQs", primaryColor: "#1a7ef0",
+      id: "default", siteName: "MedQs", primaryColor: "#0d9488",
       enableAI: true, enableForum: true, enableAds: true, enableNotifs: true,
     },
   });

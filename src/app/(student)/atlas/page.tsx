@@ -4,7 +4,7 @@ import { Search, X, ChevronRight, Info, ExternalLink, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SYSTEMS = [
-  { id: "skeletal",       label: "Skeletal",       color: "#3b82f6", emoji: "🦴" },
+  { id: "skeletal",       label: "Skeletal",       color: "#0d9488", emoji: "🦴" },
   { id: "muscular",       label: "Muscular",       color: "#ef4444", emoji: "💪" },
   { id: "nervous",        label: "Nervous",        color: "#8b5cf6", emoji: "🧠" },
   { id: "cardiovascular", label: "Cardiovascular", color: "#f43f5e", emoji: "❤️" },

@@ -1,7 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
+import { prisma } from "@/lib/prisma";
+import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import { ChevronRight } from "lucide-react";
@@ -13,12 +15,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const hubBadge = role === "SUPER_ADMIN" ? "Platform" : "Doctor";
 
+  const siteConfig = await prisma.siteConfig
+    .findFirst({ select: { siteName: true, logoUrl: true } })
+    .catch(() => null);
+
   return (
+    <SiteConfigProvider initial={{ siteName: siteConfig?.siteName ?? "MedQs", logoUrl: siteConfig?.logoUrl ?? null }}>
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-56 shrink-0 border-r border-border bg-card/75 backdrop-blur-md md:flex md:flex-col">
         <div className="flex h-14 items-center gap-2 border-b border-border/80 bg-card/50 px-4 backdrop-blur-sm">
           <MedQsLogoMark className="h-7 w-7 shrink-0" title="MedQs" />
-          <MedQsWordmark className="text-base" />
+          <span className="font-display text-base font-bold tracking-tight">{siteConfig?.siteName ?? "MedQs"}</span>
           <span
             className="ml-auto rounded-lg bg-primary/12 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
             title={PLATFORM_COPY.doctorHub}
@@ -52,5 +59,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <main className="min-h-screen">{children}</main>
       </div>
     </div>
+  </SiteConfigProvider>
   );
 }

@@ -40,8 +40,10 @@ interface NotificationStore {
 export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
   unread: 0,
-  setNotifications: (notifications) =>
-    set({ notifications, unread: notifications.filter((n) => !n.read).length }),
+  setNotifications: (raw) => {
+    const notifications = Array.isArray(raw) ? raw : [];
+    set({ notifications, unread: notifications.filter((n) => !n.read).length });
+  },
   addNotification: (n) => {
     set((state) => ({
       notifications: [n, ...state.notifications],

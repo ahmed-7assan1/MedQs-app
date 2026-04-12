@@ -6,6 +6,8 @@ import {
   Clock, BookOpen, Image, Check, X, Pencil, ImagePlus,
 } from "lucide-react";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { unwrapApiList } from "@/lib/api-list";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import { QuickDrawModal } from "@/components/draw/QuickDrawModal";
 import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
@@ -34,14 +36,6 @@ interface QuizQuestion {
 
 const CHOICE_KEYS = ["A", "B", "C", "D", "E"];
 const DIFF_COLORS = { EASY: "text-emerald-600", MEDIUM: "text-amber-600", HARD: "text-red-500" };
-
-function normalizeArrayPayload<T>(payload: unknown): T[] {
-  if (Array.isArray(payload)) return payload as T[];
-  if (payload && typeof payload === "object" && Array.isArray((payload as { result?: unknown[] }).result)) {
-    return (payload as { result: T[] }).result;
-  }
-  return [];
-}
 
 export default function AdminQuizCreatorPage() {
   const search = useSearchParams();
@@ -78,8 +72,8 @@ export default function AdminQuizCreatorPage() {
       fetch("/api/v1/semesters").then((r) => r.json()),
       fetch("/api/v1/modules-all").then((r) => r.json()),
     ]).then(([s, m]) => {
-      setSemesters(normalizeArrayPayload<Semester>(s));
-      setModules(normalizeArrayPayload<Module>(m));
+      setSemesters(unwrapApiList<Semester>(s));
+      setModules(unwrapApiList<Module>(m));
     });
   }, []);
 
@@ -176,7 +170,7 @@ export default function AdminQuizCreatorPage() {
         }
         const qsRes = await fetch(`/api/v1/questions?lectureId=${encodeURIComponent(lectureId)}`);
         const qsRaw = await qsRes.json().catch(() => []);
-        const qs = normalizeArrayPayload<any>(qsRaw);
+        const qs = unwrapApiList<any>(qsRaw);
         if (!cancelled) {
           setForm((f) => ({
             ...f,
@@ -417,19 +411,33 @@ export default function AdminQuizCreatorPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">Semester *</label>
-            <select value={form.semesterId} onChange={e => setForm(f => ({ ...f, semesterId: e.target.value }))}
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25">
+            <MedqsSelect
+              value={form.semesterId}
+              onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
+              className="w-full rounded-xl"
+            >
               <option value="">Select semester...</option>
-              {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
+              {semesters.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </MedqsSelect>
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">Module *</label>
-            <select value={form.moduleId} onChange={e => setForm(f => ({ ...f, moduleId: e.target.value }))}
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25">
+            <MedqsSelect
+              value={form.moduleId}
+              onChange={(e) => setForm((f) => ({ ...f, moduleId: e.target.value }))}
+              className="w-full rounded-xl"
+            >
               <option value="">Select module...</option>
-              {modules.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-            </select>
+              {modules.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </MedqsSelect>
           </div>
 
           <div className="sm:col-span-2 rounded-xl border border-border bg-muted/20 px-4 py-3">
@@ -496,15 +504,15 @@ export default function AdminQuizCreatorPage() {
           Upload PDF/DOCX/image. Assistant can OCR and generate MCQ, essay, or mixed questions.
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <select
+          <MedqsSelect
             value={aiQuestionMode}
-            onChange={(e) => setAiQuestionMode(e.target.value as any)}
-            className="rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            onChange={(e) => setAiQuestionMode(e.target.value as typeof aiQuestionMode)}
+            className="min-w-[12rem] rounded-xl"
           >
             <option value="mcq">Multiple choice only</option>
             <option value="essay">Essay only</option>
             <option value="mixed">Mixed (MCQ + Essay)</option>
-          </select>
+          </MedqsSelect>
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm hover:bg-muted">
             {aiFileBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
             Upload file for AI
@@ -564,7 +572,7 @@ export default function AdminQuizCreatorPage() {
                 {/* Question type */}
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1.5">Question type</label>
-                  <select
+                  <MedqsSelect
                     value={q.questionType ?? "MCQ"}
                     onChange={(e) => {
                       const t = e.target.value === "ESSAY" ? "ESSAY" : "MCQ";
@@ -575,17 +583,25 @@ export default function AdminQuizCreatorPage() {
                             : {
                                 ...item,
                                 questionType: t,
-                                choices: t === "ESSAY" ? [] : item.choices.length ? item.choices : [{ key: "A", text: "" }, { key: "B", text: "" }],
+                                choices:
+                                  t === "ESSAY"
+                                    ? []
+                                    : item.choices.length
+                                      ? item.choices
+                                      : [
+                                          { key: "A", text: "" },
+                                          { key: "B", text: "" },
+                                        ],
                                 answer: t === "ESSAY" ? "ESSAY" : item.answer || "A",
                               }
                         )
                       );
                     }}
-                    className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25"
+                    className="w-full rounded-xl"
                   >
                     <option value="MCQ">Multiple choice</option>
                     <option value="ESSAY">Essay</option>
-                  </select>
+                  </MedqsSelect>
                 </div>
 
                 {/* Image URL */}

@@ -193,7 +193,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
         <div className="mb-6 grid grid-cols-3 gap-3">
           {[
             { label: "Points", value: user.points, icon: Trophy, color: "text-amber-500" },
-            { label: "Quizzes", value: user._count.quizAttempts, icon: BookOpen, color: "text-blue-500" },
+            { label: "Quizzes", value: user._count.quizAttempts, icon: BookOpen, color: "text-primary" },
             { label: "Posts", value: user._count.posts, icon: MessageSquare, color: "text-violet-500" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div

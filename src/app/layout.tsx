@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ChunkLoadRecovery } from "@/components/system/ChunkLoadRecovery";
+import { DevServiceWorkerCleanup } from "@/components/system/DevServiceWorkerCleanup";
 import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { appFontVariableClassName } from "@/lib/app-fonts";
@@ -17,12 +18,12 @@ async function getSiteConfig() {
       logoUrl: null,
       pwaIconUrl: null,
       faviconUrl: null,
-      primaryColor: "#1a7ef0",
+      primaryColor: "#0d9488",
       enableAI: true,
       enableForum: true,
       enableAds: true,
       enableNotifs: true,
-      fontSans: "Poppins",
+      fontSans: "Plus Jakarta Sans",
       fontArabic: "Tajawal",
     };
   } catch {
@@ -31,25 +32,25 @@ async function getSiteConfig() {
       logoUrl: null,
       pwaIconUrl: null,
       faviconUrl: null,
-      primaryColor: "#1a7ef0",
+      primaryColor: "#0d9488",
       enableAI: true,
       enableForum: true,
       enableAds: true,
       enableNotifs: true,
-      fontSans: "Poppins",
+      fontSans: "Plus Jakarta Sans",
       fontArabic: "Tajawal",
     };
   }
 }
 
-const DEFAULT_PRIMARY_HEX = "#1a7ef0";
+const DEFAULT_PRIMARY_HEX = "#2563eb";
 
 function sanitizeHex(hex: string | null | undefined): string {
   const t = (hex ?? "").trim();
   return /^#[0-9A-Fa-f]{6}$/.test(t) ? t : DEFAULT_PRIMARY_HEX;
 }
 
-// Convert hex color (#1a7ef0) → HSL values for Tailwind CSS variables
+// Convert hex color → HSL values for Tailwind CSS variables
 function hexToHsl(hex: string): { h: number; s: number; l: number } {
   const safe = sanitizeHex(hex);
   const r = parseInt(safe.slice(1, 3), 16) / 255;
@@ -180,6 +181,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={appFontVariableClassName} data-theme="light" suppressHydrationWarning>
       <head>
+        {process.env.NODE_ENV === "development" ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister();});});}if(typeof caches!=='undefined'&&caches.keys)caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);});});}catch(e){}})();`,
+            }}
+          />
+        ) : null}
         {/* No-flicker theme script — runs before first paint */}
         <script
           dangerouslySetInnerHTML={{
@@ -210,6 +218,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="font-sans antialiased">
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+        <DevServiceWorkerCleanup />
         <ChunkLoadRecovery />
         {children}
         <Toaster

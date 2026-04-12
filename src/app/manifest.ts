@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
-const DEFAULT_PRIMARY = "#1a7ef0";
+const DEFAULT_PRIMARY = "#0d9488";
 const DEFAULT_BG = "#f5f6fa";
 
 function safeThemeColor(hex: string | null | undefined): string {

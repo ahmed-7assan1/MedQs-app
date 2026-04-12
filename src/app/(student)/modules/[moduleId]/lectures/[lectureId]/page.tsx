@@ -21,6 +21,9 @@ export default async function LectureHubPage({
   if (!lecture) notFound();
   await trackLectureView(session.user.id, params.lectureId, "hub");
 
+  // Plain JSON so the client bundle never receives non-serializable Prisma values (avoids RSC/hydration edge cases).
+  const lectureClient = JSON.parse(JSON.stringify(lecture)) as typeof lecture;
+
   return (
     <div className="min-h-0 flex-1">
       <nav className="mx-auto w-full max-w-6xl px-3 pt-4 text-sm text-muted-foreground sm:px-6">
@@ -66,7 +69,7 @@ export default async function LectureHubPage({
         </div>
       ) : null}
 
-      <LectureExperienceClient lecture={lecture as any} moduleId={params.moduleId} />
+      <LectureExperienceClient lecture={lectureClient as any} moduleId={params.moduleId} />
     </div>
   );
 }

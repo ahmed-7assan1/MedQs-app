@@ -76,7 +76,7 @@ model SiteConfig {
   /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
   pwaIconUrl          String?
   faviconUrl          String?
-  primaryColor        String   @default("#2563EB")
+  primaryColor        String   @default("#0d9488")
   aiPreferredProvider String   @default("auto")
   enableAI            Boolean  @default(true)
   enableForum         Boolean  @default(true)

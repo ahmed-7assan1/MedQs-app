@@ -10,6 +10,8 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   },
   workboxOptions: {
     disableDevLogs: true,
+    // Never treat Next’s own assets as “offline document” fallbacks (avoids /_next/... → wrong shell).
+    navigateFallbackDenylist: [/^\/_next\//, /^\/api\//],
   },
 });
 

@@ -9,6 +9,8 @@ import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { unwrapApiList } from "@/lib/api-list";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import Link from "next/link";
 
 interface Question {
@@ -75,8 +77,8 @@ export default function AdminQuestionsPage() {
       fetch("/api/v1/modules-all").then((r) => r.json()),
       fetch("/api/v1/subjects-all").then((r) => r.json()),
     ]).then(([m, s]) => {
-      setModules(Array.isArray(m) ? m : []);
-      setSubjects(Array.isArray(s) ? s : []);
+      setModules(unwrapApiList<ModuleT>(m));
+      setSubjects(unwrapApiList<SubjectT>(s));
     });
   }, []);
 
@@ -275,44 +277,57 @@ export default function AdminQuestionsPage() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Module</label>
-              <select
+              <MedqsSelect
                 value={pickModule}
-                onChange={(e) => { setPickModule(e.target.value); setPickSubject(""); setPickLecture(""); }}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                onChange={(e) => {
+                  setPickModule(e.target.value);
+                  setPickSubject("");
+                  setPickLecture("");
+                }}
+                className="w-full"
               >
                 <option value="">Select…</option>
                 {modules.map((m) => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
                 ))}
-              </select>
+              </MedqsSelect>
             </div>
             <div>
               <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Subject</label>
-              <select
+              <MedqsSelect
                 value={pickSubject}
-                onChange={(e) => { setPickSubject(e.target.value); setPickLecture(""); }}
+                onChange={(e) => {
+                  setPickSubject(e.target.value);
+                  setPickLecture("");
+                }}
                 disabled={!pickModule}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+                className="w-full"
               >
                 <option value="">Select…</option>
                 {filteredSubjects.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
                 ))}
-              </select>
+              </MedqsSelect>
             </div>
             <div>
               <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Lecture</label>
-              <select
+              <MedqsSelect
                 value={pickLecture}
                 onChange={(e) => setPickLecture(e.target.value)}
                 disabled={!pickSubject}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+                className="w-full"
               >
                 <option value="">Select…</option>
                 {lectures.map((l) => (
-                  <option key={l.id} value={l.id}>{l.title}</option>
+                  <option key={l.id} value={l.id}>
+                    {l.title}
+                  </option>
                 ))}
-              </select>
+              </MedqsSelect>
             </div>
           </div>
 
@@ -372,14 +387,14 @@ export default function AdminQuestionsPage() {
             ) : null}
             <div className="mt-2">
               <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Stem + image layout</label>
-              <select
+              <MedqsSelect
                 value={stemLayout}
                 onChange={(e) => setStemLayout(e.target.value as "STANDARD" | "IMAGE_OVERLAY")}
-                className="w-full max-w-md rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                className="w-full max-w-md"
               >
                 <option value="STANDARD">Image above text (default)</option>
                 <option value="IMAGE_OVERLAY">Text overlaid on image (clinical slide)</option>
-              </select>
+              </MedqsSelect>
               <p className="mt-1 text-[10px] text-muted-foreground">
                 Overlay works best when you have an image and a short line of stem text.
               </p>
@@ -407,27 +422,29 @@ export default function AdminQuestionsPage() {
           <div className="flex flex-wrap items-end gap-4">
             <div>
               <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Correct answer</label>
-              <select
+              <MedqsSelect
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                className="min-w-[4.5rem]"
               >
                 {DEFAULT_KEYS.map((k) => (
-                  <option key={k} value={k}>{k}</option>
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
                 ))}
-              </select>
+              </MedqsSelect>
             </div>
             <div>
               <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
-              <select
+              <MedqsSelect
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                className="min-w-[7rem]"
               >
                 <option value="EASY">Easy</option>
                 <option value="MEDIUM">Medium</option>
                 <option value="HARD">Hard</option>
-              </select>
+              </MedqsSelect>
             </div>
           </div>
 
@@ -469,14 +486,14 @@ export default function AdminQuestionsPage() {
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
             <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Module</label>
-            <select
+            <MedqsSelect
               value={filterModule}
               onChange={(e) => {
                 setFilterModule(e.target.value);
                 setFilterSubject("");
                 setFilterLecture("");
               }}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="w-full"
             >
               <option value="">Any</option>
               {modules.map((m) => (
@@ -484,18 +501,18 @@ export default function AdminQuestionsPage() {
                   {m.name}
                 </option>
               ))}
-            </select>
+            </MedqsSelect>
           </div>
           <div>
             <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Subject</label>
-            <select
+            <MedqsSelect
               value={filterSubject}
               onChange={(e) => {
                 setFilterSubject(e.target.value);
                 setFilterLecture("");
               }}
               disabled={!filterModule}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+              className="w-full"
             >
               <option value="">Any</option>
               {filterSubjectsByModule.map((s) => (
@@ -503,15 +520,15 @@ export default function AdminQuestionsPage() {
                   {s.name}
                 </option>
               ))}
-            </select>
+            </MedqsSelect>
           </div>
           <div>
             <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Lecture</label>
-            <select
+            <MedqsSelect
               value={filterLecture}
               onChange={(e) => setFilterLecture(e.target.value)}
               disabled={!filterSubject}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+              className="w-full"
             >
               <option value="">All in site (no lecture filter)</option>
               {filterLectures.map((l) => (
@@ -519,7 +536,7 @@ export default function AdminQuestionsPage() {
                   {l.title}
                 </option>
               ))}
-            </select>
+            </MedqsSelect>
           </div>
         </div>
       </div>
@@ -634,15 +651,15 @@ export default function AdminQuestionsPage() {
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
-                        <select
+                        <MedqsSelect
                           value={q.difficulty}
                           onChange={(e) => patchQuestion(q.id, { difficulty: e.target.value })}
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                          className="w-full"
                         >
                           <option value="EASY">EASY</option>
                           <option value="MEDIUM">MEDIUM</option>
                           <option value="HARD">HARD</option>
-                        </select>
+                        </MedqsSelect>
                       </div>
                       <div>
                         <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Explanation</label>

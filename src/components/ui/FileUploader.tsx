@@ -47,7 +47,7 @@ interface FileUploaderProps {
 }
 
 function FileTypeIcon({ mimeType }: { mimeType: string }) {
-  if (mimeType.startsWith("video/")) return <Film className="h-5 w-5 text-blue-500" />;
+  if (mimeType.startsWith("video/")) return <Film className="h-5 w-5 text-primary" />;
   if (mimeType.startsWith("image/")) return <Image className="h-5 w-5 text-emerald-500" />;
   return <FileText className="h-5 w-5 text-red-500" />;
 }

@@ -8,6 +8,8 @@ import { FileUploader } from "@/components/ui/FileUploader";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { unwrapApiList } from "@/lib/api-list";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 interface Module  { id: string; name: string }
 interface Semester { id: string; name: string }
@@ -60,13 +62,13 @@ export default function AdminPastPapersPage() {
         ]);
 
         const pp = ppRes.ok ? await ppRes.json().catch(() => []) : [];
-        const s = sRes.ok ? await sRes.json().catch(() => []) : [];
-        const m = mRes.ok ? await mRes.json().catch(() => []) : [];
+        const sRaw = sRes.ok ? await sRes.json().catch(() => []) : [];
+        const mRaw = mRes.ok ? await mRes.json().catch(() => []) : [];
 
         if (!cancelled) {
           setPapers(Array.isArray(pp) ? pp : []);
-          setSemesters(Array.isArray(s) ? s : []);
-          setModules(Array.isArray(m) ? m : []);
+          setSemesters(unwrapApiList(sRaw));
+          setModules(unwrapApiList(mRaw));
         }
 
         if (!ppRes.ok && !cancelled) {
@@ -206,26 +208,34 @@ export default function AdminPastPapersPage() {
 
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Semester *</label>
-              <select
+              <MedqsSelect
                 value={form.semesterId}
-                onChange={e => setForm(f => ({ ...f, semesterId: e.target.value }))}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
+                className="w-full"
               >
                 <option value="">Select semester...</option>
-                {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
+                {semesters.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </MedqsSelect>
             </div>
 
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Module *</label>
-              <select
+              <MedqsSelect
                 value={form.moduleId}
-                onChange={e => setForm(f => ({ ...f, moduleId: e.target.value }))}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                onChange={(e) => setForm((f) => ({ ...f, moduleId: e.target.value }))}
+                className="w-full"
               >
                 <option value="">Select module...</option>
-                {modules.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-              </select>
+                {modules.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </MedqsSelect>
             </div>
 
             <div>

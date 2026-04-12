@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronLeft, ChevronRight, Shield, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 type User = {
   id: string;
@@ -146,8 +147,8 @@ export function UsersTable({
                   </div>
                   {viewerRole === "SUPER_ADMIN" && user.role === "ADMIN" && universities.length > 0 ? (
                     <div className="mt-2">
-                      <select
-                        className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                      <MedqsSelect
+                        className="h-8 text-xs"
                         value={user.universityId ?? ""}
                         onChange={(e) => void setUniversity(user.id, e.target.value)}
                         title="Assign doctor (faculty) to a university"
@@ -158,7 +159,7 @@ export function UsersTable({
                             {u.name}
                           </option>
                         ))}
-                      </select>
+                      </MedqsSelect>
                     </div>
                   ) : null}
                 </td>

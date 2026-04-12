@@ -22,113 +22,112 @@
 /* Fonts are injected via next/font in layout; avoid runtime @import external fonts. */
 
 :root {
-  /* Poppins + Tajawal (MedQs): Latin → Poppins; Arabic → Tajawal (fallback in stack + :lang(ar)) */
-  --font-ui: var(--font-poppins), var(--font-tajawal), ui-sans-serif, system-ui, sans-serif;
+  /* Plus Jakarta Sans + Tajawal — loaded via next/font on <html> */
+  --font-ui: var(--font-jakarta), var(--font-tajawal), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-ui);
-  --font-arabic: var(--font-tajawal), var(--font-poppins), ui-sans-serif, sans-serif;
-  --font-display: var(--font-poppins), var(--font-tajawal), ui-sans-serif, sans-serif;
+  --font-arabic: var(--font-tajawal), var(--font-jakarta), ui-sans-serif, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-tajawal), ui-sans-serif, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* Brand — deep medical blue (primary still overridden by admin in layout) */
-  --primary: 217 72% 42%;
+  /* Brand — clinical blue (overridden by admin primary in layout <style>) */
+  --primary: 221 83% 53%;
   --primary-foreground: 0 0% 100%;
-  --ring: 217 72% 42%;
+  --ring: 221 83% 53%;
 
-  /* Surfaces — soft off-white (simplicity + hierarchy vs. pure #fff cards) */
-  --background: 220 24% 97%;
-  --foreground: 222 47% 11%;
+  /* Surfaces — cool porcelain + subtle sage undertone */
+  --background: 165 18% 97%;
+  --foreground: 200 24% 12%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --muted: 220 16% 95%;
-  --muted-foreground: 220 9% 46%;
-  --secondary: 220 14% 96%;
-  --secondary-foreground: 222 47% 11%;
-  --accent: 173 55% 94%;
-  --accent-foreground: 173 58% 28%;
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
+  --card-foreground: 200 24% 12%;
+  --muted: 160 14% 94%;
+  --muted-foreground: 200 12% 42%;
+  --secondary: 158 12% 95%;
+  --secondary-foreground: 200 24% 14%;
+  --accent: 214 32% 91%;
+  --accent-foreground: 221 83% 53%;
+  --border: 160 14% 88%;
+  --input: 160 14% 88%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  --success: 152 60% 38%;
-  --radius: 1rem;
+  --success: 158 64% 32%;
+  --radius: 0.875rem;
 
-  /* Mobile drawer (dark rail) */
-  --sidebar-bg: 222 32% 8%;
-  --sidebar-fg: 210 18% 72%;
-  --sidebar-accent: 221 83% 56%;
-  --sidebar-border: 222 20% 14%;
-  --sidebar-hover: 222 18% 12%;
-  --sidebar-active-bg: 221 75% 48%;
+  /* Desktop sidebar rail (dark) */
+  --sidebar-bg: 196 32% 7%;
+  --sidebar-fg: 165 14% 78%;
+  --sidebar-accent: 221 83% 53%;
+  --sidebar-border: 196 22% 12%;
+  --sidebar-hover: 196 20% 11%;
+  --sidebar-active-bg: 221 83% 40%;
 }
 
 /* ── MedQs vector logo (SVG) — light UI ── */
 .medqs-logo {
-  --ml-cyan: #38bdf8;
-  --ml-sky: #0ea5e9;
-  --ml-mid: #0284c7;
-  --ml-navy: #0c4a6e;
-  --ml-deep: #075985;
+  --ml-cyan: #60a5fa;
+  --ml-sky: #3b82f6;
+  --ml-mid: #2563eb;
+  --ml-navy: #1e3a8a;
+  --ml-deep: #1d4ed8;
   --ml-cross: #ffffff;
-  --ml-heart: #0369a1;
-  --ml-ring-hi: #7dd3fc;
-  --ml-ring-lo: #1e3a8a;
-  --ml-glass-fill: #e0f2fe;
-  --ml-text-med: #0c4a6e;
-  --ml-text-qs: #0284c7;
-  --ml-tagline: #0c4a6e;
+  --ml-heart: #2563eb;
+  --ml-ring-hi: #93c5fd;
+  --ml-ring-lo: #1e40af;
+  --ml-glass-fill: #dbeafe;
+  --ml-text-med: #1e3a8a;
+  --ml-text-qs: #2563eb;
+  --ml-tagline: #1d4ed8;
 }
 
 /* Theme dark (class + data-theme for html) */
 .dark .medqs-logo,
 html[data-theme="dark"] .medqs-logo {
-  --ml-cyan: #7dd3fc;
-  --ml-sky: #38bdf8;
-  --ml-mid: #0ea5e9;
-  --ml-navy: #082f49;
-  --ml-deep: #0c4a6e;
+  --ml-cyan: #93c5fd;
+  --ml-sky: #60a5fa;
+  --ml-mid: #3b82f6;
+  --ml-navy: #1e3a8a;
+  --ml-deep: #1d4ed8;
   --ml-cross: #f8fafc;
-  --ml-heart: #0369a1;
-  --ml-ring-hi: #bae6fd;
-  --ml-ring-lo: #1d4ed8;
-  --ml-glass-fill: #0c4a6e;
-  --ml-text-med: #e0f2fe;
-  --ml-text-qs: #38bdf8;
-  --ml-tagline: #bae6fd;
+  --ml-heart: #3b82f6;
+  --ml-ring-hi: #bfdbfe;
+  --ml-ring-lo: #1e40af;
+  --ml-glass-fill: #1e3a8a;
+  --ml-text-med: #bfdbfe;
+  --ml-text-qs: #60a5fa;
+  --ml-tagline: #93c5fd;
 }
 
 /* Force palette on always-dark surfaces (e.g. marketing hero) */
 .medqs-logo--on-dark {
-  --ml-cyan: #7dd3fc;
-  --ml-sky: #38bdf8;
-  --ml-mid: #22d3ee;
-  --ml-navy: #082f49;
-  --ml-deep: #0e7490;
+  --ml-cyan: #93c5fd;
+  --ml-sky: #60a5fa;
+  --ml-mid: #3b82f6;
+  --ml-navy: #1e3a8a;
+  --ml-deep: #2563eb;
   --ml-cross: #ffffff;
-  --ml-heart: #0ea5e9;
-  --ml-ring-hi: #93c5fd;
-  --ml-ring-lo: #1d4ed8;
-  --ml-glass-fill: #0c4a6e;
-  --ml-text-med: #f0f9ff;
-  --ml-text-qs: #38bdf8;
-  --ml-tagline: #cbd5e1;
+  --ml-heart: #3b82f6;
+  --ml-ring-hi: #bfdbfe;
+  --ml-ring-lo: #1e40af;
+  --ml-glass-fill: #1e3a8a;
+  --ml-text-med: #f8fafc;
+  --ml-text-qs: #60a5fa;
+  --ml-tagline: #94a3b8;
 }
 
 .dark {
-  /* Blue + near-black */
-  --background: 222 47% 5%;
-  --foreground: 210 40% 98%;
-  --card: 222 40% 7%;
-  --card-foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 6%;
-  --muted: 222 30% 12%;
-  --muted-foreground: 215 20% 65%;
-  --secondary: 222 35% 10%;
-  --secondary-foreground: 210 40% 96%;
-  --accent: 222 35% 12%;
-  --accent-foreground: 217 91% 70%;
-  --border: 222 25% 16%;
-  --input: 222 25% 16%;
+  --background: 196 38% 5%;
+  --foreground: 160 20% 97%;
+  --card: 196 32% 7%;
+  --card-foreground: 160 20% 97%;
+  --primary: 221 83% 60%;
+  --primary-foreground: 196 40% 6%;
+  --muted: 196 24% 14%;
+  --muted-foreground: 160 12% 68%;
+  --secondary: 196 28% 11%;
+  --secondary-foreground: 160 18% 94%;
+  --accent: 196 26% 13%;
+  --accent-foreground: 221 83% 60%;
+  --border: 196 22% 17%;
+  --input: 196 22% 17%;
 }
 
 /* ── Base ── */
@@ -139,6 +138,7 @@ html[data-theme="dark"] .medqs-logo {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     scroll-padding-top: 4.5rem;
+    min-height: 100%;
   }
   body {
     @apply bg-background text-foreground;
@@ -201,10 +201,10 @@ html[data-theme="dark"] .medqs-logo {
 @keyframes landing-root-glow-pulse {
   0%,
   100% {
-    filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.35));
+    filter: drop-shadow(0 4px 20px rgba(37, 99, 235, 0.38));
   }
   50% {
-    filter: drop-shadow(0 10px 32px rgba(99, 102, 241, 0.55));
+    filter: drop-shadow(0 10px 32px rgba(59, 130, 246, 0.45));
   }
 }
 
@@ -230,7 +230,7 @@ html[data-theme="dark"] .medqs-logo {
 
 .landing-root-cta-glow:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 36px rgba(59, 130, 246, 0.48) !important;
+  box-shadow: 0 10px 36px rgba(37, 99, 235, 0.42) !important;
 }
 
 .landing-root-card {
@@ -277,37 +277,42 @@ html[data-theme="dark"] .medqs-logo {
 
 /* ── Light: white + soft blue wash ── */
 html[data-theme="light"] body {
-  background-color: hsl(220 20% 98%);
+  background-color: hsl(210 20% 98%);
   background-image:
-    radial-gradient(ellipse 100% 80% at 50% -40%, hsl(var(--primary) / 0.09), transparent 55%),
-    radial-gradient(ellipse 60% 50% at 100% 0%, hsl(222 45% 45% / 0.06), transparent 45%);
+    radial-gradient(ellipse 100% 80% at 50% -40%, hsl(var(--primary) / 0.1), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 100% 0%, hsl(221 83% 53% / 0.07), transparent 45%);
   background-attachment: fixed;
 }
 
-/* ── Dark: deep black-blue + blue accent glow ── */
+/* ── Dark: deep blue-slate + accent glow ── */
 html[data-theme="dark"] body {
-  background-color: hsl(222 47% 5%);
+  background-color: hsl(222 47% 4%);
   background-image:
-    radial-gradient(ellipse 90% 60% at 30% -10%, hsl(var(--primary) / 0.14), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 100% 0%, hsl(221 70% 40% / 0.08), transparent 45%),
-    linear-gradient(180deg, hsl(222 50% 4%), hsl(222 47% 3%));
+    radial-gradient(ellipse 90% 60% at 30% -10%, hsl(var(--primary) / 0.16), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 100% 0%, hsl(221 83% 53% / 0.09), transparent 45%),
+    linear-gradient(180deg, hsl(222 47% 3%), hsl(222 47% 2%));
   background-attachment: fixed;
 }
 
 /* ── App shell (top nav layout) ── */
 .app-shell {
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   min-height: 100vh;
+  width: 100%;
   position: relative;
+  isolation: isolate;
 }
 
 .main-content {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
   position: relative;
   z-index: 0;
   margin-left: 0 !important;
-  min-height: 100dvh;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   /* Space for fixed top bar (h-14) */
@@ -508,7 +513,7 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   left: 0;
   width: 2px;
   height: 44px;
-  background: linear-gradient(180deg, hsl(var(--primary)), hsl(240 82% 68%));
+  background: linear-gradient(180deg, hsl(var(--primary)), hsl(190 72% 48%));
   border-radius: 0 2px 2px 0;
   opacity: .8;
   pointer-events: none;
@@ -627,7 +632,7 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   transform: translateX(1px);
 }
 .sb-link.active {
-  background: linear-gradient(90deg, hsl(var(--sidebar-active-bg)), hsl(240 76% 62%));
+  background: linear-gradient(90deg, hsl(var(--sidebar-active-bg)), hsl(221 83% 53%));
   color: white;
   font-weight: 500;
   box-shadow: 0 6px 16px hsl(var(--primary) / .35);
@@ -812,7 +817,7 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
 
 /* ── Gradient text ── */
 .gradient-text {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(240 80% 65%), hsl(180 80% 50%));
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(168 70% 42%), hsl(190 75% 48%));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -878,7 +883,7 @@ html[data-theme="light"]{ color-scheme:light; }
 .prose-sm,
 .prose-base,
 .prose-lg {
-  font-family: var(--font-poppins), var(--font-tajawal), sans-serif !important;
+  font-family: var(--font-jakarta), var(--font-tajawal), sans-serif !important;
 }
 
 .prose code,
@@ -897,7 +902,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 textarea,
 select,
 [role="textbox"] {
-  font-family: var(--font-poppins), var(--font-tajawal), sans-serif;
+  font-family: var(--font-jakarta), var(--font-tajawal), sans-serif;
 }
 
 /* Study Space — animated gradient background */
@@ -909,6 +914,57 @@ select,
 .study-space-aurora {
   background-size: 220% 220% !important;
   animation: study-space-gradient 20s ease infinite;
+}
+
+/* Student Space — focus-mode loading skeleton */
+@keyframes ss-focus-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes ss-focus-widget-in {
+  from {
+    opacity: 0;
+    transform: scale(0.93) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes ss-focus-bar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ss-focus-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.45);
+  }
+}
+.ss-focus-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: ss-focus-shimmer 1.6s ease-in-out infinite;
 }
 
 /* Landing — scroll-driven blocks */

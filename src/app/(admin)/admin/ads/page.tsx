@@ -5,6 +5,8 @@ import { FileUploader } from "@/components/ui/FileUploader";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { unwrapApiList } from "@/lib/api-list";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 interface AdBanner {
   id: string;
@@ -38,7 +40,7 @@ export default function AdminAdsPage() {
   useEffect(() => {
     fetch("/api/v1/semesters")
       .then((r) => r.json())
-      .then((d) => setSemesters(Array.isArray(d) ? d : []))
+      .then((d) => setSemesters(unwrapApiList<SemesterRow>(d)))
       .catch(() => setSemesters([]));
   }, []);
 
@@ -143,10 +145,10 @@ export default function AdminAdsPage() {
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Target semester <span className="opacity-60">(optional — all students if empty)</span>
             </label>
-            <select
+            <MedqsSelect
               value={form.semesterId}
               onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full"
             >
               <option value="">All students</option>
               {semesters.map((s) => (
@@ -154,7 +156,7 @@ export default function AdminAdsPage() {
                   {s.name} — {s.id}
                 </option>
               ))}
-            </select>
+            </MedqsSelect>
           </div>
 
           <div className="flex justify-end">

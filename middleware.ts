@@ -88,6 +88,11 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /*
+     * Skip all of `/_next/*` (chunks, CSS, HMR, RSC payloads, fonts, etc.).
+     * Matching only `_next/static` let other `/_next/...` requests hit auth middleware
+     * and could break styles/scripts — the UI then renders as unstyled HTML.
+     */
+    "/((?!_next/|favicon\\.ico|icons/|manifest\\.webmanifest|sw\\.js|workbox-|swe-worker-|fallback-).*)",
   ],
 };

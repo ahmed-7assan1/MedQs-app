@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Bot, Upload, Wand2, Search, Check, X, Pencil, Plus, Trash2 } from "lucide-react";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 type VideoSuggestion = { title: string; searchQuery: string };
 type FlashcardDraft = { front: string; back: string };
@@ -463,19 +464,19 @@ export function AdminLectureAIAssistant({ lectureId }: { lectureId: string }) {
                                 className="w-20 rounded border border-border px-2 py-1 text-xs font-mono"
                                 placeholder="Answer"
                               />
-                              <select
+                              <MedqsSelect
                                 value={q.difficulty}
                                 onChange={(e) =>
                                   setDraftQuestions((p) =>
                                     p.map((x, i) => (i === idx ? { ...x, difficulty: e.target.value as any } : x))
                                   )
                                 }
-                                className="rounded border border-border px-2 py-1 text-xs"
+                                className="h-8 min-w-[5.5rem] text-xs"
                               >
                                 <option value="EASY">EASY</option>
                                 <option value="MEDIUM">MEDIUM</option>
                                 <option value="HARD">HARD</option>
-                              </select>
+                              </MedqsSelect>
                             </div>
                             <textarea
                               value={q.explanation ?? ""}

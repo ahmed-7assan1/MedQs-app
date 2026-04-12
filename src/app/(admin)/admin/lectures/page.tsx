@@ -7,6 +7,8 @@ import {
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { unwrapApiList } from "@/lib/api-list";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 interface Module   { id: string; name: string }
 interface Subject  { id: string; name: string; moduleId: string }
@@ -38,7 +40,11 @@ export default function AdminLecturesPage() {
     Promise.all([
       fetch("/api/v1/modules-all").then(r => r.json()),
       fetch("/api/v1/subjects-all").then(r => r.json()),
-    ]).then(([m, s]) => { setModules(m); setSubjects(s); setLoading(false); });
+    ]).then(([m, s]) => {
+      setModules(unwrapApiList<Module>(m));
+      setSubjects(unwrapApiList<Subject>(s));
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -113,19 +119,38 @@ export default function AdminLecturesPage() {
       <div className="mb-6 grid gap-3 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Module</label>
-          <select value={selectedModule} onChange={e => { setSelectedModule(e.target.value); setSelectedSubject(""); setLectures([]); }}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+          <MedqsSelect
+            value={selectedModule}
+            onChange={(e) => {
+              setSelectedModule(e.target.value);
+              setSelectedSubject("");
+              setLectures([]);
+            }}
+            className="w-full"
+          >
             <option value="">Select module...</option>
-            {modules.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-          </select>
+            {modules.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </MedqsSelect>
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Subject</label>
-          <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} disabled={!selectedModule}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50">
+          <MedqsSelect
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            disabled={!selectedModule}
+            className="w-full"
+          >
             <option value="">Select subject...</option>
-            {filteredSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
+            {filteredSubjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </MedqsSelect>
         </div>
       </div>
 

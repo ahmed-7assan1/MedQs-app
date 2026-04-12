@@ -6,6 +6,8 @@ import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
+import { unwrapApiList } from "@/lib/api-list";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 interface University { id: string; name: string }
 interface AcademicYear { id: string; yearNumber: number; universityId: string }
@@ -57,8 +59,10 @@ export default function EditProfilePage() {
         }
         const me = meRes.ok ? await meRes.json() : null;
         const unis = unisRes.ok ? await unisRes.json() : [];
-        const yrs = yrsRes.ok ? await yrsRes.json() : [];
-        const sems = semsRes.ok ? await semsRes.json() : [];
+        const yrsRaw = yrsRes.ok ? await yrsRes.json() : [];
+        const semsRaw = semsRes.ok ? await semsRes.json() : [];
+        const yrs = unwrapApiList<AcademicYear>(yrsRaw);
+        const sems = unwrapApiList<Semester>(semsRaw);
         if (me && typeof me === "object") {
           setForm({
             name: me.name ?? "",
@@ -74,14 +78,13 @@ export default function EditProfilePage() {
           });
           setAvatarUrl(me.image ?? null);
           setSelectedUni(me.universityId ?? "");
-          const listSem: Semester[] = Array.isArray(sems) ? sems : [];
-          const mySem = listSem.find((s) => s.id === me.semesterId);
+          const mySem = sems.find((s) => s.id === me.semesterId);
           if (mySem) setSelectedYear(mySem.academicYearId);
           setSelectedSem(me.semesterId ?? "");
         }
         setUniversities(Array.isArray(unis) ? unis : []);
-        setYears(Array.isArray(yrs) ? yrs : []);
-        setSemesters(Array.isArray(sems) ? sems : []);
+        setYears(yrs);
+        setSemesters(sems);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -266,11 +269,22 @@ export default function EditProfilePage() {
           <div className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /><h2 className="font-semibold">University & semester</h2></div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">University</label>
-            <select value={selectedUni} onChange={(e) => { setSelectedUni(e.target.value); setSelectedYear(""); setSelectedSem(""); }}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            <MedqsSelect
+              value={selectedUni}
+              onChange={(e) => {
+                setSelectedUni(e.target.value);
+                setSelectedYear("");
+                setSelectedSem("");
+              }}
+              className="w-full"
+            >
               <option value="">Select university...</option>
-              {universities.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
+              {universities.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </MedqsSelect>
             {universities.length === 0 && (
               <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
                 No universities in the database yet. Ask an administrator to add institutions in the admin panel, or run{" "}
@@ -280,19 +294,38 @@ export default function EditProfilePage() {
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Academic year</label>
-            <select value={selectedYear} onChange={(e) => { setSelectedYear(e.target.value); setSelectedSem(""); }} disabled={!selectedUni}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50">
+            <MedqsSelect
+              value={selectedYear}
+              onChange={(e) => {
+                setSelectedYear(e.target.value);
+                setSelectedSem("");
+              }}
+              disabled={!selectedUni}
+              className="w-full"
+            >
               <option value="">Select year...</option>
-              {filteredYears.map((y) => <option key={y.id} value={y.id}>Year {y.yearNumber}</option>)}
-            </select>
+              {filteredYears.map((y) => (
+                <option key={y.id} value={y.id}>
+                  Year {y.yearNumber}
+                </option>
+              ))}
+            </MedqsSelect>
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Semester</label>
-            <select value={selectedSem} onChange={(e) => setSelectedSem(e.target.value)} disabled={!selectedYear}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50">
+            <MedqsSelect
+              value={selectedSem}
+              onChange={(e) => setSelectedSem(e.target.value)}
+              disabled={!selectedYear}
+              className="w-full"
+            >
               <option value="">Select semester...</option>
-              {filteredSems.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
+              {filteredSems.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </MedqsSelect>
           </div>
           <p className="text-xs text-amber-600 dark:text-amber-400">Changing semester updates the content, papers and forums you can access.</p>
         </div>

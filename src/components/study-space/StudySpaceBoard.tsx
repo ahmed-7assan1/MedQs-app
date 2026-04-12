@@ -47,6 +47,7 @@ export interface BoardStateV2 {
   widgets: Widget[];
   panX: number;
   panY: number;
+  scale: number;
   bgMode: BgMode;
   bgColor: string;
   bgColor2: string;
@@ -63,12 +64,13 @@ const DEFAULT_STATE: BoardStateV2 = {
   widgets: [],
   panX: 80,
   panY: 60,
+  scale: 1,
   bgMode: "grid",
-  bgColor: "#0c0e14",
-  bgColor2: "#1a1f2e",
+  bgColor: "#090a0e",
+  bgColor2: "#12141c",
   bgBlurPx: 0,
   bgImageDataUrl: null,
-  accentColor: "#6366f1",
+  accentColor: "#3b82f6",
   tasks: [],
   spotifyUrl: "",
 };
@@ -86,23 +88,23 @@ const BG_STATIC_PRESETS: BgPreset[] = [
   { id: "st-midnight", label: "Midnight", bgMode: "solid", bgColor: "#0c0e14", bgColor2: "#0c0e14" },
   { id: "st-paper", label: "Warm paper", bgMode: "solid", bgColor: "#f0ebe3", bgColor2: "#f0ebe3" },
   { id: "st-slate", label: "Slate grid", bgMode: "grid", bgColor: "#1e293b", bgColor2: "#0f172a" },
-  { id: "st-mint-dots", label: "Mint dots", bgMode: "dots", bgColor: "#042f2e", bgColor2: "#134e4a" },
+  { id: "st-navy-dots", label: "Navy dots", bgMode: "dots", bgColor: "#0a192f", bgColor2: "#1e3a8a" },
 ];
 
 const BG_GRADIENT_PRESETS: BgPreset[] = [
   { id: "gr-indigo", label: "Indigo", bgMode: "gradient", bgColor: "#3730a3", bgColor2: "#0f172a" },
-  { id: "gr-sunset", label: "Sunset", bgMode: "gradient", bgColor: "#ea580c", bgColor2: "#7f1d1d" },
-  { id: "gr-ocean", label: "Ocean", bgMode: "gradient", bgColor: "#0e7490", bgColor2: "#164e63" },
-  { id: "gr-rose", label: "Rose", bgMode: "gradient", bgColor: "#be123c", bgColor2: "#4c0519" },
+  { id: "gr-blue-dusk", label: "Blue dusk", bgMode: "gradient", bgColor: "#1e3a8a", bgColor2: "#111827" },
+  { id: "gr-ocean", label: "Ocean", bgMode: "gradient", bgColor: "#0ea5e9", bgColor2: "#1d4ed8" },
+  { id: "gr-sky", label: "Clear sky", bgMode: "gradient", bgColor: "#38bdf8", bgColor2: "#0369a1" },
   { id: "gr-lilac", label: "Lilac", bgMode: "gradient", bgColor: "#6d28d9", bgColor2: "#312e81" },
 ];
 
 const BG_MOTION_PRESETS: BgPreset[] = [
-  { id: "mo-aurora", label: "Aurora", bgMode: "motion", bgColor: "#312e81", bgColor2: "#115e59" },
+  { id: "mo-aurora", label: "Aurora", bgMode: "motion", bgColor: "#312e81", bgColor2: "#2563eb" },
   { id: "mo-violet", label: "Violet drift", bgMode: "motion", bgColor: "#5b21b6", bgColor2: "#1e1b4b" },
-  { id: "mo-emerald", label: "Emerald flow", bgMode: "motion", bgColor: "#065f46", bgColor2: "#134e4a" },
-  { id: "mo-cosmic", label: "Cosmic", bgMode: "motion", bgColor: "#1e3a8a", bgColor2: "#581c87" },
-  { id: "mo-dusk", label: "Dusk", bgMode: "motion", bgColor: "#9d174d", bgColor2: "#312e81" },
+  { id: "mo-deep-blue", label: "Deep blue flow", bgMode: "motion", bgColor: "#1e3a8a", bgColor2: "#172554" },
+  { id: "mo-cosmic", label: "Cosmic", bgMode: "motion", bgColor: "#1d4ed8", bgColor2: "#581c87" },
+  { id: "mo-cyan", label: "Cyan flow", bgMode: "motion", bgColor: "#0284c7", bgColor2: "#0f172a" },
 ];
 
 const MAX_BG_IMAGE_BYTES = 2.6 * 1024 * 1024;
@@ -117,8 +119,8 @@ function presetPreviewStyle(preset: BgPreset): CSSProperties {
   if (preset.bgMode === "grid") {
     return {
       backgroundColor: preset.bgColor,
-      backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-      backgroundSize: "10px 10px",
+      backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+      backgroundSize: "32px 32px",
     };
   }
   return {
@@ -142,7 +144,7 @@ const WIDGET_LABELS: Record<WidgetType, string> = {
 const BRUSH_PALETTE = [
   "#f8fafc", "#e2e8f0", "#94a3b8", "#475569", "#1e293b",
   "#fecaca", "#f97316", "#eab308", "#22c55e", "#14b8a6",
-  "#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#f43f5e",
+  "#0d9488", "#14b8a6", "#2dd4bf", "#5eead4", "#0ea5e9",
   "#0ea5e9", "#06b6d4", "#ffffff", "#000000",
 ] as const;
 
@@ -355,43 +357,70 @@ function TimerMini({ accent }: { accent: string }) {
   );
 }
 
+function spotifyEmbedFromUrl(raw: string): { type: "playlist" | "album" | "track"; id: string } | null {
+  const t = raw.trim();
+  if (!t) return null;
+  const withProto = t.includes("://") ? t : `https://${t}`;
+  try {
+    const u = new URL(withProto);
+    if (!u.hostname.includes("spotify.com")) return null;
+    const path = u.pathname.replace(/^\/intl-[a-z]{2}\//, "/");
+    const m = path.match(/\/(playlist|album|track)\/([a-zA-Z0-9]+)/);
+    if (m && (m[1] === "playlist" || m[1] === "album" || m[1] === "track")) {
+      return { type: m[1], id: m[2] };
+    }
+  } catch {
+    /* fall through */
+  }
+  const m2 = t.match(/(playlist|album|track)\/([a-zA-Z0-9]+)/i);
+  if (m2 && (m2[1].toLowerCase() === "playlist" || m2[1].toLowerCase() === "album" || m2[1].toLowerCase() === "track")) {
+    const k = m2[1].toLowerCase() as "playlist" | "album" | "track";
+    return { type: k, id: m2[2] };
+  }
+  return null;
+}
+
 function SpotifyMini() {
   const [url, setUrl] = useState("");
-  const [embedId, setEmbedId] = useState("");
+  const [embed, setEmbed] = useState<{ type: "playlist" | "album" | "track"; id: string } | null>(null);
   function load() {
-    const m = url.match(/playlist\/([a-zA-Z0-9]+)/);
-    if (m) {
-      setEmbedId(m[1]);
+    const parsed = spotifyEmbedFromUrl(url);
+    if (parsed) {
+      setEmbed(parsed);
       setUrl("");
-    } else toast.error("Paste a Spotify playlist URL");
+    } else toast.error("Paste a Spotify playlist, album, or track link");
   }
   return (
     <div className="p-2">
-      {embedId ? (
+      {embed ? (
         <>
           <iframe
-            title="sp"
-            src={`https://open.spotify.com/embed/playlist/${embedId}`}
+            title="Spotify"
+            src={`https://open.spotify.com/embed/${embed.type}/${embed.id}?utm_source=generator&theme=0`}
             width="100%"
-            height={180}
+            height={352}
             className="rounded-xl border-0"
             loading="lazy"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           />
-          <button type="button" onClick={() => setEmbedId("")} className="mt-1 text-[10px] text-white/40">
-            Change
+          <button type="button" onClick={() => setEmbed(null)} className="mt-1 text-[10px] text-white/40 hover:text-white/60">
+            Change link
           </button>
         </>
       ) : (
-        <div className="flex gap-1">
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Playlist URL…"
-            className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white"
-          />
-          <button type="button" onClick={load} className="rounded-lg bg-emerald-600 px-2 py-1 text-xs text-white">
-            Load
-          </button>
+        <div className="flex flex-col gap-2">
+          <p className="text-[10px] leading-relaxed text-white/40">Paste a Spotify playlist, album, or track URL.</p>
+          <div className="flex gap-1">
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://open.spotify.com/playlist/…"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white placeholder:text-white/25"
+            />
+            <button type="button" onClick={load} className="shrink-0 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-emerald-500">
+              Load
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -1395,12 +1424,13 @@ function DrawPadWidget({
   );
 }
 
-export function StudySpaceBoard() {
+export function StudySpaceBoard({ embedded = false }: { embedded?: boolean } = {}) {
   const [state, setState] = useState<BoardStateV2>(DEFAULT_STATE);
   const [showAdd, setShowAdd] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [boardFullscreen, setBoardFullscreen] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const boardRootRef = useRef<HTMLDivElement>(null);
   const bgFileInputRef = useRef<HTMLInputElement>(null);
   const panDrag = useRef<{ ox: number; oy: number; sx: number; sy: number } | null>(null);
   const stateRef = useRef(state);
@@ -1500,11 +1530,17 @@ export function StudySpaceBoard() {
       if (e.key === "Escape") {
         setShowSettings(false);
         setShowAdd(false);
+        if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
         setBoardFullscreen(false);
       }
     };
+    const onFullscreen = () => setBoardFullscreen(!!document.fullscreenElement);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.addEventListener("fullscreenchange", onFullscreen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("fullscreenchange", onFullscreen);
+    };
   }, []);
 
   function onViewportPointerDown(e: React.PointerEvent) {
@@ -1549,6 +1585,30 @@ export function StudySpaceBoard() {
     const onWheel = (ev: WheelEvent) => {
       ev.preventDefault();
       setState((prev) => {
+        const scale = prev.scale || 1;
+        if (ev.ctrlKey || ev.metaKey) {
+          const zoomFactor = Math.pow(0.995, ev.deltaY);
+          const newScale = Math.min(Math.max(scale * zoomFactor, 0.25), 3.0);
+          
+          const rect = el.getBoundingClientRect();
+          const cx = ev.clientX - rect.left;
+          const cy = ev.clientY - rect.top;
+
+          const xWorld = (cx - prev.panX) / scale;
+          const yWorld = (cy - prev.panY) / scale;
+
+          const next = {
+            ...prev,
+            scale: newScale,
+            panX: cx - xWorld * newScale,
+            panY: cy - yWorld * newScale
+          };
+          try {
+            localStorage.setItem("medqs-study-space-v2", JSON.stringify(next));
+          } catch {}
+          return next;
+        }
+
         const next = { ...prev, panX: prev.panX - ev.deltaX, panY: prev.panY - ev.deltaY };
         try {
           localStorage.setItem("medqs-study-space-v2", JSON.stringify(next));
@@ -1564,7 +1624,7 @@ export function StudySpaceBoard() {
     const d: Record<WidgetType, { w: number; h: number }> = {
       pomodoro: { w: 200, h: 280 },
       timer: { w: 200, h: 220 },
-      spotify: { w: 280, h: 260 },
+      spotify: { w: 300, h: 420 },
       tasks: { w: 260, h: 260 },
       notes: { w: 260, h: 200 },
       draw: { w: 480, h: 360 },
@@ -1574,13 +1634,12 @@ export function StudySpaceBoard() {
     const { w, h } = d[type];
     const vp = viewportRef.current;
     merge((prev) => {
-      let x = 200 - prev.panX;
-      let y = 160 - prev.panY;
+      const s = prev.scale || 1;
+      let x = (200 - prev.panX) / s;
+      let y = (160 - prev.panY) / s;
       if (vp && vp.clientWidth > 0 && vp.clientHeight > 0) {
-        const cx = vp.clientWidth / 2 - w / 2;
-        const cy = vp.clientHeight / 2 - h / 2;
-        x = cx - prev.panX;
-        y = cy - prev.panY;
+        x = (vp.clientWidth / 2 - prev.panX) / s - w / 2;
+        y = (vp.clientHeight / 2 - prev.panY) / s - h / 2;
       }
       const pad = 12;
       x = Math.max(-8000 + pad, Math.min(WORLD_W - w - pad, x));
@@ -1616,11 +1675,18 @@ export function StudySpaceBoard() {
     }));
   }
 
+  const overlayZ = embedded ? "z-[10140]" : "z-[80]";
+  const menuZ = embedded ? "z-[10145]" : "z-[70]";
+
   return (
     <div
+      ref={boardRootRef}
       className={cn(
-        "flex flex-col overflow-hidden bg-[#07080c]",
-        boardFullscreen ? "fixed inset-0 z-[280] h-[100dvh]" : "h-[100dvh]"
+        "flex flex-col overflow-hidden bg-[#090a0e]",
+        embedded ? "h-full min-h-0 flex-1" : "h-[100dvh]",
+        boardFullscreen
+          ? "fixed inset-0 z-[100000] h-[100dvh]"
+          : ""
       )}
     >
       <input
@@ -1630,19 +1696,35 @@ export function StudySpaceBoard() {
         className="hidden"
         onChange={onBoardImageSelected}
       />
-      <header className="z-[60] flex flex-shrink-0 flex-wrap items-center gap-2 border-b border-white/10 px-3 py-2 backdrop-blur-md bg-[#07080c]/90">
-        <span className="font-display text-sm font-semibold text-white/90">Study Space</span>
-        <span className="hidden text-[10px] text-white/35 sm:inline">Drag empty space to pan · infinite board</span>
+      <header
+        className={cn(
+          "z-[60] flex flex-shrink-0 flex-wrap items-center gap-2 border-b border-white/[0.08] px-3 py-2 backdrop-blur-xl",
+          embedded ? "bg-[#090a0e]/95" : "bg-[#090a0e]/90"
+        )}
+      >
+        {!embedded ? (
+          <>
+            <span className="font-display text-sm font-semibold text-white/90">Study Space</span>
+            <span className="hidden text-[10px] text-white/35 sm:inline">Drag empty space to pan · infinite board</span>
+          </>
+        ) : (
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/35">Widgets</span>
+        )}
         <div className="relative">
           <button
             type="button"
             onClick={() => setShowAdd((s) => !s)}
-            className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/80"
+            className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/[0.06] px-2.5 py-1.5 text-xs font-medium text-white/85 transition-colors hover:border-teal-500/30 hover:bg-teal-500/10"
           >
-            <Plus className="h-3.5 w-3.5" /> Widgets <ChevronDown className="h-3 w-3 opacity-60" />
+            <Plus className="h-3.5 w-3.5" /> Add <ChevronDown className="h-3 w-3 opacity-60" />
           </button>
           {showAdd && (
-            <div className="absolute left-0 top-full z-[70] mt-1 min-w-[160px] rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-2xl">
+            <div
+              className={cn(
+                "absolute left-0 top-full mt-1 min-w-[168px] rounded-xl border border-white/10 bg-zinc-950 py-1 shadow-2xl ring-1 ring-white/5",
+                menuZ
+              )}
+            >
               {(Object.keys(WIDGET_LABELS) as WidgetType[]).map((t) => (
                 <button
                   key={t}
@@ -1659,9 +1741,51 @@ export function StudySpaceBoard() {
 
         <div className="flex-1" />
 
+        <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1 mr-2 bg-white/[0.04] text-white/50">
+          <button
+            type="button"
+            onClick={() => merge((p) => {
+              const el = viewportRef.current;
+              const s = Math.max((p.scale || 1) - 0.2, 0.25);
+              if (!el) return { ...p, scale: s };
+              // Zoom around center
+              const cx = el.clientWidth / 2; const cy = el.clientHeight / 2;
+              const xw = (cx - p.panX) / (p.scale || 1); const yw = (cy - p.panY) / (p.scale || 1);
+              return { ...p, scale: s, panX: cx - xw * s, panY: cy - yw * s };
+            })}
+            title="Zoom out"
+            className="rounded p-1 hover:bg-white/10 hover:text-white"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+          <span className="text-[10px] font-mono tabular-nums w-8 text-center">{Math.round((state.scale || 1) * 100)}%</span>
+          <button
+            type="button"
+            onClick={() => merge((p) => {
+              const el = viewportRef.current;
+              const s = Math.min((p.scale || 1) + 0.2, 3.0);
+              if (!el) return { ...p, scale: s };
+              // Zoom around center
+              const cx = el.clientWidth / 2; const cy = el.clientHeight / 2;
+              const xw = (cx - p.panX) / (p.scale || 1); const yw = (cy - p.panY) / (p.scale || 1);
+              return { ...p, scale: s, panX: cx - xw * s, panY: cy - yw * s };
+            })}
+            title="Zoom in"
+            className="rounded p-1 hover:bg-white/10 hover:text-white"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
         <button
           type="button"
-          onClick={() => setBoardFullscreen((f) => !f)}
+          onClick={() => {
+            if (!document.fullscreenElement) {
+              boardRootRef.current?.requestFullscreen().catch(()=>{});
+            } else {
+              document.exitFullscreen().catch(()=>{});
+            }
+          }}
           className={cn(
             "rounded-lg border p-1.5 transition-colors",
             boardFullscreen
@@ -1691,7 +1815,7 @@ export function StudySpaceBoard() {
       </header>
 
       {showSettings && (
-        <div className="pointer-events-auto fixed inset-0 z-[80] flex justify-end">
+        <div className={cn("pointer-events-auto fixed inset-0 flex justify-end", overlayZ)}>
           <button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
@@ -1987,11 +2111,11 @@ export function StudySpaceBoard() {
               backgroundColor: state.bgColor,
               backgroundImage:
                 state.bgMode === "grid"
-                  ? `linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)`
+                  ? `linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px)`
                   : state.bgMode === "dots"
                     ? "radial-gradient(circle, rgba(255,255,255,0.14) 1px, transparent 1px)"
                     : undefined,
-              backgroundSize: state.bgMode === "grid" ? "40px 40px" : state.bgMode === "dots" ? "22px 22px" : undefined,
+              backgroundSize: state.bgMode === "grid" ? `${32 * (state.scale || 1)}px ${32 * (state.scale || 1)}px` : state.bgMode === "dots" ? `${22 * (state.scale || 1)}px ${22 * (state.scale || 1)}px` : undefined,
               backgroundPosition: `${state.panX}px ${state.panY}px`,
               filter: state.bgBlurPx > 0 ? `blur(${state.bgBlurPx}px)` : undefined,
             }}
@@ -2010,12 +2134,20 @@ export function StudySpaceBoard() {
             }}
           />
         )}
+        {state.bgMode === "grid" && (
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_38%_38%,rgba(59,130,246,0.09)_0%,transparent_58%)]"
+            aria-hidden
+            style={{ filter: state.bgBlurPx > 0 ? `blur(${state.bgBlurPx}px)` : undefined }}
+          />
+        )}
         <div
           className="pointer-events-none absolute z-10 will-change-transform"
           style={{
             width: WORLD_W,
             height: WORLD_H,
-            transform: `translate(${state.panX}px, ${state.panY}px)`,
+            transform: `translate(${state.panX}px, ${state.panY}px) scale(${state.scale || 1})`,
+            transformOrigin: "0 0",
           }}
         >
           {state.widgets.map((w) => (
@@ -2023,6 +2155,7 @@ export function StudySpaceBoard() {
               key={w.id}
               widget={w}
               accent={state.accentColor}
+              scale={state.scale || 1}
               tasks={state.tasks}
               setTasks={(t) => merge((prev) => ({ ...prev, tasks: t }))}
               onRemove={() => removeWidget(w.id)}
@@ -2066,6 +2199,7 @@ function FloatingWidget({
   onRemove,
   onPatch,
   onFillViewport,
+  scale,
 }: {
   widget: Widget;
   accent: string;
@@ -2074,7 +2208,9 @@ function FloatingWidget({
   onRemove: () => void;
   onPatch: (p: Partial<Widget>) => void;
   onFillViewport?: () => void;
+  scale?: number;
 }) {
+  const s = scale || 1;
   const drag = useRef<{ id: number; ox: number; oy: number; sx: number; sy: number } | null>(null);
   const resize = useRef<{ id: number; ox: number; oy: number; sw: number; sh: number } | null>(null);
 
@@ -2094,8 +2230,8 @@ function FloatingWidget({
 
   function onHeaderPointerMove(e: React.PointerEvent) {
     if (!drag.current || drag.current.id !== e.pointerId) return;
-    const dx = e.clientX - drag.current.ox;
-    const dy = e.clientY - drag.current.oy;
+    const dx = (e.clientX - drag.current.ox) / s;
+    const dy = (e.clientY - drag.current.oy) / s;
     const nx = drag.current.sx + dx;
     const ny = drag.current.sy + dy;
     const minEdge = 24;
@@ -2123,8 +2259,8 @@ function FloatingWidget({
 
   function onResizePointerMove(e: React.PointerEvent) {
     if (!resize.current || resize.current.id !== e.pointerId) return;
-    const dx = e.clientX - resize.current.ox;
-    const dy = e.clientY - resize.current.oy;
+    const dx = (e.clientX - resize.current.ox) / s;
+    const dy = (e.clientY - resize.current.oy) / s;
     const minW =
       widget.type === "draw" ? 240 : widget.type === "pdf" || widget.type === "youtube" ? 280 : 160;
     const minH =

@@ -9,13 +9,17 @@ export async function trackLectureView(userId: string, lectureId: string, source
   if (!userId || !lectureId) return;
   const normalizedSource = source?.trim() || null;
   const id = crypto.randomUUID();
-  await prisma.$executeRaw(
-    Prisma.sql`
+  try {
+    await prisma.$executeRaw(
+      Prisma.sql`
       INSERT INTO "UserLectureActivity" ("id", "userId", "lectureId", "source", "lastViewedAt")
       VALUES (${id}, ${userId}, ${lectureId}, ${normalizedSource}, NOW())
       ON CONFLICT ("userId", "lectureId")
       DO UPDATE SET "source" = EXCLUDED."source", "lastViewedAt" = NOW()
     `
-  );
+    );
+  } catch {
+    /* Lecture page must render even if analytics row fails (e.g. migration drift). */
+  }
 }
 

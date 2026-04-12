@@ -6,6 +6,7 @@ import { uploadFiles } from "@/lib/uploadthing-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { extractApproximatePrimaryHex } from "@/lib/branding-extract-color";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 function uploadthingAppId(): string {
   return (process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID ?? "").trim();
@@ -31,10 +32,10 @@ interface SiteConfig {
 }
 
 const DEFAULTS: SiteConfig = {
-  siteName: "MedQs", logoUrl: "", faviconUrl: "", pwaIconUrl: "", primaryColor: "#1a7ef0",
+  siteName: "MedQs", logoUrl: "", faviconUrl: "", pwaIconUrl: "", primaryColor: "#0d9488",
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
   aiPreferredProvider: "auto",
-  fontSans: "Poppins", fontArabic: "Tajawal",
+  fontSans: "Plus Jakarta Sans", fontArabic: "Tajawal",
 };
 
 export default function AdminSettingsPage() {
@@ -406,15 +407,25 @@ export default function AdminSettingsPage() {
             ) : null}
           </div>
           <div><label className="mb-1.5 block text-xs font-medium text-muted-foreground">Primary site font</label>
-            <select value={config.fontSans} onChange={(e) => setConfig((c) => ({ ...c, fontSans: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-              {["Inter", "Roboto", "Lato", "Open Sans", "Poppins"].map((f) => <option key={f} value={f}>{f}</option>)}
-            </select></div>
+            <MedqsSelect
+              value={config.fontSans}
+              onChange={(e) => setConfig((c) => ({ ...c, fontSans: e.target.value }))}
+              className="w-full"
+            >
+              {["Plus Jakarta Sans", "Inter", "Roboto", "Lato", "Open Sans", "Poppins"].map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </MedqsSelect></div>
           <div><label className="mb-1.5 block text-xs font-medium text-muted-foreground">Arabic font</label>
-            <select value={config.fontArabic} onChange={(e) => setConfig((c) => ({ ...c, fontArabic: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-              {["Cairo", "Tajawal", "Noto Sans Arabic", "Almarai"].map((f) => <option key={f} value={f}>{f}</option>)}
-            </select></div>
+            <MedqsSelect
+              value={config.fontArabic}
+              onChange={(e) => setConfig((c) => ({ ...c, fontArabic: e.target.value }))}
+              className="w-full"
+            >
+              {["Cairo", "Tajawal", "Noto Sans Arabic", "Almarai"].map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </MedqsSelect></div>
         </div>
       </div>
 
@@ -423,7 +434,7 @@ export default function AdminSettingsPage() {
         <div className="mb-5 flex items-center gap-2"><ToggleRight className="h-5 w-5 text-primary" /><h2 className="font-display text-lg font-semibold">Feature Toggles</h2></div>
         <div className="mb-4 rounded-lg border border-border bg-background p-4">
           <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Global AI provider preference</label>
-          <select
+          <MedqsSelect
             value={config.aiPreferredProvider}
             onChange={(e) =>
               setConfig((c) => ({
@@ -431,14 +442,14 @@ export default function AdminSettingsPage() {
                 aiPreferredProvider: e.target.value as SiteConfig["aiPreferredProvider"],
               }))
             }
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full"
           >
             <option value="auto">Auto (recommended)</option>
             <option value="gemini">Gemini</option>
             <option value="openai">OpenAI</option>
             <option value="anthropic">Anthropic</option>
             <option value="deepseek">DeepSeek</option>
-          </select>
+          </MedqsSelect>
           <p className="mt-1.5 text-xs text-muted-foreground">
             Applied across all AI features. If unavailable or rate-limited, the app falls back automatically.
           </p>

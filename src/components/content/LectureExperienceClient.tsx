@@ -399,7 +399,10 @@ function getTabs(lecture: LectureLike) {
     { id: "mnemonics", label: "Mnemonics", icon: Sparkles, show: (enabled.mnemonics ?? true) && hasMnemonics },
   ];
 
-  return tabs.filter((t) => t.show);
+  const visible = tabs.filter((t) => t.show);
+  // If uiConfig turns every tab off, the hub used to show almost nothing useful; always keep Overview.
+  if (visible.length > 0) return visible;
+  return [{ id: "overview" as TabId, label: "Overview", icon: BookOpen, show: true }];
 }
 
 export function LectureExperienceClient({
@@ -486,16 +489,16 @@ export function LectureExperienceClient({
   const base = `/modules/${moduleId}/lectures/${lecture?.id}`;
 
   return (
-    <div className="relative min-h-0 flex-1">
-      {/* background orbs */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+    <div className="relative z-0 min-h-0 flex-1">
+      {/* background orbs — z-0 so real content always stacks above (avoids “empty” page in some browsers) */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="medqs-lecture-bg" />
         <div className="medqs-orb medqs-orb--1" />
         <div className="medqs-orb medqs-orb--2" />
         <div className="medqs-orb medqs-orb--3" />
       </div>
 
-      <div className="relative mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-3 pb-8 pt-6 sm:px-6">
+      <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-3 pb-8 pt-6 sm:px-6">
         {/* header */}
         <div className="mb-4 flex flex-col items-center text-center">
           <div className="rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-[11px] font-semibold tracking-[0.22em] text-primary">

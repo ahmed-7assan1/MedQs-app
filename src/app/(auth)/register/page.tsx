@@ -5,6 +5,7 @@ import { Building2, Calendar, BookOpen, ChevronRight, Loader2, CheckCircle2 } fr
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import toast from "react-hot-toast";
+import { unwrapApiList } from "@/lib/api-list";
 
 interface University { id: string; name: string; logoUrl?: string }
 interface AcademicYear { id: string; yearNumber: number; universityId: string }
@@ -42,8 +43,8 @@ export default function RegisterPage() {
     (async () => {
       const r = await fetch("/api/v1/academic-years");
       const data = r.ok ? await r.json() : [];
-      const list = Array.isArray(data) ? data : [];
-      setYears(list.filter((y: AcademicYear) => y.universityId === selectedUni.id));
+      const list = unwrapApiList<AcademicYear>(data);
+      setYears(list.filter((y) => y.universityId === selectedUni.id));
     })();
   }, [selectedUni]);
 
@@ -52,8 +53,8 @@ export default function RegisterPage() {
     (async () => {
       const r = await fetch("/api/v1/semesters");
       const data = r.ok ? await r.json() : [];
-      const list = Array.isArray(data) ? data : [];
-      setSemesters(list.filter((s: Semester) => s.academicYearId === selectedYear.id));
+      const list = unwrapApiList<Semester>(data);
+      setSemesters(list.filter((s) => s.academicYearId === selectedYear.id));
     })();
   }, [selectedYear]);
 

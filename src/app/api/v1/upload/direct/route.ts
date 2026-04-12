@@ -62,8 +62,13 @@ export async function POST(req: NextRequest) {
     else if (lower.endsWith(".png")) mime = "image/png";
     else if (lower.endsWith(".webp")) mime = "image/webp";
     else if (lower.endsWith(".gif")) mime = "image/gif";
+    else if (lower.endsWith(".svg")) mime = "image/svg+xml";
+    else if (lower.endsWith(".avif")) mime = "image/avif";
+    else if (lower.endsWith(".bmp")) mime = "image/bmp";
     else if (lower.endsWith(".pdf")) mime = "application/pdf";
   }
+  // Some browsers send "image/jpg" instead of "image/jpeg"
+  if (mime === "image/jpg") mime = "image/jpeg";
 
   const types = ALLOWED_TYPES[folder] ?? [];
   if (!types.includes(mime)) {

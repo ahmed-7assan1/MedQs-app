@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
+import { unwrapApiList } from "@/lib/api-list";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 type SemesterRef = { id: string; name: string };
 
@@ -46,7 +48,7 @@ export function AiQuestionPlacementPicker({
   useEffect(() => {
     fetch("/api/v1/modules-all")
       .then((r) => r.json())
-      .then((data) => setModules(Array.isArray(data) ? data : []))
+      .then((data) => setModules(unwrapApiList(data)))
       .catch(() => setModules([]));
   }, []);
 
@@ -179,11 +181,11 @@ export function AiQuestionPlacementPicker({
       <div className="grid gap-2 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Module</label>
-          <select
+          <MedqsSelect
             value={moduleId}
             disabled={disabled}
             onChange={(e) => onModuleChange(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full"
           >
             <option value="">Select module</option>
             {modules.map((m) => {
@@ -194,15 +196,15 @@ export function AiQuestionPlacementPicker({
                 </option>
               );
             })}
-          </select>
+          </MedqsSelect>
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Subject (المادة)</label>
-          <select
+          <MedqsSelect
             value={subjectId}
             disabled={disabled || !moduleId || loadingSubjects}
             onChange={(e) => onSubjectChange(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full"
           >
             <option value="">{loadingSubjects ? "Loading…" : "Select subject"}</option>
             {subjects.map((s) => (
@@ -210,7 +212,7 @@ export function AiQuestionPlacementPicker({
                 {s.name}
               </option>
             ))}
-          </select>
+          </MedqsSelect>
         </div>
       </div>
 
@@ -245,11 +247,11 @@ export function AiQuestionPlacementPicker({
       {targetMode === "lecture" && subjectId && (
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Lecture</label>
-          <select
+          <MedqsSelect
             value={pickLectureId}
             disabled={disabled || loadingLectures}
             onChange={(e) => setPickLectureId(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full"
           >
             <option value="">{loadingLectures ? "Loading…" : "Select lecture"}</option>
             {lectures.map((lec) => (
@@ -257,7 +259,7 @@ export function AiQuestionPlacementPicker({
                 {lec.title}
               </option>
             ))}
-          </select>
+          </MedqsSelect>
         </div>
       )}
 

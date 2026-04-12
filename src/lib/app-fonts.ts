@@ -1,19 +1,15 @@
-import { Poppins, Tajawal } from "next/font/google";
+import { Plus_Jakarta_Sans, Tajawal } from "next/font/google";
 
 /**
- * Official UI pair: **Poppins** (Latin) + **Tajawal** (Arabic).
- * Loaded via next/font on `<html>` as CSS variables `--font-poppins` / `--font-tajawal`.
- * Default stack: Poppins → Tajawal (Arabic letters fall through to Tajawal).
- * For RTL blocks use `font-arabic` or `dir="rtl"` / `:lang(ar)` (see globals.css).
- * Do not replace with a single DB font — it breaks Arabic shaping.
+ * UI pair: **Plus Jakarta Sans** (Latin / UI) + **Tajawal** (Arabic).
+ * Variables on `<html>`: `--font-jakarta`, `--font-tajawal`.
+ * For RTL use `font-arabic` or `dir="rtl"` / `:lang(ar)` (globals.css).
  */
-export const fontPoppins = Poppins({
+export const fontJakarta = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-poppins",
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
   display: "swap",
-  /** Next’s size-adjusted fallback can cover Arabic before Tajawal is used — keep Latin-only. */
   adjustFontFallback: false,
 });
 
@@ -24,4 +20,4 @@ export const fontTajawal = Tajawal({
   display: "swap",
 });
 
-export const appFontVariableClassName = `${fontPoppins.variable} ${fontTajawal.variable}`.trim();
+export const appFontVariableClassName = `${fontJakarta.variable} ${fontTajawal.variable}`.trim();

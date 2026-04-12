@@ -11,7 +11,7 @@ const PRESET_COLORS = [
   "#ea580c",
   "#ca8a04",
   "#16a34a",
-  "#2563eb",
+  "#0d9488",
   "#7c3aed",
   "#db2777",
   "#ffffff",

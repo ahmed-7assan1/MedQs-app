@@ -8,7 +8,7 @@ interface LectureFile {
 }
 
 function FileIcon({ mimeType }: { mimeType: string }) {
-  if (mimeType.includes("image")) return <FileImage className="h-4 w-4 text-blue-500" />;
+  if (mimeType.includes("image")) return <FileImage className="h-4 w-4 text-primary" />;
   if (mimeType.includes("pdf")) return <FileText className="h-4 w-4 text-red-500" />;
   return <FileCode className="h-4 w-4 text-muted-foreground" />;
 }

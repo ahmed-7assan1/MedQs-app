@@ -72,7 +72,7 @@ export const ourFileRouter = {
     }),
 
   // Site branding images — admin / super (URLs go to SiteConfig.logoUrl / faviconUrl)
-  siteLogo: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+  siteLogo: f({ image: { maxFileSize: "16MB", maxFileCount: 1 } })
     .middleware(requireAdmin())
     .onUploadComplete(async ({ file }) => {
       return { url: file.url };

@@ -18,6 +18,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import toast from "react-hot-toast";
 import type { PostWithMeta } from "@/types";
 import ReactMarkdown from "react-markdown";
@@ -481,23 +482,23 @@ export function ForumClient({
 
         {tab === "feed" ? (
           <div className="flex flex-wrap items-center gap-2">
-            <select
+            <MedqsSelect
               value={feedMode}
               onChange={(e) => setFeedMode(e.target.value as any)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="min-w-[9.5rem]"
             >
               <option value="university">University</option>
               <option value="following">Following</option>
-            </select>
-            <select
+            </MedqsSelect>
+            <MedqsSelect
               value={postAudience}
               onChange={(e) => setPostAudience(e.target.value as any)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="min-w-[12rem]"
               title="Who can see your post?"
             >
               <option value="UNIVERSITY">Audience: University</option>
               <option value="FOLLOWERS">Audience: Followers</option>
-            </select>
+            </MedqsSelect>
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -508,15 +509,15 @@ export function ForumClient({
             >
               Groups
             </button>
-            <select
+            <MedqsSelect
               value={discussionScope}
               onChange={(e) => setDiscussionScope(e.target.value as any)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="min-w-[10rem]"
               title="Discussion scope"
             >
               <option value="semester">Semester</option>
               <option value="global">University</option>
-            </select>
+            </MedqsSelect>
           </div>
         )}
       </div>

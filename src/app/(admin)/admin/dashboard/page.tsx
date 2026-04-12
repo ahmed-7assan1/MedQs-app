@@ -34,7 +34,7 @@ export default async function AdminDashboardPage() {
   });
 
   const stats = [
-    { label: "Students",     value: userCount,     icon: Users,         color: "text-blue-500",    bg: "bg-blue-50 dark:bg-blue-900/20" },
+    { label: "Students",     value: userCount,     icon: Users,         color: "text-primary",    bg: "bg-primary/10 dark:bg-primary/15" },
     { label: "Questions",    value: questionCount, icon: HelpCircle,    color: "text-violet-500",  bg: "bg-violet-50 dark:bg-violet-900/20" },
     { label: "Lectures",     value: lectureCount,  icon: Video,         color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
     { label: "Past Papers",  value: paperCount,    icon: FileText,      color: "text-cyan-500",    bg: "bg-cyan-50 dark:bg-cyan-900/20" },

@@ -8,6 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { parseJsonList } from "@/lib/api-list";
 
 interface University  { id: string; name: string }
 interface AcademicYear { id: string; yearNumber: number; universityId: string }
@@ -31,15 +32,6 @@ export default function AdminContentPage() {
 
   useEffect(() => {
     let cancelled = false;
-    async function parseArray(res: Response): Promise<unknown[]> {
-      if (!res.ok) return [];
-      try {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-      } catch {
-        return [];
-      }
-    }
     (async () => {
       try {
         const [uRes, yRes, sRes, mRes, subRes] = await Promise.all([
@@ -50,11 +42,11 @@ export default function AdminContentPage() {
           fetch("/api/v1/subjects-all"),
         ]);
         const [u, y, s, m, sub] = await Promise.all([
-          parseArray(uRes),
-          parseArray(yRes),
-          parseArray(sRes),
-          parseArray(mRes),
-          parseArray(subRes),
+          parseJsonList<University>(uRes),
+          parseJsonList<AcademicYear>(yRes),
+          parseJsonList<Semester>(sRes),
+          parseJsonList<Module>(mRes),
+          parseJsonList<Subject>(subRes),
         ]);
         if (!cancelled) {
           setUniversities(u as University[]);
@@ -282,7 +274,7 @@ export default function AdminContentPage() {
                     <span className="text-muted-foreground">
                       {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                     </span>
-                    <Building2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                    <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
                     <span className="flex-1 text-sm font-medium">{uni.name}</span>
                     <span className="text-xs text-muted-foreground">{uniYears.length} year{uniYears.length !== 1 ? "s" : ""}</span>
                     <DeleteBtn kind="uni" id={uni.id} label={uni.name} />

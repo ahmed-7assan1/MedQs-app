@@ -10,11 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        /** Poppins ثم Tajawal — الواجهة الافتراضية */
-        sans: ["var(--font-poppins)", "var(--font-tajawal)", "system-ui", "sans-serif"],
-        display: ["var(--font-poppins)", "var(--font-tajawal)", "system-ui", "sans-serif"],
-        /** Tajawal ثم Poppins — فقرات عربية صريحة */
-        arabic: ["var(--font-tajawal)", "var(--font-poppins)", "system-ui", "sans-serif"],
+        sans: ["var(--font-jakarta)", "var(--font-tajawal)", "system-ui", "sans-serif"],
+        display: ["var(--font-jakarta)", "var(--font-tajawal)", "system-ui", "sans-serif"],
+        arabic: ["var(--font-tajawal)", "var(--font-jakarta)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
       colors: {
@@ -47,19 +45,19 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // MedQs brand
+        // MedQs brand — deep teal / clinical slate
         medq: {
-          50:  "#eef6ff",
-          100: "#d9ebff",
-          200: "#bcdcff",
-          300: "#8ec6ff",
-          400: "#58a6ff",
-          500: "#1a7ef0",
-          600: "#0c62cc",
-          700: "#0c4fa6",
-          800: "#104387",
-          900: "#133970",
-          950: "#0d2349",
+          50:  "#f0fdfa",
+          100: "#ccfbf1",
+          200: "#99f6e4",
+          300: "#5eead4",
+          400: "#2dd4bf",
+          500: "#14b8a6",
+          600: "#0d9488",
+          700: "#0f766e",
+          800: "#115e59",
+          900: "#134e4a",
+          950: "#042f2e",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
