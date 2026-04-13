@@ -40,7 +40,7 @@ export default async function SavedQuestionsPage() {
         </div>
         <div>
           <h1 className="font-display text-2xl font-bold">Saved Questions</h1>
-          <p className="text-sm text-muted-foreground">Review questions you've bookmarked for later study.</p>
+          <p className="text-sm text-muted-foreground">Review questions you&apos;ve bookmarked for later study.</p>
         </div>
       </div>
 
