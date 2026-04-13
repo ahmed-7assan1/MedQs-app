@@ -26,6 +26,7 @@ interface Question {
   difficulty: string;
   explanation?: string | null;
   lectureId: string;
+  lecture?: { title: string };
   choices: { key: string; text: string }[];
 }
 
@@ -288,6 +289,7 @@ export default function AdminQuestionsPage() {
       {exportOpen && (
         <WordExportModal 
            questions={filtered.map(q => ({
+             groupTitle: q.lecture?.title,
              body: q.body,
              choices: q.choices,
              answer: q.answer,

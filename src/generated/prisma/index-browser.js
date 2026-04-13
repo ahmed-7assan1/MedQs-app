@@ -126,6 +126,7 @@ exports.Prisma.SiteConfigScalarFieldEnum = {
   id: 'id',
   siteName: 'siteName',
   logoUrl: 'logoUrl',
+  logoUrlDark: 'logoUrlDark',
   pwaIconUrl: 'pwaIconUrl',
   faviconUrl: 'faviconUrl',
   primaryColor: 'primaryColor',
@@ -293,6 +294,13 @@ exports.Prisma.QuestionReportScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.SavedQuestionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  questionId: 'questionId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.GuestQuizUserScalarFieldEnum = {
   id: 'id',
   displayName: 'displayName',
@@ -351,6 +359,7 @@ exports.Prisma.UserScalarFieldEnum = {
   facebookUrl: 'facebookUrl',
   theme: 'theme',
   role: 'role',
+  canManageReports: 'canManageReports',
   points: 'points',
   password: 'password',
   studentId: 'studentId',
@@ -633,6 +642,7 @@ exports.Prisma.ModelName = {
   Question: 'Question',
   PastPaper: 'PastPaper',
   QuestionReport: 'QuestionReport',
+  SavedQuestion: 'SavedQuestion',
   GuestQuizUser: 'GuestQuizUser',
   QuizAttempt: 'QuizAttempt',
   StudyAssistantProfile: 'StudyAssistantProfile',

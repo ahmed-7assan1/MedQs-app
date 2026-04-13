@@ -61,7 +61,7 @@ export const ALLOWED_TYPES: Record<string, string[]> = {
   // Site logo (navbar / branding) — SUPER_ADMIN upload only
   site:      ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif", "image/bmp"],
   ai:        ["image/jpeg", "image/png", "image/webp", "image/gif"],
-  template:  ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  template:  ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"],
 };
 
 export const MAX_FILE_SIZE: Record<string, number> = {

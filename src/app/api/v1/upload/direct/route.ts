@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
     else if (lower.endsWith(".avif")) mime = "image/avif";
     else if (lower.endsWith(".bmp")) mime = "image/bmp";
     else if (lower.endsWith(".pdf")) mime = "application/pdf";
+    else if (lower.endsWith(".docx")) mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    else if (lower.endsWith(".doc")) mime = "application/msword";
   }
   // Some browsers send "image/jpg" instead of "image/jpeg"
   if (mime === "image/jpg") mime = "image/jpeg";

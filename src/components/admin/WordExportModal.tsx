@@ -6,6 +6,7 @@ import { FileText, Loader2, Download, Printer } from "lucide-react";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import { ExportWordItem, ExportWordSettings, exportQuestionsToWord } from "@/lib/export-word-client";
 import { exportQuestionsToPdf } from "@/lib/export-pdf-client";
+import toast from "react-hot-toast";
 
 interface WordExportModalProps {
   questions: ExportWordItem[];
@@ -73,14 +74,23 @@ export function WordExportModal({ questions, onClose, title = "Export Settings",
           const res = await fetch("/api/v1/upload/direct", { method: "POST", body: formData });
           const uploadData = await res.json();
           if (uploadData.url) {
-            await fetch("/api/v1/templates", {
+            const tmplRes = await fetch("/api/v1/templates", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ name: libTemplateName, fileUrl: uploadData.url })
             });
+            if (tmplRes.ok) {
+              toast.success("Template saved to library!");
+            } else {
+              toast.error("Failed to save template to library.");
+            }
+          } else {
+            console.error("Upload failed:", uploadData);
+            toast.error(uploadData.error || "Failed to upload template");
           }
         } catch (e) {
           console.error("Failed to save template", e);
+          toast.error("An error occurred while uploading template.");
         }
         setIsUploading(false);
       }

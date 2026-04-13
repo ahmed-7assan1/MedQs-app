@@ -73,6 +73,7 @@ model SiteConfig {
   id                  String   @id @default(uuid())
   siteName            String   @default("MedQs")
   logoUrl             String?
+  logoUrlDark         String?
   /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
   pwaIconUrl          String?
   faviconUrl          String?
@@ -281,6 +282,7 @@ model Question {
   lecture       Lecture            @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   lectureId     String
   reports       QuestionReport[]
+  savedBy       SavedQuestion[]
   attemptItems  QuizAttemptItem[]
   createdAt     DateTime           @default(now())
 }
@@ -331,6 +333,18 @@ model QuestionReport {
   createdAt   DateTime   @default(now())
 
   @@index([questionId])
+  @@index([userId, createdAt])
+}
+
+model SavedQuestion {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, questionId])
   @@index([userId, createdAt])
 }
 
@@ -413,6 +427,7 @@ model User {
   facebookUrl       String?
   theme             Theme                 @default(SYSTEM)
   role              Role                  @default(STUDENT)
+  canManageReports  Boolean               @default(false)
   points            Int                   @default(0)
   password          String?
   studentId         String?
@@ -443,6 +458,7 @@ model User {
   accounts          Account[]
   sessions          Session[]
   questionReports   QuestionReport[]
+  savedQuestions    SavedQuestion[]
   dmSent            DirectMessage[]       @relation("DmSent")
   dmReceived        DirectMessage[]       @relation("DmReceived")
   following         UserFollow[]          @relation("UserFollows")

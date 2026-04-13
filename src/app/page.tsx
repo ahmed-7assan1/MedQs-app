@@ -22,156 +22,107 @@ export default async function LandingPage() {
   ]);
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#040808", overflow: "hidden", color: "#f8fafc" }}>
+    <div className="min-h-screen bg-background overflow-hidden text-foreground">
       
       {/* ── AMBIENT MESH GRID & GRADIENTS ── */}
       <div 
+        className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] dark:opacity-80"
         style={{ 
-          position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
           backgroundSize: "60px 60px",
           backgroundPosition: "center center",
-          opacity: 0.8
         }} 
       />
       
-      <div style={{
-        position: "fixed", top: "-15%", left: "-10%", width: "50%", height: "70%",
-        background: "radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 60%)",
-        filter: "blur(120px)", zIndex: 0, pointerEvents: "none"
-      }} />
-      <div style={{
-        position: "fixed", bottom: "-20%", right: "-10%", width: "60%", height: "60%",
-        background: "radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 60%)",
-        filter: "blur(120px)", zIndex: 0, pointerEvents: "none"
-      }} />
+      <div 
+        className="fixed -top-[15%] -left-[10%] h-[70%] w-[50%] blur-[120px] pointer-events-none z-0"
+        style={{ background: "radial-gradient(circle, hsl(var(--primary)/0.15) 0%, transparent 60%)" }} 
+      />
+      <div 
+        className="fixed -bottom-[20%] -right-[10%] h-[60%] w-[60%] blur-[120px] pointer-events-none z-0"
+        style={{ background: "radial-gradient(circle, hsl(var(--primary)/0.12) 0%, transparent 60%)" }} 
+      />
 
       {/* ── TOP NAV ── */}
-      <nav style={{
-        position: "sticky", top: 0, zIndex: 50,
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        backgroundColor: "rgba(4, 8, 8, 0.65)",
-      }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 72, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-2xl">
+        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-6">
           {/* Logo */}
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none" }}>
-            <div style={{ position: "relative" }}>
-              <div style={{ position: "absolute", inset: 0, background: "rgba(59,130,246,0.5)", filter: "blur(12px)", borderRadius: "50%" }}></div>
-              <MedQsLogoMark className="h-9 w-9 shrink-0 relative z-10" title="MedQs" />
+          <Link href="/" className="flex items-center gap-3 decoration-transparent">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-primary/40 blur-[12px]"></div>
+              <MedQsLogoMark className="relative z-10 h-9 w-9 shrink-0" title="MedQs" />
             </div>
-            <MedQsWordmark className="text-xl font-bold tracking-tight text-white" />
+            <MedQsWordmark className="text-xl font-bold tracking-tight text-foreground" />
           </Link>
 
           {/* Links */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Link href="/login"
-              className="text-slate-200 hover:text-white transition-colors duration-200"
-              style={{ 
-                fontSize: 14, fontWeight: 500, padding: "10px 20px", borderRadius: 12,
-                textDecoration: "none"
-              }}
-            >
+          <div className="flex items-center gap-2">
+            <Link href="/login" className="rounded-xl px-5 py-2.5 text-sm font-medium text-foreground/80 transition-colors duration-200 hover:bg-muted/50 hover:text-foreground">
               Sign In
             </Link>
-            <Link href="/register"
-              className="hover:scale-[1.02] active:scale-[0.98] transition-transform duration-300"
-              style={{ 
-                display: "inline-flex", alignItems: "center", gap: 8,
-                fontSize: 14, fontWeight: 600, padding: "10px 24px", borderRadius: 12,
-                background: "linear-gradient(135deg, rgba(59,130,246,0.9), rgba(37,99,235,1))",
-                color: "#fff", textDecoration: "none",
-                boxShadow: "0 8px 30px rgba(59,130,246,0.3)"
-              }}
-            >
+            <Link href="/register" className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-primary to-primary/80 px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_8px_30px_hsl(var(--primary)/0.3)] transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]">
               Get Started Free
-              <ArrowRight style={{ width: 16, height: 16 }} />
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ maxWidth: 1000, margin: "0 auto", padding: "120px 24px 80px", textAlign: "center", position: "relative", zIndex: 10 }}>
-        
+      <section className="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-32 text-center">
         <ScrollReveal>
           {/* Badge */}
-          <div className="animate-fade-in" style={{ 
-            display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 100, 
-            border: "1px solid rgba(59,130,246,0.3)", background: "rgba(59,130,246,0.1)", 
-            padding: "8px 18px", fontSize: 13, fontWeight: 600, color: "#60a5fa", 
-            marginBottom: 36, backdropFilter: "blur(8px)",
-            boxShadow: "0 0 20px rgba(59,130,246,0.1) inset"
-          }}>
-            <ShieldCheck style={{ width: 16, height: 16 }} />
+          <div className="animate-fade-in mb-9 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary backdrop-blur-md shadow-[inset_0_0_20px_hsl(var(--primary)/0.1)]">
+            <ShieldCheck className="h-4 w-4" />
             The Ultimate Medical Study Platform
           </div>
 
           {/* Headline */}
-          <h1 className="animate-fade-up" style={{ 
-            fontFamily: "var(--font-display)", fontSize: "clamp(48px, 8vw, 84px)", 
-            fontWeight: 800, lineHeight: 1.05, letterSpacing: "-0.04em", 
-            marginBottom: 24, animationDelay: ".05s", color: "#ffffff" 
-          }}>
+          <h1 
+            className="animate-fade-up mb-6 font-display text-[clamp(48px,8vw,84px)] font-extrabold leading-[1.05] tracking-tight text-foreground"
+            style={{ animationDelay: ".05s" }}
+          >
             Master Medicine<br />
-            <span style={{ 
-              background: "linear-gradient(to right, #60a5fa, #818cf8, #a78bfa)", 
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              filter: "drop-shadow(0px 10px 30px rgba(96,165,250,0.2))"
-            }}>With Precision.</span>
+            <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(96,165,250,0.2)]">
+              With Precision.
+            </span>
           </h1>
 
-          <p className="animate-fade-up" style={{ 
-            fontSize: "clamp(16px, 2vw, 20px)", color: "#94a3b8", 
-            maxWidth: 600, margin: "0 auto 48px", lineHeight: 1.7, 
-            animationDelay: ".1s", letterSpacing: "0.01em"
-          }}>
+          <p 
+            className="animate-fade-up mx-auto mb-12 max-w-2xl text-[clamp(16px,2vw,20px)] leading-relaxed tracking-wide text-muted-foreground"
+            style={{ animationDelay: ".1s" }}
+          >
             Access perfectly structured curriculums, dive into detailed past-paper explanations, map your progress, and join a vibrant community of elite future doctors.
           </p>
 
           {/* CTA */}
-          <div className="animate-fade-up" style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", animationDelay: ".14s" }}>
-            <Link href="/register" 
-              className="hover:-translate-y-1 transition-transform duration-200"
-              style={{ 
-                display: "inline-flex", alignItems: "center", gap: 10,
-                fontSize: 16, fontWeight: 600, padding: "16px 36px", borderRadius: 14,
-                background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-                color: "#fff", textDecoration: "none",
-                boxShadow: "0 10px 40px -10px rgba(37,99,235,0.6), inset 0 1px 0 rgba(255,255,255,0.2)"
-              }}
-            >
+          <div 
+            className="animate-fade-up flex flex-wrap justify-center gap-4"
+            style={{ animationDelay: ".14s" }}
+          >
+            <Link href="/register" className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 px-8 py-4 text-base font-semibold text-white shadow-[0_10px_40px_-10px_rgba(37,99,235,0.6),inset_0_1px_0_rgba(255,255,255,0.2)] transition-transform duration-200 hover:-translate-y-1">
               Join Now
-              <ArrowRight style={{ width: 18, height: 18 }} />
+              <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link href="/modules" 
-              className="hover:bg-white/10 transition-colors duration-200"
-              style={{ 
-                display: "inline-flex", alignItems: "center", gap: 10,
-                fontSize: 16, fontWeight: 500, padding: "16px 32px", borderRadius: 14,
-                border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.03)",
-                color: "#f8fafc", textDecoration: "none", backdropFilter: "blur(12px)"
-              }}
-            >
-              <Play style={{ width: 18, height: 18, fill: "currentColor" }} />
+            <Link href="/modules" className="inline-flex items-center gap-2.5 rounded-2xl border border-border/80 bg-background/5 px-8 py-4 text-base font-medium text-foreground backdrop-blur-xl transition-colors duration-200 hover:bg-muted/10">
+              <Play className="h-5 w-5 fill-current" />
               Preview Curriculum
             </Link>
           </div>
 
           {/* Stats */}
-          <div className="animate-fade-up" style={{ 
-            marginTop: 72, display: "flex", justifyContent: "center", gap: "clamp(30px, 8vw, 80px)", 
-            flexWrap: "wrap", animationDelay: ".2s" 
-          }}>
+          <div 
+            className="animate-fade-up mt-16 flex flex-wrap justify-center gap-[clamp(30px,8vw,80px)]"
+            style={{ animationDelay: ".2s" }}
+          >
             {[
               { value: userCount.toLocaleString() + "+", label: "Active Students" },
               { value: questionCount.toLocaleString() + "+", label: "Bank Questions" },
               { value: moduleCount.toLocaleString() + "+", label: "Modules Covered" },
             ].map(({ value, label }) => (
-              <div key={label} style={{ textAlign: "center" }}>
-                <p style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4vw, 42px)", fontWeight: 800, margin: 0, color: "#fff", textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>{value}</p>
-                <p style={{ fontSize: 14, fontWeight: 500, color: "#64748b", margin: "6px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
+              <div key={label} className="text-center">
+                <p className="m-0 font-display text-[clamp(32px,4vw,42px)] font-extrabold text-foreground drop-shadow-md">{value}</p>
+                <p className="mt-1.5 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
               </div>
             ))}
           </div>
@@ -179,54 +130,44 @@ export default async function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px 100px", position: "relative", zIndex: 10 }}>
+      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24 pt-10">
         <ScrollReveal>
-          <div style={{ textAlign: "center", marginBottom: 64 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#60a5fa", fontWeight: 600, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
-              <Target style={{ width: 16, height: 16 }} />
+          <div className="mb-16 text-center">
+            <div className="mb-4 inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-widest text-primary">
+              <Target className="h-4 w-4" />
               Elite Toolset
             </div>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 16px", color: "#fff" }}>
+            <h2 className="mb-4 font-display text-[clamp(32px,5vw,48px)] font-extrabold tracking-tight text-foreground">
               Built for the Rigors of Med School
             </h2>
-            <p style={{ color: "#94a3b8", maxWidth: 540, margin: "0 auto", fontSize: 18, lineHeight: 1.6 }}>
+            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground">
               Everything you need to master complex subjects and conquer your exams faster than ever.
             </p>
           </div>
         </ScrollReveal>
 
         <ScrollReveal delayMs={100} className="block">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: BookOpen, color: "#60a5fa", gradient: "from-[#60a5fa] to-[#2563eb]", title: "Structured Curriculum", desc: "University → Year → Semester → Module → Subject → Lecture. Never get lost." },
-              { icon: Layers, color: "#818cf8", gradient: "from-[#818cf8] to-[#4f46e5]", title: "Active Recall", desc: "Turn any concept into actionable flashcards to build long-term retention seamlessly." },
-              { icon: ClipboardList, color: "#f472b6", gradient: "from-[#f472b6] to-[#db2777]", title: "Exam Simulator", desc: "Solve fully-timed past papers with detailed rationales for every single option." },
-              { icon: MessageSquare, color: "#34d399", gradient: "from-[#34d399] to-[#059669]", title: "Collaborative Forums", desc: "Global, semester-specific, and private discussion groups specifically for your cohort." },
-              { icon: Trophy, color: "#fbbf24", gradient: "from-[#fbbf24] to-[#d97706]", title: "Gamified Leaderboards", desc: "Earn experience points, acquire mastery badges, and climb the ranks among your peers." },
-              { icon: Clock, color: "#38bdf8", gradient: "from-[#38bdf8] to-[#0284c7]", title: "Deep Study Workspace", desc: "Integrated Pomodoro timer, dynamic task list, and a canvas to sketch pathways while studying." },
-            ].map(({ icon: Icon, color, gradient, title, desc }) => (
+              { icon: BookOpen, iconClass: "text-blue-500", shadowKey: "shadow-blue-500/20", gradient: "from-blue-400 to-blue-600", title: "Structured Curriculum", desc: "University → Year → Semester → Module → Subject → Lecture. Never get lost." },
+              { icon: Layers, iconClass: "text-indigo-500", shadowKey: "shadow-indigo-500/20", gradient: "from-indigo-400 to-indigo-600", title: "Active Recall", desc: "Turn any concept into actionable flashcards to build long-term retention seamlessly." },
+              { icon: ClipboardList, iconClass: "text-pink-500", shadowKey: "shadow-pink-500/20", gradient: "from-pink-400 to-pink-600", title: "Exam Simulator", desc: "Solve fully-timed past papers with detailed rationales for every single option." },
+              { icon: MessageSquare, iconClass: "text-emerald-500", shadowKey: "shadow-emerald-500/20", gradient: "from-emerald-400 to-emerald-600", title: "Collaborative Forums", desc: "Global, semester-specific, and private discussion groups specifically for your cohort." },
+              { icon: Trophy, iconClass: "text-amber-500", shadowKey: "shadow-amber-500/20", gradient: "from-amber-400 to-amber-600", title: "Gamified Leaderboards", desc: "Earn experience points, acquire mastery badges, and climb the ranks among your peers." },
+              { icon: Clock, iconClass: "text-sky-500", shadowKey: "shadow-sky-500/20", gradient: "from-sky-400 to-sky-600", title: "Deep Study Workspace", desc: "Integrated Pomodoro timer, dynamic task list, and a canvas to sketch pathways while studying." },
+            ].map(({ icon: Icon, iconClass, shadowKey, gradient, title, desc }) => (
               <div 
                 key={title} 
-                className="group relative overflow-hidden rounded-2xl transition-all duration-400 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:border-white/20"
-                style={{ 
-                  background: "rgba(255,255,255,0.02)", 
-                  border: "1px solid rgba(255,255,255,0.06)", 
-                  backdropFilter: "blur(12px)"
-                }}
+                className="group relative overflow-hidden rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xl transition-all duration-400 ease-in-out hover:-translate-y-1 hover:border-primary/30 hover:shadow-2xl dark:bg-background/20"
               >
                 {/* Hover Glow */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-10`} />
                 <div className="relative p-8">
-                  <div className="transition-transform duration-300 ease-in-out group-hover:scale-110"
-                    style={{ 
-                    display: "inline-flex", borderRadius: 14, padding: 14, 
-                    background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.05)",
-                    marginBottom: 20, boxShadow: `0 8px 16px -4px ${color}33`
-                  }}>
-                    <Icon style={{ width: 26, height: 26, color }} />
+                  <div className={`mb-5 inline-flex rounded-2xl border border-border bg-card/80 p-3.5 shadow-lg ${shadowKey} transition-transform duration-300 ease-in-out group-hover:scale-110`}>
+                    <Icon className={`h-6 w-6 ${iconClass}`} />
                   </div>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, margin: "0 0 10px", color: "#f8fafc" }}>{title}</h3>
-                  <p style={{ fontSize: 15, color: "#94a3b8", margin: 0, lineHeight: 1.6 }}>{desc}</p>
+                  <h3 className="mb-2.5 font-display text-xl font-bold text-foreground">{title}</h3>
+                  <p className="text-[15px] leading-relaxed text-muted-foreground">{desc}</p>
                 </div>
               </div>
             ))}
@@ -235,59 +176,36 @@ export default async function LandingPage() {
       </section>
 
       {/* ── DOCTORS & FACULTY ── */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 100px", position: "relative", zIndex: 10 }}>
+      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24">
         <ScrollReveal>
-          <div style={{ 
-            position: "relative",
-            borderRadius: 32, 
-            background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(0,0,0,0.4))",
-            border: "1px solid rgba(59,130,246,0.2)",
-            padding: "clamp(30px, 6vw, 60px)",
-            overflow: "hidden",
-            boxShadow: "0 40px 80px -20px rgba(37,99,235,0.2)"
-          }}>
-            <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "radial-gradient(ellipse at right, rgba(59,130,246,0.1), transparent 70%)", pointerEvents: "none" }} />
+          <div className="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-gradient-to-br from-primary/5 to-background/40 p-[clamp(30px,6vw,60px)] shadow-[0_40px_80px_-20px_rgba(37,99,235,0.2)]">
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_right,_hsl(var(--primary)/0.1),_transparent_70%)]" />
             
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 40, position: "relative", zIndex: 1 }}>
-              <div style={{ flex: "1 1 500px" }}>
-                <div style={{ 
-                  display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 100, 
-                  background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", 
-                  padding: "6px 16px", fontSize: 13, fontWeight: 600, color: "#f8fafc", marginBottom: 20 
-                }}>
-                  <GraduationCap style={{ width: 16, height: 16 }} aria-hidden />
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-10">
+              <div className="flex-[1_1_500px]">
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-[13px] font-semibold text-primary">
+                  <GraduationCap className="h-4 w-4" aria-hidden />
                   {PLATFORM_COPY.landingForDoctorsEyebrow}
                 </div>
-                <h2 style={{ 
-                  fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 40px)", 
-                  fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 16px", color: "#fff", lineHeight: 1.15
-                }}>
+                <h2 className="mb-4 font-display text-[clamp(28px,4vw,40px)] font-extrabold leading-[1.15] tracking-tight text-foreground">
                   {PLATFORM_COPY.landingForDoctorsTitle}
                 </h2>
-                <p style={{ fontSize: 17, color: "#cbd5e1", margin: "0 0 20px", lineHeight: 1.7 }}>
+                <p className="mb-5 text-[17px] leading-relaxed text-muted-foreground">
                   {PLATFORM_COPY.landingForDoctorsBody}
                 </p>
-                <p dir="rtl" style={{ fontSize: 16, color: "#94a3b8", margin: 0, lineHeight: 1.8, background: "rgba(0,0,0,0.2)", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
+                <p dir="rtl" className="m-0 rounded-xl border border-border/50 bg-black/5 p-4 text-base leading-relaxed text-muted-foreground dark:bg-black/20">
                   {PLATFORM_COPY.landingForDoctorsArabic}
                 </p>
               </div>
-              <div style={{ flex: "0 0 auto" }}>
-                <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: 32, borderRadius: 24, backdropFilter: "blur(12px)" }}>
-                  <Link href="/login" 
-                    className="hover:-translate-y-1 transition-transform duration-200"
-                    style={{ 
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                    fontSize: 16, fontWeight: 600, padding: "16px 32px", borderRadius: 14,
-                    background: "#f8fafc", color: "#0f172a", textDecoration: "none",
-                    boxShadow: "0 10px 30px rgba(255,255,255,0.15)"
-                  }}
-                  >
+              <div className="flex-none">
+                <div className="rounded-3xl border border-border/80 bg-background/50 p-8 backdrop-blur-xl transition-shadow hover:shadow-xl dark:bg-white/5">
+                  <Link href="/login" className="flex items-center justify-center gap-2.5 rounded-2xl bg-foreground px-8 py-4 text-base font-semibold text-background shadow-[0_10px_30px_rgba(0,0,0,0.15)] transition-transform duration-200 hover:-translate-y-1 dark:shadow-[0_10px_30px_rgba(255,255,255,0.15)]">
                     Staff Login
-                    <ArrowRight style={{ width: 18, height: 18 }} />
+                    <ArrowRight className="h-5 w-5" />
                   </Link>
-                  <p style={{ margin: "16px 0 0", fontSize: 13, color: "#64748b", textAlign: "center", lineHeight: 1.6 }}>
+                  <p className="mt-4 text-center text-[13px] leading-relaxed text-muted-foreground">
                     Direct access via{" "}
-                    <Link href="/doctor" className="hover:text-blue-400 transition-colors" style={{ color: "#60a5fa", fontWeight: 500, textDecoration: "none" }}>/doctor</Link>
+                    <Link href="/doctor" className="font-medium text-primary transition-colors hover:text-primary/80">/doctor</Link>
                   </p>
                 </div>
               </div>
@@ -297,56 +215,53 @@ export default async function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "64px 0 40px", backgroundColor: "rgba(0,0,0,0.4)", position: "relative", zIndex: 10 }} id="contact">
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 40, marginBottom: 60 }}>
-            <div style={{ gridColumn: "span 2" }}>
-              <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 20, textDecoration: "none" }}>
+      <footer className="relative z-10 border-t border-border/40 bg-card/30 pb-10 pt-16">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-16 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="lg:col-span-2">
+              <Link href="/" className="mb-5 flex items-center gap-3 decoration-transparent">
                 <MedQsLogoMark className="h-8 w-8 shrink-0" title="MedQs" />
-                <MedQsWordmark className="text-xl font-bold" />
+                <MedQsWordmark className="text-xl font-bold text-foreground" />
               </Link>
-              <p style={{ fontSize: 15, color: "#94a3b8", lineHeight: 1.7, maxWidth: 320 }}>
+              <p className="max-w-[320px] text-[15px] leading-relaxed text-muted-foreground">
                 Elevating medical education with precision tools, structured curriculums, and an unstoppable community.
               </p>
             </div>
             
             <div>
-              <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#f8fafc", marginBottom: 20 }}>Features</p>
+              <p className="mb-5 text-xs font-bold uppercase tracking-[0.1em] text-foreground">Features</p>
               {[["Curriculum", "/modules"], ["Flashcards", "/study-tools"], ["Leaderboard", "/leaderboard"], ["Study Space", "/space"], ["Discussions", "/forum"]].map(([l, h]) => (
-                <Link key={l} href={h} className="hover:text-blue-400 transition-colors duration-200" style={{ display: "block", marginBottom: 12, fontSize: 14, color: "#94a3b8", textDecoration: "none" }}>
-                  {l}
-             </Link>
-              ))}
-            </div>
-
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#f8fafc", marginBottom: 20 }}>Account</p>
-              {[["Sign In", "/login"], ["Create Account", "/register"], ["Faculty Portal", "/doctor"], ["Guest Access", "/modules"]].map(([l, h]) => (
-                <Link key={l} href={h} className="hover:text-blue-400 transition-colors duration-200" style={{ display: "block", marginBottom: 12, fontSize: 14, color: "#94a3b8", textDecoration: "none" }}>
+                <Link key={l} href={h} className="mb-3 block text-sm text-muted-foreground decoration-transparent transition-colors duration-200 hover:text-primary">
                   {l}
                 </Link>
               ))}
             </div>
 
             <div>
-              <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#f8fafc", marginBottom: 20 }}>Connect</p>
-              <a href="mailto:support@medqs.app" className="hover:text-blue-400 transition-colors duration-200" style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#94a3b8", textDecoration: "none", marginBottom: 12 }}>
-                <Mail style={{ width: 16, height: 16 }} /> Contact Support
+              <p className="mb-5 text-xs font-bold uppercase tracking-[0.1em] text-foreground">Account</p>
+              {[["Sign In", "/login"], ["Create Account", "/register"], ["Faculty Portal", "/doctor"], ["Guest Access", "/modules"]].map(([l, h]) => (
+                <Link key={l} href={h} className="mb-3 block text-sm text-muted-foreground decoration-transparent transition-colors duration-200 hover:text-primary">
+                  {l}
+                </Link>
+              ))}
+            </div>
+
+            <div>
+              <p className="mb-5 text-xs font-bold uppercase tracking-[0.1em] text-foreground">Connect</p>
+              <a href="mailto:support@medqs.app" className="mb-3 flex items-center gap-2.5 text-sm text-muted-foreground decoration-transparent transition-colors duration-200 hover:text-primary">
+                <Mail className="h-4 w-4" /> Contact Support
               </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors duration-200" style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#94a3b8", textDecoration: "none" }}>
-                <Github style={{ width: 16, height: 16 }} /> GitHub Source
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground decoration-transparent transition-colors duration-200 hover:text-primary">
+                <Github className="h-4 w-4" /> GitHub Source
               </a>
             </div>
           </div>
 
-          <div style={{ 
-            borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 32, 
-            display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 
-          }}>
-            <p style={{ fontSize: 14, color: "#64748b", margin: 0 }}>© 2026 MedQs. Excellence in medical education.</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#64748b" }}>
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border/40 pt-8">
+            <p className="m-0 text-sm text-muted-foreground">© 2026 MedQs. Excellence in medical education.</p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               Crafted with
-              <Heart style={{ width: 14, height: 14, color: "#f43f5e" }} className="animate-heartbeat" />
+              <Heart className="h-3.5 w-3.5 animate-pulse text-rose-500" />
               for future healthcare leaders
             </div>
           </div>

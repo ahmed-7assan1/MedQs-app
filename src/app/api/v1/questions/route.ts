@@ -82,6 +82,7 @@ export async function GET(req: NextRequest) {
     select: {
       id: true, questionType: true, body: true, imageUrl: true, stemLayout: true, choices: true, answer: true,
       essayReference: true, explanation: true, difficulty: true, lectureId: true,
+      lecture: { select: { title: true } },
     },
   });
 

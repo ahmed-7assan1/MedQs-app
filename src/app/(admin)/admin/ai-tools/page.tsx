@@ -233,6 +233,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
   const [placementKey, setPlacementKey] = useState(0);
   const [saving, setSaving] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [quizTitle, setQuizTitle] = useState("");
 
   async function handleExtract() {
     if (!file) return toast.error("Choose a PDF or DOCX file");
@@ -251,6 +252,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
       }
       setQuestions(data.questions ?? []);
       setIssues(data.issues ?? []);
+      setQuizTitle(data.quizTitle ?? "");
       if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
         toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
       }
@@ -377,11 +379,25 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
             disabled={saving}
           />
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-sm font-medium">{questions.length} questions extracted</span>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-3">
+            <div>
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Generated Quiz Title (Optional)</label>
+              <input 
+                type="text" 
+                value={quizTitle} 
+                onChange={(e) => setQuizTitle(e.target.value)} 
+                placeholder="e.g. Anatomy Exam 1..."
+                className="w-full sm:min-w-[280px] rounded-lg border border-border bg-background px-3 py-1.5 text-sm"
+              />
+            </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setExportOpen((o) => !o)}
+              <span className="text-sm font-medium whitespace-nowrap">{questions.length} questions extracted</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+               onClick={() => setExportOpen((o) => !o)}
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium hover:bg-muted transition-colors"
               >
                 <FileText className="h-3.5 w-3.5 text-blue-500" />
@@ -396,11 +412,10 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
                 Save All
               </button>
             </div>
-          </div>
-
           {exportOpen && (
             <WordExportModal 
               questions={questions.map(q => ({
+                groupTitle: quizTitle,
                 body: q.body,
                 choices: q.choices,
                 answer: q.answer,

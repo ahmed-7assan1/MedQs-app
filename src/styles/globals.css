@@ -114,22 +114,39 @@ html[data-theme="dark"] .medqs-logo {
 }
 
 .dark {
-  --background: 230 50% 6%;
+  --background: 222 60% 8%;
   --foreground: 220 20% 97%;
-  /* Card becomes an ultra-translucent glass */
-  --card: 230 50% 12%; 
+  /* Card becomes an ultra-translucent deep blue glass */
+  --card: 222 75% 15%; 
   --card-foreground: 220 20% 97%;
   --primary: 221 83% 60%;
   --primary-foreground: 0 0% 100%;
-  /* Muted surfaces match glass border alpha vibes */
-  --muted: 230 30% 14%;
+  --muted: 222 65% 17%;
   --muted-foreground: 215 20% 65%;
-  --secondary: 230 35% 16%;
+  --secondary: 222 70% 20%;
   --secondary-foreground: 220 20% 97%;
-  --accent: 230 40% 20%;
+  --accent: 222 80% 24%;
   --accent-foreground: 221 83% 65%;
-  --border: 230 30% 18%;
-  --input: 230 30% 18%;
+  --border: 222 50% 22%;
+  --input: 222 50% 22%;
+}
+
+@keyframes fire-flicker {
+  0%, 100% { transform: scale(1) rotate(-3deg); }
+  25% { transform: scale(1.1) rotate(3deg); filter: drop-shadow(0 0 4px coral); }
+  50% { transform: scale(0.95) rotate(-1deg); }
+  75% { transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 6px darkorange); }
+}
+.animate-fire {
+  animation: fire-flicker 1s infinite ease-in-out alternate;
+}
+
+@keyframes trophy-shine {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1) translateY(-2px); filter: drop-shadow(0 0 6px gold); }
+}
+.animate-trophy {
+  animation: trophy-shine 2.5s infinite ease-in-out;
 }
 
 html[data-theme="dark"] body, .dark body {
@@ -253,6 +270,28 @@ html[data-theme="dark"] body, .dark body {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
+/* ── Global Custom Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 @keyframes landing-root-ambient-breathe {
   0%,
   100% {
@@ -284,20 +323,30 @@ html[data-theme="dark"] body, .dark body {
 
 /* ── Light: white + soft blue wash ── */
 html[data-theme="light"] body {
-  background-color: hsl(210 20% 98%);
+  background-color: hsl(210 24% 98%);
   background-image:
-    radial-gradient(ellipse 100% 80% at 50% -40%, hsl(var(--primary) / 0.1), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 100% 0%, hsl(221 83% 53% / 0.07), transparent 45%);
+    radial-gradient(ellipse 100% 80% at 50% -40%, hsl(215 88% 54% / 0.11), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 100% 0%, hsl(265 83% 60% / 0.08), transparent 45%),
+    radial-gradient(ellipse 50% 50% at 0% 100%, hsl(160 84% 39% / 0.04), transparent 50%);
   background-attachment: fixed;
+}
+
+/* Logo Adaptive Glowing */
+html[data-theme="light"] .adaptive-logo-glow {
+  filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.8));
+}
+html[data-theme="dark"] .adaptive-logo-glow {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
 }
 
 /* ── Dark: deep blue-slate + accent glow ── */
 html[data-theme="dark"] body {
-  background-color: hsl(222 47% 4%);
+  background-color: hsl(222 60% 8%);
   background-image:
-    radial-gradient(ellipse 90% 60% at 30% -10%, hsl(var(--primary) / 0.16), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 100% 0%, hsl(221 83% 53% / 0.09), transparent 45%),
-    linear-gradient(180deg, hsl(222 47% 3%), hsl(222 47% 2%));
+    radial-gradient(ellipse 90% 60% at 30% -10%, hsl(220 88% 55% / 0.18), transparent 50%),
+    radial-gradient(ellipse 50% 45% at 100% 0%, hsl(265 83% 60% / 0.14), transparent 45%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, hsl(160 84% 39% / 0.08), transparent 50%),
+    linear-gradient(180deg, hsl(222 60% 7%), hsl(222 60% 5%));
   background-attachment: fixed;
 }
 
@@ -612,7 +661,16 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   flex-direction: column;
   gap: 2px;
 }
-.sb-nav::-webkit-scrollbar { display: none; }
+.sb-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sb-nav::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 4px;
+}
+.dark .sb-nav::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+}
 
 .sb-section-label {
   height: 28px;
@@ -683,7 +741,8 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
 }
 .sb-link:hover .sb-link-icon { color: hsl(var(--foreground)); opacity: 1; transform: scale(1.05); }
 .dark .sb-link:hover .sb-link-icon { color: hsl(0 0% 100%); opacity: 1; }
-.sb-link.active .sb-link-icon { color: hsl(var(--primary)); opacity: 1; transform: scale(1.05); }
+.sb-link.active .sb-link-icon { color: hsl(var(--foreground)); opacity: 1; transform: scale(1.05); }
+.dark .sb-link.active .sb-link-icon { color: hsl(0 0% 100%); opacity: 1; transform: scale(1.05); }
 
 .sb-link-label {
   flex: 1;

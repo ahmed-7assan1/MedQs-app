@@ -249,7 +249,7 @@ export default async function DashboardPage() {
                 <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
               </div>
               <div className={cn("rounded-xl bg-muted/80 p-2.5", tone)}>
-                <Icon className="h-5 w-5" />
+                <Icon className={cn("h-5 w-5", Icon === Flame && "animate-fire", Icon === Trophy && "animate-trophy")} />
               </div>
             </div>
           </MedqsCard>

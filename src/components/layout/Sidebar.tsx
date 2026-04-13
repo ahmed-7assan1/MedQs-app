@@ -21,6 +21,9 @@ import {
   Sun,
   Moon,
   ChevronDown,
+  MoreVertical,
+  LayoutGrid,
+  Bookmark,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore } from "@/lib/store";
@@ -113,32 +116,17 @@ export function Sidebar({
   const [desktopUserOpen, setDesktopUserOpen] = useState(false);
   const [desktopUserPlacement, setDesktopUserPlacement] = useState<{ top: number; left?: number; right?: number } | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [desktopExpanded, setDesktopExpanded] = useState(true);
+  const [desktopNavOpen, setDesktopNavOpen] = useState(false);
 
-  // Load initial state safely
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("medqs-sidebar");
-      if (stored === "collapsed") setDesktopExpanded(false);
-    } catch {}
+    setMounted(true);
   }, []);
-
-  // Sync desktop expanded state with layout margin
-  useEffect(() => {
-    if (typeof document !== "undefined") {
-      if (desktopExpanded) {
-        document.documentElement.removeAttribute("data-sidebar-collapsed");
-        try { localStorage.setItem("medqs-sidebar", "expanded"); } catch {}
-      } else {
-        document.documentElement.setAttribute("data-sidebar-collapsed", "true");
-        try { localStorage.setItem("medqs-sidebar", "collapsed"); } catch {}
-      }
-    }
-  }, [desktopExpanded]);
 
   const notifTriggerRef = useRef<HTMLElement | null>(null);
   const desktopUserRef = useRef<HTMLDivElement | null>(null);
   const desktopMenuTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const isSpace = pathname === "/space";
 
   function updateDesktopUserMenuPlacement() {
     const el = desktopMenuTriggerRef.current;
@@ -365,6 +353,17 @@ export function Sidebar({
               <User className="h-4 w-4 text-muted-foreground" aria-hidden /> Profile
             </Link>
             <Link
+              href="/profile/saved-questions"
+              role="menuitem"
+              onClick={() => {
+                setDesktopUserOpen(false);
+                setDesktopUserPlacement(null);
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted"
+            >
+              <Bookmark className="h-4 w-4 text-muted-foreground" aria-hidden /> Saved Questions
+            </Link>
+            <Link
               href="/settings"
               role="menuitem"
               onClick={() => {
@@ -409,34 +408,46 @@ export function Sidebar({
 
   return (
     <>
-      {/* ── Desktop: Floating Pill Navigation ── */}
-      <div className="desktop-pill-nav hidden md:block">
-        {/* Brand / Logo (Top Left) */}
-        <div className="fixed left-6 top-6 z-50 flex items-center gap-2">
-          <Link href="/dashboard-app" className="sb-logo cursor-pointer transition-transform hover:scale-105">
-            <BrandMark className="mb-0 scale-100" />
-          </Link>
-          {/* Detached text matches reference implicitly */}
-        </div>
+      {/* ── Desktop: Unified Capsule Navigation ── */}
+      <div 
+        className={cn(
+          "desktop-pill-nav hidden md:flex fixed left-6 top-6 z-50 flex-col items-center border border-black/5 dark:border-white/5 bg-white/80 dark:bg-white/5 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] backdrop-blur-3xl transition-all duration-700 ease-in-out will-change-transform overflow-hidden",
+          desktopNavOpen ? "rounded-[32px] w-[60px]" : "rounded-full w-[60px] h-[60px]",
+          isSpace && "hidden md:hidden"
+        )}
+      >
+        {/* Brand / Logo Toggle */}
+        <button 
+          onClick={() => setDesktopNavOpen(!desktopNavOpen)}
+          className={cn(
+            "sb-logo flex shrink-0 items-center justify-center rounded-full cursor-pointer transition-all duration-700 ease-in-out", 
+            desktopNavOpen ? "rotate-[90deg] w-12 h-12 mt-2 mb-2" : "w-[60px] h-[60px] rotate-0"
+          )}
+          title="Toggle Navigation"
+        >
+          <BrandMark className="!h-9 !w-9" />
+        </button>
 
-        {/* Main Nav (Center Left) */}
-        <nav className="fixed left-6 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-1.5 rounded-[28px] border border-black/5 dark:border-white/5 bg-white/80 dark:bg-white/5 p-2 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
+        {/* Expandable Nav Area */}
+        <nav 
+           className={cn("flex flex-col items-center gap-2 overflow-hidden transition-all duration-700 ease-in-out", desktopNavOpen ? "max-h-[800px] opacity-100 pb-4 pt-2" : "max-h-0 opacity-0 pb-0 pt-0")}
+        >
           {NAV.map(({ href, label, icon }) => (
             <DrawerLink key={href} href={href} label={label} icon={icon} />
           ))}
           {isAdmin && (
             <>
-              <div className="mx-auto my-1.5 h-px w-5 bg-black/5 dark:bg-white/10" />
+              <div className="mx-auto my-1.5 h-px w-5 bg-black/10 dark:bg-white/20" />
               <DrawerLink href="/admin/dashboard" label={PLATFORM_COPY.doctorPanel} icon={ShieldCheck} />
             </>
           )}
-        </nav>
 
-        {/* Bottom Tools (Bottom Left) */}
-        <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-1.5 rounded-[28px] border border-black/5 dark:border-white/5 bg-white/80 dark:bg-white/5 p-2 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
+          <div className="mx-auto my-1.5 h-px w-5 bg-black/10 dark:bg-white/20" />
+          
           {!isGuest && <DrawerLink href="/ai-chat" label="Study with Dr. Q" icon={Sparkles} />}
           {!isGuest && <DrawerLink href="/settings" label="Settings" icon={Settings} />}
-        </div>
+        </nav>
+      </div>
 
         {/* Top Right User Controls */}
         <div className="fixed right-6 top-6 z-50 flex items-center gap-2 rounded-full border border-black/5 dark:border-white/5 bg-white/80 dark:bg-white/5 p-2 pl-4 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
@@ -474,7 +485,7 @@ export function Sidebar({
           )}
 
           {!isGuest ? (
-            <div className="relative ml-1">
+            <div className="relative ml-1" ref={desktopUserRef}>
               <button
                 type="button"
                 className="sb-user flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border/40 transition-all hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -498,28 +509,36 @@ export function Sidebar({
               <User className="h-4 w-4" /> Sign In
             </Link>
           )}
+        </div>      {/* ── Mobile: top bar + h-opens drawer ── */}
+      <div className={cn("fixed left-3 right-3 top-3 z-[60] flex h-14 items-center justify-between rounded-2xl border border-border/80 bg-card/85 px-3 shadow-md backdrop-blur-xl md:hidden", isSpace && "hidden md:hidden")}>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="icon-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-foreground hover:bg-muted transition-all"
+            onClick={() => setMobileOpen((p) => !p)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
+          </button>
+          <Link
+            href="/dashboard-app"
+            className="flex min-w-0 items-center transition-transform hover:scale-105"
+            onClick={() => setMobileOpen(false)}
+          >
+            <span 
+              className="truncate text-xl font-bold tracking-tight"
+              style={{ 
+                fontFamily: '"Nizar Bold", "Nizar-Bold", "nizar bold", "nizar", sans-serif',
+                fontWeight: 'bold',
+                background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(220, 80%, 65%))',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent'
+              }}
+            >
+              {siteName}
+            </span>
+          </Link>
         </div>
-      </div>
-
-
-      {/* ── Mobile: top bar + h-opens drawer ── */}
-      <div className="medqs-mobile-bar fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border/80 bg-card/92 px-3 backdrop-blur-xl md:hidden">
-        <button
-          type="button"
-          className="icon-btn flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted"
-          onClick={() => setMobileOpen((p) => !p)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-        <Link
-          href="/dashboard-app"
-          className="flex min-w-0 items-center gap-2.5 text-foreground"
-          onClick={() => setMobileOpen(false)}
-        >
-          <BrandMark />
-          <span className="truncate font-display text-sm font-semibold leading-tight">{siteName}</span>
-        </Link>
         <div className="flex shrink-0 items-center justify-end gap-1">
           <GlobalSearch isGuest={isGuest} />
           <button
@@ -556,127 +575,75 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* ── Mobile drawer ── */}
-      <aside
-        className={cn(
-          "medqs-drawer fixed left-0 z-50 flex w-[min(320px,94vw)] flex-col overflow-hidden shadow-2xl transition-transform duration-300 ease-out md:hidden",
-          "top-14 h-[calc(100dvh-3.5rem)] max-h-[calc(100dvh-3.5rem)] border-r border-border dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]",
-          mobileOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
-        )}
-        aria-hidden={!mobileOpen}
-      >
-        <div className="sb-rail-glow" aria-hidden />
-
-        <div className="shrink-0 border-b border-border px-4 py-3.5 dark:border-white/10">
-          <p className="font-display text-base font-semibold leading-snug text-foreground dark:text-white">{siteName}</p>
-        </div>
-
-        <nav className="sb-nav min-h-0 flex-1">
-          <div className="sb-section-label">Main</div>
-          {NAV.map(({ href, label, icon }) => (
-            <DrawerLink key={href} href={href} label={label} icon={icon} />
+      {/* ── Mobile Icon Dropdown ── */}
+      {mobileOpen && (
+        <div className="fixed left-3 top-16 z-[65] flex flex-col gap-2 rounded-[24px] border border-black/5 dark:border-white/5 bg-white/90 dark:bg-[#111827]/90 p-2 shadow-xl backdrop-blur-xl md:hidden">
+          {NAV.map(({ href, label, icon: Icon }, i) => (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setMobileOpen(false)}
+              className="flex h-12 w-12 items-center justify-center rounded-[18px] text-muted-foreground hover:bg-primary/10 hover:text-primary animate-fade-in"
+              style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
+              title={label}
+            >
+              <Icon className="h-5 w-5" />
+            </Link>
           ))}
-
           {isAdmin && (
-            <>
-              <div className="sb-section-label">{PLATFORM_COPY.doctorHub}</div>
-              <DrawerLink href="/admin/dashboard" label={PLATFORM_COPY.doctorPanel} icon={ShieldCheck} />
-            </>
+            <Link
+              href="/admin/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className="flex h-12 w-12 items-center justify-center rounded-[18px] text-muted-foreground hover:bg-primary/10 hover:text-primary animate-fade-in"
+              style={{ animationDelay: `${NAV.length * 60}ms`, animationFillMode: "both" }}
+              title={PLATFORM_COPY.doctorPanel}
+            >
+              <ShieldCheck className="h-5 w-5" />
+            </Link>
           )}
-
-          <div className="sb-section-label">Tools</div>
-
+          {!isGuest && (
+            <Link
+              href="/ai-chat"
+              onClick={() => setMobileOpen(false)}
+              className="flex h-12 w-12 items-center justify-center rounded-[18px] text-muted-foreground hover:bg-primary/10 hover:text-primary animate-fade-in"
+              style={{ animationDelay: `${(NAV.length + 1) * 60}ms`, animationFillMode: "both" }}
+              title="Study with Dr. Q"
+            >
+              <Sparkles className="h-5 w-5" />
+            </Link>
+          )}
           {!isGuest && (
             <button
               type="button"
-              className={cn("sb-link w-full text-left", notifOpen && "active")}
-              data-notif-trigger
-              onClick={openNotifPanel}
-              aria-expanded={notifOpen}
+              className="flex h-12 w-12 items-center justify-center rounded-[18px] text-muted-foreground hover:bg-primary/10 hover:text-primary animate-fade-in"
+              style={{ animationDelay: `${(NAV.length + 2) * 60}ms`, animationFillMode: "both" }}
+              onClick={(e) => {
+                setDesktopUserPlacement({ top: 70, left: 16 });
+                setDesktopUserOpen(true);
+                setMobileOpen(false);
+              }}
+              title="Profile"
             >
-              <Bell className="sb-link-icon" style={{ width: 18, height: 18 }} />
-              <span className="sb-link-label">Notifications</span>
-              {totalUnread > 0 && (
-                <>
-                  <span className="sb-badge">{totalUnread > 99 ? "99+" : totalUnread}</span>
-                  <span className="sb-link-dot" />
-                </>
-              )}
+              <User className="h-5 w-5" />
             </button>
           )}
-
-          {!isGuest && <DrawerLink href="/ai-chat" label="Study with Dr. Q" icon={Sparkles} />}
-        </nav>
-
-        <div className="sb-footer shrink-0 border-t border-border/80 bg-card/50 pb-1 dark:border-white/10">
           {!isGuest && (
-            <DrawerLink href="/settings" label="Settings" icon={Settings} />
-          )}
-
-          {!isGuest ? (
-            <div className="relative">
-              <button type="button" className="sb-user w-full text-left" onClick={() => setUserMenuOpen((p) => !p)}>
-                {userImage ? (
-                  <img
-                    src={userImage}
-                    alt={userName}
-                    className="h-8 w-8 flex-shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
-                  />
-                ) : (
-                  <div
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-primary-foreground"
-                    style={{ background: "hsl(var(--primary))" }}
-                  >
-                    {initial}
-                  </div>
-                )}
-                <div className="sb-user-info">
-                  <p className="truncate text-xs font-semibold text-foreground dark:text-white/80">{userName}</p>
-                  <p className="truncate text-[10px] text-muted-foreground dark:text-white/35">Student</p>
-                </div>
-              </button>
-
-              {userMenuOpen && (
-                <div className="animate-notif-pop absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-xl border border-border bg-card shadow-xl dark:border-[hsl(222_18%_18%)] dark:bg-[hsl(222_24%_12%)] dark:shadow-[0_-8px_32px_rgba(0,0,0,.4)]">
-                  <div className="space-y-0.5 p-1.5">
-                    {[
-                      { href: "/profile/me", label: "View Profile", icon: User },
-                      { href: "/settings", label: "Settings", icon: Settings },
-                    ].map(({ href, label, icon: Icon }) => (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={() => {
-                          setUserMenuOpen(false);
-                          setMobileOpen(false);
-                        }}
-                        className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:text-white/60 dark:hover:bg-white/5 dark:hover:text-white"
-                      >
-                        <Icon className="h-3.5 w-3.5 shrink-0" /> {label}
-                      </Link>
-                    ))}
-                  </div>
-                  <div className="border-t border-border p-1.5 dark:border-[hsl(222_18%_18%)]">
-                    <button
-                      type="button"
-                      onClick={() => signOut({ callbackUrl: "/login" })}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-destructive transition-colors hover:bg-destructive/10 dark:hover:bg-white/5"
-                    >
-                      <LogOut className="h-3.5 w-3.5 shrink-0" /> Sign out
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <DrawerLink href="/login" label="Sign in" icon={User} />
+            <Link
+              href="/settings"
+              onClick={() => setMobileOpen(false)}
+              className="flex h-12 w-12 items-center justify-center rounded-[18px] text-muted-foreground hover:bg-primary/10 hover:text-primary animate-fade-in"
+              style={{ animationDelay: `${(NAV.length + 3) * 60}ms`, animationFillMode: "both" }}
+              title="Settings"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
           )}
         </div>
-      </aside>
+      )}
 
       {mobileOpen && (
         <div
-          className="fixed inset-x-0 bottom-0 top-14 z-[45] bg-black/40 backdrop-blur-[2px] dark:bg-black/55 md:hidden"
+          className="fixed inset-x-0 bottom-0 top-[4.5rem] z-[61] bg-background/80 backdrop-blur-sm dark:bg-black/60 md:hidden"
           role="presentation"
           aria-hidden
           onClick={() => setMobileOpen(false)}

@@ -243,11 +243,20 @@ export function QuizClient({
     if (!q) return;
     setBookmarked((prev) => {
       const next = new Set(prev);
-      if (next.has(q.id)) next.delete(q.id);
+      const isSaving = !next.has(q.id);
+      if (!isSaving) next.delete(q.id);
       else next.add(q.id);
+      
+      if (!guestQuiz) {
+        fetch(`/api/v1/questions/${q.id}/save`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ save: isSaving }),
+        }).catch(() => {});
+      }
       return next;
     });
-  }, [q]);
+  }, [q, guestQuiz]);
 
   const submitReport = useCallback(async () => {
     if (!q) return;
@@ -461,6 +470,7 @@ export function QuizClient({
               const choice = answers[qq.id];
               const correct = !examMode && rev && choice === qq.answer;
               const wrong = !examMode && rev && choice != null && choice !== qq.answer;
+              const isFlagged = flagged.has(qq.id);
               return (
                 <button
                   key={qq.id}
@@ -472,12 +482,13 @@ export function QuizClient({
                   className={cn(
                     "flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     i === currentIndex && "border-primary ring-2 ring-primary/30",
-                    !done && "border-border bg-muted/30 text-muted-foreground",
-                    examMode && done && "border-primary/45 bg-primary/10 text-primary",
-                    correct && "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-                    wrong && "border-red-400/50 bg-red-500/10 text-red-700 dark:text-red-400"
+                    isFlagged && "border-amber-400 bg-amber-400/30 text-amber-800 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400",
+                    !done && !isFlagged && "border-border bg-muted/30 text-muted-foreground",
+                    examMode && done && !isFlagged && "border-primary/45 bg-primary/10 text-primary",
+                    correct && !isFlagged && "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+                    wrong && !isFlagged && "border-red-400/50 bg-red-500/10 text-red-700 dark:text-red-400"
                   )}
-                  aria-label={`Question ${i + 1}${done ? ", answered" : ", unanswered"}`}
+                  aria-label={`Question ${i + 1}${done ? ", answered" : ", unanswered"}${isFlagged ? ", marked for review" : ""}`}
                 >
                   {i + 1}
                 </button>

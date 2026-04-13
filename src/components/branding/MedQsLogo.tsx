@@ -18,28 +18,37 @@ export function MedQsLogoMark({
   className,
   title,
   variant = "default",
+  style,
 }: {
   className?: string;
   title?: string;
   variant?: LogoVariant;
+  style?: React.CSSProperties;
 }) {
-  const { logoUrl, siteName } = useSiteConfig();
-  const src = logoUrl?.trim() || STATIC_LOGO;
+  const { logoUrl, logoUrlDark, siteName } = useSiteConfig();
+  const srcLight = logoUrl?.trim() || STATIC_LOGO;
+  const srcDark = logoUrlDark?.trim() || srcLight;
 
   return (
     <span
+      style={style}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-lg",
-        // White background chip — visible only in light mode so PNG transparency looks right.
-        // In dark mode we rely on the logo having its own dark-friendly design.
-        "bg-white dark:bg-transparent",
+        "inline-flex shrink-0 items-center justify-center rounded-full adaptive-logo-glow",
         className
       )}
     >
+      {/* Light Mode Logo */}
       <img
-        src={src}
+        src={srcLight}
         alt={title ?? siteName ?? "MedQs"}
-        className="h-full w-full object-contain"
+        className="h-full w-full object-contain dark:hidden"
+        referrerPolicy="no-referrer"
+      />
+      {/* Dark Mode Logo */}
+      <img
+        src={srcDark}
+        alt={title ?? siteName ?? "MedQs"}
+        className="h-full w-full object-contain hidden dark:block"
         referrerPolicy="no-referrer"
       />
     </span>

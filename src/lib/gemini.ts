@@ -134,7 +134,7 @@ Rules:
 export async function extractQuestionsFromText(
   text: string,
   options?: AIRequestOptions
-): Promise<ExtractedQuestion[]> {
+): Promise<{ title: string; questions: ExtractedQuestion[] }> {
   const out = await extractQuestionsFromTextWithMeta(text, options);
   return out.data;
 }
@@ -142,7 +142,7 @@ export async function extractQuestionsFromText(
 export async function extractQuestionsFromTextWithMeta(
   text: string,
   options?: AIRequestOptions
-): Promise<AIWithMeta<ExtractedQuestion[]>> {
+): Promise<AIWithMeta<{ title: string; questions: ExtractedQuestion[] }>> {
   return extractQuestionsFromTextByModeWithMeta(text, "mcq", options);
 }
 
@@ -150,7 +150,7 @@ export async function extractQuestionsFromTextByModeWithMeta(
   text: string,
   mode: "mcq" | "essay" | "mixed",
   options?: AIRequestOptions
-): Promise<AIWithMeta<ExtractedQuestion[]>> {
+): Promise<AIWithMeta<{ title: string; questions: ExtractedQuestion[] }>> {
   const modeRule =
     mode === "essay"
       ? `Generate ONLY essay questions.
@@ -170,10 +170,11 @@ export async function extractQuestionsFromTextByModeWithMeta(
 
   const prompt = `You are a medical education assistant. Extract ALL multiple-choice questions from the following text.
 
-For each question return a JSON object. Return a JSON array called "questions".
+Return a JSON object containing "quizTitle" and a JSON array called "questions".
 
 Format:
 {
+  "quizTitle": "A suitable descriptive title based on the content",
   "questions": [
     {
       "questionType": "MCQ",
@@ -202,16 +203,19 @@ Rules:
 TEXT TO PROCESS:
 ${text.slice(0, 15000)}`;
 
-  const row = await generateJsonWithFallback<{ questions: ExtractedQuestion[] }>(prompt, { questions: [] }, {
+  const row = await generateJsonWithFallback<{ quizTitle?: string; questions: ExtractedQuestion[] }>(prompt, { quizTitle: "", questions: [] }, {
     preferredProvider: options?.preferredProvider,
   });
   return {
-    data: (row.data.questions ?? []).map((q) => ({
-      ...q,
-      questionType: q.questionType === "ESSAY" ? "ESSAY" : "MCQ",
-      essayReference: typeof q.essayReference === "string" ? q.essayReference : "",
-      choices: Array.isArray(q.choices) ? q.choices : [],
-    })),
+    data: {
+      title: typeof row.data.quizTitle === "string" ? row.data.quizTitle : "",
+      questions: (row.data.questions ?? []).map((q) => ({
+        ...q,
+        questionType: q.questionType === "ESSAY" ? "ESSAY" : "MCQ",
+        essayReference: typeof q.essayReference === "string" ? q.essayReference : "",
+        choices: Array.isArray(q.choices) ? q.choices : [],
+      }))
+    },
     meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders },
   };
 }

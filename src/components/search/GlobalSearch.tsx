@@ -119,7 +119,7 @@ export function GlobalSearch({ isGuest }: { isGuest?: boolean }) {
 
       {open ? (
         <div
-          className="fixed inset-0 z-[1100] flex items-start justify-center bg-black/40 px-3 pt-[12vh] backdrop-blur-[2px] md:pt-[10vh]"
+          className="fixed inset-0 z-[1100] flex items-start justify-center bg-background/80 px-3 pt-[12vh] backdrop-blur-sm dark:bg-black/60 md:pt-[10vh]"
           role="dialog"
           aria-label="Site search"
           onClick={() => setOpen(false)}

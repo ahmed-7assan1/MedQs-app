@@ -99,6 +99,11 @@ export type PastPaper = $Result.DefaultSelection<Prisma.$PastPaperPayload>
  */
 export type QuestionReport = $Result.DefaultSelection<Prisma.$QuestionReportPayload>
 /**
+ * Model SavedQuestion
+ * 
+ */
+export type SavedQuestion = $Result.DefaultSelection<Prisma.$SavedQuestionPayload>
+/**
  * Model GuestQuizUser
  * 
  */
@@ -635,6 +640,16 @@ export class PrismaClient<
     * ```
     */
   get questionReport(): Prisma.QuestionReportDelegate<ExtArgs>;
+
+  /**
+   * `prisma.savedQuestion`: Exposes CRUD operations for the **SavedQuestion** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SavedQuestions
+    * const savedQuestions = await prisma.savedQuestion.findMany()
+    * ```
+    */
+  get savedQuestion(): Prisma.SavedQuestionDelegate<ExtArgs>;
 
   /**
    * `prisma.guestQuizUser`: Exposes CRUD operations for the **GuestQuizUser** model.
@@ -1343,6 +1358,7 @@ export namespace Prisma {
     Question: 'Question',
     PastPaper: 'PastPaper',
     QuestionReport: 'QuestionReport',
+    SavedQuestion: 'SavedQuestion',
     GuestQuizUser: 'GuestQuizUser',
     QuizAttempt: 'QuizAttempt',
     StudyAssistantProfile: 'StudyAssistantProfile',
@@ -1383,7 +1399,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2574,6 +2590,76 @@ export namespace Prisma {
           count: {
             args: Prisma.QuestionReportCountArgs<ExtArgs>
             result: $Utils.Optional<QuestionReportCountAggregateOutputType> | number
+          }
+        }
+      }
+      SavedQuestion: {
+        payload: Prisma.$SavedQuestionPayload<ExtArgs>
+        fields: Prisma.SavedQuestionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SavedQuestionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SavedQuestionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>
+          }
+          findFirst: {
+            args: Prisma.SavedQuestionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SavedQuestionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>
+          }
+          findMany: {
+            args: Prisma.SavedQuestionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>[]
+          }
+          create: {
+            args: Prisma.SavedQuestionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>
+          }
+          createMany: {
+            args: Prisma.SavedQuestionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SavedQuestionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>[]
+          }
+          delete: {
+            args: Prisma.SavedQuestionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>
+          }
+          update: {
+            args: Prisma.SavedQuestionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>
+          }
+          deleteMany: {
+            args: Prisma.SavedQuestionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SavedQuestionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.SavedQuestionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedQuestionPayload>
+          }
+          aggregate: {
+            args: Prisma.SavedQuestionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSavedQuestion>
+          }
+          groupBy: {
+            args: Prisma.SavedQuestionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SavedQuestionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SavedQuestionCountArgs<ExtArgs>
+            result: $Utils.Optional<SavedQuestionCountAggregateOutputType> | number
           }
         }
       }
@@ -4859,11 +4945,13 @@ export namespace Prisma {
 
   export type QuestionCountOutputType = {
     reports: number
+    savedBy: number
     attemptItems: number
   }
 
   export type QuestionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     reports?: boolean | QuestionCountOutputTypeCountReportsArgs
+    savedBy?: boolean | QuestionCountOutputTypeCountSavedByArgs
     attemptItems?: boolean | QuestionCountOutputTypeCountAttemptItemsArgs
   }
 
@@ -4883,6 +4971,13 @@ export namespace Prisma {
    */
   export type QuestionCountOutputTypeCountReportsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuestionReportWhereInput
+  }
+
+  /**
+   * QuestionCountOutputType without action
+   */
+  export type QuestionCountOutputTypeCountSavedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SavedQuestionWhereInput
   }
 
   /**
@@ -5018,6 +5113,7 @@ export namespace Prisma {
     accounts: number
     sessions: number
     questionReports: number
+    savedQuestions: number
     dmSent: number
     dmReceived: number
     following: number
@@ -5044,6 +5140,7 @@ export namespace Prisma {
     accounts?: boolean | UserCountOutputTypeCountAccountsArgs
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
     questionReports?: boolean | UserCountOutputTypeCountQuestionReportsArgs
+    savedQuestions?: boolean | UserCountOutputTypeCountSavedQuestionsArgs
     dmSent?: boolean | UserCountOutputTypeCountDmSentArgs
     dmReceived?: boolean | UserCountOutputTypeCountDmReceivedArgs
     following?: boolean | UserCountOutputTypeCountFollowingArgs
@@ -5186,6 +5283,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountQuestionReportsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuestionReportWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSavedQuestionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SavedQuestionWhereInput
   }
 
   /**
@@ -5402,6 +5506,7 @@ export namespace Prisma {
     id: string | null
     siteName: string | null
     logoUrl: string | null
+    logoUrlDark: string | null
     pwaIconUrl: string | null
     faviconUrl: string | null
     primaryColor: string | null
@@ -5420,6 +5525,7 @@ export namespace Prisma {
     id: string | null
     siteName: string | null
     logoUrl: string | null
+    logoUrlDark: string | null
     pwaIconUrl: string | null
     faviconUrl: string | null
     primaryColor: string | null
@@ -5438,6 +5544,7 @@ export namespace Prisma {
     id: number
     siteName: number
     logoUrl: number
+    logoUrlDark: number
     pwaIconUrl: number
     faviconUrl: number
     primaryColor: number
@@ -5458,6 +5565,7 @@ export namespace Prisma {
     id?: true
     siteName?: true
     logoUrl?: true
+    logoUrlDark?: true
     pwaIconUrl?: true
     faviconUrl?: true
     primaryColor?: true
@@ -5476,6 +5584,7 @@ export namespace Prisma {
     id?: true
     siteName?: true
     logoUrl?: true
+    logoUrlDark?: true
     pwaIconUrl?: true
     faviconUrl?: true
     primaryColor?: true
@@ -5494,6 +5603,7 @@ export namespace Prisma {
     id?: true
     siteName?: true
     logoUrl?: true
+    logoUrlDark?: true
     pwaIconUrl?: true
     faviconUrl?: true
     primaryColor?: true
@@ -5585,6 +5695,7 @@ export namespace Prisma {
     id: string
     siteName: string
     logoUrl: string | null
+    logoUrlDark: string | null
     pwaIconUrl: string | null
     faviconUrl: string | null
     primaryColor: string
@@ -5620,6 +5731,7 @@ export namespace Prisma {
     id?: boolean
     siteName?: boolean
     logoUrl?: boolean
+    logoUrlDark?: boolean
     pwaIconUrl?: boolean
     faviconUrl?: boolean
     primaryColor?: boolean
@@ -5638,6 +5750,7 @@ export namespace Prisma {
     id?: boolean
     siteName?: boolean
     logoUrl?: boolean
+    logoUrlDark?: boolean
     pwaIconUrl?: boolean
     faviconUrl?: boolean
     primaryColor?: boolean
@@ -5656,6 +5769,7 @@ export namespace Prisma {
     id?: boolean
     siteName?: boolean
     logoUrl?: boolean
+    logoUrlDark?: boolean
     pwaIconUrl?: boolean
     faviconUrl?: boolean
     primaryColor?: boolean
@@ -5678,6 +5792,7 @@ export namespace Prisma {
       id: string
       siteName: string
       logoUrl: string | null
+      logoUrlDark: string | null
       /**
        * Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
        */
@@ -6089,6 +6204,7 @@ export namespace Prisma {
     readonly id: FieldRef<"SiteConfig", 'String'>
     readonly siteName: FieldRef<"SiteConfig", 'String'>
     readonly logoUrl: FieldRef<"SiteConfig", 'String'>
+    readonly logoUrlDark: FieldRef<"SiteConfig", 'String'>
     readonly pwaIconUrl: FieldRef<"SiteConfig", 'String'>
     readonly faviconUrl: FieldRef<"SiteConfig", 'String'>
     readonly primaryColor: FieldRef<"SiteConfig", 'String'>
@@ -19587,6 +19703,7 @@ export namespace Prisma {
     createdAt?: boolean
     lecture?: boolean | LectureDefaultArgs<ExtArgs>
     reports?: boolean | Question$reportsArgs<ExtArgs>
+    savedBy?: boolean | Question$savedByArgs<ExtArgs>
     attemptItems?: boolean | Question$attemptItemsArgs<ExtArgs>
     _count?: boolean | QuestionCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["question"]>
@@ -19627,6 +19744,7 @@ export namespace Prisma {
   export type QuestionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     lecture?: boolean | LectureDefaultArgs<ExtArgs>
     reports?: boolean | Question$reportsArgs<ExtArgs>
+    savedBy?: boolean | Question$savedByArgs<ExtArgs>
     attemptItems?: boolean | Question$attemptItemsArgs<ExtArgs>
     _count?: boolean | QuestionCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -19639,6 +19757,7 @@ export namespace Prisma {
     objects: {
       lecture: Prisma.$LecturePayload<ExtArgs>
       reports: Prisma.$QuestionReportPayload<ExtArgs>[]
+      savedBy: Prisma.$SavedQuestionPayload<ExtArgs>[]
       attemptItems: Prisma.$QuizAttemptItemPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -20021,6 +20140,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     lecture<T extends LectureDefaultArgs<ExtArgs> = {}>(args?: Subset<T, LectureDefaultArgs<ExtArgs>>): Prisma__LectureClient<$Result.GetResult<Prisma.$LecturePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     reports<T extends Question$reportsArgs<ExtArgs> = {}>(args?: Subset<T, Question$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuestionReportPayload<ExtArgs>, T, "findMany"> | Null>
+    savedBy<T extends Question$savedByArgs<ExtArgs> = {}>(args?: Subset<T, Question$savedByArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "findMany"> | Null>
     attemptItems<T extends Question$attemptItemsArgs<ExtArgs> = {}>(args?: Subset<T, Question$attemptItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuizAttemptItemPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -20399,6 +20519,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: QuestionReportScalarFieldEnum | QuestionReportScalarFieldEnum[]
+  }
+
+  /**
+   * Question.savedBy
+   */
+  export type Question$savedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    where?: SavedQuestionWhereInput
+    orderBy?: SavedQuestionOrderByWithRelationInput | SavedQuestionOrderByWithRelationInput[]
+    cursor?: SavedQuestionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SavedQuestionScalarFieldEnum | SavedQuestionScalarFieldEnum[]
   }
 
   /**
@@ -22605,6 +22745,933 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: QuestionReportInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SavedQuestion
+   */
+
+  export type AggregateSavedQuestion = {
+    _count: SavedQuestionCountAggregateOutputType | null
+    _min: SavedQuestionMinAggregateOutputType | null
+    _max: SavedQuestionMaxAggregateOutputType | null
+  }
+
+  export type SavedQuestionMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    questionId: string | null
+    createdAt: Date | null
+  }
+
+  export type SavedQuestionMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    questionId: string | null
+    createdAt: Date | null
+  }
+
+  export type SavedQuestionCountAggregateOutputType = {
+    id: number
+    userId: number
+    questionId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type SavedQuestionMinAggregateInputType = {
+    id?: true
+    userId?: true
+    questionId?: true
+    createdAt?: true
+  }
+
+  export type SavedQuestionMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    questionId?: true
+    createdAt?: true
+  }
+
+  export type SavedQuestionCountAggregateInputType = {
+    id?: true
+    userId?: true
+    questionId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type SavedQuestionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SavedQuestion to aggregate.
+     */
+    where?: SavedQuestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedQuestions to fetch.
+     */
+    orderBy?: SavedQuestionOrderByWithRelationInput | SavedQuestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SavedQuestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedQuestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedQuestions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SavedQuestions
+    **/
+    _count?: true | SavedQuestionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SavedQuestionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SavedQuestionMaxAggregateInputType
+  }
+
+  export type GetSavedQuestionAggregateType<T extends SavedQuestionAggregateArgs> = {
+        [P in keyof T & keyof AggregateSavedQuestion]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSavedQuestion[P]>
+      : GetScalarType<T[P], AggregateSavedQuestion[P]>
+  }
+
+
+
+
+  export type SavedQuestionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SavedQuestionWhereInput
+    orderBy?: SavedQuestionOrderByWithAggregationInput | SavedQuestionOrderByWithAggregationInput[]
+    by: SavedQuestionScalarFieldEnum[] | SavedQuestionScalarFieldEnum
+    having?: SavedQuestionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SavedQuestionCountAggregateInputType | true
+    _min?: SavedQuestionMinAggregateInputType
+    _max?: SavedQuestionMaxAggregateInputType
+  }
+
+  export type SavedQuestionGroupByOutputType = {
+    id: string
+    userId: string
+    questionId: string
+    createdAt: Date
+    _count: SavedQuestionCountAggregateOutputType | null
+    _min: SavedQuestionMinAggregateOutputType | null
+    _max: SavedQuestionMaxAggregateOutputType | null
+  }
+
+  type GetSavedQuestionGroupByPayload<T extends SavedQuestionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SavedQuestionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SavedQuestionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SavedQuestionGroupByOutputType[P]>
+            : GetScalarType<T[P], SavedQuestionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SavedQuestionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    questionId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    question?: boolean | QuestionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["savedQuestion"]>
+
+  export type SavedQuestionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    questionId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    question?: boolean | QuestionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["savedQuestion"]>
+
+  export type SavedQuestionSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    questionId?: boolean
+    createdAt?: boolean
+  }
+
+  export type SavedQuestionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    question?: boolean | QuestionDefaultArgs<ExtArgs>
+  }
+  export type SavedQuestionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    question?: boolean | QuestionDefaultArgs<ExtArgs>
+  }
+
+  export type $SavedQuestionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SavedQuestion"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      question: Prisma.$QuestionPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      questionId: string
+      createdAt: Date
+    }, ExtArgs["result"]["savedQuestion"]>
+    composites: {}
+  }
+
+  type SavedQuestionGetPayload<S extends boolean | null | undefined | SavedQuestionDefaultArgs> = $Result.GetResult<Prisma.$SavedQuestionPayload, S>
+
+  type SavedQuestionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<SavedQuestionFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: SavedQuestionCountAggregateInputType | true
+    }
+
+  export interface SavedQuestionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SavedQuestion'], meta: { name: 'SavedQuestion' } }
+    /**
+     * Find zero or one SavedQuestion that matches the filter.
+     * @param {SavedQuestionFindUniqueArgs} args - Arguments to find a SavedQuestion
+     * @example
+     * // Get one SavedQuestion
+     * const savedQuestion = await prisma.savedQuestion.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SavedQuestionFindUniqueArgs>(args: SelectSubset<T, SavedQuestionFindUniqueArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one SavedQuestion that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {SavedQuestionFindUniqueOrThrowArgs} args - Arguments to find a SavedQuestion
+     * @example
+     * // Get one SavedQuestion
+     * const savedQuestion = await prisma.savedQuestion.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SavedQuestionFindUniqueOrThrowArgs>(args: SelectSubset<T, SavedQuestionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first SavedQuestion that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedQuestionFindFirstArgs} args - Arguments to find a SavedQuestion
+     * @example
+     * // Get one SavedQuestion
+     * const savedQuestion = await prisma.savedQuestion.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SavedQuestionFindFirstArgs>(args?: SelectSubset<T, SavedQuestionFindFirstArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first SavedQuestion that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedQuestionFindFirstOrThrowArgs} args - Arguments to find a SavedQuestion
+     * @example
+     * // Get one SavedQuestion
+     * const savedQuestion = await prisma.savedQuestion.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SavedQuestionFindFirstOrThrowArgs>(args?: SelectSubset<T, SavedQuestionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more SavedQuestions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedQuestionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SavedQuestions
+     * const savedQuestions = await prisma.savedQuestion.findMany()
+     * 
+     * // Get first 10 SavedQuestions
+     * const savedQuestions = await prisma.savedQuestion.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const savedQuestionWithIdOnly = await prisma.savedQuestion.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SavedQuestionFindManyArgs>(args?: SelectSubset<T, SavedQuestionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a SavedQuestion.
+     * @param {SavedQuestionCreateArgs} args - Arguments to create a SavedQuestion.
+     * @example
+     * // Create one SavedQuestion
+     * const SavedQuestion = await prisma.savedQuestion.create({
+     *   data: {
+     *     // ... data to create a SavedQuestion
+     *   }
+     * })
+     * 
+     */
+    create<T extends SavedQuestionCreateArgs>(args: SelectSubset<T, SavedQuestionCreateArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many SavedQuestions.
+     * @param {SavedQuestionCreateManyArgs} args - Arguments to create many SavedQuestions.
+     * @example
+     * // Create many SavedQuestions
+     * const savedQuestion = await prisma.savedQuestion.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SavedQuestionCreateManyArgs>(args?: SelectSubset<T, SavedQuestionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SavedQuestions and returns the data saved in the database.
+     * @param {SavedQuestionCreateManyAndReturnArgs} args - Arguments to create many SavedQuestions.
+     * @example
+     * // Create many SavedQuestions
+     * const savedQuestion = await prisma.savedQuestion.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SavedQuestions and only return the `id`
+     * const savedQuestionWithIdOnly = await prisma.savedQuestion.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SavedQuestionCreateManyAndReturnArgs>(args?: SelectSubset<T, SavedQuestionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a SavedQuestion.
+     * @param {SavedQuestionDeleteArgs} args - Arguments to delete one SavedQuestion.
+     * @example
+     * // Delete one SavedQuestion
+     * const SavedQuestion = await prisma.savedQuestion.delete({
+     *   where: {
+     *     // ... filter to delete one SavedQuestion
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SavedQuestionDeleteArgs>(args: SelectSubset<T, SavedQuestionDeleteArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one SavedQuestion.
+     * @param {SavedQuestionUpdateArgs} args - Arguments to update one SavedQuestion.
+     * @example
+     * // Update one SavedQuestion
+     * const savedQuestion = await prisma.savedQuestion.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SavedQuestionUpdateArgs>(args: SelectSubset<T, SavedQuestionUpdateArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more SavedQuestions.
+     * @param {SavedQuestionDeleteManyArgs} args - Arguments to filter SavedQuestions to delete.
+     * @example
+     * // Delete a few SavedQuestions
+     * const { count } = await prisma.savedQuestion.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SavedQuestionDeleteManyArgs>(args?: SelectSubset<T, SavedQuestionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SavedQuestions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedQuestionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SavedQuestions
+     * const savedQuestion = await prisma.savedQuestion.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SavedQuestionUpdateManyArgs>(args: SelectSubset<T, SavedQuestionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one SavedQuestion.
+     * @param {SavedQuestionUpsertArgs} args - Arguments to update or create a SavedQuestion.
+     * @example
+     * // Update or create a SavedQuestion
+     * const savedQuestion = await prisma.savedQuestion.upsert({
+     *   create: {
+     *     // ... data to create a SavedQuestion
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SavedQuestion we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SavedQuestionUpsertArgs>(args: SelectSubset<T, SavedQuestionUpsertArgs<ExtArgs>>): Prisma__SavedQuestionClient<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of SavedQuestions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedQuestionCountArgs} args - Arguments to filter SavedQuestions to count.
+     * @example
+     * // Count the number of SavedQuestions
+     * const count = await prisma.savedQuestion.count({
+     *   where: {
+     *     // ... the filter for the SavedQuestions we want to count
+     *   }
+     * })
+    **/
+    count<T extends SavedQuestionCountArgs>(
+      args?: Subset<T, SavedQuestionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SavedQuestionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SavedQuestion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedQuestionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SavedQuestionAggregateArgs>(args: Subset<T, SavedQuestionAggregateArgs>): Prisma.PrismaPromise<GetSavedQuestionAggregateType<T>>
+
+    /**
+     * Group by SavedQuestion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedQuestionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SavedQuestionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SavedQuestionGroupByArgs['orderBy'] }
+        : { orderBy?: SavedQuestionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SavedQuestionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSavedQuestionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SavedQuestion model
+   */
+  readonly fields: SavedQuestionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SavedQuestion.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SavedQuestionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    question<T extends QuestionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, QuestionDefaultArgs<ExtArgs>>): Prisma__QuestionClient<$Result.GetResult<Prisma.$QuestionPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SavedQuestion model
+   */ 
+  interface SavedQuestionFieldRefs {
+    readonly id: FieldRef<"SavedQuestion", 'String'>
+    readonly userId: FieldRef<"SavedQuestion", 'String'>
+    readonly questionId: FieldRef<"SavedQuestion", 'String'>
+    readonly createdAt: FieldRef<"SavedQuestion", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SavedQuestion findUnique
+   */
+  export type SavedQuestionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * Filter, which SavedQuestion to fetch.
+     */
+    where: SavedQuestionWhereUniqueInput
+  }
+
+  /**
+   * SavedQuestion findUniqueOrThrow
+   */
+  export type SavedQuestionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * Filter, which SavedQuestion to fetch.
+     */
+    where: SavedQuestionWhereUniqueInput
+  }
+
+  /**
+   * SavedQuestion findFirst
+   */
+  export type SavedQuestionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * Filter, which SavedQuestion to fetch.
+     */
+    where?: SavedQuestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedQuestions to fetch.
+     */
+    orderBy?: SavedQuestionOrderByWithRelationInput | SavedQuestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SavedQuestions.
+     */
+    cursor?: SavedQuestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedQuestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedQuestions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SavedQuestions.
+     */
+    distinct?: SavedQuestionScalarFieldEnum | SavedQuestionScalarFieldEnum[]
+  }
+
+  /**
+   * SavedQuestion findFirstOrThrow
+   */
+  export type SavedQuestionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * Filter, which SavedQuestion to fetch.
+     */
+    where?: SavedQuestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedQuestions to fetch.
+     */
+    orderBy?: SavedQuestionOrderByWithRelationInput | SavedQuestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SavedQuestions.
+     */
+    cursor?: SavedQuestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedQuestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedQuestions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SavedQuestions.
+     */
+    distinct?: SavedQuestionScalarFieldEnum | SavedQuestionScalarFieldEnum[]
+  }
+
+  /**
+   * SavedQuestion findMany
+   */
+  export type SavedQuestionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * Filter, which SavedQuestions to fetch.
+     */
+    where?: SavedQuestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedQuestions to fetch.
+     */
+    orderBy?: SavedQuestionOrderByWithRelationInput | SavedQuestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SavedQuestions.
+     */
+    cursor?: SavedQuestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedQuestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedQuestions.
+     */
+    skip?: number
+    distinct?: SavedQuestionScalarFieldEnum | SavedQuestionScalarFieldEnum[]
+  }
+
+  /**
+   * SavedQuestion create
+   */
+  export type SavedQuestionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SavedQuestion.
+     */
+    data: XOR<SavedQuestionCreateInput, SavedQuestionUncheckedCreateInput>
+  }
+
+  /**
+   * SavedQuestion createMany
+   */
+  export type SavedQuestionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SavedQuestions.
+     */
+    data: SavedQuestionCreateManyInput | SavedQuestionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SavedQuestion createManyAndReturn
+   */
+  export type SavedQuestionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many SavedQuestions.
+     */
+    data: SavedQuestionCreateManyInput | SavedQuestionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SavedQuestion update
+   */
+  export type SavedQuestionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SavedQuestion.
+     */
+    data: XOR<SavedQuestionUpdateInput, SavedQuestionUncheckedUpdateInput>
+    /**
+     * Choose, which SavedQuestion to update.
+     */
+    where: SavedQuestionWhereUniqueInput
+  }
+
+  /**
+   * SavedQuestion updateMany
+   */
+  export type SavedQuestionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SavedQuestions.
+     */
+    data: XOR<SavedQuestionUpdateManyMutationInput, SavedQuestionUncheckedUpdateManyInput>
+    /**
+     * Filter which SavedQuestions to update
+     */
+    where?: SavedQuestionWhereInput
+  }
+
+  /**
+   * SavedQuestion upsert
+   */
+  export type SavedQuestionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SavedQuestion to update in case it exists.
+     */
+    where: SavedQuestionWhereUniqueInput
+    /**
+     * In case the SavedQuestion found by the `where` argument doesn't exist, create a new SavedQuestion with this data.
+     */
+    create: XOR<SavedQuestionCreateInput, SavedQuestionUncheckedCreateInput>
+    /**
+     * In case the SavedQuestion was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SavedQuestionUpdateInput, SavedQuestionUncheckedUpdateInput>
+  }
+
+  /**
+   * SavedQuestion delete
+   */
+  export type SavedQuestionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    /**
+     * Filter which SavedQuestion to delete.
+     */
+    where: SavedQuestionWhereUniqueInput
+  }
+
+  /**
+   * SavedQuestion deleteMany
+   */
+  export type SavedQuestionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SavedQuestions to delete
+     */
+    where?: SavedQuestionWhereInput
+  }
+
+  /**
+   * SavedQuestion without action
+   */
+  export type SavedQuestionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
   }
 
 
@@ -26656,6 +27723,7 @@ export namespace Prisma {
     facebookUrl: string | null
     theme: $Enums.Theme | null
     role: $Enums.Role | null
+    canManageReports: boolean | null
     points: number | null
     password: string | null
     studentId: string | null
@@ -26682,6 +27750,7 @@ export namespace Prisma {
     facebookUrl: string | null
     theme: $Enums.Theme | null
     role: $Enums.Role | null
+    canManageReports: boolean | null
     points: number | null
     password: string | null
     studentId: string | null
@@ -26708,6 +27777,7 @@ export namespace Prisma {
     facebookUrl: number
     theme: number
     role: number
+    canManageReports: number
     points: number
     password: number
     studentId: number
@@ -26744,6 +27814,7 @@ export namespace Prisma {
     facebookUrl?: true
     theme?: true
     role?: true
+    canManageReports?: true
     points?: true
     password?: true
     studentId?: true
@@ -26770,6 +27841,7 @@ export namespace Prisma {
     facebookUrl?: true
     theme?: true
     role?: true
+    canManageReports?: true
     points?: true
     password?: true
     studentId?: true
@@ -26796,6 +27868,7 @@ export namespace Prisma {
     facebookUrl?: true
     theme?: true
     role?: true
+    canManageReports?: true
     points?: true
     password?: true
     studentId?: true
@@ -26909,6 +27982,7 @@ export namespace Prisma {
     facebookUrl: string | null
     theme: $Enums.Theme
     role: $Enums.Role
+    canManageReports: boolean
     points: number
     password: string | null
     studentId: string | null
@@ -26954,6 +28028,7 @@ export namespace Prisma {
     facebookUrl?: boolean
     theme?: boolean
     role?: boolean
+    canManageReports?: boolean
     points?: boolean
     password?: boolean
     studentId?: boolean
@@ -26984,6 +28059,7 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     questionReports?: boolean | User$questionReportsArgs<ExtArgs>
+    savedQuestions?: boolean | User$savedQuestionsArgs<ExtArgs>
     dmSent?: boolean | User$dmSentArgs<ExtArgs>
     dmReceived?: boolean | User$dmReceivedArgs<ExtArgs>
     following?: boolean | User$followingArgs<ExtArgs>
@@ -27008,6 +28084,7 @@ export namespace Prisma {
     facebookUrl?: boolean
     theme?: boolean
     role?: boolean
+    canManageReports?: boolean
     points?: boolean
     password?: boolean
     studentId?: boolean
@@ -27037,6 +28114,7 @@ export namespace Prisma {
     facebookUrl?: boolean
     theme?: boolean
     role?: boolean
+    canManageReports?: boolean
     points?: boolean
     password?: boolean
     studentId?: boolean
@@ -27070,6 +28148,7 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     questionReports?: boolean | User$questionReportsArgs<ExtArgs>
+    savedQuestions?: boolean | User$savedQuestionsArgs<ExtArgs>
     dmSent?: boolean | User$dmSentArgs<ExtArgs>
     dmReceived?: boolean | User$dmReceivedArgs<ExtArgs>
     following?: boolean | User$followingArgs<ExtArgs>
@@ -27108,6 +28187,7 @@ export namespace Prisma {
       accounts: Prisma.$AccountPayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       questionReports: Prisma.$QuestionReportPayload<ExtArgs>[]
+      savedQuestions: Prisma.$SavedQuestionPayload<ExtArgs>[]
       dmSent: Prisma.$DirectMessagePayload<ExtArgs>[]
       dmReceived: Prisma.$DirectMessagePayload<ExtArgs>[]
       following: Prisma.$UserFollowPayload<ExtArgs>[]
@@ -27130,6 +28210,7 @@ export namespace Prisma {
       facebookUrl: string | null
       theme: $Enums.Theme
       role: $Enums.Role
+      canManageReports: boolean
       points: number
       password: string | null
       studentId: string | null
@@ -27524,6 +28605,7 @@ export namespace Prisma {
     accounts<T extends User$accountsArgs<ExtArgs> = {}>(args?: Subset<T, User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany"> | Null>
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany"> | Null>
     questionReports<T extends User$questionReportsArgs<ExtArgs> = {}>(args?: Subset<T, User$questionReportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuestionReportPayload<ExtArgs>, T, "findMany"> | Null>
+    savedQuestions<T extends User$savedQuestionsArgs<ExtArgs> = {}>(args?: Subset<T, User$savedQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedQuestionPayload<ExtArgs>, T, "findMany"> | Null>
     dmSent<T extends User$dmSentArgs<ExtArgs> = {}>(args?: Subset<T, User$dmSentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DirectMessagePayload<ExtArgs>, T, "findMany"> | Null>
     dmReceived<T extends User$dmReceivedArgs<ExtArgs> = {}>(args?: Subset<T, User$dmReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DirectMessagePayload<ExtArgs>, T, "findMany"> | Null>
     following<T extends User$followingArgs<ExtArgs> = {}>(args?: Subset<T, User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserFollowPayload<ExtArgs>, T, "findMany"> | Null>
@@ -27573,6 +28655,7 @@ export namespace Prisma {
     readonly facebookUrl: FieldRef<"User", 'String'>
     readonly theme: FieldRef<"User", 'Theme'>
     readonly role: FieldRef<"User", 'Role'>
+    readonly canManageReports: FieldRef<"User", 'Boolean'>
     readonly points: FieldRef<"User", 'Int'>
     readonly password: FieldRef<"User", 'String'>
     readonly studentId: FieldRef<"User", 'String'>
@@ -28316,6 +29399,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: QuestionReportScalarFieldEnum | QuestionReportScalarFieldEnum[]
+  }
+
+  /**
+   * User.savedQuestions
+   */
+  export type User$savedQuestionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedQuestion
+     */
+    select?: SavedQuestionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SavedQuestionInclude<ExtArgs> | null
+    where?: SavedQuestionWhereInput
+    orderBy?: SavedQuestionOrderByWithRelationInput | SavedQuestionOrderByWithRelationInput[]
+    cursor?: SavedQuestionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SavedQuestionScalarFieldEnum | SavedQuestionScalarFieldEnum[]
   }
 
   /**
@@ -47699,6 +48802,7 @@ export namespace Prisma {
     id: 'id',
     siteName: 'siteName',
     logoUrl: 'logoUrl',
+    logoUrlDark: 'logoUrlDark',
     pwaIconUrl: 'pwaIconUrl',
     faviconUrl: 'faviconUrl',
     primaryColor: 'primaryColor',
@@ -47917,6 +49021,16 @@ export namespace Prisma {
   export type QuestionReportScalarFieldEnum = (typeof QuestionReportScalarFieldEnum)[keyof typeof QuestionReportScalarFieldEnum]
 
 
+  export const SavedQuestionScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    questionId: 'questionId',
+    createdAt: 'createdAt'
+  };
+
+  export type SavedQuestionScalarFieldEnum = (typeof SavedQuestionScalarFieldEnum)[keyof typeof SavedQuestionScalarFieldEnum]
+
+
   export const GuestQuizUserScalarFieldEnum: {
     id: 'id',
     displayName: 'displayName',
@@ -47987,6 +49101,7 @@ export namespace Prisma {
     facebookUrl: 'facebookUrl',
     theme: 'theme',
     role: 'role',
+    canManageReports: 'canManageReports',
     points: 'points',
     password: 'password',
     studentId: 'studentId',
@@ -48493,6 +49608,7 @@ export namespace Prisma {
     id?: StringFilter<"SiteConfig"> | string
     siteName?: StringFilter<"SiteConfig"> | string
     logoUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    logoUrlDark?: StringNullableFilter<"SiteConfig"> | string | null
     pwaIconUrl?: StringNullableFilter<"SiteConfig"> | string | null
     faviconUrl?: StringNullableFilter<"SiteConfig"> | string | null
     primaryColor?: StringFilter<"SiteConfig"> | string
@@ -48511,6 +49627,7 @@ export namespace Prisma {
     id?: SortOrder
     siteName?: SortOrder
     logoUrl?: SortOrderInput | SortOrder
+    logoUrlDark?: SortOrderInput | SortOrder
     pwaIconUrl?: SortOrderInput | SortOrder
     faviconUrl?: SortOrderInput | SortOrder
     primaryColor?: SortOrder
@@ -48532,6 +49649,7 @@ export namespace Prisma {
     NOT?: SiteConfigWhereInput | SiteConfigWhereInput[]
     siteName?: StringFilter<"SiteConfig"> | string
     logoUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    logoUrlDark?: StringNullableFilter<"SiteConfig"> | string | null
     pwaIconUrl?: StringNullableFilter<"SiteConfig"> | string | null
     faviconUrl?: StringNullableFilter<"SiteConfig"> | string | null
     primaryColor?: StringFilter<"SiteConfig"> | string
@@ -48550,6 +49668,7 @@ export namespace Prisma {
     id?: SortOrder
     siteName?: SortOrder
     logoUrl?: SortOrderInput | SortOrder
+    logoUrlDark?: SortOrderInput | SortOrder
     pwaIconUrl?: SortOrderInput | SortOrder
     faviconUrl?: SortOrderInput | SortOrder
     primaryColor?: SortOrder
@@ -48574,6 +49693,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"SiteConfig"> | string
     siteName?: StringWithAggregatesFilter<"SiteConfig"> | string
     logoUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    logoUrlDark?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     pwaIconUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     faviconUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     primaryColor?: StringWithAggregatesFilter<"SiteConfig"> | string
@@ -49429,6 +50549,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Question"> | Date | string
     lecture?: XOR<LectureRelationFilter, LectureWhereInput>
     reports?: QuestionReportListRelationFilter
+    savedBy?: SavedQuestionListRelationFilter
     attemptItems?: QuizAttemptItemListRelationFilter
   }
 
@@ -49448,6 +50569,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     lecture?: LectureOrderByWithRelationInput
     reports?: QuestionReportOrderByRelationAggregateInput
+    savedBy?: SavedQuestionOrderByRelationAggregateInput
     attemptItems?: QuizAttemptItemOrderByRelationAggregateInput
   }
 
@@ -49470,6 +50592,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Question"> | Date | string
     lecture?: XOR<LectureRelationFilter, LectureWhereInput>
     reports?: QuestionReportListRelationFilter
+    savedBy?: SavedQuestionListRelationFilter
     attemptItems?: QuizAttemptItemListRelationFilter
   }, "id">
 
@@ -49709,6 +50832,60 @@ export namespace Prisma {
     note?: StringNullableWithAggregatesFilter<"QuestionReport"> | string | null
     pastPaperId?: StringNullableWithAggregatesFilter<"QuestionReport"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"QuestionReport"> | Date | string
+  }
+
+  export type SavedQuestionWhereInput = {
+    AND?: SavedQuestionWhereInput | SavedQuestionWhereInput[]
+    OR?: SavedQuestionWhereInput[]
+    NOT?: SavedQuestionWhereInput | SavedQuestionWhereInput[]
+    id?: StringFilter<"SavedQuestion"> | string
+    userId?: StringFilter<"SavedQuestion"> | string
+    questionId?: StringFilter<"SavedQuestion"> | string
+    createdAt?: DateTimeFilter<"SavedQuestion"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+    question?: XOR<QuestionRelationFilter, QuestionWhereInput>
+  }
+
+  export type SavedQuestionOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    questionId?: SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    question?: QuestionOrderByWithRelationInput
+  }
+
+  export type SavedQuestionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_questionId?: SavedQuestionUserIdQuestionIdCompoundUniqueInput
+    AND?: SavedQuestionWhereInput | SavedQuestionWhereInput[]
+    OR?: SavedQuestionWhereInput[]
+    NOT?: SavedQuestionWhereInput | SavedQuestionWhereInput[]
+    userId?: StringFilter<"SavedQuestion"> | string
+    questionId?: StringFilter<"SavedQuestion"> | string
+    createdAt?: DateTimeFilter<"SavedQuestion"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+    question?: XOR<QuestionRelationFilter, QuestionWhereInput>
+  }, "id" | "userId_questionId">
+
+  export type SavedQuestionOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    questionId?: SortOrder
+    createdAt?: SortOrder
+    _count?: SavedQuestionCountOrderByAggregateInput
+    _max?: SavedQuestionMaxOrderByAggregateInput
+    _min?: SavedQuestionMinOrderByAggregateInput
+  }
+
+  export type SavedQuestionScalarWhereWithAggregatesInput = {
+    AND?: SavedQuestionScalarWhereWithAggregatesInput | SavedQuestionScalarWhereWithAggregatesInput[]
+    OR?: SavedQuestionScalarWhereWithAggregatesInput[]
+    NOT?: SavedQuestionScalarWhereWithAggregatesInput | SavedQuestionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SavedQuestion"> | string
+    userId?: StringWithAggregatesFilter<"SavedQuestion"> | string
+    questionId?: StringWithAggregatesFilter<"SavedQuestion"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"SavedQuestion"> | Date | string
   }
 
   export type GuestQuizUserWhereInput = {
@@ -50016,6 +51193,7 @@ export namespace Prisma {
     facebookUrl?: StringNullableFilter<"User"> | string | null
     theme?: EnumThemeFilter<"User"> | $Enums.Theme
     role?: EnumRoleFilter<"User"> | $Enums.Role
+    canManageReports?: BoolFilter<"User"> | boolean
     points?: IntFilter<"User"> | number
     password?: StringNullableFilter<"User"> | string | null
     studentId?: StringNullableFilter<"User"> | string | null
@@ -50046,6 +51224,7 @@ export namespace Prisma {
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
     questionReports?: QuestionReportListRelationFilter
+    savedQuestions?: SavedQuestionListRelationFilter
     dmSent?: DirectMessageListRelationFilter
     dmReceived?: DirectMessageListRelationFilter
     following?: UserFollowListRelationFilter
@@ -50069,6 +51248,7 @@ export namespace Prisma {
     facebookUrl?: SortOrderInput | SortOrder
     theme?: SortOrder
     role?: SortOrder
+    canManageReports?: SortOrder
     points?: SortOrder
     password?: SortOrderInput | SortOrder
     studentId?: SortOrderInput | SortOrder
@@ -50099,6 +51279,7 @@ export namespace Prisma {
     accounts?: AccountOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
     questionReports?: QuestionReportOrderByRelationAggregateInput
+    savedQuestions?: SavedQuestionOrderByRelationAggregateInput
     dmSent?: DirectMessageOrderByRelationAggregateInput
     dmReceived?: DirectMessageOrderByRelationAggregateInput
     following?: UserFollowOrderByRelationAggregateInput
@@ -50125,6 +51306,7 @@ export namespace Prisma {
     facebookUrl?: StringNullableFilter<"User"> | string | null
     theme?: EnumThemeFilter<"User"> | $Enums.Theme
     role?: EnumRoleFilter<"User"> | $Enums.Role
+    canManageReports?: BoolFilter<"User"> | boolean
     points?: IntFilter<"User"> | number
     password?: StringNullableFilter<"User"> | string | null
     studentId?: StringNullableFilter<"User"> | string | null
@@ -50155,6 +51337,7 @@ export namespace Prisma {
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
     questionReports?: QuestionReportListRelationFilter
+    savedQuestions?: SavedQuestionListRelationFilter
     dmSent?: DirectMessageListRelationFilter
     dmReceived?: DirectMessageListRelationFilter
     following?: UserFollowListRelationFilter
@@ -50178,6 +51361,7 @@ export namespace Prisma {
     facebookUrl?: SortOrderInput | SortOrder
     theme?: SortOrder
     role?: SortOrder
+    canManageReports?: SortOrder
     points?: SortOrder
     password?: SortOrderInput | SortOrder
     studentId?: SortOrderInput | SortOrder
@@ -50212,6 +51396,7 @@ export namespace Prisma {
     facebookUrl?: StringNullableWithAggregatesFilter<"User"> | string | null
     theme?: EnumThemeWithAggregatesFilter<"User"> | $Enums.Theme
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
+    canManageReports?: BoolWithAggregatesFilter<"User"> | boolean
     points?: IntWithAggregatesFilter<"User"> | number
     password?: StringNullableWithAggregatesFilter<"User"> | string | null
     studentId?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -51476,6 +52661,7 @@ export namespace Prisma {
     id?: string
     siteName?: string
     logoUrl?: string | null
+    logoUrlDark?: string | null
     pwaIconUrl?: string | null
     faviconUrl?: string | null
     primaryColor?: string
@@ -51494,6 +52680,7 @@ export namespace Prisma {
     id?: string
     siteName?: string
     logoUrl?: string | null
+    logoUrlDark?: string | null
     pwaIconUrl?: string | null
     faviconUrl?: string | null
     primaryColor?: string
@@ -51512,6 +52699,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     siteName?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrlDark?: NullableStringFieldUpdateOperationsInput | string | null
     pwaIconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: StringFieldUpdateOperationsInput | string
@@ -51530,6 +52718,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     siteName?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrlDark?: NullableStringFieldUpdateOperationsInput | string | null
     pwaIconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: StringFieldUpdateOperationsInput | string
@@ -51548,6 +52737,7 @@ export namespace Prisma {
     id?: string
     siteName?: string
     logoUrl?: string | null
+    logoUrlDark?: string | null
     pwaIconUrl?: string | null
     faviconUrl?: string | null
     primaryColor?: string
@@ -51566,6 +52756,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     siteName?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrlDark?: NullableStringFieldUpdateOperationsInput | string | null
     pwaIconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: StringFieldUpdateOperationsInput | string
@@ -51584,6 +52775,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     siteName?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrlDark?: NullableStringFieldUpdateOperationsInput | string | null
     pwaIconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: StringFieldUpdateOperationsInput | string
@@ -52448,6 +53640,7 @@ export namespace Prisma {
     createdAt?: Date | string
     lecture: LectureCreateNestedOneWithoutQuestionsInput
     reports?: QuestionReportCreateNestedManyWithoutQuestionInput
+    savedBy?: SavedQuestionCreateNestedManyWithoutQuestionInput
     attemptItems?: QuizAttemptItemCreateNestedManyWithoutQuestionInput
   }
 
@@ -52466,6 +53659,7 @@ export namespace Prisma {
     lectureId: string
     createdAt?: Date | string
     reports?: QuestionReportUncheckedCreateNestedManyWithoutQuestionInput
+    savedBy?: SavedQuestionUncheckedCreateNestedManyWithoutQuestionInput
     attemptItems?: QuizAttemptItemUncheckedCreateNestedManyWithoutQuestionInput
   }
 
@@ -52484,6 +53678,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lecture?: LectureUpdateOneRequiredWithoutQuestionsNestedInput
     reports?: QuestionReportUpdateManyWithoutQuestionNestedInput
+    savedBy?: SavedQuestionUpdateManyWithoutQuestionNestedInput
     attemptItems?: QuizAttemptItemUpdateManyWithoutQuestionNestedInput
   }
 
@@ -52502,6 +53697,7 @@ export namespace Prisma {
     lectureId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: QuestionReportUncheckedUpdateManyWithoutQuestionNestedInput
+    savedBy?: SavedQuestionUncheckedUpdateManyWithoutQuestionNestedInput
     attemptItems?: QuizAttemptItemUncheckedUpdateManyWithoutQuestionNestedInput
   }
 
@@ -52761,6 +53957,53 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     pastPaperId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SavedQuestionCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutSavedQuestionsInput
+    question: QuestionCreateNestedOneWithoutSavedByInput
+  }
+
+  export type SavedQuestionUncheckedCreateInput = {
+    id?: string
+    userId: string
+    questionId: string
+    createdAt?: Date | string
+  }
+
+  export type SavedQuestionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutSavedQuestionsNestedInput
+    question?: QuestionUpdateOneRequiredWithoutSavedByNestedInput
+  }
+
+  export type SavedQuestionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SavedQuestionCreateManyInput = {
+    id?: string
+    userId: string
+    questionId: string
+    createdAt?: Date | string
+  }
+
+  export type SavedQuestionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SavedQuestionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -53076,6 +54319,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -53103,6 +54347,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -53126,6 +54371,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -53153,6 +54399,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -53176,6 +54423,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53203,6 +54451,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -53226,6 +54475,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53253,6 +54503,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -53276,6 +54527,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -53302,6 +54554,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53325,6 +54578,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54607,6 +55861,7 @@ export namespace Prisma {
     id?: SortOrder
     siteName?: SortOrder
     logoUrl?: SortOrder
+    logoUrlDark?: SortOrder
     pwaIconUrl?: SortOrder
     faviconUrl?: SortOrder
     primaryColor?: SortOrder
@@ -54625,6 +55880,7 @@ export namespace Prisma {
     id?: SortOrder
     siteName?: SortOrder
     logoUrl?: SortOrder
+    logoUrlDark?: SortOrder
     pwaIconUrl?: SortOrder
     faviconUrl?: SortOrder
     primaryColor?: SortOrder
@@ -54643,6 +55899,7 @@ export namespace Prisma {
     id?: SortOrder
     siteName?: SortOrder
     logoUrl?: SortOrder
+    logoUrlDark?: SortOrder
     pwaIconUrl?: SortOrder
     faviconUrl?: SortOrder
     primaryColor?: SortOrder
@@ -55468,6 +56725,12 @@ export namespace Prisma {
     none?: QuestionReportWhereInput
   }
 
+  export type SavedQuestionListRelationFilter = {
+    every?: SavedQuestionWhereInput
+    some?: SavedQuestionWhereInput
+    none?: SavedQuestionWhereInput
+  }
+
   export type QuizAttemptItemListRelationFilter = {
     every?: QuizAttemptItemWhereInput
     some?: QuizAttemptItemWhereInput
@@ -55475,6 +56738,10 @@ export namespace Prisma {
   }
 
   export type QuestionReportOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SavedQuestionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -55732,6 +56999,32 @@ export namespace Prisma {
     userId?: SortOrder
     note?: SortOrder
     pastPaperId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SavedQuestionUserIdQuestionIdCompoundUniqueInput = {
+    userId: string
+    questionId: string
+  }
+
+  export type SavedQuestionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    questionId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SavedQuestionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    questionId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SavedQuestionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    questionId?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -56083,6 +57376,7 @@ export namespace Prisma {
     facebookUrl?: SortOrder
     theme?: SortOrder
     role?: SortOrder
+    canManageReports?: SortOrder
     points?: SortOrder
     password?: SortOrder
     studentId?: SortOrder
@@ -56113,6 +57407,7 @@ export namespace Prisma {
     facebookUrl?: SortOrder
     theme?: SortOrder
     role?: SortOrder
+    canManageReports?: SortOrder
     points?: SortOrder
     password?: SortOrder
     studentId?: SortOrder
@@ -56139,6 +57434,7 @@ export namespace Prisma {
     facebookUrl?: SortOrder
     theme?: SortOrder
     role?: SortOrder
+    canManageReports?: SortOrder
     points?: SortOrder
     password?: SortOrder
     studentId?: SortOrder
@@ -58150,6 +59446,13 @@ export namespace Prisma {
     connect?: QuestionReportWhereUniqueInput | QuestionReportWhereUniqueInput[]
   }
 
+  export type SavedQuestionCreateNestedManyWithoutQuestionInput = {
+    create?: XOR<SavedQuestionCreateWithoutQuestionInput, SavedQuestionUncheckedCreateWithoutQuestionInput> | SavedQuestionCreateWithoutQuestionInput[] | SavedQuestionUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutQuestionInput | SavedQuestionCreateOrConnectWithoutQuestionInput[]
+    createMany?: SavedQuestionCreateManyQuestionInputEnvelope
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+  }
+
   export type QuizAttemptItemCreateNestedManyWithoutQuestionInput = {
     create?: XOR<QuizAttemptItemCreateWithoutQuestionInput, QuizAttemptItemUncheckedCreateWithoutQuestionInput> | QuizAttemptItemCreateWithoutQuestionInput[] | QuizAttemptItemUncheckedCreateWithoutQuestionInput[]
     connectOrCreate?: QuizAttemptItemCreateOrConnectWithoutQuestionInput | QuizAttemptItemCreateOrConnectWithoutQuestionInput[]
@@ -58162,6 +59465,13 @@ export namespace Prisma {
     connectOrCreate?: QuestionReportCreateOrConnectWithoutQuestionInput | QuestionReportCreateOrConnectWithoutQuestionInput[]
     createMany?: QuestionReportCreateManyQuestionInputEnvelope
     connect?: QuestionReportWhereUniqueInput | QuestionReportWhereUniqueInput[]
+  }
+
+  export type SavedQuestionUncheckedCreateNestedManyWithoutQuestionInput = {
+    create?: XOR<SavedQuestionCreateWithoutQuestionInput, SavedQuestionUncheckedCreateWithoutQuestionInput> | SavedQuestionCreateWithoutQuestionInput[] | SavedQuestionUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutQuestionInput | SavedQuestionCreateOrConnectWithoutQuestionInput[]
+    createMany?: SavedQuestionCreateManyQuestionInputEnvelope
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
   }
 
   export type QuizAttemptItemUncheckedCreateNestedManyWithoutQuestionInput = {
@@ -58201,6 +59511,20 @@ export namespace Prisma {
     deleteMany?: QuestionReportScalarWhereInput | QuestionReportScalarWhereInput[]
   }
 
+  export type SavedQuestionUpdateManyWithoutQuestionNestedInput = {
+    create?: XOR<SavedQuestionCreateWithoutQuestionInput, SavedQuestionUncheckedCreateWithoutQuestionInput> | SavedQuestionCreateWithoutQuestionInput[] | SavedQuestionUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutQuestionInput | SavedQuestionCreateOrConnectWithoutQuestionInput[]
+    upsert?: SavedQuestionUpsertWithWhereUniqueWithoutQuestionInput | SavedQuestionUpsertWithWhereUniqueWithoutQuestionInput[]
+    createMany?: SavedQuestionCreateManyQuestionInputEnvelope
+    set?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    disconnect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    delete?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    update?: SavedQuestionUpdateWithWhereUniqueWithoutQuestionInput | SavedQuestionUpdateWithWhereUniqueWithoutQuestionInput[]
+    updateMany?: SavedQuestionUpdateManyWithWhereWithoutQuestionInput | SavedQuestionUpdateManyWithWhereWithoutQuestionInput[]
+    deleteMany?: SavedQuestionScalarWhereInput | SavedQuestionScalarWhereInput[]
+  }
+
   export type QuizAttemptItemUpdateManyWithoutQuestionNestedInput = {
     create?: XOR<QuizAttemptItemCreateWithoutQuestionInput, QuizAttemptItemUncheckedCreateWithoutQuestionInput> | QuizAttemptItemCreateWithoutQuestionInput[] | QuizAttemptItemUncheckedCreateWithoutQuestionInput[]
     connectOrCreate?: QuizAttemptItemCreateOrConnectWithoutQuestionInput | QuizAttemptItemCreateOrConnectWithoutQuestionInput[]
@@ -58227,6 +59551,20 @@ export namespace Prisma {
     update?: QuestionReportUpdateWithWhereUniqueWithoutQuestionInput | QuestionReportUpdateWithWhereUniqueWithoutQuestionInput[]
     updateMany?: QuestionReportUpdateManyWithWhereWithoutQuestionInput | QuestionReportUpdateManyWithWhereWithoutQuestionInput[]
     deleteMany?: QuestionReportScalarWhereInput | QuestionReportScalarWhereInput[]
+  }
+
+  export type SavedQuestionUncheckedUpdateManyWithoutQuestionNestedInput = {
+    create?: XOR<SavedQuestionCreateWithoutQuestionInput, SavedQuestionUncheckedCreateWithoutQuestionInput> | SavedQuestionCreateWithoutQuestionInput[] | SavedQuestionUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutQuestionInput | SavedQuestionCreateOrConnectWithoutQuestionInput[]
+    upsert?: SavedQuestionUpsertWithWhereUniqueWithoutQuestionInput | SavedQuestionUpsertWithWhereUniqueWithoutQuestionInput[]
+    createMany?: SavedQuestionCreateManyQuestionInputEnvelope
+    set?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    disconnect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    delete?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    update?: SavedQuestionUpdateWithWhereUniqueWithoutQuestionInput | SavedQuestionUpdateWithWhereUniqueWithoutQuestionInput[]
+    updateMany?: SavedQuestionUpdateManyWithWhereWithoutQuestionInput | SavedQuestionUpdateManyWithWhereWithoutQuestionInput[]
+    deleteMany?: SavedQuestionScalarWhereInput | SavedQuestionScalarWhereInput[]
   }
 
   export type QuizAttemptItemUncheckedUpdateManyWithoutQuestionNestedInput = {
@@ -58425,6 +59763,34 @@ export namespace Prisma {
     delete?: PastPaperWhereInput | boolean
     connect?: PastPaperWhereUniqueInput
     update?: XOR<XOR<PastPaperUpdateToOneWithWhereWithoutQuestionReportsInput, PastPaperUpdateWithoutQuestionReportsInput>, PastPaperUncheckedUpdateWithoutQuestionReportsInput>
+  }
+
+  export type UserCreateNestedOneWithoutSavedQuestionsInput = {
+    create?: XOR<UserCreateWithoutSavedQuestionsInput, UserUncheckedCreateWithoutSavedQuestionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSavedQuestionsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type QuestionCreateNestedOneWithoutSavedByInput = {
+    create?: XOR<QuestionCreateWithoutSavedByInput, QuestionUncheckedCreateWithoutSavedByInput>
+    connectOrCreate?: QuestionCreateOrConnectWithoutSavedByInput
+    connect?: QuestionWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutSavedQuestionsNestedInput = {
+    create?: XOR<UserCreateWithoutSavedQuestionsInput, UserUncheckedCreateWithoutSavedQuestionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSavedQuestionsInput
+    upsert?: UserUpsertWithoutSavedQuestionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSavedQuestionsInput, UserUpdateWithoutSavedQuestionsInput>, UserUncheckedUpdateWithoutSavedQuestionsInput>
+  }
+
+  export type QuestionUpdateOneRequiredWithoutSavedByNestedInput = {
+    create?: XOR<QuestionCreateWithoutSavedByInput, QuestionUncheckedCreateWithoutSavedByInput>
+    connectOrCreate?: QuestionCreateOrConnectWithoutSavedByInput
+    upsert?: QuestionUpsertWithoutSavedByInput
+    connect?: QuestionWhereUniqueInput
+    update?: XOR<XOR<QuestionUpdateToOneWithWhereWithoutSavedByInput, QuestionUpdateWithoutSavedByInput>, QuestionUncheckedUpdateWithoutSavedByInput>
   }
 
   export type QuizAttemptCreateNestedManyWithoutGuestQuizUserInput = {
@@ -58749,6 +60115,13 @@ export namespace Prisma {
     connect?: QuestionReportWhereUniqueInput | QuestionReportWhereUniqueInput[]
   }
 
+  export type SavedQuestionCreateNestedManyWithoutUserInput = {
+    create?: XOR<SavedQuestionCreateWithoutUserInput, SavedQuestionUncheckedCreateWithoutUserInput> | SavedQuestionCreateWithoutUserInput[] | SavedQuestionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutUserInput | SavedQuestionCreateOrConnectWithoutUserInput[]
+    createMany?: SavedQuestionCreateManyUserInputEnvelope
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+  }
+
   export type DirectMessageCreateNestedManyWithoutSenderInput = {
     create?: XOR<DirectMessageCreateWithoutSenderInput, DirectMessageUncheckedCreateWithoutSenderInput> | DirectMessageCreateWithoutSenderInput[] | DirectMessageUncheckedCreateWithoutSenderInput[]
     connectOrCreate?: DirectMessageCreateOrConnectWithoutSenderInput | DirectMessageCreateOrConnectWithoutSenderInput[]
@@ -58914,6 +60287,13 @@ export namespace Prisma {
     connectOrCreate?: QuestionReportCreateOrConnectWithoutUserInput | QuestionReportCreateOrConnectWithoutUserInput[]
     createMany?: QuestionReportCreateManyUserInputEnvelope
     connect?: QuestionReportWhereUniqueInput | QuestionReportWhereUniqueInput[]
+  }
+
+  export type SavedQuestionUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<SavedQuestionCreateWithoutUserInput, SavedQuestionUncheckedCreateWithoutUserInput> | SavedQuestionCreateWithoutUserInput[] | SavedQuestionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutUserInput | SavedQuestionCreateOrConnectWithoutUserInput[]
+    createMany?: SavedQuestionCreateManyUserInputEnvelope
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
   }
 
   export type DirectMessageUncheckedCreateNestedManyWithoutSenderInput = {
@@ -59255,6 +60635,20 @@ export namespace Prisma {
     deleteMany?: QuestionReportScalarWhereInput | QuestionReportScalarWhereInput[]
   }
 
+  export type SavedQuestionUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SavedQuestionCreateWithoutUserInput, SavedQuestionUncheckedCreateWithoutUserInput> | SavedQuestionCreateWithoutUserInput[] | SavedQuestionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutUserInput | SavedQuestionCreateOrConnectWithoutUserInput[]
+    upsert?: SavedQuestionUpsertWithWhereUniqueWithoutUserInput | SavedQuestionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SavedQuestionCreateManyUserInputEnvelope
+    set?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    disconnect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    delete?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    update?: SavedQuestionUpdateWithWhereUniqueWithoutUserInput | SavedQuestionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SavedQuestionUpdateManyWithWhereWithoutUserInput | SavedQuestionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SavedQuestionScalarWhereInput | SavedQuestionScalarWhereInput[]
+  }
+
   export type DirectMessageUpdateManyWithoutSenderNestedInput = {
     create?: XOR<DirectMessageCreateWithoutSenderInput, DirectMessageUncheckedCreateWithoutSenderInput> | DirectMessageCreateWithoutSenderInput[] | DirectMessageUncheckedCreateWithoutSenderInput[]
     connectOrCreate?: DirectMessageCreateOrConnectWithoutSenderInput | DirectMessageCreateOrConnectWithoutSenderInput[]
@@ -59585,6 +60979,20 @@ export namespace Prisma {
     update?: QuestionReportUpdateWithWhereUniqueWithoutUserInput | QuestionReportUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: QuestionReportUpdateManyWithWhereWithoutUserInput | QuestionReportUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: QuestionReportScalarWhereInput | QuestionReportScalarWhereInput[]
+  }
+
+  export type SavedQuestionUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SavedQuestionCreateWithoutUserInput, SavedQuestionUncheckedCreateWithoutUserInput> | SavedQuestionCreateWithoutUserInput[] | SavedQuestionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SavedQuestionCreateOrConnectWithoutUserInput | SavedQuestionCreateOrConnectWithoutUserInput[]
+    upsert?: SavedQuestionUpsertWithWhereUniqueWithoutUserInput | SavedQuestionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SavedQuestionCreateManyUserInputEnvelope
+    set?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    disconnect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    delete?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    connect?: SavedQuestionWhereUniqueInput | SavedQuestionWhereUniqueInput[]
+    update?: SavedQuestionUpdateWithWhereUniqueWithoutUserInput | SavedQuestionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SavedQuestionUpdateManyWithWhereWithoutUserInput | SavedQuestionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SavedQuestionScalarWhereInput | SavedQuestionScalarWhereInput[]
   }
 
   export type DirectMessageUncheckedUpdateManyWithoutSenderNestedInput = {
@@ -60995,6 +62403,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -61021,6 +62430,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -61044,6 +62454,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -61070,6 +62481,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -61333,6 +62745,7 @@ export namespace Prisma {
     facebookUrl?: StringNullableFilter<"User"> | string | null
     theme?: EnumThemeFilter<"User"> | $Enums.Theme
     role?: EnumRoleFilter<"User"> | $Enums.Role
+    canManageReports?: BoolFilter<"User"> | boolean
     points?: IntFilter<"User"> | number
     password?: StringNullableFilter<"User"> | string | null
     studentId?: StringNullableFilter<"User"> | string | null
@@ -61791,6 +63204,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -61817,6 +63231,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -61840,6 +63255,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -61866,6 +63282,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -62550,6 +63967,7 @@ export namespace Prisma {
     difficulty?: $Enums.Difficulty
     createdAt?: Date | string
     reports?: QuestionReportCreateNestedManyWithoutQuestionInput
+    savedBy?: SavedQuestionCreateNestedManyWithoutQuestionInput
     attemptItems?: QuizAttemptItemCreateNestedManyWithoutQuestionInput
   }
 
@@ -62567,6 +63985,7 @@ export namespace Prisma {
     difficulty?: $Enums.Difficulty
     createdAt?: Date | string
     reports?: QuestionReportUncheckedCreateNestedManyWithoutQuestionInput
+    savedBy?: SavedQuestionUncheckedCreateNestedManyWithoutQuestionInput
     attemptItems?: QuizAttemptItemUncheckedCreateNestedManyWithoutQuestionInput
   }
 
@@ -63271,6 +64690,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -63297,6 +64717,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -63320,6 +64741,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -63346,6 +64768,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -63428,6 +64851,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63454,6 +64878,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -63477,6 +64902,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63503,6 +64929,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -63563,6 +64990,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -63589,6 +65017,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -63612,6 +65041,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -63638,6 +65068,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -63720,6 +65151,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63746,6 +65178,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -63769,6 +65202,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63795,6 +65229,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -63862,6 +65297,28 @@ export namespace Prisma {
 
   export type QuestionReportCreateManyQuestionInputEnvelope = {
     data: QuestionReportCreateManyQuestionInput | QuestionReportCreateManyQuestionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SavedQuestionCreateWithoutQuestionInput = {
+    id?: string
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutSavedQuestionsInput
+  }
+
+  export type SavedQuestionUncheckedCreateWithoutQuestionInput = {
+    id?: string
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type SavedQuestionCreateOrConnectWithoutQuestionInput = {
+    where: SavedQuestionWhereUniqueInput
+    create: XOR<SavedQuestionCreateWithoutQuestionInput, SavedQuestionUncheckedCreateWithoutQuestionInput>
+  }
+
+  export type SavedQuestionCreateManyQuestionInputEnvelope = {
+    data: SavedQuestionCreateManyQuestionInput | SavedQuestionCreateManyQuestionInput[]
     skipDuplicates?: boolean
   }
 
@@ -63960,6 +65417,32 @@ export namespace Prisma {
     note?: StringNullableFilter<"QuestionReport"> | string | null
     pastPaperId?: StringNullableFilter<"QuestionReport"> | string | null
     createdAt?: DateTimeFilter<"QuestionReport"> | Date | string
+  }
+
+  export type SavedQuestionUpsertWithWhereUniqueWithoutQuestionInput = {
+    where: SavedQuestionWhereUniqueInput
+    update: XOR<SavedQuestionUpdateWithoutQuestionInput, SavedQuestionUncheckedUpdateWithoutQuestionInput>
+    create: XOR<SavedQuestionCreateWithoutQuestionInput, SavedQuestionUncheckedCreateWithoutQuestionInput>
+  }
+
+  export type SavedQuestionUpdateWithWhereUniqueWithoutQuestionInput = {
+    where: SavedQuestionWhereUniqueInput
+    data: XOR<SavedQuestionUpdateWithoutQuestionInput, SavedQuestionUncheckedUpdateWithoutQuestionInput>
+  }
+
+  export type SavedQuestionUpdateManyWithWhereWithoutQuestionInput = {
+    where: SavedQuestionScalarWhereInput
+    data: XOR<SavedQuestionUpdateManyMutationInput, SavedQuestionUncheckedUpdateManyWithoutQuestionInput>
+  }
+
+  export type SavedQuestionScalarWhereInput = {
+    AND?: SavedQuestionScalarWhereInput | SavedQuestionScalarWhereInput[]
+    OR?: SavedQuestionScalarWhereInput[]
+    NOT?: SavedQuestionScalarWhereInput | SavedQuestionScalarWhereInput[]
+    id?: StringFilter<"SavedQuestion"> | string
+    userId?: StringFilter<"SavedQuestion"> | string
+    questionId?: StringFilter<"SavedQuestion"> | string
+    createdAt?: DateTimeFilter<"SavedQuestion"> | Date | string
   }
 
   export type QuizAttemptItemUpsertWithWhereUniqueWithoutQuestionInput = {
@@ -64288,6 +65771,7 @@ export namespace Prisma {
     difficulty?: $Enums.Difficulty
     createdAt?: Date | string
     lecture: LectureCreateNestedOneWithoutQuestionsInput
+    savedBy?: SavedQuestionCreateNestedManyWithoutQuestionInput
     attemptItems?: QuizAttemptItemCreateNestedManyWithoutQuestionInput
   }
 
@@ -64305,6 +65789,7 @@ export namespace Prisma {
     difficulty?: $Enums.Difficulty
     lectureId: string
     createdAt?: Date | string
+    savedBy?: SavedQuestionUncheckedCreateNestedManyWithoutQuestionInput
     attemptItems?: QuizAttemptItemUncheckedCreateNestedManyWithoutQuestionInput
   }
 
@@ -64329,6 +65814,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -64355,6 +65841,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -64378,6 +65865,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -64404,6 +65892,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -64490,6 +65979,7 @@ export namespace Prisma {
     difficulty?: EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lecture?: LectureUpdateOneRequiredWithoutQuestionsNestedInput
+    savedBy?: SavedQuestionUpdateManyWithoutQuestionNestedInput
     attemptItems?: QuizAttemptItemUpdateManyWithoutQuestionNestedInput
   }
 
@@ -64507,6 +65997,7 @@ export namespace Prisma {
     difficulty?: EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
     lectureId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    savedBy?: SavedQuestionUncheckedUpdateManyWithoutQuestionNestedInput
     attemptItems?: QuizAttemptItemUncheckedUpdateManyWithoutQuestionNestedInput
   }
 
@@ -64537,6 +66028,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -64563,6 +66055,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -64586,6 +66079,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -64612,6 +66106,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -64672,6 +66167,314 @@ export namespace Prisma {
     moduleId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: QuizAttemptUncheckedUpdateManyWithoutPastPaperNestedInput
+  }
+
+  export type UserCreateWithoutSavedQuestionsInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    canManageReports?: boolean
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    university?: UniversityCreateNestedOneWithoutUsersInput
+    semester?: SemesterCreateNestedOneWithoutUsersInput
+    rank?: RankCreateNestedOneWithoutUsersInput
+    quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
+    posts?: PostCreateNestedManyWithoutAuthorInput
+    comments?: CommentCreateNestedManyWithoutAuthorInput
+    likes?: LikeCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
+    following?: UserFollowCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutSavedQuestionsInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    canManageReports?: boolean
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quizAttempts?: QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedCreateNestedOneWithoutUserInput
+    posts?: PostUncheckedCreateNestedManyWithoutAuthorInput
+    comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
+    likes?: LikeUncheckedCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteUncheckedCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogUncheckedCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentUncheckedCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeUncheckedCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberUncheckedCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
+    following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutSavedQuestionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutSavedQuestionsInput, UserUncheckedCreateWithoutSavedQuestionsInput>
+  }
+
+  export type QuestionCreateWithoutSavedByInput = {
+    id?: string
+    questionType?: string
+    body: string
+    imageUrl?: string | null
+    stemLayout?: $Enums.QuestionStemLayout
+    choices: JsonNullValueInput | InputJsonValue
+    answer: string
+    essayReference?: string | null
+    explanation?: string | null
+    aiExplanation?: string | null
+    difficulty?: $Enums.Difficulty
+    createdAt?: Date | string
+    lecture: LectureCreateNestedOneWithoutQuestionsInput
+    reports?: QuestionReportCreateNestedManyWithoutQuestionInput
+    attemptItems?: QuizAttemptItemCreateNestedManyWithoutQuestionInput
+  }
+
+  export type QuestionUncheckedCreateWithoutSavedByInput = {
+    id?: string
+    questionType?: string
+    body: string
+    imageUrl?: string | null
+    stemLayout?: $Enums.QuestionStemLayout
+    choices: JsonNullValueInput | InputJsonValue
+    answer: string
+    essayReference?: string | null
+    explanation?: string | null
+    aiExplanation?: string | null
+    difficulty?: $Enums.Difficulty
+    lectureId: string
+    createdAt?: Date | string
+    reports?: QuestionReportUncheckedCreateNestedManyWithoutQuestionInput
+    attemptItems?: QuizAttemptItemUncheckedCreateNestedManyWithoutQuestionInput
+  }
+
+  export type QuestionCreateOrConnectWithoutSavedByInput = {
+    where: QuestionWhereUniqueInput
+    create: XOR<QuestionCreateWithoutSavedByInput, QuestionUncheckedCreateWithoutSavedByInput>
+  }
+
+  export type UserUpsertWithoutSavedQuestionsInput = {
+    update: XOR<UserUpdateWithoutSavedQuestionsInput, UserUncheckedUpdateWithoutSavedQuestionsInput>
+    create: XOR<UserCreateWithoutSavedQuestionsInput, UserUncheckedCreateWithoutSavedQuestionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutSavedQuestionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutSavedQuestionsInput, UserUncheckedUpdateWithoutSavedQuestionsInput>
+  }
+
+  export type UserUpdateWithoutSavedQuestionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    university?: UniversityUpdateOneWithoutUsersNestedInput
+    semester?: SemesterUpdateOneWithoutUsersNestedInput
+    rank?: RankUpdateOneWithoutUsersNestedInput
+    quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
+    posts?: PostUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutSavedQuestionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quizAttempts?: QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedUpdateOneWithoutUserNestedInput
+    posts?: PostUncheckedUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUncheckedUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUncheckedUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUncheckedUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type QuestionUpsertWithoutSavedByInput = {
+    update: XOR<QuestionUpdateWithoutSavedByInput, QuestionUncheckedUpdateWithoutSavedByInput>
+    create: XOR<QuestionCreateWithoutSavedByInput, QuestionUncheckedCreateWithoutSavedByInput>
+    where?: QuestionWhereInput
+  }
+
+  export type QuestionUpdateToOneWithWhereWithoutSavedByInput = {
+    where?: QuestionWhereInput
+    data: XOR<QuestionUpdateWithoutSavedByInput, QuestionUncheckedUpdateWithoutSavedByInput>
+  }
+
+  export type QuestionUpdateWithoutSavedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionType?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stemLayout?: EnumQuestionStemLayoutFieldUpdateOperationsInput | $Enums.QuestionStemLayout
+    choices?: JsonNullValueInput | InputJsonValue
+    answer?: StringFieldUpdateOperationsInput | string
+    essayReference?: NullableStringFieldUpdateOperationsInput | string | null
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    aiExplanation?: NullableStringFieldUpdateOperationsInput | string | null
+    difficulty?: EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lecture?: LectureUpdateOneRequiredWithoutQuestionsNestedInput
+    reports?: QuestionReportUpdateManyWithoutQuestionNestedInput
+    attemptItems?: QuizAttemptItemUpdateManyWithoutQuestionNestedInput
+  }
+
+  export type QuestionUncheckedUpdateWithoutSavedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionType?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stemLayout?: EnumQuestionStemLayoutFieldUpdateOperationsInput | $Enums.QuestionStemLayout
+    choices?: JsonNullValueInput | InputJsonValue
+    answer?: StringFieldUpdateOperationsInput | string
+    essayReference?: NullableStringFieldUpdateOperationsInput | string | null
+    explanation?: NullableStringFieldUpdateOperationsInput | string | null
+    aiExplanation?: NullableStringFieldUpdateOperationsInput | string | null
+    difficulty?: EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
+    lectureId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reports?: QuestionReportUncheckedUpdateManyWithoutQuestionNestedInput
+    attemptItems?: QuizAttemptItemUncheckedUpdateManyWithoutQuestionNestedInput
   }
 
   export type QuizAttemptCreateWithoutGuestQuizUserInput = {
@@ -64738,6 +66541,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -64764,6 +66568,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -64787,6 +66592,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -64813,6 +66619,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -64948,6 +66755,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -64974,6 +66782,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -64997,6 +66806,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65023,6 +66833,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -65144,6 +66955,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -65170,6 +66982,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -65193,6 +67006,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -65219,6 +67033,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -65258,6 +67073,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65284,6 +67100,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -65307,6 +67124,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65333,6 +67151,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -65382,6 +67201,7 @@ export namespace Prisma {
     createdAt?: Date | string
     lecture: LectureCreateNestedOneWithoutQuestionsInput
     reports?: QuestionReportCreateNestedManyWithoutQuestionInput
+    savedBy?: SavedQuestionCreateNestedManyWithoutQuestionInput
   }
 
   export type QuestionUncheckedCreateWithoutAttemptItemsInput = {
@@ -65399,6 +67219,7 @@ export namespace Prisma {
     lectureId: string
     createdAt?: Date | string
     reports?: QuestionReportUncheckedCreateNestedManyWithoutQuestionInput
+    savedBy?: SavedQuestionUncheckedCreateNestedManyWithoutQuestionInput
   }
 
   export type QuestionCreateOrConnectWithoutAttemptItemsInput = {
@@ -65465,6 +67286,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lecture?: LectureUpdateOneRequiredWithoutQuestionsNestedInput
     reports?: QuestionReportUpdateManyWithoutQuestionNestedInput
+    savedBy?: SavedQuestionUpdateManyWithoutQuestionNestedInput
   }
 
   export type QuestionUncheckedUpdateWithoutAttemptItemsInput = {
@@ -65482,6 +67304,7 @@ export namespace Prisma {
     lectureId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: QuestionReportUncheckedUpdateManyWithoutQuestionNestedInput
+    savedBy?: SavedQuestionUncheckedUpdateManyWithoutQuestionNestedInput
   }
 
   export type UniversityCreateWithoutUsersInput = {
@@ -66061,6 +67884,28 @@ export namespace Prisma {
 
   export type QuestionReportCreateManyUserInputEnvelope = {
     data: QuestionReportCreateManyUserInput | QuestionReportCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SavedQuestionCreateWithoutUserInput = {
+    id?: string
+    createdAt?: Date | string
+    question: QuestionCreateNestedOneWithoutSavedByInput
+  }
+
+  export type SavedQuestionUncheckedCreateWithoutUserInput = {
+    id?: string
+    questionId: string
+    createdAt?: Date | string
+  }
+
+  export type SavedQuestionCreateOrConnectWithoutUserInput = {
+    where: SavedQuestionWhereUniqueInput
+    create: XOR<SavedQuestionCreateWithoutUserInput, SavedQuestionUncheckedCreateWithoutUserInput>
+  }
+
+  export type SavedQuestionCreateManyUserInputEnvelope = {
+    data: SavedQuestionCreateManyUserInput | SavedQuestionCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -66725,6 +68570,22 @@ export namespace Prisma {
     data: XOR<QuestionReportUpdateManyMutationInput, QuestionReportUncheckedUpdateManyWithoutUserInput>
   }
 
+  export type SavedQuestionUpsertWithWhereUniqueWithoutUserInput = {
+    where: SavedQuestionWhereUniqueInput
+    update: XOR<SavedQuestionUpdateWithoutUserInput, SavedQuestionUncheckedUpdateWithoutUserInput>
+    create: XOR<SavedQuestionCreateWithoutUserInput, SavedQuestionUncheckedCreateWithoutUserInput>
+  }
+
+  export type SavedQuestionUpdateWithWhereUniqueWithoutUserInput = {
+    where: SavedQuestionWhereUniqueInput
+    data: XOR<SavedQuestionUpdateWithoutUserInput, SavedQuestionUncheckedUpdateWithoutUserInput>
+  }
+
+  export type SavedQuestionUpdateManyWithWhereWithoutUserInput = {
+    where: SavedQuestionScalarWhereInput
+    data: XOR<SavedQuestionUpdateManyMutationInput, SavedQuestionUncheckedUpdateManyWithoutUserInput>
+  }
+
   export type DirectMessageUpsertWithWhereUniqueWithoutSenderInput = {
     where: DirectMessageWhereUniqueInput
     update: XOR<DirectMessageUpdateWithoutSenderInput, DirectMessageUncheckedUpdateWithoutSenderInput>
@@ -66856,6 +68717,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -66882,6 +68744,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -66905,6 +68768,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -66931,6 +68795,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -67007,6 +68872,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67033,6 +68899,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -67056,6 +68923,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67082,6 +68950,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -67148,6 +69017,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -67175,6 +69045,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
@@ -67197,6 +69068,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -67224,6 +69096,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
@@ -67251,6 +69124,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -67278,6 +69152,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
@@ -67300,6 +69175,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -67327,6 +69203,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
@@ -67365,6 +69242,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67392,6 +69270,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
@@ -67414,6 +69293,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67441,6 +69321,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
@@ -67474,6 +69355,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67501,6 +69383,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
@@ -67523,6 +69406,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67550,6 +69434,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
@@ -67871,6 +69756,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -67897,6 +69783,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -67920,6 +69807,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -67946,6 +69834,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -68022,6 +69911,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68048,6 +69938,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -68071,6 +69962,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68097,6 +69989,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -68151,6 +70044,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -68177,6 +70071,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -68200,6 +70095,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -68226,6 +70122,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -68254,6 +70151,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -68280,6 +70178,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -68303,6 +70202,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -68329,6 +70229,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -68405,6 +70306,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68431,6 +70333,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -68454,6 +70357,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68480,6 +70384,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -68514,6 +70419,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68540,6 +70446,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -68563,6 +70470,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68589,6 +70497,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -68612,6 +70521,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -68638,6 +70548,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -68661,6 +70572,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -68687,6 +70599,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -68846,6 +70759,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68872,6 +70786,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -68895,6 +70810,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68921,6 +70837,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -69056,6 +70973,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -69082,6 +71000,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -69105,6 +71024,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -69131,6 +71051,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -69319,6 +71240,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69345,6 +71267,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -69368,6 +71291,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69394,6 +71318,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -69564,6 +71489,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -69591,6 +71517,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
@@ -69613,6 +71540,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -69640,6 +71568,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
@@ -69667,6 +71596,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -69694,6 +71624,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -69716,6 +71647,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -69743,6 +71675,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -69781,6 +71714,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69808,6 +71742,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
@@ -69830,6 +71765,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69857,6 +71793,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
@@ -69890,6 +71827,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69917,6 +71855,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -69939,6 +71878,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69966,6 +71906,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -69988,6 +71929,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70014,6 +71956,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -70037,6 +71980,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70063,6 +72007,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -70135,6 +72080,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70161,6 +72107,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -70184,6 +72131,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70210,6 +72158,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -70272,6 +72221,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70298,6 +72248,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -70321,6 +72272,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70347,6 +72299,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -70413,6 +72366,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70439,6 +72393,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -70462,6 +72417,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70488,6 +72444,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -70544,6 +72501,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70570,6 +72528,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -70593,6 +72552,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70619,6 +72579,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -70658,6 +72619,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70684,6 +72646,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -70707,6 +72670,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70733,6 +72697,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -70756,6 +72721,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70782,6 +72748,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -70805,6 +72772,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70831,6 +72799,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -70870,6 +72839,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70896,6 +72866,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -70919,6 +72890,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70945,6 +72917,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -70968,6 +72941,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -70994,6 +72968,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -71017,6 +72992,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71043,6 +73019,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -71092,6 +73069,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71118,6 +73096,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -71141,6 +73120,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71167,6 +73147,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -71206,6 +73187,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71232,6 +73214,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -71255,6 +73238,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71281,6 +73265,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -71304,6 +73289,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71330,6 +73316,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -71353,6 +73340,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71379,6 +73367,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -71418,6 +73407,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71444,6 +73434,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -71467,6 +73458,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71493,6 +73485,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -71652,6 +73645,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71678,6 +73672,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -71701,6 +73696,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71727,6 +73723,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -71766,6 +73763,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71792,6 +73790,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -71815,6 +73814,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71841,6 +73841,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -71864,6 +73865,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71891,6 +73893,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -71913,6 +73916,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -71940,6 +73944,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -71978,6 +73983,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72005,6 +74011,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -72027,6 +74034,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72054,6 +74062,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -72076,6 +74085,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -72102,6 +74112,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
@@ -72125,6 +74136,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -72151,6 +74163,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -72190,6 +74203,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72216,6 +74230,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -72239,6 +74254,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72265,6 +74281,7 @@ export namespace Prisma {
     receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -72293,6 +74310,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -72391,6 +74409,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72417,6 +74436,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -72440,6 +74460,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72466,6 +74487,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -72489,6 +74511,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72731,6 +74754,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -72814,6 +74838,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72840,6 +74865,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -72863,6 +74889,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72889,6 +74916,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -72912,6 +74940,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73358,6 +75387,7 @@ export namespace Prisma {
     difficulty?: EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: QuestionReportUpdateManyWithoutQuestionNestedInput
+    savedBy?: SavedQuestionUpdateManyWithoutQuestionNestedInput
     attemptItems?: QuizAttemptItemUpdateManyWithoutQuestionNestedInput
   }
 
@@ -73375,6 +75405,7 @@ export namespace Prisma {
     difficulty?: EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: QuestionReportUncheckedUpdateManyWithoutQuestionNestedInput
+    savedBy?: SavedQuestionUncheckedUpdateManyWithoutQuestionNestedInput
     attemptItems?: QuizAttemptItemUncheckedUpdateManyWithoutQuestionNestedInput
   }
 
@@ -73470,6 +75501,12 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type SavedQuestionCreateManyQuestionInput = {
+    id?: string
+    userId: string
+    createdAt?: Date | string
+  }
+
   export type QuizAttemptItemCreateManyQuestionInput = {
     id?: string
     chosen?: string | null
@@ -73499,6 +75536,24 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     pastPaperId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SavedQuestionUpdateWithoutQuestionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutSavedQuestionsNestedInput
+  }
+
+  export type SavedQuestionUncheckedUpdateWithoutQuestionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SavedQuestionUncheckedUpdateManyWithoutQuestionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -73810,6 +75865,12 @@ export namespace Prisma {
     questionId: string
     note?: string | null
     pastPaperId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type SavedQuestionCreateManyUserInput = {
+    id?: string
+    questionId: string
     createdAt?: Date | string
   }
 
@@ -74277,6 +76338,24 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SavedQuestionUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: QuestionUpdateOneRequiredWithoutSavedByNestedInput
+  }
+
+  export type SavedQuestionUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SavedQuestionUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type DirectMessageUpdateWithoutSenderInput = {
     id?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
@@ -74628,6 +76707,7 @@ export namespace Prisma {
     facebookUrl?: string | null
     theme?: $Enums.Theme
     role?: $Enums.Role
+    canManageReports?: boolean
     points?: number
     password?: string | null
     studentId?: string | null
@@ -74653,6 +76733,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74679,6 +76760,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
@@ -74702,6 +76784,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74728,6 +76811,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -74751,6 +76835,7 @@ export namespace Prisma {
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74897,6 +76982,10 @@ export namespace Prisma {
      * @deprecated Use QuestionReportDefaultArgs instead
      */
     export type QuestionReportArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = QuestionReportDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use SavedQuestionDefaultArgs instead
+     */
+    export type SavedQuestionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SavedQuestionDefaultArgs<ExtArgs>
     /**
      * @deprecated Use GuestQuizUserDefaultArgs instead
      */

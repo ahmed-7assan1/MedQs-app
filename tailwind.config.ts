@@ -63,6 +63,15 @@ const config: Config = {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        brand: {
+          emerald: "#10b981",
+          rose: "#f43f5e",
+          amber: "#f59e0b",
+          violet: "#8b5cf6",
+          indigo: "#6366f1",
+          cyan: "#06b6d4",
+          midnight: "#0f172a",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

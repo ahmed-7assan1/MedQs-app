@@ -6,6 +6,7 @@ import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 
 export interface ExportWordItem {
+  groupTitle?: string;
   body: string;
   choices: { key: string; text: string }[];
   answer: string;
@@ -43,6 +44,21 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
     const ansBold = settings.answersBold;
 
     const childrenBlocks: any[] = [];
+
+    interface GroupedQuestions {
+      groupTitle: string;
+      questions: ExportWordItem[];
+    }
+    const groupedQuestionsList: GroupedQuestions[] = [];
+    questions.forEach((q) => {
+      const gt = (q.groupTitle && q.groupTitle.trim() !== "") ? q.groupTitle : "Questions";
+      let group = groupedQuestionsList.find(g => g.groupTitle === gt);
+      if (!group) {
+        group = { groupTitle: gt, questions: [] };
+        groupedQuestionsList.push(group);
+      }
+      group.questions.push(q);
+    });
 
     const renderTable = (qList: ExportWordItem[], startIndex: number, hideAnswers: boolean) => {
       return new Table({
@@ -221,24 +237,63 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
       });
     };
 
-    if (layout === "INLINE") {
-      childrenBlocks.push(renderTable(questions, 0, false));
-    } else if (layout === "END_OF_DOC") {
-      childrenBlocks.push(renderTable(questions, 0, true));
-      childrenBlocks.push(new Paragraph({ text: "", spacing: { before: 800, after: 800 } }));
-      childrenBlocks.push(new Paragraph({ children: [new TextRun({ text: "Answers Key", font: fFam, bold: true, size: 32 })], alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
-      childrenBlocks.push(renderAnswerTable(questions, 0));
-    } else if (layout === "END_OF_PAGE") {
-       for (let i = 0; i < questions.length; i += perPage) {
-          const chunk = questions.slice(i, i + perPage);
-          childrenBlocks.push(renderTable(chunk, i, true));
-          childrenBlocks.push(new Paragraph({ text: "", spacing: { before: 400, after: 400 } }));
-          childrenBlocks.push(renderAnswerTable(chunk, i));
-          
-          if (i + perPage < questions.length) {
+    let globalStartIndex = 0;
+    groupedQuestionsList.forEach((group, groupIdx) => {
+      if (groupedQuestionsList.length > 1 || (group.groupTitle && group.groupTitle !== "Questions")) {
+        childrenBlocks.push(
+          new Paragraph({
+             children: [new TextRun({ text: group.groupTitle, size: 36, bold: true, color: qColor, font: fFam })],
+             spacing: { before: groupIdx === 0 ? 0 : 600, after: 300 }
+          })
+        );
+      }
+
+      if (layout === "INLINE") {
+        childrenBlocks.push(renderTable(group.questions, globalStartIndex, false));
+        globalStartIndex += group.questions.length;
+      } else if (layout === "END_OF_DOC") {
+        childrenBlocks.push(renderTable(group.questions, globalStartIndex, true));
+        globalStartIndex += group.questions.length;
+      } else if (layout === "END_OF_PAGE") {
+         for (let i = 0; i < group.questions.length; i += perPage) {
+            const chunk = group.questions.slice(i, i + perPage);
+            childrenBlocks.push(renderTable(chunk, globalStartIndex + i, true));
+            childrenBlocks.push(new Paragraph({ text: "", spacing: { before: 400, after: 400 } }));
+            childrenBlocks.push(renderAnswerTable(chunk, globalStartIndex + i));
+            
+            if (i + perPage < group.questions.length) {
+              childrenBlocks.push(new Paragraph({ children: [new PageBreak()] }));
+            }
+         }
+         globalStartIndex += group.questions.length;
+      }
+      
+      // Add some spacing between groups
+      if (groupIdx < groupedQuestionsList.length - 1) {
+         childrenBlocks.push(new Paragraph({ text: "", spacing: { before: 400, after: 400 } }));
+         if (layout === "END_OF_PAGE") {
             childrenBlocks.push(new Paragraph({ children: [new PageBreak()] }));
-          }
-       }
+         }
+      }
+    });
+
+    if (layout === "END_OF_DOC") {
+      childrenBlocks.push(new Paragraph({ children: [new PageBreak()] }));
+      childrenBlocks.push(new Paragraph({ children: [new TextRun({ text: "Answers Key", font: fFam, bold: true, size: 32 })], alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
+      
+      let ansStartIndex = 0;
+      groupedQuestionsList.forEach((group, groupIdx) => {
+        if (groupedQuestionsList.length > 1 || (group.groupTitle && group.groupTitle !== "Questions")) {
+          childrenBlocks.push(
+            new Paragraph({
+               children: [new TextRun({ text: group.groupTitle, size: 28, bold: true, color: "555555", font: fFam })],
+               spacing: { before: groupIdx === 0 ? 0 : 400, after: 200 }
+            })
+          );
+        }
+        childrenBlocks.push(renderAnswerTable(group.questions, ansStartIndex));
+        ansStartIndex += group.questions.length;
+      });
     }
 
     let blob: Blob;
@@ -251,58 +306,77 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
 
       // We will create a flexible schema so the user can use global {#questions} OR pagination {#pages}
       const qPerPage = settings.questionsPerPage || 4;
-      const pagesData: any[] = [];
       const globalQuestions: any[] = [];
       const globalAnswers: any[] = [];
+      const docxGroups: any[] = [];
 
-      for (let i = 0; i < questions.length; i += qPerPage) {
-        const chunk = questions.slice(i, i + qPerPage);
-        
-        const chunkQuestions = chunk.map((q, localIdx) => {
-          const absoluteIdx = i + localIdx;
-          const maxLen = q.choices.length > 0 ? Math.max(...q.choices.map(c => c.text.length)) : 0;
+      let globalIdxCounter = 0;
+
+      groupedQuestionsList.forEach((group) => {
+        const docxGroupQuestions: any[] = [];
+        const pagesData: any[] = [];
+
+        for (let i = 0; i < group.questions.length; i += qPerPage) {
+          const chunk = group.questions.slice(i, i + qPerPage);
           
-          let choiceLines: { text: string }[] = [];
+          const chunkQuestions = chunk.map((q, localIdx) => {
+            const absoluteIdx = globalIdxCounter++;
+            const maxLen = q.choices.length > 0 ? Math.max(...q.choices.map(c => c.text.length)) : 0;
+            
+            let choiceLines: { text: string }[] = [];
 
-          if (q.choices.length === 0) {
-            // Essay question formatting: inject dotted lines for the student to write their answer
-            choiceLines = [
-              { text: "" },
-              { text: "................................................................................................................" },
-              { text: "................................................................................................................" },
-              { text: "................................................................................................................" }
-            ];
-          } else {
-             choiceLines = q.choices.map(c => ({ text: `${c.key}) ${c.text}` }));
-          }
+            if (q.choices.length === 0) {
+              // Essay question formatting: inject dotted lines for the student to write their answer
+              choiceLines = [
+                { text: "" },
+                { text: "................................................................................................................" },
+                { text: "................................................................................................................" },
+                { text: "................................................................................................................" }
+              ];
+            } else {
+               choiceLines = q.choices.map(c => ({ text: `${c.key}) ${c.text}` }));
+            }
 
-          const qFormatted = {
-            n: absoluteIdx + 1,
-            num: absoluteIdx + 1,
-            body: q.body,
-            choices: choiceLines.map(cl => cl.text).join('\n'), // fallback for users still using {choices}
-            choiceLines: choiceLines, // ADVANCED: array of strings to enforce true Word paragraphs
-            answer: q.answer,
-            explanation: q.explanation || ""
-          };
-          globalQuestions.push(qFormatted);
-          return qFormatted;
+            const qFormatted = {
+              n: absoluteIdx + 1,
+              num: absoluteIdx + 1,
+              body: q.body,
+              choices: choiceLines.map(cl => cl.text).join('\n'), // fallback for users still using {choices}
+              choiceLines: choiceLines, // ADVANCED: array of strings to enforce true Word paragraphs
+              answer: q.answer,
+              explanation: q.explanation || ""
+            };
+            globalQuestions.push(qFormatted);
+            docxGroupQuestions.push(qFormatted);
+            return qFormatted;
+          });
+
+          const chunkAnswers = chunk.map((q) => {
+            const ans = { q: globalQuestions[globalQuestions.length - 1].num, a: q.answer };
+            globalAnswers.push(ans);
+            return ans;
+          });
+
+          pagesData.push({
+            questions: chunkQuestions,
+            answers: chunkAnswers
+          });
+        }
+
+        docxGroups.push({
+           groupTitle: group.groupTitle,
+           quizTitle: group.groupTitle, // alias for convenience
+           questions: docxGroupQuestions,
+           pages: pagesData
         });
+      });
 
-        const chunkAnswers = chunk.map((q, localIdx) => {
-          const ans = { q: i + localIdx + 1, a: q.answer };
-          globalAnswers.push(ans);
-          return ans;
-        });
-
-        pagesData.push({
-          questions: chunkQuestions,
-          answers: chunkAnswers
-        });
-      }
-
+      // Provide backwards-compatible root arrays, AND the new hierarchical {#groups}.
+      // Also provide quizTitle at root if there is only one group (typical PDF extract scenario).
       docTpl.render({ 
-        pages: pagesData, 
+        groups: docxGroups,
+        quizTitle: docxGroups.length === 1 ? docxGroups[0].quizTitle : "",
+        pages: docxGroups.flatMap((g: any) => g.pages), 
         questions: globalQuestions, 
         answers: globalAnswers,
         all_answers: globalAnswers 

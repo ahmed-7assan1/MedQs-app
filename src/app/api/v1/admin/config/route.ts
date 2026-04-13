@@ -13,6 +13,7 @@ export async function GET() {
 const BRANDING_KEYS = new Set([
   "siteName",
   "logoUrl",
+  "logoUrlDark",
   "faviconUrl",
   "pwaIconUrl",
   "primaryColor",
@@ -53,6 +54,7 @@ export async function PUT(req: NextRequest) {
       data: {
         siteName: typeof merged.siteName === "string" ? merged.siteName : existing.siteName,
         logoUrl: merged.logoUrl === null || typeof merged.logoUrl === "string" ? merged.logoUrl : existing.logoUrl,
+        logoUrlDark: merged.logoUrlDark === null || typeof merged.logoUrlDark === "string" ? merged.logoUrlDark : existing.logoUrlDark,
         faviconUrl:
           merged.faviconUrl === null || typeof merged.faviconUrl === "string"
             ? merged.faviconUrl

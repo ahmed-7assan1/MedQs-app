@@ -108,15 +108,16 @@ export async function POST(req: NextRequest) {
     });
     // Validation is a second AI pass; skip on large/slow requests to reduce timeout risk.
     const elapsed = Date.now() - startedAt;
-    const shouldValidate = elapsed < 45_000 && text.length < 8_000 && extracted.data.length <= 25;
+    const shouldValidate = elapsed < 45_000 && text.length < 8_000 && extracted.data.questions.length <= 25;
     const reviewed = shouldValidate
       ? await validateQuestionsWithMeta(
-          extracted.data.map((q) => ({ body: q.body, answer: q.answer })),
+          extracted.data.questions.map((q) => ({ body: q.body, answer: q.answer })),
           { preferredProvider: effectiveProvider }
         )
       : { data: [] as { index: number; issue: string }[] };
     return NextResponse.json({
-      questions: extracted.data,
+      quizTitle: extracted.data.title,
+      questions: extracted.data.questions,
       issues: reviewed.data,
       questionMode,
       ocrUsed: shouldTryOcr,
