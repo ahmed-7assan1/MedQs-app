@@ -272,31 +272,6 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
               { text: "................................................................................................................" },
               { text: "................................................................................................................" }
             ];
-          } else if (maxLen <= 40 && q.choices.length > 0) {
-            let maxLeftColLen = 0;
-            for (let j = 0; j < q.choices.length; j += 2) {
-               const len = q.choices[j].text.length + 3;
-               if (len > maxLeftColLen) maxLeftColLen = len;
-            }
-            const charsPerTab = 7;
-            const targetTabStop = Math.ceil((maxLeftColLen + 2) / charsPerTab) + 1;
-
-            for (let j = 0; j < q.choices.length; j += 2) {
-              const c1 = q.choices[j];
-              const c2 = q.choices[j + 1];
-              
-              if (!c2) {
-                 choiceLines.push({ text: `${c1.key}) ${c1.text}` });
-                 continue;
-              }
-
-              const c1Str = `${c1.key}) ${c1.text}`;
-              const consumedTabs = Math.floor(c1Str.length / charsPerTab);
-              const neededTabs = Math.max(1, targetTabStop - consumedTabs);
-              const tabs = "\t".repeat(neededTabs);
-              
-              choiceLines.push({ text: `${c1Str}${tabs}${c2.key}) ${c2.text}` });
-            }
           } else {
              choiceLines = q.choices.map(c => ({ text: `${c.key}) ${c.text}` }));
           }
