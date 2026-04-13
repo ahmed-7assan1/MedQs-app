@@ -13,7 +13,8 @@ import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
-import { WordExportModal } from "@/components/admin/WordExportModal";
+import dynamic from "next/dynamic";
+const WordExportModal = dynamic(() => import("@/components/admin/WordExportModal").then((mod) => mod.WordExportModal), { ssr: false });
 import Link from "next/link";
 
 interface Question {

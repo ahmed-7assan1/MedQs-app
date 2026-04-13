@@ -10,7 +10,8 @@ import { GeminiBanner } from "@/components/admin/GeminiInfo";
 import { AiQuestionPlacementPicker } from "@/components/admin/AiQuestionPlacementPicker";
 import type { ExtractedQuestion, AISuggestion } from "@/lib/gemini";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
-import { WordExportModal } from "@/components/admin/WordExportModal";
+import dynamic from "next/dynamic";
+const WordExportModal = dynamic(() => import("@/components/admin/WordExportModal").then((mod) => mod.WordExportModal), { ssr: false });
 import { FileText } from "lucide-react";
 
 type AIProviderChoice = "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
