@@ -26,6 +26,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (typeof body.restrictCopyPaste === "boolean") data.restrictCopyPaste = body.restrictCopyPaste;
   if (typeof body.trackFocusLoss === "boolean") data.trackFocusLoss = body.trackFocusLoss;
   if (typeof body.googleSheetsSyncEnabled === "boolean") data.googleSheetsSyncEnabled = body.googleSheetsSyncEnabled;
+  if (typeof body.randomizeQuestions === "boolean") data.randomizeQuestions = body.randomizeQuestions;
+  if (typeof body.isPrivate === "boolean") data.isPrivate = body.isPrivate;
 
   if (Object.keys(data).length === 0)
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });

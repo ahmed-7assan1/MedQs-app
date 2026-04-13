@@ -302,6 +302,12 @@ model PastPaper {
   trackFocusLoss          Boolean          @default(false)
   // Append each submitted attempt as a row to Google Sheets (needs GOOGLE_SHEETS_* env).
   googleSheetsSyncEnabled Boolean          @default(false)
+  
+  // When true, questions are shuffled randomly during the digital quiz.
+  randomizeQuestions      Boolean          @default(false)
+  // When true, the quiz is hidden from students (admin-only view).
+  isPrivate               Boolean          @default(false)
+
   quizLectureId           String?          @unique
   semester                Semester         @relation(fields: [semesterId], references: [id])
   semesterId              String
@@ -441,6 +447,7 @@ model User {
   dmReceived        DirectMessage[]       @relation("DmReceived")
   following         UserFollow[]          @relation("UserFollows")
   followers         UserFollow[]          @relation("UserFollowers")
+  documentTemplates DocumentTemplate[]
 }
 
 model UserLectureActivity {
@@ -686,6 +693,17 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model DocumentTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  fileUrl   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Session {

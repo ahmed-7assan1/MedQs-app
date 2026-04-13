@@ -61,6 +61,7 @@ export const ALLOWED_TYPES: Record<string, string[]> = {
   // Site logo (navbar / branding) — SUPER_ADMIN upload only
   site:      ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif", "image/bmp"],
   ai:        ["image/jpeg", "image/png", "image/webp", "image/gif"],
+  template:  ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
 };
 
 export const MAX_FILE_SIZE: Record<string, number> = {
@@ -72,6 +73,7 @@ export const MAX_FILE_SIZE: Record<string, number> = {
   question:   8 * 1024 * 1024, // 8 MB
   site:       10 * 1024 * 1024, // 10 MB
   ai:          4 * 1024 * 1024, // 4 MB — Dr. Q chat attachments
+  template:    4 * 1024 * 1024, // 4 MB
 };
 
 // ─── Direct server-side upload (for small files / PDFs) ────────────────────────

@@ -276,6 +276,8 @@ exports.Prisma.PastPaperScalarFieldEnum = {
   restrictCopyPaste: 'restrictCopyPaste',
   trackFocusLoss: 'trackFocusLoss',
   googleSheetsSyncEnabled: 'googleSheetsSyncEnabled',
+  randomizeQuestions: 'randomizeQuestions',
+  isPrivate: 'isPrivate',
   quizLectureId: 'quizLectureId',
   semesterId: 'semesterId',
   moduleId: 'moduleId',
@@ -510,6 +512,16 @@ exports.Prisma.AccountScalarFieldEnum = {
   session_state: 'session_state'
 };
 
+exports.Prisma.DocumentTemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  fileUrl: 'fileUrl',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+};
+
 exports.Prisma.SessionScalarFieldEnum = {
   id: 'id',
   sessionToken: 'sessionToken',
@@ -643,6 +655,7 @@ exports.Prisma.ModelName = {
   AIUsageLog: 'AIUsageLog',
   AdBanner: 'AdBanner',
   Account: 'Account',
+  DocumentTemplate: 'DocumentTemplate',
   Session: 'Session',
   VerificationToken: 'VerificationToken'
 };

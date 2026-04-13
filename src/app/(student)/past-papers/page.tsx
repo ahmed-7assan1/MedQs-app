@@ -17,7 +17,11 @@ export default async function PastPapersPage() {
   });
 
   const papers = await prisma.pastPaper.findMany({
-    where: user?.semesterId ? { semesterId: user.semesterId } : undefined,
+    where: {
+      ...(user?.semesterId ? { semesterId: user.semesterId } : {}),
+      // @ts-ignore
+      ...(!isAdmin ? { isPrivate: false } : {}),
+    },
     orderBy: { createdAt: "desc" },
     include: {
       module: { select: { name: true } },

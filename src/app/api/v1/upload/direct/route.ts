@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   }
 
   const folder = folderRaw.trim();
-  const allowed = ["forum", "question", "ad", "lecture", "pastpaper", "site", "ai"] as const;
+  const allowed = ["forum", "question", "ad", "lecture", "pastpaper", "site", "ai", "template"] as const;
   if (!allowed.includes(folder as (typeof allowed)[number])) {
     return NextResponse.json({ error: "Invalid folder" }, { status: 400 });
   }

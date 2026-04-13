@@ -29,6 +29,8 @@ export default async function AttemptResultPage({
           title: true,
           aiExplanationEnabled: true,
           allowAiDuringQuiz: true,
+          // @ts-ignore
+          isPrivate: true,
         },
       },
       items: {
@@ -56,6 +58,11 @@ export default async function AttemptResultPage({
 
   if (!attempt) notFound();
   if (attempt.userId !== session.user.id) redirect("/past-papers");
+  
+  // @ts-ignore
+  if (attempt.pastPaper.isPrivate && session.user.role === "STUDENT") {
+    notFound();
+  }
 
   const correct = attempt.items.filter(i => i.isCorrect).length;
   const total   = attempt.items.length;

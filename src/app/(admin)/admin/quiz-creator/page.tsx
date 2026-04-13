@@ -50,6 +50,8 @@ export default function AdminQuizCreatorPage() {
     title: "", semesterId: "", moduleId: "",
     timeLimitMin: "", isInteractive: true,
     googleSheetsSyncEnabled: false,
+    randomizeQuestions: false,
+    isPrivate: false,
   });
   const [quizLectureId, setQuizLectureId] = useState<string>("");
 
@@ -179,6 +181,8 @@ export default function AdminQuizCreatorPage() {
             moduleId: typeof paper.moduleId === "string" ? paper.moduleId : f.moduleId,
             timeLimitMin: paper.timeLimitMin != null ? String(paper.timeLimitMin) : "",
             googleSheetsSyncEnabled: Boolean(paper.googleSheetsSyncEnabled),
+            randomizeQuestions: Boolean(paper.randomizeQuestions),
+            isPrivate: Boolean(paper.isPrivate),
           }));
           setQuizLectureId(lectureId);
           setRemovedQuestionIds([]);
@@ -293,6 +297,8 @@ export default function AdminQuizCreatorPage() {
           kind: "ADMIN_AUTHORED_QUIZ",
           timeLimitMin: form.timeLimitMin ? parseInt(form.timeLimitMin, 10) : null,
           googleSheetsSyncEnabled: form.googleSheetsSyncEnabled,
+          randomizeQuestions: form.randomizeQuestions,
+          isPrivate: form.isPrivate,
         }),
       });
 
@@ -379,6 +385,8 @@ export default function AdminQuizCreatorPage() {
         title: "", semesterId: "", moduleId: "",
         timeLimitMin: "", isInteractive: true,
         googleSheetsSyncEnabled: false,
+        randomizeQuestions: false,
+        isPrivate: false,
       });
       setQuizLectureId("");
       setQuestions([{ questionType: "MCQ", body: "", choices: [{ key:"A",text:"" }, { key:"B",text:"" }, { key:"C",text:"" }, { key:"D",text:"" }], answer: "A", essayReference: "", explanation: "", difficulty: "MEDIUM" }]);
@@ -492,6 +500,28 @@ export default function AdminQuizCreatorPage() {
               className={cn("relative h-6 w-11 rounded-full transition-colors", form.isInteractive ? "bg-primary" : "bg-muted")}>
               <span className={cn("absolute h-4 w-4 rounded-full bg-white shadow transition-transform top-1",
                 form.isInteractive ? "translate-x-6" : "translate-x-1")} />
+            </button>
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-violet-200/80 bg-violet-50/40 px-4 py-3 dark:border-violet-900/50 dark:bg-violet-950/20">
+            <div>
+              <p className="text-sm font-medium">Randomize Questions</p>
+              <p className="text-xs text-muted-foreground">Shuffle questions randomly for each student.</p>
+            </div>
+            <button type="button" onClick={() => setForm(f => ({ ...f, randomizeQuestions: !f.randomizeQuestions }))}
+              className={cn("relative h-6 w-11 rounded-full transition-colors", form.randomizeQuestions ? "bg-violet-500" : "bg-muted")}>
+              <span className={cn("absolute h-4 w-4 rounded-full bg-white shadow transition-transform top-1",
+                form.randomizeQuestions ? "translate-x-6" : "translate-x-1")} />
+            </button>
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-rose-200/80 bg-rose-50/40 px-4 py-3 dark:border-rose-900/50 dark:bg-rose-950/20">
+            <div>
+              <p className="text-sm font-medium flex items-center gap-1.5">Private Quiz (Hidden)</p>
+              <p className="text-xs text-muted-foreground">Only Admins can see this quiz. Hidden from students.</p>
+            </div>
+            <button type="button" onClick={() => setForm(f => ({ ...f, isPrivate: !f.isPrivate }))}
+              className={cn("relative h-6 w-11 rounded-full transition-colors", form.isPrivate ? "bg-rose-500" : "bg-muted")}>
+              <span className={cn("absolute h-4 w-4 rounded-full bg-white shadow transition-transform top-1",
+                form.isPrivate ? "translate-x-6" : "translate-x-1")} />
             </button>
           </div>
         </div>

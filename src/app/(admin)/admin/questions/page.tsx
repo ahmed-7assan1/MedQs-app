@@ -2,8 +2,10 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   HelpCircle, Plus, Trash2, Loader2,
-  CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen, Pencil,
+  CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen, Pencil, FileText, Download, Settings
 } from "lucide-react";
+import { saveAs } from "file-saver";
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, WidthType, ShadingType, AlignmentType, VerticalAlign, UnderlineType, PageBreak } from "docx";
 import { QuickDrawModal } from "@/components/draw/QuickDrawModal";
 import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
@@ -11,6 +13,7 @@ import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
+import { WordExportModal } from "@/components/admin/WordExportModal";
 import Link from "next/link";
 
 interface Question {
@@ -63,6 +66,7 @@ export default function AdminQuestionsPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [stemLayout, setStemLayout] = useState<"STANDARD" | "IMAGE_OVERLAY">("STANDARD");
   const [drawOpen, setDrawOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -213,6 +217,7 @@ export default function AdminQuestionsPage() {
     }
   }
 
+
   const filtered = questions.filter((q) => {
     const blob = `${q.body} ${q.imageUrl ?? ""}`.toLowerCase();
     return blob.includes(search.toLowerCase());
@@ -248,7 +253,22 @@ export default function AdminQuestionsPage() {
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => setAddOpen((o) => !o)}
+            onClick={() => {
+              setExportOpen((o) => !o);
+              setAddOpen(false);
+            }}
+            disabled={filtered.length === 0}
+            className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+          >
+            <Settings className="h-4 w-4 text-blue-500" />
+            Export Settings
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAddOpen((o) => !o);
+              setExportOpen(false);
+            }}
             className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-4 w-4" />
@@ -263,6 +283,18 @@ export default function AdminQuestionsPage() {
           </Link>
         </div>
       </div>
+
+      {exportOpen && (
+        <WordExportModal 
+           questions={filtered.map(q => ({
+             body: q.body,
+             choices: q.choices,
+             answer: q.answer,
+             explanation: q.explanation
+           }))} 
+           onClose={() => setExportOpen(false)} 
+        />
+      )}
 
       {addOpen && (
         <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">

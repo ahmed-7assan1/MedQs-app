@@ -25,10 +25,18 @@ export default async function QuizPage({ params }: { params: { paperId: string }
       secureExamMode: true,
       restrictCopyPaste: true,
       trackFocusLoss: true,
+      // @ts-ignore
+      isPrivate: true,
+      // @ts-ignore
+      randomizeQuestions: true,
     },
   });
 
   if (!paper) notFound();
+  // @ts-ignore
+  if (paper.isPrivate && session.user?.role === "STUDENT") {
+    notFound();
+  }
 
   const siteConfig = await prisma.siteConfig
     .findFirst({ select: { enableAI: true } })
@@ -36,14 +44,15 @@ export default async function QuizPage({ params }: { params: { paperId: string }
   const siteAiEnabled = siteConfig?.enableAI !== false;
 
   const questions = await loadQuestionsForPastPaper(paper.id);
-  const shuffled = [...questions].sort(() => Math.random() - 0.5);
+  // @ts-ignore
+  const displayQuestions = paper.randomizeQuestions ? [...questions].sort(() => Math.random() - 0.5) : questions;
 
   return (
     <QuizClient
       paperId={paper.id}
       paperTitle={paper.title}
       timeLimitMin={paper.timeLimitMin}
-      questions={shuffled as any}
+      questions={displayQuestions as any}
       siteAiEnabled={siteAiEnabled}
       paperAiExplanationEnabled={paper.aiExplanationEnabled !== false}
       allowAiDuringQuiz={paper.allowAiDuringQuiz === true}

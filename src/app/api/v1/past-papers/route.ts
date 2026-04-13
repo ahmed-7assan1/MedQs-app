@@ -23,6 +23,8 @@ export async function GET(req: NextRequest) {
         : {
             ...where,
             semester: { academicYear: { universityId: scope.universityId! } },
+            // @ts-ignore - Ignore TS error until prisma generate succeeds
+            isPrivate: false,
           },
       orderBy: { createdAt: "desc" },
       include: {
@@ -38,6 +40,8 @@ export async function GET(req: NextRequest) {
         : {
             ...where,
             semester: { academicYear: { universityId: scope.universityId! } },
+            // @ts-ignore
+            isPrivate: false,
           },
       orderBy: { createdAt: "desc" },
       include: {
@@ -118,6 +122,10 @@ export async function POST(req: NextRequest) {
         restrictCopyPaste: Boolean(body.restrictCopyPaste),
         trackFocusLoss: Boolean(body.trackFocusLoss),
         googleSheetsSyncEnabled: Boolean(body.googleSheetsSyncEnabled),
+        // @ts-ignore - Prisma needs regen
+        randomizeQuestions: Boolean(body.randomizeQuestions),
+        // @ts-ignore
+        isPrivate: Boolean(body.isPrivate),
       },
       select: { id: true, title: true, moduleId: true, semesterId: true, quizLectureId: true, kind: true },
     });

@@ -111,8 +111,30 @@ export function Sidebar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [desktopUserOpen, setDesktopUserOpen] = useState(false);
-  const [desktopUserPlacement, setDesktopUserPlacement] = useState<{ top: number; right: number } | null>(null);
+  const [desktopUserPlacement, setDesktopUserPlacement] = useState<{ top: number; left?: number; right?: number } | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [desktopExpanded, setDesktopExpanded] = useState(true);
+
+  // Load initial state safely
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("medqs-sidebar");
+      if (stored === "collapsed") setDesktopExpanded(false);
+    } catch {}
+  }, []);
+
+  // Sync desktop expanded state with layout margin
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (desktopExpanded) {
+        document.documentElement.removeAttribute("data-sidebar-collapsed");
+        try { localStorage.setItem("medqs-sidebar", "expanded"); } catch {}
+      } else {
+        document.documentElement.setAttribute("data-sidebar-collapsed", "true");
+        try { localStorage.setItem("medqs-sidebar", "collapsed"); } catch {}
+      }
+    }
+  }, [desktopExpanded]);
 
   const notifTriggerRef = useRef<HTMLElement | null>(null);
   const desktopUserRef = useRef<HTMLDivElement | null>(null);
@@ -123,8 +145,8 @@ export function Sidebar({
     if (!el) return;
     const r = el.getBoundingClientRect();
     setDesktopUserPlacement({
-      top: r.bottom + 8,
-      right: Math.max(12, window.innerWidth - r.right),
+      top: r.top - 8,
+      left: r.right + 12, // Popup to the right
     });
   }
 
@@ -325,7 +347,9 @@ export function Sidebar({
             style={{
               position: "fixed",
               top: desktopUserPlacement.top,
-              right: desktopUserPlacement.right,
+              left: desktopUserPlacement.left,
+              bottom: "auto",
+              right: "auto",
               zIndex: 99998,
             }}
           >
@@ -385,125 +409,101 @@ export function Sidebar({
 
   return (
     <>
-      {/* ── Desktop: top bar ── */}
-      <header className="fixed top-0 left-0 right-0 z-[1000] hidden h-14 items-center overflow-visible border-b border-border/70 bg-card/88 shadow-sm backdrop-blur-xl md:flex">
-        <div className="mx-auto flex h-full w-full max-w-[1600px] items-center gap-4 px-4 lg:gap-6">
-          <Link href="/dashboard-app" className="flex shrink-0 items-center gap-2.5 text-foreground">
-            <BrandMark />
-            <span className="font-display text-base font-bold leading-none tracking-tight">{siteName}</span>
+      {/* ── Desktop: Floating Pill Navigation ── */}
+      <div className="desktop-pill-nav hidden md:block">
+        {/* Brand / Logo (Top Left) */}
+        <div className="fixed left-6 top-6 z-50 flex items-center gap-2">
+          <Link href="/dashboard-app" className="sb-logo cursor-pointer transition-transform hover:scale-105">
+            <BrandMark className="mb-0 scale-100" />
           </Link>
+          {/* Detached text matches reference implicitly */}
+        </div>
 
-          <nav className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto py-1 lg:gap-1">
-            {NAV.map(({ href, label, icon }) => (
-              <TopNavLink key={href} href={href} label={label} icon={icon} />
-            ))}
-            {isAdmin && (
-              <TopNavLink href="/admin/dashboard" label={PLATFORM_COPY.doctorHubNav} icon={ShieldCheck} />
-            )}
-            {!isGuest && <TopNavLink href="/ai-chat" label="Dr. Q" icon={Sparkles} />}
-          </nav>
+        {/* Main Nav (Center Left) */}
+        <nav className="fixed left-6 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-1.5 rounded-[28px] border border-black/5 dark:border-white/5 bg-white/80 dark:bg-white/5 p-2 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
+          {NAV.map(({ href, label, icon }) => (
+            <DrawerLink key={href} href={href} label={label} icon={icon} />
+          ))}
+          {isAdmin && (
+            <>
+              <div className="mx-auto my-1.5 h-px w-5 bg-black/5 dark:bg-white/10" />
+              <DrawerLink href="/admin/dashboard" label={PLATFORM_COPY.doctorPanel} icon={ShieldCheck} />
+            </>
+          )}
+        </nav>
 
+        {/* Bottom Tools (Bottom Left) */}
+        <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-1.5 rounded-[28px] border border-black/5 dark:border-white/5 bg-white/80 dark:bg-white/5 p-2 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
+          {!isGuest && <DrawerLink href="/ai-chat" label="Study with Dr. Q" icon={Sparkles} />}
+          {!isGuest && <DrawerLink href="/settings" label="Settings" icon={Settings} />}
+        </div>
+
+        {/* Top Right User Controls */}
+        <div className="fixed right-6 top-6 z-50 flex items-center gap-2 rounded-full border border-black/5 dark:border-white/5 bg-white/80 dark:bg-white/5 p-2 pl-4 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
           <GlobalSearch isGuest={isGuest} />
 
-          <div className="flex shrink-0 items-center gap-2">
-            {!isGuest && (
-              <button
-                type="button"
-                className={headerControlBtnClass}
-                data-notif-trigger
-                onClick={openNotifPanel}
-                aria-expanded={notifOpen}
-                aria-haspopup="dialog"
-              >
-                <Bell className="h-[18px] w-[18px]" aria-hidden />
-                {totalUnread > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
-                    {totalUnread > 9 ? "9+" : totalUnread}
-                  </span>
-                )}
-              </button>
+          <button
+            type="button"
+            className={headerControlBtnClass}
+            onClick={toggleAppearance}
+            title="Toggle Theme"
+          >
+            {!mounted ? (
+              <Moon className="h-[18px] w-[18px]" />
+            ) : theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
+              <Sun className="h-[18px] w-[18px]" />
+            ) : (
+              <Moon className="h-[18px] w-[18px]" />
             )}
+          </button>
 
+          {!isGuest && (
             <button
               type="button"
-              className={headerControlBtnClass}
-              onClick={toggleAppearance}
-              title="Switch light / dark mode"
-              aria-label="Switch light / dark mode"
+              className={cn(headerControlBtnClass, notifOpen && "bg-muted")}
+              data-notif-trigger
+              onClick={openNotifPanel}
             >
-              {!mounted ? (
-                <Moon className="h-[18px] w-[18px] opacity-80" aria-hidden />
-              ) : theme === "dark" ||
-                (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
-                <Sun className="h-[18px] w-[18px]" aria-hidden />
-              ) : (
-                <Moon className="h-[18px] w-[18px]" aria-hidden />
+              <Bell className="h-[18px] w-[18px]" />
+              {totalUnread > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[hsl(142_71%_45%)] text-[9px] font-bold text-white shadow-sm">
+                  {totalUnread > 9 ? "9+" : totalUnread}
+                </span>
               )}
             </button>
+          )}
 
-            {!isGuest ? (
-              <div className="relative flex items-center gap-0.5" ref={desktopUserRef}>
-                <Link
-                  href="/profile/me"
-                  title="Profile"
-                  className="flex max-w-[10rem] items-center gap-2 rounded-lg border border-border/80 bg-background/80 px-2 py-1.5 text-left transition-colors hover:bg-muted"
-                  onClick={() => setDesktopUserOpen(false)}
-                >
-                  {userImage ? (
-                    <img
-                      src={userImage}
-                      alt=""
-                      className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-border"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-primary-foreground"
-                      style={{ background: "hsl(var(--primary))" }}
-                    >
-                      {initial}
-                    </div>
-                  )}
-                  <span className="hidden min-w-0 flex-1 truncate text-sm font-medium lg:block">{userName}</span>
-                </Link>
-                <button
-                  type="button"
-                  ref={desktopMenuTriggerRef}
-                  onClick={() => {
-                    setNotifOpen(false);
-                    setNotifPlacement(null);
-                    notifTriggerRef.current = null;
-                    setDesktopUserOpen((p) => !p);
-                    setUserMenuOpen(false);
-                  }}
-                  className={cn(headerControlBtnClass, desktopUserOpen && "border-primary/40 bg-primary/5")}
-                  aria-expanded={desktopUserOpen}
-                  aria-haspopup="menu"
-                  aria-label="Account menu"
-                >
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition-transform duration-200",
-                      desktopUserOpen && "rotate-180"
-                    )}
-                    aria-hidden
-                  />
-                </button>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          {!isGuest ? (
+            <div className="relative ml-1">
+              <button
+                type="button"
+                className="sb-user flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border/40 transition-all hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                onClick={() => setDesktopUserOpen((p) => !p)}
+                ref={desktopMenuTriggerRef}
               >
-                Sign in
-              </Link>
-            )}
-          </div>
+                {userImage ? (
+                  <img src={userImage} alt={userName} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-primary text-xs font-semibold text-primary-foreground">
+                    {initial}
+                  </div>
+                )}
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="ml-2 flex h-9 items-center gap-2 rounded-full bg-primary pl-3 pr-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <User className="h-4 w-4" /> Sign In
+            </Link>
+          )}
         </div>
-      </header>
+      </div>
+
 
       {/* ── Mobile: top bar + h-opens drawer ── */}
-      <div className="medqs-mobile-bar fixed top-0 left-0 right-0 z-[1002] flex h-14 items-center justify-between border-b border-border/80 bg-card/92 px-3 backdrop-blur-xl md:hidden">
+      <div className="medqs-mobile-bar fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border/80 bg-card/92 px-3 backdrop-blur-xl md:hidden">
         <button
           type="button"
           className="icon-btn flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted"
@@ -559,7 +559,7 @@ export function Sidebar({
       {/* ── Mobile drawer ── */}
       <aside
         className={cn(
-          "medqs-drawer fixed left-0 z-[1001] flex w-[min(320px,94vw)] flex-col overflow-hidden shadow-2xl transition-transform duration-300 ease-out md:hidden",
+          "medqs-drawer fixed left-0 z-50 flex w-[min(320px,94vw)] flex-col overflow-hidden shadow-2xl transition-transform duration-300 ease-out md:hidden",
           "top-14 h-[calc(100dvh-3.5rem)] max-h-[calc(100dvh-3.5rem)] border-r border-border dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]",
           mobileOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         )}
@@ -676,7 +676,7 @@ export function Sidebar({
 
       {mobileOpen && (
         <div
-          className="fixed inset-x-0 bottom-0 top-14 z-[999] bg-black/40 backdrop-blur-[2px] dark:bg-black/55 md:hidden"
+          className="fixed inset-x-0 bottom-0 top-14 z-[45] bg-black/40 backdrop-blur-[2px] dark:bg-black/55 md:hidden"
           role="presentation"
           aria-hidden
           onClick={() => setMobileOpen(false)}

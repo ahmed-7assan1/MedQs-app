@@ -43,7 +43,7 @@ async function getSiteConfig() {
   }
 }
 
-const DEFAULT_PRIMARY_HEX = "#2563eb";
+const DEFAULT_PRIMARY_HEX = "#0ea5e9";
 
 function sanitizeHex(hex: string | null | undefined): string {
   const t = (hex ?? "").trim();
@@ -84,7 +84,7 @@ function clampPct(n: number): number {
 }
 
 function safeMetadataBase(): URL | undefined {
-  const raw = process.env.NEXTAUTH_URL?.trim();
+  const raw = process.env.NEXTAUTH_URL?.trim() || "https://med-qs0.vercel.app";
   if (!raw) return undefined;
   try {
     return new URL(raw);
@@ -130,14 +130,17 @@ function appIconsFromConfig(
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getSiteConfig();
-  const title = `${config.siteName} — Medical Education`;
+  const title = `${config.siteName} — The Ultimate Medical Education Platform`;
   const description =
-    "Medical quizzes, lectures, forums, and AI study tools for university students. Built for learning — not clinical advice.";
+    "Elevate your medical studies with MedQs: Curated lectures, interactive MCQs, smart spaced repetition, AI-powered study assistance, and a community of doctors and students.";
   return {
     metadataBase: safeMetadataBase(),
     title: { default: title, template: `%s | ${config.siteName}` },
     description,
+    keywords: ["Medical Education", "Medical Students", "MCQ", "Clinical Cases", "Medical University", "MedQs", "Med Students Forum"],
     applicationName: config.siteName,
+    authors: [{ name: config.siteName }],
+    creator: config.siteName,
     appleWebApp: {
       capable: true,
       title: config.siteName,
@@ -148,9 +151,10 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       type: "website",
       siteName: config.siteName,
+      locale: "en_US",
     },
     twitter: { card: "summary_large_image", title, description },
-    robots: { index: true, follow: true },
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
     icons: appIconsFromConfig(config.faviconUrl, "pwaIconUrl" in config ? config.pwaIconUrl : null),
   };
 }

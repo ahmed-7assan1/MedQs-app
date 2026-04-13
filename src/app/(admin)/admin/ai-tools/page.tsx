@@ -10,6 +10,8 @@ import { GeminiBanner } from "@/components/admin/GeminiInfo";
 import { AiQuestionPlacementPicker } from "@/components/admin/AiQuestionPlacementPicker";
 import type { ExtractedQuestion, AISuggestion } from "@/lib/gemini";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
+import { WordExportModal } from "@/components/admin/WordExportModal";
+import { FileText } from "lucide-react";
 
 type AIProviderChoice = "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
 
@@ -22,6 +24,7 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
   const [edited, setEdited] = useState<AISuggestion | null>(null);
   const [lectureId, setLectureId] = useState("");
   const [placementKey, setPlacementKey] = useState(0);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     if (suggestion) {
@@ -178,14 +181,38 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
               onChange={setLectureId}
               disabled={loading}
             />
-            <button
-              onClick={handleSave}
-              disabled={!lectureId}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
-            >
-              <Save className="h-4 w-4" />
-              Save
-            </button>
+            
+            <div className="mt-4 flex flex-col gap-2">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setExportOpen((o) => !o)}
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  <FileText className="h-4 w-4 text-blue-500" />
+                  Export Settings
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={!lectureId}
+                  className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                  Save
+                </button>
+              </div>
+              
+              {exportOpen && (
+                <WordExportModal 
+                  questions={[{
+                    body: body,
+                    choices: edited.choices,
+                    answer: edited.answer,
+                    explanation: edited.explanation
+                  }]} 
+                  onClose={() => setExportOpen(false)} 
+                />
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -204,6 +231,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
   const [lectureId, setLectureId] = useState("");
   const [placementKey, setPlacementKey] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   async function handleExtract() {
     if (!file) return toast.error("Choose a PDF or DOCX file");
@@ -350,15 +378,36 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm font-medium">{questions.length} questions extracted</span>
-            <button
-              onClick={handleSaveAll}
-              disabled={saving || !lectureId}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
-            >
-              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-              Save All
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setExportOpen((o) => !o)}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium hover:bg-muted transition-colors"
+              >
+                <FileText className="h-3.5 w-3.5 text-blue-500" />
+                Export Settings
+              </button>
+              <button
+                onClick={handleSaveAll}
+                disabled={saving || !lectureId}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+              >
+                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                Save All
+              </button>
+            </div>
           </div>
+
+          {exportOpen && (
+            <WordExportModal 
+              questions={questions.map(q => ({
+                body: q.body,
+                choices: q.choices,
+                answer: q.answer,
+                explanation: q.explanation
+              }))} 
+              onClose={() => setExportOpen(false)} 
+            />
+          )}
 
           <div className="space-y-2">
           {questions.map((q, i) => {

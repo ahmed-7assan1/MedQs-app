@@ -114,20 +114,27 @@ html[data-theme="dark"] .medqs-logo {
 }
 
 .dark {
-  --background: 196 38% 5%;
-  --foreground: 160 20% 97%;
-  --card: 196 32% 7%;
-  --card-foreground: 160 20% 97%;
+  --background: 230 50% 6%;
+  --foreground: 220 20% 97%;
+  /* Card becomes an ultra-translucent glass */
+  --card: 230 50% 12%; 
+  --card-foreground: 220 20% 97%;
   --primary: 221 83% 60%;
-  --primary-foreground: 196 40% 6%;
-  --muted: 196 24% 14%;
-  --muted-foreground: 160 12% 68%;
-  --secondary: 196 28% 11%;
-  --secondary-foreground: 160 18% 94%;
-  --accent: 196 26% 13%;
-  --accent-foreground: 221 83% 60%;
-  --border: 196 22% 17%;
-  --input: 196 22% 17%;
+  --primary-foreground: 0 0% 100%;
+  /* Muted surfaces match glass border alpha vibes */
+  --muted: 230 30% 14%;
+  --muted-foreground: 215 20% 65%;
+  --secondary: 230 35% 16%;
+  --secondary-foreground: 220 20% 97%;
+  --accent: 230 40% 20%;
+  --accent-foreground: 221 83% 65%;
+  --border: 230 30% 18%;
+  --input: 230 30% 18%;
+}
+
+html[data-theme="dark"] body, .dark body {
+  background: radial-gradient(circle at 10% 20%, hsl(232, 45%, 11%), hsl(235, 55%, 6%), hsl(240, 60%, 3%));
+  background-attachment: fixed;
 }
 
 /* ── Base ── */
@@ -305,6 +312,12 @@ html[data-theme="dark"] body {
   isolation: isolate;
 }
 
+@media (min-width: 768px) {
+  .app-shell {
+    flex-direction: row;
+  }
+}
+
 .main-content {
   flex: 1 1 0%;
   min-height: 0;
@@ -312,11 +325,19 @@ html[data-theme="dark"] body {
   width: 100%;
   position: relative;
   z-index: 0;
-  margin-left: 0 !important;
   display: flex;
   flex-direction: column;
-  /* Space for fixed top bar (h-14) */
+  /* Space for fixed top bar on mobile */
   padding-top: 3.5rem;
+  margin-left: 0;
+  transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    padding-top: 5rem; /* Space for Top-Right Pill Header overlap */
+    margin-left: 6.5rem; /* Fixed space for the left floating pill bar */
+  }
 }
 
 .main-content > main {
@@ -497,15 +518,14 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-bottom: 1px solid hsl(var(--sidebar-border));
   padding: 0 14px;
   gap: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: background .15s;
+  transition: opacity .15s;
   position: relative;
 }
-.sb-logo:hover { background: hsl(var(--sidebar-hover)); }
+.sb-logo:hover { opacity: 0.85; }
 
 .sb-rail-glow {
   position: absolute;
@@ -555,10 +575,14 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
 .sb-toggle-btn:active { transform: scale(.95); }
 
 .sb-logo-text {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-  color: white;
+  font-family: ui-rounded, "Nunito", "Quicksand", "Comfortaa", "Varela Round", sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(220, 80%, 65%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   white-space: nowrap;
   opacity: 0;
   max-width: 0;
@@ -594,19 +618,21 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   height: 28px;
   display: flex;
   align-items: center;
-  padding: 0 8px;
-  font-size: 10px;
+  padding: 0 20px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: .07em;
+  letter-spacing: .05em;
   text-transform: uppercase;
   color: hsl(220 14% 52%);
   white-space: nowrap;
   overflow: hidden;
   opacity: 0;
   transition: opacity .15s .05s;
-  margin-top: 8px;
+  margin-top: 12px;
+  margin-bottom: 2px;
 }
-.sidebar.expanded .sb-section-label { opacity: 1; }
+.sidebar.expanded .sb-section-label,
+.medqs-drawer .sb-section-label { opacity: 1; }
 
 .sb-link {
   display: flex;
@@ -614,80 +640,118 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   gap: 12px;
   padding: 0 12px;
   height: 42px;
-  border-radius: 10px;
+  border-radius: 12px;
   color: hsl(var(--sidebar-fg));
-  font-size: 13.5px;
-  font-weight: 450;
+  font-size: 14px;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
-  transition: all .16s ease;
+  overflow: visible;
+  transition: all .25s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  margin: 0 !important; /* Pill handles layout */
 }
 .sb-link:hover {
-  background: linear-gradient(90deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-  color: hsl(215 18% 88%);
-  transform: translateX(1px);
+  color: hsl(var(--foreground));
+  background: hsl(var(--foreground) / 0.08);
+}
+.dark .sb-link:hover {
+  color: hsl(0 0% 100%);
+  background: transparent;
 }
 .sb-link.active {
-  background: linear-gradient(90deg, hsl(var(--sidebar-active-bg)), hsl(221 83% 53%));
-  color: white;
-  font-weight: 500;
-  box-shadow: 0 6px 16px hsl(var(--primary) / .35);
+  color: hsl(var(--foreground));
+  font-weight: 700;
+  background: hsl(var(--foreground) / 0.12);
 }
-.sb-link.active::before {
-  content: "";
-  position: absolute;
-  left: -2px;
-  top: 8px;
-  width: 3px;
-  height: calc(100% - 16px);
-  border-radius: 0 3px 3px 0;
-  background: #fff;
-  opacity: .92;
+.dark .sb-link.active {
+  color: hsl(0 0% 100%);
+  font-weight: 700;
+  background: hsl(0 0% 100% / 0.12);
 }
+/* No pseudo-element active bar to match clean aesthetic */
+
 .sb-link-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
-  color: hsl(218 18% 70%);
-  transition: color .14s, transform .18s cubic-bezier(.34,1.4,.64,1);
+  color: hsl(var(--sidebar-fg));
+  opacity: 0.75;
+  transition: all .25s ease;
 }
-.sb-link:hover .sb-link-icon { color: hsl(215 18% 80%); transform: scale(1.1); }
-.sb-link.active .sb-link-icon { color: rgba(255,255,255,.9); transform: scale(1.05); }
+.sb-link:hover .sb-link-icon { color: hsl(var(--foreground)); opacity: 1; transform: scale(1.05); }
+.dark .sb-link:hover .sb-link-icon { color: hsl(0 0% 100%); opacity: 1; }
+.sb-link.active .sb-link-icon { color: hsl(var(--primary)); opacity: 1; transform: scale(1.05); }
 
 .sb-link-label {
   flex: 1;
   white-space: nowrap;
-  overflow: hidden;
   opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity .18s .04s, transform .18s .04s;
-  font-size: 13.5px;
+  transition: opacity .18s;
+  pointer-events: none; 
 }
-.sidebar.expanded .sb-link-label {
+.sidebar.expanded .sb-link-label,
+.medqs-drawer .sb-link-label {
   opacity: 1;
-  transform: translateX(0);
+  pointer-events: auto;
 }
 
-/* Tooltip for collapsed state */
-.sb-link:not(.sidebar.expanded *) { position: relative; }
+.desktop-pill-nav .sb-logo,
+.desktop-pill-nav .sb-link,
+.desktop-pill-nav .sb-user {
+  width: 44px !important;
+  height: 44px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 !important;
+  gap: 0 !important; /* Extremely important to prevent flex gap pushing icon */
+  justify-content: center !important;
+}
+.desktop-pill-nav .sb-link { overflow: visible !important; }
+.desktop-pill-nav .sb-badge,
+.desktop-pill-nav .sb-user-info {
+  display: none !important;
+}
+
+.desktop-pill-nav .sb-link-label {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(4px);
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.desktop-pill-nav .sb-link:hover .sb-link-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
 
 .sb-badge {
   flex-shrink: 0;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
   border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: hsl(0 72% 51%);
+  background: hsl(142 71% 45%); /* Vivid Green */
   color: white;
+  box-shadow: 0 4px 12px hsl(142 71% 45% / 0.35);
   opacity: 0;
   transform: scale(.8);
   transition: opacity .15s .06s, transform .15s .06s;
@@ -699,37 +763,33 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: hsl(0 72% 51%);
-  border: 1.5px solid hsl(var(--sidebar-bg));
+  background: hsl(142 71% 45%);
+  border: 1.5px solid hsl(var(--card));
+  box-shadow: 0 2px 8px hsl(142 71% 45% / 0.5);
   transition: opacity .15s;
 }
 .sidebar.expanded .sb-link-dot { opacity: 0; }
 
-/* Sidebar footer */
+/* Sidebar footer styling tailored to floating User Bubble */
 .sb-footer {
   width: 100%;
   flex-shrink: 0;
-  border-top: 1px solid hsl(var(--sidebar-border));
-  padding: 10px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
 }
 
 .sb-user {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: 10px;
   cursor: pointer;
   overflow: hidden;
-  transition: background .14s, transform .16s ease;
 }
-.sb-user:hover { background: hsl(var(--sidebar-hover)); transform: translateY(-1px); }
 
 .sb-user-info {
   flex: 1;

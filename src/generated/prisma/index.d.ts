@@ -209,6 +209,11 @@ export type AdBanner = $Result.DefaultSelection<Prisma.$AdBannerPayload>
  */
 export type Account = $Result.DefaultSelection<Prisma.$AccountPayload>
 /**
+ * Model DocumentTemplate
+ * 
+ */
+export type DocumentTemplate = $Result.DefaultSelection<Prisma.$DocumentTemplatePayload>
+/**
  * Model Session
  * 
  */
@@ -852,6 +857,16 @@ export class PrismaClient<
   get account(): Prisma.AccountDelegate<ExtArgs>;
 
   /**
+   * `prisma.documentTemplate`: Exposes CRUD operations for the **DocumentTemplate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DocumentTemplates
+    * const documentTemplates = await prisma.documentTemplate.findMany()
+    * ```
+    */
+  get documentTemplate(): Prisma.DocumentTemplateDelegate<ExtArgs>;
+
+  /**
    * `prisma.session`: Exposes CRUD operations for the **Session** model.
     * Example usage:
     * ```ts
@@ -1350,6 +1365,7 @@ export namespace Prisma {
     AIUsageLog: 'AIUsageLog',
     AdBanner: 'AdBanner',
     Account: 'Account',
+    DocumentTemplate: 'DocumentTemplate',
     Session: 'Session',
     VerificationToken: 'VerificationToken'
   };
@@ -1367,7 +1383,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "session" | "verificationToken"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4101,6 +4117,76 @@ export namespace Prisma {
           }
         }
       }
+      DocumentTemplate: {
+        payload: Prisma.$DocumentTemplatePayload<ExtArgs>
+        fields: Prisma.DocumentTemplateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DocumentTemplateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DocumentTemplateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>
+          }
+          findFirst: {
+            args: Prisma.DocumentTemplateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DocumentTemplateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>
+          }
+          findMany: {
+            args: Prisma.DocumentTemplateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>[]
+          }
+          create: {
+            args: Prisma.DocumentTemplateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>
+          }
+          createMany: {
+            args: Prisma.DocumentTemplateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DocumentTemplateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>[]
+          }
+          delete: {
+            args: Prisma.DocumentTemplateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>
+          }
+          update: {
+            args: Prisma.DocumentTemplateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>
+          }
+          deleteMany: {
+            args: Prisma.DocumentTemplateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DocumentTemplateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.DocumentTemplateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentTemplatePayload>
+          }
+          aggregate: {
+            args: Prisma.DocumentTemplateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDocumentTemplate>
+          }
+          groupBy: {
+            args: Prisma.DocumentTemplateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DocumentTemplateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DocumentTemplateCountArgs<ExtArgs>
+            result: $Utils.Optional<DocumentTemplateCountAggregateOutputType> | number
+          }
+        }
+      }
       Session: {
         payload: Prisma.$SessionPayload<ExtArgs>
         fields: Prisma.SessionFieldRefs
@@ -4936,6 +5022,7 @@ export namespace Prisma {
     dmReceived: number
     following: number
     followers: number
+    documentTemplates: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4961,6 +5048,7 @@ export namespace Prisma {
     dmReceived?: boolean | UserCountOutputTypeCountDmReceivedArgs
     following?: boolean | UserCountOutputTypeCountFollowingArgs
     followers?: boolean | UserCountOutputTypeCountFollowersArgs
+    documentTemplates?: boolean | UserCountOutputTypeCountDocumentTemplatesArgs
   }
 
   // Custom InputTypes
@@ -5126,6 +5214,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountFollowersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserFollowWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDocumentTemplatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentTemplateWhereInput
   }
 
 
@@ -20374,6 +20469,8 @@ export namespace Prisma {
     restrictCopyPaste: boolean | null
     trackFocusLoss: boolean | null
     googleSheetsSyncEnabled: boolean | null
+    randomizeQuestions: boolean | null
+    isPrivate: boolean | null
     quizLectureId: string | null
     semesterId: string | null
     moduleId: string | null
@@ -20393,6 +20490,8 @@ export namespace Prisma {
     restrictCopyPaste: boolean | null
     trackFocusLoss: boolean | null
     googleSheetsSyncEnabled: boolean | null
+    randomizeQuestions: boolean | null
+    isPrivate: boolean | null
     quizLectureId: string | null
     semesterId: string | null
     moduleId: string | null
@@ -20412,6 +20511,8 @@ export namespace Prisma {
     restrictCopyPaste: number
     trackFocusLoss: number
     googleSheetsSyncEnabled: number
+    randomizeQuestions: number
+    isPrivate: number
     quizLectureId: number
     semesterId: number
     moduleId: number
@@ -20441,6 +20542,8 @@ export namespace Prisma {
     restrictCopyPaste?: true
     trackFocusLoss?: true
     googleSheetsSyncEnabled?: true
+    randomizeQuestions?: true
+    isPrivate?: true
     quizLectureId?: true
     semesterId?: true
     moduleId?: true
@@ -20460,6 +20563,8 @@ export namespace Prisma {
     restrictCopyPaste?: true
     trackFocusLoss?: true
     googleSheetsSyncEnabled?: true
+    randomizeQuestions?: true
+    isPrivate?: true
     quizLectureId?: true
     semesterId?: true
     moduleId?: true
@@ -20479,6 +20584,8 @@ export namespace Prisma {
     restrictCopyPaste?: true
     trackFocusLoss?: true
     googleSheetsSyncEnabled?: true
+    randomizeQuestions?: true
+    isPrivate?: true
     quizLectureId?: true
     semesterId?: true
     moduleId?: true
@@ -20585,6 +20692,8 @@ export namespace Prisma {
     restrictCopyPaste: boolean
     trackFocusLoss: boolean
     googleSheetsSyncEnabled: boolean
+    randomizeQuestions: boolean
+    isPrivate: boolean
     quizLectureId: string | null
     semesterId: string
     moduleId: string
@@ -20623,6 +20732,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: boolean
     semesterId?: boolean
     moduleId?: boolean
@@ -20648,6 +20759,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: boolean
     semesterId?: boolean
     moduleId?: boolean
@@ -20670,6 +20783,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: boolean
     semesterId?: boolean
     moduleId?: boolean
@@ -20712,6 +20827,8 @@ export namespace Prisma {
       restrictCopyPaste: boolean
       trackFocusLoss: boolean
       googleSheetsSyncEnabled: boolean
+      randomizeQuestions: boolean
+      isPrivate: boolean
       quizLectureId: string | null
       semesterId: string
       moduleId: string
@@ -21126,6 +21243,8 @@ export namespace Prisma {
     readonly restrictCopyPaste: FieldRef<"PastPaper", 'Boolean'>
     readonly trackFocusLoss: FieldRef<"PastPaper", 'Boolean'>
     readonly googleSheetsSyncEnabled: FieldRef<"PastPaper", 'Boolean'>
+    readonly randomizeQuestions: FieldRef<"PastPaper", 'Boolean'>
+    readonly isPrivate: FieldRef<"PastPaper", 'Boolean'>
     readonly quizLectureId: FieldRef<"PastPaper", 'String'>
     readonly semesterId: FieldRef<"PastPaper", 'String'>
     readonly moduleId: FieldRef<"PastPaper", 'String'>
@@ -26869,6 +26988,7 @@ export namespace Prisma {
     dmReceived?: boolean | User$dmReceivedArgs<ExtArgs>
     following?: boolean | User$followingArgs<ExtArgs>
     followers?: boolean | User$followersArgs<ExtArgs>
+    documentTemplates?: boolean | User$documentTemplatesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -26954,6 +27074,7 @@ export namespace Prisma {
     dmReceived?: boolean | User$dmReceivedArgs<ExtArgs>
     following?: boolean | User$followingArgs<ExtArgs>
     followers?: boolean | User$followersArgs<ExtArgs>
+    documentTemplates?: boolean | User$documentTemplatesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -26991,6 +27112,7 @@ export namespace Prisma {
       dmReceived: Prisma.$DirectMessagePayload<ExtArgs>[]
       following: Prisma.$UserFollowPayload<ExtArgs>[]
       followers: Prisma.$UserFollowPayload<ExtArgs>[]
+      documentTemplates: Prisma.$DocumentTemplatePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -27406,6 +27528,7 @@ export namespace Prisma {
     dmReceived<T extends User$dmReceivedArgs<ExtArgs> = {}>(args?: Subset<T, User$dmReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DirectMessagePayload<ExtArgs>, T, "findMany"> | Null>
     following<T extends User$followingArgs<ExtArgs> = {}>(args?: Subset<T, User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserFollowPayload<ExtArgs>, T, "findMany"> | Null>
     followers<T extends User$followersArgs<ExtArgs> = {}>(args?: Subset<T, User$followersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserFollowPayload<ExtArgs>, T, "findMany"> | Null>
+    documentTemplates<T extends User$documentTemplatesArgs<ExtArgs> = {}>(args?: Subset<T, User$documentTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -28273,6 +28396,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserFollowScalarFieldEnum | UserFollowScalarFieldEnum[]
+  }
+
+  /**
+   * User.documentTemplates
+   */
+  export type User$documentTemplatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    where?: DocumentTemplateWhereInput
+    orderBy?: DocumentTemplateOrderByWithRelationInput | DocumentTemplateOrderByWithRelationInput[]
+    cursor?: DocumentTemplateWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DocumentTemplateScalarFieldEnum | DocumentTemplateScalarFieldEnum[]
   }
 
   /**
@@ -44807,6 +44950,963 @@ export namespace Prisma {
 
 
   /**
+   * Model DocumentTemplate
+   */
+
+  export type AggregateDocumentTemplate = {
+    _count: DocumentTemplateCountAggregateOutputType | null
+    _min: DocumentTemplateMinAggregateOutputType | null
+    _max: DocumentTemplateMaxAggregateOutputType | null
+  }
+
+  export type DocumentTemplateMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    fileUrl: string | null
+    isDefault: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    userId: string | null
+  }
+
+  export type DocumentTemplateMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    fileUrl: string | null
+    isDefault: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    userId: string | null
+  }
+
+  export type DocumentTemplateCountAggregateOutputType = {
+    id: number
+    name: number
+    fileUrl: number
+    isDefault: number
+    createdAt: number
+    updatedAt: number
+    userId: number
+    _all: number
+  }
+
+
+  export type DocumentTemplateMinAggregateInputType = {
+    id?: true
+    name?: true
+    fileUrl?: true
+    isDefault?: true
+    createdAt?: true
+    updatedAt?: true
+    userId?: true
+  }
+
+  export type DocumentTemplateMaxAggregateInputType = {
+    id?: true
+    name?: true
+    fileUrl?: true
+    isDefault?: true
+    createdAt?: true
+    updatedAt?: true
+    userId?: true
+  }
+
+  export type DocumentTemplateCountAggregateInputType = {
+    id?: true
+    name?: true
+    fileUrl?: true
+    isDefault?: true
+    createdAt?: true
+    updatedAt?: true
+    userId?: true
+    _all?: true
+  }
+
+  export type DocumentTemplateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DocumentTemplate to aggregate.
+     */
+    where?: DocumentTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentTemplates to fetch.
+     */
+    orderBy?: DocumentTemplateOrderByWithRelationInput | DocumentTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DocumentTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DocumentTemplates
+    **/
+    _count?: true | DocumentTemplateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DocumentTemplateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DocumentTemplateMaxAggregateInputType
+  }
+
+  export type GetDocumentTemplateAggregateType<T extends DocumentTemplateAggregateArgs> = {
+        [P in keyof T & keyof AggregateDocumentTemplate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDocumentTemplate[P]>
+      : GetScalarType<T[P], AggregateDocumentTemplate[P]>
+  }
+
+
+
+
+  export type DocumentTemplateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentTemplateWhereInput
+    orderBy?: DocumentTemplateOrderByWithAggregationInput | DocumentTemplateOrderByWithAggregationInput[]
+    by: DocumentTemplateScalarFieldEnum[] | DocumentTemplateScalarFieldEnum
+    having?: DocumentTemplateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DocumentTemplateCountAggregateInputType | true
+    _min?: DocumentTemplateMinAggregateInputType
+    _max?: DocumentTemplateMaxAggregateInputType
+  }
+
+  export type DocumentTemplateGroupByOutputType = {
+    id: string
+    name: string
+    fileUrl: string
+    isDefault: boolean
+    createdAt: Date
+    updatedAt: Date
+    userId: string
+    _count: DocumentTemplateCountAggregateOutputType | null
+    _min: DocumentTemplateMinAggregateOutputType | null
+    _max: DocumentTemplateMaxAggregateOutputType | null
+  }
+
+  type GetDocumentTemplateGroupByPayload<T extends DocumentTemplateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DocumentTemplateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DocumentTemplateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DocumentTemplateGroupByOutputType[P]>
+            : GetScalarType<T[P], DocumentTemplateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DocumentTemplateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    fileUrl?: boolean
+    isDefault?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    userId?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["documentTemplate"]>
+
+  export type DocumentTemplateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    fileUrl?: boolean
+    isDefault?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    userId?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["documentTemplate"]>
+
+  export type DocumentTemplateSelectScalar = {
+    id?: boolean
+    name?: boolean
+    fileUrl?: boolean
+    isDefault?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    userId?: boolean
+  }
+
+  export type DocumentTemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type DocumentTemplateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $DocumentTemplatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DocumentTemplate"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      fileUrl: string
+      isDefault: boolean
+      createdAt: Date
+      updatedAt: Date
+      userId: string
+    }, ExtArgs["result"]["documentTemplate"]>
+    composites: {}
+  }
+
+  type DocumentTemplateGetPayload<S extends boolean | null | undefined | DocumentTemplateDefaultArgs> = $Result.GetResult<Prisma.$DocumentTemplatePayload, S>
+
+  type DocumentTemplateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<DocumentTemplateFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: DocumentTemplateCountAggregateInputType | true
+    }
+
+  export interface DocumentTemplateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DocumentTemplate'], meta: { name: 'DocumentTemplate' } }
+    /**
+     * Find zero or one DocumentTemplate that matches the filter.
+     * @param {DocumentTemplateFindUniqueArgs} args - Arguments to find a DocumentTemplate
+     * @example
+     * // Get one DocumentTemplate
+     * const documentTemplate = await prisma.documentTemplate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DocumentTemplateFindUniqueArgs>(args: SelectSubset<T, DocumentTemplateFindUniqueArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one DocumentTemplate that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {DocumentTemplateFindUniqueOrThrowArgs} args - Arguments to find a DocumentTemplate
+     * @example
+     * // Get one DocumentTemplate
+     * const documentTemplate = await prisma.documentTemplate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DocumentTemplateFindUniqueOrThrowArgs>(args: SelectSubset<T, DocumentTemplateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first DocumentTemplate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentTemplateFindFirstArgs} args - Arguments to find a DocumentTemplate
+     * @example
+     * // Get one DocumentTemplate
+     * const documentTemplate = await prisma.documentTemplate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DocumentTemplateFindFirstArgs>(args?: SelectSubset<T, DocumentTemplateFindFirstArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first DocumentTemplate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentTemplateFindFirstOrThrowArgs} args - Arguments to find a DocumentTemplate
+     * @example
+     * // Get one DocumentTemplate
+     * const documentTemplate = await prisma.documentTemplate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DocumentTemplateFindFirstOrThrowArgs>(args?: SelectSubset<T, DocumentTemplateFindFirstOrThrowArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more DocumentTemplates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentTemplateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DocumentTemplates
+     * const documentTemplates = await prisma.documentTemplate.findMany()
+     * 
+     * // Get first 10 DocumentTemplates
+     * const documentTemplates = await prisma.documentTemplate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const documentTemplateWithIdOnly = await prisma.documentTemplate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DocumentTemplateFindManyArgs>(args?: SelectSubset<T, DocumentTemplateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a DocumentTemplate.
+     * @param {DocumentTemplateCreateArgs} args - Arguments to create a DocumentTemplate.
+     * @example
+     * // Create one DocumentTemplate
+     * const DocumentTemplate = await prisma.documentTemplate.create({
+     *   data: {
+     *     // ... data to create a DocumentTemplate
+     *   }
+     * })
+     * 
+     */
+    create<T extends DocumentTemplateCreateArgs>(args: SelectSubset<T, DocumentTemplateCreateArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many DocumentTemplates.
+     * @param {DocumentTemplateCreateManyArgs} args - Arguments to create many DocumentTemplates.
+     * @example
+     * // Create many DocumentTemplates
+     * const documentTemplate = await prisma.documentTemplate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DocumentTemplateCreateManyArgs>(args?: SelectSubset<T, DocumentTemplateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DocumentTemplates and returns the data saved in the database.
+     * @param {DocumentTemplateCreateManyAndReturnArgs} args - Arguments to create many DocumentTemplates.
+     * @example
+     * // Create many DocumentTemplates
+     * const documentTemplate = await prisma.documentTemplate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DocumentTemplates and only return the `id`
+     * const documentTemplateWithIdOnly = await prisma.documentTemplate.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DocumentTemplateCreateManyAndReturnArgs>(args?: SelectSubset<T, DocumentTemplateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a DocumentTemplate.
+     * @param {DocumentTemplateDeleteArgs} args - Arguments to delete one DocumentTemplate.
+     * @example
+     * // Delete one DocumentTemplate
+     * const DocumentTemplate = await prisma.documentTemplate.delete({
+     *   where: {
+     *     // ... filter to delete one DocumentTemplate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DocumentTemplateDeleteArgs>(args: SelectSubset<T, DocumentTemplateDeleteArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one DocumentTemplate.
+     * @param {DocumentTemplateUpdateArgs} args - Arguments to update one DocumentTemplate.
+     * @example
+     * // Update one DocumentTemplate
+     * const documentTemplate = await prisma.documentTemplate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DocumentTemplateUpdateArgs>(args: SelectSubset<T, DocumentTemplateUpdateArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more DocumentTemplates.
+     * @param {DocumentTemplateDeleteManyArgs} args - Arguments to filter DocumentTemplates to delete.
+     * @example
+     * // Delete a few DocumentTemplates
+     * const { count } = await prisma.documentTemplate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DocumentTemplateDeleteManyArgs>(args?: SelectSubset<T, DocumentTemplateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DocumentTemplates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentTemplateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DocumentTemplates
+     * const documentTemplate = await prisma.documentTemplate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DocumentTemplateUpdateManyArgs>(args: SelectSubset<T, DocumentTemplateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one DocumentTemplate.
+     * @param {DocumentTemplateUpsertArgs} args - Arguments to update or create a DocumentTemplate.
+     * @example
+     * // Update or create a DocumentTemplate
+     * const documentTemplate = await prisma.documentTemplate.upsert({
+     *   create: {
+     *     // ... data to create a DocumentTemplate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DocumentTemplate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DocumentTemplateUpsertArgs>(args: SelectSubset<T, DocumentTemplateUpsertArgs<ExtArgs>>): Prisma__DocumentTemplateClient<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of DocumentTemplates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentTemplateCountArgs} args - Arguments to filter DocumentTemplates to count.
+     * @example
+     * // Count the number of DocumentTemplates
+     * const count = await prisma.documentTemplate.count({
+     *   where: {
+     *     // ... the filter for the DocumentTemplates we want to count
+     *   }
+     * })
+    **/
+    count<T extends DocumentTemplateCountArgs>(
+      args?: Subset<T, DocumentTemplateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DocumentTemplateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DocumentTemplate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentTemplateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DocumentTemplateAggregateArgs>(args: Subset<T, DocumentTemplateAggregateArgs>): Prisma.PrismaPromise<GetDocumentTemplateAggregateType<T>>
+
+    /**
+     * Group by DocumentTemplate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentTemplateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DocumentTemplateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DocumentTemplateGroupByArgs['orderBy'] }
+        : { orderBy?: DocumentTemplateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DocumentTemplateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDocumentTemplateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DocumentTemplate model
+   */
+  readonly fields: DocumentTemplateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DocumentTemplate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DocumentTemplateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DocumentTemplate model
+   */ 
+  interface DocumentTemplateFieldRefs {
+    readonly id: FieldRef<"DocumentTemplate", 'String'>
+    readonly name: FieldRef<"DocumentTemplate", 'String'>
+    readonly fileUrl: FieldRef<"DocumentTemplate", 'String'>
+    readonly isDefault: FieldRef<"DocumentTemplate", 'Boolean'>
+    readonly createdAt: FieldRef<"DocumentTemplate", 'DateTime'>
+    readonly updatedAt: FieldRef<"DocumentTemplate", 'DateTime'>
+    readonly userId: FieldRef<"DocumentTemplate", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DocumentTemplate findUnique
+   */
+  export type DocumentTemplateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentTemplate to fetch.
+     */
+    where: DocumentTemplateWhereUniqueInput
+  }
+
+  /**
+   * DocumentTemplate findUniqueOrThrow
+   */
+  export type DocumentTemplateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentTemplate to fetch.
+     */
+    where: DocumentTemplateWhereUniqueInput
+  }
+
+  /**
+   * DocumentTemplate findFirst
+   */
+  export type DocumentTemplateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentTemplate to fetch.
+     */
+    where?: DocumentTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentTemplates to fetch.
+     */
+    orderBy?: DocumentTemplateOrderByWithRelationInput | DocumentTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DocumentTemplates.
+     */
+    cursor?: DocumentTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DocumentTemplates.
+     */
+    distinct?: DocumentTemplateScalarFieldEnum | DocumentTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentTemplate findFirstOrThrow
+   */
+  export type DocumentTemplateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentTemplate to fetch.
+     */
+    where?: DocumentTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentTemplates to fetch.
+     */
+    orderBy?: DocumentTemplateOrderByWithRelationInput | DocumentTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DocumentTemplates.
+     */
+    cursor?: DocumentTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DocumentTemplates.
+     */
+    distinct?: DocumentTemplateScalarFieldEnum | DocumentTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentTemplate findMany
+   */
+  export type DocumentTemplateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentTemplates to fetch.
+     */
+    where?: DocumentTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentTemplates to fetch.
+     */
+    orderBy?: DocumentTemplateOrderByWithRelationInput | DocumentTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DocumentTemplates.
+     */
+    cursor?: DocumentTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentTemplates.
+     */
+    skip?: number
+    distinct?: DocumentTemplateScalarFieldEnum | DocumentTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentTemplate create
+   */
+  export type DocumentTemplateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DocumentTemplate.
+     */
+    data: XOR<DocumentTemplateCreateInput, DocumentTemplateUncheckedCreateInput>
+  }
+
+  /**
+   * DocumentTemplate createMany
+   */
+  export type DocumentTemplateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DocumentTemplates.
+     */
+    data: DocumentTemplateCreateManyInput | DocumentTemplateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DocumentTemplate createManyAndReturn
+   */
+  export type DocumentTemplateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many DocumentTemplates.
+     */
+    data: DocumentTemplateCreateManyInput | DocumentTemplateCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DocumentTemplate update
+   */
+  export type DocumentTemplateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DocumentTemplate.
+     */
+    data: XOR<DocumentTemplateUpdateInput, DocumentTemplateUncheckedUpdateInput>
+    /**
+     * Choose, which DocumentTemplate to update.
+     */
+    where: DocumentTemplateWhereUniqueInput
+  }
+
+  /**
+   * DocumentTemplate updateMany
+   */
+  export type DocumentTemplateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DocumentTemplates.
+     */
+    data: XOR<DocumentTemplateUpdateManyMutationInput, DocumentTemplateUncheckedUpdateManyInput>
+    /**
+     * Filter which DocumentTemplates to update
+     */
+    where?: DocumentTemplateWhereInput
+  }
+
+  /**
+   * DocumentTemplate upsert
+   */
+  export type DocumentTemplateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DocumentTemplate to update in case it exists.
+     */
+    where: DocumentTemplateWhereUniqueInput
+    /**
+     * In case the DocumentTemplate found by the `where` argument doesn't exist, create a new DocumentTemplate with this data.
+     */
+    create: XOR<DocumentTemplateCreateInput, DocumentTemplateUncheckedCreateInput>
+    /**
+     * In case the DocumentTemplate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DocumentTemplateUpdateInput, DocumentTemplateUncheckedUpdateInput>
+  }
+
+  /**
+   * DocumentTemplate delete
+   */
+  export type DocumentTemplateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+    /**
+     * Filter which DocumentTemplate to delete.
+     */
+    where: DocumentTemplateWhereUniqueInput
+  }
+
+  /**
+   * DocumentTemplate deleteMany
+   */
+  export type DocumentTemplateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DocumentTemplates to delete
+     */
+    where?: DocumentTemplateWhereInput
+  }
+
+  /**
+   * DocumentTemplate without action
+   */
+  export type DocumentTemplateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentTemplate
+     */
+    select?: DocumentTemplateSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentTemplateInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model Session
    */
 
@@ -46794,6 +47894,8 @@ export namespace Prisma {
     restrictCopyPaste: 'restrictCopyPaste',
     trackFocusLoss: 'trackFocusLoss',
     googleSheetsSyncEnabled: 'googleSheetsSyncEnabled',
+    randomizeQuestions: 'randomizeQuestions',
+    isPrivate: 'isPrivate',
     quizLectureId: 'quizLectureId',
     semesterId: 'semesterId',
     moduleId: 'moduleId',
@@ -47098,6 +48200,19 @@ export namespace Prisma {
   };
 
   export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
+
+
+  export const DocumentTemplateScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    fileUrl: 'fileUrl',
+    isDefault: 'isDefault',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    userId: 'userId'
+  };
+
+  export type DocumentTemplateScalarFieldEnum = (typeof DocumentTemplateScalarFieldEnum)[keyof typeof DocumentTemplateScalarFieldEnum]
 
 
   export const SessionScalarFieldEnum: {
@@ -48412,6 +49527,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFilter<"PastPaper"> | boolean
     trackFocusLoss?: BoolFilter<"PastPaper"> | boolean
     googleSheetsSyncEnabled?: BoolFilter<"PastPaper"> | boolean
+    randomizeQuestions?: BoolFilter<"PastPaper"> | boolean
+    isPrivate?: BoolFilter<"PastPaper"> | boolean
     quizLectureId?: StringNullableFilter<"PastPaper"> | string | null
     semesterId?: StringFilter<"PastPaper"> | string
     moduleId?: StringFilter<"PastPaper"> | string
@@ -48436,6 +49553,8 @@ export namespace Prisma {
     restrictCopyPaste?: SortOrder
     trackFocusLoss?: SortOrder
     googleSheetsSyncEnabled?: SortOrder
+    randomizeQuestions?: SortOrder
+    isPrivate?: SortOrder
     quizLectureId?: SortOrderInput | SortOrder
     semesterId?: SortOrder
     moduleId?: SortOrder
@@ -48464,6 +49583,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFilter<"PastPaper"> | boolean
     trackFocusLoss?: BoolFilter<"PastPaper"> | boolean
     googleSheetsSyncEnabled?: BoolFilter<"PastPaper"> | boolean
+    randomizeQuestions?: BoolFilter<"PastPaper"> | boolean
+    isPrivate?: BoolFilter<"PastPaper"> | boolean
     semesterId?: StringFilter<"PastPaper"> | string
     moduleId?: StringFilter<"PastPaper"> | string
     createdAt?: DateTimeFilter<"PastPaper"> | Date | string
@@ -48487,6 +49608,8 @@ export namespace Prisma {
     restrictCopyPaste?: SortOrder
     trackFocusLoss?: SortOrder
     googleSheetsSyncEnabled?: SortOrder
+    randomizeQuestions?: SortOrder
+    isPrivate?: SortOrder
     quizLectureId?: SortOrderInput | SortOrder
     semesterId?: SortOrder
     moduleId?: SortOrder
@@ -48514,6 +49637,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolWithAggregatesFilter<"PastPaper"> | boolean
     trackFocusLoss?: BoolWithAggregatesFilter<"PastPaper"> | boolean
     googleSheetsSyncEnabled?: BoolWithAggregatesFilter<"PastPaper"> | boolean
+    randomizeQuestions?: BoolWithAggregatesFilter<"PastPaper"> | boolean
+    isPrivate?: BoolWithAggregatesFilter<"PastPaper"> | boolean
     quizLectureId?: StringNullableWithAggregatesFilter<"PastPaper"> | string | null
     semesterId?: StringWithAggregatesFilter<"PastPaper"> | string
     moduleId?: StringWithAggregatesFilter<"PastPaper"> | string
@@ -48925,6 +50050,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageListRelationFilter
     following?: UserFollowListRelationFilter
     followers?: UserFollowListRelationFilter
+    documentTemplates?: DocumentTemplateListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -48977,6 +50103,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageOrderByRelationAggregateInput
     following?: UserFollowOrderByRelationAggregateInput
     followers?: UserFollowOrderByRelationAggregateInput
+    documentTemplates?: DocumentTemplateOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -49032,6 +50159,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageListRelationFilter
     following?: UserFollowListRelationFilter
     followers?: UserFollowListRelationFilter
+    documentTemplates?: DocumentTemplateListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -50184,6 +51312,71 @@ export namespace Prisma {
     scope?: StringNullableWithAggregatesFilter<"Account"> | string | null
     id_token?: StringNullableWithAggregatesFilter<"Account"> | string | null
     session_state?: StringNullableWithAggregatesFilter<"Account"> | string | null
+  }
+
+  export type DocumentTemplateWhereInput = {
+    AND?: DocumentTemplateWhereInput | DocumentTemplateWhereInput[]
+    OR?: DocumentTemplateWhereInput[]
+    NOT?: DocumentTemplateWhereInput | DocumentTemplateWhereInput[]
+    id?: StringFilter<"DocumentTemplate"> | string
+    name?: StringFilter<"DocumentTemplate"> | string
+    fileUrl?: StringFilter<"DocumentTemplate"> | string
+    isDefault?: BoolFilter<"DocumentTemplate"> | boolean
+    createdAt?: DateTimeFilter<"DocumentTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"DocumentTemplate"> | Date | string
+    userId?: StringFilter<"DocumentTemplate"> | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type DocumentTemplateOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    fileUrl?: SortOrder
+    isDefault?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type DocumentTemplateWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DocumentTemplateWhereInput | DocumentTemplateWhereInput[]
+    OR?: DocumentTemplateWhereInput[]
+    NOT?: DocumentTemplateWhereInput | DocumentTemplateWhereInput[]
+    name?: StringFilter<"DocumentTemplate"> | string
+    fileUrl?: StringFilter<"DocumentTemplate"> | string
+    isDefault?: BoolFilter<"DocumentTemplate"> | boolean
+    createdAt?: DateTimeFilter<"DocumentTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"DocumentTemplate"> | Date | string
+    userId?: StringFilter<"DocumentTemplate"> | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type DocumentTemplateOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    fileUrl?: SortOrder
+    isDefault?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+    _count?: DocumentTemplateCountOrderByAggregateInput
+    _max?: DocumentTemplateMaxOrderByAggregateInput
+    _min?: DocumentTemplateMinOrderByAggregateInput
+  }
+
+  export type DocumentTemplateScalarWhereWithAggregatesInput = {
+    AND?: DocumentTemplateScalarWhereWithAggregatesInput | DocumentTemplateScalarWhereWithAggregatesInput[]
+    OR?: DocumentTemplateScalarWhereWithAggregatesInput[]
+    NOT?: DocumentTemplateScalarWhereWithAggregatesInput | DocumentTemplateScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DocumentTemplate"> | string
+    name?: StringWithAggregatesFilter<"DocumentTemplate"> | string
+    fileUrl?: StringWithAggregatesFilter<"DocumentTemplate"> | string
+    isDefault?: BoolWithAggregatesFilter<"DocumentTemplate"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"DocumentTemplate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DocumentTemplate"> | Date | string
+    userId?: StringWithAggregatesFilter<"DocumentTemplate"> | string
   }
 
   export type SessionWhereInput = {
@@ -51372,6 +52565,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     createdAt?: Date | string
     semester: SemesterCreateNestedOneWithoutPastPapersInput
     module: ModuleCreateNestedOneWithoutPastPapersInput
@@ -51393,6 +52588,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     semesterId: string
     moduleId: string
@@ -51414,6 +52611,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     semester?: SemesterUpdateOneRequiredWithoutPastPapersNestedInput
     module?: ModuleUpdateOneRequiredWithoutPastPapersNestedInput
@@ -51435,6 +52634,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     moduleId?: StringFieldUpdateOperationsInput | string
@@ -51456,6 +52657,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     semesterId: string
     moduleId: string
@@ -51475,6 +52678,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -51491,6 +52696,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     moduleId?: StringFieldUpdateOperationsInput | string
@@ -51900,6 +53107,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -51949,6 +53157,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -51998,6 +53207,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -52047,6 +53257,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -53180,6 +54391,75 @@ export namespace Prisma {
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     id_token?: NullableStringFieldUpdateOperationsInput | string | null
     session_state?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type DocumentTemplateCreateInput = {
+    id?: string
+    name: string
+    fileUrl: string
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDocumentTemplatesInput
+  }
+
+  export type DocumentTemplateUncheckedCreateInput = {
+    id?: string
+    name: string
+    fileUrl: string
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+  }
+
+  export type DocumentTemplateUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDocumentTemplatesNestedInput
+  }
+
+  export type DocumentTemplateUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type DocumentTemplateCreateManyInput = {
+    id?: string
+    name: string
+    fileUrl: string
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+  }
+
+  export type DocumentTemplateUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentTemplateUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type SessionCreateInput = {
@@ -54339,6 +55619,8 @@ export namespace Prisma {
     restrictCopyPaste?: SortOrder
     trackFocusLoss?: SortOrder
     googleSheetsSyncEnabled?: SortOrder
+    randomizeQuestions?: SortOrder
+    isPrivate?: SortOrder
     quizLectureId?: SortOrder
     semesterId?: SortOrder
     moduleId?: SortOrder
@@ -54362,6 +55644,8 @@ export namespace Prisma {
     restrictCopyPaste?: SortOrder
     trackFocusLoss?: SortOrder
     googleSheetsSyncEnabled?: SortOrder
+    randomizeQuestions?: SortOrder
+    isPrivate?: SortOrder
     quizLectureId?: SortOrder
     semesterId?: SortOrder
     moduleId?: SortOrder
@@ -54381,6 +55665,8 @@ export namespace Prisma {
     restrictCopyPaste?: SortOrder
     trackFocusLoss?: SortOrder
     googleSheetsSyncEnabled?: SortOrder
+    randomizeQuestions?: SortOrder
+    isPrivate?: SortOrder
     quizLectureId?: SortOrder
     semesterId?: SortOrder
     moduleId?: SortOrder
@@ -54723,6 +56009,12 @@ export namespace Prisma {
     none?: UserFollowWhereInput
   }
 
+  export type DocumentTemplateListRelationFilter = {
+    every?: DocumentTemplateWhereInput
+    some?: DocumentTemplateWhereInput
+    none?: DocumentTemplateWhereInput
+  }
+
   export type LikeOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -54768,6 +56060,10 @@ export namespace Prisma {
   }
 
   export type UserFollowOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DocumentTemplateOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -55503,6 +56799,36 @@ export namespace Prisma {
 
   export type AccountSumOrderByAggregateInput = {
     expires_at?: SortOrder
+  }
+
+  export type DocumentTemplateCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    fileUrl?: SortOrder
+    isDefault?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type DocumentTemplateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    fileUrl?: SortOrder
+    isDefault?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type DocumentTemplateMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    fileUrl?: SortOrder
+    isDefault?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
   }
 
   export type SessionCountOrderByAggregateInput = {
@@ -57451,6 +58777,13 @@ export namespace Prisma {
     connect?: UserFollowWhereUniqueInput | UserFollowWhereUniqueInput[]
   }
 
+  export type DocumentTemplateCreateNestedManyWithoutUserInput = {
+    create?: XOR<DocumentTemplateCreateWithoutUserInput, DocumentTemplateUncheckedCreateWithoutUserInput> | DocumentTemplateCreateWithoutUserInput[] | DocumentTemplateUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentTemplateCreateOrConnectWithoutUserInput | DocumentTemplateCreateOrConnectWithoutUserInput[]
+    createMany?: DocumentTemplateCreateManyUserInputEnvelope
+    connect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+  }
+
   export type QuizAttemptUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<QuizAttemptCreateWithoutUserInput, QuizAttemptUncheckedCreateWithoutUserInput> | QuizAttemptCreateWithoutUserInput[] | QuizAttemptUncheckedCreateWithoutUserInput[]
     connectOrCreate?: QuizAttemptCreateOrConnectWithoutUserInput | QuizAttemptCreateOrConnectWithoutUserInput[]
@@ -57609,6 +58942,13 @@ export namespace Prisma {
     connectOrCreate?: UserFollowCreateOrConnectWithoutFollowingInput | UserFollowCreateOrConnectWithoutFollowingInput[]
     createMany?: UserFollowCreateManyFollowingInputEnvelope
     connect?: UserFollowWhereUniqueInput | UserFollowWhereUniqueInput[]
+  }
+
+  export type DocumentTemplateUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<DocumentTemplateCreateWithoutUserInput, DocumentTemplateUncheckedCreateWithoutUserInput> | DocumentTemplateCreateWithoutUserInput[] | DocumentTemplateUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentTemplateCreateOrConnectWithoutUserInput | DocumentTemplateCreateOrConnectWithoutUserInput[]
+    createMany?: DocumentTemplateCreateManyUserInputEnvelope
+    connect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -57971,6 +59311,20 @@ export namespace Prisma {
     deleteMany?: UserFollowScalarWhereInput | UserFollowScalarWhereInput[]
   }
 
+  export type DocumentTemplateUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DocumentTemplateCreateWithoutUserInput, DocumentTemplateUncheckedCreateWithoutUserInput> | DocumentTemplateCreateWithoutUserInput[] | DocumentTemplateUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentTemplateCreateOrConnectWithoutUserInput | DocumentTemplateCreateOrConnectWithoutUserInput[]
+    upsert?: DocumentTemplateUpsertWithWhereUniqueWithoutUserInput | DocumentTemplateUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DocumentTemplateCreateManyUserInputEnvelope
+    set?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    disconnect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    delete?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    connect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    update?: DocumentTemplateUpdateWithWhereUniqueWithoutUserInput | DocumentTemplateUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DocumentTemplateUpdateManyWithWhereWithoutUserInput | DocumentTemplateUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DocumentTemplateScalarWhereInput | DocumentTemplateScalarWhereInput[]
+  }
+
   export type QuizAttemptUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<QuizAttemptCreateWithoutUserInput, QuizAttemptUncheckedCreateWithoutUserInput> | QuizAttemptCreateWithoutUserInput[] | QuizAttemptUncheckedCreateWithoutUserInput[]
     connectOrCreate?: QuizAttemptCreateOrConnectWithoutUserInput | QuizAttemptCreateOrConnectWithoutUserInput[]
@@ -58287,6 +59641,20 @@ export namespace Prisma {
     update?: UserFollowUpdateWithWhereUniqueWithoutFollowingInput | UserFollowUpdateWithWhereUniqueWithoutFollowingInput[]
     updateMany?: UserFollowUpdateManyWithWhereWithoutFollowingInput | UserFollowUpdateManyWithWhereWithoutFollowingInput[]
     deleteMany?: UserFollowScalarWhereInput | UserFollowScalarWhereInput[]
+  }
+
+  export type DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DocumentTemplateCreateWithoutUserInput, DocumentTemplateUncheckedCreateWithoutUserInput> | DocumentTemplateCreateWithoutUserInput[] | DocumentTemplateUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentTemplateCreateOrConnectWithoutUserInput | DocumentTemplateCreateOrConnectWithoutUserInput[]
+    upsert?: DocumentTemplateUpsertWithWhereUniqueWithoutUserInput | DocumentTemplateUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DocumentTemplateCreateManyUserInputEnvelope
+    set?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    disconnect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    delete?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    connect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+    update?: DocumentTemplateUpdateWithWhereUniqueWithoutUserInput | DocumentTemplateUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DocumentTemplateUpdateManyWithWhereWithoutUserInput | DocumentTemplateUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DocumentTemplateScalarWhereInput | DocumentTemplateScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutLectureActivitiesInput = {
@@ -59083,6 +60451,20 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAccountsInput, UserUpdateWithoutAccountsInput>, UserUncheckedUpdateWithoutAccountsInput>
   }
 
+  export type UserCreateNestedOneWithoutDocumentTemplatesInput = {
+    create?: XOR<UserCreateWithoutDocumentTemplatesInput, UserUncheckedCreateWithoutDocumentTemplatesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDocumentTemplatesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutDocumentTemplatesNestedInput = {
+    create?: XOR<UserCreateWithoutDocumentTemplatesInput, UserUncheckedCreateWithoutDocumentTemplatesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDocumentTemplatesInput
+    upsert?: UserUpsertWithoutDocumentTemplatesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDocumentTemplatesInput, UserUpdateWithoutDocumentTemplatesInput>, UserUncheckedUpdateWithoutDocumentTemplatesInput>
+  }
+
   export type UserCreateNestedOneWithoutSessionsInput = {
     create?: XOR<UserCreateWithoutSessionsInput, UserUncheckedCreateWithoutSessionsInput>
     connectOrCreate?: UserCreateOrConnectWithoutSessionsInput
@@ -59643,6 +61025,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutUniversityInput = {
@@ -59691,6 +61074,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutUniversityInput = {
@@ -60437,6 +61821,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSemesterInput = {
@@ -60485,6 +61870,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSemesterInput = {
@@ -60510,6 +61896,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     createdAt?: Date | string
     module: ModuleCreateNestedOneWithoutPastPapersInput
     quizLecture?: LectureCreateNestedOneWithoutPastPaperInput
@@ -60530,6 +61918,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     moduleId: string
     createdAt?: Date | string
@@ -60707,6 +62097,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFilter<"PastPaper"> | boolean
     trackFocusLoss?: BoolFilter<"PastPaper"> | boolean
     googleSheetsSyncEnabled?: BoolFilter<"PastPaper"> | boolean
+    randomizeQuestions?: BoolFilter<"PastPaper"> | boolean
+    isPrivate?: BoolFilter<"PastPaper"> | boolean
     quizLectureId?: StringNullableFilter<"PastPaper"> | string | null
     semesterId?: StringFilter<"PastPaper"> | string
     moduleId?: StringFilter<"PastPaper"> | string
@@ -60807,6 +62199,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     createdAt?: Date | string
     semester: SemesterCreateNestedOneWithoutPastPapersInput
     quizLecture?: LectureCreateNestedOneWithoutPastPaperInput
@@ -60827,6 +62221,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     semesterId: string
     createdAt?: Date | string
@@ -61221,6 +62617,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     createdAt?: Date | string
     semester: SemesterCreateNestedOneWithoutPastPapersInput
     module: ModuleCreateNestedOneWithoutPastPapersInput
@@ -61241,6 +62639,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     semesterId: string
     moduleId: string
     createdAt?: Date | string
@@ -61451,6 +62851,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     semester?: SemesterUpdateOneRequiredWithoutPastPapersNestedInput
     module?: ModuleUpdateOneRequiredWithoutPastPapersNestedInput
@@ -61471,6 +62873,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     semesterId?: StringFieldUpdateOperationsInput | string
     moduleId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -61897,6 +63301,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVideoCommentsInput = {
@@ -61945,6 +63350,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVideoCommentsInput = {
@@ -62052,6 +63458,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVideoCommentsInput = {
@@ -62100,6 +63507,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureVideoCreateWithoutLikesInput = {
@@ -62185,6 +63593,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVideoLikesInput = {
@@ -62233,6 +63642,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVideoLikesInput = {
@@ -62340,6 +63750,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVideoLikesInput = {
@@ -62388,6 +63799,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureCreateWithoutQuestionsInput = {
@@ -62947,6 +64359,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutQuestionReportsInput = {
@@ -62995,6 +64408,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutQuestionReportsInput = {
@@ -63015,6 +64429,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     createdAt?: Date | string
     semester: SemesterCreateNestedOneWithoutPastPapersInput
     module: ModuleCreateNestedOneWithoutPastPapersInput
@@ -63035,6 +64451,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     semesterId: string
     moduleId: string
@@ -63149,6 +64567,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutQuestionReportsInput = {
@@ -63197,6 +64616,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PastPaperUpsertWithoutQuestionReportsInput = {
@@ -63223,6 +64643,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     semester?: SemesterUpdateOneRequiredWithoutPastPapersNestedInput
     module?: ModuleUpdateOneRequiredWithoutPastPapersNestedInput
@@ -63243,6 +64665,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     moduleId?: StringFieldUpdateOperationsInput | string
@@ -63344,6 +64768,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutQuizAttemptsInput = {
@@ -63392,6 +64817,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutQuizAttemptsInput = {
@@ -63433,6 +64859,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     createdAt?: Date | string
     semester: SemesterCreateNestedOneWithoutPastPapersInput
     module: ModuleCreateNestedOneWithoutPastPapersInput
@@ -63453,6 +64881,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     semesterId: string
     moduleId: string
@@ -63548,6 +64978,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
@@ -63596,6 +65027,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type GuestQuizUserUpsertWithoutQuizAttemptsInput = {
@@ -63649,6 +65081,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     semester?: SemesterUpdateOneRequiredWithoutPastPapersNestedInput
     module?: ModuleUpdateOneRequiredWithoutPastPapersNestedInput
@@ -63669,6 +65103,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     moduleId?: StringFieldUpdateOperationsInput | string
@@ -63738,6 +65174,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutStudyAssistantProfileInput = {
@@ -63786,6 +65223,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutStudyAssistantProfileInput = {
@@ -63850,6 +65288,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStudyAssistantProfileInput = {
@@ -63898,6 +65337,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type QuizAttemptCreateWithoutItemsInput = {
@@ -64720,6 +66160,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DocumentTemplateCreateWithoutUserInput = {
+    id?: string
+    name: string
+    fileUrl: string
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DocumentTemplateUncheckedCreateWithoutUserInput = {
+    id?: string
+    name: string
+    fileUrl: string
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DocumentTemplateCreateOrConnectWithoutUserInput = {
+    where: DocumentTemplateWhereUniqueInput
+    create: XOR<DocumentTemplateCreateWithoutUserInput, DocumentTemplateUncheckedCreateWithoutUserInput>
+  }
+
+  export type DocumentTemplateCreateManyUserInputEnvelope = {
+    data: DocumentTemplateCreateManyUserInput | DocumentTemplateCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UniversityUpsertWithoutUsersInput = {
     update: XOR<UniversityUpdateWithoutUsersInput, UniversityUncheckedUpdateWithoutUsersInput>
     create: XOR<UniversityCreateWithoutUsersInput, UniversityUncheckedCreateWithoutUsersInput>
@@ -65343,6 +66811,35 @@ export namespace Prisma {
     data: XOR<UserFollowUpdateManyMutationInput, UserFollowUncheckedUpdateManyWithoutFollowingInput>
   }
 
+  export type DocumentTemplateUpsertWithWhereUniqueWithoutUserInput = {
+    where: DocumentTemplateWhereUniqueInput
+    update: XOR<DocumentTemplateUpdateWithoutUserInput, DocumentTemplateUncheckedUpdateWithoutUserInput>
+    create: XOR<DocumentTemplateCreateWithoutUserInput, DocumentTemplateUncheckedCreateWithoutUserInput>
+  }
+
+  export type DocumentTemplateUpdateWithWhereUniqueWithoutUserInput = {
+    where: DocumentTemplateWhereUniqueInput
+    data: XOR<DocumentTemplateUpdateWithoutUserInput, DocumentTemplateUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DocumentTemplateUpdateManyWithWhereWithoutUserInput = {
+    where: DocumentTemplateScalarWhereInput
+    data: XOR<DocumentTemplateUpdateManyMutationInput, DocumentTemplateUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type DocumentTemplateScalarWhereInput = {
+    AND?: DocumentTemplateScalarWhereInput | DocumentTemplateScalarWhereInput[]
+    OR?: DocumentTemplateScalarWhereInput[]
+    NOT?: DocumentTemplateScalarWhereInput | DocumentTemplateScalarWhereInput[]
+    id?: StringFilter<"DocumentTemplate"> | string
+    name?: StringFilter<"DocumentTemplate"> | string
+    fileUrl?: StringFilter<"DocumentTemplate"> | string
+    isDefault?: BoolFilter<"DocumentTemplate"> | boolean
+    createdAt?: DateTimeFilter<"DocumentTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"DocumentTemplate"> | Date | string
+    userId?: StringFilter<"DocumentTemplate"> | string
+  }
+
   export type UserCreateWithoutLectureActivitiesInput = {
     id?: string
     name: string
@@ -65389,6 +66886,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLectureActivitiesInput = {
@@ -65437,6 +66935,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLectureActivitiesInput = {
@@ -65538,6 +67037,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLectureActivitiesInput = {
@@ -65586,6 +67086,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureUpsertWithoutActivitiesInput = {
@@ -65677,6 +67178,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDmSentInput = {
@@ -65725,6 +67227,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDmSentInput = {
@@ -65778,6 +67281,7 @@ export namespace Prisma {
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDmReceivedInput = {
@@ -65826,6 +67330,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDmReceivedInput = {
@@ -65890,6 +67395,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDmSentInput = {
@@ -65938,6 +67444,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutDmReceivedInput = {
@@ -65997,6 +67504,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDmReceivedInput = {
@@ -66045,6 +67553,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UniversityCreateWithoutForumsInput = {
@@ -66392,6 +67901,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutForumMembershipsInput = {
@@ -66440,6 +67950,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutForumMembershipsInput = {
@@ -66541,6 +68052,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutForumMembershipsInput = {
@@ -66589,6 +68101,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ForumCreateWithoutInvitesInput = {
@@ -66668,6 +68181,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSentInvitesInput = {
@@ -66716,6 +68230,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSentInvitesInput = {
@@ -66769,6 +68284,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReceivedInvitesInput = {
@@ -66817,6 +68333,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReceivedInvitesInput = {
@@ -66918,6 +68435,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSentInvitesInput = {
@@ -66966,6 +68484,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutReceivedInvitesInput = {
@@ -67025,6 +68544,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceivedInvitesInput = {
@@ -67073,6 +68593,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutPostsInput = {
@@ -67121,6 +68642,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPostsInput = {
@@ -67169,6 +68691,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPostsInput = {
@@ -67353,6 +68876,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPostsInput = {
@@ -67401,6 +68925,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ForumUpsertWithoutPostsInput = {
@@ -67561,6 +69086,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCommentsInput = {
@@ -67609,6 +69135,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCommentsInput = {
@@ -67822,6 +69349,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -67870,6 +69398,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PostUpsertWithoutCommentsInput = {
@@ -68065,6 +69594,7 @@ export namespace Prisma {
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFollowingInput = {
@@ -68113,6 +69643,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFollowingInput = {
@@ -68166,6 +69697,7 @@ export namespace Prisma {
     dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFollowersInput = {
@@ -68214,6 +69746,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFollowersInput = {
@@ -68278,6 +69811,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -68326,6 +69860,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutFollowersInput = {
@@ -68385,6 +69920,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -68433,6 +69969,7 @@ export namespace Prisma {
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutLikesInput = {
@@ -68481,6 +70018,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLikesInput = {
@@ -68529,6 +70067,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLikesInput = {
@@ -68626,6 +70165,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLikesInput = {
@@ -68674,6 +70214,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PostUpsertWithoutLikesInput = {
@@ -68761,6 +70302,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCommentLikesInput = {
@@ -68809,6 +70351,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCommentLikesInput = {
@@ -68900,6 +70443,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentLikesInput = {
@@ -68948,6 +70492,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CommentUpsertWithoutLikesInput = {
@@ -69029,6 +70574,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -69077,6 +70623,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -69141,6 +70688,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -69189,6 +70737,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutNotifMutesInput = {
@@ -69237,6 +70786,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotifMutesInput = {
@@ -69285,6 +70835,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotifMutesInput = {
@@ -69349,6 +70900,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotifMutesInput = {
@@ -69397,6 +70949,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutRankInput = {
@@ -69445,6 +70998,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRankInput = {
@@ -69493,6 +71047,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRankInput = {
@@ -69567,6 +71122,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutEngagementLogsInput = {
@@ -69615,6 +71171,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutEngagementLogsInput = {
@@ -69679,6 +71236,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEngagementLogsInput = {
@@ -69727,6 +71285,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAiUsageLogsInput = {
@@ -69775,6 +71334,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAiUsageLogsInput = {
@@ -69823,6 +71383,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAiUsageLogsInput = {
@@ -69887,6 +71448,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAiUsageLogsInput = {
@@ -69935,6 +71497,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UniversityCreateWithoutAdBannersInput = {
@@ -70119,6 +71682,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -70167,6 +71731,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -70231,6 +71796,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -70273,6 +71839,219 @@ export namespace Prisma {
     forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
     sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
     receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutDocumentTemplatesInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    university?: UniversityCreateNestedOneWithoutUsersInput
+    semester?: SemesterCreateNestedOneWithoutUsersInput
+    rank?: RankCreateNestedOneWithoutUsersInput
+    quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
+    posts?: PostCreateNestedManyWithoutAuthorInput
+    comments?: CommentCreateNestedManyWithoutAuthorInput
+    likes?: LikeCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
+    following?: UserFollowCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowCreateNestedManyWithoutFollowingInput
+  }
+
+  export type UserUncheckedCreateWithoutDocumentTemplatesInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quizAttempts?: QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedCreateNestedOneWithoutUserInput
+    posts?: PostUncheckedCreateNestedManyWithoutAuthorInput
+    comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
+    likes?: LikeUncheckedCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteUncheckedCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogUncheckedCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentUncheckedCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeUncheckedCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberUncheckedCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
+    following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+  }
+
+  export type UserCreateOrConnectWithoutDocumentTemplatesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDocumentTemplatesInput, UserUncheckedCreateWithoutDocumentTemplatesInput>
+  }
+
+  export type UserUpsertWithoutDocumentTemplatesInput = {
+    update: XOR<UserUpdateWithoutDocumentTemplatesInput, UserUncheckedUpdateWithoutDocumentTemplatesInput>
+    create: XOR<UserCreateWithoutDocumentTemplatesInput, UserUncheckedCreateWithoutDocumentTemplatesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDocumentTemplatesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDocumentTemplatesInput, UserUncheckedUpdateWithoutDocumentTemplatesInput>
+  }
+
+  export type UserUpdateWithoutDocumentTemplatesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    university?: UniversityUpdateOneWithoutUsersNestedInput
+    semester?: SemesterUpdateOneWithoutUsersNestedInput
+    rank?: RankUpdateOneWithoutUsersNestedInput
+    quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
+    posts?: PostUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDocumentTemplatesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quizAttempts?: QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedUpdateOneWithoutUserNestedInput
+    posts?: PostUncheckedUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUncheckedUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUncheckedUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUncheckedUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -70327,6 +72106,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -70375,6 +72155,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -70439,6 +72220,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -70487,6 +72269,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AcademicYearCreateManyUniversityInput = {
@@ -70638,6 +72421,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUniversityInput = {
@@ -70686,6 +72470,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutUniversityInput = {
@@ -70968,6 +72753,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     moduleId: string
     createdAt?: Date | string
@@ -71057,6 +72844,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSemesterInput = {
@@ -71105,6 +72893,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutSemesterInput = {
@@ -71145,6 +72934,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     module?: ModuleUpdateOneRequiredWithoutPastPapersNestedInput
     quizLecture?: LectureUpdateOneWithoutPastPaperNestedInput
@@ -71165,6 +72956,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     moduleId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71185,6 +72978,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     moduleId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71272,6 +73067,8 @@ export namespace Prisma {
     restrictCopyPaste?: boolean
     trackFocusLoss?: boolean
     googleSheetsSyncEnabled?: boolean
+    randomizeQuestions?: boolean
+    isPrivate?: boolean
     quizLectureId?: string | null
     semesterId: string
     createdAt?: Date | string
@@ -71310,6 +73107,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     semester?: SemesterUpdateOneRequiredWithoutPastPapersNestedInput
     quizLecture?: LectureUpdateOneWithoutPastPaperNestedInput
@@ -71330,6 +73129,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71350,6 +73151,8 @@ export namespace Prisma {
     restrictCopyPaste?: BoolFieldUpdateOperationsInput | boolean
     trackFocusLoss?: BoolFieldUpdateOperationsInput | boolean
     googleSheetsSyncEnabled?: BoolFieldUpdateOperationsInput | boolean
+    randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
     quizLectureId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72038,6 +73841,15 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type DocumentTemplateCreateManyUserInput = {
+    id?: string
+    name: string
+    fileUrl: string
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type QuizAttemptUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
@@ -72549,6 +74361,33 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type DocumentTemplateUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentTemplateUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentTemplateUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PostCreateManyForumInput = {
     id?: string
     content: string
@@ -72844,6 +74683,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRankInput = {
@@ -72892,6 +74732,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutRankInput = {
@@ -73144,6 +74985,10 @@ export namespace Prisma {
      * @deprecated Use AccountDefaultArgs instead
      */
     export type AccountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AccountDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use DocumentTemplateDefaultArgs instead
+     */
+    export type DocumentTemplateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DocumentTemplateDefaultArgs<ExtArgs>
     /**
      * @deprecated Use SessionDefaultArgs instead
      */
