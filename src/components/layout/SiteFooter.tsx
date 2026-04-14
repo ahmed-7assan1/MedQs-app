@@ -1,9 +1,13 @@
+"use client";
 import Link from "next/link";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
+import { Facebook, Twitter, Youtube, Instagram, Send, Phone } from "lucide-react";
 
 /**
  * Legal + trust links on every student-facing page (inside main shell).
  */
-export function SiteFooter({ siteName = "MedQs" }: { siteName?: string }) {
+export function SiteFooter() {
+  const { siteName = "MedQs", facebookUrl, twitterUrl, youtubeUrl, instagramUrl, telegramUrl, whatsappUrl, hulkLogoUrl } = useSiteConfig();
   const year = new Date().getFullYear();
   return (
     <footer
@@ -28,12 +32,42 @@ export function SiteFooter({ siteName = "MedQs" }: { siteName?: string }) {
           <Link href="/dashboard-app" className="text-muted-foreground transition-colors hover:text-primary">
             Dashboard
           </Link>
-        {/* Hidden until ready */}
         </nav>
       </div>
-      <p className="mx-auto mt-6 max-w-6xl text-center text-[11px] text-muted-foreground/80 sm:text-left">
-        © {year} {siteName}. All rights reserved.
-      </p>
+
+      <div className="mx-auto mt-8 flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center justify-between border-t border-border/40 pt-6">
+        <p className="text-[11px] text-muted-foreground/80">
+          © {year} {siteName}. All rights reserved.
+        </p>
+
+        <div className="flex items-center gap-4 text-muted-foreground">
+          {facebookUrl && (
+            <a href={facebookUrl} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors"><Facebook className="w-4 h-4" /></a>
+          )}
+          {twitterUrl && (
+            <a href={twitterUrl} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors"><Twitter className="w-4 h-4" /></a>
+          )}
+          {instagramUrl && (
+            <a href={instagramUrl} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors"><Instagram className="w-4 h-4" /></a>
+          )}
+          {youtubeUrl && (
+            <a href={youtubeUrl} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors"><Youtube className="w-4 h-4" /></a>
+          )}
+          {telegramUrl && (
+            <a href={telegramUrl} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors"><Send className="w-4 h-4" /></a>
+          )}
+          {whatsappUrl && (
+            <a href={whatsappUrl} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors"><Phone className="w-4 h-4" /></a>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-medium tracking-widest text-muted-foreground uppercase">Created by DR.HULK</span>
+          {hulkLogoUrl && (
+            <img src={hulkLogoUrl} alt="Dr. Hulk" className="w-6 h-6 object-contain rounded-sm" />
+          )}
+        </div>
+      </div>
     </footer>
   );
 }

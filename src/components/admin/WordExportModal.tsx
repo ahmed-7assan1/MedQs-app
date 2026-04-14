@@ -100,10 +100,14 @@ export function WordExportModal({ questions, onClose, title = "Export Settings",
       const st = savedTemplates.find(t => t.id === selectedTemplateId);
       if (st) {
         try {
-          const res = await fetch(st.fileUrl);
+          const res = await fetch(`/api/v1/download-proxy?url=${encodeURIComponent(st.fileUrl)}`);
+          if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
           templateBuffer = await res.arrayBuffer();
-        } catch(e) {
+        } catch(e: any) {
           console.error("Failed to fetch saved template", e);
+          toast.error("Failed to download the selected template: " + e.message);
+          setIsExporting(false);
+          return;
         }
       }
     }

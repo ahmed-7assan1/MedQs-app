@@ -6,7 +6,7 @@ import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { generateJsonWithFallback } from "@/lib/ai-router";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 async function fileToText(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());

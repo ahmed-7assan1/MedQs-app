@@ -234,6 +234,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
   const [saving, setSaving] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [quizTitle, setQuizTitle] = useState("");
+  const [duplicates, setDuplicates] = useState<boolean[]>([]);
 
   async function handleExtract() {
     if (!file) return toast.error("Choose a PDF or DOCX file");
@@ -250,16 +251,31 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
         setIssues([]);
         return;
       }
-      setQuestions(data.questions ?? []);
+      const extractedQuestions = data.questions ?? [];
+      setQuestions(extractedQuestions);
       setIssues(data.issues ?? []);
       setQuizTitle(data.quizTitle ?? "");
-      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
-        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
-      }
-      if (data.questions?.length) {
-        toast.success(`Extracted ${data.questions.length} questions`);
+      
+      // Inline duplicate check
+      if (extractedQuestions.length > 0) {
+        toast.success(`Extracted ${extractedQuestions.length} questions`);
+        fetch("/api/v1/admin/questions/check-duplicates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questions: extractedQuestions.map((q: any) => q.body) })
+        })
+        .then(r => r.json())
+        .then(d => {
+          if (Array.isArray(d.duplicates)) setDuplicates(d.duplicates);
+        })
+        .catch(() => {});
       } else {
         toast.error("No questions found in file");
+        setDuplicates([]);
+      }
+
+      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
+        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
       }
     } catch {
       toast.error("Extraction failed");
@@ -279,6 +295,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
   function removeQuestion(i: number) {
     setQuestions((q) => q.filter((_, idx) => idx !== i));
     setIssues((iss) => iss.filter((x) => x.index !== i).map((x) => ({ ...x, index: x.index > i ? x.index - 1 : x.index })));
+    setDuplicates((prev) => prev.filter((_, idx) => idx !== i));
   }
 
   function patchQuestion(i: number, patch: Partial<ExtractedQuestion>) {
@@ -414,6 +431,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
             </div>
           {exportOpen && (
             <WordExportModal 
+              filename={quizTitle || "Questions_Export"}
               questions={questions.map(q => ({
                 groupTitle: quizTitle,
                 body: q.body,
@@ -446,6 +464,11 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
                     {hasIssue && <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-500" />}
                   </div>
                   <div className="flex flex-shrink-0 items-center gap-1 ml-2">
+                    {duplicates[i] && (
+                      <span className="rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+                        DUPLICATE
+                      </span>
+                    )}
                     <span className={cn(
                       "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
                       q.difficulty === "EASY" ? "bg-green-100 text-green-700" :
@@ -532,6 +555,204 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
               </div>
             );
           })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── PDF/DOCX AI Notes Generator ──────────────────────────────────────────────
+
+function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [instructions, setInstructions] = useState("");
+  const [generatedNotes, setGeneratedNotes] = useState<{title: string; content: string} | null>(null);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleGenerateNotes() {
+    if (!file) return toast.error("Choose a PDF or DOCX file");
+    setLoading(true);
+    const form = new FormData();
+    form.append("file", file);
+    if (instructions) form.append("instructions", instructions);
+    if (providerChoice !== "auto") form.append("preferredProvider", providerChoice);
+    
+    try {
+      const res = await fetch("/api/v1/ai/generate-notes", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : "Notes generation failed");
+        setGeneratedNotes(null);
+        return;
+      }
+      
+      if (!data.content) {
+        toast.error("No valid text could be processed from this file.");
+        return;
+      }
+
+      setGeneratedNotes({ title: data.title, content: data.content });
+      toast.success("Study notes generated beautifully!");
+
+      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
+        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
+      }
+    } catch {
+      toast.error("Notes generation failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleExportWord() {
+    if (!generatedNotes) return;
+    setExporting(true);
+    try {
+      // Extremely simple but incredibly effective approach to converting Markdown to Word:
+      // Render as HTML with Word-compatible CSS namespaces.
+      // 1. Convert markdown to basic HTML manually so it opens correctly in MS Word
+      
+      let htmlBody = generatedNotes.content
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") // sanitize
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        .replace(/^\> (.*$)/gim, '<blockquote style="background:#f0f4ff; border-left: 4px solid #4472c4; padding: 10px; font-style: italic;">$1</blockquote>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^\- (.*$)/gim, '<li>$1</li>')
+        .replace(/\n\n/g, '<br/><br/>')
+        .replace(/\n/g, '<br/>');
+
+      // Wrap lists 
+      htmlBody = htmlBody.replace(/(<li>.*<\/li>(\s*<br\/>\s*)*)+/gim, (match) => {
+        return '<ul>' + match.replace(/<br\/>/g, '') + '</ul><br/>';
+      });
+
+      const fullHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="utf-8">
+          <title>${generatedNotes.title}</title>
+          <style>
+            body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 14pt; line-height: 1.5; color: #111; }
+            h1 { color: #0f172a; font-size: 24pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+            h2 { color: #1e293b; font-size: 18pt; margin-top: 16px; color: #1e3a8a; }
+            h3 { color: #334155; font-size: 14pt; font-weight: bold; }
+            ul { margin-top: 5px; margin-bottom: 15px; }
+            li { margin-bottom: 5px; }
+            strong { color: #b91c1c; } /* Reddish for medical terms */
+          </style>
+        </head>
+        <body>
+          ${htmlBody}
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\\ufeff', fullHtml], { type: 'application/msword;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${generatedNotes.title.replace(/[^a-zA-Z0-9 ]/g, "").substring(0, 30) || 'Study_Notes'}.doc`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      toast.success("Notes exported to Word successfully!");
+    } catch(e) {
+      toast.error("Export format failed.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-indigo-500" />
+          <h2 className="font-display text-lg font-semibold">AI Study Notes Generator</h2>
+        </div>
+        <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-600">New ✨</span>
+      </div>
+
+      {!generatedNotes ? (
+        <>
+          <label className={cn(
+            "mb-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 transition-colors",
+            file ? "border-indigo-500/50 bg-indigo-500/5" : "border-border hover:border-indigo-500/50 hover:bg-muted"
+          )}>
+            <BookOpen className="mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="text-sm font-medium">{file ? file.name : "Drop PDF or DOCX lecture here"}</p>
+            <p className="text-xs text-muted-foreground">{file ? `${(file.size / 1024).toFixed(0)} KB` : "AI will compress and summarize it"}</p>
+            <input
+              type="file"
+              accept=".pdf,.docx,.jpg,.png"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
+
+          <div className="mb-4">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Focus / Instructions (Optional)</label>
+            <textarea
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              placeholder="e.g. Include schemas and mnemonics for memorization..."
+              rows={2}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <button
+            onClick={handleGenerateNotes}
+            disabled={!file || loading}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {loading ? "Reading and Summarizing..." : "Generate Notes with AI"}
+          </button>
+        </>
+      ) : (
+        <div className="space-y-4 animate-fade-in">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Generated Notes Title</label>
+            <input 
+              type="text" 
+              value={generatedNotes.title} 
+              onChange={(e) => setGeneratedNotes({...generatedNotes, title: e.target.value})}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 font-semibold"
+            />
+          </div>
+          <div>
+            <label className="mb-1 flex justify-between items-end text-xs font-medium text-muted-foreground">
+              <span>Markdown Content</span>
+            </label>
+            <textarea 
+              value={generatedNotes.content}
+              onChange={(e) => setGeneratedNotes({...generatedNotes, content: e.target.value})}
+              rows={12}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono focus:outline-none"
+            />
+          </div>
+          
+          <div className="flex gap-2 justify-end">
+            <button 
+              onClick={() => { setGeneratedNotes(null); setFile(null); }}
+              className="px-4 py-2 rounded-lg border border-border hover:bg-muted text-sm"
+            >
+              Reset
+            </button>
+            <button 
+              onClick={handleExportWord}
+              disabled={exporting}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+            >
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+              Export to Word
+            </button>
           </div>
         </div>
       )}
@@ -681,6 +902,7 @@ export default function AIToolsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <ManualAssistPanel providerChoice={providerChoice} />
         <PDFExtractPanel providerChoice={providerChoice} />
+        <PDFNotesPanel providerChoice={providerChoice} />
       </div>
       <div className="mt-6">
         <LectureEnhancePanel providerChoice={providerChoice} />

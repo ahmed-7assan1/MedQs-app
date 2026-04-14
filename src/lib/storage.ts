@@ -8,37 +8,21 @@
  * (not for Vercel — use S3/R2/Uploadthing there).
  */
 
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 import path from "path";
 import { mkdir, writeFile, unlink } from "fs/promises";
+import { UTApi } from "uploadthing/server";
 
 /** Dev / self-hosted: save under public/uploads — no S3, no card. Not supported on Vercel (ephemeral disk). */
 export function localDiskUploadEnabled(): boolean {
   return process.env.USE_LOCAL_FILE_UPLOAD === "true" && process.env.VERCEL !== "1";
 }
 
-function getClient(): S3Client {
-  return new S3Client({
-    region: process.env.S3_REGION ?? "auto",
-    endpoint: process.env.S3_ENDPOINT,
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY ?? "",
-      secretAccessKey: process.env.S3_SECRET_KEY ?? "",
-    },
-    // Force path-style for R2 and local MinIO
-    forcePathStyle: !!process.env.S3_ENDPOINT,
-  });
-}
-
-const BUCKET = process.env.S3_BUCKET ?? "medqs";
-
 function assertStorageConfigured(): void {
-  if (!process.env.S3_ACCESS_KEY?.trim() || !process.env.S3_SECRET_KEY?.trim()) {
+  if (!process.env.UPLOADTHING_TOKEN?.trim()) {
     throw new Error(
-      "Object storage is not configured: set S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET, and S3_PUBLIC_URL (or S3_ENDPOINT for R2). " +
-        "For local development without S3, set USE_LOCAL_FILE_UPLOAD=true in .env (files go to public/uploads/) and restart the dev server."
+      "Object storage configured incorrectly: Set UPLOADTHING_TOKEN in .env. " +
+        "For local development without cloud storage, set USE_LOCAL_FILE_UPLOAD=true"
     );
   }
 }
@@ -73,7 +57,7 @@ export const MAX_FILE_SIZE: Record<string, number> = {
   question:   8 * 1024 * 1024, // 8 MB
   site:       10 * 1024 * 1024, // 10 MB
   ai:          4 * 1024 * 1024, // 4 MB — Dr. Q chat attachments
-  template:    4 * 1024 * 1024, // 4 MB
+  template:   32 * 1024 * 1024, // 32 MB
 };
 
 // ─── Direct server-side upload (for small files / PDFs) ────────────────────────
@@ -98,57 +82,23 @@ export async function uploadFile(
   }
 
   assertStorageConfigured();
-  const key = `${folder}/${filename}`;
-
-  const client = getClient();
-  await client.send(
-    new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: mimeType,
-      CacheControl: "public, max-age=31536000",
-    })
-  );
-
-  const url = process.env.S3_PUBLIC_URL
-    ? `${process.env.S3_PUBLIC_URL}/${key}`
-    : `https://${BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${key}`;
-
-  return { url, key };
+  const utapi = new UTApi();
+  
+  // Wrap buffer into a File object with custom name for UploadThing
+  const f = new File([new Uint8Array(buffer)], filename, { type: mimeType });
+  const response = await utapi.uploadFiles([f]);
+  
+  if (!response[0].data) throw new Error("UploadThing upload failed: " + response[0].error?.message);
+  
+  return { url: response[0].data.url, key: response[0].data.key };
 }
-
-// ─── Presigned PUT URL (for large files — browser uploads directly) ────────────
 
 export async function getPresignedUploadUrl(
   fileName: string,
   mimeType: string,
   folder: string
 ): Promise<{ uploadUrl: string; publicUrl: string; key: string }> {
-  if (localDiskUploadEnabled()) {
-    throw new Error(
-      "Presigned S3 upload is disabled when USE_LOCAL_FILE_UPLOAD=true. Use POST /api/v1/upload/direct instead."
-    );
-  }
-  assertStorageConfigured();
-  const ext = path.extname(fileName).toLowerCase();
-  const key = `${folder}/${randomUUID()}${ext}`;
-
-  const client = getClient();
-  const command = new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: key,
-    ContentType: mimeType,
-    CacheControl: "public, max-age=31536000",
-  });
-
-  const uploadUrl = await getSignedUrl(client, command, { expiresIn: 300 }); // 5 min
-
-  const publicUrl = process.env.S3_PUBLIC_URL
-    ? `${process.env.S3_PUBLIC_URL}/${key}`
-    : `https://${BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${key}`;
-
-  return { uploadUrl, publicUrl, key };
+  throw new Error("Presigned uploads are deprecated. Use Client-Side UploadThing directly or Cloudinary signatures.");
 }
 
 // ─── Delete a file ─────────────────────────────────────────────────────────────
@@ -159,6 +109,14 @@ export async function deleteFile(key: string): Promise<void> {
     await unlink(full).catch(() => {});
     return;
   }
-  const client = getClient();
-  await client.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
+  assertStorageConfigured();
+  const utapi = new UTApi();
+  
+  // Note: UploadThing uses the key for deletion
+  if (key.startsWith("http")) { // If URL is passed instead of key by mistake
+    const urlKey = key.split('/').pop();
+    if (urlKey) await utapi.deleteFiles([urlKey]);
+  } else {
+    await utapi.deleteFiles([key]);
+  }
 }

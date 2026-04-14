@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
   // Get user with rank
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    include: { rank: true },
+    include: { rank: true, university: true, semester: true },
   });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
@@ -285,7 +285,15 @@ export async function POST(req: NextRequest) {
   const systemPrompt = buildMedicalSystemPrompt(
     context ? `Current context: the student is studying ${context}` : undefined
   );
-  const personalContext = await buildStudentStudyContext(session.user.id).catch(() => "");
+  let personalContext = await buildStudentStudyContext(session.user.id).catch(() => "");
+  
+  const profileLines: string[] = [];
+  if (user.name) profileLines.push(`Name: ${user.name}`);
+  if (user.university) profileLines.push(`University/Faculty: ${user.university.name}`);
+  if (user.semester) profileLines.push(`Academic Year & Semester: ${user.semester.name}`);
+  if (profileLines.length > 0) {
+    personalContext = `### Student Profile Information:\n${profileLines.join("\n")}\n(Do NOT ask the user for this information since it is already provided above)\n\n### Study Context:\n${personalContext}`;
+  }
   const enhancedPrompt = personalContext
     ? `${systemPrompt}\n\nPersonal learning context (use this to personalize explanation and revision focus):\n${personalContext}`
     : systemPrompt;

@@ -33,7 +33,7 @@ export function MedQsLogoMark({
     <span
       style={style}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full adaptive-logo-glow",
+        "inline-flex shrink-0 items-center justify-center rounded-full",
         className
       )}
     >
@@ -89,7 +89,7 @@ export function MedQsLogoLockup({
         className
       )}
     >
-      <div className={cn("flex items-center justify-center rounded-2xl bg-white p-2 shadow-sm dark:bg-white/5", iconClassName)}>
+      <div className={cn("flex items-center justify-center", iconClassName)}>
         <img
           src={src}
           alt={siteName ?? "MedQs"}

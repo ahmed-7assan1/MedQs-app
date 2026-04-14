@@ -24,6 +24,7 @@ const adminLinks: { href: string; label: string; icon: ElementType }[] = [
   { href: "/admin/lectures", label: "Lectures", icon: Video },
   { href: "/admin/past-papers", label: "Past Papers", icon: FileText },
   { href: "/admin/questions", label: "Questions", icon: HelpCircle },
+  { href: "/admin/duplicates", label: "Duplicates", icon: Layers },
   { href: "/admin/quiz-creator", label: "Quiz Creator", icon: Layers },
   { href: "/admin/ai-tools", label: "AI Tools", icon: Zap },
   { href: "/admin/forum", label: "Community", icon: MessageSquare },

@@ -495,25 +495,53 @@ function TasksMini({
 }
 
 function NotesMini() {
-  const [text, setText] = useState(() => {
+  const [html, setHtml] = useState(() => {
     try {
-      return localStorage.getItem("medqs-notes-widget") ?? "";
+      return localStorage.getItem("medqs-notes-widget-html") ?? "";
     } catch {
       return "";
     }
   });
+  
+  const contentRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     try {
-      localStorage.setItem("medqs-notes-widget", text);
+      localStorage.setItem("medqs-notes-widget-html", html);
     } catch {}
-  }, [text]);
+  }, [html]);
+
+  const handleInput = () => {
+    if (contentRef.current) {
+      setHtml(contentRef.current.innerHTML);
+    }
+  };
+
+  const execCmd = (cmd: string, val?: string) => {
+    document.execCommand(cmd, false, val);
+  };
+
   return (
-    <textarea
-      value={text}
-      onChange={(e) => setText(e.target.value)}
-      placeholder="Notes…"
-      className="h-36 w-full resize-none bg-transparent p-2 text-xs text-white/80 placeholder:text-white/25 focus:outline-none"
-    />
+    <div className="flex h-full flex-col min-h-[200px]">
+      <div className="flex flex-wrap gap-1 border-b border-white/10 bg-black/20 p-1.5" data-widget-no-drag>
+        <button type="button" onClick={() => execCmd("bold")} className="rounded px-2 text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white">B</button>
+        <button type="button" onClick={() => execCmd("italic")} className="rounded px-2 text-xs italic text-white/70 hover:bg-white/10 hover:text-white">I</button>
+        <button type="button" onClick={() => execCmd("underline")} className="rounded px-2 text-xs underline text-white/70 hover:bg-white/10 hover:text-white">U</button>
+        <div className="w-px bg-white/10 mx-1" />
+        <button type="button" onClick={() => execCmd("foreColor", "#3b82f6")} className="h-4 w-4 rounded-full bg-blue-500 hover:ring-2 hover:ring-white/50" />
+        <button type="button" onClick={() => execCmd("foreColor", "#ef4444")} className="h-4 w-4 rounded-full bg-red-500 hover:ring-2 hover:ring-white/50" />
+        <button type="button" onClick={() => execCmd("foreColor", "#22c55e")} className="h-4 w-4 rounded-full bg-green-500 hover:ring-2 hover:ring-white/50" />
+        <button type="button" onClick={() => execCmd("foreColor", "#ffffff")} className="h-4 w-4 rounded-full bg-white hover:ring-2 hover:ring-white/50" />
+      </div>
+      <div 
+        ref={contentRef}
+        contentEditable
+        onInput={handleInput}
+        className="min-h-0 flex-1 overflow-auto p-3 text-sm text-white/90 outline-none"
+        data-widget-no-drag
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </div>
   );
 }
 
@@ -1154,7 +1182,7 @@ function DrawPadWidget({
 
   return (
     <div className="flex h-full min-h-[120px] min-w-0 flex-col">
-      <div className="max-h-[38vh] space-y-1 overflow-y-auto border-b border-white/10 bg-black/25 px-1.5 py-1.5">
+      <div className={cn("max-h-[38vh] space-y-1 overflow-y-auto px-1.5 py-1.5 bg-black/25 backdrop-blur-md rounded-xl mx-2 mb-2 border border-white/10", src ? "" : "border-b-0")}>
         {onPdfSrc && (
           <div className="mb-1 rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5">
             <span className="mb-1 block text-[9px] font-medium uppercase tracking-wide text-white/40">
@@ -1395,7 +1423,7 @@ function DrawPadWidget({
         </div>
       ) : (
         <div
-          className="min-h-0 flex-1 overflow-auto rounded-b-lg bg-[#050608] [background-size:28px_28px] [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)]"
+          className="min-h-0 flex-1 overflow-auto rounded-b-lg bg-transparent"
           data-widget-no-drag
         >
           <div
@@ -2280,19 +2308,24 @@ function FloatingWidget({
   return (
     <div
       data-widget-root
-      className="pointer-events-auto absolute flex flex-col overflow-hidden rounded-2xl border border-white/[0.12] shadow-2xl"
+      className={cn(
+        "pointer-events-auto absolute flex flex-col overflow-hidden",
+        widget.type === "draw" ? "shadow-none" : "rounded-2xl border border-white/[0.12] shadow-2xl"
+      )}
       style={{
         left: widget.x,
         top: widget.y,
         width: widget.minimized ? "auto" : widget.w,
         height: widget.minimized ? "auto" : widget.h,
-        zIndex: 40,
-        background: "rgba(12,14,20,0.92)",
-        backdropFilter: "blur(16px)",
+        zIndex: widget.type === "draw" ? 10 : 40, // Base layer for sketch
+        background: widget.type === "draw" ? "transparent" : "rgba(12,14,20,0.92)",
+        backdropFilter: widget.type === "draw" ? "none" : "blur(16px)",
       }}
     >
       <div
-        className="flex cursor-move touch-none select-none items-center gap-2 border-b border-white/10 px-2 py-1.5"
+        className={cn("flex touch-none select-none items-center gap-2 px-2 py-1.5", 
+           widget.type === "draw" ? "border-b-0 cursor-move bg-black/40 rounded-xl m-2 backdrop-blur-md" : "border-b border-white/10 cursor-move"
+        )}
         onPointerDown={onHeaderPointerDown}
         onPointerMove={onHeaderPointerMove}
         onPointerUp={onHeaderPointerUp}

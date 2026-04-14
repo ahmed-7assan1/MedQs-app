@@ -5,6 +5,7 @@ import { AdBannerModal } from "@/components/ads/AdBannerModal";
 import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
+import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -56,7 +57,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <div className={cn("app-shell")}>
+        <div className={cn("app-shell flex flex-col min-h-screen")}>
           <Sidebar
             userName={isGuest ? "Guest" : displayName}
             userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
@@ -67,14 +68,15 @@ export default async function StudentLayout({ children }: { children: React.Reac
             isGuest={isGuest}
             unreadCount={unreadCount}
           />
-          <div className="main-content">
+          <div className="main-content flex-1 flex flex-col pt-16 md:pl-64 min-w-0 transition-all duration-300">
             {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
             {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
-            <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-8 outline-none">
+            <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-8 outline-none w-full">
               {children}
             </main>
-            <SiteFooter siteName={siteConfig?.siteName ?? "MedQs"} />
+            <SiteFooter />
             {isAdmin && !isGuest ? <AdminStudentBar /> : null}
+            {!isGuest && <OnboardingTutorial />}
             <CookieConsentBanner />
           </div>
         </div>

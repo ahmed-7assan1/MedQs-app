@@ -84,6 +84,13 @@ model SiteConfig {
   enableAds           Boolean  @default(true)
   enableNotifs        Boolean  @default(true)
   enableLeaderboard   Boolean  @default(true)
+  facebookUrl         String?
+  twitterUrl          String?
+  youtubeUrl          String?
+  instagramUrl        String?
+  telegramUrl         String?
+  whatsappUrl         String?
+  hulkLogoUrl         String?
   fontSans            String?
   fontArabic          String?
   updatedAt           DateTime @updatedAt

@@ -10,9 +10,14 @@ import {
   ListOrdered,
   GraduationCap,
   BookOpen,
+  ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 
 interface Question {
   id: string;
@@ -88,6 +93,8 @@ export function QuizClient({
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [examMode, setExamMode] = useState(false);
+  const { siteName, logoUrl } = useSiteConfig();
+  const [logoHover, setLogoHover] = useState(false);
 
   const examActive = examMode || secureExamMode;
 
@@ -300,79 +307,100 @@ export function QuizClient({
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 md:px-6 md:py-8">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">Question bank</p>
-          <h1 className="font-display text-xl font-bold tracking-tight md:text-2xl">{paperTitle}</h1>
-          <p className="text-sm text-muted-foreground">
-            Question {currentIndex + 1} of {questions.length}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {!secureExamMode ? (
-            <div
-              className="flex rounded-xl border border-border bg-muted/30 p-1"
-              role="group"
-              aria-label="Study mode"
+    <div className="mx-auto max-w-4xl px-4 py-6 md:px-6 md:py-8 animate-fade-in">
+      <header className="mb-6 sticky top-4 z-40 group">
+        {/* Dynamic Glassmorphic Capsule */}
+        <div className="rounded-2xl border border-border bg-background/80 dark:bg-muted/40 px-3 py-2.5 shadow-xl shadow-black/5 dark:shadow-black/20 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors">
+          
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              onMouseEnter={() => setLogoHover(true)}
+              onMouseLeave={() => setLogoHover(false)}
+              className="flex items-center gap-2 rounded-xl bg-muted/50 dark:bg-white/[0.04] p-1.5 transition-colors hover:bg-muted dark:hover:bg-white/10"
             >
-              <button
-                type="button"
-                onClick={() => setExamMode(false)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  !examMode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                )}
-                aria-pressed={!examMode}
+              <MedQsLogoMark className="h-8 w-8" />
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: logoHover ? "auto" : 0, opacity: logoHover ? 1 : 0 }}
+                className="overflow-hidden whitespace-nowrap font-display text-sm font-bold tracking-tight text-foreground/90"
               >
-                <BookOpen className="h-3.5 w-3.5" aria-hidden />
-                Tutor
-              </button>
-              <button
-                type="button"
-                onClick={() => setExamMode(true)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  examMode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                )}
-                aria-pressed={examMode}
-              >
-                <GraduationCap className="h-3.5 w-3.5" aria-hidden />
-                Exam
-              </button>
+                <div className="pr-2">{siteName || "MedQs"}</div>
+              </motion.div>
+            </Link>
+
+            <div className="w-px h-8 bg-border mx-1 hidden sm:block" />
+
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Question {currentIndex + 1} of {questions.length}</p>
+              <h1 className="font-display text-base font-bold tracking-tight text-foreground truncate max-w-[200px] sm:max-w-[300px]">{paperTitle}</h1>
             </div>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-              <GraduationCap className="h-3.5 w-3.5" aria-hidden />
-              Secured exam
-            </span>
-          )}
-          <div
-            className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm tabular-nums text-muted-foreground"
-            title="Time on this question"
-          >
-            <Clock className="h-4 w-4 shrink-0" aria-hidden />
-            <span className="font-mono font-medium text-foreground">
-              {String(Math.floor(questionSeconds / 60)).padStart(2, "0")}:
-              {String(questionSeconds % 60).padStart(2, "0")}
-            </span>
           </div>
-          {timeLeft !== null && (
+
+          <div className="flex flex-wrap items-center gap-2">
+            {!secureExamMode ? (
+              <div
+                className="flex rounded-xl border border-border bg-muted/50 p-1"
+                role="group"
+                aria-label="Study mode"
+              >
+                <button
+                  type="button"
+                  onClick={() => setExamMode(false)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    !examMode ? "bg-background text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-pressed={!examMode}
+                >
+                  <BookOpen className="h-3.5 w-3.5" aria-hidden />
+                  Tutor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExamMode(true)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    examMode ? "bg-background text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-pressed={examMode}
+                >
+                  <GraduationCap className="h-3.5 w-3.5" aria-hidden />
+                  Exam
+                </button>
+              </div>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-200">
+                <GraduationCap className="h-3.5 w-3.5" aria-hidden />
+                Secured
+              </span>
+            )}
             <div
-              className={cn(
-                "flex items-center gap-2 rounded-xl border px-3 py-2 font-mono text-base font-bold tabular-nums transition-colors md:text-lg",
-                timerWarn
-                  ? "border-red-300 bg-red-50 text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400 animate-pulse-soft"
-                  : "border-border bg-card"
-              )}
-              role="timer"
-              aria-live="polite"
-              aria-label={`Quiz time remaining ${mins} minutes ${secs} seconds`}
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-muted/50 px-3 py-1.5 text-xs tabular-nums text-muted-foreground"
+              title="Time on this question"
             >
-              <Clock className="h-4 w-4 shrink-0" aria-hidden />
-              {mins}:{secs}
+              <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="font-mono font-medium">
+                {String(Math.floor(questionSeconds / 60)).padStart(2, "0")}:
+                {String(questionSeconds % 60).padStart(2, "0")}
+              </span>
             </div>
-          )}
+            {timeLeft !== null && (
+              <div
+                className={cn(
+                  "flex items-center gap-1.5 rounded-xl border px-3 py-1.5 font-mono text-sm font-bold tabular-nums transition-colors",
+                  timerWarn
+                    ? "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 animate-pulse-soft"
+                    : "border-border bg-muted/50 text-foreground"
+                )}
+                role="timer"
+                aria-live="polite"
+              >
+                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {mins}:{secs}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

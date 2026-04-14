@@ -6,6 +6,13 @@ interface PublicSiteConfig {
   logoUrl: string | null;
   logoUrlDark: string | null;
   primaryColor: string;
+  facebookUrl?: string | null;
+  twitterUrl?: string | null;
+  youtubeUrl?: string | null;
+  instagramUrl?: string | null;
+  telegramUrl?: string | null;
+  whatsappUrl?: string | null;
+  hulkLogoUrl?: string | null;
 }
 
 const DEFAULT: PublicSiteConfig = { siteName: "MedQs", logoUrl: null, logoUrlDark: null, primaryColor: "#2563eb" };
@@ -27,6 +34,13 @@ export function SiteConfigProvider({ children, initial }: { children: ReactNode;
             logoUrl: d.logoUrl ?? prev.logoUrl,
             logoUrlDark: d.logoUrlDark ?? prev.logoUrlDark,
             primaryColor: d.primaryColor ?? prev.primaryColor,
+            facebookUrl: d.facebookUrl ?? prev.facebookUrl,
+            twitterUrl: d.twitterUrl ?? prev.twitterUrl,
+            youtubeUrl: d.youtubeUrl ?? prev.youtubeUrl,
+            instagramUrl: d.instagramUrl ?? prev.instagramUrl,
+            telegramUrl: d.telegramUrl ?? prev.telegramUrl,
+            whatsappUrl: d.whatsappUrl ?? prev.whatsappUrl,
+            hulkLogoUrl: d.hulkLogoUrl ?? prev.hulkLogoUrl,
           }));
         }
       })

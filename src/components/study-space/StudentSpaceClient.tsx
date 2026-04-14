@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, LayoutGrid, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,30 +15,41 @@ type Mode = "desk" | "coach";
  */
 export function StudentSpaceClient() {
   const [mode, setMode] = useState<Mode>("desk");
+  const [mounted, setMounted] = useState(false);
+
+  // Initialize mode based on device width (mobile defaults to coach, PC to desk)
+  useEffect(() => {
+    setMounted(true);
+    if (window.innerWidth <= 768) {
+      setMode("coach");
+    }
+  }, []);
 
   return (
     <div
-      className="fixed inset-0 z-[10050] flex flex-col overflow-hidden bg-[#090a0e] text-white"
+      className="fixed inset-0 z-[10050] flex flex-col overflow-hidden bg-[#090a0e] text-white animate-fade-in"
       role="application"
       aria-label="Student focus desk"
     >
-      <header className="relative z-[10250] flex shrink-0 items-center gap-2 border-b border-white/[0.07] bg-[rgba(8,9,13,0.92)] px-3 py-2 backdrop-blur-xl md:gap-3 md:px-4">
-        <Link
-          href="/dashboard-app"
-          className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-xs font-semibold text-white/85 transition-colors hover:border-blue-500/35 hover:bg-blue-500/10 hover:text-white md:px-3"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 opacity-80" aria-hidden />
-          <span className="hidden sm:inline">Back to app</span>
-          <span className="sm:hidden">Exit</span>
-        </Link>
+      <header className="relative z-[10250] flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.07] bg-[rgba(8,9,13,0.92)] px-3 py-2 backdrop-blur-xl md:gap-3 md:px-4">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <Link
+            href="/dashboard-app"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-xs font-semibold text-white/85 transition-colors hover:border-blue-500/35 hover:bg-blue-500/10 hover:text-white md:px-3"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 opacity-80" aria-hidden />
+            <span className="hidden sm:inline">Back to app</span>
+            <span className="sm:hidden">Exit</span>
+          </Link>
 
-        <div className="hidden h-8 w-px bg-white/10 sm:block" aria-hidden />
+          <div className="hidden h-8 w-px bg-white/10 sm:block" aria-hidden />
 
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-sm font-bold tracking-tight text-white/95">Focus desk</p>
-          <p className="truncate text-[10px] text-white/38 md:text-[11px]">
-            Minimal distractions · Spotify, PDF, timers & notes as widgets
-          </p>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-sm font-bold tracking-tight text-white/95">Study Space</p>
+            <p className="truncate text-[10px] text-white/38 md:text-[11px]">
+              {mode === "desk" ? "For best board performance, use Google Chrome." : "Your AI Coach & Weekly Planner"}
+            </p>
+          </div>
         </div>
 
         <nav
@@ -56,7 +67,8 @@ export function StudentSpaceClient() {
             )}
           >
             <LayoutGrid className="h-3.5 w-3.5" aria-hidden />
-            Desk
+            <span className="hidden md:inline">Desk / Board</span>
+            <span className="md:hidden">Board</span>
           </button>
           <button
             type="button"
@@ -75,15 +87,23 @@ export function StudentSpaceClient() {
         </nav>
       </header>
 
-      <div className="relative min-h-0 flex-1">
-        {mode === "desk" ? (
-          <StudySpaceBoard embedded />
-        ) : (
-          <div className="dark h-full min-h-0 overflow-y-auto overscroll-contain bg-[#08090d]">
-            <PersonalStudyCoach />
-          </div>
-        )}
-      </div>
+      {mounted && (
+        <div className="relative min-h-0 flex-1">
+          {mode === "desk" ? (
+            <>
+              {/* Mobile warning overlay if they force open Desk on mobile (optional UX improvement) */}
+              <div className="md:hidden absolute top-0 left-0 right-0 z-50 bg-amber-500/90 text-white p-2 text-center text-xs font-medium">
+                The Board is optimized for PC. Please use Google Chrome on a larger screen.
+              </div>
+              <StudySpaceBoard embedded />
+            </>
+          ) : (
+            <div className="dark h-full min-h-0 overflow-y-auto overscroll-contain bg-[#08090d]">
+              <PersonalStudyCoach />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

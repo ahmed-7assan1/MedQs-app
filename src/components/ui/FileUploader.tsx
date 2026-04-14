@@ -4,6 +4,7 @@ import { Upload, X, CheckCircle2, Loader2, FileText, Image, Film, AlertCircle } 
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { uploadFiles } from "@/lib/uploadthing-react";
+import imageCompression from "browser-image-compression";
 
 function uploadthingPublicAppId(): string {
   return (process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID ?? "").trim();
@@ -101,116 +102,104 @@ export function FileUploader({
       ]);
     };
 
-    if (folder === "ad" && uploadthingPublicAppId()) {
+    let processedFile = file;
+
+    // 1. Client-Side Image Compression
+    if (file.type.startsWith("image/")) {
       try {
-        const uploaded = await uploadFiles("adBanner", { files: [file] });
+        const options = {
+          maxSizeMB: 1, // Compress large images down to approx 1MB safely without destroying quality
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        processedFile = await imageCompression(file, options);
+      } catch (e) {
+        console.warn("Image compression failed, proceeding with original source.", e);
+      }
+    }
+
+    // 2. Try Local Disk First (Fail-Safe for Developers)
+    try {
+      const fd = new FormData();
+      fd.append("file", processedFile);
+      fd.append("folder", folder);
+      const res = await fetch("/api/v1/upload/direct", { method: "POST", body: fd });
+      if (res.ok) {
+         const data = await res.json();
+         // If it uploaded locally, the URL starts with /uploads/
+         if (data.url && data.url.startsWith('/uploads/')) {
+            markDone(data.url);
+            return;
+         }
+      }
+    } catch { /* Silent failover to cloud */ }
+
+    // 3. CLOUDINARY for Images and Videos
+    if (processedFile.type.startsWith("image/") || processedFile.type.startsWith("video/")) {
+      try {
+        const signRes = await fetch("/api/v1/upload/cloudinary-sign", {
+           method: "POST", headers: { "Content-Type": "application/json" },
+           body: JSON.stringify({ folder: `medqs-${folder}` })
+        });
+        if (!signRes.ok) throw new Error("Could not fetch Cloudinary signature");
+        
+        const { timestamp, signature, cloudName, apiKey, folder: cloudFolder } = await signRes.json();
+        
+        const formData = new FormData();
+        formData.append("file", processedFile);
+        formData.append("api_key", apiKey);
+        formData.append("timestamp", timestamp);
+        formData.append("signature", signature);
+        formData.append("folder", cloudFolder);
+        
+        const cldUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+        
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", cldUrl);
+          xhr.upload.addEventListener("progress", (e) => {
+            if (e.lengthComputable) {
+              setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, progress: Math.round((e.loaded / e.total) * 100) } : f)));
+            }
+          });
+          xhr.addEventListener("load", () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              const response = JSON.parse(xhr.responseText);
+              markDone(response.secure_url);
+              resolve();
+            } else {
+              reject(new Error("Cloudinary upload failed: " + xhr.statusText));
+            }
+          });
+          xhr.addEventListener("error", () => reject(new Error("Network Error")));
+          xhr.send(formData);
+        });
+        return; 
+      } catch (e: any) {
+         setFiles((prev) => prev.map((f, i) => i === index ? { ...f, status: "error", error: e.message } : f));
+         return;
+      }
+    }
+
+    // 4. UPLOADTHING for Documents (PDFs, Word files, etc)
+    try {
+        if (!uploadthingPublicAppId()) throw new Error("UploadThing not configured");
+        
+        let endpoint: Parameters<typeof uploadFiles>[0] = "lectureFile";
+        if (folder === "ad") endpoint = "adBanner";
+        if (folder === "pastpaper") endpoint = "pastPaper";
+        if (folder === "avatar") endpoint = "avatar";
+        
+        const uploaded = await uploadFiles(endpoint, { files: [processedFile] });
         const url = fileUrlFromUt(uploaded[0]);
         if (url) {
-          markDone(url);
-          return;
+           markDone(url);
+           return;
+        } else {
+           throw new Error("UploadThing returned empty URL");
         }
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : "UploadThing failed";
-        console.warn("[FileUploader] adBanner:", msg);
-      }
-    }
-
-    const directFolders = ["forum", "question", "ad", "lecture", "pastpaper"] as const;
-    const canDirect = directFolders.includes(folder as (typeof directFolders)[number]);
-    /** Serverless hosts often cap request bodies ~4–5MB; direct upload goes through Next first */
-    const directFirstMaxBytes = 4 * 1024 * 1024;
-
-    if (canDirect && file.size <= directFirstMaxBytes) {
-      try {
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("folder", folder);
-        const res = await fetch("/api/v1/upload/direct", { method: "POST", body: fd });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && typeof data.url === "string") {
-          markDone(data.url);
-          return;
-        }
-      } catch {
-        /* continue to presigned PUT */
-      }
-    }
-
-    try {
-      const presignRes = await fetch("/api/v1/upload/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          mimeType: file.type,
-          folder,
-          fileSize: file.size,
-        }),
-      });
-
-      if (!presignRes.ok) {
-        const err = await presignRes.json().catch(() => ({}));
-        throw new Error(typeof err.error === "string" ? err.error : "Failed to get upload URL");
-      }
-
-      const { uploadUrl, publicUrl } = await presignRes.json();
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
-
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 100);
-            setFiles((prev) =>
-              prev.map((f, i) => (i === index ? { ...f, progress: pct } : f))
-            );
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error(`Upload failed: ${xhr.status}`));
-        });
-        xhr.addEventListener("error", () => reject(new Error("Network error")));
-        xhr.send(file);
-      });
-
-      markDone(publicUrl);
-    } catch (err: any) {
-      if (!canDirect) {
-        setFiles((prev) =>
-          prev.map((f, i) =>
-            i === index ? { ...f, status: "error", error: err?.message ?? "Upload failed" } : f
-          )
-        );
-        return;
-      }
-      try {
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("folder", folder);
-        const res = await fetch("/api/v1/upload/direct", { method: "POST", body: fd });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(typeof data.error === "string" ? data.error : "Direct upload failed");
-        }
-        if (typeof data.url !== "string") throw new Error("Invalid upload response");
-        markDone(data.url);
-      } catch (e2: any) {
-        setFiles((prev) =>
-          prev.map((f, i) =>
-            i === index
-              ? {
-                  ...f,
-                  status: "error",
-                  error: e2?.message ?? err?.message ?? "Upload failed",
-                }
-              : f
-          )
-        );
-      }
+    } catch(e: any) {
+        setFiles((prev) => prev.map((f, i) => i === index ? { ...f, status: "error", error: e.message } : f));
     }
   }
 

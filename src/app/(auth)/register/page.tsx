@@ -66,8 +66,12 @@ export default function RegisterPage() {
       return;
     }
     const nick = nickname.trim();
-    if (nick && !/^[a-zA-Z0-9._-]+$/.test(nick)) {
-      toast.error("Username: letters, numbers, dot, underscore, and dash only.");
+    if (!nick || !/^[a-zA-Z0-9._-]+$/.test(nick)) {
+      toast.error("Username is required and can only contain letters, numbers, dot, underscore, and dash.");
+      return;
+    }
+    if (!sid || sid.length < 6) {
+      toast.error("Official / faculty ID is required (must be at least 6 characters).");
       return;
     }
     setSaving(true);
@@ -78,9 +82,9 @@ export default function RegisterPage() {
         body: JSON.stringify({
           universityId: selectedUni.id,
           semesterId: selectedSem.id,
-          ...(nick ? { nickname: nick } : {}),
+          nickname: nick,
+          studentId: sid,
           ...(phoneInput.trim() ? { phone: phoneInput.trim() } : {}),
-          studentId: sid.length >= 6 ? sid : null,
         }),
       });
       if (res.ok) {
@@ -249,28 +253,28 @@ export default function RegisterPage() {
             )}
 
             {selectedSem && (
-              <div className="mt-6 space-y-4 rounded-xl border border-border bg-card/50 p-4">
-                <p className="text-xs font-semibold text-foreground">Profile on MedQs (optional)</p>
+              <div className="mt-6 space-y-4 rounded-xl border border-border bg-card/50 p-4 animate-slide-up">
+                <p className="text-xs font-semibold text-foreground">Required Profile Information</p>
                 <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  Helps classmates find you and personalizes the site. You can change these later in settings.
+                  Helps classmates find you and sets up your university profile correctly.
                 </p>
                 <div className="space-y-2">
-                  <label className="block text-[11px] font-medium text-muted-foreground">Username (public)</label>
+                  <label className="block text-[11px] font-medium text-foreground">Username <span className="text-red-500">*</span></label>
                   <input
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     placeholder="e.g. ahmed.m"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                     maxLength={30}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-[11px] font-medium text-muted-foreground">Official / faculty ID (searchable)</label>
+                  <label className="block text-[11px] font-medium text-foreground">University / Faculty ID <span className="text-red-500">*</span></label>
                   <input
                     value={studentIdInput}
                     onChange={(e) => setStudentIdInput(e.target.value)}
-                    placeholder="Leave empty — we assign one for you"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                    placeholder="Enter your official ID"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                     maxLength={24}
                   />
                 </div>

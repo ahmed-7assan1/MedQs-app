@@ -19,6 +19,13 @@ const BRANDING_KEYS = new Set([
   "primaryColor",
   "fontSans",
   "fontArabic",
+  "facebookUrl",
+  "twitterUrl",
+  "youtubeUrl",
+  "instagramUrl",
+  "telegramUrl",
+  "whatsappUrl",
+  "hulkLogoUrl",
 ]);
 
 function pickBranding(data: Record<string, unknown>): Record<string, unknown> {
@@ -66,6 +73,13 @@ export async function PUT(req: NextRequest) {
         primaryColor: typeof merged.primaryColor === "string" ? merged.primaryColor : existing.primaryColor,
         fontSans: typeof merged.fontSans === "string" ? merged.fontSans : existing.fontSans,
         fontArabic: typeof merged.fontArabic === "string" ? merged.fontArabic : existing.fontArabic,
+        facebookUrl: merged.facebookUrl === null || typeof merged.facebookUrl === "string" ? merged.facebookUrl : existing.facebookUrl,
+        twitterUrl: merged.twitterUrl === null || typeof merged.twitterUrl === "string" ? merged.twitterUrl : existing.twitterUrl,
+        youtubeUrl: merged.youtubeUrl === null || typeof merged.youtubeUrl === "string" ? merged.youtubeUrl : existing.youtubeUrl,
+        instagramUrl: merged.instagramUrl === null || typeof merged.instagramUrl === "string" ? merged.instagramUrl : existing.instagramUrl,
+        telegramUrl: merged.telegramUrl === null || typeof merged.telegramUrl === "string" ? merged.telegramUrl : existing.telegramUrl,
+        whatsappUrl: merged.whatsappUrl === null || typeof merged.whatsappUrl === "string" ? merged.whatsappUrl : existing.whatsappUrl,
+        hulkLogoUrl: merged.hulkLogoUrl === null || typeof merged.hulkLogoUrl === "string" ? merged.hulkLogoUrl : existing.hulkLogoUrl,
       },
     });
     return NextResponse.json(config);

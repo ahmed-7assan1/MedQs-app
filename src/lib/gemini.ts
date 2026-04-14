@@ -804,6 +804,76 @@ Return ONLY JSON:
   };
 }
 
+// ─── 7. Admin: Study Notes Extractor/Generator (AI Tools) ────────────────
+
+export async function generateStudyNotesWithMeta(
+  sourceText: string,
+  instructions: string,
+  options?: AIRequestOptions
+): Promise<AIWithMeta<{ title: string; content: string }>> {
+  const body = sourceText.trim().slice(0, 30_000); // Allow larger chunk for full notes
+  const userInstructions = instructions.trim();
+  
+  const prompt = `You are a world-class medical professor creating highly structured, comprehensive, and beautiful study notes directly from a source document.
+
+SOURCE MATERIAL:
+${body || "(No source provided)"}
+
+${userInstructions ? `SPECIFIC FOCUS INSTRUCTIONS:\n${userInstructions}\n` : ""}
+
+REQUIREMENTS:
+1. Generate extremely detailed study notes based ONLY on the source material.
+2. Structure the notes beautifully using Markdown formatting:
+   - Use headings (##) for main topics and subheadings (###) for details.
+   - Use bold text for key medical terms, symptoms, and drugs.
+   - Group related concepts using bullet points and numbered lists.
+3. Incorporate at least 2-3 "Clinical Pearls" or memory mnemonics (schemas) where applicable to aid student memorization. Highlight these in markdown blockquotes (>).
+4. Organize the content logically (e.g., Pathophysiology -> Clinical Presentation -> Diagnosis -> Management).
+
+FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
+TITLE: [A highly descriptive title for these notes]
+CONTENT:
+[The full, beautifully formatted Markdown string...]`;
+
+  try {
+    const row = await generateAIReplyWithFallback(prompt, "You are a professional medical educator.", { 
+      preferredProvider: options?.preferredProvider 
+    });
+
+    let text = row.text;
+    let title = "Generated Study Notes";
+
+    const titleMatch = text.match(/TITLE:\s*(.*)/i);
+    if (titleMatch) {
+      title = titleMatch[1].trim().replace(/\[|\]/g, "").slice(0, 150);
+      text = text.replace(titleMatch[0], "").trim();
+    }
+
+    const contentMatch = text.match(/CONTENT:\s*([\s\S]*)/i);
+    if (contentMatch) {
+      text = contentMatch[1].trim();
+    }
+
+    if (!text || text.length < 20) {
+      throw new Error("Parsed content is too short or empty");
+    }
+
+    return {
+      data: { title, content: text },
+      meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders }
+    };
+  } catch (e) {
+    return {
+      data: { 
+        title: "Study Notes", 
+        content: "Failed to generate notes. The document might be too large, or the AI stopped generating abruptly. Try splitting the text into smaller files." 
+      },
+      meta: { provider: "error", triedProviders: [] }
+    };
+  }
+}
+
+
 // ─── 7. Gemini rate limit info ────────────────────────────────────────────────
 
 export const GEMINI_LIMITS = {

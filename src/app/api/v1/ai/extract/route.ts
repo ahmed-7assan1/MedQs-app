@@ -6,6 +6,8 @@ import { extractQuestionsFromTextByModeWithMeta, validateQuestionsWithMeta } fro
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
 import { redisIncrWithExpire } from "@/lib/redis";
 
+export const maxDuration = 300; // 5 minutes max duration for Vercel
+
 const RATE_LIMIT = 5; // PDF extractions per hour — each can be large
 
 function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {

@@ -208,271 +208,329 @@ export default async function DashboardPage() {
       : "Track modules, papers, and community activity in one clinical-grade workspace.";
 
   return (
-    <StudentPageShell maxWidthClass="max-w-7xl" eyebrow={greeting} title={user?.name ?? "Student"} subtitle={dashSubtitle}>
-      {/* Hero stats */}
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+    <StudentPageShell maxWidthClass="max-w-7xl">
+      {/* Hero Banner */}
+      <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-sky-500 to-indigo-600 p-8 text-white shadow-2xl flex items-center justify-between">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay pointer-events-none" />
+        <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-indigo-900/30 blur-2xl" />
+        
+        <div className="relative z-10 max-w-2xl">
+          <p className="mb-2 text-sm font-semibold tracking-wide text-sky-100 uppercase">{greeting}</p>
+          <h1 className="mb-3 font-display text-4xl font-bold tracking-tight md:text-5xl drop-shadow-sm">
+            Welcome back, <span className="bg-gradient-to-r from-sky-100 to-white bg-clip-text text-transparent">{user?.name?.split(" ")[0] ?? "Student"}</span>
+          </h1>
+          <p className="text-sm leading-relaxed text-sky-100/90 md:text-base">
+            {dashSubtitle}
+          </p>
+        </div>
+        <div className="hidden lg:flex relative z-10 pr-8">
+          <Sparkles className="h-24 w-24 animate-pulse text-sky-200/50 mix-blend-screen" strokeWidth={1.5} />
+        </div>
+      </div>
+
+      {/* Hero Stats */}
+      <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
           {
             label: "Study streak",
             value: `${streak}d`,
             sub: streak > 0 ? "Keep it going" : "Start today",
             icon: Flame,
-            tone: "text-orange-500",
+            textTone: "text-orange-500 dark:text-orange-400",
+            bgTone: "from-orange-500/10 to-transparent border-orange-500/20",
           },
           {
             label: "Questions today",
             value: todayItemCount,
             sub: "Items in sessions",
             icon: Target,
-            tone: "text-teal-600 dark:text-teal-400",
+            textTone: "text-teal-600 dark:text-teal-400",
+            bgTone: "from-teal-500/10 to-transparent border-teal-500/20",
           },
           {
             label: "Mastery",
             value: `${overallPct}%`,
             sub: `${totalCorrect}/${totalQuestions} correct`,
             icon: TrendingUp,
-            tone: "text-emerald-600 dark:text-emerald-400",
+            textTone: "text-emerald-600 dark:text-emerald-400",
+            bgTone: "from-emerald-500/10 to-transparent border-emerald-500/20",
           },
           {
             label: "Your points",
             value: rankInfo?.points ?? 0,
             sub: rankInfo?.rank?.label ?? "Newbie",
             icon: Trophy,
-            tone: "text-amber-500",
+            textTone: "text-amber-500 dark:text-amber-400",
+            bgTone: "from-amber-500/10 to-transparent border-amber-500/20",
           },
-        ].map(({ label, value, sub, icon: Icon, tone }) => (
-          <MedqsCard key={label} hover className="animate-fade-up">
-            <div className="flex items-start justify-between gap-2">
+        ].map(({ label, value, sub, icon: Icon, textTone, bgTone }, idx) => (
+          <div
+            key={label}
+            className={cn(
+              "group relative overflow-hidden rounded-2xl border bg-card p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl dark:border-white/10 dark:bg-slate-900 animate-fade-in",
+              bgTone
+            )}
+            style={{ animationDelay: `${idx * 100}ms` }}
+          >
+            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-40 mix-blend-overlay", bgTone)} />
+            <div className="relative z-10 flex items-start justify-between gap-2">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className="mt-1 font-display text-2xl font-bold">{value}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+                <p className="mt-1.5 font-display text-3xl font-bold tracking-tight drop-shadow-sm md:text-4xl">{value}</p>
+                <p className="mt-1 text-xs font-medium text-muted-foreground/80">{sub}</p>
               </div>
-              <div className={cn("rounded-xl bg-muted/80 p-2.5", tone)}>
-                <Icon className={cn("h-5 w-5", Icon === Flame && "animate-fire", Icon === Trophy && "animate-trophy")} />
+              <div className={cn("rounded-xl bg-background/50 p-3 shadow-sm backdrop-blur-md transition-colors group-hover:bg-background/80", textTone)}>
+                <Icon className="h-6 w-6" />
               </div>
             </div>
-          </MedqsCard>
+          </div>
         ))}
       </div>
 
       {lastLectureActivity?.lecture?.subject?.moduleId ? (
-        <MedqsCard className="mb-8 border-primary/20 bg-gradient-to-r from-primary/[0.07] to-transparent">
+        <div className="mb-8 overflow-hidden rounded-2xl border border-sky-500/20 bg-gradient-to-r from-sky-500/10 to-transparent p-6 dark:border-sky-500/30 dark:from-sky-900/40">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">Continue where you left off</p>
-              <p className="mt-1 truncate font-display text-lg font-semibold text-foreground">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-sky-600 dark:text-sky-400">Continue where you left off</p>
+              <p className="mt-1 truncate font-display text-xl font-bold text-foreground drop-shadow-sm">
                 {lastLectureActivity.lecture.title}
               </p>
-              <p className="mt-0.5 text-sm text-muted-foreground">{lastLectureActivity.lecture.subject.name}</p>
+              <p className="mt-1 text-sm font-medium text-muted-foreground">{lastLectureActivity.lecture.subject.name}</p>
             </div>
             <Link
               href={`/modules/${lastLectureActivity.lecture.subject.moduleId}/lectures/${lastLectureActivity.lecture.id}`}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-sky-500/25 transition-transform hover:scale-105 active:scale-95"
             >
               Resume lecture
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
-        </MedqsCard>
+        </div>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {/* Weekly activity */}
-          <MedqsCard>
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary" aria-hidden />
-                <h2 className="font-display text-lg font-semibold">Weekly activity</h2>
+                <BarChart3 className="h-5 w-5 text-sky-500" aria-hidden />
+                <h2 className="font-display text-xl font-bold tracking-tight">Weekly activity</h2>
               </div>
-              <span className="text-xs text-muted-foreground">Questions attempted per day</span>
+              <span className="rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground">Qs per day</span>
             </div>
-            <div className="flex h-40 items-end justify-between gap-1.5 sm:gap-2" role="img" aria-label="Bar chart of questions attempted over the last seven days">
+            <div className="relative flex h-56 items-end justify-between gap-2 px-1 pb-2 pt-6 sm:gap-4" role="img" aria-label="Weekly questions chart">
+              {/* Subtle Grid Lines */}
+              <div className="absolute inset-0 flex flex-col justify-between py-6 opacity-30 pointer-events-none">
+                <div className="w-full border-t border-dashed border-border/60" />
+                <div className="w-full border-t border-dashed border-border/60" />
+                <div className="w-full border-t border-dashed border-border/60" />
+                <div className="w-full border-t border-dashed border-border/60" />
+              </div>
+
               {chartDays.map((d, i) => {
                 const h = Math.round((weekCounts[i] / weekMax) * 100);
                 return (
-                  <div key={d.key} className="flex flex-1 flex-col items-center gap-2">
-                    <div className="flex h-28 w-full items-end justify-center">
-                      <div
-                        className="w-full max-w-[2.5rem] rounded-t-lg bg-primary/85 transition-all dark:bg-primary/70"
-                        style={{ height: `${Math.max(h, weekCounts[i] > 0 ? 8 : 4)}%` }}
-                        title={`${weekCounts[i]} on ${d.key}`}
-                      />
-                    </div>
-                    <span className="text-[10px] font-medium text-muted-foreground sm:text-xs">{d.shortLabel}</span>
+                  <div key={d.key} className="group relative z-10 flex h-full flex-1 flex-col items-center justify-end gap-2">
+                    <span className="absolute -top-7 text-xs font-bold text-sky-600 transition-all dark:text-sky-400">
+                      {weekCounts[i] > 0 ? weekCounts[i] : ""}
+                    </span>
+                    <div
+                      className="w-full max-w-[3rem] rounded-t-lg bg-gradient-to-t from-sky-500/10 to-sky-500/90 shadow-[0_4px_20px_rgba(14,165,233,0.15)] transition-all group-hover:to-indigo-500 dark:to-sky-400/80"
+                      style={{ height: `${Math.max(h, weekCounts[i] > 0 ? 12 : 4)}%` }}
+                    />
+                    <span className="text-[10px] font-bold text-muted-foreground sm:text-xs">{d.shortLabel}</span>
                   </div>
                 );
               })}
             </div>
-          </MedqsCard>
+          </div>
 
           {/* Module progress */}
-          <MedqsCard>
-            <div className="mb-5 flex items-center justify-between">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+            <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-primary" aria-hidden />
-                <h2 className="font-display text-lg font-semibold">Module progress</h2>
+                <BookOpen className="h-5 w-5 text-sky-500" aria-hidden />
+                <h2 className="font-display text-xl font-bold tracking-tight">Module progress</h2>
               </div>
-              <span className="text-sm font-medium text-muted-foreground">{overallPct}% overall</span>
+              <div className="flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1">
+                 <span className="text-sm font-bold text-sky-600 dark:text-sky-400">{overallPct}% overall</span>
+              </div>
             </div>
 
             {moduleProgress.length === 0 ? (
               <div className="flex flex-col items-center py-10 text-center text-muted-foreground">
                 <BookOpen className="mb-2 h-8 w-8 opacity-30" aria-hidden />
-                <p className="text-sm">No modules yet</p>
+                <p className="text-sm font-medium">No modules yet</p>
                 <p className="text-xs opacity-80">Content will appear once added by your admin.</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {moduleProgress.map((mod) => (
                   <Link
                     key={mod.id}
                     href="/modules"
-                    className="block rounded-xl p-1 -m-1 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="group block rounded-xl border border-transparent p-3 -mx-3 transition-colors hover:border-border/50 hover:bg-muted/30 focus-visible:outline-none"
                   >
-                    <div className="mb-1.5 flex items-center justify-between gap-2">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span className="truncate text-sm font-medium">{mod.name}</span>
-                        <span className="flex-shrink-0 text-xs text-muted-foreground">
-                          {mod.lectures} lec. · {mod.total} Q
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-bold">{mod.name}</span>
+                        <span className="mt-0.5 text-[11px] font-medium text-muted-foreground/80">
+                          {mod.lectures} lectures · {mod.total} questions
                         </span>
                       </div>
-                      <div className="ml-2 flex flex-shrink-0 items-center gap-2">
-                        <span
-                          className={cn(
-                            "text-xs font-semibold",
-                            mod.pct >= 70
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : mod.pct >= 40
-                                ? "text-amber-600 dark:text-amber-400"
-                                : "text-muted-foreground"
-                          )}
-                        >
-                          {mod.correct}/{mod.total}
+                      <div className="ml-2 flex flex-shrink-0 items-center gap-3">
+                        <span className="text-xs font-bold text-muted-foreground">
+                          {mod.correct} / {mod.total}
                         </span>
-                        <span className="w-10 text-right text-xs font-bold">{mod.pct}%</span>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 shadow-inner dark:bg-slate-800">
+                          <span className="text-[10px] font-bold text-foreground">{mod.pct}%</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div className="relative h-3 overflow-hidden rounded-full bg-muted/60 shadow-inner">
                       <div
                         className={cn(
-                          "h-full rounded-full transition-all duration-700",
+                          "relative h-full rounded-full transition-all duration-1000 ease-out flex items-center justify-center overflow-hidden",
                           mod.pct >= 70
-                            ? "bg-emerald-500"
+                            ? "bg-gradient-to-r from-emerald-500 to-teal-400"
                             : mod.pct >= 40
-                              ? "bg-amber-500"
+                              ? "bg-gradient-to-r from-amber-500 to-orange-400"
                               : mod.pct > 0
-                                ? "bg-primary"
+                                ? "bg-gradient-to-r from-sky-500 to-indigo-500"
                                 : "bg-muted-foreground/20"
                         )}
                         style={{ width: `${mod.pct}%` }}
-                      />
+                      >
+                         <div className="absolute inset-0 -translate-x-full animate-[pulse_2s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                      </div>
                     </div>
                   </Link>
                 ))}
               </div>
             )}
-          </MedqsCard>
+          </div>
 
           {/* Recommended */}
           {recommended.length > 0 && (
-            <MedqsCard>
-              <h2 className="mb-4 font-display text-lg font-semibold">Recommended next</h2>
-              <p className="mb-4 text-sm text-muted-foreground">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+              <h2 className="mb-1 font-display text-xl font-bold tracking-tight">Recommended next</h2>
+              <p className="mb-5 text-sm font-medium text-muted-foreground">
                 Modules with room to grow — prioritize these for balanced prep.
               </p>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {recommended.map((m) => (
-                  <Link
-                    key={m.id}
-                    href="/modules"
-                    className="rounded-xl border border-border/80 bg-muted/30 p-4 transition-all hover:border-primary/30 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <p className="font-display text-sm font-semibold leading-snug">{m.name}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">{m.pct}% complete</p>
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${m.pct}%` }} />
-                    </div>
-                  </Link>
-                ))}
+              <div className="grid gap-4 sm:grid-cols-3">
+                {recommended.map((m, i) => {
+                  const Icon = i === 0 ? Flame : i === 1 ? Zap : Sparkles;
+                  const iconTone = i === 0 ? "text-orange-500" : i === 1 ? "text-amber-500" : "text-emerald-500";
+                  return (
+                    <Link
+                      key={m.id}
+                      href="/modules"
+                      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border/80 bg-muted/20 p-4 transition-all hover:border-sky-500/40 hover:bg-sky-500/5 hover:shadow-lg dark:hover:bg-slate-800/50"
+                    >
+                      <div className="mb-3 flex items-start justify-between">
+                        <div className={cn("rounded-xl bg-background p-2.5 shadow-sm", iconTone)}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                      </div>
+                      <p className="font-display text-sm font-bold leading-snug drop-shadow-sm">{m.name}</p>
+                      <p className="mt-1.5 text-xs font-semibold text-muted-foreground">{m.pct}% complete</p>
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted/60">
+                        <div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500" style={{ width: `${m.pct}%` }} />
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
-            </MedqsCard>
+            </div>
           )}
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <MedqsCard hover className="border-primary/15 bg-gradient-to-br from-primary/[0.06] to-transparent">
-            <div className="flex items-center gap-2 text-primary">
-              <Sparkles className="h-5 w-5" aria-hidden />
-              <h2 className="font-display text-lg font-semibold text-foreground">Dr. Q — AI study assistant</h2>
+          <div className="group relative overflow-hidden rounded-2xl border border-sky-500/20 bg-gradient-to-br from-indigo-500/10 via-sky-500/5 to-transparent p-6 transition-colors hover:border-sky-500/40 dark:border-white/10 dark:bg-slate-900">
+            <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-indigo-500/10 blur-3xl" />
+            <div className="relative z-10 flex items-center gap-3">
+              <span className="text-3xl animate-pulse">🧠</span>
+              <h2 className="font-display text-xl font-bold tracking-tight text-foreground drop-shadow-sm">Dr. Q Coach</h2>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              Explain vignettes, simplify concepts, mnemonics, and quiz ideas — tuned for medical study.
+            <p className="relative z-10 mt-3 text-sm font-medium leading-relaxed text-muted-foreground">
+              Explain vignettes, simplify concepts, mnemonics, and test ideas — expertly tuned for clinical mastery.
             </p>
             <Link
               href="/ai-chat"
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative z-10 mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 px-4 py-3.5 text-sm font-bold text-white shadow-xl shadow-sky-500/20 transition-transform active:scale-95"
             >
-              Open assistant
+              Open AI assistant
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
-          </MedqsCard>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-sky-500/10 blur-2xl" />
+            <h2 className="relative z-10 mb-1 font-display text-lg font-bold tracking-tight">Daily Target</h2>
+            <div className="relative z-10 mt-4 flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-display font-bold text-sky-500 drop-shadow-sm">
+                  {todayItemCount} <span className="text-sm font-semibold text-muted-foreground">/ 20</span>
+                </p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">questions today</p>
+              </div>
+              <div className="relative flex h-16 w-16 items-center justify-center drop-shadow-md">
+                <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
+                  <path className="stroke-muted/30 dark:stroke-muted/10 stroke-current drop-shadow-sm" strokeWidth="4" fill="none" d="M18 2a16 16 0 110 32 16 16 0 110-32" />
+                  <path className="stroke-sky-500 stroke-current transition-all duration-1000 ease-out" strokeDasharray={`${Math.min(todayItemCount / 20 * 100, 100)}, 100`} strokeLinecap="round" strokeWidth="4" fill="none" d="M18 2a16 16 0 110 32 16 16 0 110-32" />
+                </svg>
+                <Target className="absolute h-5 w-5 text-sky-500" />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="font-display text-lg font-bold tracking-tight">Your rank</h2>
+              <Trophy className="h-5 w-5 text-amber-500 drop-shadow" aria-hidden />
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-muted/40 shadow-inner">
+                <svg className="absolute inset-0 h-full w-full -rotate-90 transform drop-shadow-md" viewBox="0 0 36 36">
+                  <path className="stroke-muted/30 dark:stroke-muted/10 stroke-current" strokeWidth="3" fill="none" d="M18 2a16 16 0 110 32 16 16 0 110-32" />
+                  <path className="stroke-amber-500 stroke-current transition-all duration-1000 ease-out" strokeDasharray={`${rankInfo?.progress ?? 0}, 100`} strokeLinecap="round" strokeWidth="3" fill="none" d="M18 2a16 16 0 110 32 16 16 0 110-32" />
+                </svg>
+                <span className="relative z-10 text-3xl drop-shadow-sm">{rankInfo?.rank?.badge ?? "🎓"}</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-display text-xl font-bold leading-tight text-foreground drop-shadow-sm">{rankInfo?.rank?.label ?? "Newbie"}</p>
+                <p className="mt-1 text-sm font-bold text-sky-600 dark:text-sky-400">{rankInfo?.points ?? 0} pts</p>
+                <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/80">
+                  {rankInfo?.nextRank ? `${rankInfo.nextRank.minPoints - (rankInfo.points ?? 0)} to next` : 'Max rank!'}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {quickPaperResolved && (
-            <MedqsCard hover>
-              <div className="flex items-center gap-2">
-                <PlayCircle className="h-5 w-5 text-primary" aria-hidden />
-                <h2 className="font-display text-lg font-semibold">Quick start quiz</h2>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:border-sky-500/30 dark:border-white/10 dark:bg-slate-900">
+              <div className="flex items-center gap-2 mb-2">
+                <PlayCircle className="h-5 w-5 text-sky-500" aria-hidden />
+                <h2 className="font-display text-lg font-bold tracking-tight">Quick start quiz</h2>
               </div>
-              <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{quickPaperResolved.title}</p>
+              <p className="line-clamp-2 text-sm font-medium text-muted-foreground leading-relaxed">{quickPaperResolved.title}</p>
               <Link
                 href={`/quiz/${quickPaperResolved.id}`}
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm font-bold text-sky-600 transition hover:bg-sky-500/20 active:scale-95 dark:text-sky-400"
               >
                 Start now
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
-            </MedqsCard>
+            </div>
           )}
 
-          <MedqsCard>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">Your rank</h2>
-              <Trophy className="h-5 w-5 text-amber-500" aria-hidden />
-            </div>
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl" aria-hidden>
-                {rankInfo?.rank?.badge ?? "🎓"}
-              </div>
-              <div>
-                <p className="font-semibold">{rankInfo?.rank?.label ?? "Newbie"}</p>
-                <p className="text-sm text-muted-foreground">{rankInfo?.points ?? 0} points</p>
-              </div>
-            </div>
-            {rankInfo?.nextRank && (
-              <>
-                <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-                  <span>To {rankInfo.nextRank.label}</span>
-                  <span>{rankInfo.progress}%</span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all duration-500"
-                    style={{ width: `${rankInfo.progress}%` }}
-                  />
-                </div>
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  {rankInfo.nextRank.minPoints - (rankInfo.points ?? 0)} pts to go
-                </p>
-              </>
-            )}
-          </MedqsCard>
-
-          <MedqsCard>
-            <h2 className="mb-3 font-display text-lg font-semibold">Shortcuts</h2>
-            <div className="space-y-1">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+            <h2 className="mb-4 font-display text-lg font-bold tracking-tight">Shortcuts</h2>
+            <div className="space-y-1.5">
               {[
                 { href: "/modules", label: "Browse modules", icon: BookOpen },
                 { href: "/past-papers", label: "Practice papers", icon: FileText },
@@ -480,39 +538,39 @@ export default async function DashboardPage() {
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="group flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold transition-colors hover:bg-muted/80 focus-visible:outline-none"
                 >
-                  <span className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  <span className="flex items-center gap-3">
+                    <Icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
                     {label}
                   </span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden />
                 </Link>
               ))}
             </div>
-          </MedqsCard>
+          </div>
 
           {recentAttempts.length > 0 && (
-            <MedqsCard>
-              <h2 className="mb-3 font-display text-lg font-semibold">Recent attempts</h2>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+              <h2 className="mb-4 font-display text-lg font-bold tracking-tight">Recent attempts</h2>
               <ul className="space-y-3">
                 {recentAttempts.map((attempt) => (
                   <li key={attempt.id}>
                     <Link
                       href={`/quiz/attempt/${attempt.id}`}
-                      className="flex items-center justify-between rounded-lg px-1 py-1 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="group flex items-center justify-between rounded-xl p-2 -mx-2 transition-colors hover:bg-muted/60 focus-visible:outline-none"
                     >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{attempt.pastPaper.title}</p>
-                        <p className="text-xs text-muted-foreground">
+                      <div className="min-w-0 flex-1 pr-3">
+                        <p className="truncate text-sm font-bold transition-colors group-hover:text-sky-600 dark:group-hover:text-sky-400">{attempt.pastPaper.title}</p>
+                        <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
                           {new Date(attempt.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <span
                         className={cn(
-                          "ml-2 flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                          "flex-shrink-0 rounded-lg px-2.5 py-1 text-xs font-bold shadow-sm",
                           attempt.score >= 70
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                             : attempt.score >= 50
                               ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                               : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -524,7 +582,7 @@ export default async function DashboardPage() {
                   </li>
                 ))}
               </ul>
-            </MedqsCard>
+            </div>
           )}
         </div>
       </div>

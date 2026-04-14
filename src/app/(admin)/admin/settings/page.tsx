@@ -30,6 +30,9 @@ interface SiteConfig {
   enableAds: boolean; enableNotifs: boolean; enableLeaderboard: boolean;
   aiPreferredProvider: "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
   fontSans: string; fontArabic: string;
+  facebookUrl?: string; twitterUrl?: string; youtubeUrl?: string;
+  instagramUrl?: string; telegramUrl?: string; whatsappUrl?: string;
+  hulkLogoUrl?: string;
 }
 
 const DEFAULTS: SiteConfig = {
@@ -37,6 +40,8 @@ const DEFAULTS: SiteConfig = {
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
   aiPreferredProvider: "auto",
   fontSans: "Plus Jakarta Sans", fontArabic: "Tajawal",
+  facebookUrl: "", twitterUrl: "", youtubeUrl: "",
+  instagramUrl: "", telegramUrl: "", whatsappUrl: "", hulkLogoUrl: "",
 };
 
 export default function AdminSettingsPage() {
@@ -49,11 +54,13 @@ export default function AdminSettingsPage() {
   const [iconUploading, setIconUploading] = useState(false);
   const [pwaIconUploading, setPwaIconUploading] = useState(false);
   const [colorFromFileBusy, setColorFromFileBusy] = useState(false);
+  const [hulkLogoUploading, setHulkLogoUploading] = useState(false);
   const logoFileRef = useRef<HTMLInputElement>(null);
   const logoDarkFileRef = useRef<HTMLInputElement>(null);
   const iconFileRef = useRef<HTMLInputElement>(null);
   const pwaIconFileRef = useRef<HTMLInputElement>(null);
   const colorPickFileRef = useRef<HTMLInputElement>(null);
+  const hulkLogoFileRef = useRef<HTMLInputElement>(null);
   const [broadTitle, setBroadTitle] = useState("");
   const [broadBody, setBroadBody] = useState("");
   const [broadcasting, setBroadcasting] = useState(false);
@@ -212,6 +219,24 @@ export default function AdminSettingsPage() {
     } finally {
       setPwaIconUploading(false);
     }
+  }
+
+  async function handleHulkLogoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !canManageBranding) return;
+    setHulkLogoUploading(true);
+    try {
+      const url = await uploadSiteImage(file);
+      if (!url) { toast.error("Upload finished but no URL was returned"); return; }
+      const next = { ...config, hulkLogoUrl: url };
+      setConfig(next);
+      const saved = await persistConfig(next);
+      if (saved) toast.success("Dr. Hulk logo updated and saved");
+      else toast.error("Upload OK but save failed — click Save");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally { setHulkLogoUploading(false); }
   }
 
   async function handleColorFromImageFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -503,6 +528,45 @@ export default function AdminSettingsPage() {
                 <option key={f} value={f}>{f}</option>
               ))}
             </MedqsSelect></div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="mb-5 flex items-center gap-2">
+          <Megaphone className="h-5 w-5 text-primary" />
+          <h2 className="font-display text-lg font-semibold">Social Links & Footer</h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[{ key: "facebookUrl", label: "Facebook URL" }, { key: "twitterUrl", label: "X/Twitter URL" }, { key: "instagramUrl", label: "Instagram URL" }, { key: "youtubeUrl", label: "YouTube URL" }, { key: "telegramUrl", label: "Telegram URL" }, { key: "whatsappUrl", label: "WhatsApp URL" }].map(({ key, label }) => (
+            <div key={key}>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</label>
+              <input type="url" placeholder="https://..." value={(config as any)[key] || ""} onChange={(e) => setConfig((c) => ({ ...c, [key]: e.target.value }))} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+          ))}
+          <div className="sm:col-span-2 space-y-2 mt-4">
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Dr. Hulk Footer Logo</label>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                type="url" value={config.hulkLogoUrl || ""} onChange={(e) => setConfig(c => ({...c, hulkLogoUrl: e.target.value}))} placeholder="https://..." readOnly={!canManageBranding}
+                className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              {canManageBranding ? (
+                <>
+                  <input ref={hulkLogoFileRef} type="file" accept="image/*" className="hidden" onChange={handleHulkLogoFile} />
+                  <button type="button" disabled={hulkLogoUploading} onClick={() => hulkLogoFileRef.current?.click()} className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60">
+                    {hulkLogoUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    Upload Logo
+                  </button>
+                </>
+              ) : null}
+            </div>
+            {config.hulkLogoUrl?.trim() ? (
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-[11px] text-muted-foreground">Preview</span>
+                <img src={config.hulkLogoUrl.trim()} alt="Dr. Hulk" className="h-8 max-w-[12rem] object-contain rounded" />
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

@@ -136,6 +136,13 @@ exports.Prisma.SiteConfigScalarFieldEnum = {
   enableAds: 'enableAds',
   enableNotifs: 'enableNotifs',
   enableLeaderboard: 'enableLeaderboard',
+  facebookUrl: 'facebookUrl',
+  twitterUrl: 'twitterUrl',
+  youtubeUrl: 'youtubeUrl',
+  instagramUrl: 'instagramUrl',
+  telegramUrl: 'telegramUrl',
+  whatsappUrl: 'whatsappUrl',
+  hulkLogoUrl: 'hulkLogoUrl',
   fontSans: 'fontSans',
   fontArabic: 'fontArabic',
   updatedAt: 'updatedAt'

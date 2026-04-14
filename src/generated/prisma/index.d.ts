@@ -5516,6 +5516,13 @@ export namespace Prisma {
     enableAds: boolean | null
     enableNotifs: boolean | null
     enableLeaderboard: boolean | null
+    facebookUrl: string | null
+    twitterUrl: string | null
+    youtubeUrl: string | null
+    instagramUrl: string | null
+    telegramUrl: string | null
+    whatsappUrl: string | null
+    hulkLogoUrl: string | null
     fontSans: string | null
     fontArabic: string | null
     updatedAt: Date | null
@@ -5535,6 +5542,13 @@ export namespace Prisma {
     enableAds: boolean | null
     enableNotifs: boolean | null
     enableLeaderboard: boolean | null
+    facebookUrl: string | null
+    twitterUrl: string | null
+    youtubeUrl: string | null
+    instagramUrl: string | null
+    telegramUrl: string | null
+    whatsappUrl: string | null
+    hulkLogoUrl: string | null
     fontSans: string | null
     fontArabic: string | null
     updatedAt: Date | null
@@ -5554,6 +5568,13 @@ export namespace Prisma {
     enableAds: number
     enableNotifs: number
     enableLeaderboard: number
+    facebookUrl: number
+    twitterUrl: number
+    youtubeUrl: number
+    instagramUrl: number
+    telegramUrl: number
+    whatsappUrl: number
+    hulkLogoUrl: number
     fontSans: number
     fontArabic: number
     updatedAt: number
@@ -5575,6 +5596,13 @@ export namespace Prisma {
     enableAds?: true
     enableNotifs?: true
     enableLeaderboard?: true
+    facebookUrl?: true
+    twitterUrl?: true
+    youtubeUrl?: true
+    instagramUrl?: true
+    telegramUrl?: true
+    whatsappUrl?: true
+    hulkLogoUrl?: true
     fontSans?: true
     fontArabic?: true
     updatedAt?: true
@@ -5594,6 +5622,13 @@ export namespace Prisma {
     enableAds?: true
     enableNotifs?: true
     enableLeaderboard?: true
+    facebookUrl?: true
+    twitterUrl?: true
+    youtubeUrl?: true
+    instagramUrl?: true
+    telegramUrl?: true
+    whatsappUrl?: true
+    hulkLogoUrl?: true
     fontSans?: true
     fontArabic?: true
     updatedAt?: true
@@ -5613,6 +5648,13 @@ export namespace Prisma {
     enableAds?: true
     enableNotifs?: true
     enableLeaderboard?: true
+    facebookUrl?: true
+    twitterUrl?: true
+    youtubeUrl?: true
+    instagramUrl?: true
+    telegramUrl?: true
+    whatsappUrl?: true
+    hulkLogoUrl?: true
     fontSans?: true
     fontArabic?: true
     updatedAt?: true
@@ -5705,6 +5747,13 @@ export namespace Prisma {
     enableAds: boolean
     enableNotifs: boolean
     enableLeaderboard: boolean
+    facebookUrl: string | null
+    twitterUrl: string | null
+    youtubeUrl: string | null
+    instagramUrl: string | null
+    telegramUrl: string | null
+    whatsappUrl: string | null
+    hulkLogoUrl: string | null
     fontSans: string | null
     fontArabic: string | null
     updatedAt: Date
@@ -5741,6 +5790,13 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
+    facebookUrl?: boolean
+    twitterUrl?: boolean
+    youtubeUrl?: boolean
+    instagramUrl?: boolean
+    telegramUrl?: boolean
+    whatsappUrl?: boolean
+    hulkLogoUrl?: boolean
     fontSans?: boolean
     fontArabic?: boolean
     updatedAt?: boolean
@@ -5760,6 +5816,13 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
+    facebookUrl?: boolean
+    twitterUrl?: boolean
+    youtubeUrl?: boolean
+    instagramUrl?: boolean
+    telegramUrl?: boolean
+    whatsappUrl?: boolean
+    hulkLogoUrl?: boolean
     fontSans?: boolean
     fontArabic?: boolean
     updatedAt?: boolean
@@ -5779,6 +5842,13 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
+    facebookUrl?: boolean
+    twitterUrl?: boolean
+    youtubeUrl?: boolean
+    instagramUrl?: boolean
+    telegramUrl?: boolean
+    whatsappUrl?: boolean
+    hulkLogoUrl?: boolean
     fontSans?: boolean
     fontArabic?: boolean
     updatedAt?: boolean
@@ -5805,6 +5875,13 @@ export namespace Prisma {
       enableAds: boolean
       enableNotifs: boolean
       enableLeaderboard: boolean
+      facebookUrl: string | null
+      twitterUrl: string | null
+      youtubeUrl: string | null
+      instagramUrl: string | null
+      telegramUrl: string | null
+      whatsappUrl: string | null
+      hulkLogoUrl: string | null
       fontSans: string | null
       fontArabic: string | null
       updatedAt: Date
@@ -6214,6 +6291,13 @@ export namespace Prisma {
     readonly enableAds: FieldRef<"SiteConfig", 'Boolean'>
     readonly enableNotifs: FieldRef<"SiteConfig", 'Boolean'>
     readonly enableLeaderboard: FieldRef<"SiteConfig", 'Boolean'>
+    readonly facebookUrl: FieldRef<"SiteConfig", 'String'>
+    readonly twitterUrl: FieldRef<"SiteConfig", 'String'>
+    readonly youtubeUrl: FieldRef<"SiteConfig", 'String'>
+    readonly instagramUrl: FieldRef<"SiteConfig", 'String'>
+    readonly telegramUrl: FieldRef<"SiteConfig", 'String'>
+    readonly whatsappUrl: FieldRef<"SiteConfig", 'String'>
+    readonly hulkLogoUrl: FieldRef<"SiteConfig", 'String'>
     readonly fontSans: FieldRef<"SiteConfig", 'String'>
     readonly fontArabic: FieldRef<"SiteConfig", 'String'>
     readonly updatedAt: FieldRef<"SiteConfig", 'DateTime'>
@@ -48812,6 +48896,13 @@ export namespace Prisma {
     enableAds: 'enableAds',
     enableNotifs: 'enableNotifs',
     enableLeaderboard: 'enableLeaderboard',
+    facebookUrl: 'facebookUrl',
+    twitterUrl: 'twitterUrl',
+    youtubeUrl: 'youtubeUrl',
+    instagramUrl: 'instagramUrl',
+    telegramUrl: 'telegramUrl',
+    whatsappUrl: 'whatsappUrl',
+    hulkLogoUrl: 'hulkLogoUrl',
     fontSans: 'fontSans',
     fontArabic: 'fontArabic',
     updatedAt: 'updatedAt'
@@ -49618,6 +49709,13 @@ export namespace Prisma {
     enableAds?: BoolFilter<"SiteConfig"> | boolean
     enableNotifs?: BoolFilter<"SiteConfig"> | boolean
     enableLeaderboard?: BoolFilter<"SiteConfig"> | boolean
+    facebookUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    twitterUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    youtubeUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    instagramUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    telegramUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    whatsappUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    hulkLogoUrl?: StringNullableFilter<"SiteConfig"> | string | null
     fontSans?: StringNullableFilter<"SiteConfig"> | string | null
     fontArabic?: StringNullableFilter<"SiteConfig"> | string | null
     updatedAt?: DateTimeFilter<"SiteConfig"> | Date | string
@@ -49637,6 +49735,13 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
+    facebookUrl?: SortOrderInput | SortOrder
+    twitterUrl?: SortOrderInput | SortOrder
+    youtubeUrl?: SortOrderInput | SortOrder
+    instagramUrl?: SortOrderInput | SortOrder
+    telegramUrl?: SortOrderInput | SortOrder
+    whatsappUrl?: SortOrderInput | SortOrder
+    hulkLogoUrl?: SortOrderInput | SortOrder
     fontSans?: SortOrderInput | SortOrder
     fontArabic?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
@@ -49659,6 +49764,13 @@ export namespace Prisma {
     enableAds?: BoolFilter<"SiteConfig"> | boolean
     enableNotifs?: BoolFilter<"SiteConfig"> | boolean
     enableLeaderboard?: BoolFilter<"SiteConfig"> | boolean
+    facebookUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    twitterUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    youtubeUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    instagramUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    telegramUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    whatsappUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    hulkLogoUrl?: StringNullableFilter<"SiteConfig"> | string | null
     fontSans?: StringNullableFilter<"SiteConfig"> | string | null
     fontArabic?: StringNullableFilter<"SiteConfig"> | string | null
     updatedAt?: DateTimeFilter<"SiteConfig"> | Date | string
@@ -49678,6 +49790,13 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
+    facebookUrl?: SortOrderInput | SortOrder
+    twitterUrl?: SortOrderInput | SortOrder
+    youtubeUrl?: SortOrderInput | SortOrder
+    instagramUrl?: SortOrderInput | SortOrder
+    telegramUrl?: SortOrderInput | SortOrder
+    whatsappUrl?: SortOrderInput | SortOrder
+    hulkLogoUrl?: SortOrderInput | SortOrder
     fontSans?: SortOrderInput | SortOrder
     fontArabic?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
@@ -49703,6 +49822,13 @@ export namespace Prisma {
     enableAds?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
     enableNotifs?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
     enableLeaderboard?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
+    facebookUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    twitterUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    youtubeUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    instagramUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    telegramUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    whatsappUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    hulkLogoUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     fontSans?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     fontArabic?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     updatedAt?: DateTimeWithAggregatesFilter<"SiteConfig"> | Date | string
@@ -52671,6 +52797,13 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
+    facebookUrl?: string | null
+    twitterUrl?: string | null
+    youtubeUrl?: string | null
+    instagramUrl?: string | null
+    telegramUrl?: string | null
+    whatsappUrl?: string | null
+    hulkLogoUrl?: string | null
     fontSans?: string | null
     fontArabic?: string | null
     updatedAt?: Date | string
@@ -52690,6 +52823,13 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
+    facebookUrl?: string | null
+    twitterUrl?: string | null
+    youtubeUrl?: string | null
+    instagramUrl?: string | null
+    telegramUrl?: string | null
+    whatsappUrl?: string | null
+    hulkLogoUrl?: string | null
     fontSans?: string | null
     fontArabic?: string | null
     updatedAt?: Date | string
@@ -52709,6 +52849,13 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hulkLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52728,6 +52875,13 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hulkLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52747,6 +52901,13 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
+    facebookUrl?: string | null
+    twitterUrl?: string | null
+    youtubeUrl?: string | null
+    instagramUrl?: string | null
+    telegramUrl?: string | null
+    whatsappUrl?: string | null
+    hulkLogoUrl?: string | null
     fontSans?: string | null
     fontArabic?: string | null
     updatedAt?: Date | string
@@ -52766,6 +52927,13 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hulkLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52785,6 +52953,13 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hulkLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55871,6 +56046,13 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
+    facebookUrl?: SortOrder
+    twitterUrl?: SortOrder
+    youtubeUrl?: SortOrder
+    instagramUrl?: SortOrder
+    telegramUrl?: SortOrder
+    whatsappUrl?: SortOrder
+    hulkLogoUrl?: SortOrder
     fontSans?: SortOrder
     fontArabic?: SortOrder
     updatedAt?: SortOrder
@@ -55890,6 +56072,13 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
+    facebookUrl?: SortOrder
+    twitterUrl?: SortOrder
+    youtubeUrl?: SortOrder
+    instagramUrl?: SortOrder
+    telegramUrl?: SortOrder
+    whatsappUrl?: SortOrder
+    hulkLogoUrl?: SortOrder
     fontSans?: SortOrder
     fontArabic?: SortOrder
     updatedAt?: SortOrder
@@ -55909,6 +56098,13 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
+    facebookUrl?: SortOrder
+    twitterUrl?: SortOrder
+    youtubeUrl?: SortOrder
+    instagramUrl?: SortOrder
+    telegramUrl?: SortOrder
+    whatsappUrl?: SortOrder
+    hulkLogoUrl?: SortOrder
     fontSans?: SortOrder
     fontArabic?: SortOrder
     updatedAt?: SortOrder

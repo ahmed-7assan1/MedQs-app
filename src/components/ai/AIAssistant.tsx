@@ -500,7 +500,7 @@ export function AIAssistantPanel({
           ? fullPage
             ? { width: "100%", height: "100%", minHeight: 0 }
             : { width: "100%", height: 640 }
-          : { width: 360, height: 520 }
+          : { width: "min(calc(100vw - 2rem), 480px)", height: "min(calc(100dvh - 4rem), 680px)" }
       }
       role="dialog"
       aria-label="AI study assistant"

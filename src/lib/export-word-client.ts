@@ -11,6 +11,7 @@ export interface ExportWordItem {
   choices: { key: string; text: string }[];
   answer: string;
   explanation?: string | null;
+  difficulty?: "EASY" | "MEDIUM" | "HARD";
 }
 
 export interface ExportWordSettings {
@@ -344,7 +345,8 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
               choices: choiceLines.map(cl => cl.text).join('\n'), // fallback for users still using {choices}
               choiceLines: choiceLines, // ADVANCED: array of strings to enforce true Word paragraphs
               answer: q.answer,
-              explanation: q.explanation || ""
+              explanation: q.explanation || "",
+              difficulty: q.difficulty || "MEDIUM"
             };
             globalQuestions.push(qFormatted);
             docxGroupQuestions.push(qFormatted);
@@ -367,6 +369,9 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
            groupTitle: group.groupTitle,
            quizTitle: group.groupTitle, // alias for convenience
            questions: docxGroupQuestions,
+           EASY: docxGroupQuestions.filter(q => q.difficulty === "EASY"),
+           MEDIUM: docxGroupQuestions.filter(q => q.difficulty === "MEDIUM"),
+           HARD: docxGroupQuestions.filter(q => q.difficulty === "HARD"),
            pages: pagesData
         });
       });
@@ -378,6 +383,9 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
         quizTitle: docxGroups.length === 1 ? docxGroups[0].quizTitle : "",
         pages: docxGroups.flatMap((g: any) => g.pages), 
         questions: globalQuestions, 
+        EASY: globalQuestions.filter(q => q.difficulty === "EASY"),
+        MEDIUM: globalQuestions.filter(q => q.difficulty === "MEDIUM"),
+        HARD: globalQuestions.filter(q => q.difficulty === "HARD"),
         answers: globalAnswers,
         all_answers: globalAnswers 
       });
@@ -404,9 +412,19 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
     saveAs(blob, filename);
     toast.success("Word document generated");
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Export error:", error);
-    toast.error("Failed to generate Word document");
+    let msg = "Failed to generate Word document";
+    
+    // Check if it's a docxtemplater error with details
+    if (error.properties && error.properties.errors) {
+       const detail = error.properties.errors.map((e: any) => e.message || e.name).join(", ");
+       msg = "Template Error: " + detail;
+    } else if (error.message) {
+       msg = "Template Error: " + error.message;
+    }
+    
+    toast.error(msg, { duration: 6000 });
     return false;
   }
 }
