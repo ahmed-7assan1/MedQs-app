@@ -141,11 +141,50 @@ export default function AdminContentPage() {
     );
   }
 
+  /** Name marker for the transparent auto-created module used in "direct subjects" mode */
+  const DIRECT_MODULE = "__direct__";
+
   async function commitAdd(key: AddKey) {
     if (!addVal.trim()) return;
     const parts = key.split("-");
     const type = parts[0];
     const parentId = parts.slice(1).join("-");
+
+    // ── Special: Direct subject → auto-create __direct__ module if needed ──
+    if (type === "directsubj") {
+      const semId = parentId;
+      let directMod = modules.find(m => m.semesterId === semId && m.name === DIRECT_MODULE);
+      if (!directMod) {
+        const modRes = await fetch(`/api/v1/semesters/${semId}/modules`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: DIRECT_MODULE }),
+        });
+        if (!modRes.ok) {
+          toast.error(await apiErrorMessage(modRes, "Failed to initialize"));
+          cancelAdd();
+          return;
+        }
+        directMod = await modRes.json();
+        setModules(m => [...m, directMod!]);
+      }
+      const targetModId = directMod!.id;
+      const res = await fetch(`/api/v1/modules/${targetModId}/subjects`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: addVal.trim() }),
+      });
+      if (res.ok) {
+        const newSubj = await res.json();
+        setSubjects(s => [...s, newSubj]);
+        toast.success("Added");
+        setExpanded(prev => { const n = new Set(prev); n.add(semId); return n; });
+      } else {
+        toast.error(await apiErrorMessage(res, "Failed to add subject"));
+      }
+      cancelAdd();
+      return;
+    }
 
     const endpoints: Record<string, { url: string; body: object }> = {
       uni:     { url: "/api/v1/universities", body: { name: addVal } },
@@ -376,8 +415,11 @@ export default function AdminContentPage() {
               <AddRow k={`sem-${year.id}`} placeholder="Semester name" type="text" parentId={year.id} />
             </div>
             {yearSems.map(sem => {
-              const semMods = modules.filter(m => m.semesterId === sem.id);
-              const semOpen = expanded.has(sem.id);
+              const semMods     = modules.filter(m => m.semesterId === sem.id);
+              const directMod   = semMods.find(m => m.name === DIRECT_MODULE);
+              const regularMods = semMods.filter(m => m.name !== DIRECT_MODULE);
+              const directSubjs = directMod ? subjects.filter(s => s.moduleId === directMod.id) : [];
+              const semOpen     = expanded.has(sem.id);
               return (
                 <div key={sem.id}>
                   <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted/40 transition-colors"
@@ -387,17 +429,26 @@ export default function AdminContentPage() {
                     </span>
                     <BookOpen className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
                     <span className="flex-1 text-sm">{sem.name}</span>
-                    <span className="text-xs text-muted-foreground">{semMods.length} mod{semMods.length !== 1 ? "s" : ""}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {regularMods.length > 0 && `${regularMods.length} mod${regularMods.length !== 1 ? "s" : ""}`}
+                      {regularMods.length > 0 && directSubjs.length > 0 && " · "}
+                      {directSubjs.length > 0 && `${directSubjs.length} direct subj${directSubjs.length !== 1 ? "s" : ""}`}
+                    </span>
                     <DeleteBtn kind="sem" id={sem.id} label={sem.name} />
                   </div>
 
                   {semOpen && (
                     <div className="ml-7 border-l border-border/50 pl-4 py-1">
+
+                      {/* ── MODULES section ── */}
                       <div className="flex items-center justify-between py-1">
                         <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Modules</span>
                         <AddRow k={`mod-${sem.id}`} placeholder="Module name" type="text" parentId={sem.id} />
                       </div>
-                      {semMods.map(mod => {
+                      {regularMods.length === 0 && !adding?.startsWith(`mod-${sem.id}`) && (
+                        <p className="py-1 text-xs text-muted-foreground italic">No modules — add one above or use Direct Subjects below</p>
+                      )}
+                      {regularMods.map(mod => {
                         const modSubjs = subjects.filter(s => s.moduleId === mod.id);
                         const modOpen  = expanded.has(mod.id);
                         return (
@@ -433,6 +484,29 @@ export default function AdminContentPage() {
                           </div>
                         );
                       })}
+
+                      {/* ── DIVIDER ── */}
+                      <div className="my-2 border-t border-dashed border-border/40" />
+
+                      {/* ── DIRECT SUBJECTS section ── */}
+                      <div className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Direct Subjects</span>
+                          <span className="rounded-full bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-orange-500">No module</span>
+                        </div>
+                        <AddRow k={`directsubj-${sem.id}`} placeholder="Subject name" type="text" parentId={sem.id} />
+                      </div>
+                      {directSubjs.length === 0 && !adding?.startsWith(`directsubj-${sem.id}`) && (
+                        <p className="py-1 text-xs text-muted-foreground italic">No direct subjects</p>
+                      )}
+                      {directSubjs.map(subj => (
+                        <div key={subj.id} className="group/sub flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30 transition-colors">
+                          <FlaskConical className="h-3 w-3 text-orange-400 flex-shrink-0" />
+                          <span className="flex-1 text-sm">{subj.name}</span>
+                          <DeleteBtn kind="subj" id={subj.id} label={subj.name} alwaysShow />
+                        </div>
+                      ))}
+
                     </div>
                   )}
                 </div>
