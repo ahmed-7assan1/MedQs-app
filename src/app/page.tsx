@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { MedQsLogoMark, MedQsWordmark } from "@/components/branding/MedQsLogo";
+import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import {
   ArrowRight, BookOpen, Trophy, MessageSquare, Clock,
   Play, Heart, Mail, Layers, ClipboardList,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import { ScrollReveal } from "@/components/landing/ScrollReveal";
+import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -24,45 +25,33 @@ export default async function LandingPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden text-foreground">
+    <div className="min-h-screen overflow-hidden text-foreground bg-white dark:bg-[#080c14]">
 
       {/* ── AMBIENT BACKGROUND ── */}
+      {/* Light mode: very subtle grid */}
       <div
-        className="fixed inset-0 z-0 pointer-events-none opacity-[0.025] dark:opacity-60"
+        className="fixed inset-0 z-0 pointer-events-none opacity-[0.04] dark:opacity-0"
         style={{
-          backgroundImage: "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(#1A6BCC 1px, transparent 1px), linear-gradient(90deg, #1A6BCC 1px, transparent 1px)",
           backgroundSize: "60px 60px",
         }}
       />
-      <div className="fixed -top-[20%] -left-[10%] h-[70%] w-[55%] blur-[140px] pointer-events-none z-0"
-        style={{ background: "radial-gradient(circle, rgba(26,107,204,0.18) 0%, transparent 60%)" }} />
-      <div className="fixed -bottom-[20%] -right-[10%] h-[65%] w-[55%] blur-[140px] pointer-events-none z-0"
-        style={{ background: "radial-gradient(circle, rgba(107,72,204,0.14) 0%, transparent 60%)" }} />
+      {/* Dark mode: deep navy grid */}
+      <div
+        className="fixed inset-0 z-0 pointer-events-none opacity-0 dark:opacity-[0.06]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(100,150,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(100,150,255,1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+      {/* Glow orbs */}
+      <div className="fixed -top-[20%] -left-[10%] h-[70%] w-[55%] blur-[150px] pointer-events-none z-0"
+        style={{ background: "radial-gradient(circle, rgba(26,107,204,0.12) 0%, transparent 60%)" }} />
+      <div className="fixed -bottom-[20%] -right-[10%] h-[65%] w-[55%] blur-[150px] pointer-events-none z-0"
+        style={{ background: "radial-gradient(circle, rgba(107,72,204,0.10) 0%, transparent 60%)" }} />
 
-      {/* ── TOP NAV ── */}
-      <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/75 backdrop-blur-2xl">
-        <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3 decoration-transparent">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-blue-500/40 blur-[12px]" />
-              <MedQsLogoMark className="relative z-10 h-9 w-9 shrink-0" title="MedQs" />
-            </div>
-            <MedQsWordmark className="text-xl font-bold tracking-tight text-foreground" />
-          </Link>
-
-          <div className="flex items-center gap-2">
-            <Link href="/login"
-              className="rounded-xl px-5 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted/50 hover:text-foreground">
-              Sign In
-            </Link>
-            <Link href="/register"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_6px_24px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_8px_28px_rgba(37,99,235,0.45)] active:scale-[0.98]">
-              Get Started Free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* ── TOP NAV (client component with theme toggle) ── */}
+      <LandingNavbar />
 
       {/* ── HERO ── */}
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-16 pt-28 text-center">
@@ -444,7 +433,6 @@ export default async function LandingPage() {
             <div className="lg:col-span-2">
               <Link href="/" className="mb-5 flex items-center gap-3 decoration-transparent">
                 <MedQsLogoMark className="h-8 w-8 shrink-0" title="MedQs" />
-                <MedQsWordmark className="text-xl font-bold text-foreground" />
               </Link>
               <p className="max-w-[300px] text-sm leading-relaxed text-muted-foreground">
                 Elevating medical education with precision tools, structured curriculums, and an unstoppable community.
