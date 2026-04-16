@@ -27,10 +27,10 @@ export function LandingNavbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 decoration-transparent">
           {/* dark: filter inverts logo to white */}
-          <span className="dark:[filter:brightness(0)_invert(1)]">
+          <span className="inline-flex items-center dark:[filter:brightness(0)_invert(1)]">
             <MedQsLogoMark className="h-9 w-9 shrink-0" title="MedQs" />
           </span>
-          <span className="text-[17px] font-bold tracking-tight text-foreground dark:text-white">
+          <span className="inline-flex items-center leading-none text-[17px] font-bold tracking-tight text-foreground dark:text-white">
             MedQs
           </span>
         </Link>
