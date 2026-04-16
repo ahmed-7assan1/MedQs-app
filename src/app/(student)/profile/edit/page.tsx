@@ -11,9 +11,10 @@ import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { ImageCropModal } from "@/components/ui/ImageCropModal";
 
-interface University { id: string; name: string }
-interface AcademicYear { id: string; yearNumber: number; universityId: string }
-interface Semester { id: string; name: string; academicYearId: string }
+interface University  { id: string; name: string }
+interface Faculty    { id: string; name: string; universityId: string }
+interface AcademicYear { id: string; yearNumber: number; universityId: string; facultyId?: string | null }
+interface Semester   { id: string; name: string; academicYearId: string }
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -56,57 +57,64 @@ export default function EditProfilePage() {
       setUploadingAvatar(false);
     },
   });
-  const [selectedUni, setSelectedUni] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedSem, setSelectedSem] = useState("");
+  const [selectedUni,    setSelectedUni]    = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState("");
+  const [selectedYear,   setSelectedYear]   = useState("");
+  const [selectedSem,    setSelectedSem]    = useState("");
 
   const [universities, setUniversities] = useState<University[]>([]);
-  const [years, setYears] = useState<AcademicYear[]>([]);
-  const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [faculties,    setFaculties]    = useState<Faculty[]>([]);
+  const [years,        setYears]        = useState<AcademicYear[]>([]);
+  const [semesters,    setSemesters]    = useState<Semester[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [saving,       setSaving]       = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [meRes, unisRes, yrsRes, semsRes] = await Promise.all([
+        const [meRes, unisRes, yrsRes, semsRes, facsRes] = await Promise.all([
           fetch("/api/v1/auth/me"),
           fetch("/api/v1/universities"),
           fetch("/api/v1/academic-years"),
           fetch("/api/v1/semesters"),
+          fetch("/api/v1/faculties"),
         ]);
         if (cancelled) return;
         if (meRes.status === 401) {
           router.replace("/login");
           return;
         }
-        const me = meRes.ok ? await meRes.json() : null;
-        const unis = unisRes.ok ? await unisRes.json() : [];
-        const yrsRaw = yrsRes.ok ? await yrsRes.json() : [];
+        const me      = meRes.ok  ? await meRes.json()  : null;
+        const unis    = unisRes.ok ? await unisRes.json() : [];
+        const yrsRaw  = yrsRes.ok  ? await yrsRes.json()  : [];
         const semsRaw = semsRes.ok ? await semsRes.json() : [];
-        const yrs = unwrapApiList<AcademicYear>(yrsRaw);
-        const sems = unwrapApiList<Semester>(semsRaw);
+        const facsRaw = facsRes.ok ? await facsRes.json() : [];
+        const yrs     = unwrapApiList<AcademicYear>(yrsRaw);
+        const sems    = unwrapApiList<Semester>(semsRaw);
+        const facs    = Array.isArray(facsRaw) ? facsRaw as Faculty[] : [];
         if (me && typeof me === "object") {
           setForm({
-            name: me.name ?? "",
-            nickname: me.nickname ?? "",
-            bio: me.bio ?? "",
-            phone: me.phone ?? "",
-            phoneVisible: me.phoneVisible ?? false,
-            hideRank: me.hideRank ?? false,
-            isPrivate: me.isPrivate ?? false,
-            studentId: me.studentId ?? "",
-            instagramUrl: me.instagramUrl ?? "",
-            facebookUrl: me.facebookUrl ?? "",
+            name:          me.name          ?? "",
+            nickname:      me.nickname      ?? "",
+            bio:           me.bio           ?? "",
+            phone:         me.phone         ?? "",
+            phoneVisible:  me.phoneVisible  ?? false,
+            hideRank:      me.hideRank      ?? false,
+            isPrivate:     me.isPrivate     ?? false,
+            studentId:     me.studentId     ?? "",
+            instagramUrl:  me.instagramUrl  ?? "",
+            facebookUrl:   me.facebookUrl   ?? "",
           });
           setAvatarUrl(me.image ?? null);
           setSelectedUni(me.universityId ?? "");
+          setSelectedFaculty(me.facultyId ?? "");
           const mySem = sems.find((s) => s.id === me.semesterId);
           if (mySem) setSelectedYear(mySem.academicYearId);
           setSelectedSem(me.semesterId ?? "");
         }
         setUniversities(Array.isArray(unis) ? unis : []);
+        setFaculties(facs);
         setYears(yrs);
         setSemesters(sems);
       } finally {
@@ -118,8 +126,12 @@ export default function EditProfilePage() {
     };
   }, [router]);
 
-  const filteredYears = years.filter((y) => y.universityId === selectedUni);
-  const filteredSems = semesters.filter((s) => s.academicYearId === selectedYear);
+  const uniFaculties  = faculties.filter((f) => f.universityId === selectedUni);
+  const filteredYears = years.filter((y) =>
+    y.universityId === selectedUni &&
+    (selectedFaculty ? y.facultyId === selectedFaculty : !y.facultyId)
+  );
+  const filteredSems  = semesters.filter((s) => s.academicYearId === selectedYear);
 
   // ── When user selects a file, open crop modal instead of uploading directly ──
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -150,12 +162,13 @@ export default function EditProfilePage() {
     try {
       const payload = {
         ...form,
-        nickname: form.nickname.trim() || null,
-        studentId: form.studentId.trim() || null,
+        nickname:     form.nickname.trim()     || null,
+        studentId:    form.studentId.trim()    || null,
         instagramUrl: form.instagramUrl.trim() || null,
-        facebookUrl: form.facebookUrl.trim() || null,
-        universityId: selectedUni.trim() ? selectedUni : null,
-        semesterId: selectedSem.trim() ? selectedSem : null,
+        facebookUrl:  form.facebookUrl.trim()  || null,
+        universityId: selectedUni.trim()       ? selectedUni    : null,
+        facultyId:    selectedFaculty.trim()   ? selectedFaculty : null,
+        semesterId:   selectedSem.trim()       ? selectedSem    : null,
       };
       const res = await fetch("/api/v1/auth/profile", {
         method: "PUT",
@@ -314,6 +327,7 @@ export default function EditProfilePage() {
               value={selectedUni}
               onChange={(e) => {
                 setSelectedUni(e.target.value);
+                setSelectedFaculty("");
                 setSelectedYear("");
                 setSelectedSem("");
               }}
@@ -321,18 +335,37 @@ export default function EditProfilePage() {
             >
               <option value="">Select university...</option>
               {universities.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
+                <option key={u.id} value={u.id}>{u.name}</option>
               ))}
             </MedqsSelect>
             {universities.length === 0 && (
               <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                No universities in the database yet. Ask an administrator to add institutions in the admin panel, or run{" "}
-                <code className="rounded bg-muted px-1">npm run db:seed</code> if you use the project seed.
+                No universities in the database yet. Ask an administrator to add institutions.
               </p>
             )}
           </div>
+
+          {/* Faculty — only shown if this university has faculties */}
+          {selectedUni && uniFaculties.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Faculty (كلية)</label>
+              <MedqsSelect
+                value={selectedFaculty}
+                onChange={(e) => {
+                  setSelectedFaculty(e.target.value);
+                  setSelectedYear("");
+                  setSelectedSem("");
+                }}
+                className="w-full"
+              >
+                <option value="">Select faculty...</option>
+                {uniFaculties.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </MedqsSelect>
+            </div>
+          )}
+
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Academic year</label>
             <MedqsSelect
@@ -341,14 +374,12 @@ export default function EditProfilePage() {
                 setSelectedYear(e.target.value);
                 setSelectedSem("");
               }}
-              disabled={!selectedUni}
+              disabled={!selectedUni || (uniFaculties.length > 0 && !selectedFaculty)}
               className="w-full"
             >
               <option value="">Select year...</option>
               {filteredYears.map((y) => (
-                <option key={y.id} value={y.id}>
-                  Year {y.yearNumber}
-                </option>
+                <option key={y.id} value={y.id}>Year {y.yearNumber}</option>
               ))}
             </MedqsSelect>
           </div>
@@ -362,13 +393,11 @@ export default function EditProfilePage() {
             >
               <option value="">Select semester...</option>
               {filteredSems.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </MedqsSelect>
           </div>
-          <p className="text-xs text-amber-600 dark:text-amber-400">Changing semester updates the content, papers and forums you can access.</p>
+          <p className="text-xs text-amber-600 dark:text-amber-400">Changing faculty or semester updates the content, papers and forums you can access.</p>
         </div>
 
         {/* Theme */}

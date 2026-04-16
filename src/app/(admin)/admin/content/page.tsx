@@ -148,9 +148,14 @@ export default function AdminContentPage() {
     const parentId = parts.slice(1).join("-");
 
     const endpoints: Record<string, { url: string; body: object }> = {
-      uni:  { url: "/api/v1/universities", body: { name: addVal } },
-      fac:  { url: "/api/v1/faculties",    body: { name: addVal, universityId: parentId } },
-      year: { url: `/api/v1/universities/${parentId}/years`, body: { yearNumber: parseInt(addVal) || 1 } },
+      uni:     { url: "/api/v1/universities", body: { name: addVal } },
+      fac:     { url: "/api/v1/faculties",    body: { name: addVal, universityId: parentId } },
+      year:    { url: `/api/v1/universities/${parentId}/years`, body: { yearNumber: parseInt(addVal) || 1 } },
+      // facyear: parentId is the faculty ID — we pass facultyId in body so year is linked to the faculty
+      facyear: {
+        url: `/api/v1/universities/${faculties.find(f => f.id === parentId)?.universityId}/years`,
+        body: { yearNumber: parseInt(addVal) || 1, facultyId: parentId },
+      },
       sem:  { url: `/api/v1/years/${parentId}/semesters`, body: { name: addVal } },
       mod:  { url: `/api/v1/semesters/${parentId}/modules`, body: { name: addVal } },
       subj: { url: `/api/v1/modules/${parentId}/subjects`, body: { name: addVal } },
@@ -165,12 +170,12 @@ export default function AdminContentPage() {
     });
     if (res.ok) {
       const item = await res.json();
-      if (type === "uni")  setUniversities(u => [...u, item]);
-      if (type === "fac")  setFaculties(f => [...f, item]);
-      if (type === "year") setYears(y => [...y, item]);
-      if (type === "sem")  setSemesters(s => [...s, item]);
-      if (type === "mod")  setModules(m => [...m, item]);
-      if (type === "subj") setSubjects(s => [...s, item]);
+      if (type === "uni")     setUniversities(u => [...u, item]);
+      if (type === "fac")     setFaculties(f => [...f, item]);
+      if (type === "year" || type === "facyear") setYears(y => [...y, item]);
+      if (type === "sem")     setSemesters(s => [...s, item]);
+      if (type === "mod")     setModules(m => [...m, item]);
+      if (type === "subj")    setSubjects(s => [...s, item]);
       toast.success("Added");
       // Auto-expand parent
       if (parentId) setExpanded(prev => { const n = new Set(prev); n.add(parentId); return n; });
@@ -323,7 +328,7 @@ export default function AdminContentPage() {
                                 <div className="ml-7 border-l border-purple-500/20 pl-4 py-1">
                                   <div className="flex items-center justify-between py-1">
                                     <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Academic Years</span>
-                                    <AddRow k={`year-${uni.id}`} placeholder="Year number" type="year" parentId={uni.id} />
+                                    <AddRow k={`facyear-${fac.id}`} placeholder="Year number" type="year" parentId={fac.id} />
                                   </div>
                                   {facYears.map(year => <YearRow key={year.id} year={year} />)}
                                   {facYears.length === 0 && (

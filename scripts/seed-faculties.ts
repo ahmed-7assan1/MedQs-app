@@ -35,7 +35,7 @@ async function main() {
       facultyId = fac.id;
       console.log(`   ✅ Created "Faculty of Medicine" (${fac.id})`);
     } else {
-      const medFac = existing.find((f) =>
+      const medFac = existing.find((f: { id: string; name: string }) =>
         f.name.toLowerCase().includes("medicine")
       ) ?? existing[0];
       facultyId = medFac.id;

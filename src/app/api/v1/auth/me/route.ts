@@ -11,7 +11,7 @@ export async function GET() {
     select: {
       id: true, name: true, nickname: true, bio: true, image: true,
       phone: true, phoneVisible: true, theme: true,
-      universityId: true, semesterId: true, role: true, points: true, hideRank: true, studentId: true,
+      universityId: true, facultyId: true, semesterId: true, role: true, points: true, hideRank: true, studentId: true,
       isPrivate: true, instagramUrl: true, facebookUrl: true,
       rank: { select: { label: true, badge: true } },
       university: { select: { name: true } },
