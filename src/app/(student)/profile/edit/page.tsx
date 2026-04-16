@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
+import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface University { id: string; name: string }
 interface AcademicYear { id: string; yearNumber: number; universityId: string }
@@ -32,6 +33,26 @@ export default function EditProfilePage() {
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const { startUpload } = useUploadThing("avatar", {
+    onClientUploadComplete: async (files) => {
+      const url = files[0]?.url;
+      if (!url) return;
+      // Persist the new URL in the database
+      await fetch("/api/v1/auth/avatar-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      setAvatarUrl(url);
+      toast.success("Photo updated!");
+      setUploadingAvatar(false);
+    },
+    onUploadError: (err) => {
+      toast.error("Upload failed: " + (err.message || "Unknown error"));
+      setUploadingAvatar(false);
+    },
+  });
   const [selectedUni, setSelectedUni] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedSem, setSelectedSem] = useState("");
@@ -102,17 +123,7 @@ export default function EditProfilePage() {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) return toast.error("Max 5MB for profile photo");
     setUploadingAvatar(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/v1/auth/avatar", { method: "POST", body: fd });
-    if (res.ok) {
-      const { url } = await res.json();
-      setAvatarUrl(url);
-      toast.success("Photo updated!");
-    } else {
-      toast.error("Upload failed");
-    }
-    setUploadingAvatar(false);
+    await startUpload([file]);
     e.target.value = "";
   }
 
