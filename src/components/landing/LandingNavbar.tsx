@@ -30,6 +30,9 @@ export function LandingNavbar() {
           <span className="dark:[filter:brightness(0)_invert(1)]">
             <MedQsLogoMark className="h-9 w-9 shrink-0" title="MedQs" />
           </span>
+          <span className="text-[17px] font-bold tracking-tight text-foreground dark:text-white">
+            MedQs
+          </span>
         </Link>
 
         {/* Right side */}
