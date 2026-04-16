@@ -9,6 +9,7 @@ import { StudentPageShell } from "@/components/layout/StudentPageShell";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { ImageCropModal } from "@/components/ui/ImageCropModal";
 
 interface University { id: string; name: string }
 interface AcademicYear { id: string; yearNumber: number; universityId: string }
@@ -33,6 +34,8 @@ export default function EditProfilePage() {
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropFileName, setCropFileName] = useState("avatar.jpg");
 
   const { startUpload } = useUploadThing("avatar", {
     onClientUploadComplete: async (files) => {
@@ -118,13 +121,28 @@ export default function EditProfilePage() {
   const filteredYears = years.filter((y) => y.universityId === selectedUni);
   const filteredSems = semesters.filter((s) => s.academicYearId === selectedYear);
 
-  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+  // ── When user selects a file, open crop modal instead of uploading directly ──
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return toast.error("Max 5MB for profile photo");
+    if (file.size > 10 * 1024 * 1024) return toast.error("Max 10MB for profile photo");
+    setCropFileName(file.name);
+    const objectUrl = URL.createObjectURL(file);
+    setCropSrc(objectUrl);
+    e.target.value = ""; // reset so same file can be re-selected
+  }
+
+  // ── After crop confirmed → upload the blob ────────────────────────────────
+  async function handleCropConfirm(blob: Blob, fileName: string) {
+    setCropSrc(null);
     setUploadingAvatar(true);
+    const file = new File([blob], fileName.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
     await startUpload([file]);
-    e.target.value = "";
+  }
+
+  function handleCropCancel() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
   }
 
   async function handleSave() {
@@ -175,6 +193,18 @@ export default function EditProfilePage() {
       title="Edit profile"
       subtitle="Keep your identity, university, and preferences aligned with your cohort — clinical trainees expect accuracy and trust."
     >
+      {/* Crop Modal */}
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          cropShape="round"
+          aspect={1}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+          fileName={cropFileName}
+        />
+      )}
+
       <div className="space-y-5">
         {/* Avatar */}
         <div className="flex items-center gap-5 rounded-xl border border-border bg-card p-5">
