@@ -133,14 +133,17 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = `${config.siteName} — The Ultimate Medical Education Platform`;
   const description =
     "Elevate your medical studies with MedQs: Curated lectures, interactive MCQs, smart spaced repetition, AI-powered study assistance, and a community of doctors and students.";
+  const base = safeMetadataBase();
+  const ogImage = base ? `${base.origin}/og-image.png` : "https://med-qs0.vercel.app/og-image.png";
   return {
-    metadataBase: safeMetadataBase(),
+    metadataBase: base,
     title: { default: title, template: `%s | ${config.siteName}` },
     description,
     keywords: ["Medical Education", "Medical Students", "MCQ", "Clinical Cases", "Medical University", "MedQs", "Med Students Forum"],
     applicationName: config.siteName,
     authors: [{ name: config.siteName }],
     creator: config.siteName,
+    publisher: config.siteName,
     appleWebApp: {
       capable: true,
       title: config.siteName,
@@ -152,8 +155,21 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       siteName: config.siteName,
       locale: "en_US",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${config.siteName} — The Ultimate Medical Education Platform`,
+        },
+      ],
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
     icons: appIconsFromConfig(config.faviconUrl, "pwaIconUrl" in config ? config.pwaIconUrl : null),
   };
@@ -219,6 +235,35 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
         {/* Dynamic primary color CSS variables */}
         <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />
+        {/* JSON-LD — tells Google the site name is MedQs, not Vercel */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/#website`,
+                  "url": safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app",
+                  "name": config.siteName,
+                  "description": "The Ultimate Medical Education Platform",
+                  "publisher": { "@id": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/#organization` },
+                },
+                {
+                  "@type": "Organization",
+                  "@id": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/#organization`,
+                  "name": config.siteName,
+                  "url": safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/og-image.png`,
+                  },
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <body className="font-sans antialiased">
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
