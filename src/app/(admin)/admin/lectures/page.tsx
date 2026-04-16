@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import {
   Plus, Video, Layers, Trash2, Save, Loader2,
-  BookOpen, ChevronDown, ChevronUp, Pencil, Check, X,
+  BookOpen, ChevronDown, Pencil, Check, X, FileText, ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -48,30 +48,39 @@ export default function AdminLecturesPage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedSubject) return;
+    if (!selectedSubject) {
+      setLectures([]);
+      return;
+    }
+    setLoading(true);
     fetch(`/api/v1/subjects/${selectedSubject}/lectures`)
       .then(r => r.json())
-      .then(setLectures);
+      .then(data => {
+        setLectures(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [selectedSubject]);
 
   const filteredSubjects = subjects.filter(s => s.moduleId === selectedModule);
 
-  // Load flashcards for a lecture when expanded
   async function expandLecture(lecId: string) {
     if (expanded === lecId) { setExpanded(null); return; }
     setExpanded(lecId);
-    // Fetch full lecture with flashcards if not already loaded
     const existing = lectures.find(l => l.id === lecId);
     if (existing?.flashcards) return;
-    const res = await fetch(`/api/v1/lectures/${lecId}`);
-    const data = await res.json();
-    setLectures(prev =>
-      prev.map(l =>
-        l.id === lecId
-          ? { ...l, flashcards: data.flashcards ?? [], files: data.files ?? [], title: data.title ?? l.title, videoUrl: data.videoUrl ?? l.videoUrl }
-          : l
-      )
-    );
+    
+    try {
+      const res = await fetch(`/api/v1/lectures/${lecId}`);
+      const data = await res.json();
+      setLectures(prev =>
+        prev.map(l =>
+          l.id === lecId
+            ? { ...l, flashcards: data.flashcards ?? [], files: data.files ?? [], title: data.title ?? l.title, videoUrl: data.videoUrl ?? l.videoUrl }
+            : l
+        )
+      );
+    } catch {}
   }
 
   async function createLecture() {
@@ -90,7 +99,7 @@ export default function AdminLecturesPage() {
       if (res.ok) {
         const lec = await res.json();
         setLectures(prev => [...prev, lec]);
-        toast.success("Lecture created!");
+        toast.success("Lecture published!");
         setTitle(""); setVideoUrl(""); setNewCards([{ front: "", back: "" }]);
         setShowForm(false);
       } else {
@@ -100,7 +109,7 @@ export default function AdminLecturesPage() {
   }
 
   async function deleteLecture(id: string) {
-    if (!confirm("Delete this lecture? All flashcards and questions inside will be lost.")) return;
+    if (!confirm("Delete this lecture? All flashcards and files will be removed.")) return;
     const res = await fetch(`/api/v1/lectures/${id}`, { method: "DELETE" });
     if (res.ok) {
       setLectures((prev) => prev.filter((l) => l.id !== id));
@@ -109,127 +118,189 @@ export default function AdminLecturesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold">Lectures</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage lecture content and flashcards</p>
-      </div>
-
-      {/* Filter */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+    <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-24">
+      {/* ── Premium Header ── */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Module</label>
-          <MedqsSelect
-            value={selectedModule}
-            onChange={(e) => {
-              setSelectedModule(e.target.value);
-              setSelectedSubject("");
-              setLectures([]);
-            }}
-            className="w-full"
-          >
-            <option value="">Select module...</option>
-            {modules.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </MedqsSelect>
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-500">Curriculum Assets</p>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">Lectures</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage educational sessions, video content, and active-recall resources.
+          </p>
         </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Subject</label>
-          <MedqsSelect
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            disabled={!selectedModule}
-            className="w-full"
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
+            <Video className="h-4 w-4 text-primary" />
+            <span>{lectures.length.toLocaleString()} Items</span>
+          </div>
+          <button
+            onClick={() => setShowForm((p) => !p)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 transition-all font-display"
           >
-            <option value="">Select subject...</option>
-            {filteredSubjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </MedqsSelect>
+            {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {showForm ? "Cancel" : "Add Lecture"}
+          </button>
         </div>
       </div>
 
-      {selectedSubject && (
-        <button onClick={() => setShowForm(p => !p)}
-          className="mb-4 flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
-          <Plus className="h-4 w-4" />
-          {showForm ? "Cancel" : "Add Lecture"}
-        </button>
-      )}
+      {/* Scope Filter Section */}
+      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="h-4 w-4 text-blue-500" />
+            <span className="text-sm font-bold tracking-tight">Scope Config</span>
+          </div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Define subject scope to list content</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Module Selection</label>
+            <MedqsSelect
+              value={selectedModule}
+              onChange={(e) => {
+                setSelectedModule(e.target.value);
+                setSelectedSubject("");
+                setLectures([]);
+              }}
+              className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+            >
+              <option value="">Choose Module…</option>
+              {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </MedqsSelect>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Subject Selection</label>
+            <MedqsSelect
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              disabled={!selectedModule}
+              className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+            >
+              <option value="">Choose Subject…</option>
+              {filteredSubjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </MedqsSelect>
+          </div>
+        </div>
+      </div>
 
       {/* Create form */}
       {showForm && (
-        <div className="mb-6 rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in">
-          <h2 className="font-semibold">New Lecture</h2>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Title *</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. The Shoulder Joint"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Video className="h-3.5 w-3.5" /> Video URL (optional)
-            </label>
-            <input type="url" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://youtube.com/embed/..."
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-
-          {/* Flashcards for new lecture */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5"><Layers className="h-3.5 w-3.5" /> Flashcards</label>
-              <button onClick={() => setNewCards(c => [...c, { front: "", back: "" }])}
-                className="flex items-center gap-1 rounded px-2 py-1 text-xs text-primary hover:bg-primary/10 transition-colors">
-                <Plus className="h-3 w-3" /> Add card
-              </button>
+        <div className="rounded-2xl border border-blue-500/20 bg-card p-6 shadow-xl shadow-blue-500/5 ring-1 ring-blue-500/10 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+           <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+              <Plus className="h-5 w-5" />
             </div>
-            <div className="space-y-2">
-              {newCards.map((card, i) => (
-                <div key={i} className="flex gap-2">
-                  <input type="text" value={card.front} onChange={e => setNewCards(c => c.map((x, j) => j === i ? { ...x, front: e.target.value } : x))}
-                    placeholder="Front (question)"
-                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <input type="text" value={card.back} onChange={e => setNewCards(c => c.map((x, j) => j === i ? { ...x, back: e.target.value } : x))}
-                    placeholder="Back (answer)"
-                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <button onClick={() => setNewCards(c => c.filter((_, j) => j !== i))}
-                    className="rounded-lg p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
+            <div>
+              <h2 className="font-display text-lg font-bold tracking-tight">New Educational Session</h2>
+              <p className="text-xs text-muted-foreground">Configure the session title and attach media resources.</p>
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <button onClick={createLecture} disabled={saving}
-              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {saving ? "Saving..." : "Save Lecture"}
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Lecture Title *</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Clinical Approach to Shock"
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Video Resource (Embed Link)</label>
+              <div className="relative">
+                <Video className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=…"
+                  className="w-full h-11 rounded-xl border-border/60 bg-background/50 pl-10 pr-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Starter Study Cards</label>
+                <button
+                  type="button"
+                  onClick={() => setNewCards([...newCards, { front: "", back: "" }])}
+                  className="text-[10px] font-bold text-blue-500 uppercase hover:underline"
+                >
+                  + Add Item
+                </button>
+              </div>
+              <div className="space-y-2">
+                {newCards.map((c, i) => (
+                  <div key={i} className="flex gap-2">
+                    <input
+                      placeholder="Card Front (Term)"
+                      className="flex-1 h-10 rounded-xl border-border/60 bg-background/50 px-3 text-xs focus:ring-blue-500/40 focus:outline-none"
+                      value={c.front}
+                      onChange={(e) => setNewCards(prev => prev.map((x, j) => j === i ? { ...x, front: e.target.value } : x))}
+                    />
+                    <input
+                      placeholder="Card Back (Info)"
+                      className="flex-1 h-10 rounded-xl border-border/60 bg-background/50 px-3 text-xs focus:ring-blue-500/40 focus:outline-none"
+                      value={c.back}
+                      onChange={(e) => setNewCards(prev => prev.map((x, j) => j === i ? { ...x, back: e.target.value } : x))}
+                    />
+                    <button
+                      onClick={() => setNewCards(prev => prev.filter((_, j) => i !== j))}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all shadow-sm"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-border/60 pt-5">
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground">Discard Session</button>
+            <button
+              onClick={createLecture}
+              disabled={saving}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 disabled:opacity-60 transition-all font-display"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Save className="h-4 w-4 text-white" />}
+              Publish Session
             </button>
           </div>
         </div>
       )}
 
       {/* Lectures list */}
-      {lectures.length === 0 && selectedSubject && !showForm ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-12 text-center">
-          <BookOpen className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
-          <p className="text-sm font-medium">No lectures yet</p>
-          <p className="text-xs text-muted-foreground">Click &quot;Add Lecture&quot; to create the first one.</p>
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      ) : !selectedSubject ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
+            <Layers className="h-8 w-8 text-muted-foreground opacity-30" />
+          </div>
+          <p className="font-display text-lg font-bold">Scope Undefined</p>
+          <p className="max-w-xs text-sm text-muted-foreground mt-1">Please select a module and subject to manage curriculum content.</p>
+        </div>
+      ) : lectures.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
+            <BookOpen className="h-8 w-8 text-muted-foreground opacity-30" />
+          </div>
+          <p className="font-display text-lg font-bold">Subject is Empty</p>
+          <p className="max-w-xs text-sm text-muted-foreground mt-1">Start building the curriculum by adding the first lecture session.</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {lectures.map((lec, i) => (
+        <div className="space-y-3">
+          {lectures.sort((a,b) => a.order - b.order).map((lec, idx) => (
             <LectureRow
               key={lec.id}
               lecture={lec}
-              index={i}
+              index={idx}
               expanded={expanded === lec.id}
               onExpand={() => expandLecture(lec.id)}
               onDelete={() => deleteLecture(lec.id)}
@@ -247,7 +318,7 @@ export default function AdminLecturesPage() {
   );
 }
 
-// ─── LectureRow with inline flashcard CRUD ────────────────────────────────────
+// ─── Sub-components ─────────────────────────────────────────────────────────
 
 function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcardsChange, onLecturePatch }: {
   lecture: Lecture; index: number; expanded: boolean;
@@ -255,13 +326,14 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
   onFlashcardsChange: (cards: Flashcard[]) => void;
   onLecturePatch: (patch: Partial<Lecture>) => void;
 }) {
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [editFront, setEditFront] = useState("");
   const [editBack,  setEditBack]  = useState("");
   const [savingCard, setSavingCard] = useState(false);
   const [addFront, setAddFront] = useState("");
   const [addBack,  setAddBack]  = useState("");
   const [addingCard, setAddingCard] = useState(false);
+  
   const [editTitle, setEditTitle] = useState(lecture.title);
   const [editVideo, setEditVideo] = useState(lecture.videoUrl ?? "");
   const [savingLecture, setSavingLecture] = useState(false);
@@ -271,292 +343,338 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
   const cards = lecture.flashcards ?? [];
   const files = lecture.files ?? [];
 
-  function startEdit(card: Flashcard) {
-    setEditing(card.id);
+  function startEditCard(card: Flashcard) {
+    setEditingCardId(card.id);
     setEditFront(card.front);
     setEditBack(card.back);
   }
 
   async function saveCard(cardId: string) {
     setSavingCard(true);
-    const res = await fetch(`/api/v1/flashcards/${cardId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ front: editFront, back: editBack }),
-    });
-    setSavingCard(false);
-    if (res.ok) {
-      const updated = await res.json();
-      onFlashcardsChange(cards.map(c => c.id === cardId ? updated : c));
-      setEditing(null);
-      toast.success("Card updated");
-    } else toast.error(await apiErrorMessage(res, "Failed to update"));
+    try {
+      const res = await fetch(`/api/v1/flashcards/${cardId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ front: editFront, back: editBack }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        onFlashcardsChange(cards.map(c => c.id === cardId ? updated : c));
+        setEditingCardId(null);
+        toast.success("Card updated");
+      }
+    } finally { setSavingCard(false); }
   }
 
   async function deleteCard(cardId: string) {
-    if (!confirm("Delete this flashcard?")) return;
+    if (!confirm("Remove this card?")) return;
     const res = await fetch(`/api/v1/flashcards/${cardId}`, { method: "DELETE" });
     if (res.ok) {
       onFlashcardsChange(cards.filter(c => c.id !== cardId));
-      toast.success("Card deleted");
-    } else toast.error(await apiErrorMessage(res, "Failed to delete"));
+      toast.success("Card removed");
+    }
   }
 
   async function addCard() {
     if (!addFront.trim() || !addBack.trim()) return;
     setAddingCard(true);
-    const res = await fetch(`/api/v1/lectures/${lecture.id}/flashcards`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ front: addFront, back: addBack }),
-    });
-    setAddingCard(false);
-    if (res.ok) {
-      const card = await res.json();
-      onFlashcardsChange([...cards, card]);
-      setAddFront(""); setAddBack("");
-      toast.success("Card added");
-    } else toast.error(await apiErrorMessage(res, "Failed to add card"));
+    try {
+      const res = await fetch(`/api/v1/lectures/${lecture.id}/flashcards`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ front: addFront, back: addBack }),
+      });
+      if (res.ok) {
+        const card = await res.json();
+        onFlashcardsChange([...cards, card]);
+        setAddFront(""); setAddBack("");
+        toast.success("New card added");
+      }
+    } finally { setAddingCard(false); }
   }
 
   async function saveLectureMeta() {
-    if (!editTitle.trim()) {
-      toast.error("Lecture title is required");
-      return;
-    }
+    if (!editTitle.trim()) return toast.error("Title is required");
     setSavingLecture(true);
-    const res = await fetch(`/api/v1/lectures/${lecture.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: editTitle.trim(), videoUrl: editVideo.trim() || null }),
-    });
-    setSavingLecture(false);
-    if (res.ok) {
-      const updated = await res.json();
-      onLecturePatch({ title: updated.title, videoUrl: updated.videoUrl });
-      toast.success("Lecture updated");
-    } else {
-      toast.error(await apiErrorMessage(res, "Failed to update lecture"));
-    }
+    try {
+      const res = await fetch(`/api/v1/lectures/${lecture.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editTitle.trim(), videoUrl: editVideo.trim() || null }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        onLecturePatch({ title: updated.title, videoUrl: updated.videoUrl });
+        toast.success("Lecture metrics updated");
+      }
+    } finally { setSavingLecture(false); }
   }
 
   async function uploadLectureFile(file: File) {
     setUploadingFile(true);
-    const form = new FormData();
-    form.append("file", file);
-    const res = await fetch(`/api/v1/lectures/${lecture.id}/files`, { method: "POST", body: form });
-    setUploadingFile(false);
-    if (res.ok) {
-      const created = await res.json();
-      onLecturePatch({ files: [...files, created] });
-      toast.success("File uploaded");
-    } else {
-      toast.error(await apiErrorMessage(res, "Upload failed"));
-    }
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch(`/api/v1/lectures/${lecture.id}/files`, { method: "POST", body: formData });
+      if (res.ok) {
+        const created = await res.json();
+        onLecturePatch({ files: [...files, created] });
+        toast.success("Attachment linked");
+      }
+    } finally { setUploadingFile(false); }
   }
 
   async function renameFile(fileId: string, name: string) {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      toast.error("File name is required");
-      return;
-    }
+    if (!name.trim()) return;
     setRenamingFileId(fileId);
-    const res = await fetch(`/api/v1/lectures/${lecture.id}/files/${fileId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: trimmed }),
-    });
-    setRenamingFileId(null);
-    if (res.ok) {
-      const updated = await res.json();
-      onLecturePatch({ files: files.map((f) => (f.id === fileId ? updated : f)) });
-      toast.success("File renamed");
-    } else toast.error(await apiErrorMessage(res, "Rename failed"));
+    try {
+      const res = await fetch(`/api/v1/lectures/${lecture.id}/files/${fileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        onLecturePatch({ files: files.map((f) => (f.id === fileId ? updated : f)) });
+        toast.success("File renamed");
+      }
+    } finally { setRenamingFileId(null); }
   }
 
   async function deleteFile(fileId: string) {
-    if (!confirm("Delete this file?")) return;
+    if (!confirm("Remove this attachment?")) return;
     const res = await fetch(`/api/v1/lectures/${lecture.id}/files/${fileId}`, { method: "DELETE" });
     if (res.ok) {
       onLecturePatch({ files: files.filter((f) => f.id !== fileId) });
-      toast.success("File deleted");
-    } else toast.error(await apiErrorMessage(res, "Delete failed"));
+      toast.success("Attachment removed");
+    }
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
-      <div className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors" onClick={onExpand}>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">{index + 1}</span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">{lecture.title}</p>
-          {lecture.videoUrl && <p className="text-xs text-muted-foreground flex items-center gap-1"><Video className="h-3 w-3" /> Has video</p>}
+    <div className={cn(
+      "overflow-hidden rounded-2xl border transition-all duration-300",
+      expanded ? "border-blue-500/30 bg-card shadow-lg ring-1 ring-blue-500/10" : "border-border/60 bg-card hover:border-border/80"
+    )}>
+      <div className="flex cursor-pointer items-center justify-between p-5" onClick={onExpand}>
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 shadow-inner">
+            <BookOpen className="h-6 w-6 text-blue-500" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-display text-lg font-bold truncate">{lecture.title}</h3>
+            <div className="mt-1 flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Video className={cn("h-3.5 w-3.5", lecture.videoUrl ? "text-blue-500" : "text-muted-foreground/30")} />
+                <span>{lecture.videoUrl ? "Active Media" : "Text Only"}</span>
+              </div>
+              <span className="h-1 w-1 rounded-full bg-border" />
+              <span className="text-xs font-bold text-muted-foreground/70 uppercase tracking-tighter">Session {index + 1}</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground">{cards.length} cards</span>
-          <button onClick={e => { e.stopPropagation(); onDelete(); }}
-            className="rounded-lg p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-            <Trash2 className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all"
+          >
+            <Trash2 className="h-4.5 w-4.5" />
           </button>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 text-muted-foreground", expanded && "rotate-180")}>
+            <ChevronDown className="h-5 w-5" />
+          </div>
         </div>
       </div>
 
-      {/* Flashcards inline editor */}
       {expanded && (
-        <div className="border-t border-border px-4 pb-4 pt-3 animate-fade-in">
-          <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lecture details</p>
-            <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-              <input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="Lecture title"
-                className="rounded border border-border bg-background px-2 py-2 text-sm"
-              />
-              <input
-                value={editVideo}
-                onChange={(e) => setEditVideo(e.target.value)}
-                placeholder="Video URL (optional)"
-                className="rounded border border-border bg-background px-2 py-2 text-sm"
-              />
-              <button
-                onClick={saveLectureMeta}
-                disabled={savingLecture}
-                className="rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
-              >
-                {savingLecture ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </div>
+        <div className="border-t border-border/40 p-6 space-y-8 animate-in fade-in slide-in-from-top-2 duration-400">
+           {/* Session Config */}
+           <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Session Configuration</p>
+              <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto]">
+                  <div className="space-y-1">
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="Session Title"
+                      className="w-full h-11 rounded-xl border border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <input
+                      value={editVideo}
+                      onChange={(e) => setEditVideo(e.target.value)}
+                      placeholder="Video Asset URL"
+                      className="w-full h-11 rounded-xl border border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={saveLectureMeta}
+                    disabled={savingLecture}
+                    className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 h-11 text-xs font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 disabled:opacity-60 transition-all uppercase tracking-widest"
+                  >
+                    {savingLecture ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    Save
+                  </button>
+              </div>
+           </div>
 
-          <div className="mb-4 rounded-lg border border-border bg-muted/20 p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lecture files</p>
-              <label className="cursor-pointer rounded border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted">
-                {uploadingFile ? "Uploading..." : "Upload file"}
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
+           {/* Attachments */}
+           <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-display text-sm font-bold flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-blue-500" />
+                  Learning Handouts
+                </h4>
+                <label className="flex items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-tight hover:bg-muted cursor-pointer transition-all">
+                  {uploadingFile ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                  {uploadingFile ? "Syncing…" : "Upload File"}
+                  <input type="file" className="hidden" onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void uploadLectureFile(f);
                     e.target.value = "";
-                    if (file) void uploadLectureFile(file);
-                  }}
-                />
-              </label>
-            </div>
-            {files.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No files uploaded yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {files.map((file) => (
-                  <LectureFileRow
-                    key={file.id}
-                    file={file}
-                    renaming={renamingFileId === file.id}
-                    onRename={renameFile}
-                    onDelete={deleteFile}
-                  />
-                ))}
+                  }} />
+                </label>
               </div>
-            )}
-          </div>
+              
+              {files.length === 0 ? (
+                <div className="py-4 text-center rounded-xl border border-dashed border-border/40 bg-muted/5">
+                  <p className="text-xs text-muted-foreground italic tracking-tight opacity-60">Empty handout bank</p>
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  {files.map((file) => (
+                    <LectureFileRow
+                      key={file.id}
+                      file={file}
+                      renaming={renamingFileId === file.id}
+                      onRename={renameFile}
+                      onDelete={deleteFile}
+                    />
+                  ))}
+                </div>
+              )}
+           </div>
 
-          <div className="mb-3 flex items-center gap-2">
-            <Layers className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Flashcards ({cards.length})</span>
-          </div>
-
-          <div className="space-y-2">
-            {cards.map(card => (
-              <div key={card.id} className="rounded-lg border border-border bg-background">
-                {editing === card.id ? (
-                  <div className="flex gap-2 p-2">
-                    <input value={editFront} onChange={e => setEditFront(e.target.value)}
-                      className="flex-1 rounded border border-border bg-muted/50 px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
-                    <input value={editBack} onChange={e => setEditBack(e.target.value)}
-                      className="flex-1 rounded border border-border bg-muted/50 px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
-                    <button onClick={() => saveCard(card.id)} disabled={savingCard}
-                      className="rounded p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors">
-                      {savingCard ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                    </button>
-                    <button onClick={() => setEditing(null)} className="rounded p-1.5 text-muted-foreground hover:bg-muted transition-colors">
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-2">
-                    <div className="flex-1 grid grid-cols-2 gap-2">
-                      <p className="text-xs font-medium text-muted-foreground truncate">{card.front}</p>
-                      <p className="text-xs truncate">{card.back}</p>
-                    </div>
-                    <button onClick={() => startEdit(card)} className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button onClick={() => deleteCard(card.id)} className="rounded p-1 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex-shrink-0">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                )}
+           {/* Flashcards */}
+           <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-display text-sm font-bold flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-blue-500" />
+                  Flashcard Bank ({cards.length})
+                </h4>
               </div>
-            ))}
 
-            {/* Add new card inline */}
-            <div className="flex gap-2">
-              <input value={addFront} onChange={e => setAddFront(e.target.value)} onKeyDown={e => e.key === "Enter" && addCard()}
-                placeholder="New front (question)"
-                className="flex-1 rounded-lg border border-dashed border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground" />
-              <input value={addBack} onChange={e => setAddBack(e.target.value)} onKeyDown={e => e.key === "Enter" && addCard()}
-                placeholder="Back (answer)"
-                className="flex-1 rounded-lg border border-dashed border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground" />
-              <button onClick={addCard} disabled={addingCard || !addFront.trim() || !addBack.trim()}
-                className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                {addingCard ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                 {cards.map(card => {
+                    const isEditing = editingCardId === card.id;
+                    return (
+                        <div key={card.id} className={cn(
+                          "group relative rounded-2xl border p-4 transition-all duration-200",
+                          isEditing ? "border-blue-500/40 bg-blue-500/5 ring-1 ring-blue-500/10 scale-[1.02]" : "border-border/60 bg-background/50 hover:border-border"
+                        )}>
+                           {isEditing ? (
+                             <div className="space-y-3">
+                                <textarea
+                                  value={editFront}
+                                  onChange={(e) => setEditFront(e.target.value)}
+                                  className="w-full bg-transparent p-0 text-xs font-bold border-none focus:ring-0 min-h-[50px]"
+                                />
+                                <div className="h-px w-full bg-blue-500/20" />
+                                <textarea
+                                  value={editBack}
+                                  onChange={(e) => setEditBack(e.target.value)}
+                                  className="w-full bg-transparent p-0 text-xs border-none focus:ring-0 min-h-[50px]"
+                                />
+                                <div className="flex justify-end gap-2 pt-1">
+                                   <button onClick={() => setEditingCardId(null)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground"><X className="h-4 w-4" /></button>
+                                   <button onClick={() => saveCard(card.id)} disabled={savingCard} className="h-7 w-7 flex items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm disabled:opacity-50">
+                                      {savingCard ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-4 w-4" />}
+                                   </button>
+                                </div>
+                             </div>
+                           ) : (
+                             <div onClick={() => startEditCard(card)} className="cursor-text group-hover:opacity-80 transition-opacity">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 leading-none opacity-60">Question</p>
+                                <p className="text-xs font-bold mb-3 line-clamp-2">{card.front}</p>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 leading-none opacity-60">Fact</p>
+                                <p className="text-xs line-clamp-2">{card.back}</p>
+                                
+                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                   <button onClick={(e) => { e.stopPropagation(); startEditCard(card); }} className="h-7 w-7 flex items-center justify-center rounded-lg bg-white shadow-sm border border-border/60 text-muted-foreground hover:text-blue-500"><Pencil className="h-3.5 w-3.5" /></button>
+                                   <button onClick={(e) => { e.stopPropagation(); deleteCard(card.id); }} className="h-7 w-7 flex items-center justify-center rounded-lg bg-white shadow-sm border border-border/60 text-muted-foreground hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+                                </div>
+                             </div>
+                           )}
+                        </div>
+                    )
+                 })}
+                 
+                 {/* Quick Add Card */}
+                 <div className="rounded-2xl border border-dashed border-border/60 bg-muted/5 p-4 space-y-3 flex flex-col justify-center min-h-[140px]">
+                    <textarea 
+                      placeholder="Type term…" 
+                      className="bg-transparent border-none p-0 text-xs font-bold focus:ring-0 min-h-[40px] placeholder:font-normal"
+                      value={addFront}
+                      onChange={(e) => setAddFront(e.target.value)}
+                    />
+                    <div className="h-px w-full bg-border/40" />
+                    <textarea 
+                      placeholder="Type definition…" 
+                      className="bg-transparent border-none p-0 text-xs focus:ring-0 min-h-[40px]"
+                      value={addBack}
+                      onChange={(e) => setAddBack(e.target.value)}
+                    />
+                    <button
+                      onClick={addCard}
+                      disabled={addingCard || !addFront.trim() || !addBack.trim()}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-blue-600/10 text-blue-600 h-9 text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-blue-600 hover:text-white disabled:opacity-40"
+                    >
+                      {addingCard ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                      Add Card
+                    </button>
+                 </div>
+              </div>
+           </div>
         </div>
       )}
     </div>
   );
 }
 
-function LectureFileRow({
-  file,
-  renaming,
-  onRename,
-  onDelete,
-}: {
-  file: LectureFile;
-  renaming: boolean;
+function LectureFileRow({ file, renaming, onRename, onDelete }: {
+  file: LectureFile; renaming: boolean;
   onRename: (fileId: string, name: string) => Promise<void>;
   onDelete: (fileId: string) => Promise<void>;
 }) {
   const [name, setName] = useState(file.name);
   return (
-    <div className="flex items-center gap-2 rounded border border-border bg-background px-2 py-1.5">
+    <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-background/50 px-4 py-2.5 group transition-all hover:border-border hover:shadow-sm">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/5 text-blue-500">
+        <FileText className="h-4 w-4" />
+      </div>
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-xs"
+        className="min-w-0 flex-1 bg-transparent text-sm font-medium focus:outline-none"
       />
-      <a href={file.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">
-        Open
-      </a>
-      <button
-        onClick={() => void onRename(file.id, name)}
-        disabled={renaming}
-        className="rounded border border-border px-2 py-1 text-xs hover:bg-muted disabled:opacity-60"
-      >
-        Save
-      </button>
-      <button
-        onClick={() => void onDelete(file.id)}
-        className="rounded border border-border px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-      >
-        Delete
-      </button>
+      <div className="flex items-center gap-1.5 ">
+        <a href={file.url} target="_blank" rel="noreferrer" className="flex h-8 items-center px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
+          <ExternalLink className="h-3 w-3 mr-1.5" /> Open
+        </a>
+        <button
+          onClick={() => void onRename(file.id, name)}
+          disabled={renaming || name === file.name}
+          className="flex h-8 items-center px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white transition-all disabled:opacity-20"
+        >
+          {renaming ? "Syncing…" : "Rename"}
+        </button>
+        <button
+          onClick={() => void onDelete(file.id)}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
   );
 }

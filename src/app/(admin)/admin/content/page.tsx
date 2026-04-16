@@ -2,8 +2,7 @@
 import { useState, useEffect } from "react";
 import {
   Building2, Calendar, BookOpen, FlaskConical, GraduationCap,
-  Plus, ChevronDown, ChevronRight,
-  Loader2, Trash2, Check, X, ShieldAlert,
+  Plus, ChevronDown, Loader2, Trash2, Check, X, ShieldAlert, Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -18,6 +17,8 @@ interface Module      { id: string; name: string; semesterId: string }
 interface Subject     { id: string; name: string; moduleId: string }
 
 type AddKey = string;
+
+const DIRECT_MODULE = "__direct__";
 
 export default function AdminContentPage() {
   const [universities, setUniversities]   = useState<University[]>([]);
@@ -37,16 +38,15 @@ export default function AdminContentPage() {
     let cancelled = false;
     (async () => {
       try {
-        const [uRes, yRes, sRes, mRes, subRes, sessionRes] = await Promise.all([
+        const [uRes, yRes, sRes, mRes, subRes, sessionRes, facRes] = await Promise.all([
           fetch("/api/v1/universities"),
           fetch("/api/v1/academic-years"),
           fetch("/api/v1/semesters"),
           fetch("/api/v1/modules-all"),
           fetch("/api/v1/subjects-all"),
           fetch("/api/auth/session"),
+          fetch("/api/v1/faculties"),
         ]);
-        // Fetch all faculties (no filter)
-        const facRes = await fetch("/api/v1/faculties");
         const [u, y, s, m, sub, fac] = await Promise.all([
           parseJsonList<University>(uRes),
           parseJsonList<AcademicYear>(yRes),
@@ -69,12 +69,8 @@ export default function AdminContentPage() {
       } catch (e) {
         console.error("[admin/content] load", e);
         if (!cancelled) {
-          toast.error("تعذّر تحميل هيكل المحتوى. تحقق من الجلسة والشبكة.");
+          toast.error("Failed to load content structure.");
           setUniversities([]);
-          setYears([]);
-          setSemesters([]);
-          setModules([]);
-          setSubjects([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -94,63 +90,13 @@ export default function AdminContentPage() {
   function startAdd(key: AddKey) { setAdding(key); setAddVal(""); }
   function cancelAdd() { setAdding(null); setAddVal(""); }
 
-  async function commitDelete(
-    kind: "uni" | "fac" | "year" | "sem" | "mod" | "subj",
-    id: string,
-    label: string
-  ) {
-    if (!confirm(`Delete "${label}"? This removes all nested content. Cannot be undone.`))
-      return;
-    setDeleting(id);
-    try {
-      const paths: Record<"uni" | "fac" | "year" | "sem" | "mod" | "subj", string> = {
-        uni: `/api/v1/universities/${id}`,
-        fac: `/api/v1/faculties/${id}`,
-        year: `/api/v1/years/${id}`,
-        sem: `/api/v1/semesters/${id}`,
-        mod: `/api/v1/modules/${id}`,
-        subj: `/api/v1/subjects/${id}`,
-      };
-      const res = await fetch(paths[kind], { method: "DELETE" });
-      if (!res.ok) { toast.error(await apiErrorMessage(res, "Delete failed")); return; }
-      if (kind === "uni")  setUniversities(u => u.filter(x => x.id !== id));
-      if (kind === "fac")  setFaculties(f => f.filter(x => x.id !== id));
-      if (kind === "year") setYears(y => y.filter(x => x.id !== id));
-      if (kind === "sem")  setSemesters(s => s.filter(x => x.id !== id));
-      if (kind === "mod")  setModules(m => m.filter(x => x.id !== id));
-      if (kind === "subj") setSubjects(s => s.filter(x => x.id !== id));
-      toast.success("Deleted");
-    } finally { setDeleting(null); }
-  }
-
-  function DeleteBtn({
-    kind, id, label, alwaysShow,
-  }: {
-    kind: "uni" | "fac" | "year" | "sem" | "mod" | "subj";
-    id: string; label: string; alwaysShow?: boolean;
-  }) {
-    return (
-      <button type="button" title="Delete" disabled={deleting === id}
-        onClick={e => { e.stopPropagation(); void commitDelete(kind, id, label); }}
-        className={cn(
-          "rounded-lg p-1.5 text-muted-foreground transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20",
-          alwaysShow ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100"
-        )}>
-        {deleting === id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-      </button>
-    );
-  }
-
-  /** Name marker for the transparent auto-created module used in "direct subjects" mode */
-  const DIRECT_MODULE = "__direct__";
-
   async function commitAdd(key: AddKey) {
     if (!addVal.trim()) return;
     const parts = key.split("-");
     const type = parts[0];
     const parentId = parts.slice(1).join("-");
 
-    // ── Special: Direct subject → auto-create __direct__ module if needed ──
+    // Special: Direct subject
     if (type === "directsubj") {
       const semId = parentId;
       let directMod = modules.find(m => m.semesterId === semId && m.name === DIRECT_MODULE);
@@ -160,27 +106,20 @@ export default function AdminContentPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: DIRECT_MODULE }),
         });
-        if (!modRes.ok) {
-          toast.error(await apiErrorMessage(modRes, "Failed to initialize"));
-          cancelAdd();
-          return;
-        }
+        if (!modRes.ok) return toast.error("Failed to initialize system module");
         directMod = await modRes.json();
         setModules(m => [...m, directMod!]);
       }
-      const targetModId = directMod!.id;
-      const res = await fetch(`/api/v1/modules/${targetModId}/subjects`, {
+      const res = await fetch(`/api/v1/modules/${directMod!.id}/subjects`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: addVal.trim() }),
       });
       if (res.ok) {
-        const newSubj = await res.json();
-        setSubjects(s => [...s, newSubj]);
-        toast.success("Added");
+        const item = await res.json();
+        setSubjects(s => [...s, item]);
+        toast.success("Subject added");
         setExpanded(prev => { const n = new Set(prev); n.add(semId); return n; });
-      } else {
-        toast.error(await apiErrorMessage(res, "Failed to add subject"));
       }
       cancelAdd();
       return;
@@ -190,7 +129,6 @@ export default function AdminContentPage() {
       uni:     { url: "/api/v1/universities", body: { name: addVal } },
       fac:     { url: "/api/v1/faculties",    body: { name: addVal, universityId: parentId } },
       year:    { url: `/api/v1/universities/${parentId}/years`, body: { yearNumber: parseInt(addVal) || 1 } },
-      // facyear: parentId is the faculty ID — we pass facultyId in body so year is linked to the faculty
       facyear: {
         url: `/api/v1/universities/${faculties.find(f => f.id === parentId)?.universityId}/years`,
         body: { yearNumber: parseInt(addVal) || 1, facultyId: parentId },
@@ -199,322 +137,424 @@ export default function AdminContentPage() {
       mod:  { url: `/api/v1/semesters/${parentId}/modules`, body: { name: addVal } },
       subj: { url: `/api/v1/modules/${parentId}/subjects`, body: { name: addVal } },
     };
+
     const cfg = endpoints[type];
     if (!cfg) return;
 
-    const res = await fetch(cfg.url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(cfg.body),
-    });
-    if (res.ok) {
-      const item = await res.json();
-      if (type === "uni")     setUniversities(u => [...u, item]);
-      if (type === "fac")     setFaculties(f => [...f, item]);
-      if (type === "year" || type === "facyear") setYears(y => [...y, item]);
-      if (type === "sem")     setSemesters(s => [...s, item]);
-      if (type === "mod")     setModules(m => [...m, item]);
-      if (type === "subj")    setSubjects(s => [...s, item]);
-      toast.success("Added");
-      // Auto-expand parent
-      if (parentId) setExpanded(prev => { const n = new Set(prev); n.add(parentId); return n; });
-    } else {
-      toast.error(await apiErrorMessage(res, "Failed to add"));
-    }
-    cancelAdd();
+    try {
+      const res = await fetch(cfg.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cfg.body),
+      });
+      if (res.ok) {
+        const item = await res.json();
+        if (type === "uni")     setUniversities(u => [...u, item]);
+        if (type === "fac")     setFaculties(f => [...f, item]);
+        if (type === "year" || type === "facyear") setYears(y => [...y, item]);
+        if (type === "sem")     setSemesters(s => [...s, item]);
+        if (type === "mod")     setModules(m => [...m, item]);
+        if (type === "subj")    setSubjects(s => [...s, item]);
+        toast.success("Added successfully");
+        if (parentId) setExpanded(prev => { const n = new Set(prev); n.add(parentId); return n; });
+      } else toast.error(await apiErrorMessage(res, "Failed to add"));
+    } finally { cancelAdd(); }
   }
 
-  // Inline add row
-  function AddRow({ k, placeholder, parentId, type }: { k: string; placeholder: string; parentId?: string; type: string }) {
-    const active = adding === k;
-    if (!active) {
-      return (
-        <button
-          onClick={() => startAdd(k)}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        >
-          <Plus className="h-3 w-3" /> Add {placeholder.toLowerCase()}
-        </button>
-      );
-    }
-    return (
-      <div className="flex items-center gap-2 px-2 py-1" onClick={e => e.stopPropagation()}>
-        <input
-          autoFocus
-          type={type === "year" ? "number" : "text"}
-          value={addVal}
-          onChange={e => setAddVal(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") commitAdd(k); if (e.key === "Escape") cancelAdd(); }}
-          placeholder={placeholder}
-          className="w-44 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-        <button onClick={() => commitAdd(k)} className="rounded p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors">
-          <Check className="h-3.5 w-3.5" />
-        </button>
-        <button onClick={cancelAdd} className="rounded p-1 text-muted-foreground hover:bg-muted transition-colors">
-          <X className="h-3.5 w-3.5" />
-        </button>
-      </div>
-    );
+  async function commitDelete(kind: string, id: string, label: string) {
+    if (!confirm(`Confirm deletion of "${label}"? This action cannot be undone.`)) return;
+    setDeleting(id);
+    try {
+      const paths: Record<string, string> = {
+        uni: `/api/v1/universities/${id}`,
+        fac: `/api/v1/faculties/${id}`,
+        year: `/api/v1/years/${id}`,
+        sem: `/api/v1/semesters/${id}`,
+        mod: `/api/v1/modules/${id}`,
+        subj: `/api/v1/subjects/${id}`,
+      };
+      const res = await fetch(paths[kind], { method: "DELETE" });
+      if (res.ok) {
+        if (kind === "uni")  setUniversities(u => u.filter(x => x.id !== id));
+        if (kind === "fac")  setFaculties(f => f.filter(x => x.id !== id));
+        if (kind === "year") setYears(y => y.filter(x => x.id !== id));
+        if (kind === "sem")  setSemesters(s => s.filter(x => x.id !== id));
+        if (kind === "mod")  setModules(m => m.filter(x => x.id !== id));
+        if (kind === "subj") setSubjects(s => s.filter(x => x.id !== id));
+        toast.success("Removed");
+      } else toast.error(await apiErrorMessage(res, "Delete failed"));
+    } finally { setDeleting(null); }
   }
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  if (loading) return (
+    <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
+      <div className="relative flex h-16 w-16 items-center justify-center">
+        <div className="absolute inset-0 animate-ping rounded-full bg-blue-500/20" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold">Courses & curriculum</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          This tree is your course map: university → year → semester → module → subject. Add lectures, videos, and
-          questions under <strong className="font-medium text-foreground">Lectures</strong> and{" "}
-          <strong className="font-medium text-foreground">Questions</strong> in the Doctor hub — students see it in{" "}
-          <strong className="font-medium text-foreground">Lectures</strong> on their side.
-        </p>
-      </div>
-
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        {/* Universities header */}
-        <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Building2 className="h-4 w-4 text-primary" />
-            Universities
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
-              {universities.length}
-            </span>
-          </div>
-          {isSuperAdmin
-            ? <AddRow k="uni" placeholder="University name" type="text" />
-            : <span className="flex items-center gap-1 rounded-lg border border-amber-500/25 bg-amber-500/8 px-2.5 py-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
-                <ShieldAlert className="h-3 w-3" /> Super Admin only
-              </span>
-          }
-        </div>
-
-        {universities.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-muted-foreground text-center">
-            No universities yet. Add one above.
-          </p>
-        ) : (
-          <div className="divide-y divide-border">
-            {universities.map(uni => {
-              const uniYears = years.filter(y => y.universityId === uni.id);
-              const open = expanded.has(uni.id);
-              return (
-                <div key={uni.id}>
-                  {/* University row */}
-                  <div
-                    className="group flex cursor-pointer items-center gap-2 px-5 py-3 hover:bg-muted/20 transition-colors"
-                    onClick={() => toggle(uni.id)}
-                  >
-                    <span className="text-muted-foreground">
-                      {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </span>
-                    <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="flex-1 text-sm font-medium">{uni.name}</span>
-                    <span className="text-xs text-muted-foreground">{uniYears.length} year{uniYears.length !== 1 ? "s" : ""}</span>
-                    {isSuperAdmin && <DeleteBtn kind="uni" id={uni.id} label={uni.name} />}
-                  </div>
-
-                  {/* Faculties + Years */}
-                  {open && (
-                    <div className="border-t border-border/40 bg-muted/10 py-2">
-                      <div className="ml-9">
-                        {/* Faculties header */}
-                        <div className="flex items-center justify-between py-1 pr-4">
-                          <span className="px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                            Faculties (كليات)
-                          </span>
-                          <AddRow k={`fac-${uni.id}`} placeholder="Faculty name" type="text" parentId={uni.id} />
-                        </div>
-
-                        {/* No faculties → flat year list */}
-                        {faculties.filter(f => f.universityId === uni.id).length === 0 && (
-                          <>
-                            <div className="flex items-center justify-between py-1 pr-4 mt-1">
-                              <span className="px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Academic Years</span>
-                              <AddRow k={`year-${uni.id}`} placeholder="Year number" type="year" parentId={uni.id} />
-                            </div>
-                            {uniYears.filter(y => !y.facultyId).map(year => (
-                              <YearRow key={year.id} year={year} />
-                            ))}
-                          </>
-                        )}
-
-                        {/* Faculties list */}
-                        {faculties.filter(f => f.universityId === uni.id).map(fac => {
-                          const facOpen  = expanded.has(fac.id);
-                          const facYears = years.filter(y => y.facultyId === fac.id);
-                          return (
-                            <div key={fac.id}>
-                              <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
-                                onClick={() => toggle(fac.id)}>
-                                <span className="text-muted-foreground">
-                                  {facOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                                </span>
-                                <GraduationCap className="h-3.5 w-3.5 text-purple-500 flex-shrink-0" />
-                                <span className="flex-1 text-sm font-medium">{fac.name}</span>
-                                <span className="text-xs text-muted-foreground">{facYears.length} yr{facYears.length !== 1 ? "s" : ""}</span>
-                                <DeleteBtn kind="fac" id={fac.id} label={fac.name} />
-                              </div>
-
-                              {facOpen && (
-                                <div className="ml-7 border-l border-purple-500/20 pl-4 py-1">
-                                  <div className="flex items-center justify-between py-1">
-                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Academic Years</span>
-                                    <AddRow k={`facyear-${fac.id}`} placeholder="Year number" type="year" parentId={fac.id} />
-                                  </div>
-                                  {facYears.map(year => <YearRow key={year.id} year={year} />)}
-                                  {facYears.length === 0 && (
-                                    <p className="py-1.5 text-xs text-muted-foreground italic">No years yet</p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* YearRow local component — reused for faculty and flat year lists */}
+      <p className="font-display text-sm font-bold animate-pulse text-muted-foreground">Architecting Curriculum Layers…</p>
     </div>
   );
 
-  function YearRow({ year }: { year: AcademicYear }) {
-    const yearSems = semesters.filter(s => s.academicYearId === year.id);
-    const yearOpen = expanded.has(year.id);
-    return (
-      <div key={year.id}>
-        <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
-          onClick={() => toggle(year.id)}>
-          <span className="text-muted-foreground">
-            {yearOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-          </span>
-          <Calendar className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
-          <span className="flex-1 text-sm">Year {year.yearNumber}</span>
-          <span className="text-xs text-muted-foreground">{yearSems.length} sem{yearSems.length !== 1 ? "s" : ""}</span>
-          <DeleteBtn kind="year" id={year.id} label={`Year ${year.yearNumber}`} />
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-32">
+       {/* ── Premium Header ── */}
+       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-500">Global Infrastructure</p>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">Content Hierarchy</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Construct and manage the foundational map of universities, faculties, and academic years.
+          </p>
         </div>
-
-        {yearOpen && (
-          <div className="ml-7 border-l border-border/50 pl-4 py-1">
-            <div className="flex items-center justify-between py-1">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Semesters</span>
-              <AddRow k={`sem-${year.id}`} placeholder="Semester name" type="text" parentId={year.id} />
-            </div>
-            {yearSems.map(sem => {
-              const semMods     = modules.filter(m => m.semesterId === sem.id);
-              const directMod   = semMods.find(m => m.name === DIRECT_MODULE);
-              const regularMods = semMods.filter(m => m.name !== DIRECT_MODULE);
-              const directSubjs = directMod ? subjects.filter(s => s.moduleId === directMod.id) : [];
-              const semOpen     = expanded.has(sem.id);
-              return (
-                <div key={sem.id}>
-                  <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted/40 transition-colors"
-                    onClick={() => toggle(sem.id)}>
-                    <span className="text-muted-foreground">
-                      {semOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                    </span>
-                    <BookOpen className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
-                    <span className="flex-1 text-sm">{sem.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {regularMods.length > 0 && `${regularMods.length} mod${regularMods.length !== 1 ? "s" : ""}`}
-                      {regularMods.length > 0 && directSubjs.length > 0 && " · "}
-                      {directSubjs.length > 0 && `${directSubjs.length} direct subj${directSubjs.length !== 1 ? "s" : ""}`}
-                    </span>
-                    <DeleteBtn kind="sem" id={sem.id} label={sem.name} />
-                  </div>
-
-                  {semOpen && (
-                    <div className="ml-7 border-l border-border/50 pl-4 py-1">
-
-                      {/* ── MODULES section ── */}
-                      <div className="flex items-center justify-between py-1">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Modules</span>
-                        <AddRow k={`mod-${sem.id}`} placeholder="Module name" type="text" parentId={sem.id} />
-                      </div>
-                      {regularMods.length === 0 && !adding?.startsWith(`mod-${sem.id}`) && (
-                        <p className="py-1 text-xs text-muted-foreground italic">No modules — add one above or use Direct Subjects below</p>
-                      )}
-                      {regularMods.map(mod => {
-                        const modSubjs = subjects.filter(s => s.moduleId === mod.id);
-                        const modOpen  = expanded.has(mod.id);
-                        return (
-                          <div key={mod.id}>
-                            <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/40 transition-colors"
-                              onClick={() => toggle(mod.id)}>
-                              <span className="text-muted-foreground">
-                                {modOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                              </span>
-                              <div className="h-2 w-2 rounded-full bg-emerald-400 flex-shrink-0" />
-                              <span className="flex-1 text-sm">{mod.name}</span>
-                              <span className="text-xs text-muted-foreground">{modSubjs.length} subj{modSubjs.length !== 1 ? "s" : ""}</span>
-                              <DeleteBtn kind="mod" id={mod.id} label={mod.name} />
-                            </div>
-                            {modOpen && (
-                              <div className="ml-6 border-l border-border/40 pl-4 py-1">
-                                <div className="flex items-center justify-between py-1">
-                                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Subjects</span>
-                                  <AddRow k={`subj-${mod.id}`} placeholder="Subject name" type="text" parentId={mod.id} />
-                                </div>
-                                {modSubjs.length === 0
-                                  ? <p className="py-1.5 text-xs text-muted-foreground italic">No subjects yet</p>
-                                  : modSubjs.map(subj => (
-                                    <div key={subj.id} className="group/sub flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30 transition-colors">
-                                      <FlaskConical className="h-3 w-3 text-pink-400 flex-shrink-0" />
-                                      <span className="flex-1 text-sm">{subj.name}</span>
-                                      <DeleteBtn kind="subj" id={subj.id} label={subj.name} alwaysShow />
-                                    </div>
-                                  ))
-                                }
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-
-                      {/* ── DIVIDER ── */}
-                      <div className="my-2 border-t border-dashed border-border/40" />
-
-                      {/* ── DIRECT SUBJECTS section ── */}
-                      <div className="flex items-center justify-between py-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Direct Subjects</span>
-                          <span className="rounded-full bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-orange-500">No module</span>
-                        </div>
-                        <AddRow k={`directsubj-${sem.id}`} placeholder="Subject name" type="text" parentId={sem.id} />
-                      </div>
-                      {directSubjs.length === 0 && !adding?.startsWith(`directsubj-${sem.id}`) && (
-                        <p className="py-1 text-xs text-muted-foreground italic">No direct subjects</p>
-                      )}
-                      {directSubjs.map(subj => (
-                        <div key={subj.id} className="group/sub flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30 transition-colors">
-                          <FlaskConical className="h-3 w-3 text-orange-400 flex-shrink-0" />
-                          <span className="flex-1 text-sm">{subj.name}</span>
-                          <DeleteBtn kind="subj" id={subj.id} label={subj.name} alwaysShow />
-                        </div>
-                      ))}
-
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+        {!isSuperAdmin && (
+          <div className="flex items-center gap-2 rounded-xl bg-amber-500/10 px-3 py-1.5 text-[10px] font-bold text-amber-500 uppercase ring-1 ring-amber-500/20">
+            <ShieldAlert className="h-3.5 w-3.5" />
+            Restricted Node
           </div>
         )}
       </div>
-    );
-  }
+
+      <div className="space-y-4">
+        {universities.map(uni => (
+          <UniversityNode
+            key={uni.id}
+            uni={uni}
+            faculties={faculties}
+            years={years}
+            semesters={semesters}
+            modules={modules}
+            subjects={subjects}
+            expanded={expanded}
+            onToggle={toggle}
+            isSuperAdmin={isSuperAdmin}
+            onAdd={startAdd}
+            onDelete={commitDelete}
+            addingKey={adding}
+            addVal={addVal}
+            onAddValChange={setAddVal}
+            onCommitAdd={commitAdd}
+            onCancelAdd={cancelAdd}
+            deletingId={deleting}
+          />
+        ))}
+        
+        {isSuperAdmin && (
+          <div className="rounded-2xl border border-dashed border-border/60 bg-muted/5 p-8 flex flex-col items-center justify-center text-center">
+             <Building2 className="h-10 w-10 text-muted-foreground opacity-20 mb-3" />
+             <p className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-widest leading-none">Global Root</p>
+             <button
+               onClick={() => startAdd("uni-root")}
+               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 transition-all font-display"
+             >
+               <Plus className="h-4 w-4" />
+               New University
+             </button>
+             
+             {adding === "uni-root" && (
+                <div className="mt-6 w-full max-w-sm flex items-center gap-2 p-2 rounded-xl bg-card border border-blue-500 animate-in zoom-in-95">
+                   <input autoFocus placeholder="Name…" className="flex-1 bg-transparent text-sm px-2 focus:outline-none" value={addVal} onChange={(e) => setAddVal(e.target.value)} onKeyDown={e => e.key === "Enter" && commitAdd("uni-root")} />
+                   <button onClick={() => commitAdd("uni-root")} className="h-8 w-8 rounded-lg bg-blue-600 text-white flex items-center justify-center"><Check className="h-4 w-4" /></button>
+                   <button onClick={cancelAdd} className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground flex items-center justify-center"><X className="h-4 w-4" /></button>
+                </div>
+             )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Hierarchy Nodes ────────────────────────────────────────────────────────
+
+function UniversityNode({ uni, faculties, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+  const open = expanded.has(uni.id);
+  const uniFaculties = faculties.filter((f: any) => f.universityId === uni.id);
+  const uniYears = years.filter((y: any) => y.universityId === uni.id && !y.facultyId);
+
+  return (
+    <div className={cn(
+      "overflow-hidden rounded-2xl border transition-all duration-300",
+      open ? "border-blue-500/30 bg-card shadow-lg ring-1 ring-blue-500/10" : "border-border/60 bg-card hover:border-border/80"
+    )}>
+      <div className="flex cursor-pointer items-center justify-between p-5" onClick={() => onToggle(uni.id)}>
+        <div className="flex items-center gap-4 min-w-0">
+          <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 shadow-inner", open ? "bg-blue-600 text-white" : "bg-blue-500/10 text-blue-600")}>
+            <Building2 className="h-6 w-6" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-display text-lg font-bold truncate">{uni.name}</h3>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 tracking-widest">Global Institution</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {isSuperAdmin && (
+            <button onClick={(e) => { e.stopPropagation(); onAdd(`uni-${uni.id}-fac`); }} className="h-10 w-10 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-blue-500/10 hover:text-blue-500"><Plus className="h-5 w-5" /></button>
+          )}
+          {isSuperAdmin && (
+            <button onClick={(e) => { e.stopPropagation(); onDelete("uni", uni.id, uni.name); }} className={cn("h-10 w-10 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-red-500/10 hover:text-red-500", deletingId === uni.id && "animate-pulse")}>
+              {deletingId === uni.id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+            </button>
+          )}
+          <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 text-muted-foreground", open && "rotate-180")}>
+            <ChevronDown className="h-5 w-5" />
+          </div>
+        </div>
+      </div>
+
+      {open && (
+        <div className="border-t border-border/40 bg-muted/5 p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+           {addingKey === `uni-${uni.id}-fac` && (
+              <div className="flex items-center gap-2 mb-2 p-2 rounded-xl bg-card border border-blue-500/30">
+                <input autoFocus placeholder="Faculty Name…" className="flex-1 bg-transparent text-sm px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`uni-${uni.id}-fac`)} />
+                <button onClick={() => onCommitAdd(`uni-${uni.id}-fac`)} className="h-8 w-8 rounded-lg bg-blue-600 text-white flex items-center justify-center"><Check className="h-4 w-4" /></button>
+                <button onClick={onCancelAdd} className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground flex items-center justify-center"><X className="h-4 w-4" /></button>
+              </div>
+           )}
+
+           {uniFaculties.length === 0 && uniYears.length === 0 && (
+             <div className="py-8 text-center bg-muted/20 rounded-xl border border-dashed border-border/60">
+                <p className="text-xs text-muted-foreground italic font-medium opacity-60">No children defined for this node.</p>
+             </div>
+           )}
+
+           {uniFaculties.map((fac: any) => (
+             <FacultyNode
+                key={fac.id}
+                fac={fac}
+                years={years}
+                semesters={semesters}
+                modules={modules}
+                subjects={subjects}
+                expanded={expanded}
+                onToggle={onToggle}
+                isSuperAdmin={isSuperAdmin}
+                onAdd={onAdd}
+                onDelete={onDelete}
+                addingKey={addingKey}
+                addVal={addVal}
+                onAddValChange={onAddValChange}
+                onCommitAdd={onCommitAdd}
+                onCancelAdd={onCancelAdd}
+                deletingId={deletingId}
+             />
+           ))}
+
+           {uniYears.length > 0 && <div className="pt-2"><p className="text-[10px] font-bold uppercase text-muted-foreground ml-2 mb-2 opacity-60">Direct Academic Years</p></div>}
+           {uniYears.map((year: any) => (
+              <YearNode
+                key={year.id}
+                year={year}
+                semesters={semesters}
+                modules={modules}
+                subjects={subjects}
+                expanded={expanded}
+                onToggle={onToggle}
+                isSuperAdmin={isSuperAdmin}
+                onAdd={onAdd}
+                onDelete={onDelete}
+                addingKey={addingKey}
+                addVal={addVal}
+                onAddValChange={onAddValChange}
+                onCommitAdd={onCommitAdd}
+                onCancelAdd={onCancelAdd}
+                deletingId={deletingId}
+              />
+           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+  const open = expanded.has(fac.id);
+  const facYears = years.filter((y: any) => y.facultyId === fac.id);
+
+  return (
+    <div className={cn(
+      "rounded-2xl border transition-all duration-300",
+      open ? "border-emerald-500/30 bg-card/60 shadow-md ring-1 ring-emerald-500/10" : "border-border/40 bg-card hover:border-border/60"
+    )}>
+      <div className="flex items-center justify-between p-3.5 cursor-pointer" onClick={() => onToggle(fac.id)}>
+         <div className="flex items-center gap-3">
+            <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg shadow-sm border border-border/40", open ? "bg-emerald-600 text-white" : "bg-emerald-500/10 text-emerald-600")}>
+               <GraduationCap className="h-5 w-5" />
+            </div>
+            <span className="text-sm font-bold tracking-tight text-foreground/90">{fac.name}</span>
+         </div>
+         <div className="flex items-center gap-1.5">
+            <button onClick={(e) => { e.stopPropagation(); onAdd(`facyear-${fac.id}`); }} className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-500"><Plus className="h-4 w-4" /></button>
+            {isSuperAdmin && (
+              <button onClick={(e) => { e.stopPropagation(); onDelete("fac", fac.id, fac.name); }} className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+            <div className={cn("transition-transform", open && "rotate-180")}>
+               <ChevronDown className="h-4 w-4 text-muted-foreground/40" />
+            </div>
+         </div>
+      </div>
+
+      {open && (
+        <div className="pl-6 pr-3 pb-3 space-y-2 animate-in fade-in slide-in-from-left-2 duration-300">
+           {addingKey === `facyear-${fac.id}` && (
+             <div className="flex items-center gap-2 p-1.5 rounded-xl border border-emerald-500/30 bg-card">
+                <input type="number" placeholder="Year # (e.g. 5)" className="flex-1 bg-transparent text-xs px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`facyear-${fac.id}`)} />
+                <button onClick={() => onCommitAdd(`facyear-${fac.id}`)} className="h-7 w-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center"><Check className="h-3.5 w-3.5" /></button>
+                <button onClick={onCancelAdd} className="h-7 w-7 rounded-lg hover:bg-muted text-muted-foreground flex items-center justify-center"><X className="h-3.5 w-3.5" /></button>
+             </div>
+           )}
+           {facYears.sort((a: any, b: any) => (a.yearNumber ?? 0) - (b.yearNumber ?? 0)).map((year: any) => (
+             <YearNode key={year.id} year={year} semesters={semesters} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} isSuperAdmin={isSuperAdmin} onAdd={onAdd} onDelete={onDelete} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} deletingId={deletingId} />
+           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+  const open = expanded.has(year.id);
+  const yearSemesters = semesters.filter((s: any) => s.academicYearId === year.id);
+
+  return (
+    <div className="group/year">
+      <div className="flex items-center justify-between p-2 rounded-xl hover:bg-muted/40 cursor-pointer transition-colors" onClick={() => onToggle(year.id)}>
+         <div className="flex items-center gap-3">
+            <Calendar className={cn("h-4 w-4", open ? "text-blue-500" : "text-muted-foreground/40")} />
+            <span className="text-xs font-bold text-foreground/80 tracking-tight">Academic Year {year.yearNumber}</span>
+         </div>
+         <div className="flex items-center gap-1.5">
+            <button onClick={(e) => { e.stopPropagation(); onAdd(`sem-${year.id}`); }} className="h-7 w-7 rounded-lg opacity-0 group-hover/year:opacity-100 text-muted-foreground hover:bg-blue-500/10 hover:text-blue-500 transition-all"><Plus className="h-3.5 w-3.5" /></button>
+            <button onClick={(e) => { e.stopPropagation(); onDelete("year", year.id, `Year ${year.yearNumber}`); }} className="h-7 w-7 rounded-lg opacity-0 group-hover/year:opacity-100 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all"><Trash2 className="h-3.5 w-3.5" /></button>
+            <div className={cn("transition-transform opacity-30", open && "rotate-180 opacity-60")}>
+               <ChevronDown className="h-4 w-4" />
+            </div>
+         </div>
+      </div>
+
+      {open && (
+        <div className="pl-6 border-l border-border/40 ml-3.5 mt-1 pb-2 space-y-2 animate-in fade-in slide-in-from-left-1 duration-200">
+           {addingKey === `sem-${year.id}` && (
+             <div className="flex items-center gap-1.5 p-1 rounded-lg border border-blue-500/20 bg-background/50">
+                <input placeholder="Semester name…" className="flex-1 bg-transparent text-[11px] px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`sem-${year.id}`)} />
+                <button onClick={() => onCommitAdd(`sem-${year.id}`)} className="h-6 w-6 rounded bg-blue-600 text-white flex items-center justify-center shadow-blue-500/20"><Check className="h-3 w-3" /></button>
+                <button onClick={onCancelAdd} className="h-6 w-6 rounded hover:bg-muted text-muted-foreground flex items-center justify-center"><X className="h-3 w-3" /></button>
+             </div>
+           )}
+           {yearSemesters.map((sem: any) => (
+              <SemesterNode key={sem.id} sem={sem} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
+           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd }: any) {
+  const open = expanded.has(sem.id);
+  const semModules = modules.filter((m: any) => m.semesterId === sem.id);
+  const regularModules = semModules.filter((m: any) => m.name !== DIRECT_MODULE);
+  const directMod = semModules.find((m: any) => m.name === DIRECT_MODULE);
+  const directSubjs = directMod ? subjects.filter((s: any) => s.moduleId === directMod.id) : [];
+
+  return (
+    <div className="group/sem">
+       <div className="flex items-center justify-between p-1.5 px-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors" onClick={() => onToggle(sem.id)}>
+          <div className="flex items-center gap-2.5">
+             <div className={cn("h-1.5 w-1.5 rounded-full", open ? "bg-violet-500 shadow-sm" : "bg-muted-foreground/30")} />
+             <span className="text-xs font-bold text-foreground/70 uppercase tracking-tighter">{sem.name}</span>
+          </div>
+          <div className="flex items-center gap-1.5 opacity-0 group-hover/sem:opacity-100 transition-all">
+             <button onClick={(e) => { e.stopPropagation(); onAdd(`sem-${sem.id}-mod`); }} className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-muted"><Plus className="h-3 w-3" /></button>
+             <button onClick={(e) => { e.stopPropagation(); onDelete("sem", sem.id, sem.name); }} className="h-6 w-6 flex items-center justify-center rounded-md text-red-500/50 hover:bg-red-500/10 hover:text-red-500"><Trash2 className="h-3 w-3" /></button>
+          </div>
+       </div>
+
+       {open && (
+         <div className="pl-5 pt-1 space-y-2 animate-in fade-in duration-200">
+            {addingKey === `sem-${sem.id}-mod` && (
+               <div className="flex items-center gap-1.5 p-1 rounded-lg border border-emerald-500/10 bg-emerald-500/5">
+                  <input placeholder="Module Name…" className="flex-1 bg-transparent text-[10px] px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`sem-${sem.id}-mod`)} />
+                  <button onClick={() => onCommitAdd(`sem-${sem.id}-mod`)} className="text-emerald-600 hover:opacity-80"><Check className="h-3.5 w-3.5" /></button>
+                  <button onClick={onCancelAdd} className="text-muted-foreground"><X className="h-3.5 w-3.5" /></button>
+               </div>
+            )}
+            
+            {regularModules.map((mod: any) => (
+               <ModuleNode key={mod.id} mod={mod} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
+            ))}
+
+            {/* Direct Subjects logic */}
+            <div className="mt-2 pl-1 border-t border-dashed border-border/40 pt-2 space-y-1">
+               <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Independent Subjects</p>
+                  </div>
+                  <button onClick={() => onAdd(`directsubj-${sem.id}`)} className="text-[9px] font-bold text-blue-500 uppercase hover:underline">+ Link Subj</button>
+               </div>
+               {addingKey === `directsubj-${sem.id}` && (
+                  <div className="flex items-center gap-1.5 p-1 rounded-lg border border-blue-500/20 bg-blue-500/5">
+                     <input placeholder="Subject title…" className="flex-1 bg-transparent text-[10px] px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`directsubj-${sem.id}`)} />
+                     <button onClick={() => onCommitAdd(`directsubj-${sem.id}`)} className="text-blue-500"><Check className="h-3.5 w-3.5" /></button>
+                  </div>
+               )}
+               {directSubjs.map((sub: any) => (
+                  <SubjectNode key={sub.id} sub={sub} onDelete={onDelete} />
+               ))}
+            </div>
+         </div>
+       )}
+    </div>
+  );
+}
+
+function ModuleNode({ mod, subjects, expanded, onToggle, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd }: any) {
+  const open = expanded.has(mod.id);
+  const modSubjects = subjects.filter((s: any) => s.moduleId === mod.id);
+
+  return (
+    <div className="group/mod">
+       <div className={cn("flex items-center justify-between p-2 px-3 rounded-xl border transition-all cursor-pointer", open ? "bg-emerald-500/5 border-emerald-500/20 shadow-sm" : "bg-card border-border/60 hover:bg-muted/30")} onClick={() => onToggle(mod.id)}>
+          <div className="flex items-center gap-2.5">
+             <BookOpen className={cn("h-3.5 w-3.5", open ? "text-emerald-500" : "text-muted-foreground/50")} />
+             <span className="text-[11px] font-bold text-foreground/80">{mod.name}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+             <button onClick={(e) => { e.stopPropagation(); onAdd(`mod-${mod.id}-subj`); }} className="h-6 w-6 flex items-center justify-center rounded-lg text-emerald-600/50 hover:bg-emerald-500/10 hover:text-emerald-600 transition-all"><Plus className="h-3.5 w-3.5" /></button>
+             <button onClick={(e) => { e.stopPropagation(); onDelete("mod", mod.id, mod.name); }} className="h-6 w-6 flex items-center justify-center rounded-lg text-red-500/50 hover:bg-red-500/10 hover:text-red-500 transition-all"><Trash2 className="h-3.5 w-3.5" /></button>
+          </div>
+       </div>
+
+       {open && (
+         <div className="pl-6 pt-1.5 space-y-1 animate-in zoom-in-95 duration-200">
+            {addingKey === `mod-${mod.id}-subj` && (
+               <div className="flex items-center gap-1.5 p-1 rounded-lg border border-blue-500/10 bg-blue-500/5">
+                  <input placeholder="Subject…" className="flex-1 bg-transparent text-[10px] px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`mod-${mod.id}-subj`)} />
+                  <button onClick={() => onCommitAdd(`mod-${mod.id}-subj`)} className="text-blue-500"><Check className="h-3.5 w-3.5" /></button>
+                  <button onClick={onCancelAdd} className="text-muted-foreground"><X className="h-3.5 w-3.5" /></button>
+               </div>
+            )}
+            {modSubjects.map((sub: any) => (
+               <SubjectNode key={sub.id} sub={sub} onDelete={onDelete} />
+            ))}
+         </div>
+       )}
+    </div>
+  );
+}
+
+function SubjectNode({ sub, onDelete }: any) {
+  return (
+    <div className="group/subj flex items-center justify-between p-2 px-3 rounded-lg hover:bg-blue-500/5 transition-colors border border-transparent hover:border-blue-500/10">
+       <div className="flex items-center gap-2.5">
+          <Layers className="h-3 w-3 text-blue-500/60" />
+          <span className="text-[11px] font-medium text-muted-foreground leading-none">{sub.name}</span>
+       </div>
+       <button onClick={() => onDelete("subj", sub.id, sub.name)} className="opacity-0 group-hover/subj:opacity-100 text-red-500/40 hover:text-red-500 transition-all">
+          <Trash2 className="h-3 w-3" />
+       </button>
+    </div>
+  );
 }

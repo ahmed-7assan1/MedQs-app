@@ -51,12 +51,22 @@ export default async function AdminUsersPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold">Users</h1>
-        <p className="text-sm text-muted-foreground">
-          {total.toLocaleString()} total accounts (students & doctors)
-        </p>
+    <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 space-y-6">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin Panel</p>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">Users</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {total.toLocaleString()} total accounts — students, doctors &amp; platform admins
+          </p>
+        </div>
+        <div className="flex gap-2 flex-wrap text-xs font-bold">
+          <span className="rounded-2xl bg-emerald-500/10 px-3 py-1.5 text-emerald-600 dark:text-emerald-400">Students</span>
+          <span className="rounded-2xl bg-blue-500/10 px-3 py-1.5 text-blue-500">Doctors</span>
+          {role === "SUPER_ADMIN" && (
+            <span className="rounded-2xl bg-purple-500/10 px-3 py-1.5 text-purple-500">Platform</span>
+          )}
+        </div>
       </div>
       <UsersTable users={users as any} total={total} page={page} limit={limit} viewerRole={role ?? "STUDENT"} universities={universities as any} />
     </div>

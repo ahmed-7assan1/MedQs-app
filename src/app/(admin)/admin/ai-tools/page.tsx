@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import {
   Wand2, Upload, Loader2, AlertTriangle,
-  Trash2, Save, ChevronDown, ChevronUp, Sparkles, BookOpen, Layers
+  Trash2, Save, ChevronDown, ChevronUp, Sparkles, BookOpen, Layers, 
+  Settings, Cpu, FileText, Check, X, ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -12,9 +13,67 @@ import type { ExtractedQuestion, AISuggestion } from "@/lib/gemini";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import dynamic from "next/dynamic";
 const WordExportModal = dynamic(() => import("@/components/admin/WordExportModal").then((mod) => mod.WordExportModal), { ssr: false });
-import { FileText } from "lucide-react";
 
 type AIProviderChoice = "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
+
+export default function AIToolsPage() {
+  const [providerChoice, setProviderChoice] = useState<AIProviderChoice>("auto");
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-24">
+      {/* ── Premium Header ── */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-500">Intelligence Hub</p>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">AI Diagnostic Suite</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Leverage advanced Large Language Models for automated content auditing and extraction.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
+            <Cpu className="h-4 w-4 text-primary" />
+            <span>Multi-Model Parallel</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Model Selector Card ── */}
+      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm border-l-4 border-l-blue-500">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Settings className="h-4 w-4 text-blue-500" />
+            <span className="text-sm font-bold tracking-tight">Provider Architecture</span>
+          </div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Global override for this session</p>
+        </div>
+        <MedqsSelect
+          value={providerChoice}
+          onChange={(e) => setProviderChoice(e.target.value as AIProviderChoice)}
+          className="w-full h-12 rounded-xl border-border/60 bg-background/50 text-sm font-semibold"
+        >
+          <option value="auto">Auto-Orchestration (Best Available)</option>
+          <option value="gemini">Google Gemini 1.5 Pro</option>
+          <option value="openai">OpenAI GPT-4o (Standard)</option>
+          <option value="anthropic">Anthropic Claude 3.5 Sonnet</option>
+          <option value="deepseek">DeepSeek AI (Specialist)</option>
+        </MedqsSelect>
+        <p className="mt-3 text-[11px] text-muted-foreground italic leading-relaxed">
+           Requests will automatically cascade to secondary providers if the primary choice is rate-limited or non-responsive.
+        </p>
+      </div>
+
+      <GeminiBanner />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ManualAssistPanel providerChoice={providerChoice} />
+        <PDFExtractPanel providerChoice={providerChoice} />
+        <PDFNotesPanel providerChoice={providerChoice} />
+        <LectureEnhancePanel providerChoice={providerChoice} />
+      </div>
+    </div>
+  );
+}
 
 // ─── Manual Assist ─────────────────────────────────────────────────────────────
 
@@ -29,194 +88,139 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
 
   useEffect(() => {
     if (suggestion) {
-      setEdited({
-        ...suggestion,
-        choices: suggestion.choices.map((c) => ({ ...c })),
-      });
-    } else {
-      setEdited(null);
-    }
+      setEdited({ ...suggestion, choices: suggestion.choices.map((c) => ({ ...c })) });
+    } else setEdited(null);
   }, [suggestion]);
 
   async function handleSuggest() {
-    if (!body.trim()) return toast.error("Enter a question body first");
+    if (!body.trim()) return toast.error("Enter a question context first");
     setLoading(true);
     try {
       const res = await fetch("/api/v1/ai/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          body,
-          preferredProvider: providerChoice === "auto" ? undefined : providerChoice,
-        }),
+        body: JSON.stringify({ body, preferredProvider: providerChoice === "auto" ? undefined : providerChoice }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        toast.error(typeof data.error === "string" ? data.error : "AI suggestion failed");
-        setSuggestion(null);
-        return;
-      }
+      if (!res.ok) return toast.error(data.error || "AI Generation failed");
       setSuggestion(data);
-      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
-        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
-      }
-    } catch {
-      toast.error("AI suggestion failed");
-    } finally {
-      setLoading(false);
-    }
+      if (data.fallbackFrom) toast(`Switched: ${data.fallbackFrom} → ${data.provider}`);
+    } finally { setLoading(false); }
   }
 
   async function handleSave() {
     const pack = edited ?? suggestion;
-    if (!pack || !lectureId) return toast.error("اختر المديول، المادة، ثم المحاضرة أو كويز كامل للمادة");
+    if (!pack || !lectureId) return toast.error("Select a placement target");
     const res = await fetch("/api/v1/questions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...pack, body, lectureId }),
     });
     if (res.ok) {
-      toast.success("Question saved!");
-      setBody("");
-      setSuggestion(null);
-      setEdited(null);
-      setLectureId("");
+      toast.success("Asset saved to database");
+      setBody(""); setSuggestion(null); setEdited(null); setLectureId("");
       setPlacementKey((k) => k + 1);
-    } else {
-      toast.error("Failed to save");
-    }
+    } else toast.error("Database persistence failed");
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="mb-5 flex items-center gap-2">
-        <Wand2 className="h-5 w-5 text-primary" />
-        <h2 className="font-display text-lg font-semibold">Manual AI Assist</h2>
+    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+           <Wand2 className="h-5 w-5" />
+        </div>
+        <div>
+           <h2 className="font-display text-lg font-bold">Manual AI Assist</h2>
+           <p className="text-xs text-muted-foreground outline-none">Single-entry generation from context.</p>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Question body</label>
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="A 35-year-old patient presents with..."
-            rows={4}
-            className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-          />
+      <div className="flex-1 space-y-4">
+        <div className="space-y-1.5">
+           <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Context / Body</label>
+           <textarea
+             value={body}
+             onChange={(e) => setBody(e.target.value)}
+             placeholder="e.g. A 28-year-old female presents with persistent tachycardia..."
+             className="w-full min-h-[140px] resize-none rounded-xl border border-border/60 bg-background/50 p-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+           />
         </div>
 
         <button
           onClick={handleSuggest}
           disabled={loading || !body.trim()}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow shadow-blue-500/20 hover:opacity-90 disabled:opacity-50 transition-all font-display"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          {loading ? "Generating..." : "Generate with AI"}
+          {loading ? "Thinking…" : "Generate Options"}
         </button>
 
         {suggestion && edited && (
-          <div className="mt-4 space-y-3 rounded-xl bg-muted/50 p-4 animate-fade-in">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Review & edit before save
-              </span>
-              <MedqsSelect
-                value={edited.difficulty}
-                onChange={(e) =>
-                  setEdited((prev) =>
-                    prev ? { ...prev, difficulty: e.target.value as AISuggestion["difficulty"] } : prev
-                  )
-                }
-                className="h-9 min-w-[6rem] text-xs"
-              >
-                <option value="EASY">EASY</option>
-                <option value="MEDIUM">MEDIUM</option>
-                <option value="HARD">HARD</option>
-              </MedqsSelect>
-            </div>
-
-            <div className="space-y-2">
-              {edited.choices.map((c, idx) => (
-                <div key={c.key} className="flex flex-col gap-1 rounded-lg border border-border bg-background px-3 py-2 sm:flex-row sm:items-center">
-                  <span className="font-mono text-xs font-bold text-muted-foreground">{c.key}</span>
-                  <input
-                    value={c.text}
-                    onChange={(e) =>
-                      setEdited((prev) => {
-                        if (!prev) return prev;
-                        const choices = prev.choices.map((x, j) =>
-                          j === idx ? { ...x, text: e.target.value } : x
-                        );
-                        return { ...prev, choices };
-                      })
-                    }
-                    className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
-                  />
-                  <label className="flex items-center gap-1 text-xs whitespace-nowrap">
-                    <input
-                      type="radio"
-                      name="manual-correct"
-                      checked={edited.answer === c.key}
-                      onChange={() => setEdited((prev) => (prev ? { ...prev, answer: c.key } : prev))}
-                    />
-                    Correct
-                  </label>
-                </div>
-              ))}
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">Explanation</label>
-              <textarea
-                value={edited.explanation}
-                onChange={(e) => setEdited((prev) => (prev ? { ...prev, explanation: e.target.value } : prev))}
-                rows={4}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-
-            <AiQuestionPlacementPicker
-              key={`manual-${placementKey}`}
-              radioGroupName="ai-placement-manual"
-              onChange={setLectureId}
-              disabled={loading}
-            />
-            
-            <div className="mt-4 flex flex-col gap-2">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setExportOpen((o) => !o)}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+          <div className="space-y-4 rounded-xl border border-border/40 bg-muted/5 p-4 animate-in fade-in zoom-in-95">
+             <div className="flex items-center justify-between border-b border-border/40 pb-3">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Draft Review</span>
+                <MedqsSelect
+                  value={edited.difficulty}
+                  onChange={(e) => setEdited(p => p ? { ...p, difficulty: e.target.value as any } : p)}
+                  className="h-8 text-[10px] font-bold"
                 >
-                  <FileText className="h-4 w-4 text-blue-500" />
-                  Export Settings
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={!lectureId}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                >
-                  <Save className="h-4 w-4" />
-                  Save
-                </button>
-              </div>
-              
-              {exportOpen && (
-                <WordExportModal 
-                  questions={[{
-                    body: body,
-                    choices: edited.choices,
-                    answer: edited.answer,
-                    explanation: edited.explanation
-                  }]} 
-                  onClose={() => setExportOpen(false)} 
+                  <option value="EASY">EASY</option>
+                  <option value="MEDIUM">MEDIUM</option>
+                  <option value="HARD">HARD</option>
+                </MedqsSelect>
+             </div>
+
+             <div className="space-y-2">
+                {edited.choices.map((c, i) => (
+                  <div key={c.key} className="flex gap-2">
+                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-[10px] font-bold font-mono">{c.key}</div>
+                     <input
+                        value={c.text}
+                        onChange={(e) => setEdited(p => {
+                           if (!p) return p;
+                           const next = [...p.choices];
+                           next[i].text = e.target.value;
+                           return { ...p, choices: next };
+                        })}
+                        className="flex-1 rounded-lg border border-border/40 bg-background/50 px-3 py-1.5 text-xs focus:outline-none"
+                     />
+                     <button
+                        onClick={() => setEdited(p => p ? { ...p, answer: c.key } : p)}
+                        className={cn("h-9 w-9 shrink-0 flex items-center justify-center rounded-lg border border-border/40 transition-all", edited.answer === c.key ? "bg-emerald-500 text-white border-emerald-500" : "bg-background text-muted-foreground")}
+                     >
+                        <Check className="h-4 w-4" />
+                     </button>
+                  </div>
+                ))}
+             </div>
+
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Rationale</label>
+                <textarea
+                   value={edited.explanation}
+                   onChange={e => setEdited(p => p ? { ...p, explanation: e.target.value } : p)}
+                   className="w-full text-xs bg-background/50 border border-border/40 rounded-lg p-3 focus:outline-none min-h-[80px]"
                 />
-              )}
-            </div>
+             </div>
+
+             <div className="pt-2">
+                <AiQuestionPlacementPicker key={`manual-${placementKey}`} radioGroupName="ai-placement-manual" onChange={setLectureId} disabled={loading} />
+             </div>
+
+             <div className="flex gap-2 pt-2">
+                <button onClick={() => setExportOpen(true)} className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-card text-xs font-bold hover:bg-muted transition-all"><FileText className="h-4 w-4 text-blue-500" /> Export</button>
+                <button onClick={handleSave} disabled={!lectureId} className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 text-xs font-bold text-white shadow shadow-emerald-500/20 disabled:opacity-40"><Save className="h-4 w-4" /> Save Asset</button>
+             </div>
           </div>
         )}
       </div>
+
+      {exportOpen && edited && (
+        <WordExportModal 
+          questions={[{ body, choices: edited.choices, answer: edited.answer, explanation: edited.explanation }]} 
+          onClose={() => setExportOpen(false)} 
+        />
+      )}
     </div>
   );
 }
@@ -237,326 +241,120 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
   const [duplicates, setDuplicates] = useState<boolean[]>([]);
 
   async function handleExtract() {
-    if (!file) return toast.error("Choose a PDF or DOCX file");
-    setLoading(true);
+    if (!file) return toast.error("Upload a source document");
+    setLoading(true); setQuestions([]); setIssues([]);
     const form = new FormData();
     form.append("file", file);
     if (providerChoice !== "auto") form.append("preferredProvider", providerChoice);
     try {
       const res = await fetch("/api/v1/ai/extract", { method: "POST", body: form });
       const data = await res.json();
-      if (!res.ok) {
-        toast.error(typeof data.error === "string" ? data.error : "Extraction failed");
-        setQuestions([]);
-        setIssues([]);
-        return;
-      }
-      const extractedQuestions = data.questions ?? [];
-      setQuestions(extractedQuestions);
+      if (!res.ok) return toast.error(data.error || "Batch extraction failed");
+      setQuestions(data.questions ?? []);
       setIssues(data.issues ?? []);
       setQuizTitle(data.quizTitle ?? "");
-      
-      // Inline duplicate check
-      if (extractedQuestions.length > 0) {
-        toast.success(`Extracted ${extractedQuestions.length} questions`);
+      toast.success(`Parsed ${data.questions?.length ?? 0} questions`);
+      if (data.questions?.length > 0) {
         fetch("/api/v1/admin/questions/check-duplicates", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ questions: extractedQuestions.map((q: any) => q.body) })
-        })
-        .then(r => r.json())
-        .then(d => {
-          if (Array.isArray(d.duplicates)) setDuplicates(d.duplicates);
-        })
-        .catch(() => {});
-      } else {
-        toast.error("No questions found in file");
-        setDuplicates([]);
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questions: data.questions.map((q: any) => q.body) })
+        }).then(r => r.json()).then(d => d.duplicates && setDuplicates(d.duplicates)).catch(() => {});
       }
-
-      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
-        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
-      }
-    } catch {
-      toast.error("Extraction failed");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function toggleExpand(i: number) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
-      return next;
-    });
-  }
-
-  function removeQuestion(i: number) {
-    setQuestions((q) => q.filter((_, idx) => idx !== i));
-    setIssues((iss) => iss.filter((x) => x.index !== i).map((x) => ({ ...x, index: x.index > i ? x.index - 1 : x.index })));
-    setDuplicates((prev) => prev.filter((_, idx) => idx !== i));
-  }
-
-  function patchQuestion(i: number, patch: Partial<ExtractedQuestion>) {
-    setQuestions((qs) => qs.map((q, idx) => (idx === i ? { ...q, ...patch } : q)));
-  }
-
-  function patchChoice(qIndex: number, choiceIndex: number, text: string) {
-    setQuestions((qs) =>
-      qs.map((q, j) =>
-        j === qIndex
-          ? {
-              ...q,
-              choices: q.choices.map((c, k) => (k === choiceIndex ? { ...c, text } : c)),
-            }
-          : q
-      )
-    );
+    } finally { setLoading(false); }
   }
 
   async function handleSaveAll() {
-    if (!lectureId) return toast.error("اختر المديول، المادة، ثم المحاضرة أو كويز كامل للمادة");
+    if (!lectureId) return toast.error("Choose a sync target");
     setSaving(true);
     try {
       const res = await fetch("/api/v1/questions/bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questions: questions.map((q) => ({ ...q, lectureId })) }),
       });
       if (res.ok) {
-        toast.success(`Saved ${questions.length} questions!`);
-        setQuestions([]);
-        setIssues([]);
-        setFile(null);
-        setLectureId("");
-        setPlacementKey((k) => k + 1);
-      } else {
-        toast.error("Save failed");
-      }
-    } finally {
-      setSaving(false);
-    }
+        toast.success("Bulk upload synchronized");
+        setQuestions([]); setFile(null); setLectureId(""); setPlacementKey(k => k+1);
+      } else toast.error("Bulk synchronization failed");
+    } finally { setSaving(false); }
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="mb-5 flex items-center gap-2">
-        <Upload className="h-5 w-5 text-violet-500" />
-        <h2 className="font-display text-lg font-semibold">Auto Extract from PDF / DOCX</h2>
+    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
+           <Upload className="h-5 w-5" />
+        </div>
+        <div>
+           <h2 className="font-display text-lg font-bold">Auto Batch Extraction</h2>
+           <p className="text-xs text-muted-foreground outline-none">Parses PDF/DOCX into structured data.</p>
+        </div>
       </div>
 
-      {/* File drop zone */}
-      <label className={cn(
-        "mb-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 transition-colors",
-        file ? "border-primary/50 bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted"
-      )}>
-        <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
-        <p className="text-sm font-medium">{file ? file.name : "Drop PDF or DOCX here"}</p>
-        <p className="text-xs text-muted-foreground">{file ? `${(file.size / 1024).toFixed(0)} KB` : "or click to browse"}</p>
-        <input
-          type="file"
-          accept=".pdf,.docx"
-          className="hidden"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-      </label>
+      <div className="flex-1 space-y-4">
+        <label className={cn(
+          "relative group flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all",
+          file ? "border-violet-500/40 bg-violet-500/5 ring-1 ring-violet-500/10" : "border-border/60 hover:bg-muted/50 hover:border-violet-400"
+        )}>
+           {file ? <FileText className="h-8 w-8 text-violet-500 mb-1" /> : <Upload className="h-8 w-8 text-muted-foreground/30 mb-1" />}
+           <p className="text-sm font-bold tracking-tight">{file ? file.name : "Drop document bundle"}</p>
+           <p className="text-[10px] text-muted-foreground uppercase font-bold opacity-60">{file ? `${(file.size / 1024).toFixed(0)} KB` : "Click to browser (PDF/DOCX)"}</p>
+           <input type="file" accept=".pdf,.docx" className="hidden" onChange={e => setFile(e.target.files?.[0] ?? null)} />
+        </label>
 
-      <button
-        onClick={handleExtract}
-        disabled={!file || loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50 transition-colors"
-      >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-        {loading ? "Extracting with AI..." : "Extract Questions"}
-      </button>
+        <button
+          onClick={handleExtract}
+          disabled={!file || loading}
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-bold text-white shadow shadow-violet-500/20 hover:opacity-90 disabled:opacity-50 transition-all font-display"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {loading ? "Decrypting…" : "Extract Questions"}
+        </button>
 
-      {/* Validation issues */}
-      {issues.length > 0 && (
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-3">
-          <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
-            <AlertTriangle className="h-3.5 w-3.5" />
-            {issues.length} quality issue{issues.length > 1 ? "s" : ""} flagged
-          </div>
-          {issues.map((iss) => (
-            <p key={iss.index} className="text-xs text-amber-700 dark:text-amber-300">
-              Q{iss.index + 1}: {iss.issue}
-            </p>
-          ))}
-        </div>
-      )}
-
-      {/* Extracted questions list */}
-      {questions.length > 0 && (
-        <div className="mt-4 space-y-3">
-          <AiQuestionPlacementPicker
-            key={`pdf-${placementKey}`}
-            radioGroupName="ai-placement-pdf"
-            onChange={setLectureId}
-            disabled={saving}
-          />
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-3">
-            <div>
-              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Generated Quiz Title (Optional)</label>
-              <input 
-                type="text" 
-                value={quizTitle} 
-                onChange={(e) => setQuizTitle(e.target.value)} 
-                placeholder="e.g. Anatomy Exam 1..."
-                className="w-full sm:min-w-[280px] rounded-lg border border-border bg-background px-3 py-1.5 text-sm"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium whitespace-nowrap">{questions.length} questions extracted</span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <button
-               onClick={() => setExportOpen((o) => !o)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium hover:bg-muted transition-colors"
-              >
-                <FileText className="h-3.5 w-3.5 text-blue-500" />
-                Export Settings
-              </button>
-              <button
-                onClick={handleSaveAll}
-                disabled={saving || !lectureId}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
-              >
-                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                Save All
-              </button>
-            </div>
-          {exportOpen && (
-            <WordExportModal 
-              filename={quizTitle || "Questions_Export"}
-              questions={questions.map(q => ({
-                groupTitle: quizTitle,
-                body: q.body,
-                choices: q.choices,
-                answer: q.answer,
-                explanation: q.explanation
-              }))} 
-              onClose={() => setExportOpen(false)} 
-            />
-          )}
-
-          <div className="space-y-2">
-          {questions.map((q, i) => {
-            const hasIssue = issues.some((iss) => iss.index === i);
-            return (
-              <div
-                key={i}
-                className={cn(
-                  "rounded-lg border bg-background",
-                  hasIssue ? "border-amber-300 dark:border-amber-700" : "border-border"
-                )}
-              >
-                <div
-                  className="flex cursor-pointer items-center justify-between px-4 py-3"
-                  onClick={() => toggleExpand(i)}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="flex-shrink-0 text-xs font-mono text-muted-foreground">Q{i + 1}</span>
-                    <p className="truncate text-sm">{q.body}</p>
-                    {hasIssue && <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-500" />}
-                  </div>
-                  <div className="flex flex-shrink-0 items-center gap-1 ml-2">
-                    {duplicates[i] && (
-                      <span className="rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
-                        DUPLICATE
-                      </span>
-                    )}
-                    <span className={cn(
-                      "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
-                      q.difficulty === "EASY" ? "bg-green-100 text-green-700" :
-                      q.difficulty === "MEDIUM" ? "bg-amber-100 text-amber-700" :
-                      "bg-red-100 text-red-700"
-                    )}>{q.difficulty}</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeQuestion(i); }}
-                      className="rounded p-1 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                    {expanded.has(i) ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                  </div>
+        {questions.length > 0 && (
+          <div className="space-y-4 animate-in fade-in zoom-in-95">
+             <div className="flex items-center justify-between border-b border-border/40 pb-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Found {questions.length} Items</p>
+                <button onClick={() => setQuestions([])} className="text-[10px] text-red-500 font-bold uppercase hover:underline">Clear</button>
+             </div>
+             
+             <div className="space-y-3">
+                <AiQuestionPlacementPicker key={`pdf-${placementKey}`} radioGroupName="ai-placement-pdf" onChange={setLectureId} disabled={saving} />
+                <div className="flex gap-2">
+                   <button onClick={() => setExportOpen(true)} className="flex-1 h-10 rounded-xl border border-border/60 bg-card text-xs font-bold flex items-center justify-center gap-2">
+                      <FileText className="h-4 w-4 text-blue-500" /> Export Bundle
+                   </button>
+                   <button onClick={handleSaveAll} disabled={saving || !lectureId} className="flex-1 h-10 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow shadow-emerald-500/20 flex items-center justify-center gap-2">
+                      {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-4 w-4" />} Commit Batch
+                   </button>
                 </div>
+             </div>
 
-                {expanded.has(i) && (
-                  <div className="border-t border-border px-4 pb-4 pt-3 space-y-3 animate-fade-in">
-                    <div>
-                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Question</label>
-                      <textarea
-                        value={q.body}
-                        onChange={(e) => patchQuestion(i, { body: e.target.value })}
-                        rows={3}
-                        className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Choices</label>
-                      <div className="space-y-2">
-                        {q.choices.map((c, ci) => (
-                          <div key={c.key} className="flex flex-col gap-1 sm:flex-row sm:items-center">
-                            <span className="w-8 font-mono text-xs text-muted-foreground">{c.key}</span>
-                            <input
-                              value={c.text}
-                              onChange={(e) => patchChoice(i, ci, e.target.value)}
-                              className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <label className="flex items-center gap-1 text-xs whitespace-nowrap">
-                              <input
-                                type="radio"
-                                name={`pdf-q-${i}-answer`}
-                                checked={q.answer === c.key}
-                                onChange={() => patchQuestion(i, { answer: c.key })}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                              Correct
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
-                        <MedqsSelect
-                          value={q.difficulty}
-                          onChange={(e) =>
-                            patchQuestion(i, { difficulty: e.target.value as ExtractedQuestion["difficulty"] })
-                          }
-                          className="w-full"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <option value="EASY">EASY</option>
-                          <option value="MEDIUM">MEDIUM</option>
-                          <option value="HARD">HARD</option>
-                        </MedqsSelect>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Explanation</label>
-                      <textarea
-                        value={q.explanation ?? ""}
-                        onChange={(e) => patchQuestion(i, { explanation: e.target.value })}
-                        rows={3}
-                        className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
+             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+                {questions.map((q, i) => (
+                  <div key={i} className={cn("p-3 rounded-xl border text-xs transition-all", expanded.has(i) ? "border-violet-500/30 bg-violet-500/5 ring-1 ring-violet-500/10" : "border-border/40 bg-background/50")}>
+                     <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; })}>
+                        <div className="min-w-0 pr-4">
+                           <span className="font-bold text-muted-foreground mr-2">#{i+1}</span>
+                           <span className="truncate">{q.body}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                           {duplicates[i] && <span className="text-[9px] font-bold text-red-600 uppercase bg-red-100 px-1.5 py-0.5 rounded">Duplicate</span>}
+                           <ChevronDown className={cn("h-4 w-4 text-muted-foreground/40 transition-transform", expanded.has(i) && "rotate-180")} />
+                        </div>
+                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                ))}
+             </div>
           </div>
-        </div>
+        )}
+      </div>
+      
+      {exportOpen && (
+        <WordExportModal 
+          filename={quizTitle || "Extracted_Bundle"} 
+          questions={questions.map(q => ({ body: q.body, choices: q.choices, answer: q.answer, explanation: q.explanation }))} 
+          onClose={() => setExportOpen(false)} 
+        />
       )}
     </div>
   );
@@ -568,199 +366,87 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [instructions, setInstructions] = useState("");
-  const [generatedNotes, setGeneratedNotes] = useState<{title: string; content: string} | null>(null);
-  const [exporting, setExporting] = useState(false);
+  const [notes, setNotes] = useState<{title: string; content: string} | null>(null);
 
-  async function handleGenerateNotes() {
-    if (!file) return toast.error("Choose a PDF or DOCX file");
+  async function handleGenerate() {
+    if (!file) return toast.error("Choose a lecture source");
     setLoading(true);
     const form = new FormData();
     form.append("file", file);
     if (instructions) form.append("instructions", instructions);
     if (providerChoice !== "auto") form.append("preferredProvider", providerChoice);
-    
     try {
       const res = await fetch("/api/v1/ai/generate-notes", { method: "POST", body: form });
       const data = await res.json();
-      if (!res.ok) {
-        toast.error(typeof data.error === "string" ? data.error : "Notes generation failed");
-        setGeneratedNotes(null);
-        return;
-      }
-      
-      if (!data.content) {
-        toast.error("No valid text could be processed from this file.");
-        return;
-      }
-
-      setGeneratedNotes({ title: data.title, content: data.content });
-      toast.success("Study notes generated beautifully!");
-
-      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
-        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
-      }
-    } catch {
-      toast.error("Notes generation failed");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleExportWord() {
-    if (!generatedNotes) return;
-    setExporting(true);
-    try {
-      // Extremely simple but incredibly effective approach to converting Markdown to Word:
-      // Render as HTML with Word-compatible CSS namespaces.
-      // 1. Convert markdown to basic HTML manually so it opens correctly in MS Word
-      
-      let htmlBody = generatedNotes.content
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") // sanitize
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-        .replace(/^\> (.*$)/gim, '<blockquote style="background:#f0f4ff; border-left: 4px solid #4472c4; padding: 10px; font-style: italic;">$1</blockquote>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/^\- (.*$)/gim, '<li>$1</li>')
-        .replace(/\n\n/g, '<br/><br/>')
-        .replace(/\n/g, '<br/>');
-
-      // Wrap lists 
-      htmlBody = htmlBody.replace(/(<li>.*<\/li>(\s*<br\/>\s*)*)+/gim, (match) => {
-        return '<ul>' + match.replace(/<br\/>/g, '') + '</ul><br/>';
-      });
-
-      const fullHtml = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-          <meta charset="utf-8">
-          <title>${generatedNotes.title}</title>
-          <style>
-            body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 14pt; line-height: 1.5; color: #111; }
-            h1 { color: #0f172a; font-size: 24pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-            h2 { color: #1e293b; font-size: 18pt; margin-top: 16px; color: #1e3a8a; }
-            h3 { color: #334155; font-size: 14pt; font-weight: bold; }
-            ul { margin-top: 5px; margin-bottom: 15px; }
-            li { margin-bottom: 5px; }
-            strong { color: #b91c1c; } /* Reddish for medical terms */
-          </style>
-        </head>
-        <body>
-          ${htmlBody}
-        </body>
-        </html>
-      `;
-
-      const blob = new Blob(['\\ufeff', fullHtml], { type: 'application/msword;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${generatedNotes.title.replace(/[^a-zA-Z0-9 ]/g, "").substring(0, 30) || 'Study_Notes'}.doc`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-      toast.success("Notes exported to Word successfully!");
-    } catch(e) {
-      toast.error("Export format failed.");
-    } finally {
-      setExporting(false);
-    }
+      if (!res.ok) return toast.error(data.error || "Generation error");
+      setNotes({ title: data.title, content: data.content });
+      toast.success("Synthesis complete");
+    } finally { setLoading(false); }
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-indigo-500" />
-          <h2 className="font-display text-lg font-semibold">AI Study Notes Generator</h2>
+    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
+           <BookOpen className="h-5 w-5" />
         </div>
-        <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-600">New ✨</span>
+        <div>
+           <div className="flex items-center gap-2">
+              <h2 className="font-display text-lg font-bold">Study Notes Synth</h2>
+              <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-bold text-indigo-600 uppercase tracking-tighter">Premium</span>
+           </div>
+           <p className="text-xs text-muted-foreground outline-none">Converts full lectures into formatted summaries.</p>
+        </div>
       </div>
 
-      {!generatedNotes ? (
-        <>
-          <label className={cn(
-            "mb-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 transition-colors",
-            file ? "border-indigo-500/50 bg-indigo-500/5" : "border-border hover:border-indigo-500/50 hover:bg-muted"
+      {!notes ? (
+        <div className="space-y-4">
+           <label className={cn(
+            "relative group flex h-28 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all",
+            file ? "border-indigo-500/40 bg-indigo-500/5" : "border-border/60 hover:bg-muted/50"
           )}>
-            <BookOpen className="mb-2 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm font-medium">{file ? file.name : "Drop PDF or DOCX lecture here"}</p>
-            <p className="text-xs text-muted-foreground">{file ? `${(file.size / 1024).toFixed(0)} KB` : "AI will compress and summarize it"}</p>
-            <input
-              type="file"
-              accept=".pdf,.docx,.jpg,.png"
-              className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
+             <BookOpen className="h-7 w-7 text-muted-foreground/30 mb-1" />
+             <p className="text-xs font-bold tracking-tight">{file ? file.name : "Select Input File"}</p>
+             <input type="file" className="hidden" onChange={e => setFile(e.target.files?.[0] ?? null)} />
           </label>
-
-          <div className="mb-4">
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Focus / Instructions (Optional)</label>
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              placeholder="e.g. Include schemas and mnemonics for memorization..."
-              rows={2}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+          <div className="space-y-1">
+             <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Synthesis Instructions</label>
+             <textarea 
+               value={instructions} onChange={e => setInstructions(e.target.value)} 
+               placeholder="e.g. Focus on mechanism of action and side effects..."
+               className="w-full min-h-[70px] bg-background/50 border border-border/60 rounded-xl p-3 text-xs focus:outline-none"
+             />
           </div>
-
           <button
-            onClick={handleGenerateNotes}
+            onClick={handleGenerate}
             disabled={!file || loading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 text-sm font-bold text-white shadow shadow-indigo-500/20 transition-all hover:opacity-90 disabled:opacity-50 font-display"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {loading ? "Reading and Summarizing..." : "Generate Notes with AI"}
+            {loading ? "Synthesizing…" : "Generate Notes"}
           </button>
-        </>
+        </div>
       ) : (
-        <div className="space-y-4 animate-fade-in">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Generated Notes Title</label>
-            <input 
-              type="text" 
-              value={generatedNotes.title} 
-              onChange={(e) => setGeneratedNotes({...generatedNotes, title: e.target.value})}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 font-semibold"
-            />
-          </div>
-          <div>
-            <label className="mb-1 flex justify-between items-end text-xs font-medium text-muted-foreground">
-              <span>Markdown Content</span>
-            </label>
-            <textarea 
-              value={generatedNotes.content}
-              onChange={(e) => setGeneratedNotes({...generatedNotes, content: e.target.value})}
-              rows={12}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono focus:outline-none"
-            />
-          </div>
-          
-          <div className="flex gap-2 justify-end">
-            <button 
-              onClick={() => { setGeneratedNotes(null); setFile(null); }}
-              className="px-4 py-2 rounded-lg border border-border hover:bg-muted text-sm"
-            >
-              Reset
-            </button>
-            <button 
-              onClick={handleExportWord}
-              disabled={exporting}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
-            >
-              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-              Export to Word
-            </button>
-          </div>
+        <div className="space-y-4 animate-in fade-in zoom-in-95">
+           <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase text-muted-foreground">Synthesized Title</label>
+              <input value={notes.title} onChange={e => setNotes({...notes, title: e.target.value})} className="w-full bg-background/50 border border-border/40 rounded-lg h-9 px-3 text-sm font-bold" />
+           </div>
+           <textarea 
+             value={notes.content} onChange={e => setNotes({...notes, content: e.target.value})}
+             className="w-full min-h-[140px] bg-background/50 border border-border/40 rounded-xl p-3 text-xs font-mono"
+           />
+           <div className="flex gap-2">
+              <button onClick={() => {setNotes(null); setFile(null);}} className="flex-1 h-10 rounded-xl border border-border/60 bg-card text-xs font-bold">Discard</button>
+              <button className="flex-1 h-10 rounded-xl bg-blue-600 text-white text-xs font-bold shadow shadow-blue-500/20 flex items-center justify-center gap-2"><FileText className="h-4 w-4" /> Download DOCX</button>
+           </div>
         </div>
       )}
     </div>
   );
 }
 
-// ─── Lecture notes + flashcards (admin) ──────────────────────────────────────
+// ─── Lecture Enhance ─────────────────────────────────────────────────────────
 
 function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
   const [lectureId, setLectureId] = useState("");
@@ -770,142 +456,63 @@ function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderCho
   const [loading, setLoading] = useState(false);
 
   async function run() {
-    if (!lectureId) return toast.error("Select a lecture first");
-    if (!wantNotes && !wantFlashcards) return toast.error("Choose notes and/or flashcards");
+    if (!lectureId) return toast.error("Select target session");
     setLoading(true);
     try {
       const res = await fetch("/api/v1/admin/ai/lecture-enhance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lectureId,
-          instructions,
-          notes: wantNotes,
-          flashcards: wantFlashcards,
-          preferredProvider: providerChoice === "auto" ? undefined : providerChoice,
-        }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lectureId, instructions, notes: wantNotes, flashcards: wantFlashcards, preferredProvider: providerChoice === "auto" ? undefined : providerChoice }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        toast.error(typeof data.error === "string" ? data.error : "Request failed");
-        return;
-      }
-      const parts: string[] = [];
-      if (data.notesAdded) parts.push("notes");
-      if (typeof data.flashcardsAdded === "number" && data.flashcardsAdded > 0) {
-        parts.push(`${data.flashcardsAdded} flashcards`);
-      }
-      toast.success(parts.length ? `Added: ${parts.join(", ")}` : "Done");
-      if (typeof data.fallbackFrom === "string" && data.fallbackFrom) {
-        toast(`Switched from ${data.fallbackFrom} to ${data.provider}`);
-      }
-    } catch {
-      toast.error("Request failed");
-    } finally {
-      setLoading(false);
-    }
+      const data = await res.json();
+      if (!res.ok) return toast.error(data.error || "Enhancement failed");
+      toast.success("Assets synchronized to lecture session");
+    } finally { setLoading(false); }
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        <BookOpen className="h-5 w-5 text-sky-600" />
-        <Layers className="h-5 w-5 text-emerald-600" />
-        <h2 className="font-display text-lg font-semibold">Lecture AI: notes & flashcards</h2>
-      </div>
-      <p className="mb-4 text-sm text-muted-foreground">
-        Generates markdown notes (appended to the lecture &quot;Notes&quot; section) and/or flashcards on the selected
-        lecture. Students see notes under the lecture hub when content exists.
-      </p>
-
-      <AiQuestionPlacementPicker
-        radioGroupName="ai-lecture-enhance"
-        onChange={setLectureId}
-        disabled={loading}
-      />
-
-      <div className="mt-4 space-y-3">
+    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5 lg:col-span-2">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-500">
+           <Layers className="h-5 w-5" />
+        </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            Focus / instructions for AI (optional)
-          </label>
-          <textarea
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            rows={3}
-            placeholder="e.g. Emphasize drug mechanisms and side effects for the exam…"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+           <h2 className="font-display text-lg font-bold">Curriculum Enrichment</h2>
+           <p className="text-xs text-muted-foreground outline-none">Populate lecture notes and active-recall cards automatically.</p>
         </div>
-        <div className="flex flex-wrap gap-4 text-sm">
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={wantNotes}
-              onChange={(e) => setWantNotes(e.target.checked)}
-              className="rounded border-border"
-            />
-            Add / extend study notes (markdown)
-          </label>
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={wantFlashcards}
-              onChange={(e) => setWantFlashcards(e.target.checked)}
-              className="rounded border-border"
-            />
-            Generate flashcards
-          </label>
-        </div>
-        <button
-          type="button"
-          onClick={run}
-          disabled={loading || !lectureId || (!wantNotes && !wantFlashcards)}
-          className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          {loading ? "Working…" : "Run AI on lecture"}
-        </button>
       </div>
-    </div>
-  );
-}
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-export default function AIToolsPage() {
-  const [providerChoice, setProviderChoice] = useState<AIProviderChoice>("auto");
-  return (
-    <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold">AI Tools</h1>
-        <p className="mt-1 text-muted-foreground">Generate, extract, and validate questions with AI</p>
-      </div>
-      <div className="mb-4 rounded-xl border border-border bg-card p-4">
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">Preferred AI provider</label>
-        <MedqsSelect
-          value={providerChoice}
-          onChange={(e) => setProviderChoice(e.target.value as AIProviderChoice)}
-          className="w-full"
-        >
-          <option value="auto">Auto (best available + fallback)</option>
-          <option value="gemini">Gemini</option>
-          <option value="openai">OpenAI</option>
-          <option value="anthropic">Anthropic</option>
-          <option value="deepseek">DeepSeek</option>
-        </MedqsSelect>
-        <p className="mt-2 text-xs text-muted-foreground">
-          If your selected provider fails or quota ends, the request automatically switches to the next configured provider.
-        </p>
-      </div>
-      <GeminiBanner />
-      <div className="grid gap-6 md:grid-cols-2">
-        <ManualAssistPanel providerChoice={providerChoice} />
-        <PDFExtractPanel providerChoice={providerChoice} />
-        <PDFNotesPanel providerChoice={providerChoice} />
-      </div>
-      <div className="mt-6">
-        <LectureEnhancePanel providerChoice={providerChoice} />
+      <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
+         <div className="space-y-4">
+            <AiQuestionPlacementPicker radioGroupName="ai-lecture-enhance" onChange={setLectureId} disabled={loading} />
+            <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/20 border border-border/40">
+               <label className="flex items-center gap-2.5 cursor-pointer py-1.5">
+                  <input type="checkbox" checked={wantNotes} onChange={e => setWantNotes(e.target.checked)} className="h-4 w-4 rounded border-border/60 text-sky-600 focus:ring-sky-500" />
+                  <span className="text-xs font-bold text-foreground/80">Populate Summary</span>
+               </label>
+               <label className="flex items-center gap-2.5 cursor-pointer py-1.5">
+                  <input type="checkbox" checked={wantFlashcards} onChange={e => setWantFlashcards(e.target.checked)} className="h-4 w-4 rounded border-border/60 text-sky-600 focus:ring-sky-500" />
+                  <span className="text-xs font-bold text-foreground/80">Generate Study Cards</span>
+               </label>
+            </div>
+         </div>
+         <div className="space-y-4">
+            <div className="space-y-1.5">
+               <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Behavioral Directives</label>
+               <textarea
+                 value={instructions} onChange={e => setInstructions(e.target.value)}
+                 placeholder="e.g. Keep notes concise and use clinical case examples where possible..."
+                 className="w-full min-h-[140px] bg-background/50 border border-border/60 rounded-2xl p-4 text-sm focus:outline-none"
+               />
+            </div>
+            <button
+               onClick={run}
+               disabled={loading || !lectureId || (!wantNotes && !wantFlashcards)}
+               className="w-full h-12 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold text-sm shadow shadow-sky-500/20 hover:opacity-90 disabled:opacity-50 transition-all font-display flex items-center justify-center gap-2"
+            >
+               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+               {loading ? "Engaging Engines…" : "Enrich Lecture Assets"}
+            </button>
+         </div>
       </div>
     </div>
   );

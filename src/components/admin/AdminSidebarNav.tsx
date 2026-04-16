@@ -4,39 +4,52 @@ import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  BookOpen,
-  HelpCircle,
-  Layers,
-  Zap,
-  MessageSquare,
-  Users,
-  Settings,
-  Megaphone,
-  Video,
-  FileText,
+  LayoutDashboard, BookOpen, HelpCircle, Layers, Zap,
+  MessageSquare, Users, Settings, Megaphone, Video,
+  FileText, GraduationCap, Copy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const adminLinks: { href: string; label: string; icon: ElementType }[] = [
-  { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/content", label: "Courses", icon: BookOpen },
-  { href: "/admin/lectures", label: "Lectures", icon: Video },
-  { href: "/admin/past-papers", label: "Past Papers", icon: FileText },
-  { href: "/admin/questions", label: "Questions", icon: HelpCircle },
-  { href: "/admin/duplicates", label: "Duplicates", icon: Layers },
-  { href: "/admin/quiz-creator", label: "Quiz Creator", icon: Layers },
-  { href: "/admin/ai-tools", label: "AI Tools", icon: Zap },
-  { href: "/admin/forum", label: "Community", icon: MessageSquare },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/ads", label: "Ads", icon: Megaphone },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+const NAV_GROUPS: {
+  label: string;
+  items: { href: string; label: string; icon: ElementType; badge?: string }[];
+}[] = [
+  {
+    label: "Curriculum",
+    items: [
+      { href: "/admin/dashboard",  label: "Overview",     icon: LayoutDashboard },
+      { href: "/admin/content",    label: "Courses",      icon: BookOpen },
+      { href: "/admin/lectures",   label: "Lectures",     icon: Video },
+      { href: "/admin/past-papers",label: "Past Papers",  icon: FileText },
+    ],
+  },
+  {
+    label: "Assessment",
+    items: [
+      { href: "/admin/questions",    label: "Questions",    icon: HelpCircle },
+      { href: "/admin/duplicates",   label: "Duplicates",   icon: Copy },
+      { href: "/admin/quiz-creator", label: "Quiz Creator", icon: Layers },
+      { href: "/admin/ai-tools",     label: "AI Tools",     icon: Zap, badge: "AI" },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { href: "/admin/forum",  label: "Community", icon: MessageSquare },
+      { href: "/admin/users",  label: "Users",     icon: Users },
+      { href: "/admin/ads",    label: "Ads",       icon: Megaphone },
+    ],
+  },
+  {
+    label: "Platform",
+    items: [
+      { href: "/admin/settings", label: "Settings", icon: Settings },
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/admin/dashboard") {
-    return pathname === href || pathname === "/admin";
-  }
+  if (href === "/admin/dashboard") return pathname === href || pathname === "/admin";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -44,26 +57,46 @@ export function AdminSidebarNav() {
   const pathname = usePathname() ?? "";
 
   return (
-    <>
-      {adminLinks.map(({ href, label, icon: Icon }) => {
-        const active = isActive(pathname, href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors",
-              active
-                ? "bg-primary font-medium text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            )}
-            aria-current={active ? "page" : undefined}
-          >
-            <Icon className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-            {label}
-          </Link>
-        );
-      })}
-    </>
+    <div className="space-y-4">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+            {group.label}
+          </p>
+          <div className="space-y-0.5">
+            {group.items.map(({ href, label, icon: Icon, badge }) => {
+              const active = isActive(pathname, href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-all duration-150",
+                    active
+                      ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/10 font-semibold text-blue-500 dark:text-blue-400 shadow-[inset_0_0_0_1px_rgba(37,99,235,0.25)]"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  )}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <Icon
+                    className={cn("h-4 w-4 shrink-0", active ? "text-blue-500 dark:text-blue-400" : "opacity-70")}
+                    aria-hidden
+                  />
+                  <span className="flex-1 leading-none">{label}</span>
+                  {badge && (
+                    <span className="rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-500">
+                      {badge}
+                    </span>
+                  )}
+                  {active && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(37,99,235,0.8)]" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

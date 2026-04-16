@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   HelpCircle, Plus, Trash2, Loader2,
-  CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen, Pencil, FileText, Download, Settings
+  CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen, Pencil, FileText, Download, Settings, Save, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { saveAs } from "file-saver";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, WidthType, ShadingType, AlignmentType, VerticalAlign, UnderlineType, PageBreak } from "docx";
@@ -246,13 +246,21 @@ export default function AdminQuestionsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-24">
+      {/* ── Premium Header ── */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold">Questions</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{questions.length} total — add manually or use AI tools</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-500">Assessment Bank</p>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">Questions</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage your question bank, export to Word, or use AI tools to generate content.
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
+            <HelpCircle className="h-4 w-4 text-primary" />
+            <span>{questions.length.toLocaleString()} Items</span>
+          </div>
           <button
             type="button"
             onClick={() => {
@@ -260,7 +268,7 @@ export default function AdminQuestionsPage() {
               setAddOpen(false);
             }}
             disabled={filtered.length === 0}
-            className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl border border-border/60 bg-card px-4 py-2.5 text-sm font-semibold transition-all hover:bg-muted disabled:opacity-40"
           >
             <Settings className="h-4 w-4 text-blue-500" />
             Export Settings
@@ -271,18 +279,11 @@ export default function AdminQuestionsPage() {
               setAddOpen((o) => !o);
               setExportOpen(false);
             }}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 transition-all"
           >
-            <Plus className="h-4 w-4" />
-            Add manually
+            {addOpen ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {addOpen ? "Cancel" : "Add Manually"}
           </button>
-          <Link
-            href="/admin/ai-tools"
-            className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-          >
-            <HelpCircle className="h-4 w-4" />
-            AI tools
-          </Link>
         </div>
       </div>
 
@@ -300,18 +301,20 @@ export default function AdminQuestionsPage() {
       )}
 
       {addOpen && (
-        <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <BookOpen className="h-4 w-4 text-primary" />
-            New question (manual)
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Pick a lecture, write the stem (optional if you only use an image), add choices, and mark the correct key.
-          </p>
-
-          <div className="grid gap-3 sm:grid-cols-3">
+        <div className="mb-6 rounded-2xl border border-blue-500/20 bg-card p-6 shadow-xl shadow-blue-500/5 ring-1 ring-blue-500/10 space-y-5 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+              <Plus className="h-5 w-5" />
+            </div>
             <div>
-              <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Module</label>
+              <h2 className="font-display text-lg font-bold tracking-tight">New Manual Question</h2>
+              <p className="text-xs text-muted-foreground">Fill in the details below to add a custom item to the bank.</p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Context: Module</label>
               <MedqsSelect
                 value={pickModule}
                 onChange={(e) => {
@@ -319,18 +322,14 @@ export default function AdminQuestionsPage() {
                   setPickSubject("");
                   setPickLecture("");
                 }}
-                className="w-full"
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
               >
-                <option value="">Select…</option>
-                {modules.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
+                <option value="">Select Module…</option>
+                {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </MedqsSelect>
             </div>
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Subject</label>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Context: Subject</label>
               <MedqsSelect
                 value={pickSubject}
                 onChange={(e) => {
@@ -338,189 +337,202 @@ export default function AdminQuestionsPage() {
                   setPickLecture("");
                 }}
                 disabled={!pickModule}
-                className="w-full"
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
               >
-                <option value="">Select…</option>
-                {filteredSubjects.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
+                <option value="">Select Subject…</option>
+                {filteredSubjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </MedqsSelect>
             </div>
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Lecture</label>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Target: Lecture</label>
               <MedqsSelect
                 value={pickLecture}
                 onChange={(e) => setPickLecture(e.target.value)}
                 disabled={!pickSubject}
-                className="w-full"
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
               >
-                <option value="">Select…</option>
-                {lectures.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.title}
-                  </option>
-                ))}
+                <option value="">Select Lecture…</option>
+                {lectures.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
               </MedqsSelect>
             </div>
           </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Question text (markdown OK)</label>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Question Body</label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={3}
-              placeholder="Question stem… (can leave empty if the image carries the question)"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              placeholder="Type question stem here (Markdown supported)…"
+              className="w-full rounded-xl border border-border/60 bg-background/50 px-4 py-3 text-sm focus:ring-blue-500/40 focus:outline-none min-h-[100px]"
             />
           </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Image (URL or upload)</label>
-            <div className="flex flex-wrap gap-2">
-              <input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://…"
-                className="min-w-[200px] flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => setDrawOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs hover:bg-muted"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Draw
-              </button>
-              <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs hover:bg-muted">
-                {uploadingImage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-                Upload
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) uploadQuestionImage(file);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-              {imageUrl ? (
-                <button type="button" onClick={() => setImageUrl("")} className="rounded-lg border border-border p-2 hover:bg-muted">
-                  <X className="h-4 w-4" />
-                </button>
-              ) : null}
-            </div>
-            {imageUrl ? (
-              <div className="mt-2 overflow-hidden rounded-lg border border-border max-w-md">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imageUrl} alt="" className="max-h-40 w-full object-contain bg-muted/30" />
-              </div>
-            ) : null}
-            <div className="mt-2">
-              <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Stem + image layout</label>
-              <MedqsSelect
-                value={stemLayout}
-                onChange={(e) => setStemLayout(e.target.value as "STANDARD" | "IMAGE_OVERLAY")}
-                className="w-full max-w-md"
-              >
-                <option value="STANDARD">Image above text (default)</option>
-                <option value="IMAGE_OVERLAY">Text overlaid on image (clinical slide)</option>
-              </MedqsSelect>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                Overlay works best when you have an image and a short line of stem text.
-              </p>
-            </div>
-          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="space-y-3">
+               <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Media / Figures</label>
+               <div className="flex flex-col gap-3">
+                 <div className="flex gap-2">
+                   <input
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="External Image URL (or upload)"
+                    className="flex-1 rounded-xl border border-border/60 bg-background/50 px-4 py-2.5 text-sm focus:ring-blue-500/40 focus:outline-none"
+                   />
+                   <button
+                    type="button"
+                    onClick={() => setDrawOpen(true)}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-background/50 text-muted-foreground hover:bg-muted"
+                    title="Sketch a figure"
+                   >
+                    <Pencil className="h-4 w-4" />
+                   </button>
+                   <label className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border/60 bg-background/50 text-muted-foreground hover:bg-muted" title="Upload file">
+                    {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) uploadQuestionImage(file);
+                        e.target.value = "";
+                      }}
+                    />
+                   </label>
+                   {imageUrl && (
+                    <button type="button" onClick={() => setImageUrl("")} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-red-500/10 text-red-500 hover:bg-red-500/20">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                   )}
+                 </div>
 
-          <div className="grid gap-2 sm:grid-cols-2">
-            {choices.map((c, i) => (
-              <div key={c.key} className="flex gap-2">
-                <span className="flex w-8 items-center justify-center rounded-md bg-muted text-xs font-mono font-semibold">
-                  {c.key}
-                </span>
-                <input
-                  value={c.text}
-                  onChange={(e) =>
-                    setChoices((prev) => prev.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))
-                  }
-                  placeholder="Choice text"
-                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                />
-              </div>
-            ))}
-          </div>
+                 {imageUrl && (
+                  <div className="aspect-video w-full overflow-hidden rounded-xl border border-border/60 bg-muted/20 relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageUrl} alt="Question figure" className="h-full w-full object-contain p-2" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-[10px] font-bold text-white uppercase tracking-widest">Image Attached</p>
+                    </div>
+                  </div>
+                 )}
 
-          <div className="flex flex-wrap items-end gap-4">
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Correct answer</label>
-              <MedqsSelect
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                className="min-w-[4.5rem]"
-              >
-                {DEFAULT_KEYS.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
+                 <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1 opacity-60">Layout Mode</label>
+                    <MedqsSelect
+                      value={stemLayout}
+                      onChange={(e) => setStemLayout(e.target.value as any)}
+                      className="w-full h-10 rounded-xl border-border/60 bg-background/50 text-xs"
+                    >
+                      <option value="STANDARD">Standard: Image above text</option>
+                      <option value="IMAGE_OVERLAY">Overlay: Text on image (clinical)</option>
+                    </MedqsSelect>
+                 </div>
+               </div>
+            </div>
+
+            <div className="space-y-4">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Proffered Choices</label>
+              <div className="grid gap-2.5">
+                {choices.map((c, i) => (
+                  <div key={c.key} className={cn(
+                    "relative flex items-center gap-3 rounded-xl border p-2.5 transition-all",
+                    answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-border/60 bg-background/30"
+                  )}>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/40 text-[10px] font-bold font-mono">
+                      {c.key}
+                    </span>
+                    <input
+                      value={c.text}
+                      onChange={(e) =>
+                        setChoices((prev) => prev.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))
+                      }
+                      className="min-w-0 flex-1 border-none bg-transparent p-0 text-sm focus:ring-0"
+                      placeholder={`Possible Answer ${c.key}…`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setAnswer(c.key)}
+                      className={cn(
+                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all",
+                        answer === c.key ? "bg-emerald-500 text-white shadow shadow-emerald-500/30" : "bg-muted/40 text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 ))}
-              </MedqsSelect>
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Complexity & Difficulty</label>
               <MedqsSelect
                 value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
-                className="min-w-[7rem]"
+                onChange={(e) => setDifficulty(e.target.value as any)}
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50"
               >
-                <option value="EASY">Easy</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HARD">Hard</option>
+                <option value="EASY">Level: Easy — Straightforward facts</option>
+                <option value="MEDIUM">Level: Medium — Clinical application</option>
+                <option value="HARD">Level: Hard — Complex reasoning</option>
               </MedqsSelect>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Rationale / Solution (Markdown OK)</label>
+              <input
+                value={explanation}
+                onChange={(e) => setExplanation(e.target.value)}
+                placeholder="Explain why the correct answer is the right one…"
+                className="w-full h-11 rounded-xl border border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+              />
             </div>
           </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Explanation (optional)</label>
-            <input
-              value={explanation}
-              onChange={(e) => setExplanation(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center justify-between border-t border-border/60 pt-5">
             <button
               type="button"
               onClick={() => setAddOpen(false)}
-              className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted"
+              className="px-4 py-2.5 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
             >
-              Close
+              Discard Entry
             </button>
             <button
               type="button"
               disabled={saving}
               onClick={addManualQuestion}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 disabled:opacity-60 transition-all"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save question"}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Create Question
             </button>
           </div>
         </div>
       )}
 
-      {/* List scope: exact lecture (module → subject → lecture) */}
-      <div className="mb-4 rounded-xl border border-border bg-muted/15 p-4">
-        <p className="mb-3 text-sm font-semibold text-foreground">Show questions from…</p>
-        <p className="mb-3 text-xs text-muted-foreground">
-          Choose the lecture whose bank you want to edit. Leave lecture empty to load all questions (may be slow on large sites).
-        </p>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Module</label>
+      {/* ── Filter Card ── */}
+      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Settings className="h-4 w-4 text-blue-500" />
+            <span className="text-sm font-bold tracking-tight">List Filter</span>
+          </div>
+          <div className="relative w-full max-w-xs">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search in loaded list…"
+              className="w-full rounded-xl border border-border/60 bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            />
+          </div>
+        </div>
+        
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Module</label>
             <MedqsSelect
               value={filterModule}
               onChange={(e) => {
@@ -528,18 +540,14 @@ export default function AdminQuestionsPage() {
                 setFilterSubject("");
                 setFilterLecture("");
               }}
-              className="w-full"
+              className="w-full h-10 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
             >
-              <option value="">Any</option>
-              {modules.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
+              <option value="">Any Module</option>
+              {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
             </MedqsSelect>
           </div>
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Subject</label>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Subject</label>
             <MedqsSelect
               value={filterSubject}
               onChange={(e) => {
@@ -547,213 +555,243 @@ export default function AdminQuestionsPage() {
                 setFilterLecture("");
               }}
               disabled={!filterModule}
-              className="w-full"
+              className="w-full h-10 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
             >
-              <option value="">Any</option>
-              {filterSubjectsByModule.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
+              <option value="">Any Subject</option>
+              {filterSubjectsByModule.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </MedqsSelect>
           </div>
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Lecture</label>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Lecture</label>
             <MedqsSelect
               value={filterLecture}
               onChange={(e) => setFilterLecture(e.target.value)}
               disabled={!filterSubject}
-              className="w-full"
+              className="w-full h-10 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
             >
-              <option value="">All in site (no lecture filter)</option>
-              {filterLectures.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.title}
-                </option>
-              ))}
+              <option value="">All Lectures</option>
+              {filterLectures.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
             </MedqsSelect>
           </div>
         </div>
       </div>
 
-      <div className="mb-4 flex gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search in loaded list…"
-            className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
-      </div>
-
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-16 text-center">
-          <HelpCircle className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
-          <p className="font-medium">No questions found</p>
-          <p className="text-sm text-muted-foreground">Add one manually above or use AI tools with a lecture PDF.</p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
+            <HelpCircle className="h-8 w-8 text-muted-foreground opacity-30" />
+          </div>
+          <p className="font-display text-lg font-bold">No questions found</p>
+          <p className="max-w-sm text-sm text-muted-foreground mt-1">
+            We couldn&apos;t find any items matching these filters. Try adjusting your selections or add one manually.
+          </p>
         </div>
       ) : (
-        <>
-        <div className="space-y-2">
-          {paged.map((q, i) => {
-            const open = expanded.has(q.id);
-            const rowNum = safeListPage * PAGE_SIZE + i + 1;
-            return (
-              <div key={q.id} className="rounded-xl border border-border bg-card overflow-hidden">
-                <div
-                  className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors"
-                  onClick={() =>
-                    setExpanded((s) => {
-                      const n = new Set(s);
-                      n.has(q.id) ? n.delete(q.id) : n.add(q.id);
-                      return n;
-                    })
-                  }
-                >
-                  <span className="flex-shrink-0 text-xs font-mono text-muted-foreground w-8">{rowNum}</span>
-                  <div className="flex-1 min-w-0">
-                    {q.imageUrl ? (
-                      <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
-                        <ImagePlus className="h-3.5 w-3.5" /> Image question
-                      </div>
-                    ) : null}
-                    <p className="text-sm truncate">{q.body || "(image only)"}</p>
-                  </div>
-                  <div className="flex flex-shrink-0 items-center gap-2">
-                    <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", diffColor[q.difficulty])}>
-                      {q.difficulty}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteQuestion(q.id);
-                      }}
-                      className="rounded p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                    {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                  </div>
-                </div>
-
-                {open && (
-                  <div className="border-t border-border px-4 pb-4 pt-3 space-y-3 animate-fade-in">
-                    {q.imageUrl ? (
-                      <div className="max-w-md overflow-hidden rounded-lg border border-border">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={q.imageUrl} alt="" className="max-h-56 w-full object-contain bg-muted/20" />
-                      </div>
-                    ) : null}
-                    <div>
-                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Question text</label>
-                      <textarea
-                        value={q.body}
-                        onChange={(e) => patchQuestion(q.id, { body: e.target.value })}
-                        rows={3}
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                      />
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {q.choices.map((c, idx) => (
-                        <div key={c.key} className="flex items-center gap-2 rounded border border-border bg-background px-2 py-1.5">
-                          <span className="w-6 text-xs font-mono text-muted-foreground">{c.key}</span>
-                          <input
-                            value={c.text}
-                            onChange={(e) => patchChoice(q.id, idx, e.target.value)}
-                            className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
-                          />
-                          <label className="text-xs">
-                            <input
-                              type="radio"
-                              name={`answer-${q.id}`}
-                              checked={q.answer === c.key}
-                              onChange={() => patchQuestion(q.id, { answer: c.key })}
-                            />{" "}
-                            Correct
-                          </label>
-                          {c.key === q.answer && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Difficulty</label>
-                        <MedqsSelect
-                          value={q.difficulty}
-                          onChange={(e) => patchQuestion(q.id, { difficulty: e.target.value })}
-                          className="w-full"
-                        >
-                          <option value="EASY">EASY</option>
-                          <option value="MEDIUM">MEDIUM</option>
-                          <option value="HARD">HARD</option>
-                        </MedqsSelect>
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Explanation</label>
-                        <input
-                          value={q.explanation ?? ""}
-                          onChange={(e) => patchQuestion(q.id, { explanation: e.target.value })}
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">
-                        Lecture: <code className="font-mono">{q.lectureId}</code>
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => void saveQuestion(q.id)}
-                        className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
-                      >
-                        Save edits
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {filtered.length > PAGE_SIZE ? (
-          <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-border pt-4 sm:flex-row">
-            <p className="text-xs text-muted-foreground">
-              Showing {safeListPage * PAGE_SIZE + 1}–{Math.min((safeListPage + 1) * PAGE_SIZE, filtered.length)} of{" "}
-              {filtered.length}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              Showing {paged.length} of {filtered.length} questions
             </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={safeListPage <= 0}
-                onClick={() => setListPage((p) => Math.max(0, p - 1))}
-                className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
-              >
-                Previous
-              </button>
-              <span className="text-sm tabular-nums text-muted-foreground">
-                Page {safeListPage + 1} / {totalPages}
-              </span>
-              <button
-                type="button"
-                disabled={safeListPage >= totalPages - 1}
-                onClick={() => setListPage((p) => Math.min(totalPages - 1, p + 1))}
-                className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
+            <div className="h-px flex-1 bg-border/40 mx-4 hidden sm:block" />
           </div>
-        ) : null}
-        </>
+
+          <div className="space-y-2.5">
+            {paged.map((q, i) => {
+              const open = expanded.has(q.id);
+              const rowNum = (safeListPage * PAGE_SIZE) + i + 1;
+              return (
+                <div key={q.id} className={cn(
+                  "overflow-hidden rounded-2xl border transition-all duration-200",
+                  open ? "border-blue-500/30 bg-card shadow-lg shadow-blue-500/5 ring-1 ring-blue-500/10" : "border-border/60 bg-card hover:border-border hover:shadow-md"
+                )}>
+                  <div
+                    className="flex cursor-pointer items-center gap-4 px-5 py-4"
+                    onClick={() =>
+                      setExpanded((s) => {
+                        const n = new Set(s);
+                        n.has(q.id) ? n.delete(q.id) : n.add(q.id);
+                        return n;
+                      })
+                    }
+                  >
+                    <span className="flex-shrink-0 text-[10px] font-bold tabular-nums text-muted-foreground/60 w-6">
+                      {rowNum.toString().padStart(2, '0')}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      {q.imageUrl ? (
+                        <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold text-blue-500 uppercase tracking-wide">
+                          <ImagePlus className="h-3 w-3" /> Image Question
+                        </div>
+                      ) : null}
+                      <p className="text-sm font-medium leading-relaxed truncate">
+                        {q.body || "(image only)"}
+                      </p>
+                    </div>
+                    <div className="flex flex-shrink-0 items-center gap-3">
+                      <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight", diffColor[q.difficulty])}>
+                        {q.difficulty}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteQuestion(q.id);
+                          }}
+                          className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-transform duration-200",
+                          open && "rotate-180"
+                        )}>
+                          <ChevronDown className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {open && (
+                    <div className="border-t border-border/40 px-5 pb-5 pt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {q.imageUrl ? (
+                        <div className="max-w-md overflow-hidden rounded-xl border border-border/60 shadow-inner bg-muted/20">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={q.imageUrl} alt="" className="max-h-64 w-full object-contain p-2" />
+                        </div>
+                      ) : null}
+                      
+                      <div className="grid gap-5">
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Question Stem</label>
+                          <textarea
+                            value={q.body}
+                            onChange={(e) => patchQuestion(q.id, { body: e.target.value })}
+                            rows={3}
+                            className="w-full rounded-xl border border-border/60 bg-background/50 px-4 py-3 text-sm focus:ring-blue-500/40 focus:outline-none"
+                            placeholder="Type stem here..."
+                          />
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {q.choices.map((c, idx) => (
+                            <div key={c.key} className={cn(
+                              "relative flex items-center gap-3 rounded-xl border p-3 transition-all",
+                              q.answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-border/60 bg-background/30"
+                            )}>
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/40 text-[10px] font-bold font-mono">
+                                {c.key}
+                              </span>
+                              <input
+                                value={c.text}
+                                onChange={(e) => patchChoice(q.id, idx, e.target.value)}
+                                className="min-w-0 flex-1 border-none bg-transparent p-0 text-sm focus:ring-0"
+                                placeholder={`Choice ${c.key}...`}
+                              />
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`answer-${q.id}`}
+                                  checked={q.answer === c.key}
+                                  onChange={() => patchQuestion(q.id, { answer: c.key })}
+                                  className="h-4 w-4 rounded-full border-border/60 text-emerald-500 focus:ring-emerald-500/40"
+                                />
+                                <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">Right</span>
+                              </label>
+                              {c.key === q.answer && <CheckCircle2 className="h-4 w-4 text-emerald-500 ml-1" />}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-1">Difficulty Level</label>
+                            <MedqsSelect
+                              value={q.difficulty}
+                              onChange={(e) => patchQuestion(q.id, { difficulty: e.target.value })}
+                              className="w-full h-10 rounded-xl border-border/60 bg-background/50"
+                            >
+                              <option value="EASY">EASY</option>
+                              <option value="MEDIUM">MEDIUM</option>
+                              <option value="HARD">HARD</option>
+                            </MedqsSelect>
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-1">Explanation / Rationale</label>
+                            <input
+                              value={q.explanation ?? ""}
+                              onChange={(e) => patchQuestion(q.id, { explanation: e.target.value })}
+                              className="w-full h-10 rounded-xl border border-border/60 bg-background/50 px-4 text-sm"
+                              placeholder="Why is it right?"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between border-t border-border/60">
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                            <span className="font-bold uppercase tracking-widest">Linked ID:</span>
+                            <code className="rounded bg-muted px-1.5 py-0.5 font-mono">{q.id}</code>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => void saveQuestion(q.id)}
+                            className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 transition-all font-display"
+                          >
+                            <Save className="h-3.5 w-3.5" />
+                            Update Changes
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {filtered.length > PAGE_SIZE && (
+            <div className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row border-t border-border/40 px-2 mt-4">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                Page {safeListPage + 1} of {totalPages}
+              </p>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={safeListPage <= 0}
+                  onClick={() => setListPage((p) => Math.max(0, p - 1))}
+                  className="flex h-10 items-center justify-center rounded-xl border border-border/60 bg-card px-4 text-xs font-bold transition-all hover:bg-muted disabled:opacity-40"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Prev
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const p = i; // simple logic for now
+                    return (
+                      <button key={p} onClick={() => setListPage(p)} className={cn(
+                        "h-10 w-10 rounded-xl text-xs font-bold transition-all",
+                        safeListPage === p ? "bg-blue-600 text-white shadow shadow-blue-500/40" : "border border-border/60 bg-card hover:bg-muted"
+                      )}>
+                        {p + 1}
+                      </button>
+                    )
+                  })}
+                </div>
+                <button
+                  type="button"
+                  disabled={safeListPage >= totalPages - 1}
+                  onClick={() => setListPage((p) => Math.min(totalPages - 1, p + 1))}
+                  className="flex h-10 items-center justify-center rounded-xl border border-border/60 bg-card px-4 text-xs font-bold transition-all hover:bg-muted disabled:opacity-40"
+                >
+                  Next <ChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       <QuickDrawModal

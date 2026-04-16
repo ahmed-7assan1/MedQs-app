@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
+import { AdminMobileNav } from "../../components/admin/AdminMobileNav";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
-import { ChevronRight } from "lucide-react";
+import { LayoutDashboard, ArrowLeft } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -19,46 +20,52 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .findFirst({ select: { siteName: true, logoUrl: true } })
     .catch(() => null);
 
+  const siteName = siteConfig?.siteName ?? "MedQs";
+
   return (
-    <SiteConfigProvider initial={{ siteName: siteConfig?.siteName ?? "MedQs", logoUrl: siteConfig?.logoUrl ?? null }}>
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-56 shrink-0 border-r border-border bg-card/75 backdrop-blur-md md:flex md:flex-col">
-        <div className="flex h-14 items-center gap-2 border-b border-border/80 bg-card/50 px-4 backdrop-blur-sm">
-          <MedQsLogoMark className="h-7 w-7 shrink-0" title="MedQs" />
-          <span className="font-display text-base font-bold tracking-tight">{siteConfig?.siteName ?? "MedQs"}</span>
-          <span
-            className="ml-auto rounded-lg bg-primary/12 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
-            title={PLATFORM_COPY.doctorHub}
-          >
-            {hubBadge}
-          </span>
+    <SiteConfigProvider initial={{ siteName, logoUrl: siteConfig?.logoUrl ?? null }}>
+      <div className="flex min-h-screen bg-background">
+
+        {/* ── Desktop Sidebar ──────────────────────────────────────── */}
+        <aside className="hidden w-60 shrink-0 border-r border-border/60 md:flex md:flex-col"
+          style={{ background: "hsl(var(--card)/0.7)", backdropFilter: "blur(16px)" }}>
+
+          {/* Logo header */}
+          <div className="flex h-14 items-center gap-2.5 border-b border-border/60 px-4">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/30">
+              <MedQsLogoMark className="h-5 w-5 shrink-0 brightness-0 invert" title="MedQs" />
+            </div>
+            <span className="font-display text-sm font-bold tracking-tight">{siteName}</span>
+            <span className="ml-auto rounded-lg bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-500"
+              title={PLATFORM_COPY.doctorHub}>
+              {hubBadge}
+            </span>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex flex-1 flex-col overflow-y-auto px-3 py-4" aria-label={PLATFORM_COPY.doctorHub}>
+            <AdminSidebarNav />
+          </nav>
+
+          {/* Back to student view */}
+          <div className="border-t border-border/60 p-3">
+            <Link href="/dashboard-app"
+              className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground">
+              <ArrowLeft className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {PLATFORM_COPY.studentView}
+            </Link>
+          </div>
+        </aside>
+
+        {/* ── Mobile top bar + drawer ───────────────────────────────── */}
+        <AdminMobileNav siteName={siteName} hubBadge={hubBadge} />
+
+        {/* ── Main content ─────────────────────────────────────────── */}
+        <div className="flex flex-1 flex-col overflow-auto">
+          <main className="flex-1 pb-8">{children}</main>
         </div>
 
-        <nav
-          className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4"
-          aria-label={PLATFORM_COPY.doctorHub}
-        >
-          <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {PLATFORM_COPY.teachingWorkspace}
-          </p>
-          <AdminSidebarNav />
-        </nav>
-
-        <div className="border-t border-border/80 p-3">
-          <Link
-            href="/dashboard-app"
-            className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            {PLATFORM_COPY.studentView}
-          </Link>
-        </div>
-      </aside>
-
-      <div className="flex-1 overflow-auto">
-        <main className="min-h-screen">{children}</main>
       </div>
-    </div>
-  </SiteConfigProvider>
+    </SiteConfigProvider>
   );
 }

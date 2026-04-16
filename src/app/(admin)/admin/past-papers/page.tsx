@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import {
   FileText, Plus, Trash2, Loader2,
-  Clock, BarChart3, CheckCircle2, AlertCircle,
+  Clock, BarChart3, CheckCircle2, AlertCircle, X, Search, Filter, BookOpen, MapPin, User, ChevronDown, ChevronRight
 } from "lucide-react";
 import { FileUploader } from "@/components/ui/FileUploader";
 import { cn } from "@/lib/utils";
@@ -174,227 +174,162 @@ export default function AdminPastPapersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-24">
+      {/* ── Premium Header ── */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold">Past Papers</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{papers.length} papers uploaded</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-500">Academic Archives</p>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">Past Papers</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Upload exam archives and configure interactive sessions with AI proctoring.
+          </p>
         </div>
-        <button
-          onClick={() => setShowForm(p => !p)}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          {showForm ? "Cancel" : "Add Paper"}
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
+            <FileText className="h-4 w-4 text-primary" />
+            <span>{papers.length.toLocaleString()} Papers</span>
+          </div>
+          <button
+            onClick={() => setShowForm((p) => !p)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 transition-all"
+          >
+            {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {showForm ? "Cancel" : "Add Paper"}
+          </button>
+        </div>
       </div>
 
       {/* Create form */}
       {showForm && (
-        <div className="mb-6 rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in">
-          <h2 className="font-semibold">Add Past Paper</h2>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Title *</label>
-              <input
-                type="text"
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Anatomy Final Exam 2024"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
+        <div className="rounded-2xl border border-blue-500/20 bg-card p-6 shadow-xl shadow-blue-500/5 ring-1 ring-blue-500/10 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+              <Plus className="h-5 w-5" />
             </div>
-
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Semester *</label>
-              <MedqsSelect
-                value={form.semesterId}
-                onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
-                className="w-full"
-              >
-                <option value="">Select semester...</option>
-                {semesters.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </MedqsSelect>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Module *</label>
-              <MedqsSelect
-                value={form.moduleId}
-                onChange={(e) => setForm((f) => ({ ...f, moduleId: e.target.value }))}
-                className="w-full"
-              >
-                <option value="">Select module...</option>
-                {modules.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </MedqsSelect>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Time limit (minutes) <span className="opacity-60">optional</span>
-              </label>
-              <input
-                type="number"
-                value={form.timeLimitMin}
-                onChange={e => setForm(f => ({ ...f, timeLimitMin: e.target.value }))}
-                placeholder="e.g. 60"
-                min="1"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">Interactive quiz</p>
-                <p className="text-xs text-muted-foreground">
-                  Linked question set (Quiz Creator) or all module questions if none linked
-                </p>
-              </div>
-              <div
-                onClick={() => setForm(f => ({ ...f, isInteractive: !f.isInteractive }))}
-                className={cn(
-                  "relative ml-auto flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors",
-                  form.isInteractive ? "bg-primary" : "bg-muted"
-                )}
-              >
-                <span className={cn(
-                  "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
-                  form.isInteractive ? "translate-x-6" : "translate-x-1"
-                )} />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-lg border border-emerald-200/70 bg-emerald-50/30 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/15">
-              <div>
-                <p className="text-sm font-medium">Google Sheets sync</p>
-                <p className="text-xs text-muted-foreground">
-                  Append each attempt to the live tab (server env <code className="rounded bg-muted px-1">GOOGLE_SHEETS_*</code>)
-                </p>
-              </div>
-              <div
-                role="switch"
-                aria-checked={form.googleSheetsSyncEnabled}
-                onClick={() => setForm((f) => ({ ...f, googleSheetsSyncEnabled: !f.googleSheetsSyncEnabled }))}
-                className={cn(
-                  "relative ml-auto flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors",
-                  form.googleSheetsSyncEnabled ? "bg-primary" : "bg-muted"
-                )}
-              >
-                <span
-                  className={cn(
-                    "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
-                    form.googleSheetsSyncEnabled ? "translate-x-6" : "translate-x-1"
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">AI explanations</p>
-                <p className="text-xs text-muted-foreground">Gemini “explain this question” on review / quiz</p>
-              </div>
-              <div
-                role="switch"
-                aria-checked={form.aiExplanationEnabled}
-                onClick={() => setForm((f) => ({ ...f, aiExplanationEnabled: !f.aiExplanationEnabled }))}
-                className={cn(
-                  "relative ml-auto flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors",
-                  form.aiExplanationEnabled ? "bg-primary" : "bg-muted"
-                )}
-              >
-                <span
-                  className={cn(
-                    "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
-                    form.aiExplanationEnabled ? "translate-x-6" : "translate-x-1"
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">AI during quiz</p>
-                <p className="text-xs text-muted-foreground">
-                  If off, AI only after submit / on results page (recommended for exams)
-                </p>
-              </div>
-              <div
-                role="switch"
-                aria-checked={form.allowAiDuringQuiz}
-                onClick={() => setForm((f) => ({ ...f, allowAiDuringQuiz: !f.allowAiDuringQuiz }))}
-                className={cn(
-                  "relative ml-auto flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors",
-                  form.allowAiDuringQuiz ? "bg-primary" : "bg-muted"
-                )}
-              >
-                <span
-                  className={cn(
-                    "absolute h-4 w-4 rounded-full bg-white shadow transition-transform",
-                    form.allowAiDuringQuiz ? "translate-x-6" : "translate-x-1"
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2 space-y-2 rounded-lg border border-amber-200/80 bg-amber-50/50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/20">
-              <p className="text-xs font-semibold text-amber-900 dark:text-amber-200">Exam integrity (interactive papers)</p>
-              <div className="grid gap-2 sm:grid-cols-3">
-                <label className="flex cursor-pointer items-center gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={form.secureExamMode}
-                    onChange={(e) => setForm((f) => ({ ...f, secureExamMode: e.target.checked }))}
-                    className="rounded border-border"
-                  />
-                  Secured exam (exam only, no tutor)
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={form.restrictCopyPaste}
-                    onChange={(e) => setForm((f) => ({ ...f, restrictCopyPaste: e.target.checked }))}
-                    className="rounded border-border"
-                  />
-                  Block copy / right-click on questions
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={form.trackFocusLoss}
-                    onChange={(e) => setForm((f) => ({ ...f, trackFocusLoss: e.target.checked }))}
-                    className="rounded border-border"
-                  />
-                  Track tab switches + warn
-                </label>
-              </div>
+              <h2 className="font-display text-lg font-bold tracking-tight">New Past Paper</h2>
+              <p className="text-xs text-muted-foreground">Configure the exam title, visibility, and AI features.</p>
             </div>
           </div>
 
-          {/* PDF upload */}
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              PDF file <span className="opacity-60">(optional — for non-interactive papers)</span>
-            </label>
-            {form.pdfUrl ? (
-              <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
-                <p className="flex-1 text-sm text-emerald-700 dark:text-emerald-400 truncate">PDF uploaded</p>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Exam Title *</label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                placeholder="e.g. Final Anatomy Exam 2024"
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Semester Selection *</label>
+              <MedqsSelect
+                value={form.semesterId}
+                onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50"
+              >
+                <option value="">Select Semester…</option>
+                {semesters.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </MedqsSelect>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Assigned Module *</label>
+              <MedqsSelect
+                value={form.moduleId}
+                onChange={(e) => setForm((f) => ({ ...f, moduleId: e.target.value }))}
+                className="w-full h-11 rounded-xl border-border/60 bg-background/50"
+              >
+                <option value="">Select Module…</option>
+                {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+              </MedqsSelect>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Duration (Min) <span className="opacity-60">optional</span></label>
+              <div className="relative">
+                <Clock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="number"
+                  value={form.timeLimitMin}
+                  onChange={(e) => setForm((f) => ({ ...f, timeLimitMin: e.target.value }))}
+                  placeholder="e.g. 60"
+                  className="w-full h-11 rounded-xl border-border/60 bg-background/50 pl-10 pr-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-background/30 p-3">
+              <div>
+                <p className="text-sm font-bold">Interactive Mode</p>
+                <p className="text-[10px] text-muted-foreground">Enable student quiz logic</p>
+              </div>
+              <button
+                onClick={() => setForm((f) => ({ ...f, isInteractive: !f.isInteractive }))}
+                className={cn(
+                  "relative flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                  form.isInteractive ? "bg-blue-600 shadow-sm shadow-blue-500/40" : "bg-muted"
+                )}
+              >
+                <span className={cn(
+                  "h-4 w-4 rounded-full bg-white shadow transition-transform",
+                  form.isInteractive ? "translate-x-6" : "translate-x-1"
+                )} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+             <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Google Sync</span>
                 <button
-                  onClick={() => setForm(f => ({ ...f, pdfUrl: "" }))}
-                  className="text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => setForm((f) => ({ ...f, googleSheetsSyncEnabled: !f.googleSheetsSyncEnabled }))}
+                  className={cn(
+                    "relative flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                    form.googleSheetsSyncEnabled ? "bg-emerald-500" : "bg-muted"
+                  )}
                 >
-                  Remove
+                  <span className={cn("h-3 w-3 rounded-full bg-white shadow transition-transform", form.googleSheetsSyncEnabled ? "translate-x-5" : "translate-x-1")} />
                 </button>
+             </div>
+             <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-500/5 p-3">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-500">AI Tutor</span>
+                <button
+                  onClick={() => setForm((f) => ({ ...f, aiExplanationEnabled: !f.aiExplanationEnabled }))}
+                  className={cn(
+                    "relative flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                    form.aiExplanationEnabled ? "bg-blue-500" : "bg-muted"
+                  )}
+                >
+                  <span className={cn("h-3 w-3 rounded-full bg-white shadow transition-transform", form.aiExplanationEnabled ? "translate-x-5" : "translate-x-1")} />
+                </button>
+             </div>
+             <div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500">Secured Exam</span>
+                <button
+                  onClick={() => setForm((f) => ({ ...f, secureExamMode: !f.secureExamMode }))}
+                  className={cn(
+                    "relative flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                    form.secureExamMode ? "bg-amber-500" : "bg-muted"
+                  )}
+                >
+                  <span className={cn("h-3 w-3 rounded-full bg-white shadow transition-transform", form.secureExamMode ? "translate-x-5" : "translate-x-1")} />
+                </button>
+             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">PDF Document <span className="opacity-50">(Manual Only)</span></label>
+            {form.pdfUrl ? (
+              <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                </div>
+                <p className="flex-1 text-sm font-medium text-emerald-600 dark:text-emerald-400 truncate">Document ready for publish</p>
+                <button onClick={() => setForm(f => ({ ...f, pdfUrl: "" }))} className="text-xs font-bold text-muted-foreground hover:text-red-500">Remove</button>
               </div>
             ) : (
               <FileUploader
@@ -408,14 +343,15 @@ export default function AdminPastPapersPage() {
             )}
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between border-t border-border/60 pt-5">
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground">Discard</button>
             <button
               onClick={handleCreate}
               disabled={saving}
-              className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 disabled:opacity-60 transition-all font-display"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              {saving ? "Creating..." : "Create Paper"}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Plus className="h-4 w-4 text-white" />}
+              Create Archives
             </button>
           </div>
         </div>
@@ -423,116 +359,76 @@ export default function AdminPastPapersPage() {
 
       {/* Papers list */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       ) : papers.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-16 text-center">
-          <FileText className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
-          <p className="font-medium">No past papers yet</p>
-          <p className="text-sm text-muted-foreground">Click &quot;Add Paper&quot; to upload the first one.</p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
+            <FileText className="h-8 w-8 text-muted-foreground opacity-30" />
+          </div>
+          <p className="font-display text-lg font-bold">No archives yet</p>
+          <p className="max-w-xs text-sm text-muted-foreground mt-1">Upload exams to provide students with assessment history.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {papers.map(paper => (
-            <div key={paper.id} className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card px-5 py-4">
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold truncate">{paper.title}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span>{paper.module?.name ?? "—"}</span>
-                    {paper.timeLimitMin && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {paper.timeLimitMin} min
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <BarChart3 className="h-3 w-3" /> {paper._count?.attempts ?? 0} attempts
-                    </span>
-                    {paper.isInteractive && (
-                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-                        Interactive
-                      </span>
-                    )}
-                    {paper.isInteractive && (paper._count?.paperQuestions ?? 0) > 0 && (
-                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                        {paper._count?.paperQuestions} linked Q
-                      </span>
-                    )}
-                    {paper.googleSheetsSyncEnabled && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-                        Sheets
-                      </span>
-                    )}
-                    {paper.aiExplanationEnabled === false && (
-                      <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-                        No AI
-                      </span>
-                    )}
-                    {paper.allowAiDuringQuiz && (
-                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">
-                        AI in-quiz
-                      </span>
-                    )}
-                    {paper.secureExamMode && (
-                      <span className="rounded-full bg-amber-200 px-2 py-0.5 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200">
-                        Secured
-                      </span>
-                    )}
-                    {paper.pdfUrl && (
-                      <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer"
-                        className="text-primary hover:underline">PDF</a>
-                    )}
+            <div key={paper.id} className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 transition-all hover:border-blue-500/40 hover:shadow-lg">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-4 min-w-0">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 shadow-inner">
+                    <FileText className="h-6 w-6 text-blue-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-display text-lg font-bold truncate">{paper.title}</h3>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                       <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] uppercase font-bold text-foreground/70">
+                        {paper.module?.name ?? "General"}
+                       </span>
+                       <span className="h-1 w-1 rounded-full bg-border" />
+                       <div className="flex items-center gap-3 text-xs font-semibold text-muted-foreground">
+                         {paper.timeLimitMin && <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {paper.timeLimitMin}m</span>}
+                         <span className="flex items-center gap-1"><BarChart3 className="h-3 w-3" /> {paper._count?.attempts ?? 0} sign-ins</span>
+                       </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {paper.isInteractive && <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-500 uppercase tracking-tight ring-1 ring-violet-500/20">Interactive</span>}
+                      {paper.isInteractive && (paper._count?.paperQuestions ?? 0) > 0 && <span className="rounded-full bg-slate-500/10 px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-500/10">{paper._count?.paperQuestions} Questions</span>}
+                      {paper.googleSheetsSyncEnabled && <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-500 uppercase tracking-tight ring-1 ring-emerald-500/20">Sync On</span>}
+                      {paper.secureExamMode && <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-500 uppercase tracking-tight ring-1 ring-amber-500/20">Secured</span>}
+                      {paper.pdfUrl && <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-500 hover:bg-blue-500/20 transition-colors uppercase tracking-tight ring-1 ring-blue-500/20">PDF Archive</a>}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-shrink-0 flex-col items-end gap-2">
-                <div className="flex flex-wrap justify-end gap-2">
+
+                <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+                  <div className="flex flex-wrap gap-1 sm:justify-end">
+                    {[
+                      { label: "AI Tutor", active: paper.aiExplanationEnabled !== false, onClick: () => patchPaper(paper.id, { aiExplanationEnabled: !paper.aiExplanationEnabled }) },
+                      { label: "AI In-Quiz", active: !!paper.allowAiDuringQuiz, onClick: () => patchPaper(paper.id, { allowAiDuringQuiz: !paper.allowAiDuringQuiz }) },
+                      { label: "Secured", active: !!paper.secureExamMode, onClick: () => patchPaper(paper.id, { secureExamMode: !paper.secureExamMode }) },
+                      { label: "Sync", active: !!paper.googleSheetsSyncEnabled, onClick: () => patchPaper(paper.id, { googleSheetsSyncEnabled: !paper.googleSheetsSyncEnabled }) }
+                    ].map(btn => (
+                      <button
+                        key={btn.label}
+                        onClick={btn.onClick}
+                        className={cn(
+                          "rounded-lg px-2 py-1 text-[9px] font-bold uppercase tracking-widest transition-all",
+                          btn.active ? "bg-blue-600 text-white shadow shadow-blue-500/30" : "border border-border/60 text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
                   <button
-                    type="button"
-                    onClick={() => {
-                      const on = paper.aiExplanationEnabled !== false;
-                      patchPaper(paper.id, { aiExplanationEnabled: !on });
-                    }}
-                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
+                    onClick={() => handleDelete(paper.id, paper.title)}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background/50 text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 sm:self-end"
                   >
-                    {paper.aiExplanationEnabled === false ? "Enable AI" : "Disable AI"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      patchPaper(paper.id, { allowAiDuringQuiz: !Boolean(paper.allowAiDuringQuiz) })
-                    }
-                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
-                  >
-                    {paper.allowAiDuringQuiz ? "AI only after quiz" : "Allow AI in quiz"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => patchPaper(paper.id, { secureExamMode: !Boolean(paper.secureExamMode) })}
-                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
-                  >
-                    {paper.secureExamMode ? "Unsecure exam" : "Secure exam"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      patchPaper(paper.id, { googleSheetsSyncEnabled: !Boolean(paper.googleSheetsSyncEnabled) })
-                    }
-                    className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted"
-                  >
-                    {paper.googleSheetsSyncEnabled ? "Sheets off" : "Sheets on"}
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-                <button
-                  onClick={() => handleDelete(paper.id, paper.title)}
-                  className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
               </div>
             </div>
           ))}

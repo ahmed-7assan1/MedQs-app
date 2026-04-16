@@ -33,7 +33,7 @@ export function MedQsLogoMark({
     <span
       style={style}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full",
+        "inline-flex shrink-0 items-center justify-center rounded-full overflow-hidden",
         className
       )}
     >
@@ -41,14 +41,14 @@ export function MedQsLogoMark({
       <img
         src={srcLight}
         alt={title ?? siteName ?? "MedQs"}
-        className="h-full w-full object-contain dark:hidden"
+        className="h-full w-full max-h-full max-w-full object-contain dark:hidden"
         referrerPolicy="no-referrer"
       />
       {/* Dark Mode Logo */}
       <img
         src={srcDark}
         alt={title ?? siteName ?? "MedQs"}
-        className="h-full w-full object-contain hidden dark:block"
+        className="h-full w-full max-h-full max-w-full object-contain hidden dark:block"
         referrerPolicy="no-referrer"
       />
     </span>
