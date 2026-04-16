@@ -62,6 +62,11 @@ export const MAX_FILE_SIZE: Record<string, number> = {
 
 // ─── Direct server-side upload (for small files / PDFs) ────────────────────────
 
+const IMAGE_MIME_TYPES = new Set([
+  "image/jpeg", "image/png", "image/webp", "image/gif",
+  "image/avif", "image/bmp", "image/svg+xml",
+]);
+
 export async function uploadFile(
   buffer: Buffer,
   originalName: string,
@@ -72,6 +77,7 @@ export async function uploadFile(
   const filename = `${randomUUID()}${ext}`;
   const segments = folder.split(/[/\\]+/).filter(Boolean);
 
+  // ── Local dev: write to public/uploads/ ──────────────────────────────────────
   if (localDiskUploadEnabled()) {
     const dir = path.join(process.cwd(), "public", "uploads", ...segments);
     await mkdir(dir, { recursive: true });
@@ -81,17 +87,23 @@ export async function uploadFile(
     return { url: `/uploads/${key}`, key };
   }
 
+  // ── Images → Cloudinary (fast CDN, auto WebP, no Vercel timeout risk) ────────
+  if (IMAGE_MIME_TYPES.has(mimeType)) {
+    const { uploadToCloudinary } = await import("./cloudinary");
+    const cloudFolder = `medqs/${segments.join("/")}`;
+    const result = await uploadToCloudinary(buffer, cloudFolder);
+    return { url: result.url, key: result.key };
+  }
+
+  // ── PDFs / documents → UploadThing ─────────────────────────────────────────
   assertStorageConfigured();
   const utapi = new UTApi();
-  
-  // Wrap buffer into a File object with custom name for UploadThing
   const f = new File([new Uint8Array(buffer)], filename, { type: mimeType });
   const response = await utapi.uploadFiles([f]);
-  
   if (!response[0].data) throw new Error("UploadThing upload failed: " + response[0].error?.message);
-  
   return { url: response[0].data.url, key: response[0].data.key };
 }
+
 
 export async function getPresignedUploadUrl(
   fileName: string,
