@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { CustomVideoPlayer } from "../content/CustomVideoPlayer";
 
 /** Large logical canvas for placing widgets; background grid is infinite in the viewport. */
 export const WORLD_W = 20000;
@@ -657,14 +658,10 @@ function YoutubeMini({
         </button>
       </div>
       {id ? (
-        <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-white/10 bg-black/40 pt-[56.25%]">
-          <iframe
-            title="yt"
-            className="absolute inset-0 h-full w-full"
-            src={`https://www.youtube-nocookie.com/embed/${id}?rel=0`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+        <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-white/10 bg-black/40">
+          <div className="absolute inset-0 h-full w-full">
+            <CustomVideoPlayer url={`https://www.youtube.com/watch?v=${id}`} />
+          </div>
         </div>
       ) : (
         <p className="text-center text-[11px] text-white/35">No video</p>

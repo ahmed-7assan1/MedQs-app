@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getLectureInModule } from "@/lib/lecture-navigation";
 import { trackLectureView } from "@/lib/lecture-activity";
+import { getSessionScope, isAdminRole } from "@/lib/tenant";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Video } from "lucide-react";
@@ -16,6 +17,8 @@ export default async function LectureVideoPage({
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const scope = await getSessionScope(session);
+  const isAdmin = isAdminRole(scope?.role);
 
   const lecture = await getLectureInModule(params.moduleId, params.lectureId);
   if (!lecture) notFound();
@@ -27,30 +30,30 @@ export default async function LectureVideoPage({
     ? lecture.videos
     : lecture.videoUrl
       ? [
-          {
-            id: "legacy-single",
-            title: "Main lecture video",
-            url: lecture.videoUrl,
-            sourceType: "external",
-            sharingEnabled: true,
-            likesCount: 0,
-            commentsCount: 0,
-            sharesCount: 0,
-            sortOrder: 1,
-            lectureId: lecture.id,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ]
+        {
+          id: "legacy-single",
+          title: "Main lecture video",
+          url: lecture.videoUrl,
+          sourceType: "external",
+          sharingEnabled: true,
+          likesCount: 0,
+          commentsCount: 0,
+          sharesCount: 0,
+          sortOrder: 1,
+          lectureId: lecture.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]
       : [];
 
   const videoIds = videos.map((v: any) => v.id);
   const likedRows =
     videoIds.length > 0
       ? await prisma.lectureVideoLike.findMany({
-          where: { userId: session.user.id, videoId: { in: videoIds } },
-          select: { videoId: true },
-        })
+        where: { userId: session.user.id, videoId: { in: videoIds } },
+        select: { videoId: true },
+      })
       : [];
   const likedSet = new Set(likedRows.map((r) => r.videoId));
 
@@ -91,6 +94,7 @@ export default async function LectureVideoPage({
             likedByMe: likedSet.has(v.id),
           }))}
           selectedVideoId={selected}
+          isAdmin={isAdmin}
         />
       ) : (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-muted/20 py-16">

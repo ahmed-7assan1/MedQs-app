@@ -131,80 +131,80 @@ function MindMapCanvas({
     <div
       ref={containerRef}
       className="relative min-h-[min(52vh,520px)] w-full overflow-hidden rounded-2xl bg-muted/25 ring-1 ring-border/50"
-        onPointerDown={(e) => {
-          if ((e.target as HTMLElement)?.closest?.("[data-node]")) return;
-          (e.currentTarget as any).setPointerCapture?.(e.pointerId);
-          setDragging({ x: e.clientX, y: e.clientY, px: pan.x, py: pan.y });
-        }}
-        onPointerMove={(e) => {
-          if (!dragging) return;
-          setPan({ x: dragging.px + (e.clientX - dragging.x), y: dragging.py + (e.clientY - dragging.y) });
-        }}
-          onPointerUp={() => setDragging(null)}
-        >
-        <div
-          className="absolute left-1/2 top-1/2 will-change-transform"
-          style={{ transform: `translate(${pan.x}px,${pan.y}px) translate(-50%,-50%) scale(${scale})` }}
-        >
-          <svg className="absolute inset-0 -z-10" width={1600} height={1200} viewBox="-800 -600 1600 1200">
-            {edges.map((e, i) => {
-              const a = layout.pos.get(e.from);
-              const b = layout.pos.get(e.to);
-              if (!a || !b) return null;
-              const midX = (a.x + b.x) / 2;
-              return (
-                <path
-                  key={`${e.from}-${e.to}-${i}`}
-                  d={`M ${a.x} ${a.y} C ${midX} ${a.y}, ${midX} ${b.y}, ${b.x} ${b.y}`}
-                  fill="none"
-                  stroke="hsl(var(--primary) / 0.30)"
-                  strokeWidth="2"
-                />
-              );
-            })}
-          </svg>
-
-          {nodes.map((n) => {
-            const p = layout.pos.get(n.id) ?? { x: 0, y: 0 };
-            const isSel = selectedId === n.id;
-            const shape = n.shape ?? ((levelById.get(n.id) ?? 0) === 0 ? "hex" : "circle");
-            const baseCls =
-              "select-none shadow-sm transition-transform duration-200 hover:-translate-y-0.5";
-            const selCls = isSel ? "ring-2 ring-ring" : "";
-            const w = shape === "card" ? 220 : 150;
-            const h = shape === "card" ? 72 : 64;
+      onPointerDown={(e) => {
+        if ((e.target as HTMLElement)?.closest?.("[data-node]")) return;
+        (e.currentTarget as any).setPointerCapture?.(e.pointerId);
+        setDragging({ x: e.clientX, y: e.clientY, px: pan.x, py: pan.y });
+      }}
+      onPointerMove={(e) => {
+        if (!dragging) return;
+        setPan({ x: dragging.px + (e.clientX - dragging.x), y: dragging.py + (e.clientY - dragging.y) });
+      }}
+      onPointerUp={() => setDragging(null)}
+    >
+      <div
+        className="absolute left-1/2 top-1/2 will-change-transform"
+        style={{ transform: `translate(${pan.x}px,${pan.y}px) translate(-50%,-50%) scale(${scale})` }}
+      >
+        <svg className="absolute inset-0 -z-10" width={1600} height={1200} viewBox="-800 -600 1600 1200">
+          {edges.map((e, i) => {
+            const a = layout.pos.get(e.from);
+            const b = layout.pos.get(e.to);
+            if (!a || !b) return null;
+            const midX = (a.x + b.x) / 2;
             return (
-              <button
-                key={n.id}
-                type="button"
-                data-node
-                onClick={() => onSelectId(n.id)}
-                className={cn(
-                  "absolute flex items-center justify-center border px-4 text-left",
-                  baseCls,
-                  selCls,
-                  shape === "circle" ? "rounded-full" : "rounded-2xl",
-                  "bg-card/85 border-border hover:border-primary/40"
-                )}
-                style={{
-                  left: p.x - w / 2,
-                  top: p.y - h / 2,
-                  width: w,
-                  height: h,
-                  clipPath: shape === "hex" ? hexClip() : undefined,
-                }}
-              >
-                <span className="text-sm font-semibold">{n.label}</span>
-              </button>
+              <path
+                key={`${e.from}-${e.to}-${i}`}
+                d={`M ${a.x} ${a.y} C ${midX} ${a.y}, ${midX} ${b.y}, ${b.x} ${b.y}`}
+                fill="none"
+                stroke="hsl(var(--primary) / 0.30)"
+                strokeWidth="2"
+              />
             );
           })}
-        </div>
+        </svg>
 
-          <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Drag to pan</span>
-            <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Ctrl + wheel to zoom</span>
-          </div>
-        </div>
+        {nodes.map((n) => {
+          const p = layout.pos.get(n.id) ?? { x: 0, y: 0 };
+          const isSel = selectedId === n.id;
+          const shape = n.shape ?? ((levelById.get(n.id) ?? 0) === 0 ? "hex" : "circle");
+          const baseCls =
+            "select-none shadow-sm transition-transform duration-200 hover:-translate-y-0.5";
+          const selCls = isSel ? "ring-2 ring-ring" : "";
+          const w = shape === "card" ? 220 : 150;
+          const h = shape === "card" ? 72 : 64;
+          return (
+            <button
+              key={n.id}
+              type="button"
+              data-node
+              onClick={() => onSelectId(n.id)}
+              className={cn(
+                "absolute flex items-center justify-center border px-4 text-left",
+                baseCls,
+                selCls,
+                shape === "circle" ? "rounded-full" : "rounded-2xl",
+                "bg-card/85 border-border hover:border-primary/40"
+              )}
+              style={{
+                left: p.x - w / 2,
+                top: p.y - h / 2,
+                width: w,
+                height: h,
+                clipPath: shape === "hex" ? hexClip() : undefined,
+              }}
+            >
+              <span className="text-sm font-semibold">{n.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+        <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Drag to pan</span>
+        <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Ctrl + wheel to zoom</span>
+      </div>
+    </div>
   );
 }
 

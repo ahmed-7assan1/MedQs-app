@@ -229,64 +229,86 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Hero Stats */}
+      {/* ── Stat Cards ── */}
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[
-          {
-            label: "Study streak",
-            value: `${streak}d`,
-            sub: streak > 0 ? "Keep it going" : "Start today",
-            icon: Flame,
-            textTone: "text-orange-500 dark:text-orange-400",
-            bgTone: "from-orange-500/10 to-transparent border-orange-500/20",
-          },
-          {
-            label: "Questions today",
-            value: todayItemCount,
-            sub: "Items in sessions",
-            icon: Target,
-            textTone: "text-teal-600 dark:text-teal-400",
-            bgTone: "from-teal-500/10 to-transparent border-teal-500/20",
-          },
-          {
-            label: "Mastery",
-            value: `${overallPct}%`,
-            sub: `${totalCorrect}/${totalQuestions} correct`,
-            icon: TrendingUp,
-            textTone: "text-emerald-600 dark:text-emerald-400",
-            bgTone: "from-emerald-500/10 to-transparent border-emerald-500/20",
-          },
-          {
-            label: "Your points",
-            value: rankInfo?.points ?? 0,
-            sub: rankInfo?.rank?.label ?? "Newbie",
-            icon: Trophy,
-            textTone: "text-amber-500 dark:text-amber-400",
-            bgTone: "from-amber-500/10 to-transparent border-amber-500/20",
-          },
-        ].map(({ label, value, sub, icon: Icon, textTone, bgTone }, idx) => (
-          <div
-            key={label}
-            className={cn(
-              "group relative overflow-hidden rounded-2xl border bg-card p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl dark:border-white/10 dark:bg-slate-900 animate-fade-in",
-              bgTone
-            )}
-            style={{ animationDelay: `${idx * 100}ms` }}
-          >
-            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-40 mix-blend-overlay", bgTone)} />
-            <div className="relative z-10 flex items-start justify-between gap-2">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
-                <p className="mt-1.5 font-display text-3xl font-bold tracking-tight drop-shadow-sm md:text-4xl">{value}</p>
-                <p className="mt-1 text-xs font-medium text-muted-foreground/80">{sub}</p>
-              </div>
-              <div className={cn("rounded-xl bg-background/50 p-3 shadow-sm backdrop-blur-md transition-colors group-hover:bg-background/80", textTone)}>
-                <Icon className="h-6 w-6" />
-              </div>
+
+        {/* Study Streak — Orange */}
+        <div className="group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-card p-5 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:border-orange-500/40 dark:bg-slate-900 lg:p-7"
+          style={{ background: "linear-gradient(135deg, rgba(249,115,22,0.06) 0%, transparent 70%)", borderLeft: "4px solid #f97316" }}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground lg:text-xs">Study Streak</p>
+              <p className="mt-1.5 font-display text-3xl font-bold tabular-nums md:text-4xl lg:text-5xl">{streak}d</p>
+              <p className="mt-1 text-xs font-medium text-muted-foreground/80 lg:text-sm">{streak > 0 ? "Keep it going 🔥" : "Start today"}</p>
+            </div>
+            <div className="rounded-xl bg-orange-500/10 p-2.5 lg:rounded-2xl lg:p-4">
+              <Flame className={cn("h-6 w-6 text-orange-500 lg:h-8 lg:w-8", streak > 0 && "animate-[flicker_1.5s_ease-in-out_infinite]")} />
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Questions Today — Teal */}
+        <div className="group relative overflow-hidden rounded-2xl border border-teal-500/20 bg-card p-5 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:border-teal-500/40 dark:bg-slate-900 lg:p-7"
+          style={{ background: "linear-gradient(135deg, rgba(6,182,212,0.06) 0%, transparent 70%)", borderLeft: "4px solid #06b6d4" }}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground lg:text-xs">Questions Today</p>
+              <p className="mt-1.5 font-display text-3xl font-bold tabular-nums md:text-4xl lg:text-5xl">{todayItemCount}</p>
+              <p className="mt-1 text-xs font-medium text-muted-foreground/80 lg:text-sm">Items in sessions</p>
+            </div>
+            <div className="rounded-xl bg-teal-500/10 p-2.5 lg:rounded-2xl lg:p-4">
+              <Target className="h-6 w-6 text-teal-500 lg:h-8 lg:w-8" />
+            </div>
+          </div>
+        </div>
+
+        {/* Mastery — Purple */}
+        <div className="group relative overflow-hidden rounded-2xl border border-purple-500/20 bg-card p-5 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:border-purple-500/40 dark:bg-slate-900 lg:p-7"
+          style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.06) 0%, transparent 70%)", borderLeft: "4px solid #8b5cf6" }}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground lg:text-xs">Mastery</p>
+              <p className="mt-1.5 font-display text-3xl font-bold tabular-nums md:text-4xl lg:text-5xl">{overallPct}%</p>
+              <p className="mt-1 text-xs font-medium text-muted-foreground/80 lg:text-sm">{totalCorrect}/{totalQuestions} correct</p>
+            </div>
+            {/* Circular progress ring */}
+            <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center lg:h-16 lg:w-16">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                <path className="stroke-purple-500/20" strokeWidth="3.5" fill="none" d="M18 2a16 16 0 110 32 16 16 0 110-32" />
+                <path className="stroke-purple-500 transition-all duration-1000 ease-out" strokeWidth="3.5" fill="none"
+                  strokeDasharray={`${overallPct}, 100`} strokeLinecap="round"
+                  d="M18 2a16 16 0 110 32 16 16 0 110-32" />
+              </svg>
+              <TrendingUp className="absolute h-4 w-4 text-purple-500 lg:h-5 lg:w-5" />
+            </div>
+          </div>
+        </div>
+
+        {/* Your Points — Gold */}
+        <div className="group relative overflow-hidden rounded-2xl border border-amber-500/20 bg-card p-5 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:border-amber-500/40 dark:bg-slate-900 lg:p-7"
+          style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.06) 0%, transparent 70%)", borderLeft: "4px solid #eab308" }}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground lg:text-xs">Your Points</p>
+              <p className="mt-1.5 font-display text-3xl font-bold tabular-nums md:text-4xl lg:text-5xl">{rankInfo?.points ?? 0}</p>
+              <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400 lg:text-xs">
+                {rankInfo?.rank?.label ?? "Newbie"}
+              </p>
+            </div>
+            <div className="rounded-xl bg-amber-500/10 p-2.5 animate-[bounce_2s_ease-in-out_1] lg:rounded-2xl lg:p-4">
+              <Trophy className="h-6 w-6 text-amber-500 lg:h-8 lg:w-8" />
+            </div>
+          </div>
+        </div>
+
       </div>
+
+
+      {/* CSS keyframes for card animations */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes flicker { 0%,100%{opacity:1;transform:scale(1)} 25%{opacity:.85;transform:scale(1.08) rotate(-3deg)} 75%{opacity:.9;transform:scale(1.05) rotate(3deg)} }
+      ` }} />
+
 
       {lastLectureActivity?.lecture?.subject?.moduleId ? (
         <div className="mb-8 overflow-hidden rounded-2xl border border-sky-500/20 bg-gradient-to-r from-sky-500/10 to-transparent p-6 dark:border-sky-500/30 dark:from-sky-900/40">
