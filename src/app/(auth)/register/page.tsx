@@ -81,9 +81,9 @@ export default function RegisterPage() {
   useEffect(() => {
     if (!selectedUni) return;
     (async () => {
-      const r    = await fetch("/api/v1/academic-years");
+      const r    = await fetch(`/api/v1/academic-years?universityId=${selectedUni.id}`);
       const data = r.ok ? await r.json() : [];
-      setYears(unwrapApiList<AcademicYear>(data).filter(y => y.universityId === selectedUni.id));
+      setYears(unwrapApiList<AcademicYear>(data));
     })();
   }, [selectedUni]);
 
@@ -91,9 +91,9 @@ export default function RegisterPage() {
   useEffect(() => {
     if (!selectedYear) return;
     (async () => {
-      const r    = await fetch("/api/v1/semesters");
+      const r    = await fetch(`/api/v1/semesters?academicYearId=${selectedYear.id}`);
       const data = r.ok ? await r.json() : [];
-      setSemesters(unwrapApiList<Semester>(data).filter(s => s.academicYearId === selectedYear.id));
+      setSemesters(unwrapApiList<Semester>(data));
     })();
   }, [selectedYear]);
 
@@ -137,10 +137,10 @@ export default function RegisterPage() {
 
   // ── Filtered lists ─────────────────────────────────────────────────────────
   const filteredYears = years.filter(y => {
-    if (!selectedFaculty) return !y.facultyId; // no faculty → show unfacultied years
+    if (!selectedFaculty) return !y.facultyId; 
     return y.facultyId === selectedFaculty.id;
   });
-  const filteredSems = semesters.filter(s => s.academicYearId === selectedYear?.id);
+  const filteredSems  = semesters;
 
   // Visible step count (skip faculty step if none)
   const visibleSteps = hasFaculties === false
