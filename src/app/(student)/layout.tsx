@@ -9,6 +9,7 @@ import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,6 +27,15 @@ export default async function StudentLayout({ children }: { children: React.Reac
           select: { name: true, nickname: true, image: true, semesterId: true, role: true },
         })
         .catch(() => null);
+
+  // ── Onboarding guard: redirect to /register if profile is incomplete ──────
+  // Exempt: guests, admins, and pages already under /register
+  if (!isGuest && user) {
+    const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+    if (!isAdmin && !user.semesterId) {
+      redirect("/register");
+    }
+  }
 
   const siteConfig = await prisma.siteConfig
     .findFirst({

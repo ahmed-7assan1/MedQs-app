@@ -87,8 +87,12 @@ export default async function LandingPage() {
             </Link>
             <Link href="/modules"
               className="inline-flex items-center gap-2.5 rounded-2xl border border-border/70 bg-background/40 px-8 py-4 text-base font-medium text-foreground backdrop-blur-xl transition-colors hover:bg-muted/20">
-              <Play className="h-4.5 w-4.5 fill-current" />
+              <Play className="h-4 w-4 fill-current" />
               Preview Curriculum
+            </Link>
+            <Link href="/guest/past-papers"
+              className="inline-flex items-center gap-2.5 rounded-2xl border border-border/50 bg-background/20 px-8 py-4 text-base font-medium text-muted-foreground backdrop-blur-xl transition-all hover:bg-muted/10 hover:text-foreground">
+              Browse as Guest
             </Link>
           </div>
 

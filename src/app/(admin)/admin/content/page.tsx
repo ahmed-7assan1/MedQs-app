@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
   Building2, Calendar, BookOpen, FlaskConical,
   Plus, ChevronDown, ChevronRight,
-  Loader2, Trash2, Check, X,
+  Loader2, Trash2, Check, X, ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -29,17 +29,19 @@ export default function AdminContentPage() {
   const [adding,       setAdding]         = useState<AddKey | null>(null);
   const [addVal,       setAddVal]         = useState("");
   const [deleting,     setDeleting]       = useState<string | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin]   = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [uRes, yRes, sRes, mRes, subRes] = await Promise.all([
+        const [uRes, yRes, sRes, mRes, subRes, sessionRes] = await Promise.all([
           fetch("/api/v1/universities"),
           fetch("/api/v1/academic-years"),
           fetch("/api/v1/semesters"),
           fetch("/api/v1/modules-all"),
           fetch("/api/v1/subjects-all"),
+          fetch("/api/auth/session"),
         ]);
         const [u, y, s, m, sub] = await Promise.all([
           parseJsonList<University>(uRes),
@@ -48,12 +50,15 @@ export default function AdminContentPage() {
           parseJsonList<Module>(mRes),
           parseJsonList<Subject>(subRes),
         ]);
+        const sessionData = sessionRes.ok ? await sessionRes.json() : null;
+        const role = sessionData?.user?.role;
         if (!cancelled) {
           setUniversities(u as University[]);
           setYears(y as AcademicYear[]);
           setSemesters(s as Semester[]);
           setModules(m as Module[]);
           setSubjects(sub as Subject[]);
+          setIsSuperAdmin(role === "SUPER_ADMIN");
         }
       } catch (e) {
         console.error("[admin/content] load", e);
@@ -69,9 +74,7 @@ export default function AdminContentPage() {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   function toggle(id: string) {
@@ -252,7 +255,12 @@ export default function AdminContentPage() {
               {universities.length}
             </span>
           </div>
-          <AddRow k="uni" placeholder="University name" type="text" />
+          {isSuperAdmin
+            ? <AddRow k="uni" placeholder="University name" type="text" />
+            : <span className="flex items-center gap-1 rounded-lg border border-amber-500/25 bg-amber-500/8 px-2.5 py-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                <ShieldAlert className="h-3 w-3" /> Super Admin only
+              </span>
+          }
         </div>
 
         {universities.length === 0 ? (
@@ -277,7 +285,7 @@ export default function AdminContentPage() {
                     <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
                     <span className="flex-1 text-sm font-medium">{uni.name}</span>
                     <span className="text-xs text-muted-foreground">{uniYears.length} year{uniYears.length !== 1 ? "s" : ""}</span>
-                    <DeleteBtn kind="uni" id={uni.id} label={uni.name} />
+                    {isSuperAdmin && <DeleteBtn kind="uni" id={uni.id} label={uni.name} />}
                   </div>
 
                   {/* Years */}
