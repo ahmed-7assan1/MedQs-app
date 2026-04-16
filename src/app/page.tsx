@@ -54,16 +54,16 @@ export default async function LandingPage() {
       <LandingNavbar />
 
       {/* ── HERO ── */}
-      <section className="relative z-10 mx-auto max-w-5xl px-6 pb-16 pt-28 text-center">
+      <section className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 pb-12 sm:pb-16 pt-16 sm:pt-24 text-center">
         <ScrollReveal>
           {/* Badge */}
-          <div className="animate-fade-in mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-500 backdrop-blur-md">
-            <ShieldCheck className="h-4 w-4" />
+          <div className="animate-fade-in mb-6 sm:mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-blue-500 backdrop-blur-md">
+            <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             The Ultimate Medical Study Platform
           </div>
 
           {/* Headline */}
-          <h1 className="animate-fade-up mb-6 font-display text-[clamp(44px,8vw,80px)] font-extrabold leading-[1.05] tracking-tight text-foreground"
+          <h1 className="animate-fade-up mb-4 sm:mb-6 font-display text-[clamp(36px,8vw,80px)] font-extrabold leading-[1.05] tracking-tight text-foreground"
             style={{ animationDelay: ".05s" }}>
             Master Medicine
             <br />
@@ -72,26 +72,26 @@ export default async function LandingPage() {
             </span>
           </h1>
 
-          <p className="animate-fade-up mx-auto mb-10 max-w-2xl text-[clamp(16px,2vw,19px)] leading-relaxed text-muted-foreground"
+          <p className="animate-fade-up mx-auto mb-8 sm:mb-10 max-w-2xl text-[clamp(14px,2vw,18px)] leading-relaxed text-muted-foreground px-2"
             style={{ animationDelay: ".1s" }}>
             Structured curriculums, past-paper deep dives, AI-powered study tools,
             and a vibrant community — everything elite med students need in one place.
           </p>
 
           {/* CTA */}
-          <div className="animate-fade-up flex flex-wrap justify-center gap-4" style={{ animationDelay: ".14s" }}>
+          <div className="animate-fade-up flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4" style={{ animationDelay: ".14s" }}>
             <Link href="/register"
-              className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-[0_12px_40px_-8px_rgba(37,99,235,0.55),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(37,99,235,0.65)]">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-semibold text-white shadow-[0_12px_40px_-8px_rgba(37,99,235,0.55),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(37,99,235,0.65)]">
               Start for Free
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
             <Link href="/modules"
-              className="inline-flex items-center gap-2.5 rounded-2xl border border-border/70 bg-background/40 px-8 py-4 text-base font-medium text-foreground backdrop-blur-xl transition-colors hover:bg-muted/20">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/70 bg-background/40 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-foreground backdrop-blur-xl transition-colors hover:bg-muted/20">
               <Play className="h-4 w-4 fill-current" />
               Preview Curriculum
             </Link>
             <Link href="/guest/past-papers"
-              className="inline-flex items-center gap-2.5 rounded-2xl border border-border/50 bg-background/20 px-8 py-4 text-base font-medium text-muted-foreground backdrop-blur-xl transition-all hover:bg-muted/10 hover:text-foreground">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/50 bg-background/20 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-muted-foreground backdrop-blur-xl transition-all hover:bg-muted/10 hover:text-foreground">
               Browse as Guest
             </Link>
           </div>

@@ -66,18 +66,18 @@ export default async function LoginPage() {
       </div>
 
       {/* ── RIGHT PANEL (form) ── */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 lg:max-w-[480px]">
+      <div className="flex flex-1 flex-col items-center justify-center px-5 py-10 lg:max-w-[480px]">
         {/* Mobile logo */}
-        <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-          <MedQsLogoMark className="h-9 w-9" title="MedQs" />
-          <span className="text-lg font-bold tracking-tight text-foreground">MedQs</span>
+        <div className="mb-6 flex items-center gap-2.5 lg:hidden">
+          <MedQsLogoMark className="h-8 w-8" title="MedQs" />
+          <span className="text-base font-bold tracking-tight text-foreground">MedQs</span>
         </div>
 
-        <div className="w-full max-w-[360px]">
-          <h1 className="mb-1 font-display text-2xl font-extrabold tracking-tight text-foreground">
+        <div className="w-full max-w-[340px] sm:max-w-[360px]">
+          <h1 className="mb-1 font-display text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
             Welcome back
           </h1>
-          <p className="mb-8 text-sm text-muted-foreground">
+          <p className="mb-6 sm:mb-8 text-sm text-muted-foreground">
             Sign in to continue your medical studies.
           </p>
 

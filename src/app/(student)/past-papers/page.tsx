@@ -47,14 +47,14 @@ export default async function PastPapersPage() {
     : 0;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8 md:px-6">
 
       {/* ── HEADER ── */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <p className="mb-1 text-xs font-bold uppercase tracking-widest text-blue-500">Assessments</p>
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-display text-3xl font-extrabold tracking-tight">Quizzes & Past Papers</h1>
+            <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight">Quizzes &amp; Past Papers</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {papers.length} quiz{papers.length !== 1 ? "zes" : ""} available for your semester
             </p>
@@ -62,10 +62,10 @@ export default async function PastPapersPage() {
           {isAdmin && (
             <Link
               href="/admin/quiz-creator"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(37,99,235,0.3)] transition-all hover:shadow-[0_6px_18px_rgba(37,99,235,0.4)] hover:-translate-y-0.5 active:scale-[0.98]"
+              className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_rgba(37,99,235,0.3)] transition-all hover:shadow-[0_6px_18px_rgba(37,99,235,0.4)] hover:-translate-y-0.5 active:scale-[0.98]"
             >
               <Plus className="h-4 w-4" />
-              Create Quiz
+              <span className="hidden sm:inline">Create Quiz</span>
             </Link>
           )}
         </div>
@@ -73,20 +73,20 @@ export default async function PastPapersPage() {
 
       {/* ── STATS ROW ── */}
       {papers.length > 0 && (
-        <div className="mb-8 grid grid-cols-3 gap-4">
+        <div className="mb-6 sm:mb-8 grid grid-cols-3 gap-2 sm:gap-4">
           {[
             { label: "Total Quizzes", value: papers.length, icon: FileText, color: "#1A6BCC", bg: "rgba(26,107,204,.08)", border: "rgba(26,107,204,.25)" },
             { label: "Completed", value: completedPapers, icon: Trophy, color: "#059669", bg: "rgba(5,150,105,.08)", border: "rgba(5,150,105,.25)" },
             { label: "Avg Score", value: avgScore > 0 ? `${avgScore}%` : "—", icon: TrendingUp, color: "#8b5cf6", bg: "rgba(139,92,246,.08)", border: "rgba(139,92,246,.25)" },
           ].map(({ label, value, icon: Icon, color, bg, border }) => (
-            <div key={label} className="relative overflow-hidden rounded-2xl border p-4"
+            <div key={label} className="relative overflow-hidden rounded-xl sm:rounded-2xl border p-3 sm:p-4"
               style={{ borderColor: border, borderLeft: `3px solid ${color}`, background: `linear-gradient(135deg, ${bg} 0%, transparent 70%)` }}>
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
-                  <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-foreground lg:text-3xl">{value}</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+                  <p className="mt-1 font-display text-xl sm:text-2xl font-extrabold tabular-nums text-foreground lg:text-3xl">{value}</p>
                 </div>
-                <div className="rounded-xl p-2" style={{ background: bg }}>
+                <div className="hidden sm:flex rounded-xl p-2" style={{ background: bg }}>
                   <Icon className="h-5 w-5 lg:h-6 lg:w-6" style={{ color }} />
                 </div>
               </div>
@@ -129,14 +129,14 @@ export default async function PastPapersPage() {
                 style={{ borderLeft: `3px solid ${done ? scoreColor : "#1A6BCC"}` }}>
 
                 {/* Main row */}
-                <div className="flex items-center justify-between gap-4 px-5 py-4.5">
-                  <div className="flex items-start gap-4 min-w-0">
+                <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4">
+                  <div className="flex items-start gap-3 min-w-0">
                     {/* Icon */}
-                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl"
+                    <div className="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-xl"
                       style={{ background: done ? scoreBg : "rgba(26,107,204,.08)" }}>
                       {done
-                        ? <Trophy className="h-5 w-5" style={{ color: scoreColor }} />
-                        : <FileText className="h-5 w-5 text-blue-500" />
+                        ? <Trophy className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: scoreColor }} />
+                        : <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                       }
                     </div>
 
@@ -179,16 +179,16 @@ export default async function PastPapersPage() {
                   <div className="flex flex-shrink-0 items-center gap-2">
                     {isAdmin && (
                       <Link href={`/admin/quiz-creator?paperId=${paper.id}`}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         title="Manage quiz">
-                        <Settings2 className="h-4 w-4" />
+                        <Settings2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Link>
                     )}
                     <Link href={`/quiz/${paper.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                      className="inline-flex items-center gap-1 sm:gap-1.5 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]"
                       style={{ background: `linear-gradient(135deg, ${done ? scoreColor : "#1A6BCC"}, ${done ? scoreColor + "dd" : "#4f46e5"})` }}>
                       {bestAttempt ? "Retry" : "Start"}
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </Link>
                   </div>
                 </div>
