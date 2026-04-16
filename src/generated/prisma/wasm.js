@@ -166,6 +166,14 @@ exports.Prisma.UniversityScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.FacultyScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  logoUrl: 'logoUrl',
+  universityId: 'universityId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.UniversityYearIdFormatScalarFieldEnum = {
   id: 'id',
   universityId: 'universityId',
@@ -178,7 +186,8 @@ exports.Prisma.UniversityYearIdFormatScalarFieldEnum = {
 exports.Prisma.AcademicYearScalarFieldEnum = {
   id: 'id',
   yearNumber: 'yearNumber',
-  universityId: 'universityId'
+  universityId: 'universityId',
+  facultyId: 'facultyId'
 };
 
 exports.Prisma.SemesterScalarFieldEnum = {
@@ -371,6 +380,7 @@ exports.Prisma.UserScalarFieldEnum = {
   password: 'password',
   studentId: 'studentId',
   universityId: 'universityId',
+  facultyId: 'facultyId',
   semesterId: 'semesterId',
   rankId: 'rankId',
   createdAt: 'createdAt',
@@ -635,6 +645,7 @@ exports.Prisma.ModelName = {
   SiteConfig: 'SiteConfig',
   FeatureFlag: 'FeatureFlag',
   University: 'University',
+  Faculty: 'Faculty',
   UniversityYearIdFormat: 'UniversityYearIdFormat',
   AcademicYear: 'AcademicYear',
   Semester: 'Semester',

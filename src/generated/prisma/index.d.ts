@@ -29,6 +29,13 @@ export type FeatureFlag = $Result.DefaultSelection<Prisma.$FeatureFlagPayload>
  */
 export type University = $Result.DefaultSelection<Prisma.$UniversityPayload>
 /**
+ * Model Faculty
+ * Faculty (كليه) — optional sub-division of a University.
+ * When present, AcademicYears are grouped under a Faculty.
+ * If a University has no Faculties, the old flat structure is preserved (facultyId = null).
+ */
+export type Faculty = $Result.DefaultSelection<Prisma.$FacultyPayload>
+/**
  * Model UniversityYearIdFormat
  * 
  */
@@ -500,6 +507,16 @@ export class PrismaClient<
     * ```
     */
   get university(): Prisma.UniversityDelegate<ExtArgs>;
+
+  /**
+   * `prisma.faculty`: Exposes CRUD operations for the **Faculty** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Faculties
+    * const faculties = await prisma.faculty.findMany()
+    * ```
+    */
+  get faculty(): Prisma.FacultyDelegate<ExtArgs>;
 
   /**
    * `prisma.universityYearIdFormat`: Exposes CRUD operations for the **UniversityYearIdFormat** model.
@@ -1344,6 +1361,7 @@ export namespace Prisma {
     SiteConfig: 'SiteConfig',
     FeatureFlag: 'FeatureFlag',
     University: 'University',
+    Faculty: 'Faculty',
     UniversityYearIdFormat: 'UniversityYearIdFormat',
     AcademicYear: 'AcademicYear',
     Semester: 'Semester',
@@ -1399,7 +1417,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1610,6 +1628,76 @@ export namespace Prisma {
           count: {
             args: Prisma.UniversityCountArgs<ExtArgs>
             result: $Utils.Optional<UniversityCountAggregateOutputType> | number
+          }
+        }
+      }
+      Faculty: {
+        payload: Prisma.$FacultyPayload<ExtArgs>
+        fields: Prisma.FacultyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FacultyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FacultyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>
+          }
+          findFirst: {
+            args: Prisma.FacultyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FacultyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>
+          }
+          findMany: {
+            args: Prisma.FacultyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>[]
+          }
+          create: {
+            args: Prisma.FacultyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>
+          }
+          createMany: {
+            args: Prisma.FacultyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FacultyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>[]
+          }
+          delete: {
+            args: Prisma.FacultyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>
+          }
+          update: {
+            args: Prisma.FacultyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>
+          }
+          deleteMany: {
+            args: Prisma.FacultyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FacultyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.FacultyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacultyPayload>
+          }
+          aggregate: {
+            args: Prisma.FacultyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFaculty>
+          }
+          groupBy: {
+            args: Prisma.FacultyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FacultyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FacultyCountArgs<ExtArgs>
+            result: $Utils.Optional<FacultyCountAggregateOutputType> | number
           }
         }
       }
@@ -4574,6 +4662,7 @@ export namespace Prisma {
    */
 
   export type UniversityCountOutputType = {
+    faculties: number
     academicYears: number
     users: number
     adBanners: number
@@ -4585,6 +4674,7 @@ export namespace Prisma {
   }
 
   export type UniversityCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    faculties?: boolean | UniversityCountOutputTypeCountFacultiesArgs
     academicYears?: boolean | UniversityCountOutputTypeCountAcademicYearsArgs
     users?: boolean | UniversityCountOutputTypeCountUsersArgs
     adBanners?: boolean | UniversityCountOutputTypeCountAdBannersArgs
@@ -4604,6 +4694,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the UniversityCountOutputType
      */
     select?: UniversityCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UniversityCountOutputType without action
+   */
+  export type UniversityCountOutputTypeCountFacultiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacultyWhereInput
   }
 
   /**
@@ -4660,6 +4757,46 @@ export namespace Prisma {
    */
   export type UniversityCountOutputTypeCountCommentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CommentWhereInput
+  }
+
+
+  /**
+   * Count Type FacultyCountOutputType
+   */
+
+  export type FacultyCountOutputType = {
+    academicYears: number
+    users: number
+  }
+
+  export type FacultyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    academicYears?: boolean | FacultyCountOutputTypeCountAcademicYearsArgs
+    users?: boolean | FacultyCountOutputTypeCountUsersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * FacultyCountOutputType without action
+   */
+  export type FacultyCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacultyCountOutputType
+     */
+    select?: FacultyCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * FacultyCountOutputType without action
+   */
+  export type FacultyCountOutputTypeCountAcademicYearsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AcademicYearWhereInput
+  }
+
+  /**
+   * FacultyCountOutputType without action
+   */
+  export type FacultyCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
   }
 
 
@@ -7755,6 +7892,7 @@ export namespace Prisma {
     idMinLength?: boolean
     idMaxLength?: boolean
     createdAt?: boolean
+    faculties?: boolean | University$facultiesArgs<ExtArgs>
     academicYears?: boolean | University$academicYearsArgs<ExtArgs>
     users?: boolean | University$usersArgs<ExtArgs>
     adBanners?: boolean | University$adBannersArgs<ExtArgs>
@@ -7785,6 +7923,7 @@ export namespace Prisma {
   }
 
   export type UniversityInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    faculties?: boolean | University$facultiesArgs<ExtArgs>
     academicYears?: boolean | University$academicYearsArgs<ExtArgs>
     users?: boolean | University$usersArgs<ExtArgs>
     adBanners?: boolean | University$adBannersArgs<ExtArgs>
@@ -7800,6 +7939,7 @@ export namespace Prisma {
   export type $UniversityPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "University"
     objects: {
+      faculties: Prisma.$FacultyPayload<ExtArgs>[]
       academicYears: Prisma.$AcademicYearPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
       adBanners: Prisma.$AdBannerPayload<ExtArgs>[]
@@ -8180,6 +8320,7 @@ export namespace Prisma {
    */
   export interface Prisma__UniversityClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    faculties<T extends University$facultiesArgs<ExtArgs> = {}>(args?: Subset<T, University$facultiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findMany"> | Null>
     academicYears<T extends University$academicYearsArgs<ExtArgs> = {}>(args?: Subset<T, University$academicYearsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcademicYearPayload<ExtArgs>, T, "findMany"> | Null>
     users<T extends University$usersArgs<ExtArgs> = {}>(args?: Subset<T, University$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
     adBanners<T extends University$adBannersArgs<ExtArgs> = {}>(args?: Subset<T, University$adBannersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdBannerPayload<ExtArgs>, T, "findMany"> | Null>
@@ -8537,6 +8678,26 @@ export namespace Prisma {
   }
 
   /**
+   * University.faculties
+   */
+  export type University$facultiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    where?: FacultyWhereInput
+    orderBy?: FacultyOrderByWithRelationInput | FacultyOrderByWithRelationInput[]
+    cursor?: FacultyWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FacultyScalarFieldEnum | FacultyScalarFieldEnum[]
+  }
+
+  /**
    * University.academicYears
    */
   export type University$academicYearsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8708,6 +8869,989 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UniversityInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Faculty
+   */
+
+  export type AggregateFaculty = {
+    _count: FacultyCountAggregateOutputType | null
+    _min: FacultyMinAggregateOutputType | null
+    _max: FacultyMaxAggregateOutputType | null
+  }
+
+  export type FacultyMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    logoUrl: string | null
+    universityId: string | null
+    createdAt: Date | null
+  }
+
+  export type FacultyMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    logoUrl: string | null
+    universityId: string | null
+    createdAt: Date | null
+  }
+
+  export type FacultyCountAggregateOutputType = {
+    id: number
+    name: number
+    logoUrl: number
+    universityId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type FacultyMinAggregateInputType = {
+    id?: true
+    name?: true
+    logoUrl?: true
+    universityId?: true
+    createdAt?: true
+  }
+
+  export type FacultyMaxAggregateInputType = {
+    id?: true
+    name?: true
+    logoUrl?: true
+    universityId?: true
+    createdAt?: true
+  }
+
+  export type FacultyCountAggregateInputType = {
+    id?: true
+    name?: true
+    logoUrl?: true
+    universityId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type FacultyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Faculty to aggregate.
+     */
+    where?: FacultyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Faculties to fetch.
+     */
+    orderBy?: FacultyOrderByWithRelationInput | FacultyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FacultyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Faculties from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Faculties.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Faculties
+    **/
+    _count?: true | FacultyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FacultyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FacultyMaxAggregateInputType
+  }
+
+  export type GetFacultyAggregateType<T extends FacultyAggregateArgs> = {
+        [P in keyof T & keyof AggregateFaculty]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFaculty[P]>
+      : GetScalarType<T[P], AggregateFaculty[P]>
+  }
+
+
+
+
+  export type FacultyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacultyWhereInput
+    orderBy?: FacultyOrderByWithAggregationInput | FacultyOrderByWithAggregationInput[]
+    by: FacultyScalarFieldEnum[] | FacultyScalarFieldEnum
+    having?: FacultyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FacultyCountAggregateInputType | true
+    _min?: FacultyMinAggregateInputType
+    _max?: FacultyMaxAggregateInputType
+  }
+
+  export type FacultyGroupByOutputType = {
+    id: string
+    name: string
+    logoUrl: string | null
+    universityId: string
+    createdAt: Date
+    _count: FacultyCountAggregateOutputType | null
+    _min: FacultyMinAggregateOutputType | null
+    _max: FacultyMaxAggregateOutputType | null
+  }
+
+  type GetFacultyGroupByPayload<T extends FacultyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FacultyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FacultyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FacultyGroupByOutputType[P]>
+            : GetScalarType<T[P], FacultyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FacultySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    logoUrl?: boolean
+    universityId?: boolean
+    createdAt?: boolean
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+    academicYears?: boolean | Faculty$academicYearsArgs<ExtArgs>
+    users?: boolean | Faculty$usersArgs<ExtArgs>
+    _count?: boolean | FacultyCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["faculty"]>
+
+  export type FacultySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    logoUrl?: boolean
+    universityId?: boolean
+    createdAt?: boolean
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["faculty"]>
+
+  export type FacultySelectScalar = {
+    id?: boolean
+    name?: boolean
+    logoUrl?: boolean
+    universityId?: boolean
+    createdAt?: boolean
+  }
+
+  export type FacultyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+    academicYears?: boolean | Faculty$academicYearsArgs<ExtArgs>
+    users?: boolean | Faculty$usersArgs<ExtArgs>
+    _count?: boolean | FacultyCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type FacultyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+  }
+
+  export type $FacultyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Faculty"
+    objects: {
+      university: Prisma.$UniversityPayload<ExtArgs>
+      academicYears: Prisma.$AcademicYearPayload<ExtArgs>[]
+      users: Prisma.$UserPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      logoUrl: string | null
+      universityId: string
+      createdAt: Date
+    }, ExtArgs["result"]["faculty"]>
+    composites: {}
+  }
+
+  type FacultyGetPayload<S extends boolean | null | undefined | FacultyDefaultArgs> = $Result.GetResult<Prisma.$FacultyPayload, S>
+
+  type FacultyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<FacultyFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: FacultyCountAggregateInputType | true
+    }
+
+  export interface FacultyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Faculty'], meta: { name: 'Faculty' } }
+    /**
+     * Find zero or one Faculty that matches the filter.
+     * @param {FacultyFindUniqueArgs} args - Arguments to find a Faculty
+     * @example
+     * // Get one Faculty
+     * const faculty = await prisma.faculty.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FacultyFindUniqueArgs>(args: SelectSubset<T, FacultyFindUniqueArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Faculty that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {FacultyFindUniqueOrThrowArgs} args - Arguments to find a Faculty
+     * @example
+     * // Get one Faculty
+     * const faculty = await prisma.faculty.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FacultyFindUniqueOrThrowArgs>(args: SelectSubset<T, FacultyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Faculty that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacultyFindFirstArgs} args - Arguments to find a Faculty
+     * @example
+     * // Get one Faculty
+     * const faculty = await prisma.faculty.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FacultyFindFirstArgs>(args?: SelectSubset<T, FacultyFindFirstArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Faculty that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacultyFindFirstOrThrowArgs} args - Arguments to find a Faculty
+     * @example
+     * // Get one Faculty
+     * const faculty = await prisma.faculty.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FacultyFindFirstOrThrowArgs>(args?: SelectSubset<T, FacultyFindFirstOrThrowArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Faculties that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacultyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Faculties
+     * const faculties = await prisma.faculty.findMany()
+     * 
+     * // Get first 10 Faculties
+     * const faculties = await prisma.faculty.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const facultyWithIdOnly = await prisma.faculty.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FacultyFindManyArgs>(args?: SelectSubset<T, FacultyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Faculty.
+     * @param {FacultyCreateArgs} args - Arguments to create a Faculty.
+     * @example
+     * // Create one Faculty
+     * const Faculty = await prisma.faculty.create({
+     *   data: {
+     *     // ... data to create a Faculty
+     *   }
+     * })
+     * 
+     */
+    create<T extends FacultyCreateArgs>(args: SelectSubset<T, FacultyCreateArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Faculties.
+     * @param {FacultyCreateManyArgs} args - Arguments to create many Faculties.
+     * @example
+     * // Create many Faculties
+     * const faculty = await prisma.faculty.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FacultyCreateManyArgs>(args?: SelectSubset<T, FacultyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Faculties and returns the data saved in the database.
+     * @param {FacultyCreateManyAndReturnArgs} args - Arguments to create many Faculties.
+     * @example
+     * // Create many Faculties
+     * const faculty = await prisma.faculty.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Faculties and only return the `id`
+     * const facultyWithIdOnly = await prisma.faculty.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FacultyCreateManyAndReturnArgs>(args?: SelectSubset<T, FacultyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Faculty.
+     * @param {FacultyDeleteArgs} args - Arguments to delete one Faculty.
+     * @example
+     * // Delete one Faculty
+     * const Faculty = await prisma.faculty.delete({
+     *   where: {
+     *     // ... filter to delete one Faculty
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FacultyDeleteArgs>(args: SelectSubset<T, FacultyDeleteArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Faculty.
+     * @param {FacultyUpdateArgs} args - Arguments to update one Faculty.
+     * @example
+     * // Update one Faculty
+     * const faculty = await prisma.faculty.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FacultyUpdateArgs>(args: SelectSubset<T, FacultyUpdateArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Faculties.
+     * @param {FacultyDeleteManyArgs} args - Arguments to filter Faculties to delete.
+     * @example
+     * // Delete a few Faculties
+     * const { count } = await prisma.faculty.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FacultyDeleteManyArgs>(args?: SelectSubset<T, FacultyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Faculties.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacultyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Faculties
+     * const faculty = await prisma.faculty.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FacultyUpdateManyArgs>(args: SelectSubset<T, FacultyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Faculty.
+     * @param {FacultyUpsertArgs} args - Arguments to update or create a Faculty.
+     * @example
+     * // Update or create a Faculty
+     * const faculty = await prisma.faculty.upsert({
+     *   create: {
+     *     // ... data to create a Faculty
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Faculty we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FacultyUpsertArgs>(args: SelectSubset<T, FacultyUpsertArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Faculties.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacultyCountArgs} args - Arguments to filter Faculties to count.
+     * @example
+     * // Count the number of Faculties
+     * const count = await prisma.faculty.count({
+     *   where: {
+     *     // ... the filter for the Faculties we want to count
+     *   }
+     * })
+    **/
+    count<T extends FacultyCountArgs>(
+      args?: Subset<T, FacultyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FacultyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Faculty.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacultyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FacultyAggregateArgs>(args: Subset<T, FacultyAggregateArgs>): Prisma.PrismaPromise<GetFacultyAggregateType<T>>
+
+    /**
+     * Group by Faculty.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacultyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FacultyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FacultyGroupByArgs['orderBy'] }
+        : { orderBy?: FacultyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FacultyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFacultyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Faculty model
+   */
+  readonly fields: FacultyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Faculty.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FacultyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    university<T extends UniversityDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UniversityDefaultArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    academicYears<T extends Faculty$academicYearsArgs<ExtArgs> = {}>(args?: Subset<T, Faculty$academicYearsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcademicYearPayload<ExtArgs>, T, "findMany"> | Null>
+    users<T extends Faculty$usersArgs<ExtArgs> = {}>(args?: Subset<T, Faculty$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Faculty model
+   */ 
+  interface FacultyFieldRefs {
+    readonly id: FieldRef<"Faculty", 'String'>
+    readonly name: FieldRef<"Faculty", 'String'>
+    readonly logoUrl: FieldRef<"Faculty", 'String'>
+    readonly universityId: FieldRef<"Faculty", 'String'>
+    readonly createdAt: FieldRef<"Faculty", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Faculty findUnique
+   */
+  export type FacultyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * Filter, which Faculty to fetch.
+     */
+    where: FacultyWhereUniqueInput
+  }
+
+  /**
+   * Faculty findUniqueOrThrow
+   */
+  export type FacultyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * Filter, which Faculty to fetch.
+     */
+    where: FacultyWhereUniqueInput
+  }
+
+  /**
+   * Faculty findFirst
+   */
+  export type FacultyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * Filter, which Faculty to fetch.
+     */
+    where?: FacultyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Faculties to fetch.
+     */
+    orderBy?: FacultyOrderByWithRelationInput | FacultyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Faculties.
+     */
+    cursor?: FacultyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Faculties from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Faculties.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Faculties.
+     */
+    distinct?: FacultyScalarFieldEnum | FacultyScalarFieldEnum[]
+  }
+
+  /**
+   * Faculty findFirstOrThrow
+   */
+  export type FacultyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * Filter, which Faculty to fetch.
+     */
+    where?: FacultyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Faculties to fetch.
+     */
+    orderBy?: FacultyOrderByWithRelationInput | FacultyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Faculties.
+     */
+    cursor?: FacultyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Faculties from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Faculties.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Faculties.
+     */
+    distinct?: FacultyScalarFieldEnum | FacultyScalarFieldEnum[]
+  }
+
+  /**
+   * Faculty findMany
+   */
+  export type FacultyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * Filter, which Faculties to fetch.
+     */
+    where?: FacultyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Faculties to fetch.
+     */
+    orderBy?: FacultyOrderByWithRelationInput | FacultyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Faculties.
+     */
+    cursor?: FacultyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Faculties from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Faculties.
+     */
+    skip?: number
+    distinct?: FacultyScalarFieldEnum | FacultyScalarFieldEnum[]
+  }
+
+  /**
+   * Faculty create
+   */
+  export type FacultyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Faculty.
+     */
+    data: XOR<FacultyCreateInput, FacultyUncheckedCreateInput>
+  }
+
+  /**
+   * Faculty createMany
+   */
+  export type FacultyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Faculties.
+     */
+    data: FacultyCreateManyInput | FacultyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Faculty createManyAndReturn
+   */
+  export type FacultyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Faculties.
+     */
+    data: FacultyCreateManyInput | FacultyCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Faculty update
+   */
+  export type FacultyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Faculty.
+     */
+    data: XOR<FacultyUpdateInput, FacultyUncheckedUpdateInput>
+    /**
+     * Choose, which Faculty to update.
+     */
+    where: FacultyWhereUniqueInput
+  }
+
+  /**
+   * Faculty updateMany
+   */
+  export type FacultyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Faculties.
+     */
+    data: XOR<FacultyUpdateManyMutationInput, FacultyUncheckedUpdateManyInput>
+    /**
+     * Filter which Faculties to update
+     */
+    where?: FacultyWhereInput
+  }
+
+  /**
+   * Faculty upsert
+   */
+  export type FacultyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Faculty to update in case it exists.
+     */
+    where: FacultyWhereUniqueInput
+    /**
+     * In case the Faculty found by the `where` argument doesn't exist, create a new Faculty with this data.
+     */
+    create: XOR<FacultyCreateInput, FacultyUncheckedCreateInput>
+    /**
+     * In case the Faculty was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FacultyUpdateInput, FacultyUncheckedUpdateInput>
+  }
+
+  /**
+   * Faculty delete
+   */
+  export type FacultyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    /**
+     * Filter which Faculty to delete.
+     */
+    where: FacultyWhereUniqueInput
+  }
+
+  /**
+   * Faculty deleteMany
+   */
+  export type FacultyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Faculties to delete
+     */
+    where?: FacultyWhereInput
+  }
+
+  /**
+   * Faculty.academicYears
+   */
+  export type Faculty$academicYearsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcademicYear
+     */
+    select?: AcademicYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcademicYearInclude<ExtArgs> | null
+    where?: AcademicYearWhereInput
+    orderBy?: AcademicYearOrderByWithRelationInput | AcademicYearOrderByWithRelationInput[]
+    cursor?: AcademicYearWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AcademicYearScalarFieldEnum | AcademicYearScalarFieldEnum[]
+  }
+
+  /**
+   * Faculty.users
+   */
+  export type Faculty$usersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * Faculty without action
+   */
+  export type FacultyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
   }
 
 
@@ -9722,18 +10866,21 @@ export namespace Prisma {
     id: string | null
     yearNumber: number | null
     universityId: string | null
+    facultyId: string | null
   }
 
   export type AcademicYearMaxAggregateOutputType = {
     id: string | null
     yearNumber: number | null
     universityId: string | null
+    facultyId: string | null
   }
 
   export type AcademicYearCountAggregateOutputType = {
     id: number
     yearNumber: number
     universityId: number
+    facultyId: number
     _all: number
   }
 
@@ -9750,18 +10897,21 @@ export namespace Prisma {
     id?: true
     yearNumber?: true
     universityId?: true
+    facultyId?: true
   }
 
   export type AcademicYearMaxAggregateInputType = {
     id?: true
     yearNumber?: true
     universityId?: true
+    facultyId?: true
   }
 
   export type AcademicYearCountAggregateInputType = {
     id?: true
     yearNumber?: true
     universityId?: true
+    facultyId?: true
     _all?: true
   }
 
@@ -9855,6 +11005,7 @@ export namespace Prisma {
     id: string
     yearNumber: number
     universityId: string
+    facultyId: string | null
     _count: AcademicYearCountAggregateOutputType | null
     _avg: AcademicYearAvgAggregateOutputType | null
     _sum: AcademicYearSumAggregateOutputType | null
@@ -9880,7 +11031,9 @@ export namespace Prisma {
     id?: boolean
     yearNumber?: boolean
     universityId?: boolean
+    facultyId?: boolean
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    faculty?: boolean | AcademicYear$facultyArgs<ExtArgs>
     semesters?: boolean | AcademicYear$semestersArgs<ExtArgs>
     _count?: boolean | AcademicYearCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["academicYear"]>
@@ -9889,34 +11042,44 @@ export namespace Prisma {
     id?: boolean
     yearNumber?: boolean
     universityId?: boolean
+    facultyId?: boolean
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    faculty?: boolean | AcademicYear$facultyArgs<ExtArgs>
   }, ExtArgs["result"]["academicYear"]>
 
   export type AcademicYearSelectScalar = {
     id?: boolean
     yearNumber?: boolean
     universityId?: boolean
+    facultyId?: boolean
   }
 
   export type AcademicYearInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    faculty?: boolean | AcademicYear$facultyArgs<ExtArgs>
     semesters?: boolean | AcademicYear$semestersArgs<ExtArgs>
     _count?: boolean | AcademicYearCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AcademicYearIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    faculty?: boolean | AcademicYear$facultyArgs<ExtArgs>
   }
 
   export type $AcademicYearPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AcademicYear"
     objects: {
       university: Prisma.$UniversityPayload<ExtArgs>
+      /**
+       * Optional: when set, this year belongs to a specific faculty within the university.
+       */
+      faculty: Prisma.$FacultyPayload<ExtArgs> | null
       semesters: Prisma.$SemesterPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       yearNumber: number
       universityId: string
+      facultyId: string | null
     }, ExtArgs["result"]["academicYear"]>
     composites: {}
   }
@@ -10282,6 +11445,7 @@ export namespace Prisma {
   export interface Prisma__AcademicYearClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     university<T extends UniversityDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UniversityDefaultArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    faculty<T extends AcademicYear$facultyArgs<ExtArgs> = {}>(args?: Subset<T, AcademicYear$facultyArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     semesters<T extends AcademicYear$semestersArgs<ExtArgs> = {}>(args?: Subset<T, AcademicYear$semestersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -10315,6 +11479,7 @@ export namespace Prisma {
     readonly id: FieldRef<"AcademicYear", 'String'>
     readonly yearNumber: FieldRef<"AcademicYear", 'Int'>
     readonly universityId: FieldRef<"AcademicYear", 'String'>
+    readonly facultyId: FieldRef<"AcademicYear", 'String'>
   }
     
 
@@ -10630,6 +11795,21 @@ export namespace Prisma {
      * Filter which AcademicYears to delete
      */
     where?: AcademicYearWhereInput
+  }
+
+  /**
+   * AcademicYear.faculty
+   */
+  export type AcademicYear$facultyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    where?: FacultyWhereInput
   }
 
   /**
@@ -27812,6 +28992,7 @@ export namespace Prisma {
     password: string | null
     studentId: string | null
     universityId: string | null
+    facultyId: string | null
     semesterId: string | null
     rankId: string | null
     createdAt: Date | null
@@ -27839,6 +29020,7 @@ export namespace Prisma {
     password: string | null
     studentId: string | null
     universityId: string | null
+    facultyId: string | null
     semesterId: string | null
     rankId: string | null
     createdAt: Date | null
@@ -27866,6 +29048,7 @@ export namespace Prisma {
     password: number
     studentId: number
     universityId: number
+    facultyId: number
     semesterId: number
     rankId: number
     createdAt: number
@@ -27903,6 +29086,7 @@ export namespace Prisma {
     password?: true
     studentId?: true
     universityId?: true
+    facultyId?: true
     semesterId?: true
     rankId?: true
     createdAt?: true
@@ -27930,6 +29114,7 @@ export namespace Prisma {
     password?: true
     studentId?: true
     universityId?: true
+    facultyId?: true
     semesterId?: true
     rankId?: true
     createdAt?: true
@@ -27957,6 +29142,7 @@ export namespace Prisma {
     password?: true
     studentId?: true
     universityId?: true
+    facultyId?: true
     semesterId?: true
     rankId?: true
     createdAt?: true
@@ -28071,6 +29257,7 @@ export namespace Prisma {
     password: string | null
     studentId: string | null
     universityId: string | null
+    facultyId: string | null
     semesterId: string | null
     rankId: string | null
     createdAt: Date
@@ -28117,11 +29304,13 @@ export namespace Prisma {
     password?: boolean
     studentId?: boolean
     universityId?: boolean
+    facultyId?: boolean
     semesterId?: boolean
     rankId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     university?: boolean | User$universityArgs<ExtArgs>
+    faculty?: boolean | User$facultyArgs<ExtArgs>
     semester?: boolean | User$semesterArgs<ExtArgs>
     rank?: boolean | User$rankArgs<ExtArgs>
     quizAttempts?: boolean | User$quizAttemptsArgs<ExtArgs>
@@ -28173,11 +29362,13 @@ export namespace Prisma {
     password?: boolean
     studentId?: boolean
     universityId?: boolean
+    facultyId?: boolean
     semesterId?: boolean
     rankId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     university?: boolean | User$universityArgs<ExtArgs>
+    faculty?: boolean | User$facultyArgs<ExtArgs>
     semester?: boolean | User$semesterArgs<ExtArgs>
     rank?: boolean | User$rankArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -28203,6 +29394,7 @@ export namespace Prisma {
     password?: boolean
     studentId?: boolean
     universityId?: boolean
+    facultyId?: boolean
     semesterId?: boolean
     rankId?: boolean
     createdAt?: boolean
@@ -28211,6 +29403,7 @@ export namespace Prisma {
 
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     university?: boolean | User$universityArgs<ExtArgs>
+    faculty?: boolean | User$facultyArgs<ExtArgs>
     semester?: boolean | User$semesterArgs<ExtArgs>
     rank?: boolean | User$rankArgs<ExtArgs>
     quizAttempts?: boolean | User$quizAttemptsArgs<ExtArgs>
@@ -28242,6 +29435,7 @@ export namespace Prisma {
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     university?: boolean | User$universityArgs<ExtArgs>
+    faculty?: boolean | User$facultyArgs<ExtArgs>
     semester?: boolean | User$semesterArgs<ExtArgs>
     rank?: boolean | User$rankArgs<ExtArgs>
   }
@@ -28250,6 +29444,10 @@ export namespace Prisma {
     name: "User"
     objects: {
       university: Prisma.$UniversityPayload<ExtArgs> | null
+      /**
+       * Optional faculty — set during onboarding when university has faculties.
+       */
+      faculty: Prisma.$FacultyPayload<ExtArgs> | null
       semester: Prisma.$SemesterPayload<ExtArgs> | null
       rank: Prisma.$RankPayload<ExtArgs> | null
       quizAttempts: Prisma.$QuizAttemptPayload<ExtArgs>[]
@@ -28299,6 +29497,7 @@ export namespace Prisma {
       password: string | null
       studentId: string | null
       universityId: string | null
+      facultyId: string | null
       semesterId: string | null
       rankId: string | null
       createdAt: Date
@@ -28668,6 +29867,7 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     university<T extends User$universityArgs<ExtArgs> = {}>(args?: Subset<T, User$universityArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    faculty<T extends User$facultyArgs<ExtArgs> = {}>(args?: Subset<T, User$facultyArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     semester<T extends User$semesterArgs<ExtArgs> = {}>(args?: Subset<T, User$semesterArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     rank<T extends User$rankArgs<ExtArgs> = {}>(args?: Subset<T, User$rankArgs<ExtArgs>>): Prisma__RankClient<$Result.GetResult<Prisma.$RankPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     quizAttempts<T extends User$quizAttemptsArgs<ExtArgs> = {}>(args?: Subset<T, User$quizAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuizAttemptPayload<ExtArgs>, T, "findMany"> | Null>
@@ -28744,6 +29944,7 @@ export namespace Prisma {
     readonly password: FieldRef<"User", 'String'>
     readonly studentId: FieldRef<"User", 'String'>
     readonly universityId: FieldRef<"User", 'String'>
+    readonly facultyId: FieldRef<"User", 'String'>
     readonly semesterId: FieldRef<"User", 'String'>
     readonly rankId: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
@@ -29078,6 +30279,21 @@ export namespace Prisma {
      */
     include?: UniversityInclude<ExtArgs> | null
     where?: UniversityWhereInput
+  }
+
+  /**
+   * User.faculty
+   */
+  export type User$facultyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Faculty
+     */
+    select?: FacultySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacultyInclude<ExtArgs> | null
+    where?: FacultyWhereInput
   }
 
   /**
@@ -48935,6 +50151,17 @@ export namespace Prisma {
   export type UniversityScalarFieldEnum = (typeof UniversityScalarFieldEnum)[keyof typeof UniversityScalarFieldEnum]
 
 
+  export const FacultyScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    logoUrl: 'logoUrl',
+    universityId: 'universityId',
+    createdAt: 'createdAt'
+  };
+
+  export type FacultyScalarFieldEnum = (typeof FacultyScalarFieldEnum)[keyof typeof FacultyScalarFieldEnum]
+
+
   export const UniversityYearIdFormatScalarFieldEnum: {
     id: 'id',
     universityId: 'universityId',
@@ -48950,7 +50177,8 @@ export namespace Prisma {
   export const AcademicYearScalarFieldEnum: {
     id: 'id',
     yearNumber: 'yearNumber',
-    universityId: 'universityId'
+    universityId: 'universityId',
+    facultyId: 'facultyId'
   };
 
   export type AcademicYearScalarFieldEnum = (typeof AcademicYearScalarFieldEnum)[keyof typeof AcademicYearScalarFieldEnum]
@@ -49197,6 +50425,7 @@ export namespace Prisma {
     password: 'password',
     studentId: 'studentId',
     universityId: 'universityId',
+    facultyId: 'facultyId',
     semesterId: 'semesterId',
     rankId: 'rankId',
     createdAt: 'createdAt',
@@ -49905,6 +51134,7 @@ export namespace Prisma {
     idMinLength?: IntFilter<"University"> | number
     idMaxLength?: IntFilter<"University"> | number
     createdAt?: DateTimeFilter<"University"> | Date | string
+    faculties?: FacultyListRelationFilter
     academicYears?: AcademicYearListRelationFilter
     users?: UserListRelationFilter
     adBanners?: AdBannerListRelationFilter
@@ -49922,6 +51152,7 @@ export namespace Prisma {
     idMinLength?: SortOrder
     idMaxLength?: SortOrder
     createdAt?: SortOrder
+    faculties?: FacultyOrderByRelationAggregateInput
     academicYears?: AcademicYearOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
     adBanners?: AdBannerOrderByRelationAggregateInput
@@ -49942,6 +51173,7 @@ export namespace Prisma {
     idMinLength?: IntFilter<"University"> | number
     idMaxLength?: IntFilter<"University"> | number
     createdAt?: DateTimeFilter<"University"> | Date | string
+    faculties?: FacultyListRelationFilter
     academicYears?: AcademicYearListRelationFilter
     users?: UserListRelationFilter
     adBanners?: AdBannerListRelationFilter
@@ -49976,6 +51208,67 @@ export namespace Prisma {
     idMinLength?: IntWithAggregatesFilter<"University"> | number
     idMaxLength?: IntWithAggregatesFilter<"University"> | number
     createdAt?: DateTimeWithAggregatesFilter<"University"> | Date | string
+  }
+
+  export type FacultyWhereInput = {
+    AND?: FacultyWhereInput | FacultyWhereInput[]
+    OR?: FacultyWhereInput[]
+    NOT?: FacultyWhereInput | FacultyWhereInput[]
+    id?: StringFilter<"Faculty"> | string
+    name?: StringFilter<"Faculty"> | string
+    logoUrl?: StringNullableFilter<"Faculty"> | string | null
+    universityId?: StringFilter<"Faculty"> | string
+    createdAt?: DateTimeFilter<"Faculty"> | Date | string
+    university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    academicYears?: AcademicYearListRelationFilter
+    users?: UserListRelationFilter
+  }
+
+  export type FacultyOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+    university?: UniversityOrderByWithRelationInput
+    academicYears?: AcademicYearOrderByRelationAggregateInput
+    users?: UserOrderByRelationAggregateInput
+  }
+
+  export type FacultyWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FacultyWhereInput | FacultyWhereInput[]
+    OR?: FacultyWhereInput[]
+    NOT?: FacultyWhereInput | FacultyWhereInput[]
+    name?: StringFilter<"Faculty"> | string
+    logoUrl?: StringNullableFilter<"Faculty"> | string | null
+    universityId?: StringFilter<"Faculty"> | string
+    createdAt?: DateTimeFilter<"Faculty"> | Date | string
+    university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    academicYears?: AcademicYearListRelationFilter
+    users?: UserListRelationFilter
+  }, "id">
+
+  export type FacultyOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+    _count?: FacultyCountOrderByAggregateInput
+    _max?: FacultyMaxOrderByAggregateInput
+    _min?: FacultyMinOrderByAggregateInput
+  }
+
+  export type FacultyScalarWhereWithAggregatesInput = {
+    AND?: FacultyScalarWhereWithAggregatesInput | FacultyScalarWhereWithAggregatesInput[]
+    OR?: FacultyScalarWhereWithAggregatesInput[]
+    NOT?: FacultyScalarWhereWithAggregatesInput | FacultyScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Faculty"> | string
+    name?: StringWithAggregatesFilter<"Faculty"> | string
+    logoUrl?: StringNullableWithAggregatesFilter<"Faculty"> | string | null
+    universityId?: StringWithAggregatesFilter<"Faculty"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Faculty"> | Date | string
   }
 
   export type UniversityYearIdFormatWhereInput = {
@@ -50048,7 +51341,9 @@ export namespace Prisma {
     id?: StringFilter<"AcademicYear"> | string
     yearNumber?: IntFilter<"AcademicYear"> | number
     universityId?: StringFilter<"AcademicYear"> | string
+    facultyId?: StringNullableFilter<"AcademicYear"> | string | null
     university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    faculty?: XOR<FacultyNullableRelationFilter, FacultyWhereInput> | null
     semesters?: SemesterListRelationFilter
   }
 
@@ -50056,26 +51351,31 @@ export namespace Prisma {
     id?: SortOrder
     yearNumber?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrderInput | SortOrder
     university?: UniversityOrderByWithRelationInput
+    faculty?: FacultyOrderByWithRelationInput
     semesters?: SemesterOrderByRelationAggregateInput
   }
 
   export type AcademicYearWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    universityId_yearNumber?: AcademicYearUniversityIdYearNumberCompoundUniqueInput
+    universityId_yearNumber_facultyId?: AcademicYearUniversityIdYearNumberFacultyIdCompoundUniqueInput
     AND?: AcademicYearWhereInput | AcademicYearWhereInput[]
     OR?: AcademicYearWhereInput[]
     NOT?: AcademicYearWhereInput | AcademicYearWhereInput[]
     yearNumber?: IntFilter<"AcademicYear"> | number
     universityId?: StringFilter<"AcademicYear"> | string
+    facultyId?: StringNullableFilter<"AcademicYear"> | string | null
     university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    faculty?: XOR<FacultyNullableRelationFilter, FacultyWhereInput> | null
     semesters?: SemesterListRelationFilter
-  }, "id" | "universityId_yearNumber">
+  }, "id" | "universityId_yearNumber_facultyId">
 
   export type AcademicYearOrderByWithAggregationInput = {
     id?: SortOrder
     yearNumber?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrderInput | SortOrder
     _count?: AcademicYearCountOrderByAggregateInput
     _avg?: AcademicYearAvgOrderByAggregateInput
     _max?: AcademicYearMaxOrderByAggregateInput
@@ -50090,6 +51390,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"AcademicYear"> | string
     yearNumber?: IntWithAggregatesFilter<"AcademicYear"> | number
     universityId?: StringWithAggregatesFilter<"AcademicYear"> | string
+    facultyId?: StringNullableWithAggregatesFilter<"AcademicYear"> | string | null
   }
 
   export type SemesterWhereInput = {
@@ -51324,11 +52625,13 @@ export namespace Prisma {
     password?: StringNullableFilter<"User"> | string | null
     studentId?: StringNullableFilter<"User"> | string | null
     universityId?: StringNullableFilter<"User"> | string | null
+    facultyId?: StringNullableFilter<"User"> | string | null
     semesterId?: StringNullableFilter<"User"> | string | null
     rankId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     university?: XOR<UniversityNullableRelationFilter, UniversityWhereInput> | null
+    faculty?: XOR<FacultyNullableRelationFilter, FacultyWhereInput> | null
     semester?: XOR<SemesterNullableRelationFilter, SemesterWhereInput> | null
     rank?: XOR<RankNullableRelationFilter, RankWhereInput> | null
     quizAttempts?: QuizAttemptListRelationFilter
@@ -51379,11 +52682,13 @@ export namespace Prisma {
     password?: SortOrderInput | SortOrder
     studentId?: SortOrderInput | SortOrder
     universityId?: SortOrderInput | SortOrder
+    facultyId?: SortOrderInput | SortOrder
     semesterId?: SortOrderInput | SortOrder
     rankId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     university?: UniversityOrderByWithRelationInput
+    faculty?: FacultyOrderByWithRelationInput
     semester?: SemesterOrderByWithRelationInput
     rank?: RankOrderByWithRelationInput
     quizAttempts?: QuizAttemptOrderByRelationAggregateInput
@@ -51437,11 +52742,13 @@ export namespace Prisma {
     password?: StringNullableFilter<"User"> | string | null
     studentId?: StringNullableFilter<"User"> | string | null
     universityId?: StringNullableFilter<"User"> | string | null
+    facultyId?: StringNullableFilter<"User"> | string | null
     semesterId?: StringNullableFilter<"User"> | string | null
     rankId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     university?: XOR<UniversityNullableRelationFilter, UniversityWhereInput> | null
+    faculty?: XOR<FacultyNullableRelationFilter, FacultyWhereInput> | null
     semester?: XOR<SemesterNullableRelationFilter, SemesterWhereInput> | null
     rank?: XOR<RankNullableRelationFilter, RankWhereInput> | null
     quizAttempts?: QuizAttemptListRelationFilter
@@ -51492,6 +52799,7 @@ export namespace Prisma {
     password?: SortOrderInput | SortOrder
     studentId?: SortOrderInput | SortOrder
     universityId?: SortOrderInput | SortOrder
+    facultyId?: SortOrderInput | SortOrder
     semesterId?: SortOrderInput | SortOrder
     rankId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -51527,6 +52835,7 @@ export namespace Prisma {
     password?: StringNullableWithAggregatesFilter<"User"> | string | null
     studentId?: StringNullableWithAggregatesFilter<"User"> | string | null
     universityId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    facultyId?: StringNullableWithAggregatesFilter<"User"> | string | null
     semesterId?: StringNullableWithAggregatesFilter<"User"> | string | null
     rankId?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -53034,6 +54343,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
@@ -53051,6 +54361,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
@@ -53068,6 +54379,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
@@ -53085,6 +54397,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
@@ -53119,6 +54432,69 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacultyCreateInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    createdAt?: Date | string
+    university: UniversityCreateNestedOneWithoutFacultiesInput
+    academicYears?: AcademicYearCreateNestedManyWithoutFacultyInput
+    users?: UserCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyUncheckedCreateInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    universityId: string
+    createdAt?: Date | string
+    academicYears?: AcademicYearUncheckedCreateNestedManyWithoutFacultyInput
+    users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    university?: UniversityUpdateOneRequiredWithoutFacultiesNestedInput
+    academicYears?: AcademicYearUpdateManyWithoutFacultyNestedInput
+    users?: UserUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type FacultyUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput
+    users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type FacultyCreateManyInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    universityId: string
+    createdAt?: Date | string
+  }
+
+  export type FacultyUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacultyUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -53188,6 +54564,7 @@ export namespace Prisma {
     id?: string
     yearNumber: number
     university: UniversityCreateNestedOneWithoutAcademicYearsInput
+    faculty?: FacultyCreateNestedOneWithoutAcademicYearsInput
     semesters?: SemesterCreateNestedManyWithoutAcademicYearInput
   }
 
@@ -53195,6 +54572,7 @@ export namespace Prisma {
     id?: string
     yearNumber: number
     universityId: string
+    facultyId?: string | null
     semesters?: SemesterUncheckedCreateNestedManyWithoutAcademicYearInput
   }
 
@@ -53202,6 +54580,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
     university?: UniversityUpdateOneRequiredWithoutAcademicYearsNestedInput
+    faculty?: FacultyUpdateOneWithoutAcademicYearsNestedInput
     semesters?: SemesterUpdateManyWithoutAcademicYearNestedInput
   }
 
@@ -53209,6 +54588,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
     universityId?: StringFieldUpdateOperationsInput | string
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesters?: SemesterUncheckedUpdateManyWithoutAcademicYearNestedInput
   }
 
@@ -53216,6 +54596,7 @@ export namespace Prisma {
     id?: string
     yearNumber: number
     universityId: string
+    facultyId?: string | null
   }
 
   export type AcademicYearUpdateManyMutationInput = {
@@ -53227,6 +54608,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
     universityId?: StringFieldUpdateOperationsInput | string
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SemesterCreateInput = {
@@ -54501,6 +55883,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -54551,6 +55934,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -54605,6 +55989,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -54655,6 +56040,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54707,6 +56093,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -54758,6 +56145,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56261,6 +57649,12 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type FacultyListRelationFilter = {
+    every?: FacultyWhereInput
+    some?: FacultyWhereInput
+    none?: FacultyWhereInput
+  }
+
   export type AcademicYearListRelationFilter = {
     every?: AcademicYearWhereInput
     some?: AcademicYearWhereInput
@@ -56307,6 +57701,10 @@ export namespace Prisma {
     every?: CommentWhereInput
     some?: CommentWhereInput
     none?: CommentWhereInput
+  }
+
+  export type FacultyOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type AcademicYearOrderByRelationAggregateInput = {
@@ -56399,6 +57797,30 @@ export namespace Prisma {
     isNot?: UniversityWhereInput
   }
 
+  export type FacultyCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    logoUrl?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type FacultyMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    logoUrl?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type FacultyMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    logoUrl?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type UniversityYearIdFormatUniversityIdYearNumberCompoundUniqueInput = {
     universityId: string
     yearNumber: number
@@ -56443,6 +57865,11 @@ export namespace Prisma {
     maxLength?: SortOrder
   }
 
+  export type FacultyNullableRelationFilter = {
+    is?: FacultyWhereInput | null
+    isNot?: FacultyWhereInput | null
+  }
+
   export type SemesterListRelationFilter = {
     every?: SemesterWhereInput
     some?: SemesterWhereInput
@@ -56453,15 +57880,17 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type AcademicYearUniversityIdYearNumberCompoundUniqueInput = {
+  export type AcademicYearUniversityIdYearNumberFacultyIdCompoundUniqueInput = {
     universityId: string
     yearNumber: number
+    facultyId: string
   }
 
   export type AcademicYearCountOrderByAggregateInput = {
     id?: SortOrder
     yearNumber?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrder
   }
 
   export type AcademicYearAvgOrderByAggregateInput = {
@@ -56472,12 +57901,14 @@ export namespace Prisma {
     id?: SortOrder
     yearNumber?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrder
   }
 
   export type AcademicYearMinOrderByAggregateInput = {
     id?: SortOrder
     yearNumber?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrder
   }
 
   export type AcademicYearSumOrderByAggregateInput = {
@@ -57577,6 +59008,7 @@ export namespace Prisma {
     password?: SortOrder
     studentId?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrder
     semesterId?: SortOrder
     rankId?: SortOrder
     createdAt?: SortOrder
@@ -57608,6 +59040,7 @@ export namespace Prisma {
     password?: SortOrder
     studentId?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrder
     semesterId?: SortOrder
     rankId?: SortOrder
     createdAt?: SortOrder
@@ -57635,6 +59068,7 @@ export namespace Prisma {
     password?: SortOrder
     studentId?: SortOrder
     universityId?: SortOrder
+    facultyId?: SortOrder
     semesterId?: SortOrder
     rankId?: SortOrder
     createdAt?: SortOrder
@@ -58399,6 +59833,13 @@ export namespace Prisma {
     update?: XOR<XOR<UniversityUpdateToOneWithWhereWithoutFeatureFlagsInput, UniversityUpdateWithoutFeatureFlagsInput>, UniversityUncheckedUpdateWithoutFeatureFlagsInput>
   }
 
+  export type FacultyCreateNestedManyWithoutUniversityInput = {
+    create?: XOR<FacultyCreateWithoutUniversityInput, FacultyUncheckedCreateWithoutUniversityInput> | FacultyCreateWithoutUniversityInput[] | FacultyUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: FacultyCreateOrConnectWithoutUniversityInput | FacultyCreateOrConnectWithoutUniversityInput[]
+    createMany?: FacultyCreateManyUniversityInputEnvelope
+    connect?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+  }
+
   export type AcademicYearCreateNestedManyWithoutUniversityInput = {
     create?: XOR<AcademicYearCreateWithoutUniversityInput, AcademicYearUncheckedCreateWithoutUniversityInput> | AcademicYearCreateWithoutUniversityInput[] | AcademicYearUncheckedCreateWithoutUniversityInput[]
     connectOrCreate?: AcademicYearCreateOrConnectWithoutUniversityInput | AcademicYearCreateOrConnectWithoutUniversityInput[]
@@ -58453,6 +59894,13 @@ export namespace Prisma {
     connectOrCreate?: CommentCreateOrConnectWithoutUniversityInput | CommentCreateOrConnectWithoutUniversityInput[]
     createMany?: CommentCreateManyUniversityInputEnvelope
     connect?: CommentWhereUniqueInput | CommentWhereUniqueInput[]
+  }
+
+  export type FacultyUncheckedCreateNestedManyWithoutUniversityInput = {
+    create?: XOR<FacultyCreateWithoutUniversityInput, FacultyUncheckedCreateWithoutUniversityInput> | FacultyCreateWithoutUniversityInput[] | FacultyUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: FacultyCreateOrConnectWithoutUniversityInput | FacultyCreateOrConnectWithoutUniversityInput[]
+    createMany?: FacultyCreateManyUniversityInputEnvelope
+    connect?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
   }
 
   export type AcademicYearUncheckedCreateNestedManyWithoutUniversityInput = {
@@ -58517,6 +59965,20 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type FacultyUpdateManyWithoutUniversityNestedInput = {
+    create?: XOR<FacultyCreateWithoutUniversityInput, FacultyUncheckedCreateWithoutUniversityInput> | FacultyCreateWithoutUniversityInput[] | FacultyUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: FacultyCreateOrConnectWithoutUniversityInput | FacultyCreateOrConnectWithoutUniversityInput[]
+    upsert?: FacultyUpsertWithWhereUniqueWithoutUniversityInput | FacultyUpsertWithWhereUniqueWithoutUniversityInput[]
+    createMany?: FacultyCreateManyUniversityInputEnvelope
+    set?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    disconnect?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    delete?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    connect?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    update?: FacultyUpdateWithWhereUniqueWithoutUniversityInput | FacultyUpdateWithWhereUniqueWithoutUniversityInput[]
+    updateMany?: FacultyUpdateManyWithWhereWithoutUniversityInput | FacultyUpdateManyWithWhereWithoutUniversityInput[]
+    deleteMany?: FacultyScalarWhereInput | FacultyScalarWhereInput[]
   }
 
   export type AcademicYearUpdateManyWithoutUniversityNestedInput = {
@@ -58631,6 +60093,20 @@ export namespace Prisma {
     deleteMany?: CommentScalarWhereInput | CommentScalarWhereInput[]
   }
 
+  export type FacultyUncheckedUpdateManyWithoutUniversityNestedInput = {
+    create?: XOR<FacultyCreateWithoutUniversityInput, FacultyUncheckedCreateWithoutUniversityInput> | FacultyCreateWithoutUniversityInput[] | FacultyUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: FacultyCreateOrConnectWithoutUniversityInput | FacultyCreateOrConnectWithoutUniversityInput[]
+    upsert?: FacultyUpsertWithWhereUniqueWithoutUniversityInput | FacultyUpsertWithWhereUniqueWithoutUniversityInput[]
+    createMany?: FacultyCreateManyUniversityInputEnvelope
+    set?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    disconnect?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    delete?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    connect?: FacultyWhereUniqueInput | FacultyWhereUniqueInput[]
+    update?: FacultyUpdateWithWhereUniqueWithoutUniversityInput | FacultyUpdateWithWhereUniqueWithoutUniversityInput[]
+    updateMany?: FacultyUpdateManyWithWhereWithoutUniversityInput | FacultyUpdateManyWithWhereWithoutUniversityInput[]
+    deleteMany?: FacultyScalarWhereInput | FacultyScalarWhereInput[]
+  }
+
   export type AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput = {
     create?: XOR<AcademicYearCreateWithoutUniversityInput, AcademicYearUncheckedCreateWithoutUniversityInput> | AcademicYearCreateWithoutUniversityInput[] | AcademicYearUncheckedCreateWithoutUniversityInput[]
     connectOrCreate?: AcademicYearCreateOrConnectWithoutUniversityInput | AcademicYearCreateOrConnectWithoutUniversityInput[]
@@ -58743,6 +60219,104 @@ export namespace Prisma {
     deleteMany?: CommentScalarWhereInput | CommentScalarWhereInput[]
   }
 
+  export type UniversityCreateNestedOneWithoutFacultiesInput = {
+    create?: XOR<UniversityCreateWithoutFacultiesInput, UniversityUncheckedCreateWithoutFacultiesInput>
+    connectOrCreate?: UniversityCreateOrConnectWithoutFacultiesInput
+    connect?: UniversityWhereUniqueInput
+  }
+
+  export type AcademicYearCreateNestedManyWithoutFacultyInput = {
+    create?: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput> | AcademicYearCreateWithoutFacultyInput[] | AcademicYearUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: AcademicYearCreateOrConnectWithoutFacultyInput | AcademicYearCreateOrConnectWithoutFacultyInput[]
+    createMany?: AcademicYearCreateManyFacultyInputEnvelope
+    connect?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+  }
+
+  export type UserCreateNestedManyWithoutFacultyInput = {
+    create?: XOR<UserCreateWithoutFacultyInput, UserUncheckedCreateWithoutFacultyInput> | UserCreateWithoutFacultyInput[] | UserUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFacultyInput | UserCreateOrConnectWithoutFacultyInput[]
+    createMany?: UserCreateManyFacultyInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type AcademicYearUncheckedCreateNestedManyWithoutFacultyInput = {
+    create?: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput> | AcademicYearCreateWithoutFacultyInput[] | AcademicYearUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: AcademicYearCreateOrConnectWithoutFacultyInput | AcademicYearCreateOrConnectWithoutFacultyInput[]
+    createMany?: AcademicYearCreateManyFacultyInputEnvelope
+    connect?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutFacultyInput = {
+    create?: XOR<UserCreateWithoutFacultyInput, UserUncheckedCreateWithoutFacultyInput> | UserCreateWithoutFacultyInput[] | UserUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFacultyInput | UserCreateOrConnectWithoutFacultyInput[]
+    createMany?: UserCreateManyFacultyInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UniversityUpdateOneRequiredWithoutFacultiesNestedInput = {
+    create?: XOR<UniversityCreateWithoutFacultiesInput, UniversityUncheckedCreateWithoutFacultiesInput>
+    connectOrCreate?: UniversityCreateOrConnectWithoutFacultiesInput
+    upsert?: UniversityUpsertWithoutFacultiesInput
+    connect?: UniversityWhereUniqueInput
+    update?: XOR<XOR<UniversityUpdateToOneWithWhereWithoutFacultiesInput, UniversityUpdateWithoutFacultiesInput>, UniversityUncheckedUpdateWithoutFacultiesInput>
+  }
+
+  export type AcademicYearUpdateManyWithoutFacultyNestedInput = {
+    create?: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput> | AcademicYearCreateWithoutFacultyInput[] | AcademicYearUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: AcademicYearCreateOrConnectWithoutFacultyInput | AcademicYearCreateOrConnectWithoutFacultyInput[]
+    upsert?: AcademicYearUpsertWithWhereUniqueWithoutFacultyInput | AcademicYearUpsertWithWhereUniqueWithoutFacultyInput[]
+    createMany?: AcademicYearCreateManyFacultyInputEnvelope
+    set?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    disconnect?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    delete?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    connect?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    update?: AcademicYearUpdateWithWhereUniqueWithoutFacultyInput | AcademicYearUpdateWithWhereUniqueWithoutFacultyInput[]
+    updateMany?: AcademicYearUpdateManyWithWhereWithoutFacultyInput | AcademicYearUpdateManyWithWhereWithoutFacultyInput[]
+    deleteMany?: AcademicYearScalarWhereInput | AcademicYearScalarWhereInput[]
+  }
+
+  export type UserUpdateManyWithoutFacultyNestedInput = {
+    create?: XOR<UserCreateWithoutFacultyInput, UserUncheckedCreateWithoutFacultyInput> | UserCreateWithoutFacultyInput[] | UserUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFacultyInput | UserCreateOrConnectWithoutFacultyInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutFacultyInput | UserUpsertWithWhereUniqueWithoutFacultyInput[]
+    createMany?: UserCreateManyFacultyInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutFacultyInput | UserUpdateWithWhereUniqueWithoutFacultyInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutFacultyInput | UserUpdateManyWithWhereWithoutFacultyInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput = {
+    create?: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput> | AcademicYearCreateWithoutFacultyInput[] | AcademicYearUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: AcademicYearCreateOrConnectWithoutFacultyInput | AcademicYearCreateOrConnectWithoutFacultyInput[]
+    upsert?: AcademicYearUpsertWithWhereUniqueWithoutFacultyInput | AcademicYearUpsertWithWhereUniqueWithoutFacultyInput[]
+    createMany?: AcademicYearCreateManyFacultyInputEnvelope
+    set?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    disconnect?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    delete?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    connect?: AcademicYearWhereUniqueInput | AcademicYearWhereUniqueInput[]
+    update?: AcademicYearUpdateWithWhereUniqueWithoutFacultyInput | AcademicYearUpdateWithWhereUniqueWithoutFacultyInput[]
+    updateMany?: AcademicYearUpdateManyWithWhereWithoutFacultyInput | AcademicYearUpdateManyWithWhereWithoutFacultyInput[]
+    deleteMany?: AcademicYearScalarWhereInput | AcademicYearScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutFacultyNestedInput = {
+    create?: XOR<UserCreateWithoutFacultyInput, UserUncheckedCreateWithoutFacultyInput> | UserCreateWithoutFacultyInput[] | UserUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFacultyInput | UserCreateOrConnectWithoutFacultyInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutFacultyInput | UserUpsertWithWhereUniqueWithoutFacultyInput[]
+    createMany?: UserCreateManyFacultyInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutFacultyInput | UserUpdateWithWhereUniqueWithoutFacultyInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutFacultyInput | UserUpdateManyWithWhereWithoutFacultyInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
   export type UniversityCreateNestedOneWithoutYearIdFormatsInput = {
     create?: XOR<UniversityCreateWithoutYearIdFormatsInput, UniversityUncheckedCreateWithoutYearIdFormatsInput>
     connectOrCreate?: UniversityCreateOrConnectWithoutYearIdFormatsInput
@@ -58761,6 +60335,12 @@ export namespace Prisma {
     create?: XOR<UniversityCreateWithoutAcademicYearsInput, UniversityUncheckedCreateWithoutAcademicYearsInput>
     connectOrCreate?: UniversityCreateOrConnectWithoutAcademicYearsInput
     connect?: UniversityWhereUniqueInput
+  }
+
+  export type FacultyCreateNestedOneWithoutAcademicYearsInput = {
+    create?: XOR<FacultyCreateWithoutAcademicYearsInput, FacultyUncheckedCreateWithoutAcademicYearsInput>
+    connectOrCreate?: FacultyCreateOrConnectWithoutAcademicYearsInput
+    connect?: FacultyWhereUniqueInput
   }
 
   export type SemesterCreateNestedManyWithoutAcademicYearInput = {
@@ -58783,6 +60363,16 @@ export namespace Prisma {
     upsert?: UniversityUpsertWithoutAcademicYearsInput
     connect?: UniversityWhereUniqueInput
     update?: XOR<XOR<UniversityUpdateToOneWithWhereWithoutAcademicYearsInput, UniversityUpdateWithoutAcademicYearsInput>, UniversityUncheckedUpdateWithoutAcademicYearsInput>
+  }
+
+  export type FacultyUpdateOneWithoutAcademicYearsNestedInput = {
+    create?: XOR<FacultyCreateWithoutAcademicYearsInput, FacultyUncheckedCreateWithoutAcademicYearsInput>
+    connectOrCreate?: FacultyCreateOrConnectWithoutAcademicYearsInput
+    upsert?: FacultyUpsertWithoutAcademicYearsInput
+    disconnect?: FacultyWhereInput | boolean
+    delete?: FacultyWhereInput | boolean
+    connect?: FacultyWhereUniqueInput
+    update?: XOR<XOR<FacultyUpdateToOneWithWhereWithoutAcademicYearsInput, FacultyUpdateWithoutAcademicYearsInput>, FacultyUncheckedUpdateWithoutAcademicYearsInput>
   }
 
   export type SemesterUpdateManyWithoutAcademicYearNestedInput = {
@@ -60167,6 +61757,12 @@ export namespace Prisma {
     connect?: UniversityWhereUniqueInput
   }
 
+  export type FacultyCreateNestedOneWithoutUsersInput = {
+    create?: XOR<FacultyCreateWithoutUsersInput, FacultyUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: FacultyCreateOrConnectWithoutUsersInput
+    connect?: FacultyWhereUniqueInput
+  }
+
   export type SemesterCreateNestedOneWithoutUsersInput = {
     create?: XOR<SemesterCreateWithoutUsersInput, SemesterUncheckedCreateWithoutUsersInput>
     connectOrCreate?: SemesterCreateOrConnectWithoutUsersInput
@@ -60547,6 +62143,16 @@ export namespace Prisma {
     delete?: UniversityWhereInput | boolean
     connect?: UniversityWhereUniqueInput
     update?: XOR<XOR<UniversityUpdateToOneWithWhereWithoutUsersInput, UniversityUpdateWithoutUsersInput>, UniversityUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type FacultyUpdateOneWithoutUsersNestedInput = {
+    create?: XOR<FacultyCreateWithoutUsersInput, FacultyUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: FacultyCreateOrConnectWithoutUsersInput
+    upsert?: FacultyUpsertWithoutUsersInput
+    disconnect?: FacultyWhereInput | boolean
+    delete?: FacultyWhereInput | boolean
+    connect?: FacultyWhereUniqueInput
+    update?: XOR<XOR<FacultyUpdateToOneWithWhereWithoutUsersInput, FacultyUpdateWithoutUsersInput>, FacultyUncheckedUpdateWithoutUsersInput>
   }
 
   export type SemesterUpdateOneWithoutUsersNestedInput = {
@@ -62488,6 +64094,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
@@ -62504,6 +64111,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
@@ -62536,6 +64144,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
@@ -62552,6 +64161,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
@@ -62561,15 +64171,45 @@ export namespace Prisma {
     comments?: CommentUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
+  export type FacultyCreateWithoutUniversityInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    createdAt?: Date | string
+    academicYears?: AcademicYearCreateNestedManyWithoutFacultyInput
+    users?: UserCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyUncheckedCreateWithoutUniversityInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    createdAt?: Date | string
+    academicYears?: AcademicYearUncheckedCreateNestedManyWithoutFacultyInput
+    users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyCreateOrConnectWithoutUniversityInput = {
+    where: FacultyWhereUniqueInput
+    create: XOR<FacultyCreateWithoutUniversityInput, FacultyUncheckedCreateWithoutUniversityInput>
+  }
+
+  export type FacultyCreateManyUniversityInputEnvelope = {
+    data: FacultyCreateManyUniversityInput | FacultyCreateManyUniversityInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AcademicYearCreateWithoutUniversityInput = {
     id?: string
     yearNumber: number
+    faculty?: FacultyCreateNestedOneWithoutAcademicYearsInput
     semesters?: SemesterCreateNestedManyWithoutAcademicYearInput
   }
 
   export type AcademicYearUncheckedCreateWithoutUniversityInput = {
     id?: string
     yearNumber: number
+    facultyId?: string | null
     semesters?: SemesterUncheckedCreateNestedManyWithoutAcademicYearInput
   }
 
@@ -62605,6 +64245,7 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -62654,6 +64295,7 @@ export namespace Prisma {
     points?: number
     password?: string | null
     studentId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -62881,6 +64523,33 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FacultyUpsertWithWhereUniqueWithoutUniversityInput = {
+    where: FacultyWhereUniqueInput
+    update: XOR<FacultyUpdateWithoutUniversityInput, FacultyUncheckedUpdateWithoutUniversityInput>
+    create: XOR<FacultyCreateWithoutUniversityInput, FacultyUncheckedCreateWithoutUniversityInput>
+  }
+
+  export type FacultyUpdateWithWhereUniqueWithoutUniversityInput = {
+    where: FacultyWhereUniqueInput
+    data: XOR<FacultyUpdateWithoutUniversityInput, FacultyUncheckedUpdateWithoutUniversityInput>
+  }
+
+  export type FacultyUpdateManyWithWhereWithoutUniversityInput = {
+    where: FacultyScalarWhereInput
+    data: XOR<FacultyUpdateManyMutationInput, FacultyUncheckedUpdateManyWithoutUniversityInput>
+  }
+
+  export type FacultyScalarWhereInput = {
+    AND?: FacultyScalarWhereInput | FacultyScalarWhereInput[]
+    OR?: FacultyScalarWhereInput[]
+    NOT?: FacultyScalarWhereInput | FacultyScalarWhereInput[]
+    id?: StringFilter<"Faculty"> | string
+    name?: StringFilter<"Faculty"> | string
+    logoUrl?: StringNullableFilter<"Faculty"> | string | null
+    universityId?: StringFilter<"Faculty"> | string
+    createdAt?: DateTimeFilter<"Faculty"> | Date | string
+  }
+
   export type AcademicYearUpsertWithWhereUniqueWithoutUniversityInput = {
     where: AcademicYearWhereUniqueInput
     update: XOR<AcademicYearUpdateWithoutUniversityInput, AcademicYearUncheckedUpdateWithoutUniversityInput>
@@ -62904,6 +64573,7 @@ export namespace Prisma {
     id?: StringFilter<"AcademicYear"> | string
     yearNumber?: IntFilter<"AcademicYear"> | number
     universityId?: StringFilter<"AcademicYear"> | string
+    facultyId?: StringNullableFilter<"AcademicYear"> | string | null
   }
 
   export type UserUpsertWithWhereUniqueWithoutUniversityInput = {
@@ -62946,6 +64616,7 @@ export namespace Prisma {
     password?: StringNullableFilter<"User"> | string | null
     studentId?: StringNullableFilter<"User"> | string | null
     universityId?: StringNullableFilter<"User"> | string | null
+    facultyId?: StringNullableFilter<"User"> | string | null
     semesterId?: StringNullableFilter<"User"> | string | null
     rankId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -63128,6 +64799,260 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Comment"> | Date | string
   }
 
+  export type UniversityCreateWithoutFacultiesInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    idMinLength?: number
+    idMaxLength?: number
+    createdAt?: Date | string
+    academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
+    users?: UserCreateNestedManyWithoutUniversityInput
+    adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
+    yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
+    featureFlags?: FeatureFlagCreateNestedManyWithoutUniversityInput
+    forums?: ForumCreateNestedManyWithoutUniversityInput
+    posts?: PostCreateNestedManyWithoutUniversityInput
+    comments?: CommentCreateNestedManyWithoutUniversityInput
+  }
+
+  export type UniversityUncheckedCreateWithoutFacultiesInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    idMinLength?: number
+    idMaxLength?: number
+    createdAt?: Date | string
+    academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
+    users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
+    yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
+    featureFlags?: FeatureFlagUncheckedCreateNestedManyWithoutUniversityInput
+    forums?: ForumUncheckedCreateNestedManyWithoutUniversityInput
+    posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
+    comments?: CommentUncheckedCreateNestedManyWithoutUniversityInput
+  }
+
+  export type UniversityCreateOrConnectWithoutFacultiesInput = {
+    where: UniversityWhereUniqueInput
+    create: XOR<UniversityCreateWithoutFacultiesInput, UniversityUncheckedCreateWithoutFacultiesInput>
+  }
+
+  export type AcademicYearCreateWithoutFacultyInput = {
+    id?: string
+    yearNumber: number
+    university: UniversityCreateNestedOneWithoutAcademicYearsInput
+    semesters?: SemesterCreateNestedManyWithoutAcademicYearInput
+  }
+
+  export type AcademicYearUncheckedCreateWithoutFacultyInput = {
+    id?: string
+    yearNumber: number
+    universityId: string
+    semesters?: SemesterUncheckedCreateNestedManyWithoutAcademicYearInput
+  }
+
+  export type AcademicYearCreateOrConnectWithoutFacultyInput = {
+    where: AcademicYearWhereUniqueInput
+    create: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput>
+  }
+
+  export type AcademicYearCreateManyFacultyInputEnvelope = {
+    data: AcademicYearCreateManyFacultyInput | AcademicYearCreateManyFacultyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserCreateWithoutFacultyInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    canManageReports?: boolean
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    university?: UniversityCreateNestedOneWithoutUsersInput
+    semester?: SemesterCreateNestedOneWithoutUsersInput
+    rank?: RankCreateNestedOneWithoutUsersInput
+    quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
+    posts?: PostCreateNestedManyWithoutAuthorInput
+    comments?: CommentCreateNestedManyWithoutAuthorInput
+    likes?: LikeCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
+    following?: UserFollowCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutFacultyInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    canManageReports?: boolean
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quizAttempts?: QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedCreateNestedOneWithoutUserInput
+    posts?: PostUncheckedCreateNestedManyWithoutAuthorInput
+    comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
+    likes?: LikeUncheckedCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteUncheckedCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogUncheckedCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentUncheckedCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeUncheckedCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberUncheckedCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
+    following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutFacultyInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFacultyInput, UserUncheckedCreateWithoutFacultyInput>
+  }
+
+  export type UserCreateManyFacultyInputEnvelope = {
+    data: UserCreateManyFacultyInput | UserCreateManyFacultyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UniversityUpsertWithoutFacultiesInput = {
+    update: XOR<UniversityUpdateWithoutFacultiesInput, UniversityUncheckedUpdateWithoutFacultiesInput>
+    create: XOR<UniversityCreateWithoutFacultiesInput, UniversityUncheckedCreateWithoutFacultiesInput>
+    where?: UniversityWhereInput
+  }
+
+  export type UniversityUpdateToOneWithWhereWithoutFacultiesInput = {
+    where?: UniversityWhereInput
+    data: XOR<UniversityUpdateWithoutFacultiesInput, UniversityUncheckedUpdateWithoutFacultiesInput>
+  }
+
+  export type UniversityUpdateWithoutFacultiesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    idMinLength?: IntFieldUpdateOperationsInput | number
+    idMaxLength?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
+    users?: UserUpdateManyWithoutUniversityNestedInput
+    adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
+    yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
+    featureFlags?: FeatureFlagUpdateManyWithoutUniversityNestedInput
+    forums?: ForumUpdateManyWithoutUniversityNestedInput
+    posts?: PostUpdateManyWithoutUniversityNestedInput
+    comments?: CommentUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type UniversityUncheckedUpdateWithoutFacultiesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    idMinLength?: IntFieldUpdateOperationsInput | number
+    idMaxLength?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
+    users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
+    yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
+    featureFlags?: FeatureFlagUncheckedUpdateManyWithoutUniversityNestedInput
+    forums?: ForumUncheckedUpdateManyWithoutUniversityNestedInput
+    posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type AcademicYearUpsertWithWhereUniqueWithoutFacultyInput = {
+    where: AcademicYearWhereUniqueInput
+    update: XOR<AcademicYearUpdateWithoutFacultyInput, AcademicYearUncheckedUpdateWithoutFacultyInput>
+    create: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput>
+  }
+
+  export type AcademicYearUpdateWithWhereUniqueWithoutFacultyInput = {
+    where: AcademicYearWhereUniqueInput
+    data: XOR<AcademicYearUpdateWithoutFacultyInput, AcademicYearUncheckedUpdateWithoutFacultyInput>
+  }
+
+  export type AcademicYearUpdateManyWithWhereWithoutFacultyInput = {
+    where: AcademicYearScalarWhereInput
+    data: XOR<AcademicYearUpdateManyMutationInput, AcademicYearUncheckedUpdateManyWithoutFacultyInput>
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutFacultyInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutFacultyInput, UserUncheckedUpdateWithoutFacultyInput>
+    create: XOR<UserCreateWithoutFacultyInput, UserUncheckedCreateWithoutFacultyInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutFacultyInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutFacultyInput, UserUncheckedUpdateWithoutFacultyInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutFacultyInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutFacultyInput>
+  }
+
   export type UniversityCreateWithoutYearIdFormatsInput = {
     id?: string
     name: string
@@ -63135,6 +65060,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
@@ -63151,6 +65077,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
@@ -63183,6 +65110,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
@@ -63199,6 +65127,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
@@ -63215,6 +65144,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
@@ -63231,6 +65161,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
@@ -63243,6 +65174,29 @@ export namespace Prisma {
   export type UniversityCreateOrConnectWithoutAcademicYearsInput = {
     where: UniversityWhereUniqueInput
     create: XOR<UniversityCreateWithoutAcademicYearsInput, UniversityUncheckedCreateWithoutAcademicYearsInput>
+  }
+
+  export type FacultyCreateWithoutAcademicYearsInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    createdAt?: Date | string
+    university: UniversityCreateNestedOneWithoutFacultiesInput
+    users?: UserCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyUncheckedCreateWithoutAcademicYearsInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    universityId: string
+    createdAt?: Date | string
+    users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyCreateOrConnectWithoutAcademicYearsInput = {
+    where: FacultyWhereUniqueInput
+    create: XOR<FacultyCreateWithoutAcademicYearsInput, FacultyUncheckedCreateWithoutAcademicYearsInput>
   }
 
   export type SemesterCreateWithoutAcademicYearInput = {
@@ -63293,6 +65247,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
@@ -63309,6 +65264,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
@@ -63316,6 +65272,35 @@ export namespace Prisma {
     forums?: ForumUncheckedUpdateManyWithoutUniversityNestedInput
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type FacultyUpsertWithoutAcademicYearsInput = {
+    update: XOR<FacultyUpdateWithoutAcademicYearsInput, FacultyUncheckedUpdateWithoutAcademicYearsInput>
+    create: XOR<FacultyCreateWithoutAcademicYearsInput, FacultyUncheckedCreateWithoutAcademicYearsInput>
+    where?: FacultyWhereInput
+  }
+
+  export type FacultyUpdateToOneWithWhereWithoutAcademicYearsInput = {
+    where?: FacultyWhereInput
+    data: XOR<FacultyUpdateWithoutAcademicYearsInput, FacultyUncheckedUpdateWithoutAcademicYearsInput>
+  }
+
+  export type FacultyUpdateWithoutAcademicYearsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    university?: UniversityUpdateOneRequiredWithoutFacultiesNestedInput
+    users?: UserUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type FacultyUncheckedUpdateWithoutAcademicYearsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type SemesterUpsertWithWhereUniqueWithoutAcademicYearInput = {
@@ -63347,12 +65332,14 @@ export namespace Prisma {
     id?: string
     yearNumber: number
     university: UniversityCreateNestedOneWithoutAcademicYearsInput
+    faculty?: FacultyCreateNestedOneWithoutAcademicYearsInput
   }
 
   export type AcademicYearUncheckedCreateWithoutSemestersInput = {
     id?: string
     yearNumber: number
     universityId: string
+    facultyId?: string | null
   }
 
   export type AcademicYearCreateOrConnectWithoutSemestersInput = {
@@ -63407,6 +65394,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
     studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
@@ -63456,6 +65444,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -63629,12 +65618,14 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
     university?: UniversityUpdateOneRequiredWithoutAcademicYearsNestedInput
+    faculty?: FacultyUpdateOneWithoutAcademicYearsNestedInput
   }
 
   export type AcademicYearUncheckedUpdateWithoutSemestersInput = {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
     universityId?: StringFieldUpdateOperationsInput | string
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ModuleUpsertWithWhereUniqueWithoutSemesterInput = {
@@ -64893,6 +66884,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -64942,6 +66934,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -65054,6 +67047,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -65103,6 +67097,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -65193,6 +67188,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -65242,6 +67238,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -65354,6 +67351,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -65403,6 +67401,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -66017,6 +68016,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -66066,6 +68066,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -66231,6 +68232,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -66280,6 +68282,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -66388,6 +68391,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -66437,6 +68441,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -66547,6 +68552,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -66596,6 +68602,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -66744,6 +68751,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
@@ -66793,6 +68801,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -66958,6 +68967,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
@@ -67007,6 +69017,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -67158,6 +69169,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -67207,6 +69219,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -67276,6 +69289,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -67325,6 +69339,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -67510,6 +69525,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
@@ -67526,6 +69542,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
@@ -67538,6 +69555,29 @@ export namespace Prisma {
   export type UniversityCreateOrConnectWithoutUsersInput = {
     where: UniversityWhereUniqueInput
     create: XOR<UniversityCreateWithoutUsersInput, UniversityUncheckedCreateWithoutUsersInput>
+  }
+
+  export type FacultyCreateWithoutUsersInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    createdAt?: Date | string
+    university: UniversityCreateNestedOneWithoutFacultiesInput
+    academicYears?: AcademicYearCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyUncheckedCreateWithoutUsersInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    universityId: string
+    createdAt?: Date | string
+    academicYears?: AcademicYearUncheckedCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyCreateOrConnectWithoutUsersInput = {
+    where: FacultyWhereUniqueInput
+    create: XOR<FacultyCreateWithoutUsersInput, FacultyUncheckedCreateWithoutUsersInput>
   }
 
   export type SemesterCreateWithoutUsersInput = {
@@ -68247,6 +70287,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
@@ -68263,6 +70304,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
@@ -68270,6 +70312,35 @@ export namespace Prisma {
     forums?: ForumUncheckedUpdateManyWithoutUniversityNestedInput
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type FacultyUpsertWithoutUsersInput = {
+    update: XOR<FacultyUpdateWithoutUsersInput, FacultyUncheckedUpdateWithoutUsersInput>
+    create: XOR<FacultyCreateWithoutUsersInput, FacultyUncheckedCreateWithoutUsersInput>
+    where?: FacultyWhereInput
+  }
+
+  export type FacultyUpdateToOneWithWhereWithoutUsersInput = {
+    where?: FacultyWhereInput
+    data: XOR<FacultyUpdateWithoutUsersInput, FacultyUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type FacultyUpdateWithoutUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    university?: UniversityUpdateOneRequiredWithoutFacultiesNestedInput
+    academicYears?: AcademicYearUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type FacultyUncheckedUpdateWithoutUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type SemesterUpsertWithoutUsersInput = {
@@ -68920,6 +70991,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -68969,6 +71041,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -69075,6 +71148,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -69124,6 +71198,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -69220,6 +71295,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -69269,6 +71345,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -69327,6 +71404,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -69376,6 +71454,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -69445,6 +71524,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -69494,6 +71574,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -69558,6 +71639,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -69607,6 +71689,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -69644,6 +71727,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
@@ -69660,6 +71744,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
@@ -69801,6 +71886,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
@@ -69817,6 +71903,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
@@ -69959,6 +72046,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -70008,6 +72096,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -70114,6 +72203,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -70163,6 +72253,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -70247,6 +72338,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -70296,6 +72388,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -70354,6 +72447,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -70403,6 +72497,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -70509,6 +72604,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -70558,6 +72654,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -70622,6 +72719,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -70671,6 +72769,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -70724,6 +72823,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -70773,6 +72873,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -70846,6 +72947,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
@@ -70862,6 +72964,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
@@ -70962,6 +73065,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -71011,6 +73115,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71096,6 +73201,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
@@ -71112,6 +73218,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
@@ -71176,6 +73283,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -71225,6 +73333,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -71300,6 +73409,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
@@ -71316,6 +73426,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
@@ -71443,6 +73554,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -71492,6 +73604,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71579,6 +73692,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
@@ -71595,6 +73709,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
@@ -71692,6 +73807,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -71741,6 +73857,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -71799,6 +73916,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -71848,6 +73966,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -71917,6 +74036,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -71966,6 +74086,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72030,6 +74151,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -72079,6 +74201,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72132,6 +74255,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -72181,6 +74305,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -72283,6 +74408,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -72332,6 +74458,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72424,6 +74551,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -72473,6 +74601,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -72569,6 +74698,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -72618,6 +74748,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72704,6 +74835,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -72753,6 +74885,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -72822,6 +74955,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -72871,6 +75005,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72924,6 +75059,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -72973,6 +75109,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -73042,6 +75179,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -73091,6 +75229,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73144,6 +75283,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
     studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
@@ -73193,6 +75333,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -73272,6 +75413,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -73321,6 +75463,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -73390,6 +75533,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -73439,6 +75583,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73492,6 +75637,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -73541,6 +75687,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -73610,6 +75757,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -73659,6 +75807,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73696,6 +75845,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
@@ -73712,6 +75862,7 @@ export namespace Prisma {
     idMinLength?: number
     idMaxLength?: number
     createdAt?: Date | string
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
@@ -73769,6 +75920,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
@@ -73785,6 +75937,7 @@ export namespace Prisma {
     idMinLength?: IntFieldUpdateOperationsInput | number
     idMaxLength?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
     academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
@@ -73848,6 +76001,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -73897,6 +76051,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -73966,6 +76121,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -74015,6 +76171,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74068,6 +76225,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -74117,6 +76275,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -74186,6 +76345,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -74235,6 +76395,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74288,6 +76449,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
     semester?: SemesterCreateNestedOneWithoutUsersInput
     rank?: RankCreateNestedOneWithoutUsersInput
     quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
@@ -74337,6 +76499,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -74406,6 +76569,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -74455,6 +76619,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74485,9 +76650,17 @@ export namespace Prisma {
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
   }
 
+  export type FacultyCreateManyUniversityInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    createdAt?: Date | string
+  }
+
   export type AcademicYearCreateManyUniversityInput = {
     id?: string
     yearNumber: number
+    facultyId?: string | null
   }
 
   export type UserCreateManyUniversityInput = {
@@ -74510,6 +76683,7 @@ export namespace Prisma {
     points?: number
     password?: string | null
     studentId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     rankId?: string | null
     createdAt?: Date | string
@@ -74572,21 +76746,49 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type FacultyUpdateWithoutUniversityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUpdateManyWithoutFacultyNestedInput
+    users?: UserUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type FacultyUncheckedUpdateWithoutUniversityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput
+    users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type FacultyUncheckedUpdateManyWithoutUniversityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AcademicYearUpdateWithoutUniversityInput = {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
+    faculty?: FacultyUpdateOneWithoutAcademicYearsNestedInput
     semesters?: SemesterUpdateManyWithoutAcademicYearNestedInput
   }
 
   export type AcademicYearUncheckedUpdateWithoutUniversityInput = {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesters?: SemesterUncheckedUpdateManyWithoutAcademicYearNestedInput
   }
 
   export type AcademicYearUncheckedUpdateManyWithoutUniversityInput = {
     id?: StringFieldUpdateOperationsInput | string
     yearNumber?: IntFieldUpdateOperationsInput | number
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUpdateWithoutUniversityInput = {
@@ -74611,6 +76813,7 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -74660,6 +76863,7 @@ export namespace Prisma {
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74711,6 +76915,7 @@ export namespace Prisma {
     points?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74899,6 +77104,190 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AcademicYearCreateManyFacultyInput = {
+    id?: string
+    yearNumber: number
+    universityId: string
+  }
+
+  export type UserCreateManyFacultyInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    canManageReports?: boolean
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AcademicYearUpdateWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    yearNumber?: IntFieldUpdateOperationsInput | number
+    university?: UniversityUpdateOneRequiredWithoutAcademicYearsNestedInput
+    semesters?: SemesterUpdateManyWithoutAcademicYearNestedInput
+  }
+
+  export type AcademicYearUncheckedUpdateWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    yearNumber?: IntFieldUpdateOperationsInput | number
+    universityId?: StringFieldUpdateOperationsInput | string
+    semesters?: SemesterUncheckedUpdateManyWithoutAcademicYearNestedInput
+  }
+
+  export type AcademicYearUncheckedUpdateManyWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    yearNumber?: IntFieldUpdateOperationsInput | number
+    universityId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type UserUpdateWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    university?: UniversityUpdateOneWithoutUsersNestedInput
+    semester?: SemesterUpdateOneWithoutUsersNestedInput
+    rank?: RankUpdateOneWithoutUsersNestedInput
+    quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
+    posts?: PostUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quizAttempts?: QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedUpdateOneWithoutUserNestedInput
+    posts?: PostUncheckedUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUncheckedUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUncheckedUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUncheckedUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SemesterCreateManyAcademicYearInput = {
     id?: string
     name: string
@@ -74955,6 +77344,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -75041,6 +77431,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     rank?: RankUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
     studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
@@ -75090,6 +77481,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75141,6 +77533,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76908,6 +79301,7 @@ export namespace Prisma {
     password?: string | null
     studentId?: string | null
     universityId?: string | null
+    facultyId?: string | null
     semesterId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -76936,6 +79330,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
     semester?: SemesterUpdateOneWithoutUsersNestedInput
     quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
     studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
@@ -76985,6 +79380,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77036,6 +79432,7 @@ export namespace Prisma {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77050,6 +79447,10 @@ export namespace Prisma {
      * @deprecated Use UniversityCountOutputTypeDefaultArgs instead
      */
     export type UniversityCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UniversityCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use FacultyCountOutputTypeDefaultArgs instead
+     */
+    export type FacultyCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FacultyCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use AcademicYearCountOutputTypeDefaultArgs instead
      */
@@ -77122,6 +79523,10 @@ export namespace Prisma {
      * @deprecated Use UniversityDefaultArgs instead
      */
     export type UniversityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UniversityDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use FacultyDefaultArgs instead
+     */
+    export type FacultyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FacultyDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UniversityYearIdFormatDefaultArgs instead
      */

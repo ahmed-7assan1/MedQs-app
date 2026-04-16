@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
-  Building2, Calendar, BookOpen, FlaskConical,
+  Building2, Calendar, BookOpen, FlaskConical, GraduationCap,
   Plus, ChevronDown, ChevronRight,
   Loader2, Trash2, Check, X, ShieldAlert,
 } from "lucide-react";
@@ -11,25 +11,27 @@ import { apiErrorMessage } from "@/lib/api-error-client";
 import { parseJsonList } from "@/lib/api-list";
 
 interface University  { id: string; name: string }
-interface AcademicYear { id: string; yearNumber: number; universityId: string }
+interface Faculty     { id: string; name: string; universityId: string }
+interface AcademicYear { id: string; yearNumber: number; universityId: string; facultyId?: string | null }
 interface Semester    { id: string; name: string; academicYearId: string }
 interface Module      { id: string; name: string; semesterId: string }
 interface Subject     { id: string; name: string; moduleId: string }
 
-type AddKey = string; // format: "uni" | "year-{uniId}" | "sem-{yearId}" | "mod-{semId}" | "subj-{modId}"
+type AddKey = string;
 
 export default function AdminContentPage() {
   const [universities, setUniversities]   = useState<University[]>([]);
-  const [years,        setYears]          = useState<AcademicYear[]>([]);
-  const [semesters,    setSemesters]      = useState<Semester[]>([]);
-  const [modules,      setModules]        = useState<Module[]>([]);
-  const [subjects,     setSubjects]       = useState<Subject[]>([]);
-  const [loading,      setLoading]        = useState(true);
-  const [expanded,     setExpanded]       = useState<Set<string>>(new Set());
-  const [adding,       setAdding]         = useState<AddKey | null>(null);
-  const [addVal,       setAddVal]         = useState("");
-  const [deleting,     setDeleting]       = useState<string | null>(null);
-  const [isSuperAdmin, setIsSuperAdmin]   = useState(false);
+  const [faculties,    setFaculties]       = useState<Faculty[]>([]);
+  const [years,        setYears]           = useState<AcademicYear[]>([]);
+  const [semesters,    setSemesters]       = useState<Semester[]>([]);
+  const [modules,      setModules]         = useState<Module[]>([]);
+  const [subjects,     setSubjects]        = useState<Subject[]>([]);
+  const [loading,      setLoading]         = useState(true);
+  const [expanded,     setExpanded]        = useState<Set<string>>(new Set());
+  const [adding,       setAdding]          = useState<AddKey | null>(null);
+  const [addVal,       setAddVal]          = useState("");
+  const [deleting,     setDeleting]        = useState<string | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin]    = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,17 +45,21 @@ export default function AdminContentPage() {
           fetch("/api/v1/subjects-all"),
           fetch("/api/auth/session"),
         ]);
-        const [u, y, s, m, sub] = await Promise.all([
+        // Fetch all faculties (no filter)
+        const facRes = await fetch("/api/v1/faculties");
+        const [u, y, s, m, sub, fac] = await Promise.all([
           parseJsonList<University>(uRes),
           parseJsonList<AcademicYear>(yRes),
           parseJsonList<Semester>(sRes),
           parseJsonList<Module>(mRes),
           parseJsonList<Subject>(subRes),
+          parseJsonList<Faculty>(facRes),
         ]);
         const sessionData = sessionRes.ok ? await sessionRes.json() : null;
         const role = sessionData?.user?.role;
         if (!cancelled) {
           setUniversities(u as University[]);
+          setFaculties(fac as Faculty[]);
           setYears(y as AcademicYear[]);
           setSemesters(s as Semester[]);
           setModules(m as Module[]);
@@ -89,67 +95,48 @@ export default function AdminContentPage() {
   function cancelAdd() { setAdding(null); setAddVal(""); }
 
   async function commitDelete(
-    kind: "uni" | "year" | "sem" | "mod" | "subj",
+    kind: "uni" | "fac" | "year" | "sem" | "mod" | "subj",
     id: string,
     label: string
   ) {
-    if (!confirm(`Delete "${label}"? This removes all nested content (modules, lectures, forums tied to it, etc.). Cannot be undone.`))
+    if (!confirm(`Delete "${label}"? This removes all nested content. Cannot be undone.`))
       return;
     setDeleting(id);
     try {
-      const paths: Record<"uni" | "year" | "sem" | "mod" | "subj", string> = {
+      const paths: Record<"uni" | "fac" | "year" | "sem" | "mod" | "subj", string> = {
         uni: `/api/v1/universities/${id}`,
+        fac: `/api/v1/faculties/${id}`,
         year: `/api/v1/years/${id}`,
         sem: `/api/v1/semesters/${id}`,
         mod: `/api/v1/modules/${id}`,
         subj: `/api/v1/subjects/${id}`,
       };
       const res = await fetch(paths[kind], { method: "DELETE" });
-      if (!res.ok) {
-        toast.error(await apiErrorMessage(res, "Delete failed"));
-        return;
-      }
-      if (kind === "uni") setUniversities((u) => u.filter((x) => x.id !== id));
-      if (kind === "year") setYears((y) => y.filter((x) => x.id !== id));
-      if (kind === "sem") setSemesters((s) => s.filter((x) => x.id !== id));
-      if (kind === "mod") setModules((m) => m.filter((x) => x.id !== id));
-      if (kind === "subj") setSubjects((s) => s.filter((x) => x.id !== id));
+      if (!res.ok) { toast.error(await apiErrorMessage(res, "Delete failed")); return; }
+      if (kind === "uni")  setUniversities(u => u.filter(x => x.id !== id));
+      if (kind === "fac")  setFaculties(f => f.filter(x => x.id !== id));
+      if (kind === "year") setYears(y => y.filter(x => x.id !== id));
+      if (kind === "sem")  setSemesters(s => s.filter(x => x.id !== id));
+      if (kind === "mod")  setModules(m => m.filter(x => x.id !== id));
+      if (kind === "subj") setSubjects(s => s.filter(x => x.id !== id));
       toast.success("Deleted");
-    } finally {
-      setDeleting(null);
-    }
+    } finally { setDeleting(null); }
   }
 
   function DeleteBtn({
-    kind,
-    id,
-    label,
-    alwaysShow,
+    kind, id, label, alwaysShow,
   }: {
-    kind: "uni" | "year" | "sem" | "mod" | "subj";
-    id: string;
-    label: string;
-    alwaysShow?: boolean;
+    kind: "uni" | "fac" | "year" | "sem" | "mod" | "subj";
+    id: string; label: string; alwaysShow?: boolean;
   }) {
     return (
-      <button
-        type="button"
-        title="Delete"
-        disabled={deleting === id}
-        onClick={(e) => {
-          e.stopPropagation();
-          void commitDelete(kind, id, label);
-        }}
+      <button type="button" title="Delete" disabled={deleting === id}
+        onClick={e => { e.stopPropagation(); void commitDelete(kind, id, label); }}
         className={cn(
           "rounded-lg p-1.5 text-muted-foreground transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20",
           alwaysShow ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100"
-        )}
-      >
-        {deleting === id ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <Trash2 className="h-3.5 w-3.5" />
-        )}
+        )}>
+        {deleting === id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
       </button>
     );
   }
@@ -162,6 +149,7 @@ export default function AdminContentPage() {
 
     const endpoints: Record<string, { url: string; body: object }> = {
       uni:  { url: "/api/v1/universities", body: { name: addVal } },
+      fac:  { url: "/api/v1/faculties",    body: { name: addVal, universityId: parentId } },
       year: { url: `/api/v1/universities/${parentId}/years`, body: { yearNumber: parseInt(addVal) || 1 } },
       sem:  { url: `/api/v1/years/${parentId}/semesters`, body: { name: addVal } },
       mod:  { url: `/api/v1/semesters/${parentId}/modules`, body: { name: addVal } },
@@ -178,6 +166,7 @@ export default function AdminContentPage() {
     if (res.ok) {
       const item = await res.json();
       if (type === "uni")  setUniversities(u => [...u, item]);
+      if (type === "fac")  setFaculties(f => [...f, item]);
       if (type === "year") setYears(y => [...y, item]);
       if (type === "sem")  setSemesters(s => [...s, item]);
       if (type === "mod")  setModules(m => [...m, item]);
@@ -288,113 +277,58 @@ export default function AdminContentPage() {
                     {isSuperAdmin && <DeleteBtn kind="uni" id={uni.id} label={uni.name} />}
                   </div>
 
-                  {/* Years */}
+                  {/* Faculties + Years */}
                   {open && (
                     <div className="border-t border-border/40 bg-muted/10 py-2">
                       <div className="ml-9">
+                        {/* Faculties header */}
                         <div className="flex items-center justify-between py-1 pr-4">
-                          <span className="px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Academic Years</span>
-                          <AddRow k={`year-${uni.id}`} placeholder="Year number" type="year" parentId={uni.id} />
+                          <span className="px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                            Faculties (كليات)
+                          </span>
+                          <AddRow k={`fac-${uni.id}`} placeholder="Faculty name" type="text" parentId={uni.id} />
                         </div>
 
-                        {uniYears.map(year => {
-                          const yearSems = semesters.filter(s => s.academicYearId === year.id);
-                          const yearOpen = expanded.has(year.id);
+                        {/* No faculties → flat year list */}
+                        {faculties.filter(f => f.universityId === uni.id).length === 0 && (
+                          <>
+                            <div className="flex items-center justify-between py-1 pr-4 mt-1">
+                              <span className="px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Academic Years</span>
+                              <AddRow k={`year-${uni.id}`} placeholder="Year number" type="year" parentId={uni.id} />
+                            </div>
+                            {uniYears.filter(y => !y.facultyId).map(year => (
+                              <YearRow key={year.id} year={year} />
+                            ))}
+                          </>
+                        )}
+
+                        {/* Faculties list */}
+                        {faculties.filter(f => f.universityId === uni.id).map(fac => {
+                          const facOpen  = expanded.has(fac.id);
+                          const facYears = years.filter(y => y.facultyId === fac.id);
                           return (
-                            <div key={year.id}>
-                              <div
-                                className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
-                                onClick={() => toggle(year.id)}
-                              >
+                            <div key={fac.id}>
+                              <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
+                                onClick={() => toggle(fac.id)}>
                                 <span className="text-muted-foreground">
-                                  {yearOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                                  {facOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                                 </span>
-                                <Calendar className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
-                                <span className="flex-1 text-sm">Year {year.yearNumber}</span>
-                                <span className="text-xs text-muted-foreground">{yearSems.length} sem{yearSems.length !== 1 ? "s" : ""}</span>
-                                <DeleteBtn kind="year" id={year.id} label={`Year ${year.yearNumber}`} />
+                                <GraduationCap className="h-3.5 w-3.5 text-purple-500 flex-shrink-0" />
+                                <span className="flex-1 text-sm font-medium">{fac.name}</span>
+                                <span className="text-xs text-muted-foreground">{facYears.length} yr{facYears.length !== 1 ? "s" : ""}</span>
+                                <DeleteBtn kind="fac" id={fac.id} label={fac.name} />
                               </div>
 
-                              {/* Semesters */}
-                              {yearOpen && (
-                                <div className="ml-7 border-l border-border/50 pl-4 py-1">
+                              {facOpen && (
+                                <div className="ml-7 border-l border-purple-500/20 pl-4 py-1">
                                   <div className="flex items-center justify-between py-1">
-                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Semesters</span>
-                                    <AddRow k={`sem-${year.id}`} placeholder="Semester name" type="text" parentId={year.id} />
+                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Academic Years</span>
+                                    <AddRow k={`year-${uni.id}`} placeholder="Year number" type="year" parentId={uni.id} />
                                   </div>
-
-                                  {yearSems.map(sem => {
-                                    const semMods = modules.filter(m => m.semesterId === sem.id);
-                                    const semOpen = expanded.has(sem.id);
-                                    return (
-                                      <div key={sem.id}>
-                                        <div
-                                          className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted/40 transition-colors"
-                                          onClick={() => toggle(sem.id)}
-                                        >
-                                          <span className="text-muted-foreground">
-                                            {semOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                                          </span>
-                                          <BookOpen className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
-                                          <span className="flex-1 text-sm">{sem.name}</span>
-                                          <span className="text-xs text-muted-foreground">{semMods.length} mod{semMods.length !== 1 ? "s" : ""}</span>
-                                          <DeleteBtn kind="sem" id={sem.id} label={sem.name} />
-                                        </div>
-
-                                        {/* Modules */}
-                                        {semOpen && (
-                                          <div className="ml-7 border-l border-border/50 pl-4 py-1">
-                                            <div className="flex items-center justify-between py-1">
-                                              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Modules</span>
-                                              <AddRow k={`mod-${sem.id}`} placeholder="Module name" type="text" parentId={sem.id} />
-                                            </div>
-
-                                            {semMods.map(mod => {
-                                              const modSubjs = subjects.filter(s => s.moduleId === mod.id);
-                                              const modOpen = expanded.has(mod.id);
-                                              return (
-                                                <div key={mod.id}>
-                                                  <div
-                                                    className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/40 transition-colors"
-                                                    onClick={() => toggle(mod.id)}
-                                                  >
-                                                    <span className="text-muted-foreground">
-                                                      {modOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                                                    </span>
-                                                    <div className="h-2 w-2 rounded-full bg-emerald-400 flex-shrink-0" />
-                                                    <span className="flex-1 text-sm">{mod.name}</span>
-                                                    <span className="text-xs text-muted-foreground">{modSubjs.length} subj{modSubjs.length !== 1 ? "s" : ""}</span>
-                                                    <DeleteBtn kind="mod" id={mod.id} label={mod.name} />
-                                                  </div>
-
-                                                  {/* Subjects */}
-                                                  {modOpen && (
-                                                    <div className="ml-6 border-l border-border/40 pl-4 py-1">
-                                                      <div className="flex items-center justify-between py-1">
-                                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Subjects</span>
-                                                        <AddRow k={`subj-${mod.id}`} placeholder="Subject name" type="text" parentId={mod.id} />
-                                                      </div>
-                                                      {modSubjs.length === 0 ? (
-                                                        <p className="py-1.5 text-xs text-muted-foreground italic">No subjects yet</p>
-                                                      ) : (
-                                                        modSubjs.map(subj => (
-                                                          <div key={subj.id} className="group/sub flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30 transition-colors">
-                                                            <FlaskConical className="h-3 w-3 text-pink-400 flex-shrink-0" />
-                                                            <span className="flex-1 text-sm">{subj.name}</span>
-                                                            <DeleteBtn kind="subj" id={subj.id} label={subj.name} alwaysShow />
-                                                          </div>
-                                                        ))
-                                                      )}
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
+                                  {facYears.map(year => <YearRow key={year.id} year={year} />)}
+                                  {facYears.length === 0 && (
+                                    <p className="py-1.5 text-xs text-muted-foreground italic">No years yet</p>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -409,6 +343,99 @@ export default function AdminContentPage() {
           </div>
         )}
       </div>
+
+      {/* YearRow local component — reused for faculty and flat year lists */}
     </div>
   );
+
+  function YearRow({ year }: { year: AcademicYear }) {
+    const yearSems = semesters.filter(s => s.academicYearId === year.id);
+    const yearOpen = expanded.has(year.id);
+    return (
+      <div key={year.id}>
+        <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
+          onClick={() => toggle(year.id)}>
+          <span className="text-muted-foreground">
+            {yearOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+          </span>
+          <Calendar className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+          <span className="flex-1 text-sm">Year {year.yearNumber}</span>
+          <span className="text-xs text-muted-foreground">{yearSems.length} sem{yearSems.length !== 1 ? "s" : ""}</span>
+          <DeleteBtn kind="year" id={year.id} label={`Year ${year.yearNumber}`} />
+        </div>
+
+        {yearOpen && (
+          <div className="ml-7 border-l border-border/50 pl-4 py-1">
+            <div className="flex items-center justify-between py-1">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Semesters</span>
+              <AddRow k={`sem-${year.id}`} placeholder="Semester name" type="text" parentId={year.id} />
+            </div>
+            {yearSems.map(sem => {
+              const semMods = modules.filter(m => m.semesterId === sem.id);
+              const semOpen = expanded.has(sem.id);
+              return (
+                <div key={sem.id}>
+                  <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted/40 transition-colors"
+                    onClick={() => toggle(sem.id)}>
+                    <span className="text-muted-foreground">
+                      {semOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                    </span>
+                    <BookOpen className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
+                    <span className="flex-1 text-sm">{sem.name}</span>
+                    <span className="text-xs text-muted-foreground">{semMods.length} mod{semMods.length !== 1 ? "s" : ""}</span>
+                    <DeleteBtn kind="sem" id={sem.id} label={sem.name} />
+                  </div>
+
+                  {semOpen && (
+                    <div className="ml-7 border-l border-border/50 pl-4 py-1">
+                      <div className="flex items-center justify-between py-1">
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Modules</span>
+                        <AddRow k={`mod-${sem.id}`} placeholder="Module name" type="text" parentId={sem.id} />
+                      </div>
+                      {semMods.map(mod => {
+                        const modSubjs = subjects.filter(s => s.moduleId === mod.id);
+                        const modOpen  = expanded.has(mod.id);
+                        return (
+                          <div key={mod.id}>
+                            <div className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/40 transition-colors"
+                              onClick={() => toggle(mod.id)}>
+                              <span className="text-muted-foreground">
+                                {modOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                              </span>
+                              <div className="h-2 w-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                              <span className="flex-1 text-sm">{mod.name}</span>
+                              <span className="text-xs text-muted-foreground">{modSubjs.length} subj{modSubjs.length !== 1 ? "s" : ""}</span>
+                              <DeleteBtn kind="mod" id={mod.id} label={mod.name} />
+                            </div>
+                            {modOpen && (
+                              <div className="ml-6 border-l border-border/40 pl-4 py-1">
+                                <div className="flex items-center justify-between py-1">
+                                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Subjects</span>
+                                  <AddRow k={`subj-${mod.id}`} placeholder="Subject name" type="text" parentId={mod.id} />
+                                </div>
+                                {modSubjs.length === 0
+                                  ? <p className="py-1.5 text-xs text-muted-foreground italic">No subjects yet</p>
+                                  : modSubjs.map(subj => (
+                                    <div key={subj.id} className="group/sub flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/30 transition-colors">
+                                      <FlaskConical className="h-3 w-3 text-pink-400 flex-shrink-0" />
+                                      <span className="flex-1 text-sm">{subj.name}</span>
+                                      <DeleteBtn kind="subj" id={subj.id} label={subj.name} alwaysShow />
+                                    </div>
+                                  ))
+                                }
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
 }

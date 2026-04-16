@@ -36,6 +36,7 @@ const ProfileSchema = z.object({
   instagramUrl: optionalSocialUrl.optional(),
   facebookUrl: optionalSocialUrl.optional(),
   universityId: z.string().nullable().optional(),
+  facultyId:   z.string().nullable().optional(),
   semesterId:  z.string().nullable().optional(),
   studentId: z.string().min(6).max(16).nullable().optional(),
 });
@@ -80,13 +81,14 @@ export async function PUT(req: NextRequest) {
       ...parsed.data,
       nickname: parsed.data.nickname === "" ? null : parsed.data.nickname,
       universityId: parsed.data.universityId === "" ? null : parsed.data.universityId,
+      facultyId: parsed.data.facultyId === "" ? null : parsed.data.facultyId,
       semesterId: parsed.data.semesterId === "" ? null : parsed.data.semesterId,
       studentId: resolvedStudentId,
     },
     select: {
       id: true, name: true, nickname: true, bio: true, phone: true, phoneVisible: true,
       hideRank: true, isPrivate: true, instagramUrl: true, facebookUrl: true,
-      semesterId: true, universityId: true, studentId: true,
+      semesterId: true, universityId: true, facultyId: true, studentId: true,
     },
   });
 
