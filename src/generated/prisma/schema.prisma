@@ -73,14 +73,24 @@ model SiteConfig {
   id                  String   @id @default(uuid())
   siteName            String   @default("MedQs")
   logoUrl             String?
+  logoUrlDark         String?
+  /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
+  pwaIconUrl          String?
   faviconUrl          String?
-  primaryColor        String   @default("#2563EB")
+  primaryColor        String   @default("#0d9488")
   aiPreferredProvider String   @default("auto")
   enableAI            Boolean  @default(true)
   enableForum         Boolean  @default(true)
   enableAds           Boolean  @default(true)
   enableNotifs        Boolean  @default(true)
   enableLeaderboard   Boolean  @default(true)
+  facebookUrl         String?
+  twitterUrl          String?
+  youtubeUrl          String?
+  instagramUrl        String?
+  telegramUrl         String?
+  whatsappUrl         String?
+  hulkLogoUrl         String?
   fontSans            String?
   fontArabic          String?
   updatedAt           DateTime @updatedAt
@@ -111,6 +121,7 @@ model University {
   idMinLength   Int                      @default(6)
   idMaxLength   Int                      @default(10)
   createdAt     DateTime                 @default(now())
+  faculties     Faculty[]
   academicYears AcademicYear[]
   users         User[]
   adBanners     AdBanner[]
@@ -119,6 +130,22 @@ model University {
   forums        Forum[]
   posts         Post[]
   comments      Comment[]
+}
+
+/// Faculty (كليه) — optional sub-division of a University.
+/// When present, AcademicYears are grouped under a Faculty.
+/// If a University has no Faculties, the old flat structure is preserved (facultyId = null).
+model Faculty {
+  id            String         @id @default(uuid())
+  name          String
+  logoUrl       String?
+  university    University     @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  universityId  String
+  academicYears AcademicYear[]
+  users         User[]
+  createdAt     DateTime       @default(now())
+
+  @@index([universityId])
 }
 
 model UniversityYearIdFormat {
@@ -138,9 +165,13 @@ model AcademicYear {
   yearNumber   Int
   university   University @relation(fields: [universityId], references: [id])
   universityId String
+  /// Optional: when set, this year belongs to a specific faculty within the university.
+  faculty      Faculty?   @relation(fields: [facultyId], references: [id])
+  facultyId    String?
   semesters    Semester[]
 
-  @@unique([universityId, yearNumber])
+  @@unique([universityId, yearNumber, facultyId])
+  @@index([facultyId])
 }
 
 model Semester {
@@ -279,36 +310,43 @@ model Question {
   lecture        Lecture            @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   lectureId      String
   reports        QuestionReport[]
+  savedBy        SavedQuestion[]
   attemptItems   QuizAttemptItem[]
   createdAt      DateTime           @default(now())
 }
 
 model PastPaper {
-  id                      String           @id @default(uuid())
+  id                      String        @id @default(uuid())
   title                   String
-  kind                    PastPaperKind    @default(MODULE_QUESTION_BANK)
+  kind                    PastPaperKind @default(MODULE_QUESTION_BANK)
   pdfUrl                  String?
-  isInteractive           Boolean          @default(false)
+  isInteractive           Boolean       @default(false)
   timeLimitMin            Int?
   // Site-wide AI can still be off; when false, hide AI explain for this paper everywhere.
-  aiExplanationEnabled    Boolean          @default(true)
+  aiExplanationEnabled    Boolean       @default(true)
   // When true, students can open AI during the quiz; when false, only after submit / on review page.
-  allowAiDuringQuiz       Boolean          @default(false)
+  allowAiDuringQuiz       Boolean       @default(false)
   // Secure exam: force exam mode (no tutor / instant feedback), optional integrity UI
-  secureExamMode          Boolean          @default(false)
-  restrictCopyPaste       Boolean          @default(false)
-  trackFocusLoss          Boolean          @default(false)
+  secureExamMode          Boolean       @default(false)
+  restrictCopyPaste       Boolean       @default(false)
+  trackFocusLoss          Boolean       @default(false)
   // Append each submitted attempt as a row to Google Sheets (needs GOOGLE_SHEETS_* env).
-  googleSheetsSyncEnabled Boolean          @default(false)
-  quizLectureId           String?          @unique
-  semester                Semester         @relation(fields: [semesterId], references: [id])
-  semesterId              String
-  module                  Module           @relation(fields: [moduleId], references: [id])
-  moduleId                String
-  quizLecture             Lecture?         @relation(fields: [quizLectureId], references: [id])
-  attempts                QuizAttempt[]
-  questionReports         QuestionReport[]
-  createdAt               DateTime         @default(now())
+  googleSheetsSyncEnabled Boolean       @default(false)
+
+  // When true, questions are shuffled randomly during the digital quiz.
+  randomizeQuestions Boolean @default(false)
+  // When true, the quiz is hidden from students (admin-only view).
+  isPrivate          Boolean @default(false)
+
+  quizLectureId   String?          @unique
+  semester        Semester         @relation(fields: [semesterId], references: [id])
+  semesterId      String
+  module          Module           @relation(fields: [moduleId], references: [id])
+  moduleId        String
+  quizLecture     Lecture?         @relation(fields: [quizLectureId], references: [id])
+  attempts        QuizAttempt[]
+  questionReports QuestionReport[]
+  createdAt       DateTime         @default(now())
 }
 
 model QuestionReport {
@@ -323,6 +361,18 @@ model QuestionReport {
   createdAt   DateTime   @default(now())
 
   @@index([questionId])
+  @@index([userId, createdAt])
+}
+
+model SavedQuestion {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, questionId])
   @@index([userId, createdAt])
 }
 
@@ -405,11 +455,15 @@ model User {
   facebookUrl           String?
   theme                 Theme                  @default(SYSTEM)
   role                  Role                   @default(STUDENT)
+  canManageReports      Boolean                @default(false)
   points                Int                    @default(0)
   password              String?
   studentId             String?
   university            University?            @relation(fields: [universityId], references: [id])
   universityId          String?
+  /// Optional faculty — set during onboarding when university has faculties.
+  faculty               Faculty?               @relation(fields: [facultyId], references: [id])
+  facultyId             String?
   semester              Semester?              @relation(fields: [semesterId], references: [id])
   semesterId            String?
   rank                  Rank?                  @relation(fields: [rankId], references: [id])
@@ -435,10 +489,12 @@ model User {
   accounts              Account[]
   sessions              Session[]
   questionReports       QuestionReport[]
+  savedQuestions        SavedQuestion[]
   dmSent                DirectMessage[]        @relation("DmSent")
   dmReceived            DirectMessage[]        @relation("DmReceived")
   following             UserFollow[]           @relation("UserFollows")
   followers             UserFollow[]           @relation("UserFollowers")
+  documentTemplates     DocumentTemplate[]
 }
 
 model UserLectureActivity {
@@ -684,6 +740,17 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model DocumentTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  fileUrl   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Session {
