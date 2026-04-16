@@ -20,7 +20,7 @@ const navLinks = [
   { href: "/past-papers",  label: "Papers",      icon: FileText },
   { href: "/forum",        label: "Forum",       icon: MessageSquare },
   { href: "/leaderboard",  label: "Leaderboard", icon: Trophy },
-  { href: "/space",        label: "My Space",    icon: Clock },
+  { href: "/taskat",       label: "Taskat",      icon: Clock },
 ];
 
 interface NavbarProps {

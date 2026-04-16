@@ -235,6 +235,11 @@ export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
  * 
  */
 export type VerificationToken = $Result.DefaultSelection<Prisma.$VerificationTokenPayload>
+/**
+ * Model UserTask
+ * 
+ */
+export type UserTask = $Result.DefaultSelection<Prisma.$UserTaskPayload>
 
 /**
  * Enums
@@ -917,6 +922,16 @@ export class PrismaClient<
     * ```
     */
   get verificationToken(): Prisma.VerificationTokenDelegate<ExtArgs>;
+
+  /**
+   * `prisma.userTask`: Exposes CRUD operations for the **UserTask** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserTasks
+    * const userTasks = await prisma.userTask.findMany()
+    * ```
+    */
+  get userTask(): Prisma.UserTaskDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1401,7 +1416,8 @@ export namespace Prisma {
     Account: 'Account',
     DocumentTemplate: 'DocumentTemplate',
     Session: 'Session',
-    VerificationToken: 'VerificationToken'
+    VerificationToken: 'VerificationToken',
+    UserTask: 'UserTask'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1417,7 +1433,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4501,6 +4517,76 @@ export namespace Prisma {
           }
         }
       }
+      UserTask: {
+        payload: Prisma.$UserTaskPayload<ExtArgs>
+        fields: Prisma.UserTaskFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserTaskFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserTaskFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>
+          }
+          findFirst: {
+            args: Prisma.UserTaskFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserTaskFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>
+          }
+          findMany: {
+            args: Prisma.UserTaskFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>[]
+          }
+          create: {
+            args: Prisma.UserTaskCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>
+          }
+          createMany: {
+            args: Prisma.UserTaskCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserTaskCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>[]
+          }
+          delete: {
+            args: Prisma.UserTaskDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>
+          }
+          update: {
+            args: Prisma.UserTaskUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserTaskDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserTaskUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.UserTaskUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserTaskPayload>
+          }
+          aggregate: {
+            args: Prisma.UserTaskAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserTask>
+          }
+          groupBy: {
+            args: Prisma.UserTaskGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserTaskGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserTaskCountArgs<ExtArgs>
+            result: $Utils.Optional<UserTaskCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4837,6 +4923,7 @@ export namespace Prisma {
 
   export type SemesterCountOutputType = {
     modules: number
+    subjects: number
     users: number
     pastPapers: number
     forums: number
@@ -4845,6 +4932,7 @@ export namespace Prisma {
 
   export type SemesterCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     modules?: boolean | SemesterCountOutputTypeCountModulesArgs
+    subjects?: boolean | SemesterCountOutputTypeCountSubjectsArgs
     users?: boolean | SemesterCountOutputTypeCountUsersArgs
     pastPapers?: boolean | SemesterCountOutputTypeCountPastPapersArgs
     forums?: boolean | SemesterCountOutputTypeCountForumsArgs
@@ -4867,6 +4955,13 @@ export namespace Prisma {
    */
   export type SemesterCountOutputTypeCountModulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ModuleWhereInput
+  }
+
+  /**
+   * SemesterCountOutputType without action
+   */
+  export type SemesterCountOutputTypeCountSubjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SubjectWhereInput
   }
 
   /**
@@ -5256,6 +5351,7 @@ export namespace Prisma {
     following: number
     followers: number
     documentTemplates: number
+    tasks: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5283,6 +5379,7 @@ export namespace Prisma {
     following?: boolean | UserCountOutputTypeCountFollowingArgs
     followers?: boolean | UserCountOutputTypeCountFollowersArgs
     documentTemplates?: boolean | UserCountOutputTypeCountDocumentTemplatesArgs
+    tasks?: boolean | UserCountOutputTypeCountTasksArgs
   }
 
   // Custom InputTypes
@@ -5462,6 +5559,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountDocumentTemplatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DocumentTemplateWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserTaskWhereInput
   }
 
 
@@ -11997,6 +12101,7 @@ export namespace Prisma {
     academicYearId?: boolean
     academicYear?: boolean | AcademicYearDefaultArgs<ExtArgs>
     modules?: boolean | Semester$modulesArgs<ExtArgs>
+    subjects?: boolean | Semester$subjectsArgs<ExtArgs>
     users?: boolean | Semester$usersArgs<ExtArgs>
     pastPapers?: boolean | Semester$pastPapersArgs<ExtArgs>
     forums?: boolean | Semester$forumsArgs<ExtArgs>
@@ -12020,6 +12125,7 @@ export namespace Prisma {
   export type SemesterInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     academicYear?: boolean | AcademicYearDefaultArgs<ExtArgs>
     modules?: boolean | Semester$modulesArgs<ExtArgs>
+    subjects?: boolean | Semester$subjectsArgs<ExtArgs>
     users?: boolean | Semester$usersArgs<ExtArgs>
     pastPapers?: boolean | Semester$pastPapersArgs<ExtArgs>
     forums?: boolean | Semester$forumsArgs<ExtArgs>
@@ -12035,6 +12141,7 @@ export namespace Prisma {
     objects: {
       academicYear: Prisma.$AcademicYearPayload<ExtArgs>
       modules: Prisma.$ModulePayload<ExtArgs>[]
+      subjects: Prisma.$SubjectPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
       pastPapers: Prisma.$PastPaperPayload<ExtArgs>[]
       forums: Prisma.$ForumPayload<ExtArgs>[]
@@ -12410,6 +12517,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     academicYear<T extends AcademicYearDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AcademicYearDefaultArgs<ExtArgs>>): Prisma__AcademicYearClient<$Result.GetResult<Prisma.$AcademicYearPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     modules<T extends Semester$modulesArgs<ExtArgs> = {}>(args?: Subset<T, Semester$modulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "findMany"> | Null>
+    subjects<T extends Semester$subjectsArgs<ExtArgs> = {}>(args?: Subset<T, Semester$subjectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubjectPayload<ExtArgs>, T, "findMany"> | Null>
     users<T extends Semester$usersArgs<ExtArgs> = {}>(args?: Subset<T, Semester$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
     pastPapers<T extends Semester$pastPapersArgs<ExtArgs> = {}>(args?: Subset<T, Semester$pastPapersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PastPaperPayload<ExtArgs>, T, "findMany"> | Null>
     forums<T extends Semester$forumsArgs<ExtArgs> = {}>(args?: Subset<T, Semester$forumsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ForumPayload<ExtArgs>, T, "findMany"> | Null>
@@ -12781,6 +12889,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ModuleScalarFieldEnum | ModuleScalarFieldEnum[]
+  }
+
+  /**
+   * Semester.subjects
+   */
+  export type Semester$subjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Subject
+     */
+    select?: SubjectSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SubjectInclude<ExtArgs> | null
+    where?: SubjectWhereInput
+    orderBy?: SubjectOrderByWithRelationInput | SubjectOrderByWithRelationInput[]
+    cursor?: SubjectWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SubjectScalarFieldEnum | SubjectScalarFieldEnum[]
   }
 
   /**
@@ -13851,6 +13979,7 @@ export namespace Prisma {
     id: string | null
     name: string | null
     moduleId: string | null
+    semesterId: string | null
     isQuizSystemBank: boolean | null
   }
 
@@ -13858,6 +13987,7 @@ export namespace Prisma {
     id: string | null
     name: string | null
     moduleId: string | null
+    semesterId: string | null
     isQuizSystemBank: boolean | null
   }
 
@@ -13865,6 +13995,7 @@ export namespace Prisma {
     id: number
     name: number
     moduleId: number
+    semesterId: number
     isQuizSystemBank: number
     _all: number
   }
@@ -13874,6 +14005,7 @@ export namespace Prisma {
     id?: true
     name?: true
     moduleId?: true
+    semesterId?: true
     isQuizSystemBank?: true
   }
 
@@ -13881,6 +14013,7 @@ export namespace Prisma {
     id?: true
     name?: true
     moduleId?: true
+    semesterId?: true
     isQuizSystemBank?: true
   }
 
@@ -13888,6 +14021,7 @@ export namespace Prisma {
     id?: true
     name?: true
     moduleId?: true
+    semesterId?: true
     isQuizSystemBank?: true
     _all?: true
   }
@@ -13967,7 +14101,8 @@ export namespace Prisma {
   export type SubjectGroupByOutputType = {
     id: string
     name: string
-    moduleId: string
+    moduleId: string | null
+    semesterId: string | null
     isQuizSystemBank: boolean
     _count: SubjectCountAggregateOutputType | null
     _min: SubjectMinAggregateOutputType | null
@@ -13992,8 +14127,10 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     moduleId?: boolean
+    semesterId?: boolean
     isQuizSystemBank?: boolean
-    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    module?: boolean | Subject$moduleArgs<ExtArgs>
+    semester?: boolean | Subject$semesterArgs<ExtArgs>
     lectures?: boolean | Subject$lecturesArgs<ExtArgs>
     _count?: boolean | SubjectCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subject"]>
@@ -14002,36 +14139,43 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     moduleId?: boolean
+    semesterId?: boolean
     isQuizSystemBank?: boolean
-    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    module?: boolean | Subject$moduleArgs<ExtArgs>
+    semester?: boolean | Subject$semesterArgs<ExtArgs>
   }, ExtArgs["result"]["subject"]>
 
   export type SubjectSelectScalar = {
     id?: boolean
     name?: boolean
     moduleId?: boolean
+    semesterId?: boolean
     isQuizSystemBank?: boolean
   }
 
   export type SubjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    module?: boolean | Subject$moduleArgs<ExtArgs>
+    semester?: boolean | Subject$semesterArgs<ExtArgs>
     lectures?: boolean | Subject$lecturesArgs<ExtArgs>
     _count?: boolean | SubjectCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SubjectIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    module?: boolean | Subject$moduleArgs<ExtArgs>
+    semester?: boolean | Subject$semesterArgs<ExtArgs>
   }
 
   export type $SubjectPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Subject"
     objects: {
-      module: Prisma.$ModulePayload<ExtArgs>
+      module: Prisma.$ModulePayload<ExtArgs> | null
+      semester: Prisma.$SemesterPayload<ExtArgs> | null
       lectures: Prisma.$LecturePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
-      moduleId: string
+      moduleId: string | null
+      semesterId: string | null
       isQuizSystemBank: boolean
     }, ExtArgs["result"]["subject"]>
     composites: {}
@@ -14397,7 +14541,8 @@ export namespace Prisma {
    */
   export interface Prisma__SubjectClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    module<T extends ModuleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ModuleDefaultArgs<ExtArgs>>): Prisma__ModuleClient<$Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    module<T extends Subject$moduleArgs<ExtArgs> = {}>(args?: Subset<T, Subject$moduleArgs<ExtArgs>>): Prisma__ModuleClient<$Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    semester<T extends Subject$semesterArgs<ExtArgs> = {}>(args?: Subset<T, Subject$semesterArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     lectures<T extends Subject$lecturesArgs<ExtArgs> = {}>(args?: Subset<T, Subject$lecturesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LecturePayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -14431,6 +14576,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Subject", 'String'>
     readonly name: FieldRef<"Subject", 'String'>
     readonly moduleId: FieldRef<"Subject", 'String'>
+    readonly semesterId: FieldRef<"Subject", 'String'>
     readonly isQuizSystemBank: FieldRef<"Subject", 'Boolean'>
   }
     
@@ -14747,6 +14893,36 @@ export namespace Prisma {
      * Filter which Subjects to delete
      */
     where?: SubjectWhereInput
+  }
+
+  /**
+   * Subject.module
+   */
+  export type Subject$moduleArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Module
+     */
+    select?: ModuleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleInclude<ExtArgs> | null
+    where?: ModuleWhereInput
+  }
+
+  /**
+   * Subject.semester
+   */
+  export type Subject$semesterArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    where?: SemesterWhereInput
   }
 
   /**
@@ -29338,6 +29514,7 @@ export namespace Prisma {
     following?: boolean | User$followingArgs<ExtArgs>
     followers?: boolean | User$followersArgs<ExtArgs>
     documentTemplates?: boolean | User$documentTemplatesArgs<ExtArgs>
+    tasks?: boolean | User$tasksArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -29431,6 +29608,7 @@ export namespace Prisma {
     following?: boolean | User$followingArgs<ExtArgs>
     followers?: boolean | User$followersArgs<ExtArgs>
     documentTemplates?: boolean | User$documentTemplatesArgs<ExtArgs>
+    tasks?: boolean | User$tasksArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -29475,6 +29653,7 @@ export namespace Prisma {
       following: Prisma.$UserFollowPayload<ExtArgs>[]
       followers: Prisma.$UserFollowPayload<ExtArgs>[]
       documentTemplates: Prisma.$DocumentTemplatePayload<ExtArgs>[]
+      tasks: Prisma.$UserTaskPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -29895,6 +30074,7 @@ export namespace Prisma {
     following<T extends User$followingArgs<ExtArgs> = {}>(args?: Subset<T, User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserFollowPayload<ExtArgs>, T, "findMany"> | Null>
     followers<T extends User$followersArgs<ExtArgs> = {}>(args?: Subset<T, User$followersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserFollowPayload<ExtArgs>, T, "findMany"> | Null>
     documentTemplates<T extends User$documentTemplatesArgs<ExtArgs> = {}>(args?: Subset<T, User$documentTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentTemplatePayload<ExtArgs>, T, "findMany"> | Null>
+    tasks<T extends User$tasksArgs<ExtArgs> = {}>(args?: Subset<T, User$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -30822,6 +31002,26 @@ export namespace Prisma {
   }
 
   /**
+   * User.tasks
+   */
+  export type User$tasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    where?: UserTaskWhereInput
+    orderBy?: UserTaskOrderByWithRelationInput | UserTaskOrderByWithRelationInput[]
+    cursor?: UserTaskWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserTaskScalarFieldEnum | UserTaskScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -30851,6 +31051,7 @@ export namespace Prisma {
     userId: string | null
     lectureId: string | null
     source: string | null
+    isCompleted: boolean | null
     lastViewedAt: Date | null
   }
 
@@ -30859,6 +31060,7 @@ export namespace Prisma {
     userId: string | null
     lectureId: string | null
     source: string | null
+    isCompleted: boolean | null
     lastViewedAt: Date | null
   }
 
@@ -30867,6 +31069,7 @@ export namespace Prisma {
     userId: number
     lectureId: number
     source: number
+    isCompleted: number
     lastViewedAt: number
     _all: number
   }
@@ -30877,6 +31080,7 @@ export namespace Prisma {
     userId?: true
     lectureId?: true
     source?: true
+    isCompleted?: true
     lastViewedAt?: true
   }
 
@@ -30885,6 +31089,7 @@ export namespace Prisma {
     userId?: true
     lectureId?: true
     source?: true
+    isCompleted?: true
     lastViewedAt?: true
   }
 
@@ -30893,6 +31098,7 @@ export namespace Prisma {
     userId?: true
     lectureId?: true
     source?: true
+    isCompleted?: true
     lastViewedAt?: true
     _all?: true
   }
@@ -30974,6 +31180,7 @@ export namespace Prisma {
     userId: string
     lectureId: string
     source: string | null
+    isCompleted: boolean
     lastViewedAt: Date
     _count: UserLectureActivityCountAggregateOutputType | null
     _min: UserLectureActivityMinAggregateOutputType | null
@@ -30999,6 +31206,7 @@ export namespace Prisma {
     userId?: boolean
     lectureId?: boolean
     source?: boolean
+    isCompleted?: boolean
     lastViewedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     lecture?: boolean | LectureDefaultArgs<ExtArgs>
@@ -31009,6 +31217,7 @@ export namespace Prisma {
     userId?: boolean
     lectureId?: boolean
     source?: boolean
+    isCompleted?: boolean
     lastViewedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     lecture?: boolean | LectureDefaultArgs<ExtArgs>
@@ -31019,6 +31228,7 @@ export namespace Prisma {
     userId?: boolean
     lectureId?: boolean
     source?: boolean
+    isCompleted?: boolean
     lastViewedAt?: boolean
   }
 
@@ -31042,6 +31252,7 @@ export namespace Prisma {
       userId: string
       lectureId: string
       source: string | null
+      isCompleted: boolean
       lastViewedAt: Date
     }, ExtArgs["result"]["userLectureActivity"]>
     composites: {}
@@ -31442,6 +31653,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"UserLectureActivity", 'String'>
     readonly lectureId: FieldRef<"UserLectureActivity", 'String'>
     readonly source: FieldRef<"UserLectureActivity", 'String'>
+    readonly isCompleted: FieldRef<"UserLectureActivity", 'Boolean'>
     readonly lastViewedAt: FieldRef<"UserLectureActivity", 'DateTime'>
   }
     
@@ -50085,6 +50297,999 @@ export namespace Prisma {
 
 
   /**
+   * Model UserTask
+   */
+
+  export type AggregateUserTask = {
+    _count: UserTaskCountAggregateOutputType | null
+    _min: UserTaskMinAggregateOutputType | null
+    _max: UserTaskMaxAggregateOutputType | null
+  }
+
+  export type UserTaskMinAggregateOutputType = {
+    id: string | null
+    title: string | null
+    description: string | null
+    time: string | null
+    completed: boolean | null
+    date: Date | null
+    lectureId: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserTaskMaxAggregateOutputType = {
+    id: string | null
+    title: string | null
+    description: string | null
+    time: string | null
+    completed: boolean | null
+    date: Date | null
+    lectureId: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserTaskCountAggregateOutputType = {
+    id: number
+    title: number
+    description: number
+    time: number
+    completed: number
+    date: number
+    lectureId: number
+    userId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type UserTaskMinAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    time?: true
+    completed?: true
+    date?: true
+    lectureId?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserTaskMaxAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    time?: true
+    completed?: true
+    date?: true
+    lectureId?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserTaskCountAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    time?: true
+    completed?: true
+    date?: true
+    lectureId?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type UserTaskAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserTask to aggregate.
+     */
+    where?: UserTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserTasks to fetch.
+     */
+    orderBy?: UserTaskOrderByWithRelationInput | UserTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserTasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserTasks
+    **/
+    _count?: true | UserTaskCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserTaskMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserTaskMaxAggregateInputType
+  }
+
+  export type GetUserTaskAggregateType<T extends UserTaskAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserTask]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserTask[P]>
+      : GetScalarType<T[P], AggregateUserTask[P]>
+  }
+
+
+
+
+  export type UserTaskGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserTaskWhereInput
+    orderBy?: UserTaskOrderByWithAggregationInput | UserTaskOrderByWithAggregationInput[]
+    by: UserTaskScalarFieldEnum[] | UserTaskScalarFieldEnum
+    having?: UserTaskScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserTaskCountAggregateInputType | true
+    _min?: UserTaskMinAggregateInputType
+    _max?: UserTaskMaxAggregateInputType
+  }
+
+  export type UserTaskGroupByOutputType = {
+    id: string
+    title: string
+    description: string | null
+    time: string | null
+    completed: boolean
+    date: Date
+    lectureId: string | null
+    userId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: UserTaskCountAggregateOutputType | null
+    _min: UserTaskMinAggregateOutputType | null
+    _max: UserTaskMaxAggregateOutputType | null
+  }
+
+  type GetUserTaskGroupByPayload<T extends UserTaskGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserTaskGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserTaskGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserTaskGroupByOutputType[P]>
+            : GetScalarType<T[P], UserTaskGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserTaskSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    time?: boolean
+    completed?: boolean
+    date?: boolean
+    lectureId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userTask"]>
+
+  export type UserTaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    time?: boolean
+    completed?: boolean
+    date?: boolean
+    lectureId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userTask"]>
+
+  export type UserTaskSelectScalar = {
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    time?: boolean
+    completed?: boolean
+    date?: boolean
+    lectureId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type UserTaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UserTaskIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $UserTaskPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserTask"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      title: string
+      description: string | null
+      time: string | null
+      completed: boolean
+      date: Date
+      lectureId: string | null
+      userId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["userTask"]>
+    composites: {}
+  }
+
+  type UserTaskGetPayload<S extends boolean | null | undefined | UserTaskDefaultArgs> = $Result.GetResult<Prisma.$UserTaskPayload, S>
+
+  type UserTaskCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<UserTaskFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: UserTaskCountAggregateInputType | true
+    }
+
+  export interface UserTaskDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserTask'], meta: { name: 'UserTask' } }
+    /**
+     * Find zero or one UserTask that matches the filter.
+     * @param {UserTaskFindUniqueArgs} args - Arguments to find a UserTask
+     * @example
+     * // Get one UserTask
+     * const userTask = await prisma.userTask.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserTaskFindUniqueArgs>(args: SelectSubset<T, UserTaskFindUniqueArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one UserTask that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {UserTaskFindUniqueOrThrowArgs} args - Arguments to find a UserTask
+     * @example
+     * // Get one UserTask
+     * const userTask = await prisma.userTask.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserTaskFindUniqueOrThrowArgs>(args: SelectSubset<T, UserTaskFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first UserTask that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserTaskFindFirstArgs} args - Arguments to find a UserTask
+     * @example
+     * // Get one UserTask
+     * const userTask = await prisma.userTask.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserTaskFindFirstArgs>(args?: SelectSubset<T, UserTaskFindFirstArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first UserTask that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserTaskFindFirstOrThrowArgs} args - Arguments to find a UserTask
+     * @example
+     * // Get one UserTask
+     * const userTask = await prisma.userTask.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserTaskFindFirstOrThrowArgs>(args?: SelectSubset<T, UserTaskFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more UserTasks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserTaskFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserTasks
+     * const userTasks = await prisma.userTask.findMany()
+     * 
+     * // Get first 10 UserTasks
+     * const userTasks = await prisma.userTask.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userTaskWithIdOnly = await prisma.userTask.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UserTaskFindManyArgs>(args?: SelectSubset<T, UserTaskFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a UserTask.
+     * @param {UserTaskCreateArgs} args - Arguments to create a UserTask.
+     * @example
+     * // Create one UserTask
+     * const UserTask = await prisma.userTask.create({
+     *   data: {
+     *     // ... data to create a UserTask
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserTaskCreateArgs>(args: SelectSubset<T, UserTaskCreateArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many UserTasks.
+     * @param {UserTaskCreateManyArgs} args - Arguments to create many UserTasks.
+     * @example
+     * // Create many UserTasks
+     * const userTask = await prisma.userTask.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserTaskCreateManyArgs>(args?: SelectSubset<T, UserTaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserTasks and returns the data saved in the database.
+     * @param {UserTaskCreateManyAndReturnArgs} args - Arguments to create many UserTasks.
+     * @example
+     * // Create many UserTasks
+     * const userTask = await prisma.userTask.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserTasks and only return the `id`
+     * const userTaskWithIdOnly = await prisma.userTask.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserTaskCreateManyAndReturnArgs>(args?: SelectSubset<T, UserTaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a UserTask.
+     * @param {UserTaskDeleteArgs} args - Arguments to delete one UserTask.
+     * @example
+     * // Delete one UserTask
+     * const UserTask = await prisma.userTask.delete({
+     *   where: {
+     *     // ... filter to delete one UserTask
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserTaskDeleteArgs>(args: SelectSubset<T, UserTaskDeleteArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one UserTask.
+     * @param {UserTaskUpdateArgs} args - Arguments to update one UserTask.
+     * @example
+     * // Update one UserTask
+     * const userTask = await prisma.userTask.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserTaskUpdateArgs>(args: SelectSubset<T, UserTaskUpdateArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more UserTasks.
+     * @param {UserTaskDeleteManyArgs} args - Arguments to filter UserTasks to delete.
+     * @example
+     * // Delete a few UserTasks
+     * const { count } = await prisma.userTask.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserTaskDeleteManyArgs>(args?: SelectSubset<T, UserTaskDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserTasks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserTaskUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserTasks
+     * const userTask = await prisma.userTask.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserTaskUpdateManyArgs>(args: SelectSubset<T, UserTaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one UserTask.
+     * @param {UserTaskUpsertArgs} args - Arguments to update or create a UserTask.
+     * @example
+     * // Update or create a UserTask
+     * const userTask = await prisma.userTask.upsert({
+     *   create: {
+     *     // ... data to create a UserTask
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserTask we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserTaskUpsertArgs>(args: SelectSubset<T, UserTaskUpsertArgs<ExtArgs>>): Prisma__UserTaskClient<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of UserTasks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserTaskCountArgs} args - Arguments to filter UserTasks to count.
+     * @example
+     * // Count the number of UserTasks
+     * const count = await prisma.userTask.count({
+     *   where: {
+     *     // ... the filter for the UserTasks we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserTaskCountArgs>(
+      args?: Subset<T, UserTaskCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserTaskCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserTask.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserTaskAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserTaskAggregateArgs>(args: Subset<T, UserTaskAggregateArgs>): Prisma.PrismaPromise<GetUserTaskAggregateType<T>>
+
+    /**
+     * Group by UserTask.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserTaskGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserTaskGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserTaskGroupByArgs['orderBy'] }
+        : { orderBy?: UserTaskGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserTaskGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserTaskGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserTask model
+   */
+  readonly fields: UserTaskFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserTask.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserTaskClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserTask model
+   */ 
+  interface UserTaskFieldRefs {
+    readonly id: FieldRef<"UserTask", 'String'>
+    readonly title: FieldRef<"UserTask", 'String'>
+    readonly description: FieldRef<"UserTask", 'String'>
+    readonly time: FieldRef<"UserTask", 'String'>
+    readonly completed: FieldRef<"UserTask", 'Boolean'>
+    readonly date: FieldRef<"UserTask", 'DateTime'>
+    readonly lectureId: FieldRef<"UserTask", 'String'>
+    readonly userId: FieldRef<"UserTask", 'String'>
+    readonly createdAt: FieldRef<"UserTask", 'DateTime'>
+    readonly updatedAt: FieldRef<"UserTask", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserTask findUnique
+   */
+  export type UserTaskFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * Filter, which UserTask to fetch.
+     */
+    where: UserTaskWhereUniqueInput
+  }
+
+  /**
+   * UserTask findUniqueOrThrow
+   */
+  export type UserTaskFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * Filter, which UserTask to fetch.
+     */
+    where: UserTaskWhereUniqueInput
+  }
+
+  /**
+   * UserTask findFirst
+   */
+  export type UserTaskFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * Filter, which UserTask to fetch.
+     */
+    where?: UserTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserTasks to fetch.
+     */
+    orderBy?: UserTaskOrderByWithRelationInput | UserTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserTasks.
+     */
+    cursor?: UserTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserTasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserTasks.
+     */
+    distinct?: UserTaskScalarFieldEnum | UserTaskScalarFieldEnum[]
+  }
+
+  /**
+   * UserTask findFirstOrThrow
+   */
+  export type UserTaskFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * Filter, which UserTask to fetch.
+     */
+    where?: UserTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserTasks to fetch.
+     */
+    orderBy?: UserTaskOrderByWithRelationInput | UserTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserTasks.
+     */
+    cursor?: UserTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserTasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserTasks.
+     */
+    distinct?: UserTaskScalarFieldEnum | UserTaskScalarFieldEnum[]
+  }
+
+  /**
+   * UserTask findMany
+   */
+  export type UserTaskFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * Filter, which UserTasks to fetch.
+     */
+    where?: UserTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserTasks to fetch.
+     */
+    orderBy?: UserTaskOrderByWithRelationInput | UserTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserTasks.
+     */
+    cursor?: UserTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserTasks.
+     */
+    skip?: number
+    distinct?: UserTaskScalarFieldEnum | UserTaskScalarFieldEnum[]
+  }
+
+  /**
+   * UserTask create
+   */
+  export type UserTaskCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UserTask.
+     */
+    data: XOR<UserTaskCreateInput, UserTaskUncheckedCreateInput>
+  }
+
+  /**
+   * UserTask createMany
+   */
+  export type UserTaskCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserTasks.
+     */
+    data: UserTaskCreateManyInput | UserTaskCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserTask createManyAndReturn
+   */
+  export type UserTaskCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many UserTasks.
+     */
+    data: UserTaskCreateManyInput | UserTaskCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserTask update
+   */
+  export type UserTaskUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UserTask.
+     */
+    data: XOR<UserTaskUpdateInput, UserTaskUncheckedUpdateInput>
+    /**
+     * Choose, which UserTask to update.
+     */
+    where: UserTaskWhereUniqueInput
+  }
+
+  /**
+   * UserTask updateMany
+   */
+  export type UserTaskUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserTasks.
+     */
+    data: XOR<UserTaskUpdateManyMutationInput, UserTaskUncheckedUpdateManyInput>
+    /**
+     * Filter which UserTasks to update
+     */
+    where?: UserTaskWhereInput
+  }
+
+  /**
+   * UserTask upsert
+   */
+  export type UserTaskUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UserTask to update in case it exists.
+     */
+    where: UserTaskWhereUniqueInput
+    /**
+     * In case the UserTask found by the `where` argument doesn't exist, create a new UserTask with this data.
+     */
+    create: XOR<UserTaskCreateInput, UserTaskUncheckedCreateInput>
+    /**
+     * In case the UserTask was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserTaskUpdateInput, UserTaskUncheckedUpdateInput>
+  }
+
+  /**
+   * UserTask delete
+   */
+  export type UserTaskDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+    /**
+     * Filter which UserTask to delete.
+     */
+    where: UserTaskWhereUniqueInput
+  }
+
+  /**
+   * UserTask deleteMany
+   */
+  export type UserTaskDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserTasks to delete
+     */
+    where?: UserTaskWhereInput
+  }
+
+  /**
+   * UserTask without action
+   */
+  export type UserTaskDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserTask
+     */
+    select?: UserTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserTaskInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -50206,6 +51411,7 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     moduleId: 'moduleId',
+    semesterId: 'semesterId',
     isQuizSystemBank: 'isQuizSystemBank'
   };
 
@@ -50440,6 +51646,7 @@ export namespace Prisma {
     userId: 'userId',
     lectureId: 'lectureId',
     source: 'source',
+    isCompleted: 'isCompleted',
     lastViewedAt: 'lastViewedAt'
   };
 
@@ -50667,6 +51874,22 @@ export namespace Prisma {
   };
 
   export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
+
+
+  export const UserTaskScalarFieldEnum: {
+    id: 'id',
+    title: 'title',
+    description: 'description',
+    time: 'time',
+    completed: 'completed',
+    date: 'date',
+    lectureId: 'lectureId',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type UserTaskScalarFieldEnum = (typeof UserTaskScalarFieldEnum)[keyof typeof UserTaskScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -51402,6 +52625,7 @@ export namespace Prisma {
     academicYearId?: StringFilter<"Semester"> | string
     academicYear?: XOR<AcademicYearRelationFilter, AcademicYearWhereInput>
     modules?: ModuleListRelationFilter
+    subjects?: SubjectListRelationFilter
     users?: UserListRelationFilter
     pastPapers?: PastPaperListRelationFilter
     forums?: ForumListRelationFilter
@@ -51414,6 +52638,7 @@ export namespace Prisma {
     academicYearId?: SortOrder
     academicYear?: AcademicYearOrderByWithRelationInput
     modules?: ModuleOrderByRelationAggregateInput
+    subjects?: SubjectOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
     pastPapers?: PastPaperOrderByRelationAggregateInput
     forums?: ForumOrderByRelationAggregateInput
@@ -51429,6 +52654,7 @@ export namespace Prisma {
     academicYearId?: StringFilter<"Semester"> | string
     academicYear?: XOR<AcademicYearRelationFilter, AcademicYearWhereInput>
     modules?: ModuleListRelationFilter
+    subjects?: SubjectListRelationFilter
     users?: UserListRelationFilter
     pastPapers?: PastPaperListRelationFilter
     forums?: ForumListRelationFilter
@@ -51510,18 +52736,22 @@ export namespace Prisma {
     NOT?: SubjectWhereInput | SubjectWhereInput[]
     id?: StringFilter<"Subject"> | string
     name?: StringFilter<"Subject"> | string
-    moduleId?: StringFilter<"Subject"> | string
+    moduleId?: StringNullableFilter<"Subject"> | string | null
+    semesterId?: StringNullableFilter<"Subject"> | string | null
     isQuizSystemBank?: BoolFilter<"Subject"> | boolean
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
+    module?: XOR<ModuleNullableRelationFilter, ModuleWhereInput> | null
+    semester?: XOR<SemesterNullableRelationFilter, SemesterWhereInput> | null
     lectures?: LectureListRelationFilter
   }
 
   export type SubjectOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
-    moduleId?: SortOrder
+    moduleId?: SortOrderInput | SortOrder
+    semesterId?: SortOrderInput | SortOrder
     isQuizSystemBank?: SortOrder
     module?: ModuleOrderByWithRelationInput
+    semester?: SemesterOrderByWithRelationInput
     lectures?: LectureOrderByRelationAggregateInput
   }
 
@@ -51531,16 +52761,19 @@ export namespace Prisma {
     OR?: SubjectWhereInput[]
     NOT?: SubjectWhereInput | SubjectWhereInput[]
     name?: StringFilter<"Subject"> | string
-    moduleId?: StringFilter<"Subject"> | string
+    moduleId?: StringNullableFilter<"Subject"> | string | null
+    semesterId?: StringNullableFilter<"Subject"> | string | null
     isQuizSystemBank?: BoolFilter<"Subject"> | boolean
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
+    module?: XOR<ModuleNullableRelationFilter, ModuleWhereInput> | null
+    semester?: XOR<SemesterNullableRelationFilter, SemesterWhereInput> | null
     lectures?: LectureListRelationFilter
   }, "id">
 
   export type SubjectOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
-    moduleId?: SortOrder
+    moduleId?: SortOrderInput | SortOrder
+    semesterId?: SortOrderInput | SortOrder
     isQuizSystemBank?: SortOrder
     _count?: SubjectCountOrderByAggregateInput
     _max?: SubjectMaxOrderByAggregateInput
@@ -51553,7 +52786,8 @@ export namespace Prisma {
     NOT?: SubjectScalarWhereWithAggregatesInput | SubjectScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Subject"> | string
     name?: StringWithAggregatesFilter<"Subject"> | string
-    moduleId?: StringWithAggregatesFilter<"Subject"> | string
+    moduleId?: StringNullableWithAggregatesFilter<"Subject"> | string | null
+    semesterId?: StringNullableWithAggregatesFilter<"Subject"> | string | null
     isQuizSystemBank?: BoolWithAggregatesFilter<"Subject"> | boolean
   }
 
@@ -52659,6 +53893,7 @@ export namespace Prisma {
     following?: UserFollowListRelationFilter
     followers?: UserFollowListRelationFilter
     documentTemplates?: DocumentTemplateListRelationFilter
+    tasks?: UserTaskListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -52716,6 +53951,7 @@ export namespace Prisma {
     following?: UserFollowOrderByRelationAggregateInput
     followers?: UserFollowOrderByRelationAggregateInput
     documentTemplates?: DocumentTemplateOrderByRelationAggregateInput
+    tasks?: UserTaskOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -52776,6 +54012,7 @@ export namespace Prisma {
     following?: UserFollowListRelationFilter
     followers?: UserFollowListRelationFilter
     documentTemplates?: DocumentTemplateListRelationFilter
+    tasks?: UserTaskListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -52850,6 +54087,7 @@ export namespace Prisma {
     userId?: StringFilter<"UserLectureActivity"> | string
     lectureId?: StringFilter<"UserLectureActivity"> | string
     source?: StringNullableFilter<"UserLectureActivity"> | string | null
+    isCompleted?: BoolFilter<"UserLectureActivity"> | boolean
     lastViewedAt?: DateTimeFilter<"UserLectureActivity"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
     lecture?: XOR<LectureRelationFilter, LectureWhereInput>
@@ -52860,6 +54098,7 @@ export namespace Prisma {
     userId?: SortOrder
     lectureId?: SortOrder
     source?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
     lastViewedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     lecture?: LectureOrderByWithRelationInput
@@ -52874,6 +54113,7 @@ export namespace Prisma {
     userId?: StringFilter<"UserLectureActivity"> | string
     lectureId?: StringFilter<"UserLectureActivity"> | string
     source?: StringNullableFilter<"UserLectureActivity"> | string | null
+    isCompleted?: BoolFilter<"UserLectureActivity"> | boolean
     lastViewedAt?: DateTimeFilter<"UserLectureActivity"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
     lecture?: XOR<LectureRelationFilter, LectureWhereInput>
@@ -52884,6 +54124,7 @@ export namespace Prisma {
     userId?: SortOrder
     lectureId?: SortOrder
     source?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
     lastViewedAt?: SortOrder
     _count?: UserLectureActivityCountOrderByAggregateInput
     _max?: UserLectureActivityMaxOrderByAggregateInput
@@ -52898,6 +54139,7 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"UserLectureActivity"> | string
     lectureId?: StringWithAggregatesFilter<"UserLectureActivity"> | string
     source?: StringNullableWithAggregatesFilter<"UserLectureActivity"> | string | null
+    isCompleted?: BoolWithAggregatesFilter<"UserLectureActivity"> | boolean
     lastViewedAt?: DateTimeWithAggregatesFilter<"UserLectureActivity"> | Date | string
   }
 
@@ -54092,6 +55334,86 @@ export namespace Prisma {
     expires?: DateTimeWithAggregatesFilter<"VerificationToken"> | Date | string
   }
 
+  export type UserTaskWhereInput = {
+    AND?: UserTaskWhereInput | UserTaskWhereInput[]
+    OR?: UserTaskWhereInput[]
+    NOT?: UserTaskWhereInput | UserTaskWhereInput[]
+    id?: StringFilter<"UserTask"> | string
+    title?: StringFilter<"UserTask"> | string
+    description?: StringNullableFilter<"UserTask"> | string | null
+    time?: StringNullableFilter<"UserTask"> | string | null
+    completed?: BoolFilter<"UserTask"> | boolean
+    date?: DateTimeFilter<"UserTask"> | Date | string
+    lectureId?: StringNullableFilter<"UserTask"> | string | null
+    userId?: StringFilter<"UserTask"> | string
+    createdAt?: DateTimeFilter<"UserTask"> | Date | string
+    updatedAt?: DateTimeFilter<"UserTask"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type UserTaskOrderByWithRelationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    time?: SortOrderInput | SortOrder
+    completed?: SortOrder
+    date?: SortOrder
+    lectureId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type UserTaskWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: UserTaskWhereInput | UserTaskWhereInput[]
+    OR?: UserTaskWhereInput[]
+    NOT?: UserTaskWhereInput | UserTaskWhereInput[]
+    title?: StringFilter<"UserTask"> | string
+    description?: StringNullableFilter<"UserTask"> | string | null
+    time?: StringNullableFilter<"UserTask"> | string | null
+    completed?: BoolFilter<"UserTask"> | boolean
+    date?: DateTimeFilter<"UserTask"> | Date | string
+    lectureId?: StringNullableFilter<"UserTask"> | string | null
+    userId?: StringFilter<"UserTask"> | string
+    createdAt?: DateTimeFilter<"UserTask"> | Date | string
+    updatedAt?: DateTimeFilter<"UserTask"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type UserTaskOrderByWithAggregationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    time?: SortOrderInput | SortOrder
+    completed?: SortOrder
+    date?: SortOrder
+    lectureId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: UserTaskCountOrderByAggregateInput
+    _max?: UserTaskMaxOrderByAggregateInput
+    _min?: UserTaskMinOrderByAggregateInput
+  }
+
+  export type UserTaskScalarWhereWithAggregatesInput = {
+    AND?: UserTaskScalarWhereWithAggregatesInput | UserTaskScalarWhereWithAggregatesInput[]
+    OR?: UserTaskScalarWhereWithAggregatesInput[]
+    NOT?: UserTaskScalarWhereWithAggregatesInput | UserTaskScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"UserTask"> | string
+    title?: StringWithAggregatesFilter<"UserTask"> | string
+    description?: StringNullableWithAggregatesFilter<"UserTask"> | string | null
+    time?: StringNullableWithAggregatesFilter<"UserTask"> | string | null
+    completed?: BoolWithAggregatesFilter<"UserTask"> | boolean
+    date?: DateTimeWithAggregatesFilter<"UserTask"> | Date | string
+    lectureId?: StringNullableWithAggregatesFilter<"UserTask"> | string | null
+    userId?: StringWithAggregatesFilter<"UserTask"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"UserTask"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"UserTask"> | Date | string
+  }
+
   export type SiteConfigCreateInput = {
     id?: string
     siteName?: string
@@ -54616,6 +55938,7 @@ export namespace Prisma {
     name: string
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
     forums?: ForumCreateNestedManyWithoutSemesterInput
@@ -54627,6 +55950,7 @@ export namespace Prisma {
     name: string
     academicYearId: string
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
@@ -54638,6 +55962,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
     forums?: ForumUpdateManyWithoutSemesterNestedInput
@@ -54649,6 +55974,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYearId?: StringFieldUpdateOperationsInput | string
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
@@ -54725,14 +56051,16 @@ export namespace Prisma {
     id?: string
     name: string
     isQuizSystemBank?: boolean
-    module: ModuleCreateNestedOneWithoutSubjectsInput
+    module?: ModuleCreateNestedOneWithoutSubjectsInput
+    semester?: SemesterCreateNestedOneWithoutSubjectsInput
     lectures?: LectureCreateNestedManyWithoutSubjectInput
   }
 
   export type SubjectUncheckedCreateInput = {
     id?: string
     name: string
-    moduleId: string
+    moduleId?: string | null
+    semesterId?: string | null
     isQuizSystemBank?: boolean
     lectures?: LectureUncheckedCreateNestedManyWithoutSubjectInput
   }
@@ -54741,14 +56069,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
-    module?: ModuleUpdateOneRequiredWithoutSubjectsNestedInput
+    module?: ModuleUpdateOneWithoutSubjectsNestedInput
+    semester?: SemesterUpdateOneWithoutSubjectsNestedInput
     lectures?: LectureUpdateManyWithoutSubjectNestedInput
   }
 
   export type SubjectUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    moduleId?: StringFieldUpdateOperationsInput | string
+    moduleId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     lectures?: LectureUncheckedUpdateManyWithoutSubjectNestedInput
   }
@@ -54756,7 +56086,8 @@ export namespace Prisma {
   export type SubjectCreateManyInput = {
     id?: string
     name: string
-    moduleId: string
+    moduleId?: string | null
+    semesterId?: string | null
     isQuizSystemBank?: boolean
   }
 
@@ -54769,7 +56100,8 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    moduleId?: StringFieldUpdateOperationsInput | string
+    moduleId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -55911,6 +57243,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -55964,6 +57297,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -56017,6 +57351,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -56070,6 +57405,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -56155,6 +57491,7 @@ export namespace Prisma {
   export type UserLectureActivityCreateInput = {
     id?: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
     user: UserCreateNestedOneWithoutLectureActivitiesInput
     lecture: LectureCreateNestedOneWithoutActivitiesInput
@@ -56165,12 +57502,14 @@ export namespace Prisma {
     userId: string
     lectureId: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
   }
 
   export type UserLectureActivityUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutLectureActivitiesNestedInput
     lecture?: LectureUpdateOneRequiredWithoutActivitiesNestedInput
@@ -56181,6 +57520,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     lectureId?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -56189,12 +57529,14 @@ export namespace Prisma {
     userId: string
     lectureId: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
   }
 
   export type UserLectureActivityUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -56203,6 +57545,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     lectureId?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -57369,6 +58712,96 @@ export namespace Prisma {
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserTaskCreateInput = {
+    id?: string
+    title: string
+    description?: string | null
+    time?: string | null
+    completed?: boolean
+    date?: Date | string
+    lectureId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutTasksInput
+  }
+
+  export type UserTaskUncheckedCreateInput = {
+    id?: string
+    title: string
+    description?: string | null
+    time?: string | null
+    completed?: boolean
+    date?: Date | string
+    lectureId?: string | null
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserTaskUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    time?: NullableStringFieldUpdateOperationsInput | string | null
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    lectureId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTasksNestedInput
+  }
+
+  export type UserTaskUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    time?: NullableStringFieldUpdateOperationsInput | string | null
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    lectureId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserTaskCreateManyInput = {
+    id?: string
+    title: string
+    description?: string | null
+    time?: string | null
+    completed?: boolean
+    date?: Date | string
+    lectureId?: string | null
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserTaskUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    time?: NullableStringFieldUpdateOperationsInput | string | null
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    lectureId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserTaskUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    time?: NullableStringFieldUpdateOperationsInput | string | null
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    lectureId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -57926,6 +59359,12 @@ export namespace Prisma {
     none?: ModuleWhereInput
   }
 
+  export type SubjectListRelationFilter = {
+    every?: SubjectWhereInput
+    some?: SubjectWhereInput
+    none?: SubjectWhereInput
+  }
+
   export type PastPaperListRelationFilter = {
     every?: PastPaperWhereInput
     some?: PastPaperWhereInput
@@ -57933,6 +59372,10 @@ export namespace Prisma {
   }
 
   export type ModuleOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SubjectOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -57963,16 +59406,6 @@ export namespace Prisma {
     isNot?: SemesterWhereInput
   }
 
-  export type SubjectListRelationFilter = {
-    every?: SubjectWhereInput
-    some?: SubjectWhereInput
-    none?: SubjectWhereInput
-  }
-
-  export type SubjectOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type ModuleCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -57991,9 +59424,14 @@ export namespace Prisma {
     semesterId?: SortOrder
   }
 
-  export type ModuleRelationFilter = {
-    is?: ModuleWhereInput
-    isNot?: ModuleWhereInput
+  export type ModuleNullableRelationFilter = {
+    is?: ModuleWhereInput | null
+    isNot?: ModuleWhereInput | null
+  }
+
+  export type SemesterNullableRelationFilter = {
+    is?: SemesterWhereInput | null
+    isNot?: SemesterWhereInput | null
   }
 
   export type LectureListRelationFilter = {
@@ -58010,6 +59448,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     moduleId?: SortOrder
+    semesterId?: SortOrder
     isQuizSystemBank?: SortOrder
   }
 
@@ -58017,6 +59456,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     moduleId?: SortOrder
+    semesterId?: SortOrder
     isQuizSystemBank?: SortOrder
   }
 
@@ -58024,6 +59464,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     moduleId?: SortOrder
+    semesterId?: SortOrder
     isQuizSystemBank?: SortOrder
   }
 
@@ -58485,6 +59926,11 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type ModuleRelationFilter = {
+    is?: ModuleWhereInput
+    isNot?: ModuleWhereInput
+  }
+
   export type LectureNullableRelationFilter = {
     is?: LectureWhereInput | null
     isNot?: LectureWhereInput | null
@@ -58842,11 +60288,6 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
-  export type SemesterNullableRelationFilter = {
-    is?: SemesterWhereInput | null
-    isNot?: SemesterWhereInput | null
-  }
-
   export type RankNullableRelationFilter = {
     is?: RankWhereInput | null
     isNot?: RankWhereInput | null
@@ -58935,6 +60376,12 @@ export namespace Prisma {
     none?: DocumentTemplateWhereInput
   }
 
+  export type UserTaskListRelationFilter = {
+    every?: UserTaskWhereInput
+    some?: UserTaskWhereInput
+    none?: UserTaskWhereInput
+  }
+
   export type LikeOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -58984,6 +60431,10 @@ export namespace Prisma {
   }
 
   export type DocumentTemplateOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type UserTaskOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -59123,6 +60574,7 @@ export namespace Prisma {
     userId?: SortOrder
     lectureId?: SortOrder
     source?: SortOrder
+    isCompleted?: SortOrder
     lastViewedAt?: SortOrder
   }
 
@@ -59131,6 +60583,7 @@ export namespace Prisma {
     userId?: SortOrder
     lectureId?: SortOrder
     source?: SortOrder
+    isCompleted?: SortOrder
     lastViewedAt?: SortOrder
   }
 
@@ -59139,6 +60592,7 @@ export namespace Prisma {
     userId?: SortOrder
     lectureId?: SortOrder
     source?: SortOrder
+    isCompleted?: SortOrder
     lastViewedAt?: SortOrder
   }
 
@@ -59801,6 +61255,45 @@ export namespace Prisma {
     expires?: SortOrder
   }
 
+  export type UserTaskCountOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    time?: SortOrder
+    completed?: SortOrder
+    date?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserTaskMaxOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    time?: SortOrder
+    completed?: SortOrder
+    date?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserTaskMinOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    time?: SortOrder
+    completed?: SortOrder
+    date?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -60416,6 +61909,13 @@ export namespace Prisma {
     connect?: ModuleWhereUniqueInput | ModuleWhereUniqueInput[]
   }
 
+  export type SubjectCreateNestedManyWithoutSemesterInput = {
+    create?: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput> | SubjectCreateWithoutSemesterInput[] | SubjectUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: SubjectCreateOrConnectWithoutSemesterInput | SubjectCreateOrConnectWithoutSemesterInput[]
+    createMany?: SubjectCreateManySemesterInputEnvelope
+    connect?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+  }
+
   export type UserCreateNestedManyWithoutSemesterInput = {
     create?: XOR<UserCreateWithoutSemesterInput, UserUncheckedCreateWithoutSemesterInput> | UserCreateWithoutSemesterInput[] | UserUncheckedCreateWithoutSemesterInput[]
     connectOrCreate?: UserCreateOrConnectWithoutSemesterInput | UserCreateOrConnectWithoutSemesterInput[]
@@ -60449,6 +61949,13 @@ export namespace Prisma {
     connectOrCreate?: ModuleCreateOrConnectWithoutSemesterInput | ModuleCreateOrConnectWithoutSemesterInput[]
     createMany?: ModuleCreateManySemesterInputEnvelope
     connect?: ModuleWhereUniqueInput | ModuleWhereUniqueInput[]
+  }
+
+  export type SubjectUncheckedCreateNestedManyWithoutSemesterInput = {
+    create?: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput> | SubjectCreateWithoutSemesterInput[] | SubjectUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: SubjectCreateOrConnectWithoutSemesterInput | SubjectCreateOrConnectWithoutSemesterInput[]
+    createMany?: SubjectCreateManySemesterInputEnvelope
+    connect?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
   }
 
   export type UserUncheckedCreateNestedManyWithoutSemesterInput = {
@@ -60499,6 +62006,20 @@ export namespace Prisma {
     update?: ModuleUpdateWithWhereUniqueWithoutSemesterInput | ModuleUpdateWithWhereUniqueWithoutSemesterInput[]
     updateMany?: ModuleUpdateManyWithWhereWithoutSemesterInput | ModuleUpdateManyWithWhereWithoutSemesterInput[]
     deleteMany?: ModuleScalarWhereInput | ModuleScalarWhereInput[]
+  }
+
+  export type SubjectUpdateManyWithoutSemesterNestedInput = {
+    create?: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput> | SubjectCreateWithoutSemesterInput[] | SubjectUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: SubjectCreateOrConnectWithoutSemesterInput | SubjectCreateOrConnectWithoutSemesterInput[]
+    upsert?: SubjectUpsertWithWhereUniqueWithoutSemesterInput | SubjectUpsertWithWhereUniqueWithoutSemesterInput[]
+    createMany?: SubjectCreateManySemesterInputEnvelope
+    set?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    disconnect?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    delete?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    connect?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    update?: SubjectUpdateWithWhereUniqueWithoutSemesterInput | SubjectUpdateWithWhereUniqueWithoutSemesterInput[]
+    updateMany?: SubjectUpdateManyWithWhereWithoutSemesterInput | SubjectUpdateManyWithWhereWithoutSemesterInput[]
+    deleteMany?: SubjectScalarWhereInput | SubjectScalarWhereInput[]
   }
 
   export type UserUpdateManyWithoutSemesterNestedInput = {
@@ -60569,6 +62090,20 @@ export namespace Prisma {
     update?: ModuleUpdateWithWhereUniqueWithoutSemesterInput | ModuleUpdateWithWhereUniqueWithoutSemesterInput[]
     updateMany?: ModuleUpdateManyWithWhereWithoutSemesterInput | ModuleUpdateManyWithWhereWithoutSemesterInput[]
     deleteMany?: ModuleScalarWhereInput | ModuleScalarWhereInput[]
+  }
+
+  export type SubjectUncheckedUpdateManyWithoutSemesterNestedInput = {
+    create?: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput> | SubjectCreateWithoutSemesterInput[] | SubjectUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: SubjectCreateOrConnectWithoutSemesterInput | SubjectCreateOrConnectWithoutSemesterInput[]
+    upsert?: SubjectUpsertWithWhereUniqueWithoutSemesterInput | SubjectUpsertWithWhereUniqueWithoutSemesterInput[]
+    createMany?: SubjectCreateManySemesterInputEnvelope
+    set?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    disconnect?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    delete?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    connect?: SubjectWhereUniqueInput | SubjectWhereUniqueInput[]
+    update?: SubjectUpdateWithWhereUniqueWithoutSemesterInput | SubjectUpdateWithWhereUniqueWithoutSemesterInput[]
+    updateMany?: SubjectUpdateManyWithWhereWithoutSemesterInput | SubjectUpdateManyWithWhereWithoutSemesterInput[]
+    deleteMany?: SubjectScalarWhereInput | SubjectScalarWhereInput[]
   }
 
   export type UserUncheckedUpdateManyWithoutSemesterNestedInput = {
@@ -60731,6 +62266,12 @@ export namespace Prisma {
     connect?: ModuleWhereUniqueInput
   }
 
+  export type SemesterCreateNestedOneWithoutSubjectsInput = {
+    create?: XOR<SemesterCreateWithoutSubjectsInput, SemesterUncheckedCreateWithoutSubjectsInput>
+    connectOrCreate?: SemesterCreateOrConnectWithoutSubjectsInput
+    connect?: SemesterWhereUniqueInput
+  }
+
   export type LectureCreateNestedManyWithoutSubjectInput = {
     create?: XOR<LectureCreateWithoutSubjectInput, LectureUncheckedCreateWithoutSubjectInput> | LectureCreateWithoutSubjectInput[] | LectureUncheckedCreateWithoutSubjectInput[]
     connectOrCreate?: LectureCreateOrConnectWithoutSubjectInput | LectureCreateOrConnectWithoutSubjectInput[]
@@ -60745,12 +62286,24 @@ export namespace Prisma {
     connect?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
   }
 
-  export type ModuleUpdateOneRequiredWithoutSubjectsNestedInput = {
+  export type ModuleUpdateOneWithoutSubjectsNestedInput = {
     create?: XOR<ModuleCreateWithoutSubjectsInput, ModuleUncheckedCreateWithoutSubjectsInput>
     connectOrCreate?: ModuleCreateOrConnectWithoutSubjectsInput
     upsert?: ModuleUpsertWithoutSubjectsInput
+    disconnect?: ModuleWhereInput | boolean
+    delete?: ModuleWhereInput | boolean
     connect?: ModuleWhereUniqueInput
     update?: XOR<XOR<ModuleUpdateToOneWithWhereWithoutSubjectsInput, ModuleUpdateWithoutSubjectsInput>, ModuleUncheckedUpdateWithoutSubjectsInput>
+  }
+
+  export type SemesterUpdateOneWithoutSubjectsNestedInput = {
+    create?: XOR<SemesterCreateWithoutSubjectsInput, SemesterUncheckedCreateWithoutSubjectsInput>
+    connectOrCreate?: SemesterCreateOrConnectWithoutSubjectsInput
+    upsert?: SemesterUpsertWithoutSubjectsInput
+    disconnect?: SemesterWhereInput | boolean
+    delete?: SemesterWhereInput | boolean
+    connect?: SemesterWhereUniqueInput
+    update?: XOR<XOR<SemesterUpdateToOneWithWhereWithoutSubjectsInput, SemesterUpdateWithoutSubjectsInput>, SemesterUncheckedUpdateWithoutSubjectsInput>
   }
 
   export type LectureUpdateManyWithoutSubjectNestedInput = {
@@ -61949,6 +63502,13 @@ export namespace Prisma {
     connect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
   }
 
+  export type UserTaskCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserTaskCreateWithoutUserInput, UserTaskUncheckedCreateWithoutUserInput> | UserTaskCreateWithoutUserInput[] | UserTaskUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserTaskCreateOrConnectWithoutUserInput | UserTaskCreateOrConnectWithoutUserInput[]
+    createMany?: UserTaskCreateManyUserInputEnvelope
+    connect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+  }
+
   export type QuizAttemptUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<QuizAttemptCreateWithoutUserInput, QuizAttemptUncheckedCreateWithoutUserInput> | QuizAttemptCreateWithoutUserInput[] | QuizAttemptUncheckedCreateWithoutUserInput[]
     connectOrCreate?: QuizAttemptCreateOrConnectWithoutUserInput | QuizAttemptCreateOrConnectWithoutUserInput[]
@@ -62121,6 +63681,13 @@ export namespace Prisma {
     connectOrCreate?: DocumentTemplateCreateOrConnectWithoutUserInput | DocumentTemplateCreateOrConnectWithoutUserInput[]
     createMany?: DocumentTemplateCreateManyUserInputEnvelope
     connect?: DocumentTemplateWhereUniqueInput | DocumentTemplateWhereUniqueInput[]
+  }
+
+  export type UserTaskUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserTaskCreateWithoutUserInput, UserTaskUncheckedCreateWithoutUserInput> | UserTaskCreateWithoutUserInput[] | UserTaskUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserTaskCreateOrConnectWithoutUserInput | UserTaskCreateOrConnectWithoutUserInput[]
+    createMany?: UserTaskCreateManyUserInputEnvelope
+    connect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -62521,6 +64088,20 @@ export namespace Prisma {
     deleteMany?: DocumentTemplateScalarWhereInput | DocumentTemplateScalarWhereInput[]
   }
 
+  export type UserTaskUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserTaskCreateWithoutUserInput, UserTaskUncheckedCreateWithoutUserInput> | UserTaskCreateWithoutUserInput[] | UserTaskUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserTaskCreateOrConnectWithoutUserInput | UserTaskCreateOrConnectWithoutUserInput[]
+    upsert?: UserTaskUpsertWithWhereUniqueWithoutUserInput | UserTaskUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserTaskCreateManyUserInputEnvelope
+    set?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    disconnect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    delete?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    connect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    update?: UserTaskUpdateWithWhereUniqueWithoutUserInput | UserTaskUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserTaskUpdateManyWithWhereWithoutUserInput | UserTaskUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserTaskScalarWhereInput | UserTaskScalarWhereInput[]
+  }
+
   export type QuizAttemptUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<QuizAttemptCreateWithoutUserInput, QuizAttemptUncheckedCreateWithoutUserInput> | QuizAttemptCreateWithoutUserInput[] | QuizAttemptUncheckedCreateWithoutUserInput[]
     connectOrCreate?: QuizAttemptCreateOrConnectWithoutUserInput | QuizAttemptCreateOrConnectWithoutUserInput[]
@@ -62865,6 +64446,20 @@ export namespace Prisma {
     update?: DocumentTemplateUpdateWithWhereUniqueWithoutUserInput | DocumentTemplateUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: DocumentTemplateUpdateManyWithWhereWithoutUserInput | DocumentTemplateUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: DocumentTemplateScalarWhereInput | DocumentTemplateScalarWhereInput[]
+  }
+
+  export type UserTaskUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserTaskCreateWithoutUserInput, UserTaskUncheckedCreateWithoutUserInput> | UserTaskCreateWithoutUserInput[] | UserTaskUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserTaskCreateOrConnectWithoutUserInput | UserTaskCreateOrConnectWithoutUserInput[]
+    upsert?: UserTaskUpsertWithWhereUniqueWithoutUserInput | UserTaskUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserTaskCreateManyUserInputEnvelope
+    set?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    disconnect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    delete?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    connect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+    update?: UserTaskUpdateWithWhereUniqueWithoutUserInput | UserTaskUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserTaskUpdateManyWithWhereWithoutUserInput | UserTaskUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserTaskScalarWhereInput | UserTaskScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutLectureActivitiesInput = {
@@ -63689,6 +65284,20 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSessionsInput, UserUpdateWithoutSessionsInput>, UserUncheckedUpdateWithoutSessionsInput>
   }
 
+  export type UserCreateNestedOneWithoutTasksInput = {
+    create?: XOR<UserCreateWithoutTasksInput, UserUncheckedCreateWithoutTasksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTasksInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutTasksNestedInput = {
+    create?: XOR<UserCreateWithoutTasksInput, UserUncheckedCreateWithoutTasksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTasksInput
+    upsert?: UserUpsertWithoutTasksInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTasksInput, UserUpdateWithoutTasksInput>, UserUncheckedUpdateWithoutTasksInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -64273,6 +65882,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutUniversityInput = {
@@ -64325,6 +65935,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutUniversityInput = {
@@ -64912,6 +66523,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFacultyInput = {
@@ -64964,6 +66576,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFacultyInput = {
@@ -65203,6 +66816,7 @@ export namespace Prisma {
     id?: string
     name: string
     modules?: ModuleCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
     forums?: ForumCreateNestedManyWithoutSemesterInput
@@ -65213,6 +66827,7 @@ export namespace Prisma {
     id?: string
     name: string
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
@@ -65371,6 +66986,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SubjectCreateWithoutSemesterInput = {
+    id?: string
+    name: string
+    isQuizSystemBank?: boolean
+    module?: ModuleCreateNestedOneWithoutSubjectsInput
+    lectures?: LectureCreateNestedManyWithoutSubjectInput
+  }
+
+  export type SubjectUncheckedCreateWithoutSemesterInput = {
+    id?: string
+    name: string
+    moduleId?: string | null
+    isQuizSystemBank?: boolean
+    lectures?: LectureUncheckedCreateNestedManyWithoutSubjectInput
+  }
+
+  export type SubjectCreateOrConnectWithoutSemesterInput = {
+    where: SubjectWhereUniqueInput
+    create: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput>
+  }
+
+  export type SubjectCreateManySemesterInputEnvelope = {
+    data: SubjectCreateManySemesterInput | SubjectCreateManySemesterInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserCreateWithoutSemesterInput = {
     id?: string
     name: string
@@ -65421,6 +67062,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSemesterInput = {
@@ -65473,6 +67115,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSemesterInput = {
@@ -65653,6 +67296,33 @@ export namespace Prisma {
     semesterId?: StringFilter<"Module"> | string
   }
 
+  export type SubjectUpsertWithWhereUniqueWithoutSemesterInput = {
+    where: SubjectWhereUniqueInput
+    update: XOR<SubjectUpdateWithoutSemesterInput, SubjectUncheckedUpdateWithoutSemesterInput>
+    create: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput>
+  }
+
+  export type SubjectUpdateWithWhereUniqueWithoutSemesterInput = {
+    where: SubjectWhereUniqueInput
+    data: XOR<SubjectUpdateWithoutSemesterInput, SubjectUncheckedUpdateWithoutSemesterInput>
+  }
+
+  export type SubjectUpdateManyWithWhereWithoutSemesterInput = {
+    where: SubjectScalarWhereInput
+    data: XOR<SubjectUpdateManyMutationInput, SubjectUncheckedUpdateManyWithoutSemesterInput>
+  }
+
+  export type SubjectScalarWhereInput = {
+    AND?: SubjectScalarWhereInput | SubjectScalarWhereInput[]
+    OR?: SubjectScalarWhereInput[]
+    NOT?: SubjectScalarWhereInput | SubjectScalarWhereInput[]
+    id?: StringFilter<"Subject"> | string
+    name?: StringFilter<"Subject"> | string
+    moduleId?: StringNullableFilter<"Subject"> | string | null
+    semesterId?: StringNullableFilter<"Subject"> | string | null
+    isQuizSystemBank?: BoolFilter<"Subject"> | boolean
+  }
+
   export type UserUpsertWithWhereUniqueWithoutSemesterInput = {
     where: UserWhereUniqueInput
     update: XOR<UserUpdateWithoutSemesterInput, UserUncheckedUpdateWithoutSemesterInput>
@@ -65745,6 +67415,7 @@ export namespace Prisma {
     id?: string
     name: string
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
+    subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
     forums?: ForumCreateNestedManyWithoutSemesterInput
@@ -65755,6 +67426,7 @@ export namespace Prisma {
     id?: string
     name: string
     academicYearId: string
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
@@ -65770,12 +67442,14 @@ export namespace Prisma {
     id?: string
     name: string
     isQuizSystemBank?: boolean
+    semester?: SemesterCreateNestedOneWithoutSubjectsInput
     lectures?: LectureCreateNestedManyWithoutSubjectInput
   }
 
   export type SubjectUncheckedCreateWithoutModuleInput = {
     id?: string
     name: string
+    semesterId?: string | null
     isQuizSystemBank?: boolean
     lectures?: LectureUncheckedCreateNestedManyWithoutSubjectInput
   }
@@ -65859,6 +67533,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
+    subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
     forums?: ForumUpdateManyWithoutSemesterNestedInput
@@ -65869,6 +67544,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     academicYearId?: StringFieldUpdateOperationsInput | string
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
@@ -65889,16 +67565,6 @@ export namespace Prisma {
   export type SubjectUpdateManyWithWhereWithoutModuleInput = {
     where: SubjectScalarWhereInput
     data: XOR<SubjectUpdateManyMutationInput, SubjectUncheckedUpdateManyWithoutModuleInput>
-  }
-
-  export type SubjectScalarWhereInput = {
-    AND?: SubjectScalarWhereInput | SubjectScalarWhereInput[]
-    OR?: SubjectScalarWhereInput[]
-    NOT?: SubjectScalarWhereInput | SubjectScalarWhereInput[]
-    id?: StringFilter<"Subject"> | string
-    name?: StringFilter<"Subject"> | string
-    moduleId?: StringFilter<"Subject"> | string
-    isQuizSystemBank?: BoolFilter<"Subject"> | boolean
   }
 
   export type PastPaperUpsertWithWhereUniqueWithoutModuleInput = {
@@ -65934,6 +67600,33 @@ export namespace Prisma {
   export type ModuleCreateOrConnectWithoutSubjectsInput = {
     where: ModuleWhereUniqueInput
     create: XOR<ModuleCreateWithoutSubjectsInput, ModuleUncheckedCreateWithoutSubjectsInput>
+  }
+
+  export type SemesterCreateWithoutSubjectsInput = {
+    id?: string
+    name: string
+    academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
+    modules?: ModuleCreateNestedManyWithoutSemesterInput
+    users?: UserCreateNestedManyWithoutSemesterInput
+    pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    forums?: ForumCreateNestedManyWithoutSemesterInput
+    adBanners?: AdBannerCreateNestedManyWithoutSemesterInput
+  }
+
+  export type SemesterUncheckedCreateWithoutSubjectsInput = {
+    id?: string
+    name: string
+    academicYearId: string
+    modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    users?: UserUncheckedCreateNestedManyWithoutSemesterInput
+    pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
+    forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
+    adBanners?: AdBannerUncheckedCreateNestedManyWithoutSemesterInput
+  }
+
+  export type SemesterCreateOrConnectWithoutSubjectsInput = {
+    where: SemesterWhereUniqueInput
+    create: XOR<SemesterCreateWithoutSubjectsInput, SemesterUncheckedCreateWithoutSubjectsInput>
   }
 
   export type LectureCreateWithoutSubjectInput = {
@@ -66003,6 +67696,39 @@ export namespace Prisma {
     pastPapers?: PastPaperUncheckedUpdateManyWithoutModuleNestedInput
   }
 
+  export type SemesterUpsertWithoutSubjectsInput = {
+    update: XOR<SemesterUpdateWithoutSubjectsInput, SemesterUncheckedUpdateWithoutSubjectsInput>
+    create: XOR<SemesterCreateWithoutSubjectsInput, SemesterUncheckedCreateWithoutSubjectsInput>
+    where?: SemesterWhereInput
+  }
+
+  export type SemesterUpdateToOneWithWhereWithoutSubjectsInput = {
+    where?: SemesterWhereInput
+    data: XOR<SemesterUpdateWithoutSubjectsInput, SemesterUncheckedUpdateWithoutSubjectsInput>
+  }
+
+  export type SemesterUpdateWithoutSubjectsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
+    modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    users?: UserUpdateManyWithoutSemesterNestedInput
+    pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    forums?: ForumUpdateManyWithoutSemesterNestedInput
+    adBanners?: AdBannerUpdateManyWithoutSemesterNestedInput
+  }
+
+  export type SemesterUncheckedUpdateWithoutSubjectsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    academicYearId?: StringFieldUpdateOperationsInput | string
+    modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
+    pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
+    forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
+    adBanners?: AdBannerUncheckedUpdateManyWithoutSemesterNestedInput
+  }
+
   export type LectureUpsertWithWhereUniqueWithoutSubjectInput = {
     where: LectureWhereUniqueInput
     update: XOR<LectureUpdateWithoutSubjectInput, LectureUncheckedUpdateWithoutSubjectInput>
@@ -66037,13 +67763,15 @@ export namespace Prisma {
     id?: string
     name: string
     isQuizSystemBank?: boolean
-    module: ModuleCreateNestedOneWithoutSubjectsInput
+    module?: ModuleCreateNestedOneWithoutSubjectsInput
+    semester?: SemesterCreateNestedOneWithoutSubjectsInput
   }
 
   export type SubjectUncheckedCreateWithoutLecturesInput = {
     id?: string
     name: string
-    moduleId: string
+    moduleId?: string | null
+    semesterId?: string | null
     isQuizSystemBank?: boolean
   }
 
@@ -66055,6 +67783,7 @@ export namespace Prisma {
   export type UserLectureActivityCreateWithoutLectureInput = {
     id?: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
     user: UserCreateNestedOneWithoutLectureActivitiesInput
   }
@@ -66063,6 +67792,7 @@ export namespace Prisma {
     id?: string
     userId: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
   }
 
@@ -66274,13 +68004,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
-    module?: ModuleUpdateOneRequiredWithoutSubjectsNestedInput
+    module?: ModuleUpdateOneWithoutSubjectsNestedInput
+    semester?: SemesterUpdateOneWithoutSubjectsNestedInput
   }
 
   export type SubjectUncheckedUpdateWithoutLecturesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    moduleId?: StringFieldUpdateOperationsInput | string
+    moduleId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -66308,6 +68040,7 @@ export namespace Prisma {
     userId?: StringFilter<"UserLectureActivity"> | string
     lectureId?: StringFilter<"UserLectureActivity"> | string
     source?: StringNullableFilter<"UserLectureActivity"> | string | null
+    isCompleted?: BoolFilter<"UserLectureActivity"> | boolean
     lastViewedAt?: DateTimeFilter<"UserLectureActivity"> | Date | string
   }
 
@@ -66911,6 +68644,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVideoCommentsInput = {
@@ -66963,6 +68697,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVideoCommentsInput = {
@@ -67074,6 +68809,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVideoCommentsInput = {
@@ -67126,6 +68862,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureVideoCreateWithoutLikesInput = {
@@ -67215,6 +68952,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVideoLikesInput = {
@@ -67267,6 +69005,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVideoLikesInput = {
@@ -67378,6 +69117,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVideoLikesInput = {
@@ -67430,6 +69170,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureCreateWithoutQuestionsInput = {
@@ -67673,6 +69414,7 @@ export namespace Prisma {
     name: string
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
     forums?: ForumCreateNestedManyWithoutSemesterInput
     adBanners?: AdBannerCreateNestedManyWithoutSemesterInput
@@ -67683,6 +69425,7 @@ export namespace Prisma {
     name: string
     academicYearId: string
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutSemesterInput
@@ -67823,6 +69566,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
     forums?: ForumUpdateManyWithoutSemesterNestedInput
     adBanners?: AdBannerUpdateManyWithoutSemesterNestedInput
@@ -67833,6 +69577,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYearId?: StringFieldUpdateOperationsInput | string
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutSemesterNestedInput
@@ -68043,6 +69788,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutQuestionReportsInput = {
@@ -68095,6 +69841,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutQuestionReportsInput = {
@@ -68259,6 +70006,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutQuestionReportsInput = {
@@ -68311,6 +70059,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PastPaperUpsertWithoutQuestionReportsInput = {
@@ -68418,6 +70167,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSavedQuestionsInput = {
@@ -68470,6 +70220,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSavedQuestionsInput = {
@@ -68579,6 +70330,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSavedQuestionsInput = {
@@ -68631,6 +70383,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type QuestionUpsertWithoutSavedByInput = {
@@ -68778,6 +70531,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutQuizAttemptsInput = {
@@ -68830,6 +70584,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutQuizAttemptsInput = {
@@ -68994,6 +70749,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
@@ -69046,6 +70802,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type GuestQuizUserUpsertWithoutQuizAttemptsInput = {
@@ -69196,6 +70953,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutStudyAssistantProfileInput = {
@@ -69248,6 +71006,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutStudyAssistantProfileInput = {
@@ -69316,6 +71075,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStudyAssistantProfileInput = {
@@ -69368,6 +71128,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type QuizAttemptCreateWithoutItemsInput = {
@@ -69585,6 +71346,7 @@ export namespace Prisma {
     name: string
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
     forums?: ForumCreateNestedManyWithoutSemesterInput
     adBanners?: AdBannerCreateNestedManyWithoutSemesterInput
@@ -69595,6 +71357,7 @@ export namespace Prisma {
     name: string
     academicYearId: string
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutSemesterInput
@@ -69900,6 +71663,7 @@ export namespace Prisma {
   export type UserLectureActivityCreateWithoutUserInput = {
     id?: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
     lecture: LectureCreateNestedOneWithoutActivitiesInput
   }
@@ -69908,6 +71672,7 @@ export namespace Prisma {
     id?: string
     lectureId: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
   }
 
@@ -70269,6 +72034,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type UserTaskCreateWithoutUserInput = {
+    id?: string
+    title: string
+    description?: string | null
+    time?: string | null
+    completed?: boolean
+    date?: Date | string
+    lectureId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserTaskUncheckedCreateWithoutUserInput = {
+    id?: string
+    title: string
+    description?: string | null
+    time?: string | null
+    completed?: boolean
+    date?: Date | string
+    lectureId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserTaskCreateOrConnectWithoutUserInput = {
+    where: UserTaskWhereUniqueInput
+    create: XOR<UserTaskCreateWithoutUserInput, UserTaskUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserTaskCreateManyUserInputEnvelope = {
+    data: UserTaskCreateManyUserInput | UserTaskCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UniversityUpsertWithoutUsersInput = {
     update: XOR<UniversityUpdateWithoutUsersInput, UniversityUncheckedUpdateWithoutUsersInput>
     create: XOR<UniversityCreateWithoutUsersInput, UniversityUncheckedCreateWithoutUsersInput>
@@ -70359,6 +72158,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
     forums?: ForumUpdateManyWithoutSemesterNestedInput
     adBanners?: AdBannerUpdateManyWithoutSemesterNestedInput
@@ -70369,6 +72169,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYearId?: StringFieldUpdateOperationsInput | string
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutSemesterNestedInput
@@ -70968,6 +72769,38 @@ export namespace Prisma {
     userId?: StringFilter<"DocumentTemplate"> | string
   }
 
+  export type UserTaskUpsertWithWhereUniqueWithoutUserInput = {
+    where: UserTaskWhereUniqueInput
+    update: XOR<UserTaskUpdateWithoutUserInput, UserTaskUncheckedUpdateWithoutUserInput>
+    create: XOR<UserTaskCreateWithoutUserInput, UserTaskUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserTaskUpdateWithWhereUniqueWithoutUserInput = {
+    where: UserTaskWhereUniqueInput
+    data: XOR<UserTaskUpdateWithoutUserInput, UserTaskUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserTaskUpdateManyWithWhereWithoutUserInput = {
+    where: UserTaskScalarWhereInput
+    data: XOR<UserTaskUpdateManyMutationInput, UserTaskUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type UserTaskScalarWhereInput = {
+    AND?: UserTaskScalarWhereInput | UserTaskScalarWhereInput[]
+    OR?: UserTaskScalarWhereInput[]
+    NOT?: UserTaskScalarWhereInput | UserTaskScalarWhereInput[]
+    id?: StringFilter<"UserTask"> | string
+    title?: StringFilter<"UserTask"> | string
+    description?: StringNullableFilter<"UserTask"> | string | null
+    time?: StringNullableFilter<"UserTask"> | string | null
+    completed?: BoolFilter<"UserTask"> | boolean
+    date?: DateTimeFilter<"UserTask"> | Date | string
+    lectureId?: StringNullableFilter<"UserTask"> | string | null
+    userId?: StringFilter<"UserTask"> | string
+    createdAt?: DateTimeFilter<"UserTask"> | Date | string
+    updatedAt?: DateTimeFilter<"UserTask"> | Date | string
+  }
+
   export type UserCreateWithoutLectureActivitiesInput = {
     id?: string
     name: string
@@ -71018,6 +72851,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLectureActivitiesInput = {
@@ -71070,6 +72904,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLectureActivitiesInput = {
@@ -71175,6 +73010,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLectureActivitiesInput = {
@@ -71227,6 +73063,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureUpsertWithoutActivitiesInput = {
@@ -71322,6 +73159,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDmSentInput = {
@@ -71374,6 +73212,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDmSentInput = {
@@ -71431,6 +73270,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDmReceivedInput = {
@@ -71483,6 +73323,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDmReceivedInput = {
@@ -71551,6 +73392,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDmSentInput = {
@@ -71603,6 +73445,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutDmReceivedInput = {
@@ -71666,6 +73509,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDmReceivedInput = {
@@ -71718,6 +73562,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UniversityCreateWithoutForumsInput = {
@@ -71764,6 +73609,7 @@ export namespace Prisma {
     name: string
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
     adBanners?: AdBannerCreateNestedManyWithoutSemesterInput
@@ -71774,6 +73620,7 @@ export namespace Prisma {
     name: string
     academicYearId: string
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
     adBanners?: AdBannerUncheckedCreateNestedManyWithoutSemesterInput
@@ -71929,6 +73776,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
     adBanners?: AdBannerUpdateManyWithoutSemesterNestedInput
@@ -71939,6 +73787,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYearId?: StringFieldUpdateOperationsInput | string
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
     adBanners?: AdBannerUncheckedUpdateManyWithoutSemesterNestedInput
@@ -72073,6 +73922,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutForumMembershipsInput = {
@@ -72125,6 +73975,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutForumMembershipsInput = {
@@ -72230,6 +74081,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutForumMembershipsInput = {
@@ -72282,6 +74134,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ForumCreateWithoutInvitesInput = {
@@ -72365,6 +74218,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSentInvitesInput = {
@@ -72417,6 +74271,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSentInvitesInput = {
@@ -72474,6 +74329,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReceivedInvitesInput = {
@@ -72526,6 +74382,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReceivedInvitesInput = {
@@ -72631,6 +74488,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSentInvitesInput = {
@@ -72683,6 +74541,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutReceivedInvitesInput = {
@@ -72746,6 +74605,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceivedInvitesInput = {
@@ -72798,6 +74658,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutPostsInput = {
@@ -72850,6 +74711,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPostsInput = {
@@ -72902,6 +74764,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPostsInput = {
@@ -73092,6 +74955,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPostsInput = {
@@ -73144,6 +75008,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ForumUpsertWithoutPostsInput = {
@@ -73310,6 +75175,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCommentsInput = {
@@ -73362,6 +75228,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCommentsInput = {
@@ -73581,6 +75448,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -73633,6 +75501,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PostUpsertWithoutCommentsInput = {
@@ -73834,6 +75703,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFollowingInput = {
@@ -73886,6 +75756,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFollowingInput = {
@@ -73943,6 +75814,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFollowersInput = {
@@ -73995,6 +75867,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFollowersInput = {
@@ -74063,6 +75936,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -74115,6 +75989,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutFollowersInput = {
@@ -74178,6 +76053,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -74230,6 +76106,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutLikesInput = {
@@ -74282,6 +76159,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLikesInput = {
@@ -74334,6 +76212,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLikesInput = {
@@ -74435,6 +76314,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLikesInput = {
@@ -74487,6 +76367,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PostUpsertWithoutLikesInput = {
@@ -74578,6 +76459,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCommentLikesInput = {
@@ -74630,6 +76512,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCommentLikesInput = {
@@ -74725,6 +76608,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentLikesInput = {
@@ -74777,6 +76661,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CommentUpsertWithoutLikesInput = {
@@ -74862,6 +76747,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -74914,6 +76800,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -74982,6 +76869,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -75034,6 +76922,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutNotifMutesInput = {
@@ -75086,6 +76975,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotifMutesInput = {
@@ -75138,6 +77028,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotifMutesInput = {
@@ -75206,6 +77097,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotifMutesInput = {
@@ -75258,6 +77150,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutRankInput = {
@@ -75310,6 +77203,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRankInput = {
@@ -75362,6 +77256,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRankInput = {
@@ -75440,6 +77335,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutEngagementLogsInput = {
@@ -75492,6 +77388,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutEngagementLogsInput = {
@@ -75560,6 +77457,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEngagementLogsInput = {
@@ -75612,6 +77510,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAiUsageLogsInput = {
@@ -75664,6 +77563,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAiUsageLogsInput = {
@@ -75716,6 +77616,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAiUsageLogsInput = {
@@ -75784,6 +77685,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAiUsageLogsInput = {
@@ -75836,6 +77738,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UniversityCreateWithoutAdBannersInput = {
@@ -75882,6 +77785,7 @@ export namespace Prisma {
     name: string
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
     forums?: ForumCreateNestedManyWithoutSemesterInput
@@ -75892,6 +77796,7 @@ export namespace Prisma {
     name: string
     academicYearId: string
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
@@ -75963,6 +77868,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
     forums?: ForumUpdateManyWithoutSemesterNestedInput
@@ -75973,6 +77879,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     academicYearId?: StringFieldUpdateOperationsInput | string
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
@@ -76028,6 +77935,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -76080,6 +77988,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -76148,6 +78057,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -76200,6 +78110,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutDocumentTemplatesInput = {
@@ -76252,6 +78163,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDocumentTemplatesInput = {
@@ -76304,6 +78216,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDocumentTemplatesInput = {
@@ -76372,6 +78285,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDocumentTemplatesInput = {
@@ -76424,6 +78338,7 @@ export namespace Prisma {
     dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -76476,6 +78391,7 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -76528,6 +78444,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -76596,6 +78513,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -76641,6 +78559,235 @@ export namespace Prisma {
     sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
     receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutTasksInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    canManageReports?: boolean
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    university?: UniversityCreateNestedOneWithoutUsersInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
+    semester?: SemesterCreateNestedOneWithoutUsersInput
+    rank?: RankCreateNestedOneWithoutUsersInput
+    quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
+    posts?: PostCreateNestedManyWithoutAuthorInput
+    comments?: CommentCreateNestedManyWithoutAuthorInput
+    likes?: LikeCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
+    following?: UserFollowCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutTasksInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    isPrivate?: boolean
+    hideRank?: boolean
+    instagramUrl?: string | null
+    facebookUrl?: string | null
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    canManageReports?: boolean
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    facultyId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quizAttempts?: QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedCreateNestedOneWithoutUserInput
+    posts?: PostUncheckedCreateNestedManyWithoutAuthorInput
+    comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
+    likes?: LikeUncheckedCreateNestedManyWithoutUserInput
+    commentLikes?: CommentLikeUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteUncheckedCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogUncheckedCreateNestedManyWithoutUserInput
+    aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
+    lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentUncheckedCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeUncheckedCreateNestedManyWithoutUserInput
+    forumMemberships?: PrivateForumMemberUncheckedCreateNestedManyWithoutUserInput
+    sentInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutSenderInput
+    receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
+    dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
+    dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
+    following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutTasksInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutTasksInput, UserUncheckedCreateWithoutTasksInput>
+  }
+
+  export type UserUpsertWithoutTasksInput = {
+    update: XOR<UserUpdateWithoutTasksInput, UserUncheckedUpdateWithoutTasksInput>
+    create: XOR<UserCreateWithoutTasksInput, UserUncheckedCreateWithoutTasksInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutTasksInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutTasksInput, UserUncheckedUpdateWithoutTasksInput>
+  }
+
+  export type UserUpdateWithoutTasksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    university?: UniversityUpdateOneWithoutUsersNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
+    semester?: SemesterUpdateOneWithoutUsersNestedInput
+    rank?: RankUpdateOneWithoutUsersNestedInput
+    quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
+    posts?: PostUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
+    dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
+    dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
+    following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutTasksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quizAttempts?: QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedUpdateOneWithoutUserNestedInput
+    posts?: PostUncheckedUpdateManyWithoutAuthorNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutUserNestedInput
+    commentLikes?: CommentLikeUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUncheckedUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
+    lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUncheckedUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUncheckedUpdateManyWithoutUserNestedInput
+    forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
+    sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
+    receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
     savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
     dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -76841,6 +78988,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUniversityInput = {
@@ -76893,6 +79041,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutUniversityInput = {
@@ -77207,6 +79356,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFacultyInput = {
@@ -77259,6 +79409,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutFacultyInput = {
@@ -77297,6 +79448,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
     forums?: ForumUpdateManyWithoutSemesterNestedInput
@@ -77307,6 +79459,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
@@ -77321,6 +79474,13 @@ export namespace Prisma {
   export type ModuleCreateManySemesterInput = {
     id?: string
     name: string
+  }
+
+  export type SubjectCreateManySemesterInput = {
+    id?: string
+    name: string
+    moduleId?: string | null
+    isQuizSystemBank?: boolean
   }
 
   export type UserCreateManySemesterInput = {
@@ -77408,6 +79568,29 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
   }
 
+  export type SubjectUpdateWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
+    module?: ModuleUpdateOneWithoutSubjectsNestedInput
+    lectures?: LectureUpdateManyWithoutSubjectNestedInput
+  }
+
+  export type SubjectUncheckedUpdateWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    moduleId?: NullableStringFieldUpdateOperationsInput | string | null
+    isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
+    lectures?: LectureUncheckedUpdateManyWithoutSubjectNestedInput
+  }
+
+  export type SubjectUncheckedUpdateManyWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    moduleId?: NullableStringFieldUpdateOperationsInput | string | null
+    isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
+  }
+
   export type UserUpdateWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -77458,6 +79641,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSemesterInput = {
@@ -77510,6 +79694,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutSemesterInput = {
@@ -77669,6 +79854,7 @@ export namespace Prisma {
   export type SubjectCreateManyModuleInput = {
     id?: string
     name: string
+    semesterId?: string | null
     isQuizSystemBank?: boolean
   }
 
@@ -77696,12 +79882,14 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
+    semester?: SemesterUpdateOneWithoutSubjectsNestedInput
     lectures?: LectureUpdateManyWithoutSubjectNestedInput
   }
 
   export type SubjectUncheckedUpdateWithoutModuleInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     lectures?: LectureUncheckedUpdateManyWithoutSubjectNestedInput
   }
@@ -77709,6 +79897,7 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateManyWithoutModuleInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -77832,6 +80021,7 @@ export namespace Prisma {
     id?: string
     userId: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
   }
 
@@ -77880,6 +80070,7 @@ export namespace Prisma {
   export type UserLectureActivityUpdateWithoutLectureInput = {
     id?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutLectureActivitiesNestedInput
   }
@@ -77888,6 +80079,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -77895,6 +80087,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -78393,6 +80586,7 @@ export namespace Prisma {
     id?: string
     lectureId: string
     source?: string | null
+    isCompleted?: boolean
     lastViewedAt?: Date | string
   }
 
@@ -78496,6 +80690,18 @@ export namespace Prisma {
     name: string
     fileUrl: string
     isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserTaskCreateManyUserInput = {
+    id?: string
+    title: string
+    description?: string | null
+    time?: string | null
+    completed?: boolean
+    date?: Date | string
+    lectureId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78726,6 +80932,7 @@ export namespace Prisma {
   export type UserLectureActivityUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lecture?: LectureUpdateOneRequiredWithoutActivitiesNestedInput
   }
@@ -78734,6 +80941,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     lectureId?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -78741,6 +80949,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     lectureId?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -79056,6 +81265,42 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserTaskUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    time?: NullableStringFieldUpdateOperationsInput | string | null
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    lectureId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserTaskUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    time?: NullableStringFieldUpdateOperationsInput | string | null
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    lectureId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserTaskUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    time?: NullableStringFieldUpdateOperationsInput | string | null
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    lectureId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PostCreateManyForumInput = {
     id?: string
     content: string
@@ -79357,6 +81602,7 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRankInput = {
@@ -79409,6 +81655,7 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutRankInput = {
@@ -79687,6 +81934,10 @@ export namespace Prisma {
      * @deprecated Use VerificationTokenDefaultArgs instead
      */
     export type VerificationTokenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = VerificationTokenDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use UserTaskDefaultArgs instead
+     */
+    export type UserTaskArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserTaskDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

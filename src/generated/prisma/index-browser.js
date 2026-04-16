@@ -206,6 +206,7 @@ exports.Prisma.SubjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
   moduleId: 'moduleId',
+  semesterId: 'semesterId',
   isQuizSystemBank: 'isQuizSystemBank'
 };
 
@@ -392,6 +393,7 @@ exports.Prisma.UserLectureActivityScalarFieldEnum = {
   userId: 'userId',
   lectureId: 'lectureId',
   source: 'source',
+  isCompleted: 'isCompleted',
   lastViewedAt: 'lastViewedAt'
 };
 
@@ -561,6 +563,19 @@ exports.Prisma.VerificationTokenScalarFieldEnum = {
   expires: 'expires'
 };
 
+exports.Prisma.UserTaskScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  time: 'time',
+  completed: 'completed',
+  date: 'date',
+  lectureId: 'lectureId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -685,7 +700,8 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   DocumentTemplate: 'DocumentTemplate',
   Session: 'Session',
-  VerificationToken: 'VerificationToken'
+  VerificationToken: 'VerificationToken',
+  UserTask: 'UserTask'
 };
 
 /**

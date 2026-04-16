@@ -27,7 +27,7 @@ export const NAV = [
   { href: "/study-tools",   label: "Study Tools",  icon: BarChart3 },
   { href: "/past-papers",   label: "Quizzes",      icon: HelpCircle },
   { href: "/forum",         label: "Community",    icon: MessageSquare },
-  { href: "/space",         label: "My Space",     icon: Clock },
+  { href: "/taskat",        label: "Taskat",       icon: Clock },
 ];
 
 export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQs", logoUrl, isGuest, unreadCount = 0 }: SidebarProps) {
@@ -395,11 +395,11 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
               <div>
                 <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 border-l-2 border-primary/50 pl-3">Tools</p>
                 <div className="space-y-0.5">
-                  <Link href="/space" onClick={() => setMobileOpen(false)}
+                  <Link href="/taskat" onClick={() => setMobileOpen(false)}
                     className={cn("flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
-                      isActive("/space") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}>
-                    <Clock className={cn("h-[18px] w-[18px]", isActive("/space") && "text-primary")} />
-                    My Space
+                      isActive("/taskat") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}>
+                    <Clock className={cn("h-[18px] w-[18px]", isActive("/taskat") && "text-primary")} />
+                    Taskat
                   </Link>
                   {!isGuest && (
                     <Link href="/ai-chat" onClick={() => setMobileOpen(false)}

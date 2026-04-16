@@ -180,6 +180,7 @@ model Semester {
   academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
   academicYearId String
   modules        Module[]
+  subjects       Subject[]
   users          User[]
   pastPapers     PastPaper[]
   forums         Forum[]
@@ -198,13 +199,16 @@ model Module {
 model Subject {
   id               String    @id @default(uuid())
   name             String
-  module           Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  moduleId         String
+  module           Module?   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId         String?
+  semester         Semester? @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  semesterId       String?
   // Built-in question bank subject for the module (Quiz Creator / similar).
   isQuizSystemBank Boolean   @default(false)
   lectures         Lecture[]
 
   @@index([moduleId, isQuizSystemBank])
+  @@index([semesterId])
 }
 
 model Lecture {
@@ -495,6 +499,7 @@ model User {
   following         UserFollow[]          @relation("UserFollows")
   followers         UserFollow[]          @relation("UserFollowers")
   documentTemplates DocumentTemplate[]
+  tasks             UserTask[]
 }
 
 model UserLectureActivity {
@@ -504,6 +509,7 @@ model UserLectureActivity {
   lecture      Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   lectureId    String
   source       String?
+  isCompleted  Boolean  @default(false)
   lastViewedAt DateTime @default(now())
 
   @@unique([userId, lectureId])
@@ -767,4 +773,24 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model UserTask {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  time        String?  @db.VarChar(50) // e.g. "14:00"
+  completed   Boolean  @default(false)
+  date        DateTime @default(now()) // The day this task is for
+  
+  // Optional link to a lecture for auto-syncing
+  lectureId   String?
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, date])
 }
