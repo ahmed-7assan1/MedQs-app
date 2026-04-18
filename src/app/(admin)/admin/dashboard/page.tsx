@@ -62,60 +62,60 @@ export default async function AdminDashboardPage() {
 
   const stats = [
     {
-      label: "Students",     value: userCount,     icon: Users,
+      label: "Students", value: userCount, icon: Users,
       color: "text-blue-500", bg: "from-blue-500/10 to-blue-500/5",
       border: "border-l-blue-500", trend: `+${newUsersThisWeek} this week`,
     },
     {
-      label: "Questions",    value: questionCount, icon: HelpCircle,
+      label: "Questions", value: questionCount, icon: HelpCircle,
       color: "text-violet-500", bg: "from-violet-500/10 to-violet-500/5",
       border: "border-l-violet-500", trend: "In question bank",
     },
     {
-      label: "Lectures",     value: lectureCount,  icon: Video,
+      label: "Lectures", value: lectureCount, icon: Video,
       color: "text-emerald-500", bg: "from-emerald-500/10 to-emerald-500/5",
       border: "border-l-emerald-500", trend: "Videos & flashcards",
     },
     {
-      label: "Past Papers",  value: paperCount,    icon: FileText,
+      label: "Past Papers", value: paperCount, icon: FileText,
       color: "text-cyan-500", bg: "from-cyan-500/10 to-cyan-500/5",
       border: "border-l-cyan-500", trend: "Exam archives",
     },
     {
-      label: "Forum Posts",  value: postCount,     icon: MessageSquare,
+      label: "Forum Posts", value: postCount, icon: MessageSquare,
       color: "text-pink-500", bg: "from-pink-500/10 to-pink-500/5",
       border: "border-l-pink-500", trend: "Community threads",
     },
     {
-      label: "Quiz Attempts",value: attemptCount,  icon: TrendingUp,
+      label: "Quiz Attempts", value: attemptCount, icon: TrendingUp,
       color: "text-amber-500", bg: "from-amber-500/10 to-amber-500/5",
       border: "border-l-amber-500", trend: "Assessments taken",
     },
   ];
 
   const quickActions = [
-    { href: "/admin/content",     icon: BookOpen,      label: "Curriculum",   desc: "Manage universities, faculties, years", color: "text-blue-500",    bg: "bg-blue-500/10" },
-    { href: "/admin/questions",   icon: HelpCircle,    label: "Questions",    desc: "Create & import question bank",        color: "text-violet-500",  bg: "bg-violet-500/10" },
-    { href: "/admin/lectures",    icon: Video,         label: "Lectures",     desc: "Upload videos & flashcards",           color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { href: "/admin/past-papers", icon: FileText,      label: "Past Papers",  desc: "Manage exam archives",                 color: "text-cyan-500",    bg: "bg-cyan-500/10" },
-    { href: "/admin/ai-tools",    icon: Zap,           label: "AI Tools",     desc: "Extract & generate from materials",    color: "text-purple-500",  bg: "bg-purple-500/10" },
-    { href: "/admin/users",       icon: Users,         label: "Users",        desc: "Manage roles & permissions",           color: "text-pink-500",    bg: "bg-pink-500/10" },
-    { href: "/admin/forum",       icon: MessageSquare, label: "Community",    desc: "Forum moderation & status",            color: "text-orange-500",  bg: "bg-orange-500/10" },
-    { href: "/admin/settings",    icon: LayoutDashboard,label: "Settings",   desc: "Branding, features & integrations",    color: "text-amber-500",   bg: "bg-amber-500/10" },
+    { href: "/admin/content", icon: BookOpen, label: "Curriculum", desc: "Manage universities, faculties, years", color: "text-blue-500", bg: "bg-blue-500/10" },
+    { href: "/admin/questions", icon: HelpCircle, label: "Questions", desc: "Create & import question bank", color: "text-violet-500", bg: "bg-violet-500/10" },
+    { href: "/admin/lectures", icon: Video, label: "Lectures", desc: "Upload videos & flashcards", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { href: "/admin/past-papers", icon: FileText, label: "Past Papers", desc: "Manage exam archives", color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { href: "/admin/ai-tools", icon: Zap, label: "AI Tools", desc: "Extract & generate from materials", color: "text-purple-500", bg: "bg-purple-500/10" },
+    { href: "/admin/users", icon: Users, label: "Users", desc: "Manage roles & permissions", color: "text-pink-500", bg: "bg-pink-500/10" },
+    { href: "/admin/forum", icon: MessageSquare, label: "Community", desc: "Forum moderation & status", color: "text-orange-500", bg: "bg-orange-500/10" },
+    { href: "/admin/settings", icon: LayoutDashboard, label: "Settings", desc: "Branding, features & integrations", color: "text-amber-500", bg: "bg-amber-500/10" },
   ];
 
   const roleBadge: Record<string, string> = {
     SUPER_ADMIN: "bg-purple-500/15 text-purple-500",
-    ADMIN:       "bg-blue-500/15 text-blue-500",
-    STUDENT:     "bg-emerald-500/15 text-emerald-500",
+    ADMIN: "bg-blue-500/15 text-blue-500",
+    STUDENT: "bg-emerald-500/15 text-emerald-500",
   };
   const roleLabel: Record<string, string> = {
     SUPER_ADMIN: "Super Admin",
-    ADMIN:       "Admin",
-    STUDENT:     "Student",
+    ADMIN: "Admin",
+    STUDENT: "Student",
   };
 
-  const dayLabels = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 space-y-8">

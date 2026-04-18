@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BookOpen, HelpCircle, Layers, Zap,
-  MessageSquare, Users, Settings, Megaphone, Video,
+  MessageSquare, Users, Settings, Megaphone, Video, Youtube,
   FileText, GraduationCap, Copy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ const NAV_GROUPS: {
       { href: "/admin/dashboard",  label: "Overview",     icon: LayoutDashboard },
       { href: "/admin/content",    label: "Courses",      icon: BookOpen },
       { href: "/admin/lectures",   label: "Lectures",     icon: Video },
+      { href: "/admin/channels",   label: "Channels",     icon: Youtube },
       { href: "/admin/past-papers",label: "Past Papers",  icon: FileText },
     ],
   },

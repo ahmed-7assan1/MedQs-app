@@ -16,11 +16,17 @@ export async function GET(
   }
 
   const comments = await prisma.lectureVideoComment.findMany({
-    where: { videoId: targetVideoId, video: { lectureId: params.id } },
+    where: { videoId: targetVideoId }, // prioritize direct video relationship
     orderBy: { createdAt: "asc" },
-    include: {
+    select: {
+      id: true,
+      content: true,
+      videoId: true,
+      userId: true,
+      parentId: true,
+      createdAt: true,
       user: { select: { id: true, name: true, nickname: true, image: true } },
-    },
+    }
   });
   return NextResponse.json(comments);
 }
@@ -52,14 +58,67 @@ export async function POST(
   });
   if (!video) return NextResponse.json({ error: "Video not found" }, { status: 404 });
 
-  const row = await prisma.lectureVideoComment.create({
-    data: { videoId: targetVideoId, userId, content: content.slice(0, 1000) },
-    include: { user: { select: { id: true, name: true, nickname: true, image: true } } },
+  const parentId = typeof body?.parentId === "string" ? body.parentId : null;
+
+  try {
+    const row = await prisma.lectureVideoComment.create({
+      data: { 
+        videoId: targetVideoId, 
+        userId, 
+        content: content.slice(0, 1000),
+        // Use direct scalar field to bypass relation metadata issues
+        parentId: parentId || undefined
+      },
+      include: { user: { select: { id: true, name: true, nickname: true, image: true } } },
+    });
+    
+    await prisma.lectureVideo.update({
+      where: { id: targetVideoId },
+      data: { commentsCount: { increment: 1 } },
+    });
+    
+    return NextResponse.json(row, { status: 201 });
+  } catch (err: any) {
+    console.error("Comment Create Error:", err);
+    return NextResponse.json({ 
+      error: `Failed: ${err.message || "Unknown Prisma Error"}` 
+    }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string; videoId: string } }
+) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { searchParams } = new URL(req.url);
+  const commentId = searchParams.get("commentId");
+  if (!commentId) return NextResponse.json({ error: "Comment ID required" }, { status: 400 });
+
+  const comment = await prisma.lectureVideoComment.findUnique({
+    where: { id: commentId },
+    select: { userId: true, videoId: true }
   });
+
+  if (!comment) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Only author can delete
+  if (comment.userId !== userId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  await prisma.lectureVideoComment.delete({
+    where: { id: commentId }
+  });
+
   await prisma.lectureVideo.update({
-    where: { id: targetVideoId },
-    data: { commentsCount: { increment: 1 } },
+    where: { id: comment.videoId },
+    data: { commentsCount: { decrement: 1 } }
   });
-  return NextResponse.json(row, { status: 201 });
+
+  return NextResponse.json({ success: true });
 }
 

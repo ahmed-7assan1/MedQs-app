@@ -1,7 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // Avoid Windows EPERM when replacing node_modules/.prisma/client/query_engine-*.dll
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -272,13 +270,16 @@ model LectureVideo {
 }
 
 model LectureVideoComment {
-  id        String       @id @default(uuid())
-  content   String       @db.Text
-  video     LectureVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id        String                @id @default(uuid())
+  content   String                @db.Text
+  video     LectureVideo          @relation(fields: [videoId], references: [id], onDelete: Cascade)
   videoId   String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  createdAt DateTime     @default(now())
+  parentId  String?
+  parent    LectureVideoComment?  @relation("VideoCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   LectureVideoComment[] @relation("VideoCommentReplies")
+  createdAt DateTime              @default(now())
 
   @@index([videoId, createdAt])
   @@index([userId])
@@ -498,6 +499,7 @@ model User {
   dmReceived        DirectMessage[]       @relation("DmReceived")
   following         UserFollow[]          @relation("UserFollows")
   followers         UserFollow[]          @relation("UserFollowers")
+  channelFollows    ChannelFollow[]
   documentTemplates DocumentTemplate[]
   tasks             UserTask[]
 }
@@ -793,4 +795,32 @@ model UserTask {
   updatedAt   DateTime @updatedAt
 
   @@index([userId, date])
+}
+
+// ─────────────────────────────────────────────
+// VIDEO HUB MODELS
+// ─────────────────────────────────────────────
+
+model AllowedChannel {
+  id          String          @id @default(uuid())
+  youtubeId   String          @unique
+  name        String
+  handle      String?
+  thumbnail   String?
+  description String?         @db.Text
+  subscribers String?
+  follows     ChannelFollow[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ChannelFollow {
+  id        String         @id @default(uuid())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  channel   AllowedChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channelId String
+  createdAt DateTime       @default(now())
+
+  @@unique([userId, channelId])
 }

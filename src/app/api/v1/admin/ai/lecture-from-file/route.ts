@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     const prompt = `You help medical educators turn lecture materials into structured study assets.
 
 Lecture title: ${lecture.title}
-Module: ${lecture.subject.module.name}
+Module: ${lecture.subject.module?.name ?? "General"}
 Subject: ${lecture.subject.name}
 
 MATERIAL (extract): 

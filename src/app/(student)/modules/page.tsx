@@ -52,21 +52,21 @@ export default async function ModulesPage() {
 
   const modules = user?.semesterId
     ? await prisma.module.findMany({
-        where: { semesterId: user.semesterId },
-        orderBy: { name: "asc" },
-        include: {
-          subjects: {
-            include: {
-              lectures: {
-                include: {
-                  _count: { select: { questions: true, flashcards: true } },
-                  questions: { select: { difficulty: true } },
-                },
+      where: { semesterId: user.semesterId },
+      orderBy: { name: "asc" },
+      include: {
+        subjects: {
+          include: {
+            lectures: {
+              include: {
+                _count: { select: { questions: true, flashcards: true } },
+                questions: { select: { difficulty: true } },
               },
             },
           },
         },
-      })
+      },
+    })
     : [];
 
   const correctByModule: Record<string, Set<string>> = {};
@@ -80,6 +80,7 @@ export default async function ModulesPage() {
     });
     for (const item of items) {
       const moduleId = item.question.lecture.subject.moduleId;
+      if (!moduleId) continue;
       if (!correctByModule[moduleId]) correctByModule[moduleId] = new Set();
       correctByModule[moduleId].add(item.questionId);
     }

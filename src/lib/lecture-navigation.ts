@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export function getVideoEmbedInfo(url: string): { embedUrl: string; type: string } | null {

@@ -93,30 +93,30 @@ export default async function DashboardPage() {
     quickPaperResolved =
       user?.semesterId != null
         ? await prisma.pastPaper.findFirst({
-            where: { semesterId: user.semesterId },
-            orderBy: { title: "asc" },
-            select: { id: true, title: true },
-          })
+          where: { semesterId: user.semesterId },
+          orderBy: { title: "asc" },
+          select: { id: true, title: true },
+        })
         : null;
 
     [modules, attemptItems, lastLectureActivity] = await Promise.all([
       user?.semesterId != null
         ? prisma.module.findMany({
-            where: { semesterId: user.semesterId },
-            orderBy: { name: "asc" },
-            include: {
-              subjects: {
-                include: {
-                  lectures: {
-                    include: {
-                      _count: { select: { questions: true } },
-                      questions: { select: { id: true } },
-                    },
+          where: { semesterId: user.semesterId },
+          orderBy: { name: "asc" },
+          include: {
+            subjects: {
+              include: {
+                lectures: {
+                  include: {
+                    _count: { select: { questions: true } },
+                    questions: { select: { id: true } },
                   },
                 },
               },
             },
-          })
+          },
+        })
         : Promise.resolve([]),
       prisma.quizAttemptItem.findMany({
         where: {
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay pointer-events-none" />
         <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-indigo-900/30 blur-2xl" />
-        
+
         <div className="relative z-10 max-w-2xl">
           <p className="mb-2 text-sm font-semibold tracking-wide text-sky-100 uppercase">{greeting}</p>
           <h1 className="mb-3 font-display text-4xl font-bold tracking-tight md:text-5xl drop-shadow-sm">
@@ -305,7 +305,8 @@ export default async function DashboardPage() {
 
 
       {/* CSS keyframes for card animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes flicker { 0%,100%{opacity:1;transform:scale(1)} 25%{opacity:.85;transform:scale(1.08) rotate(-3deg)} 75%{opacity:.9;transform:scale(1.05) rotate(3deg)} }
       ` }} />
 
@@ -377,7 +378,7 @@ export default async function DashboardPage() {
                 <h2 className="font-display text-xl font-bold tracking-tight">Module progress</h2>
               </div>
               <div className="flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1">
-                 <span className="text-sm font-bold text-sky-600 dark:text-sky-400">{overallPct}% overall</span>
+                <span className="text-sm font-bold text-sky-600 dark:text-sky-400">{overallPct}% overall</span>
               </div>
             </div>
 
@@ -425,7 +426,7 @@ export default async function DashboardPage() {
                         )}
                         style={{ width: `${mod.pct}%` }}
                       >
-                         <div className="absolute inset-0 -translate-x-full animate-[pulse_2s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                        <div className="absolute inset-0 -translate-x-full animate-[pulse_2s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
                       </div>
                     </div>
                   </Link>

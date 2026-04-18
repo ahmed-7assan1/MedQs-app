@@ -1,0 +1,8 @@
+﻿"Path","LineNumber","Line"
+"C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\src\lib\admin-delete-structure.ts","1","import type { Prisma } from ""@/generated/prisma"";"
+"C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\src\lib\essay-grade.ts","1","import type { Prisma } from ""@/generated/prisma"";"
+"C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\src\lib\fetch-user-for-profile.ts","1","import { Prisma } from ""@/generated/prisma"";"
+"C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\src\lib\forum-posts.ts","1","import { Prisma } from ""@/generated/prisma"";"
+"C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\src\lib\lecture-activity.ts","2","import { Prisma } from ""@/generated/prisma"";"
+"C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\src\lib\lecture-navigation.ts","1","import { Prisma } from ""@/generated/prisma"";"
+"C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\src\lib\quiz-attempt-items.ts","1","import type { Prisma } from ""@/generated/prisma"";"

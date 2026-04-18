@@ -49,7 +49,7 @@ export default async function SubjectLecturesPage({
         </Link>
         <span>/</span>
         <Link href={`/modules/${params.moduleId}`} className="hover:text-foreground truncate max-w-[140px]">
-          {subject.module.name}
+          {subject.module?.name ?? "Module"}
         </Link>
         <span>/</span>
         <span className="font-medium text-foreground truncate max-w-[200px]">{subject.name}</span>

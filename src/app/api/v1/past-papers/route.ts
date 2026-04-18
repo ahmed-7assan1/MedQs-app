@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
       return tx.pastPaper.create({
         data: {
           title: String(body.title ?? "").trim(),
-          semesterId: lecture.subject.module.semesterId,
-          moduleId: lecture.subject.moduleId,
+          semesterId: lecture.subject.module?.semesterId ?? "",
+          moduleId: lecture.subject.moduleId ?? "",
           isInteractive: true,
           kind: "ADMIN_AUTHORED_QUIZ",
           quizLectureId: lecture.id,

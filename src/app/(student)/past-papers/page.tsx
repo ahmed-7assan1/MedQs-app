@@ -39,11 +39,11 @@ export default async function PastPapersPage() {
   const completedPapers = papers.filter(p => p.attempts.length > 0).length;
   const avgScore = papers.length
     ? Math.round(
-        papers
-          .filter(p => p.attempts[0])
-          .reduce((s, p) => s + (p.attempts[0]?.score ?? 0), 0) /
-          Math.max(papers.filter(p => p.attempts[0]).length, 1)
-      )
+      papers
+        .filter(p => p.attempts[0])
+        .reduce((s, p) => s + (p.attempts[0]?.score ?? 0), 0) /
+      Math.max(papers.filter(p => p.attempts[0]).length, 1)
+    )
     : 0;
 
   return (
@@ -114,12 +114,12 @@ export default async function PastPapersPage() {
         <div className="space-y-4">
           {papers.map((paper) => {
             const bestAttempt = paper.attempts[0];
-            const bestScore   = bestAttempt?.score;
-            const done        = paper.attempts.length > 0;
-            const scoreColor  = bestScore !== undefined
+            const bestScore = bestAttempt?.score;
+            const done = paper.attempts.length > 0;
+            const scoreColor = bestScore !== undefined
               ? bestScore >= 70 ? "#059669" : bestScore >= 50 ? "#d97706" : "#dc2626"
               : "#1A6BCC";
-            const scoreBg     = bestScore !== undefined
+            const scoreBg = bestScore !== undefined
               ? bestScore >= 70 ? "rgba(5,150,105,.08)" : bestScore >= 50 ? "rgba(217,119,6,.08)" : "rgba(220,38,38,.08)"
               : "rgba(26,107,204,.08)";
 

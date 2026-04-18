@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 
 export type EssayGradeStored = {
   feedback: string;

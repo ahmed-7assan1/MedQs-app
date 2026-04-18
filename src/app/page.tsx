@@ -115,7 +115,7 @@ export default async function LandingPage() {
                 style={{ background: "linear-gradient(135deg,rgba(6,182,212,.07) 0%,transparent 70%)", borderLeft: "3px solid #06b6d4" }}>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Questions</p>
                 <p className="mt-1 font-display text-3xl font-extrabold tabular-nums text-foreground">48</p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground">Today's sessions</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">Today&apos;s sessions</p>
                 <div className="absolute right-3 top-3 rounded-xl bg-teal-500/10 p-2">
                   <Target className="h-5 w-5 text-teal-500" />
                 </div>
@@ -346,7 +346,7 @@ export default async function LandingPage() {
                     <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="mb-5 text-sm leading-relaxed text-foreground/80">"{text}"</p>
+                <p className="mb-5 text-sm leading-relaxed text-foreground/80">&quot;{text}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white"
                     style={{ background: color }}>

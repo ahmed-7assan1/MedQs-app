@@ -22,11 +22,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const user = isGuest
     ? null
     : await prisma.user
-        .findUnique({
-          where: { id: session!.user!.id },
-          select: { name: true, nickname: true, image: true, semesterId: true, role: true },
-        })
-        .catch(() => null);
+      .findUnique({
+        where: { id: session!.user!.id },
+        select: { name: true, nickname: true, image: true, semesterId: true, role: true },
+      })
+      .catch(() => null);
 
   // ── Onboarding guard: redirect to /register if profile is incomplete ──────
   // Exempt: guests, admins, and pages already under /register
@@ -47,10 +47,10 @@ export default async function StudentLayout({ children }: { children: React.Reac
     isGuest || !session?.user?.id
       ? 0
       : await prisma.notification
-          .count({
-            where: { userId: session.user.id, read: false },
-          })
-          .catch(() => 0);
+        .count({
+          where: { userId: session.user.id, read: false },
+        })
+        .catch(() => 0);
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
   const displayName = user?.nickname || user?.name || session?.user?.name || "Student";

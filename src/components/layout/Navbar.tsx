@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import {
-  Bell, Sun, Moon, Monitor, Menu, X,
+  Bell, Sun, Moon, Monitor, Menu, X, Video,
   BookOpen, LayoutDashboard, MessageSquare, Clock, FileText,
   User, Settings, LogOut, Trophy, ShieldCheck, BellOff,
 } from "lucide-react";
@@ -18,6 +18,7 @@ const navLinks = [
   { href: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
   { href: "/modules",      label: "Modules",     icon: BookOpen },
   { href: "/past-papers",  label: "Papers",      icon: FileText },
+  { href: "/videos",       label: "Videos",      icon: Video },
   { href: "/forum",        label: "Forum",       icon: MessageSquare },
   { href: "/leaderboard",  label: "Leaderboard", icon: Trophy },
   { href: "/taskat",       label: "Taskat",      icon: Clock },

@@ -296,7 +296,7 @@ export function PaperList({ papers, allAttempts }: { papers: GuestPaper[], allAt
             </div>
             <h3 className="font-display text-lg font-bold">No papers found</h3>
             <p className="mt-1 text-sm font-medium text-muted-foreground max-w-sm text-center">
-               We couldn't find any papers matching your current filters. Try adjusting your search or clearing the filters.
+               We couldn&apos;t find any papers matching your current filters. Try adjusting your search or clearing the filters.
             </p>
          </div>
       ) : (

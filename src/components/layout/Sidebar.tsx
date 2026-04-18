@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import {
   LayoutDashboard, BookOpen, MessageSquare, Clock, Settings, LogOut,
   ShieldCheck, Bell, X, Sparkles, HelpCircle, Library, User,
-  Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3
+  Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore } from "@/lib/store";
@@ -22,12 +22,13 @@ interface SidebarProps {
 }
 
 export const NAV = [
-  { href: "/dashboard-app", label: "Dashboard",   icon: LayoutDashboard },
-  { href: "/modules",       label: "Lectures",     icon: BookOpen },
-  { href: "/study-tools",   label: "Study Tools",  icon: BarChart3 },
-  { href: "/past-papers",   label: "Quizzes",      icon: HelpCircle },
-  { href: "/forum",         label: "Community",    icon: MessageSquare },
-  { href: "/taskat",        label: "Taskat",       icon: Clock },
+  { href: "/dashboard-app", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/modules", label: "Lectures", icon: BookOpen },
+  { href: "/study-tools", label: "Study Tools", icon: BarChart3 },
+  { href: "/past-papers", label: "Quizzes", icon: HelpCircle },
+  { href: "/videos", label: "Videos", icon: Video },
+  { href: "/forum", label: "Community", icon: MessageSquare },
+  { href: "/taskat", label: "Taskat", icon: Clock },
 ];
 
 export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQs", logoUrl, isGuest, unreadCount = 0 }: SidebarProps) {
@@ -98,11 +99,11 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
       const res = await fetch("/api/v1/notifications?limit=20");
       const data = await res.json();
       setNotifications(Array.isArray(data) ? data : data.notifications ?? []);
-    } catch {} finally { setNotifLoading(false); }
+    } catch { } finally { setNotifLoading(false); }
   }
 
   async function markAllRead() {
-    await fetch("/api/v1/notifications/read-all", { method: "PUT" }).catch(() => {});
+    await fetch("/api/v1/notifications/read-all", { method: "PUT" }).catch(() => { });
     setNotifications(n => n.map(x => ({ ...x, read: true })));
   }
 
@@ -127,7 +128,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
         className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center border-b border-white/5 bg-background/85 backdrop-blur-[14px]"
         style={{ boxShadow: "0 1px 12px rgba(0,0,0,0.18)" }}
       >
-        <div className="mx-auto flex h-full w-full max-w-screen-xl items-center gap-0 px-4 lg:px-6">
+        <div className="flex h-full w-full items-center gap-0 px-6 lg:px-10">
 
           {/* ── Logo ── */}
           <Link href="/dashboard-app" className="group flex items-center gap-2.5 flex-shrink-0 mr-4">

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     const out = await generateLectureExtrasWithMeta(
       lecture.title,
       lecture.subject.name,
-      lecture.subject.module.name,
+      lecture.subject.module?.name ?? "General",
       text,
       wantOverviewCards,
       wantMnemonics,

@@ -47,7 +47,7 @@ const config: Config = {
         },
         // MedQs brand — deep teal / clinical slate
         medq: {
-          50:  "#f0fdfa",
+          50: "#f0fdfa",
           100: "#ccfbf1",
           200: "#99f6e4",
           300: "#5eead4",

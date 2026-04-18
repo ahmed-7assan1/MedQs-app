@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -107,7 +107,7 @@ async function buildStudentStudyContext(userId: string): Promise<string> {
   } else if (lastAttemptItem) {
     const lec = lastAttemptItem.question.lecture;
     lines.push(
-      `Latest attempted lecture: ${lec.title} (${lec.subject.module.name} / ${lec.subject.name})`
+      `Latest attempted lecture: ${lec.title} (${lec.subject.module?.name ?? "General"} / ${lec.subject.name})`
     );
   }
 
@@ -120,7 +120,7 @@ async function buildStudentStudyContext(userId: string): Promise<string> {
       const row = byLecture.get(key) ?? {
         count: 0,
         lectureTitle: lec.title,
-        moduleName: lec.subject.module.name,
+        moduleName: lec.subject.module?.name ?? "General",
         subjectName: lec.subject.name,
         sample: [],
       };

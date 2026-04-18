@@ -107,11 +107,11 @@ export async function GET(req: NextRequest) {
     take,
   });
   for (const l of lecRows) {
-    const mid = l.subject.module.id;
+    const mid = l.subject.module?.id ?? "__none__";
     lectures.push({
       id: l.id,
       label: l.title,
-      sub: `${l.subject.module.name} · ${l.subject.name}`,
+      sub: `${l.subject.module?.name ?? "General"} · ${l.subject.name}`,
       href: `/modules/${mid}/lectures/${l.id}`,
     });
   }

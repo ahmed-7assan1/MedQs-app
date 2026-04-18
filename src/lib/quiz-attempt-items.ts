@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { gradeEssayAnswerWithMeta, type AIRequestOptions } from "@/lib/gemini";
 import { essayGradeToJson, type EssayGradeStored } from "@/lib/essay-grade";
 
