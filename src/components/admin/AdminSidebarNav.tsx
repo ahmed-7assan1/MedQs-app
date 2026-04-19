@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BookOpen, HelpCircle, Layers, Zap,
   MessageSquare, Users, Settings, Megaphone, Video, Youtube,
-  FileText, GraduationCap, Copy,
+  FileText, GraduationCap, Copy, Library
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,7 @@ const NAV_GROUPS: {
       { href: "/admin/lectures",   label: "Lectures",     icon: Video },
       { href: "/admin/channels",   label: "Channels",     icon: Youtube },
       { href: "/admin/past-papers",label: "Past Papers",  icon: FileText },
+      { href: "/admin/medical-library", label: "Medical Library", icon: Library },
     ],
   },
   {

@@ -289,7 +289,7 @@ export function LectureVideoStudio({
   }
 
   return (
-    <div className="mx-auto max-w-[1700px] px-4 md:px-6">
+    <div className="mx-auto max-w-[1700px] px-3 md:px-6 overflow-hidden">
       <div className={cn(
         "grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 transition-all duration-500",
       )}>
@@ -316,13 +316,13 @@ export function LectureVideoStudio({
 
         {active && (
           <div className="space-y-6">
-            <div className="space-y-3">
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
+            <div className="space-y-1">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground leading-[1.3]">
                 {active.title}
               </h1>
 
               {/* YouTube Style Instructor & Actions Row */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-1">
                 {/* Left: Instructor Profile */}
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 md:h-12 md:w-12 rounded-full overflow-hidden border border-white/10 shadow-lg shrink-0">
@@ -339,7 +339,7 @@ export function LectureVideoStudio({
                       </h3>
                       <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <span className="text-[11px] md:text-xs text-muted-foreground/60">
+                    <span className="text-[11px] md:text-xs text-muted-foreground/60 leading-none">
                       {channelMetadata?.subscriberCount || "6.2K"} Subscribers
                     </span>
                   </div>
@@ -357,7 +357,7 @@ export function LectureVideoStudio({
                 </div>
 
                 {/* Right: Action Buttons Group (YouTube Style Pills) */}
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 pb-2">
                   <div className="flex items-center rounded-full bg-white/5 ring-1 ring-white/10">
                     <button 
                       onClick={() => void toggleLike()}

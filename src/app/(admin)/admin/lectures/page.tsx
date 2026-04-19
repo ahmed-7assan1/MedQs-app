@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import {
   Plus, Video, Layers, Trash2, Save, Loader2,
-  BookOpen, ChevronDown, Pencil, Check, X, FileText, ExternalLink
+  BookOpen, ChevronDown, Pencil, Check, X, FileText, ExternalLink, Library
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -152,7 +152,7 @@ export default function AdminLecturesPage() {
           </div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Define subject scope to list content</p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1.5">
             <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Module Selection</label>
             <MedqsSelect
@@ -179,6 +179,20 @@ export default function AdminLecturesPage() {
               <option value="">Choose Subject…</option>
               {filteredSubjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </MedqsSelect>
+          </div>
+          <div className="space-y-1.5 flex flex-col justify-end">
+             <button 
+               onClick={() => {
+                 // Trigger a simple cross-link to library for discovery context
+                 // In a more complex setup, this could open a search modal
+                 toast.success("Tip: Use Medical Library to discovery & import entire lectures!");
+                 window.open("/admin/medical-library", "_blank");
+               }}
+               className="flex items-center justify-center gap-2 h-11 px-4 rounded-xl border border-primary/30 bg-primary/5 text-primary text-[11px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
+             >
+               <Library className="h-4 w-4" />
+               Discover Library
+             </button>
           </div>
         </div>
       </div>

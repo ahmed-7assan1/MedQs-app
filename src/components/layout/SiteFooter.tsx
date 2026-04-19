@@ -14,7 +14,7 @@ export function SiteFooter() {
 
   return (
     <footer
-      className="mt-auto border-t border-border/40 bg-background/50 backdrop-blur-md w-full py-4 px-6 md:px-12"
+      className="mt-auto hidden md:block border-t border-border/40 bg-background/50 backdrop-blur-md w-full py-4 px-6 md:px-12"
       role="contentinfo"
     >
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-[11px] font-bold uppercase tracking-widest">

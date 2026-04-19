@@ -17,23 +17,36 @@ const withPWA = require("@ducanh2912/next-pwa").default({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Ignore typescript and eslint during Vercel builds to prevent failures on warnings
+  // ── Build ────────────────────────────────────────────────────────────────────
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
-  // Bundle next-auth through Next’s compiler (can reduce broken vendor-chunk paths on Windows after partial .next deletes).
+
+  // ── Runtime ──────────────────────────────────────────────────────────────────
+  compress: true,                // gzip responses
+  poweredByHeader: false,        // remove X-Powered-By header
+  reactStrictMode: true,         // catch bugs early
+
+  // Bundle next-auth through Next's compiler (fixes broken vendor-chunk paths on Windows).
   transpilePackages: ["next-auth"],
+
+  // ── Images ───────────────────────────────────────────────────────────────────
   images: {
+    formats: ["image/avif", "image/webp"], // serve modern formats = 30-50% smaller
     remotePatterns: [
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "graph.facebook.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "*.r2.cloudflarestorage.com" },
       { protocol: "https", hostname: "*.s3.amazonaws.com" },
       { protocol: "https", hostname: "utfs.io" },
       { protocol: "https", hostname: "*.ufs.sh" },
       { protocol: "https", hostname: "uploadthing.com" },
       { protocol: "https", hostname: "*.uploadthing.com" },
+      { protocol: "https", hostname: "www.transparenttextures.com" },
     ],
   },
+
+  // ── Experimental ─────────────────────────────────────────────────────────────
   experimental: {
     serverActions: {
       allowedOrigins: [
@@ -46,14 +59,12 @@ const nextConfig = {
       ],
     },
   },
-  // Avoid stale webpack chunk maps after HMR on Windows (e.g. Cannot find module './8948.js').
-  // Production builds still use webpack cache; `dev` is false during `next build`.
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.cache = false;
-    }
-    return config;
-  },
+
+  // ── Webpack ───────────────────────────────────────────────────────────────────
+  // NOTE: Do NOT disable cache in dev — it causes slow HMR and full rebuilds.
+  // The cache=false workaround was masking a stale .next issue; instead, just
+  // delete .next when you see stale chunk errors.
+  webpack: (config) => config,
 };
 
 module.exports = withPWA(nextConfig);

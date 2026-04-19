@@ -8,7 +8,7 @@ import {
   Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useNotificationStore, useThemeStore } from "@/lib/store";
+import { useNotificationStore, useThemeStore, useSidebarStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
@@ -41,14 +41,14 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { isOpen: mobileOpen, close: setMobileClose, toggle: toggleMobile } = useSidebarStore();
   const [userOpen, setUserOpen] = useState(false);
 
   const userRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { setMobileOpen(false); setUserOpen(false); setNotifOpen(false); }, [pathname]);
+  useEffect(() => { setMobileClose(); setUserOpen(false); setNotifOpen(false); }, [pathname, setMobileClose]);
 
   // Close on outside click
   useEffect(() => {
@@ -62,10 +62,10 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
 
   // Close mobile on escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setMobileOpen(false); };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setMobileClose(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, []);
+  }, [setMobileClose]);
 
   // Prevent body scroll when mobile open
   useEffect(() => {
@@ -80,7 +80,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
     let startX = 0;
     const onTouchStart = (e: TouchEvent) => { startX = e.touches[0].clientX; };
     const onTouchEnd = (e: TouchEvent) => {
-      if (e.changedTouches[0].clientX - startX > 60) setMobileOpen(false);
+      if (e.changedTouches[0].clientX - startX > 60) setMobileClose();
     };
     document.addEventListener("touchstart", onTouchStart);
     document.addEventListener("touchend", onTouchEnd);
@@ -299,10 +299,10 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
               </Link>
             )}
 
-            {/* Mobile hamburger */}
+            {/* Mobile hamburger - HIDDEN (handled by BottomNav) */}
             <button
-              onClick={() => setMobileOpen(true)}
-              className="ml-1 flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all lg:hidden"
+              onClick={toggleMobile}
+              className="hidden lg:hidden items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
               aria-label="Open menu"
             >
               <div className="flex flex-col gap-[5px] w-[17px]">
@@ -323,7 +323,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-[3px]"
-            onClick={() => setMobileOpen(false)}
+            onClick={setMobileClose}
             aria-hidden
           />
 
@@ -341,7 +341,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                 <span className="font-display text-[15px] font-extrabold">{siteName}</span>
               </div>
               <button
-                onClick={() => setMobileOpen(false)}
+                onClick={setMobileClose}
                 className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
@@ -438,7 +438,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Link href="/settings" onClick={() => setMobileOpen(false)}
+                  <Link href="/settings" onClick={setMobileClose}
                     className="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted transition-colors">
                     <Settings className="h-3.5 w-3.5" /> Settings
                   </Link>

@@ -14,7 +14,7 @@ type SearchResponse = {
 };
 
 const headerSearchBtnClass =
-  "relative flex h-9 shrink-0 items-center gap-2 rounded-lg border border-border/80 bg-background/85 px-2.5 text-foreground shadow-sm transition-[background,border-color,transform,box-shadow] hover:bg-muted hover:border-border active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background max-lg:px-2";
+  "relative flex h-8 shrink-0 items-center gap-2 rounded-lg border border-border/40 bg-muted/40 px-2.5 text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-[0.97] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 max-lg:px-2";
 
 export function GlobalSearch({ isGuest }: { isGuest?: boolean }) {
   const router = useRouter();

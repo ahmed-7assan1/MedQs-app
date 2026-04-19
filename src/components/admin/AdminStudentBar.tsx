@@ -41,26 +41,23 @@ export function AdminStudentBar() {
   if (pathname?.startsWith("/ai-chat")) return null;
 
   return (
-    <div className="pointer-events-none fixed bottom-0 right-0 z-[132] p-4 max-md:bottom-[max(1rem,env(safe-area-inset-bottom,0px))] md:p-6">
-      <div className="pointer-events-auto flex flex-col items-end gap-2">
+    <div className="pointer-events-none fixed bottom-24 right-4 z-[132] md:bottom-6 md:right-6">
+      <div className="pointer-events-auto flex flex-col items-end gap-3">
         {open ? (
           <div
-            className="mb-1 max-h-[min(70vh,440px)] w-[min(calc(100vw-2rem),15rem)] overflow-y-auto rounded-xl border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+            className="mb-2 max-h-[min(70vh,440px)] w-[min(calc(100vw-2rem),15rem)] overflow-y-auto rounded-2xl border border-border/40 bg-card/95 p-2 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
             role="menu"
             aria-label={PLATFORM_COPY.doctorShortcutsMenu}
           >
-            <p className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              {PLATFORM_COPY.doctorHub}
-            </p>
-            <p className="px-2 pb-1.5 text-[10px] text-muted-foreground/90">
-              {PLATFORM_COPY.doctorShortcutsSubtitle}
+            <p className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary/80">
+              Admin Control
             </p>
             {LINKS.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-foreground hover:bg-muted"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-primary/5 transition-colors"
               >
                 <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                 {label}
@@ -72,13 +69,12 @@ export function AdminStudentBar() {
           type="button"
           onClick={() => setOpen((o) => !o)}
           className={cn(
-            "flex items-center gap-2 rounded-full border border-primary/20 bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90",
-            open && "ring-2 ring-ring"
+            "flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/90 text-primary-foreground shadow-[0_8px_30px_rgb(var(--primary-rgb)/0.2)] backdrop-blur-md transition-all hover:scale-110 active:scale-95",
+            open && "rotate-45"
           )}
           aria-expanded={open}
         >
-          <ShieldCheck className="h-4 w-4" aria-hidden />
-          {PLATFORM_COPY.floatingDoctorButton}
+          <ShieldCheck className="h-6 w-6" aria-hidden />
         </button>
       </div>
     </div>

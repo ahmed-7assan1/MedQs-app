@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -78,16 +79,17 @@ export default async function StudentLayout({ children }: { children: React.Reac
             isGuest={isGuest}
             unreadCount={unreadCount}
           />
-          <div className="main-content flex-1 flex flex-col pt-16 min-w-0 transition-all duration-300">
+          <div className="main-content flex-1 flex flex-col pt-14 min-w-0 transition-all duration-300">
             {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
             {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
-            <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-8 outline-none w-full">
+            <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-24 md:pb-8 outline-none w-full">
               {children}
             </main>
             <SiteFooter />
             {isAdmin && !isGuest ? <AdminStudentBar /> : null}
             {!isGuest && <OnboardingTutorial />}
             <CookieConsentBanner />
+            <BottomNav />
           </div>
         </div>
       </>

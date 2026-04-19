@@ -17,16 +17,21 @@ export default async function GuestPastPapersPage() {
     return <GuestIdentifyForm />;
   }
 
-  const guest = await prisma.guestQuizUser.findUnique({
+  const guest = await (prisma as any).guestQuizUser.findUnique({
     where: { id: guestId },
-    select: { id: true, displayName: true, externalStudentId: true },
+    select: { id: true, displayName: true, externalStudentId: true, semesterId: true },
   });
 
-  if (!guest) {
+  if (!guest || !(guest as any).semesterId) {
     return <GuestIdentifyForm />;
   }
 
   const papers = await prisma.pastPaper.findMany({
+    where: {
+      semesterId: (guest as any).semesterId,
+      // @ts-ignore
+      isPrivate: false,
+    },
     orderBy: { createdAt: "desc" },
     take: 300,
     include: {

@@ -62,7 +62,7 @@ export default async function LectureVideoPage({
   const likedSet = new Set(likedRows.map((r) => r.videoId));
 
   return (
-    <div className="mx-auto max-w-[1248px] px-6 py-6 animate-in fade-in duration-500">
+    <div className="mx-auto max-w-[1248px] px-4 md:px-6 py-6 animate-in fade-in duration-500 overflow-x-hidden">
       {/* 1. BREADCRUMBS */}
       <nav className="mb-6 flex flex-wrap items-center gap-2 text-[13px] font-normal text-muted-foreground/60">
         <Link href="/modules" className="hover:text-primary transition-colors">Modules</Link>

@@ -11,6 +11,7 @@ import {
   Bookmark,
   BookmarkCheck,
   MessageSquareWarning,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { QuestionWithChoices } from "@/types";
@@ -41,6 +42,8 @@ interface Props {
   explainPaperId?: string;
   /** Anti-cheat: discourage copy/paste of stem and choices during live quiz */
   protectContent?: boolean;
+  /** Admin/AI verification marker */
+  isCurriculumVerified?: boolean;
 }
 
 export function QuestionCard({
@@ -60,6 +63,7 @@ export function QuestionCard({
   showAiPanel = true,
   explainPaperId,
   protectContent = false,
+  isCurriculumVerified = false,
 }: Props) {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [loadingExplain, setLoadingExplain] = useState(false);
@@ -157,6 +161,12 @@ export function QuestionCard({
             <span className={cn("rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide", difficultyColor)}>
               {question.difficulty.toLowerCase()}
             </span>
+            {isCurriculumVerified && (
+              <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary ring-1 ring-primary/20">
+                <Sparkles className="h-3 w-3" />
+                Verified
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-1">
             <span className="mr-1 hidden font-mono text-xs tabular-nums text-muted-foreground sm:inline" title="Time on this question">

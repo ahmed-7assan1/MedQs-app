@@ -38,20 +38,21 @@ export async function POST(req: NextRequest) {
 
     // 3. Prompt Gemini AI for a High-Yield Medical Summary
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using stable flash for long transcripts
 
     const prompt = `
       You are an expert medical educator. Below is a transcript of a medical lecture.
       Please generate a comprehensive, high-yield summary of the lecture in Markdown format.
       
       Requirements:
-      1. Use Arabic (اللغة العربية) as the primary language, but keep medical terms in English and Arabic where appropriate.
+      1. Use Arabic (اللغة العربية) as the primary language, but keep medical terms in English.
       2. Group the info into clear sections (Overview, Key Concepts, Clinical Signficance, Mnemonics).
-      3. Use bolding and bullet points for readability.
-      4. Focus on what is most likely to be tested in medical exams.
+      3. Classify the lecture into a medical subject (e.g., Cardiology, Anatomy, Biochemistry) and include this as a tag at the top.
+      4. Use bolding and bullet points for readability.
+      5. Focus on concepts most relevant for USMLE/PLAB and academic medical exams.
       
       Transcript:
-      ${transcriptText.substring(0, 30000)} // Limit to 30k chars for stability
+      ${transcriptText.substring(0, 30000)}
     `;
 
     const result = await model.generateContent(prompt);

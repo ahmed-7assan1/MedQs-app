@@ -11,7 +11,7 @@ interface StudentPageShellProps {
 
 /** Consistent inner layout for student-facing pages (medical / academic tone). */
 export function StudentPageShell({
-  eyebrow = "Study hub",
+  eyebrow = "",
   title,
   subtitle,
   children,
