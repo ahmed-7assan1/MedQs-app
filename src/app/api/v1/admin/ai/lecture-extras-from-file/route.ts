@@ -8,22 +8,7 @@ import { generateLectureExtrasWithMeta } from "@/lib/gemini";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-async function fileToText(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const name = (file.name || "").toLowerCase();
-  if (name.endsWith(".pdf") || file.type === "application/pdf") {
-    const pdfParse = (await import("pdf-parse")).default;
-    const parsed = await pdfParse(buffer);
-    return parsed.text ?? "";
-  }
-  if (
-    name.endsWith(".docx") ||
-    file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  ) {
-    return buffer.toString("utf-8").replace(/[^\x20-\x7E\n\r]/g, " ");
-  }
-  return buffer.toString("utf-8");
-}
+import { fileToText, scrapeUrlContent } from "@/lib/manus-fetcher";
 
 function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
   if (typeof raw !== "string") return undefined;
@@ -44,21 +29,23 @@ export async function POST(req: NextRequest) {
     }
 
     const form = await req.formData();
-    const lectureId = String(form.get("lectureId") ?? "").trim();
-    const wantOverviewCards = String(form.get("overviewCards") ?? "") === "1";
-    const wantMnemonics = String(form.get("mnemonics") ?? "") === "1";
-    const wantCases = String(form.get("cases") ?? "") === "1";
-    const wantMindMaps = String(form.get("mindMaps") ?? "") === "1";
-    const preferredProvider = String(form.get("preferredProvider") ?? "").trim() || undefined;
-    const dryRun = String(form.get("dryRun") ?? "") === "1";
+    const lectureId = String((form as any).get("lectureId") ?? "").trim();
+    const wantOverviewCards = String((form as any).get("overviewCards") ?? "") === "1";
+    const wantMnemonics = String((form as any).get("mnemonics") ?? "") === "1";
+    const wantCases = String((form as any).get("cases") ?? "") === "1";
+    const wantMindMaps = String((form as any).get("mindMaps") ?? "") === "1";
+    const preferredProvider = String((form as any).get("preferredProvider") ?? "").trim() || undefined;
+    const dryRun = String((form as any).get("dryRun") ?? "") === "1";
 
-    const file = form.get("file") as File | null;
+    const file = (form as any).get("file") as File | null;
+    const linkText = String((form as any).get("linkText") || "").trim();
+
     if (!lectureId) return NextResponse.json({ error: "lectureId required" }, { status: 400 });
-    if (!file) return NextResponse.json({ error: "file required" }, { status: 400 });
+    if (!file && !linkText) return NextResponse.json({ error: "Either a file or a link is required" }, { status: 400 });
     if (!wantOverviewCards && !wantMnemonics && !wantCases && !wantMindMaps) {
       return NextResponse.json({ error: "Select at least one output" }, { status: 400 });
     }
-    if (file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "Max file size 20MB" }, { status: 400 });
+    if (file && file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "Max file size 20MB" }, { status: 400 });
 
     const boundary = await assertLecture(w.scope, lectureId);
     if (boundary) return boundary;
@@ -69,8 +56,14 @@ export async function POST(req: NextRequest) {
     });
     if (!lecture) return NextResponse.json({ error: "Lecture not found" }, { status: 404 });
 
-    const text = (await fileToText(file)).trim();
-    if (!text) return NextResponse.json({ error: "File contained no readable text" }, { status: 422 });
+    let text = "";
+    if (linkText) {
+       text = await scrapeUrlContent(linkText) || "";
+    } else if (file) {
+       text = (await fileToText(file)).trim();
+    }
+
+    if (!text) return NextResponse.json({ error: "File or Link contained no readable text" }, { status: 422 });
 
     const effectiveProvider =
       normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
@@ -89,9 +82,10 @@ export async function POST(req: NextRequest) {
 
     if (!dryRun) {
       // Avoid interactive transaction timeouts with large JSON writes.
-      const rows = await prisma.$queryRaw<Array<{ extras: any }>>(
-        Prisma.sql`SELECT "extras" FROM "Lecture" WHERE "id" = ${lectureId} LIMIT 1`
-      );
+      const rows = (await prisma.$queryRawUnsafe(
+        `SELECT "extras" FROM "Lecture" WHERE "id" = $1 LIMIT 1`,
+        lectureId
+      )) as Array<{ extras: any }>;
       const prev = (rows?.[0]?.extras ?? {}) as any;
       const next = {
         ...prev,
@@ -105,11 +99,13 @@ export async function POST(req: NextRequest) {
             }
           : {}),
         updatedAt: new Date().toISOString(),
-        source: { type: "file", name: file.name, size: file.size },
+        source: { type: file ? "file" : "link", name: file ? file.name : "MANUS Agent Scraping", size: file ? file.size : text.length },
       };
       const nextJson = JSON.stringify(next);
-      await prisma.$executeRaw(
-        Prisma.sql`UPDATE "Lecture" SET "extras" = ${nextJson}::jsonb WHERE "id" = ${lectureId}`
+      await prisma.$executeRawUnsafe(
+        `UPDATE "Lecture" SET "extras" = $1::jsonb WHERE "id" = $2`,
+        nextJson,
+        lectureId
       );
     }
 

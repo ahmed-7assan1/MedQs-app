@@ -161,6 +161,7 @@ model Lecture {
   subject       Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   files         LectureFile[]
   videos        LectureVideo[]
+  records       LectureRecord[]
   PastPaper     PastPaper?
   questions     Question[]
   activities    UserLectureActivity[]
@@ -201,6 +202,19 @@ model LectureVideo {
   likes          LectureVideoLike[]
 
   @@index([lectureId, sortOrder])
+}
+
+model LectureRecord {
+  id             String      @id @default(uuid())
+  title          String
+  url            String
+  sourceType     String      @default("spotify") // spotify, soundcloud, generic
+  lectureId      String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  lecture        Lecture     @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  @@index([lectureId])
 }
 
 model LectureVideoComment {
@@ -387,6 +401,7 @@ model User {
   rankId                String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
+  personalGeminiKey     String?
   facebookUrl           String?
   instagramUrl          String?
   isPrivate             Boolean                @default(false)

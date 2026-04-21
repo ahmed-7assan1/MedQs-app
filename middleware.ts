@@ -19,6 +19,16 @@ const AUTH_REQUIRED = ["/profile/edit", "/notifications", "/quiz", "/register"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+  
+  // Mobile Support: Map Bearer token to NextAuth Cookies
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    // Set both to cover local dev and production over HTTPS
+    req.cookies.set("authjs.session-token", token);
+    req.cookies.set("__Secure-authjs.session-token", token);
+  }
+
   const session = req.auth;
   const role = (session?.user as { role?: string } | undefined)?.role;
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";

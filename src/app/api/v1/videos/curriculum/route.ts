@@ -16,7 +16,9 @@ export async function GET(req: NextRequest) {
       where: {
         lecture: {
           subject: {
-            semesterId: semesterId
+            module: {
+              semesterId: semesterId
+            }
           }
         }
       },

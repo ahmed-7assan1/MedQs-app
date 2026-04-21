@@ -67,10 +67,11 @@ async function callGemini(
   message: string,
   systemPrompt: string,
   images: ChatImagePart[] = [],
-  pdfs: ChatPdfPart[] = []
+  pdfs: ChatPdfPart[] = [],
+  personalKey?: string
 ): Promise<ProviderResult> {
-  const key = process.env.GEMINI_API_KEY?.trim();
-  if (!key) throw new Error("Gemini key missing");
+  // No key needed check here — handled below in the dual-key loop
+  void personalKey; // used below
 
   const textPart = `${systemPrompt}\n\nStudent: ${message}`;
   const parts: Record<string, unknown>[] = [{ text: textPart }];
@@ -93,45 +94,98 @@ async function callGemini(
     });
   }
 
+  const keys: string[] = [
+    personalKey?.trim(),
+    process.env.GEMINI_API_KEY?.trim(),
+    process.env.GEMINI_API_KEY_2?.trim(),
+  ].filter(Boolean) as string[];
+
+  if (keys.length === 0) throw new Error("No Gemini API keys configured");
+
   const body = JSON.stringify({ contents: [{ parts }] });
   const chain = geminiModelChain();
-  let lastErr = "All Gemini models failed";
+  let lastErr = "All Gemini keys and models failed";
 
-  for (let i = 0; i < chain.length; i++) {
-    const model = chain[i]!;
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(FETCH_MS),
-        body,
+  for (let k = 0; k < keys.length; k++) {
+    const key = keys[k]!;
+    const keyLabel = k === 0 ? "KEY_1" : "KEY_2";
+    let keyQuotaExhausted = false;
+
+    for (let i = 0; i < chain.length; i++) {
+      const model = chain[i]!;
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(FETCH_MS),
+          body,
+        }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const apiMsg = typeof data?.error?.message === "string" ? data.error.message : res.statusText;
+        lastErr = `Gemini error (${res.status}) [${keyLabel}/${model}]: ${apiMsg}`;
+
+        const isQuota = res.status === 429 || /quota|limit:\s*0|free_tier|resource_exhausted/i.test(apiMsg);
+        const isModelIssue = res.status === 404 || res.status === 503 || /not found|not supported|overloaded/i.test(apiMsg);
+
+        if (isQuota) {
+          // Entire key quota is exhausted - break model loop and try next key
+          keyQuotaExhausted = true;
+          console.warn(`[AI Router] ${keyLabel} quota exhausted, switching to next key...`);
+          break;
+        }
+        if (isModelIssue && i < chain.length - 1) continue;
+        // For other errors on last model, try next key if available
+        if (k < keys.length - 1) { keyQuotaExhausted = true; break; }
+        throw new Error(lastErr);
       }
-    );
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      const apiMsg = typeof data?.error?.message === "string" ? data.error.message : res.statusText;
-      lastErr = `Gemini error (${res.status}) [${model}]: ${apiMsg}`;
-      // Wrong model / no free quota on this model / overloaded — try next (not for bad key)
-      const tryNext =
-        i < chain.length - 1 &&
-        (res.status === 404 ||
-          res.status === 429 ||
-          res.status === 503 ||
-          /not found|not supported|quota|limit:\s*0|free_tier/i.test(apiMsg));
-      if (tryNext) continue;
-      throw new Error(lastErr);
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        lastErr = `Gemini returned no text for [${keyLabel}/${model}] (blocked or empty)`;
+        if (i < chain.length - 1) continue;
+        if (k < keys.length - 1) { keyQuotaExhausted = true; break; }
+        throw new Error(lastErr);
+      }
+      return { provider: `gemini:${model}:${keyLabel}`, text };
     }
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      lastErr = `Gemini returned no text for ${model} (blocked or empty)`;
-      if (i < chain.length - 1) continue;
-      throw new Error(lastErr);
-    }
-    return { provider: `gemini:${model}`, text };
+
+    if (!keyQuotaExhausted) break; // success already returned above
   }
 
   throw new Error(lastErr);
+}
+
+
+/** MANUS fallback — uses DeepSeek-compatible endpoint style via OpenAI-compatible v1 */
+async function callManus(message: string, systemPrompt: string): Promise<ProviderResult> {
+  const key = process.env.MANUS_API_KEY?.trim();
+  if (!key) throw new Error("MANUS key missing");
+  // MANUS exposes an OpenAI-compatible endpoint
+  const res = await fetch("https://api.manus.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: "manus-default",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+    }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`MANUS call failed (${res.status}): ${errData?.error?.message ?? res.statusText}`);
+  }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("MANUS empty response");
+  return { provider: "manus", text };
 }
 
 async function callOpenAI(message: string, systemPrompt: string): Promise<ProviderResult> {
@@ -213,7 +267,7 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
 export async function generateAIReplyWithFallback(
   message: string,
   systemPrompt: string,
-  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string }
+  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string; personalGeminiKey?: string }
 ): Promise<ProviderResult & AIFallbackMeta> {
   if (!hasAnyAiKey()) {
     throw new AIConfigurationError(
@@ -224,29 +278,34 @@ export async function generateAIReplyWithFallback(
   const images = options?.images?.filter((i) => i.data && i.mimeType) ?? [];
   const pdfs = options?.pdfs?.filter((p) => p.data && p.mimeType === "application/pdf") ?? [];
   const preferred = normalizePreferredProvider(options?.preferredProvider);
+  const personalGeminiKey = options?.personalGeminiKey?.trim() || undefined;
 
   if (images.length > 0 || pdfs.length > 0) {
-    if (!process.env.GEMINI_API_KEY?.trim()) {
+    if (!personalGeminiKey && !process.env.GEMINI_API_KEY?.trim()) {
       throw new AIConfigurationError(
         "Images and PDFs in chat require **GEMINI_API_KEY** on the server (multimodal). Add it in Vercel env and redeploy."
       );
     }
-    const row = await callGemini(message, systemPrompt, images, pdfs);
+    const row = await callGemini(message, systemPrompt, images, pdfs, personalGeminiKey);
     return { ...row, provider: row.provider, triedProviders: ["gemini"] };
   }
 
   const order = buildProviderOrder(preferred);
-  const runners: Array<{ id: AIProviderId; run: () => Promise<ProviderResult> }> = order.map((id) => ({
+  const runners: Array<{ id: string; run: () => Promise<ProviderResult> }> = order.map((id) => ({
     id,
     run:
       id === "gemini"
-        ? () => callGemini(message, systemPrompt, [], [])
+        ? () => callGemini(message, systemPrompt, [], [], personalGeminiKey)
         : id === "openai"
           ? () => callOpenAI(message, systemPrompt)
           : id === "anthropic"
             ? () => callAnthropic(message, systemPrompt)
             : () => callDeepSeek(message, systemPrompt),
   }));
+  // Always add MANUS as the last resort fallback if key exists
+  if (process.env.MANUS_API_KEY?.trim()) {
+    runners.push({ id: "manus", run: () => callManus(message, systemPrompt) });
+  }
 
   if (runners.length === 0) {
     throw new AIConfigurationError(

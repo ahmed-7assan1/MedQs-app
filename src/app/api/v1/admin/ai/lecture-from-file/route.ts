@@ -8,21 +8,7 @@ import { generateJsonWithFallback } from "@/lib/ai-router";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-async function fileToText(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const name = (file.name || "").toLowerCase();
-  if (name.endsWith(".pdf") || file.type === "application/pdf") {
-    const pdfParse = (await import("pdf-parse")).default;
-    const parsed = await pdfParse(buffer);
-    return parsed.text ?? "";
-  }
-  // Simple docx support (best-effort)
-  if (name.endsWith(".docx") || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-    return buffer.toString("utf-8").replace(/[^\x20-\x7E\n\r]/g, " ");
-  }
-  // txt/md fallback
-  return buffer.toString("utf-8");
-}
+import { fileToText, scrapeUrlContent } from "@/lib/manus-fetcher";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,21 +22,23 @@ export async function POST(req: NextRequest) {
     }
 
     const form = await req.formData();
-    const lectureId = String(form.get("lectureId") ?? "").trim();
-    const wantNotes = String(form.get("notes") ?? "") === "1";
-    const wantFlashcards = String(form.get("flashcards") ?? "") === "1";
-    const wantQuestions = String(form.get("questions") ?? "") === "1";
-    const wantVideos = String(form.get("videos") ?? "") === "1";
-    const preferredProvider = String(form.get("preferredProvider") ?? "").trim() || undefined;
-    const dryRun = String(form.get("dryRun") ?? "") === "1";
+    const lectureId = String((form as any).get("lectureId") ?? "").trim();
+    const wantNotes = String((form as any).get("notes") ?? "") === "1";
+    const wantFlashcards = String((form as any).get("flashcards") ?? "") === "1";
+    const wantQuestions = String((form as any).get("questions") ?? "") === "1";
+    const wantVideos = String((form as any).get("videos") ?? "") === "1";
+    const preferredProvider = String((form as any).get("preferredProvider") ?? "").trim() || undefined;
+    const dryRun = String((form as any).get("dryRun") ?? "") === "1";
 
-    const file = form.get("file") as File | null;
+    const file = (form as any).get("file") as File | null;
+    const linkText = String((form as any).get("linkText") || "").trim();
+
     if (!lectureId) return NextResponse.json({ error: "lectureId required" }, { status: 400 });
-    if (!file) return NextResponse.json({ error: "file required" }, { status: 400 });
+    if (!file && !linkText) return NextResponse.json({ error: "Either a file or a link is required" }, { status: 400 });
     if (!wantNotes && !wantFlashcards && !wantQuestions && !wantVideos) {
       return NextResponse.json({ error: "Select at least one output" }, { status: 400 });
     }
-    if (file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "Max file size 20MB" }, { status: 400 });
+    if (file && file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "Max file size 20MB" }, { status: 400 });
 
     const boundary = await assertLecture(w.scope, lectureId);
     if (boundary) return boundary;
@@ -61,8 +49,14 @@ export async function POST(req: NextRequest) {
     });
     if (!lecture) return NextResponse.json({ error: "Lecture not found" }, { status: 404 });
 
-    const text = (await fileToText(file)).trim();
-    if (!text) return NextResponse.json({ error: "File contained no readable text" }, { status: 422 });
+    let text = "";
+    if (linkText) {
+       text = await scrapeUrlContent(linkText) || "";
+    } else if (file) {
+       text = (await fileToText(file)).trim();
+    }
+    
+    if (!text) return NextResponse.json({ error: "File or Link contained no readable text" }, { status: 422 });
 
     const cap = text.slice(0, 14000);
     const prompt = `You help medical educators turn lecture materials into structured study assets.
@@ -140,14 +134,15 @@ Rules:
 
     if (!dryRun) {
       // Persist selected outputs (notes append + createMany)
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: any) => {
         if (wantNotes && notesMarkdown) {
-          const rows = await tx.$queryRaw<Array<{ notesMarkdown: string | null }>>(
-            Prisma.sql`SELECT "notesMarkdown" FROM "Lecture" WHERE "id" = ${lectureId} LIMIT 1`
-          );
+          const rows = (await tx.$queryRawUnsafe(
+            `SELECT "notesMarkdown" FROM "Lecture" WHERE "id" = $1 LIMIT 1`,
+            lectureId
+          )) as Array<{ notesMarkdown: string | null }>;
           const prev = rows[0]?.notesMarkdown?.trim() ?? "";
           const merged = prev ? `${prev}\n\n---\n\n${notesMarkdown}` : notesMarkdown;
-          await tx.$executeRaw(Prisma.sql`UPDATE "Lecture" SET "notesMarkdown" = ${merged} WHERE "id" = ${lectureId}`);
+          await tx.$executeRawUnsafe(`UPDATE "Lecture" SET "notesMarkdown" = $1 WHERE "id" = $2`, merged, lectureId);
         }
         if (wantFlashcards && flashcardsClean.length) {
           await tx.flashcard.createMany({

@@ -576,12 +576,22 @@ export function LectureVideoStudio({
                           </div>
 
                           <div className="flex-1 min-w-0 flex flex-col items-start gap-1 py-0.5">
-                             <p className={cn(
-                               "text-[12px] md:text-[13px] font-bold tracking-tight line-clamp-2 text-left leading-[1.3]",
-                               isActive ? "text-primary" : "text-foreground group-hover:text-primary transition-colors"
-                             )}>
-                               {v.title}
-                             </p>
+                             <div className="flex w-full items-start justify-between gap-1">
+                                <p className={cn(
+                                  "text-[12px] md:text-[13px] font-bold tracking-tight line-clamp-2 text-left leading-[1.3]",
+                                  isActive ? "text-primary" : "text-foreground group-hover:text-primary transition-colors"
+                                )}>
+                                  {v.title}
+                                </p>
+                                {isAdmin && (
+                                  <div 
+                                    onClick={(e) => { e.stopPropagation(); deleteVideo(v.id); }}
+                                    className="p-1 rounded text-muted-foreground hover:bg-red-500/10 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </div>
+                                )}
+                             </div>
                              <div className="flex flex-col gap-0.5 opacity-40">
                                <span className="text-[10px] md:text-[11px] font-medium">Instructor Gomaa</span>
                                <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-medium">

@@ -38,24 +38,25 @@ export async function GET(req: NextRequest) {
     // 3. Resolve these channels via YouTube
     let discoveredChannels: any[] = [];
     if (apiKey && videoIds.length > 0) {
-       // Step A: Find Channel IDs from Video IDs
+       // Batch process all unique video IDs (up to 50 per request)
        const idsStr = videoIds.slice(0, 50).join(",");
        const vRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${idsStr}&key=${apiKey}`);
        const vData = await vRes.json();
        
        const channelIds = [...new Set((vData.items || []).map((i: any) => i.snippet.channelId))];
        
-       // Step B: Get rich channel info (Avatar, Title)
+       // Step B: Get rich channel info (Avatar, Title, Subscribers)
        if (channelIds.length > 0) {
           const chanIdsStr = channelIds.join(",");
-          const cRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${chanIdsStr}&key=${apiKey}`);
+          const cRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${chanIdsStr}&key=${apiKey}`);
           const cData = await cRes.json();
           
           discoveredChannels = (cData.items || []).map((item: any) => ({
              id: item.id,
              youtubeId: item.id,
              name: item.snippet.title,
-             thumbnail: item.snippet.thumbnails.default.url,
+             thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default.url,
+             subscribers: formatSubs(item.statistics?.subscriberCount),
              followersCount: 0,
              isFollowing: false,
              isDiscovered: true
@@ -63,24 +64,42 @@ export async function GET(req: NextRequest) {
        }
     }
 
+    // Helper to format subs (e.g. 1.2M)
+    function formatSubs(count: string | undefined) {
+      if (!count) return "0";
+      const num = parseInt(count);
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+      if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+      return count;
+    }
+
     // 4. Update Manual Channels with latest YT Avatars if possible
     let finalManual = manualChannels;
     if (apiKey && manualChannels.length > 0) {
        const mIds = manualChannels.map((c: any) => c.youtubeId).join(",");
-       const cRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${mIds}&key=${apiKey}`);
+       const cRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${mIds}&key=${apiKey}`);
        const cData = await cRes.json();
-       const ytAvatarMap = new Map((cData.items || []).map((i: any) => [i.id, i.snippet.thumbnails.default.url]));
+       const ytDataMap = new Map((cData.items || []).map((i: any) => [
+         i.id, 
+         { 
+           thumbnail: i.snippet.thumbnails.high?.url || i.snippet.thumbnails.default.url,
+           subs: formatSubs(i.statistics?.subscriberCount)
+         }
+       ]));
        
-       finalManual = manualChannels.map((c: any) => ({
-          ...c,
-          thumbnail: ytAvatarMap.get(c.youtubeId) || c.thumbnail
-       }));
+       finalManual = manualChannels.map((c: any) => {
+          const yt = ytDataMap.get(c.youtubeId);
+          return {
+            ...c,
+            thumbnail: yt?.thumbnail || c.thumbnail,
+            subscribers: yt?.subs || c.subscribers
+          };
+       });
     }
 
-    // 5. Merge
+    // 5. Merge and Brand
     const manualMap = new Map(finalManual.map((c: any) => [c.youtubeId, c]));
     
-    // Check follows
     if (session?.user?.id) {
        const allChanIds = [...finalManual.map((c: any) => c.id), ...discoveredChannels.map(d => d.id)];
        const follows = await (prisma as any).channelFollow.findMany({
@@ -107,9 +126,31 @@ export async function GET(req: NextRequest) {
       ...discoveredChannels.filter(d => !manualMap.has(d.youtubeId))
     ];
 
-    unified.sort((a, b) => (a.isFollowing === b.isFollowing ? a.name.localeCompare(b.name) : a.isFollowing ? -1 : 1));
+    const platformLogo = "/logo.png";
 
-    return NextResponse.json(unified);
+    const brandedUnified = unified.map(instructor => {
+      let name = instructor.name;
+      let thumbnail = instructor.thumbnail;
+
+      if (name.includes("Ahmed Jumaa") || name.includes("أحمد جمعة")) {
+        name = "Dr. Q";
+        thumbnail = platformLogo;
+      }
+      
+      if (!thumbnail || thumbnail.includes("placeholder")) {
+        thumbnail = platformLogo;
+      }
+
+      return { ...instructor, name, thumbnail };
+    });
+
+    brandedUnified.sort((a, b) => (a.isFollowing === b.isFollowing ? a.name.localeCompare(b.name) : a.isFollowing ? -1 : 1));
+
+    return NextResponse.json(brandedUnified);
+
+    brandedUnified.sort((a, b) => (a.isFollowing === b.isFollowing ? a.name.localeCompare(b.name) : a.isFollowing ? -1 : 1));
+
+    return NextResponse.json(brandedUnified);
   } catch (error) {
     console.error("Instructors API Error:", error);
     return NextResponse.json({ error: "Operation failed" }, { status: 500 });

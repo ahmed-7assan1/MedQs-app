@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
+import { useConfirm } from "@/contexts/ConfirmContext";
 
 type ModuleItem = { id: string; name: string };
 
@@ -49,8 +50,15 @@ export function ModuleInlineManager({
     toast.success("Module updated");
   }
 
+  const confirm = useConfirm();
   async function removeModule(id: string) {
-    if (!confirm("Delete this module and all nested content?")) return;
+    const ok = await confirm({
+      title: "Delete Module",
+      message: "Are you sure you want to delete this module and ALL its content? This action cannot be undone.",
+      confirmLabel: "Delete permanently",
+      variant: "danger"
+    });
+    if (!ok) return;
     const res = await fetch(`/api/v1/modules/${id}`, { method: "DELETE" });
     if (!res.ok) {
       toast.error(await apiErrorMessage(res, "Delete failed"));

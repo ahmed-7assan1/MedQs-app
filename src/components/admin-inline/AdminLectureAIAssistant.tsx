@@ -19,6 +19,7 @@ type QuestionDraft = {
 export function AdminLectureAIAssistant({ lectureId }: { lectureId: string }) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [linkInput, setLinkInput] = useState("");
   const [notes, setNotes] = useState(true);
   const [flashcards, setFlashcards] = useState(true);
   const [questions, setQuestions] = useState(false);
@@ -31,10 +32,10 @@ export function AdminLectureAIAssistant({ lectureId }: { lectureId: string }) {
   const [activeReview, setActiveReview] = useState<null | "notes" | "flashcards" | "questions" | "videos">(null);
   const [applying, setApplying] = useState<null | "notes" | "flashcards" | "questions">(null);
 
-  const canRun = useMemo(() => Boolean(file) && (notes || flashcards || questions || videos), [file, notes, flashcards, questions, videos]);
+  const canRun = useMemo(() => Boolean(file || linkInput.trim()) && (notes || flashcards || questions || videos), [file, linkInput, notes, flashcards, questions, videos]);
 
   async function run() {
-    if (!file) return;
+    if (!file && !linkInput.trim()) return;
     if (!notes && !flashcards && !questions && !videos) {
       toast.error("Select at least one output");
       return;
@@ -50,7 +51,8 @@ export function AdminLectureAIAssistant({ lectureId }: { lectureId: string }) {
     try {
       const form = new FormData();
       form.append("lectureId", lectureId);
-      form.append("file", file);
+      if (file) form.append("file", file);
+      if (linkInput.trim()) form.append("linkText", linkInput.trim());
       if (notes) form.append("notes", "1");
       if (flashcards) form.append("flashcards", "1");
       if (questions) form.append("questions", "1");
@@ -195,6 +197,17 @@ export function AdminLectureAIAssistant({ lectureId }: { lectureId: string }) {
                 }}
               />
             </label>
+            
+            <div className="flex items-center gap-2">
+               <span className="text-xs text-muted-foreground font-bold">OR</span>
+               <input 
+                  type="text" 
+                  placeholder="Paste a MANUS Link..." 
+                  value={linkInput}
+                  onChange={e => setLinkInput(e.target.value)}
+                  className="rounded-md border border-border bg-background px-3 py-2 text-xs w-[180px] hover:bg-muted/50 focus:outline-none focus:ring-1 focus:ring-primary"
+               />
+            </div>
 
             <button
               onClick={() => void run()}

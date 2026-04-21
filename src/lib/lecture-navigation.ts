@@ -46,6 +46,9 @@ export async function getLectureInModule(moduleId: string, lectureId: string) {
       videos: {
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       },
+      records: {
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
   if (!lecture) return null;

@@ -56,14 +56,13 @@ export async function POST(req: NextRequest) {
     await prisma.$transaction(async (tx) => {
       if (wantNotes && notesMarkdown) {
         /** Raw SQL so this works even when Prisma Client was not regenerated after adding `notesMarkdown` (common Windows EPERM during `prisma generate`). */
-        const rows = await tx.$queryRaw<Array<{ notesMarkdown: string | null }>>(
-          Prisma.sql`SELECT "notesMarkdown" FROM "Lecture" WHERE "id" = ${lectureId} LIMIT 1`
-        );
+        const rows = (await tx.$queryRawUnsafe(
+          `SELECT "notesMarkdown" FROM "Lecture" WHERE "id" = $1 LIMIT 1`,
+          lectureId
+        )) as Array<{ notesMarkdown: string | null }>;
         const prev = rows[0]?.notesMarkdown?.trim() ?? "";
         const merged = prev ? `${prev}\n\n---\n\n${notesMarkdown}` : notesMarkdown;
-        await tx.$executeRaw(
-          Prisma.sql`UPDATE "Lecture" SET "notesMarkdown" = ${merged} WHERE "id" = ${lectureId}`
-        );
+        await tx.$executeRawUnsafe(`UPDATE "Lecture" SET "notesMarkdown" = $1 WHERE "id" = $2`, merged, lectureId);
       }
       if (wantFlashcards && flashcards.length > 0) {
         await tx.flashcard.createMany({

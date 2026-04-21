@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload, Settings, Globe, Layers, Plus } from "lucide-react";
 import { ExportPanel } from "@/components/admin/ExportPanel";
+import { PersonalAIKeyCard } from "@/components/admin/PersonalAIKeyCard";
 import { uploadFiles } from "@/lib/uploadthing-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
@@ -628,3 +629,4 @@ export default function AdminSettingsPage() {
     </div>
   );
 }
+

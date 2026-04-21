@@ -79,7 +79,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
             isGuest={isGuest}
             unreadCount={unreadCount}
           />
-          <div className="main-content flex-1 flex flex-col pt-14 min-w-0 transition-all duration-300">
+          <div className="main-content flex-1 flex flex-col pt-0 lg:pt-14 min-w-0 transition-all duration-300">
             {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
             {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
             <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-24 md:pb-8 outline-none w-full">

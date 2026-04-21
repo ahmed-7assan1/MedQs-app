@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
+import { useConfirm } from "@/contexts/ConfirmContext";
 
 interface Module  { id: string; name: string }
 interface Semester { id: string; name: string }
@@ -29,6 +30,7 @@ interface PastPaper {
 }
 
 export default function AdminPastPapersPage() {
+  const confirm = useConfirm();
   const [papers, setPapers]     = useState<PastPaper[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [modules, setModules]   = useState<Module[]>([]);
@@ -163,7 +165,14 @@ export default function AdminPastPapersPage() {
   }
 
   async function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? All student attempts will be lost.`)) return;
+    const ok = await confirm({
+      title: "Delete Paper",
+      message: `Are you sure you want to delete "${title}"? All student attempts will be lost.`,
+      confirmLabel: "Delete permanently",
+      cancelLabel: "Cancel",
+      variant: "danger"
+    });
+    if (!ok) return;
     const res = await fetch(`/api/v1/past-papers/${id}`, { method: "DELETE" });
     if (res.ok) {
       setPapers(prev => prev.filter(p => p.id !== id));

@@ -6,6 +6,7 @@ import { ChevronRight, BookOpen, FileText } from "lucide-react";
 import { getUserRankInfo } from "@/lib/engagement";
 import { cn } from "@/lib/utils";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
+import { HomeTopBar } from "@/components/dashboard/HomeTopBar";
 import { DashboardDrQFab } from "@/components/dashboard/DashboardDrQFab";
 import { last7DayKeys } from "@/lib/dashboard-stats";
 import { fetchDashboardData } from "@/lib/dashboard-queries";
@@ -67,11 +68,19 @@ export default async function DashboardPage() {
     .slice(0, 4);
 
   return (
-    <StudentPageShell maxWidthClass="max-w-[1400px]">
+    <StudentPageShell maxWidthClass="max-w-[1400px]" className="pt-0 lg:pt-10" noTopPaddingMobile>
+      
+      {/* ── Premium Mobile Top Bar (Home Only) ── */}
+      <HomeTopBar 
+        userName={user?.name ?? "Student"} 
+        userImage={user?.image ?? undefined}
+        location={location}
+        modules={moduleProgress.map(m => ({ id: m.id, name: m.name }))}
+      />
 
-      {/* ── Greeting Banner ── */}
+      {/* ── Desktop Greeting Banner (Hidden on mobile via HomeTopBar presence) ── */}
       <div
-        className="mb-5 flex items-center justify-between overflow-hidden rounded-xl px-6 py-5"
+        className="mb-5 hidden lg:flex items-center justify-between overflow-hidden rounded-xl px-6 py-5"
         style={{ background: "linear-gradient(130deg, #534AB7 0%, #7C3AED 60%, #6D28D9 100%)" }}
       >
         <div>

@@ -68,9 +68,10 @@ export async function POST(req: NextRequest) {
 
     if (!dryRun) {
       // Avoid interactive transaction timeouts with large JSON writes.
-      const rows = await prisma.$queryRaw<Array<{ extras: any }>>(
-        Prisma.sql`SELECT "extras" FROM "Lecture" WHERE "id" = ${lectureId} LIMIT 1`
-      );
+      const rows = (await prisma.$queryRawUnsafe(
+        `SELECT "extras" FROM "Lecture" WHERE "id" = $1 LIMIT 1`,
+        lectureId
+      )) as Array<{ extras: any }>;
       const prev = (rows?.[0]?.extras ?? {}) as any;
       const next = {
         ...prev,
@@ -86,8 +87,10 @@ export async function POST(req: NextRequest) {
         updatedAt: new Date().toISOString(),
       };
       const nextJson = JSON.stringify(next);
-      await prisma.$executeRaw(
-        Prisma.sql`UPDATE "Lecture" SET "extras" = ${nextJson}::jsonb WHERE "id" = ${lectureId}`
+      await prisma.$executeRawUnsafe(
+        `UPDATE "Lecture" SET "extras" = $1::jsonb WHERE "id" = $2`,
+        nextJson,
+        lectureId
       );
     }
 

@@ -7,6 +7,7 @@ import { DevServiceWorkerCleanup } from "@/components/system/DevServiceWorkerCle
 import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { appFontVariableClassName } from "@/lib/app-fonts";
+import { ConfirmProvider } from "@/contexts/ConfirmContext";
 import "../styles/globals.css";
 
 // Fetch site config server-side — cached per request by Next.js
@@ -269,7 +270,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <DevServiceWorkerCleanup />
         <ChunkLoadRecovery />
-        {children}
+        <ConfirmProvider>
+          {children}
+        </ConfirmProvider>
         <Toaster
           position="top-center"
           containerStyle={{

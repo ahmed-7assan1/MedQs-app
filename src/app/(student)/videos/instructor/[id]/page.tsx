@@ -1,12 +1,12 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { 
   ArrowLeft, Play, Users, CheckCircle2, 
   Heart, Loader2, Video, Bookmark, Sparkles, LayoutGrid,
-  ChevronRight, GraduationCap
+  ChevronRight, GraduationCap, Share2, Subscriptions
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -59,7 +59,7 @@ export default function InstructorProfilePage({ params }: { params: { id: string
             followersCount: following ? prev.instructor.followersCount + 1 : prev.instructor.followersCount - 1
           }
         } : null);
-        toast.success(following ? "Educator Followed!" : "Unfollowed");
+        toast.success(following ? `Followed ${data.instructor.name}!` : "Unfollowed");
       }
     } catch {
       toast.error("Operation failed");
@@ -69,16 +69,22 @@ export default function InstructorProfilePage({ params }: { params: { id: string
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-10 w-10 animate-spin text-primary/40" />
+        <Loader2 className="h-10 w-10 animate-spin text-primary/30" />
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-6 bg-background">
-        <h1 className="text-2xl font-black italic uppercase">Authority not found</h1>
-        <button onClick={() => router.back()} className="text-primary font-black uppercase text-xs border-b-2 border-primary/20 pb-1">Return to Hub</button>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-background">
+        <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-6">
+          <Users className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <h1 className="text-2xl font-bold mb-2">Instructor not found</h1>
+        <p className="text-muted-foreground mb-8">The requested educator could not be located in our system.</p>
+        <button onClick={() => router.back()} className="px-6 py-2.5 rounded-full bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20">
+          Go Back
+        </button>
       </div>
     );
   }
@@ -86,133 +92,153 @@ export default function InstructorProfilePage({ params }: { params: { id: string
   const { instructor, videos } = data;
 
   return (
-    <div className="min-h-screen bg-background pb-32 w-full overflow-x-hidden">
-      {/* 1. Immersive Authority Header (Full Width) */}
-      <section className="relative pt-16 pb-24 border-b border-border/40 overflow-hidden w-full bg-muted/10">
-        <div className="absolute inset-x-0 bottom-0 h-[200px] bg-gradient-to-t from-background to-transparent" />
-        <div className="w-full px-6 md:px-12 relative z-10">
+    <div className="min-h-screen bg-background pb-32">
+      {/* 1. Profile Header */}
+      <div className="relative border-b border-border/40 overflow-hidden">
+        {/* Banner Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[300px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2" />
+        
+        <div className="max-w-7xl mx-auto px-4 pt-4 md:pt-10 pb-12 relative z-10">
+          {/* Back Button */}
           <button 
            onClick={() => router.back()}
-           className="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 hover:text-primary transition-all group"
+           className="mb-8 flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors group"
           >
-             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1.5 transition-transform" /> Return to Discovery
+             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> 
+             Back to Hub
           </button>
 
-          <div className="flex flex-col md:flex-row gap-12 items-center md:items-end">
-             {/* Thumbnail (YouTube Style Circle) */}
-             <div className="relative">
-                <div className="absolute -inset-4 bg-primary/20 blur-[64px] rounded-full opacity-40 shrink-0" />
-                <div className="relative h-40 w-40 md:h-56 md:w-56 rounded-full border-[6px] border-background shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden bg-card p-1">
-                   <img src={instructor.thumbnail} className="h-full w-full rounded-full object-cover" alt="" />
+          <div className="flex flex-col md:flex-row gap-8 md:items-center">
+            {/* Avatar */}
+            <div className="relative flex-shrink-0 mx-auto md:mx-0">
+              <div className="h-32 w-32 md:h-44 md:w-44 rounded-full p-1 bg-gradient-to-br from-primary via-primary/50 to-primary/10 shadow-2xl relative">
+                <div className="h-full w-full rounded-full bg-background p-1">
+                  <img src={instructor.thumbnail} className="h-full w-full rounded-full object-cover" alt={instructor.name} />
                 </div>
-             </div>
-
-             {/* Authority Meta */}
-             <div className="flex-1 space-y-8 text-center md:text-left">
-                <div className="space-y-3">
-                   <div className="flex items-center justify-center md:justify-start gap-4">
-                      <h1 className="text-4xl md:text-7xl font-black font-display tracking-tight leading-none italic uppercase">{instructor.name}</h1>
-                      <CheckCircle2 className="h-10 w-10 text-primary fill-primary/5 hidden md:block" />
-                   </div>
-                   <p className="text-primary font-bold text-xl md:text-2xl opacity-60 italic">{instructor.handle || `@${instructor.name.toLowerCase().replace(/\s/g, "")}`}</p>
+                {/* Online Indicator / Verified Icon */}
+                <div className="absolute bottom-2 right-2 h-8 w-8 rounded-full bg-background p-1 shadow-lg">
+                  <div className="h-full w-full rounded-full bg-primary flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-white" />
+                  </div>
                 </div>
+              </div>
+            </div>
 
-                <div className="flex items-center justify-center md:justify-start gap-12">
-                   <div className="space-y-1">
-                      <p className="text-3xl font-black leading-none">{instructor.subscribers}</p>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">YT Authority</p>
-                   </div>
-                   <div className="h-10 w-px bg-border/40" />
-                   <div className="space-y-1">
-                      <p className="text-3xl font-black leading-none">{instructor.followersCount}</p>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">MedQs Followers</p>
-                   </div>
+            {/* Info */}
+            <div className="flex-1 text-center md:text-left space-y-4">
+              <div className="space-y-1">
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">{instructor.name}</h1>
+                <p className="text-primary/70 font-semibold text-sm md:text-lg">
+                  {instructor.handle || `@${instructor.name.toLowerCase().replace(/\s/g, "")}`}
+                </p>
+              </div>
+
+              {/* Stats Bar */}
+              <div className="flex items-center justify-center md:justify-start gap-8 lg:gap-12">
+                <div className="space-y-0.5">
+                  <p className="text-xl md:text-2xl font-black text-foreground">{instructor.subscribers || "0"}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Subscribers</p>
                 </div>
-             </div>
+                <div className="h-8 w-px bg-border/40" />
+                <div className="space-y-0.5">
+                  <p className="text-xl md:text-2xl font-black text-foreground">{instructor.followersCount}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">MedQs Fans</p>
+                </div>
+                <div className="h-8 w-px bg-border/40" />
+                <div className="space-y-0.5">
+                  <p className="text-xl md:text-2xl font-black text-foreground">{videos.length}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Lectures</p>
+                </div>
+              </div>
 
-             {/* Action Bar */}
-             <button 
-               onClick={toggleFollow}
-               className={cn(
-                 "h-16 px-12 rounded-2xl font-black text-[12px] uppercase tracking-[0.2em] transition-all shadow-2xl flex items-center gap-4",
-                 instructor.isFollowing 
-                   ? "bg-muted text-foreground border border-border/80 shadow-none hover:bg-muted/80" 
-                   : "bg-primary text-primary-foreground shadow-primary/30 hover:scale-[1.03] active:scale-95 ring-4 ring-primary/10"
-               )}
-             >
-               <Heart className={cn("h-5 w-5", instructor.isFollowing && "fill-current")} />
-               {instructor.isFollowing ? "Following Source" : "Follow Advisor"}
-             </button>
+              {/* Action Buttons */}
+              <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
+                <button 
+                  onClick={toggleFollow}
+                  className={cn(
+                    "flex-1 md:flex-none h-12 px-8 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2.5",
+                    instructor.isFollowing 
+                      ? "bg-muted text-foreground border border-border/80" 
+                      : "bg-primary text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95"
+                  )}
+                >
+                  <Heart className={cn("h-4.5 w-4.5", instructor.isFollowing && "fill-current text-red-500")} />
+                  {instructor.isFollowing ? "Subscribed" : "Subscribe"}
+                </button>
+                <button className="h-12 w-12 rounded-2xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                  <Share2 className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 2. Structured Content Feed (Full Width) */}
-      <main className="w-full px-6 md:px-12 mt-20 space-y-16">
-         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-border/40">
-            <div className="space-y-3">
-               <h2 className="text-2xl md:text-3xl font-black font-display tracking-tight italic uppercase">Semester <span className="text-primary italic">Featured</span></h2>
-               <p className="text-muted-foreground text-[11px] font-bold opacity-50 uppercase tracking-[0.1em] max-w-xl italic">Instructional media by {instructor.name} specifically referenced in your active semester lectures.</p>
-            </div>
-            <div className="flex items-center gap-3 bg-muted/40 p-2 rounded-2xl border border-border/40">
-               <div className="px-6 py-2.5 bg-card rounded-xl text-[10px] font-black text-primary border border-border/80 flex items-center gap-3 uppercase tracking-widest">
-                  <GraduationCap className="h-4 w-4" /> Academic Focus Only
-               </div>
-            </div>
-         </div>
+      {/* 2. Videos Grid */}
+      <div className="max-w-7xl mx-auto px-4 mt-12 space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">Academic Lectures</h2>
+            <p className="text-xs font-medium text-muted-foreground">High-yield content by {instructor.name}</p>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-muted/40 rounded-xl border border-border/50 text-[10px] font-bold text-primary uppercase tracking-widest">
+            <GraduationCap className="h-4 w-4" /> Academic Focus
+          </div>
+        </div>
 
-         {videos.length > 0 ? (
-            <div className="grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 animate-in fade-in slide-in-from-bottom-12 duration-1000">
-               {videos.map((video) => (
-                  <div key={video.id} className="group flex flex-col gap-5">
-                    <Link href={`/lectures/${video.lectureId}/video`} className="block relative aspect-video rounded-xl overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] border border-border/40 group-hover:border-primary/60 transition-all duration-700">
-                       <img src={video.thumbnail!} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s] opacity-90 group-hover:opacity-100" alt="" />
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
-                       
-                       <div className="absolute top-4 left-4">
-                          <div className="px-3 py-1.5 bg-white/10 backdrop-blur-3xl rounded-xl border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-2xl">
-                            {video.subjectName}
-                          </div>
-                       </div>
-                       
-                       <div className="absolute inset-x-6 bottom-6 flex items-center justify-between">
-                          <span className="flex items-center gap-2 text-[9px] font-black text-white uppercase tracking-[0.2em] drop-shadow-lg">
-                             <Sparkles className="h-4 w-4 text-primary fill-current" /> High Yield
-                          </span>
-                          <div className="h-14 w-14 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ring-4 ring-white/10">
-                             <Play className="h-6 w-6 fill-current ml-1" />
-                          </div>
-                       </div>
+        {videos.length > 0 ? (
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {videos.map((video) => {
+              const href = `/modules/${video.moduleId}/lectures/${video.lectureId}/video`;
+              return (
+                <div key={video.id} className="group flex flex-col gap-3">
+                  {/* Thumbnail Card */}
+                  <Link 
+                    href={href} 
+                    className="relative aspect-video rounded-2xl overflow-hidden bg-muted border border-border/10 group-hover:border-primary/20 transition-all shadow-sm group-hover:shadow-md group-hover:shadow-primary/5"
+                  >
+                    <img src={video.thumbnail!} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={video.title} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
+                      <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                        <Play className="h-5 w-5 text-white fill-white ml-0.5" />
+                      </div>
+                    </div>
+                    {/* Badge */}
+                    <div className="absolute top-2 left-2">
+                       <span className="px-2 py-0.5 bg-primary/90 text-[8px] font-black text-white uppercase rounded-md shadow-lg backdrop-blur-sm">
+                         {video.subjectName}
+                       </span>
+                    </div>
+                  </Link>
+
+                  {/* Info */}
+                  <div className="px-1 space-y-1">
+                    <Link href={href} className="font-bold text-[14px] leading-snug line-clamp-2 hover:text-primary transition-colors">
+                      {video.title}
                     </Link>
-
-                    <div className="px-2 space-y-3">
-                       <h3 className="font-bold text-base md:text-lg leading-snug line-clamp-2 min-h-[44px] group-hover:text-primary transition-colors decoration-primary/40 group-hover:underline underline-offset-4 decoration-2">{video.title}</h3>
-                       <div className="flex items-center gap-3">
-                          <div className="px-4 py-1.5 bg-primary/5 border border-primary/10 rounded-full text-[10px] font-black text-primary/60 uppercase tracking-[0.1em] flex items-center gap-2 shadow-inner">
-                             <Bookmark className="h-3 w-3" /> {video.lectureTitle}
-                          </div>
-                       </div>
+                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                      <Bookmark className="h-3 w-3" /> 
+                      <span className="truncate">{video.lectureTitle}</span>
                     </div>
                   </div>
-               ))}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-24 text-center space-y-5 bg-card border border-dashed border-border rounded-[2.5rem]">
+            <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center text-primary/30">
+              <Video className="h-8 w-8" />
             </div>
-         ) : (
-            <div className="flex flex-col items-center justify-center py-48 text-center space-y-10 bg-muted/5 rounded-[80px] border-4 border-dashed border-border/20 animate-in zoom-in duration-1000">
-               <div className="relative">
-                  <div className="absolute -inset-10 bg-primary/10 blur-[90px] rounded-full" />
-                  <div className="relative h-28 w-28 rounded-[40px] bg-primary/5 text-primary/30 flex items-center justify-center border border-primary/10 shadow-inner">
-                     <Video className="h-14 w-14" />
-                  </div>
-               </div>
-               <div className="space-y-3 max-w-sm mx-auto">
-                 <h3 className="text-3xl font-display font-black tracking-tight italic uppercase leading-none">Context Gap</h3>
-                 <p className="text-muted-foreground text-xs font-bold leading-relaxed px-10 opacity-40 uppercase tracking-[0.1em]">
-                   {instructor.name} has specialized instructional media, but no current videos have been linked to your academic modules for this semester.
-                 </p>
-               </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold">No linked videos</h3>
+              <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
+                {instructor.name} has content, but none are currently linked to your active semester modules.
+              </p>
             </div>
-         )}
-      </main>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

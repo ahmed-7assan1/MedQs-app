@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import {
   Building2, Calendar, BookOpen, FlaskConical, GraduationCap,
-  Plus, ChevronDown, Loader2, Trash2, Check, X, ShieldAlert, Layers
+  Plus, ChevronDown, Loader2, Trash2, Check, X, ShieldAlert, Layers, Zap
 } from "lucide-react";
+import { SmartArchitectDialog } from "@/components/admin/SmartArchitectDialog";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
@@ -33,6 +34,24 @@ export default function AdminContentPage() {
   const [addVal,       setAddVal]          = useState("");
   const [deleting,     setDeleting]        = useState<string | null>(null);
   const [isSuperAdmin, setIsSuperAdmin]    = useState(false);
+  const [architectTarget, setArchitectTarget] = useState<Semester | null>(null);
+
+  const refreshData = async () => {
+    try {
+      const [mRes, subRes] = await Promise.all([
+        fetch("/api/v1/modules-all"),
+        fetch("/api/v1/subjects-all"),
+      ]);
+      const [m, sub] = await Promise.all([
+        parseJsonList<Module>(mRes),
+        parseJsonList<Subject>(subRes),
+      ]);
+      setModules(m as Module[]);
+      setSubjects(sub as Subject[]);
+    } catch (e) {
+      console.error("Refresh failed", e);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -96,7 +115,6 @@ export default function AdminContentPage() {
     const type = parts[0];
     const parentId = parts.slice(1).join("-");
 
-    // Special: Direct subject
     if (type === "directsubj") {
       const semId = parentId;
       let directMod = modules.find(m => m.semesterId === semId && m.name === DIRECT_MODULE);
@@ -198,7 +216,6 @@ export default function AdminContentPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-32">
-       {/* ── Premium Header ── */}
        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-blue-500">Global Infrastructure</p>
@@ -230,6 +247,7 @@ export default function AdminContentPage() {
             isSuperAdmin={isSuperAdmin}
             onAdd={startAdd}
             onDelete={commitDelete}
+            onArchitect={setArchitectTarget}
             addingKey={adding}
             addVal={addVal}
             onAddValChange={setAddVal}
@@ -239,6 +257,16 @@ export default function AdminContentPage() {
           />
         ))}
         
+        <SmartArchitectDialog 
+          isOpen={!!architectTarget}
+          onClose={() => setArchitectTarget(null)}
+          semester={architectTarget}
+          onSuccess={() => {
+            refreshData();
+            setArchitectTarget(null);
+          }}
+        />
+
         {isSuperAdmin && (
           <div className="rounded-2xl border border-dashed border-border/60 bg-muted/5 p-8 flex flex-col items-center justify-center text-center">
              <Building2 className="h-10 w-10 text-muted-foreground opacity-20 mb-3" />
@@ -265,9 +293,7 @@ export default function AdminContentPage() {
   );
 }
 
-// ─── Hierarchy Nodes ────────────────────────────────────────────────────────
-
-function UniversityNode({ uni, faculties, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+function UniversityNode({ uni, faculties, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
   const open = expanded.has(uni.id);
   const uniFaculties = faculties.filter((f: any) => f.universityId === uni.id);
   const uniYears = years.filter((y: any) => y.universityId === uni.id && !y.facultyId);
@@ -331,6 +357,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
                 isSuperAdmin={isSuperAdmin}
                 onAdd={onAdd}
                 onDelete={onDelete}
+                onArchitect={onArchitect}
                 addingKey={addingKey}
                 addVal={addVal}
                 onAddValChange={onAddValChange}
@@ -353,6 +380,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
                 isSuperAdmin={isSuperAdmin}
                 onAdd={onAdd}
                 onDelete={onDelete}
+                onArchitect={onArchitect}
                 addingKey={addingKey}
                 addVal={addVal}
                 onAddValChange={onAddValChange}
@@ -367,7 +395,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
   );
 }
 
-function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
   const open = expanded.has(fac.id);
   const facYears = years.filter((y: any) => y.facultyId === fac.id);
 
@@ -406,7 +434,7 @@ function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onTog
              </div>
            )}
            {facYears.sort((a: any, b: any) => (a.yearNumber ?? 0) - (b.yearNumber ?? 0)).map((year: any) => (
-             <YearNode key={year.id} year={year} semesters={semesters} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} isSuperAdmin={isSuperAdmin} onAdd={onAdd} onDelete={onDelete} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} deletingId={deletingId} />
+             <YearNode key={year.id} year={year} semesters={semesters} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} isSuperAdmin={isSuperAdmin} onAdd={onAdd} onDelete={onDelete} onArchitect={onArchitect} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} deletingId={deletingId} />
            ))}
         </div>
       )}
@@ -414,7 +442,7 @@ function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onTog
   );
 }
 
-function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
   const open = expanded.has(year.id);
   const yearSemesters = semesters.filter((s: any) => s.academicYearId === year.id);
 
@@ -444,7 +472,7 @@ function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSu
              </div>
            )}
            {yearSemesters.map((sem: any) => (
-              <SemesterNode key={sem.id} sem={sem} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
+              <SemesterNode key={sem.id} sem={sem} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} onArchitect={onArchitect} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
            ))}
         </div>
       )}
@@ -452,7 +480,7 @@ function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSu
   );
 }
 
-function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDelete, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd }: any) {
+function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd }: any) {
   const open = expanded.has(sem.id);
   const semModules = modules.filter((m: any) => m.semesterId === sem.id);
   const regularModules = semModules.filter((m: any) => m.name !== DIRECT_MODULE);
@@ -467,6 +495,7 @@ function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDel
              <span className="text-xs font-bold text-foreground/70 uppercase tracking-tighter">{sem.name}</span>
           </div>
           <div className="flex items-center gap-1.5 opacity-0 group-hover/sem:opacity-100 transition-all">
+             <button onClick={(e) => { e.stopPropagation(); onArchitect(sem); }} className="h-6 w-6 flex items-center justify-center rounded-md text-blue-500/70 hover:bg-blue-500/10 hover:text-blue-500"><Zap className="h-3 w-3" /></button>
              <button onClick={(e) => { e.stopPropagation(); onAdd(`sem-${sem.id}-mod`); }} className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-muted"><Plus className="h-3 w-3" /></button>
              <button onClick={(e) => { e.stopPropagation(); onDelete("sem", sem.id, sem.name); }} className="h-6 w-6 flex items-center justify-center rounded-md text-red-500/50 hover:bg-red-500/10 hover:text-red-500"><Trash2 className="h-3 w-3" /></button>
           </div>
@@ -486,7 +515,6 @@ function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDel
                <ModuleNode key={mod.id} mod={mod} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
             ))}
 
-            {/* Direct Subjects logic */}
             <div className="mt-2 pl-1 border-t border-dashed border-border/40 pt-2 space-y-1">
                <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">

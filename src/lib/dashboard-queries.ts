@@ -196,6 +196,7 @@ export async function fetchDashboardData(
         where: { id: userId },
         select: {
           name: true,
+          image: true,
           semesterId: true,
           university: { select: { name: true } },
           semester: { select: { name: true } },

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { FileText, Clock, BarChart3, ChevronRight, Eye, Plus, Settings2, Trophy, TrendingUp, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StudentPageShell } from "@/components/layout/StudentPageShell";
 
 export default async function PastPapersPage() {
   const session = await auth();
@@ -35,19 +36,19 @@ export default async function PastPapersPage() {
     },
   });
 
-  const totalAttempts = papers.reduce((s, p) => s + p._count.attempts, 0);
-  const completedPapers = papers.filter(p => p.attempts.length > 0).length;
+  const totalAttempts = papers.reduce((s: number, p: any) => s + p._count.attempts, 0);
+  const completedPapers = papers.filter((p: any) => p.attempts.length > 0).length;
   const avgScore = papers.length
     ? Math.round(
       papers
-        .filter(p => p.attempts[0])
-        .reduce((s, p) => s + (p.attempts[0]?.score ?? 0), 0) /
-      Math.max(papers.filter(p => p.attempts[0]).length, 1)
+        .filter((p: any) => p.attempts[0])
+        .reduce((s: number, p: any) => s + (p.attempts[0]?.score ?? 0), 0) /
+      Math.max(papers.filter((p: any) => p.attempts[0]).length, 1)
     )
     : 0;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8 md:px-6">
+    <StudentPageShell maxWidthClass="max-w-4xl" noTopPaddingMobile>
 
       {/* ── HEADER ── */}
       <div className="mb-6 sm:mb-8">
@@ -112,7 +113,7 @@ export default async function PastPapersPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {papers.map((paper) => {
+          {papers.map((paper: any) => {
             const bestAttempt = paper.attempts[0];
             const bestScore = bestAttempt?.score;
             const done = paper.attempts.length > 0;
@@ -198,7 +199,7 @@ export default async function PastPapersPage() {
                   <div className="border-t border-border/40 bg-muted/20 px-5 py-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[11px] font-medium text-muted-foreground">Previous:</span>
-                      {paper.attempts.map((attempt) => (
+                      {paper.attempts.map((attempt: any) => (
                         <Link key={attempt.id} href={`/quiz/attempt/${attempt.id}`}
                           className="flex items-center gap-1.5 rounded-lg border border-border/50 bg-background/60 px-2.5 py-1 text-[11px] transition-colors hover:border-primary/30 hover:bg-muted">
                           <Eye className="h-3 w-3 text-muted-foreground" />
@@ -223,6 +224,6 @@ export default async function PastPapersPage() {
           })}
         </div>
       )}
-    </div>
+    </StudentPageShell>
   );
 }

@@ -13,6 +13,12 @@ import {
   Sparkles,
   ListTree,
   CircleDot,
+  Headphones,
+  ChevronRight,
+  ArrowRight,
+  PlayCircle,
+  FileCode,
+  GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
@@ -23,6 +29,7 @@ import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 type TabId =
   | "overview"
   | "video"
+  | "records"
   | "attachments"
   | "flashcards"
   | "questions"
@@ -61,7 +68,6 @@ function MindMapCanvas({
   onSelectId: (id: string) => void;
 }) {
   const { nodes, edges } = useMemo(() => sanitizeMindMapGraph(graph), [graph]);
-  // Derive levels if missing, based on edges from a root-ish node.
   const levelById = useMemo(() => {
     const m = new Map<string, number>();
     for (const n of nodes) if (typeof n.level === "number") m.set(n.id, n.level);
@@ -130,7 +136,10 @@ function MindMapCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative min-h-[min(52vh,520px)] w-full overflow-hidden rounded-2xl bg-muted/25 ring-1 ring-border/50"
+      className={cn(
+        "relative min-h-[min(52vh,520px)] w-full overflow-hidden rounded-3xl backdrop-blur-md shadow-2xl border",
+        "bg-white/40 dark:bg-black/20 border-black/5 dark:border-white/10"
+      )}
       onPointerDown={(e) => {
         if ((e.target as HTMLElement)?.closest?.("[data-node]")) return;
         (e.currentTarget as any).setPointerCapture?.(e.pointerId);
@@ -143,7 +152,7 @@ function MindMapCanvas({
       onPointerUp={() => setDragging(null)}
     >
       <div
-        className="absolute left-1/2 top-1/2 will-change-transform"
+        className="absolute left-1/2 top-1/2 transition-transform duration-300 ease-out"
         style={{ transform: `translate(${pan.x}px,${pan.y}px) translate(-50%,-50%) scale(${scale})` }}
       >
         <svg className="absolute inset-0 -z-10" width={1600} height={1200} viewBox="-800 -600 1600 1200">
@@ -157,8 +166,10 @@ function MindMapCanvas({
                 key={`${e.from}-${e.to}-${i}`}
                 d={`M ${a.x} ${a.y} C ${midX} ${a.y}, ${midX} ${b.y}, ${b.x} ${b.y}`}
                 fill="none"
-                stroke="hsl(var(--primary) / 0.30)"
-                strokeWidth="2"
+                stroke="currentColor"
+                className="text-primary/30"
+                strokeWidth="2.5"
+                strokeDasharray="5 5"
               />
             );
           })}
@@ -168,11 +179,12 @@ function MindMapCanvas({
           const p = layout.pos.get(n.id) ?? { x: 0, y: 0 };
           const isSel = selectedId === n.id;
           const shape = n.shape ?? ((levelById.get(n.id) ?? 0) === 0 ? "hex" : "circle");
-          const baseCls =
-            "select-none shadow-sm transition-transform duration-200 hover:-translate-y-0.5";
-          const selCls = isSel ? "ring-2 ring-ring" : "";
-          const w = shape === "card" ? 220 : 150;
-          const h = shape === "card" ? 72 : 64;
+          const baseCls = "transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl";
+          const selCls = isSel 
+            ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20 scale-110" 
+            : "bg-white dark:bg-[#1c1c22] dark:bg-card/90";
+          const w = shape === "card" ? 220 : 160;
+          const h = shape === "card" ? 80 : 64;
           return (
             <button
               key={n.id}
@@ -180,11 +192,11 @@ function MindMapCanvas({
               data-node
               onClick={() => onSelectId(n.id)}
               className={cn(
-                "absolute flex items-center justify-center border px-4 text-left",
+                "absolute flex items-center justify-center border px-4 text-center backdrop-blur-xl",
                 baseCls,
                 selCls,
                 shape === "circle" ? "rounded-full" : "rounded-2xl",
-                "bg-card/85 border-border hover:border-primary/40"
+                "border-black/5 dark:border-white/10 hover:border-primary/50"
               )}
               style={{
                 left: p.x - w / 2,
@@ -194,15 +206,16 @@ function MindMapCanvas({
                 clipPath: shape === "hex" ? hexClip() : undefined,
               }}
             >
-              <span className="text-sm font-semibold">{n.label}</span>
+              <span className="text-sm font-bold tracking-tight text-foreground">{n.label}</span>
             </button>
           );
         })}
       </div>
 
-      <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-        <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Drag to pan</span>
-        <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/60">Ctrl + wheel to zoom</span>
+      <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-3">
+        <div className="rounded-full bg-black/5 dark:bg-black/40 backdrop-blur-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-white/50 border border-black/5 dark:border-white/5">
+           Scroll to zoom • Drag to move
+        </div>
       </div>
     </div>
   );
@@ -249,20 +262,25 @@ function MindMapOutline({
           type="button"
           onClick={() => onSelect(id)}
           className={cn(
-            "w-full rounded-xl px-3 py-2.5 text-left transition-colors",
-            depth > 0 && "ml-3 border-l border-border/80 pl-4",
-            active ? "bg-primary/12 ring-1 ring-primary/25" : "hover:bg-muted/60"
+            "w-full group rounded-2xl px-4 py-3 text-left transition-all",
+            depth > 0 && "ml-3 border-l border-primary/20 pl-5",
+            active 
+              ? "bg-primary/10 dark:bg-primary/20 ring-1 ring-primary/40 shadow-lg shadow-primary/5" 
+              : "hover:bg-primary/5 dark:hover:bg-white/5"
           )}
         >
-          <span className="block text-sm font-semibold text-foreground">{n.label}</span>
+          <span className={cn(
+            "block text-sm font-bold transition-colors",
+            active ? "text-primary" : "text-foreground group-hover:text-primary/80"
+          )}>{n.label}</span>
           {n.detail?.trim() ? (
-            <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{n.detail}</span>
+            <span className="mt-1 block text-xs leading-relaxed opacity-60 font-medium">{n.detail}</span>
           ) : null}
         </button>
         {kids.length > 0 ? (
-          <ul className="mt-1 space-y-1">
+          <ul className="mt-2 space-y-1">
             {kids.map((cid) => (
-              <Row key={cid} id={cid} depth={depth + 1} />
+              <Row id={cid} depth={depth + 1} />
             ))}
           </ul>
         ) : null}
@@ -270,21 +288,15 @@ function MindMapOutline({
     );
   }
 
-  if (!rootId) {
-    return (
-      <div className="rounded-xl bg-muted/30 p-4 text-sm text-muted-foreground ring-1 ring-border/40">
-        Map data could not be laid out as a tree. Use the graphic above.
-      </div>
-    );
-  }
+  if (!rootId) return null;
 
   return (
-    <div className="rounded-2xl bg-muted/20 p-4 ring-1 ring-border/40">
-      <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        <ListTree className="h-4 w-4 text-primary" aria-hidden />
-        Outline (same order as branches)
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 px-1 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+        <ListTree className="h-3 w-3" />
+        Lecture Map Architecture
       </div>
-      <ul className="space-y-1">
+      <ul className="space-y-2">
         <Row id={rootId} depth={0} />
       </ul>
     </div>
@@ -298,20 +310,34 @@ function MindMapFocusCard({ graph, selectedId }: { graph: MindMapGraph; selected
   }, [graph]);
   const sel = selectedId ? byId.get(selectedId) : null;
   return (
-    <div className="flex h-full min-h-[200px] flex-col gap-3 rounded-2xl bg-muted/20 p-4 ring-1 ring-border/40">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        <CircleDot className="h-4 w-4 text-primary" aria-hidden />
-        Selected topic
+    <div className={cn(
+      "flex h-full min-h-[220px] flex-col gap-4 rounded-[28px] p-6 border shadow-2xl relative overflow-hidden",
+      "bg-gradient-to-br from-white to-slate-50 dark:from-white/5 dark:to-transparent border-black/5 dark:border-white/10"
+    )}>
+      <div className="absolute top-0 right-0 p-8 opacity-5">
+         <Sparkles className="h-24 w-24" />
+      </div>
+      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+        <CircleDot className="h-3.5 w-3.5" />
+        Active Topic Insight
       </div>
       {sel ? (
-        <>
-          <p className="font-display text-lg font-bold leading-snug text-foreground">{sel.label}</p>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {sel.detail?.trim() ? sel.detail : "Open the outline or tap the map to explore subtopics."}
-          </p>
-        </>
+        <div className="relative z-10 animate-in fade-in slide-in-from-right-4">
+          <h4 className="font-display text-xl font-black leading-tight text-foreground">{sel.label}</h4>
+          <div className="mt-4 prose dark:prose-invert prose-sm">
+            <p className={cn(
+              "text-sm leading-relaxed font-medium italic",
+              "text-muted-foreground dark:text-white/60"
+            )}>
+              {sel.detail?.trim() ? sel.detail : "Explore the visual map or the structured outline to dive deeper into this medical concept."}
+            </p>
+          </div>
+        </div>
       ) : (
-        <p className="text-sm text-muted-foreground">Choose a branch from the outline or a node on the map.</p>
+        <div className="mt-4 flex flex-col items-center justify-center flex-1 opacity-40">
+           <Layers className="h-8 w-8 mb-2" />
+           <p className="text-xs font-bold text-center">Tap a node to reveal details</p>
+        </div>
       )}
     </div>
   );
@@ -323,10 +349,7 @@ function MindMapSection({ graph, markdown }: { graph: MindMapGraph; markdown: st
 
   useEffect(() => {
     if (safe.nodes.length && selectedId == null) {
-      const root =
-        safe.nodes.find((n) => n.id === "root") ||
-        safe.nodes.find((n) => n.level === 0) ||
-        safe.nodes[0];
+      const root = safe.nodes.find((n) => n.id === "root" || n.level === 0) || safe.nodes[0];
       if (root) setSelectedId(root.id);
     }
   }, [safe.nodes, selectedId]);
@@ -335,28 +358,29 @@ function MindMapSection({ graph, markdown }: { graph: MindMapGraph; markdown: st
   const md = safeString(markdown).trim();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
       {hasGraph ? (
-        <>
-          <MindMapCanvas graph={safe} selectedId={selectedId} onSelectId={setSelectedId} />
-          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-            <MindMapOutline graph={safe} selectedId={selectedId} onSelect={setSelectedId} />
-            <MindMapFocusCard graph={safe} selectedId={selectedId} />
-          </div>
-        </>
-      ) : null}
-
-      {md ? (
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Written outline</p>
-          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-p:leading-relaxed">
-            <ReactMarkdown components={markdownComponentsWithImages}>{enhancePlainImageUrls(md)}</ReactMarkdown>
-          </div>
+        <div className="space-y-6">
+           <MindMapCanvas graph={safe} selectedId={selectedId} onSelectId={setSelectedId} />
+           <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+              <MindMapOutline graph={safe} selectedId={selectedId} onSelect={setSelectedId} />
+              <div className="lg:sticky lg:top-24">
+                 <MindMapFocusCard graph={safe} selectedId={selectedId} />
+              </div>
+           </div>
         </div>
       ) : null}
 
-      {!hasGraph && !md ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">No mind map content yet.</p>
+      {md ? (
+        <div className="rounded-[32px] bg-card/40 p-8 border border-black/5 dark:border-white/5 shadow-xl">
+          <div className="flex items-center gap-2 mb-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+             <NotebookPen className="h-3 w-3" />
+             Written Synthesis
+          </div>
+          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-p:leading-relaxed prose-li:my-1">
+            <ReactMarkdown components={markdownComponentsWithImages}>{enhancePlainImageUrls(md)}</ReactMarkdown>
+          </div>
+        </div>
       ) : null}
     </div>
   );
@@ -370,7 +394,6 @@ function getTabs(lecture: LectureLike) {
   const ui = (lecture?.uiConfig ?? {}) as any;
   const enabled = (ui?.tabs ?? {}) as Record<string, boolean>;
 
-  // Core tabs default on (if content exists).
   const hasVideo = Boolean((lecture?.videos?.length ?? 0) > 0 || safeString(lecture?.videoUrl).trim());
   const hasFiles = (lecture?.files?.length ?? 0) > 0;
   const hasCards = (lecture?.flashcards?.length ?? 0) > 0;
@@ -378,10 +401,7 @@ function getTabs(lecture: LectureLike) {
   const hasNotes = Boolean(safeString(lecture?.notesMarkdown).trim());
 
   const extras = (lecture?.extras ?? {}) as any;
-  const hasMindMapGraph =
-    extras?.mindMapGraph &&
-    Array.isArray(extras.mindMapGraph.nodes) &&
-    extras.mindMapGraph.nodes.length > 0;
+  const hasMindMapGraph = extras?.mindMapGraph && Array.isArray(extras.mindMapGraph.nodes) && extras.mindMapGraph.nodes.length > 0;
   const hasMindmaps = Boolean(safeString(extras?.mindMapsMarkdown).trim()) || Boolean(hasMindMapGraph);
   const hasCases = Array.isArray(extras?.cases) && extras.cases.length > 0;
   const hasMnemonics = Array.isArray(extras?.mnemonics) && extras.mnemonics.length > 0;
@@ -389,20 +409,17 @@ function getTabs(lecture: LectureLike) {
   const tabs: Array<{ id: TabId; label: string; icon: any; show: boolean }> = [
     { id: "overview", label: "Overview", icon: BookOpen, show: enabled.overview ?? true },
     { id: "video", label: "Video", icon: Video, show: enabled.video ?? hasVideo },
-    { id: "attachments", label: "Attachments", icon: FileText, show: enabled.attachments ?? hasFiles },
+    { id: "records", label: "Records", icon: Headphones, show: enabled.records ?? Boolean((lecture?.records?.length ?? 0) > 0) },
+    { id: "attachments", label: "Files", icon: FileText, show: enabled.attachments ?? hasFiles },
     { id: "flashcards", label: "Flashcards", icon: Layers, show: enabled.flashcards ?? hasCards },
     { id: "questions", label: "Quiz", icon: HelpCircle, show: enabled.questions ?? hasQs },
-    { id: "notes", label: "Notes", icon: NotebookPen, show: enabled.notes ?? hasNotes },
-    // Extras appear only if content exists AND doctor didn't hide them.
-    { id: "mindmaps", label: "Mind maps", icon: Sparkles, show: (enabled.mindmaps ?? true) && hasMindmaps },
-    { id: "cases", label: "Cases", icon: Sparkles, show: (enabled.cases ?? true) && hasCases },
+    { id: "notes", label: "AI Notes", icon: NotebookPen, show: enabled.notes ?? hasNotes },
+    { id: "mindmaps", label: "Mind Maps", icon: Sparkles, show: (enabled.mindmaps ?? true) && hasMindmaps },
     { id: "mnemonics", label: "Mnemonics", icon: Sparkles, show: (enabled.mnemonics ?? true) && hasMnemonics },
+    { id: "cases", label: "Clinical Cases", icon: Sparkles, show: (enabled.cases ?? true) && hasCases },
   ];
 
-  const visible = tabs.filter((t) => t.show);
-  // If uiConfig turns every tab off, the hub used to show almost nothing useful; always keep Overview.
-  if (visible.length > 0) return visible;
-  return [{ id: "overview" as TabId, label: "Overview", icon: BookOpen, show: true }];
+  return tabs.filter((t) => t.show);
 }
 
 export function LectureExperienceClient({
@@ -415,51 +432,35 @@ export function LectureExperienceClient({
   const ui = (lecture?.uiConfig ?? {}) as any;
   const extras = (lecture?.extras ?? {}) as any;
 
-  const badge = safeString(ui?.badge).trim() || `${lecture?.subject?.module?.name ?? "Module"} · Interactive Lecture`;
-  const subtitle =
-    safeString(ui?.subtitle).trim() ||
-    `${lecture?.subject?.name ?? "Subject"} · Flashcards · Quiz · Notes`;
+  const badge = safeString(ui?.badge).trim() || `${lecture?.subject?.module?.name ?? "Module"} • Academic Lecture`;
+  const subtitle = safeString(ui?.subtitle).trim() || `${lecture?.subject?.name ?? "Subject"} • Flashcards • Quiz • Notes`;
 
   const tabs = useMemo(() => getTabs(lecture), [lecture]);
   const [active, setActive] = useState<TabId>((tabs[0]?.id as TabId) ?? "overview");
 
   useEffect(() => {
-    // If the active tab disappeared (doctor disabled it), fall back.
     if (!tabs.find((t) => t.id === active)) setActive((tabs[0]?.id as TabId) ?? "overview");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabs.map((t) => t.id).join("|")]);
 
-  // Search
   const [q, setQ] = useState("");
   const [showResults, setShowResults] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
-
   const searchItems = useMemo(() => {
     const items: Array<{ tab: TabId; title: string; text: string }> = [];
-
     const cards = Array.isArray(extras?.overviewCards) ? extras.overviewCards : [];
-    for (const c of cards) {
-      items.push({ tab: "overview", title: safeString(c?.title) || "Card", text: safeString(c?.body) });
-    }
-
+    for (const c of cards) items.push({ tab: "overview", title: safeString(c?.title) || "Card", text: safeString(c?.body) });
     const notes = safeString(lecture?.notesMarkdown);
     if (notes.trim()) items.push({ tab: "notes", title: "Notes", text: notes });
-
     const fcs = Array.isArray(lecture?.flashcards) ? lecture.flashcards : [];
     for (const c of fcs) items.push({ tab: "flashcards", title: safeString(c?.front) || "Flashcard", text: safeString(c?.back) });
-
     const qs = Array.isArray(lecture?.questions) ? lecture.questions : [];
     for (const qu of qs) items.push({ tab: "questions", title: "Question", text: safeString(qu?.body) });
-
     const mm = safeString(extras?.mindMapsMarkdown);
     if (mm.trim()) items.push({ tab: "mindmaps", title: "Mind maps", text: mm });
-
     const mns = Array.isArray(extras?.mnemonics) ? extras.mnemonics : [];
     for (const m of mns) items.push({ tab: "mnemonics", title: safeString(m?.title) || "Mnemonic", text: safeString(m?.word) + " " + safeString(m?.topic) });
-
     const cases = Array.isArray(extras?.cases) ? extras.cases : [];
     for (const c of cases) items.push({ tab: "cases", title: safeString(c?.title) || "Case", text: safeString(c?.vignette) });
-
     return items;
   }, [extras, lecture]);
 
@@ -476,374 +477,327 @@ export function LectureExperienceClient({
       .slice(0, 10) as Array<{ tab: TabId; title: string; text: string; idx: number }>;
   }, [q, searchItems]);
 
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (!resultsRef.current) return;
-      if (!resultsRef.current.contains(e.target as Node)) setShowResults(false);
-    }
-    if (!showResults) return;
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [showResults]);
-
   const base = `/modules/${moduleId}/lectures/${lecture?.id}`;
 
   return (
-    <div className="relative z-0 min-h-0 flex-1">
-      {/* background orbs — z-0 so real content always stacks above (avoids “empty” page in some browsers) */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="medqs-lecture-bg" />
-        <div className="medqs-orb medqs-orb--1" />
-        <div className="medqs-orb medqs-orb--2" />
-        <div className="medqs-orb medqs-orb--3" />
+    <div className="relative min-h-screen">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 -z-10 bg-background transition-colors duration-500">
+         <div className="absolute top-0 right-0 h-[600px] w-[800px] bg-primary/10 dark:bg-primary/5 blur-[160px] rounded-full -translate-y-1/2 translate-x-1/4 opacity-60 dark:opacity-100" />
+         <div className="absolute bottom-0 left-0 h-[400px] w-[700px] bg-blue-500/5 dark:bg-blue-900/5 blur-[120px] rounded-full translate-y-1/3 -translate-x-1/4" />
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-3 pb-8 pt-6 sm:px-6">
-        {/* header */}
-        <div className="mb-4 flex flex-col items-center text-center">
-          <div className="rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-[11px] font-semibold tracking-[0.22em] text-primary">
-            {badge}
-          </div>
-          <h1 className="mt-3 bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text font-display text-3xl font-black tracking-tight text-transparent sm:text-4xl">
-            {lecture?.title}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
-        </div>
+      {/* Main Container */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Breadcrumbs */}
+        <nav className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/50 dark:text-white/30">
+          <Link href="/modules" className="hover:text-primary transition-colors">Lectures</Link>
+          <ChevronRight className="h-3 w-3" />
+          <Link href={`/modules/${moduleId}`} className="hover:text-primary transition-colors truncate max-w-[120px]">
+            {lecture?.subject?.module?.name}
+          </Link>
+          <ChevronRight className="h-3 w-3" />
+          <Link href={`/modules/${moduleId}/subjects/${lecture?.subjectId}`} className="hover:text-primary transition-colors truncate max-w-[120px]">
+            {lecture?.subject?.name}
+          </Link>
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-muted-foreground dark:text-white/60 truncate max-w-[150px]">{lecture?.title}</span>
+        </nav>
 
-        {/* stats + search */}
-        <div className="mb-3 grid gap-2 md:grid-cols-[1fr_420px]">
-          <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-            <div className="rounded-full border border-border bg-card/70 px-4 py-2 text-xs text-muted-foreground">
-              Flashcards{" "}
-              <span className="ml-1 font-semibold text-primary">
-                {(lecture?.flashcards?.length ?? 0).toString()}
-              </span>
-            </div>
-            <div className="rounded-full border border-border bg-card/70 px-4 py-2 text-xs text-muted-foreground">
-              Questions{" "}
-              <span className="ml-1 font-semibold text-primary">
-                {(lecture?.questions?.length ?? 0).toString()}
-              </span>
-            </div>
-            <div className="rounded-full border border-border bg-card/70 px-4 py-2 text-xs text-muted-foreground">
-              Files{" "}
-              <span className="ml-1 font-semibold text-primary">
-                {(lecture?.files?.length ?? 0).toString()}
-              </span>
-            </div>
-            <Link
-              href="/ai-chat"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/50"
-            >
-              <Sparkles className="h-4 w-4 text-primary" />
-              Ask Dr. Q
-            </Link>
-          </div>
-
-          <div className="relative" ref={resultsRef}>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={q}
-                onChange={(e) => {
-                  setQ(e.target.value);
-                  setShowResults(true);
-                }}
-                onFocus={() => setShowResults(true)}
-                placeholder="Search inside this lecture…"
-                className="w-full rounded-full border border-border bg-card/70 py-2 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            {showResults && filtered.length > 0 ? (
-              <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
-                {filtered.map((r, idx) => (
-                  <button
-                    key={`${r.tab}-${idx}`}
-                    type="button"
-                    onClick={() => {
-                      setActive(r.tab);
-                      setShowResults(false);
-                    }}
-                    className="flex w-full flex-col gap-0.5 border-b border-border/60 px-4 py-3 text-left hover:bg-muted/40"
-                  >
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">{r.tab}</span>
-                    <span className="text-sm font-medium text-foreground">{r.title}</span>
-                    <span className="line-clamp-1 text-xs text-muted-foreground">{r.text}</span>
-                  </button>
-                ))}
+        {/* --- PREMIUM HERO SECTION --- */}
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+           <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-5">
+                 <GraduationCap className="h-3.5 w-3.5" />
+                 {badge}
               </div>
-            ) : null}
-          </div>
+              <h1 className="font-display text-4xl font-black tracking-tight text-foreground sm:text-5xl lg:text-6xl mb-4 leading-[1.1]">
+                {lecture?.title}
+              </h1>
+              <p className="text-base font-medium text-muted-foreground dark:text-white/50 max-w-xl">
+                {subtitle}
+              </p>
+           </div>
+           
+           <div className="flex flex-col gap-4 min-w-[300px]">
+              {/* Search Inside Lecture */}
+              <div className="relative group" ref={resultsRef}>
+                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
+                 <input
+                    value={q}
+                    onChange={(e) => { setQ(e.target.value); setShowResults(true); }}
+                    onFocus={() => setShowResults(true)}
+                    placeholder="Search inside lecture..."
+                    className={cn(
+                      "w-full h-12 rounded-2xl border text-sm transition-all pl-11 pr-4 outline-none",
+                      "bg-white/50 border-black/5 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-white/20",
+                      "focus:bg-white dark:focus:bg-white/10 focus:border-primary/50"
+                    )}
+                 />
+                 {showResults && filtered.length > 0 && (
+                    <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-black/5 dark:border-white/10 bg-white/95 dark:bg-black/90 backdrop-blur-2xl shadow-2xl animate-in fade-in zoom-in-95">
+                       {filtered.map((r, idx) => (
+                          <button
+                             key={`${r.tab}-${idx}`}
+                             onClick={() => { setActive(r.tab); setShowResults(false); }}
+                             className="flex w-full flex-col gap-1 border-b border-black/5 dark:border-white/5 px-5 py-4 text-left hover:bg-black/5 dark:hover:bg-white/5"
+                          >
+                             <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-primary border border-primary/40 px-1.5 py-0.5 rounded-md">{r.tab}</span>
+                                <span className="text-sm font-bold text-foreground dark:text-white">{r.title}</span>
+                             </div>
+                             <span className="line-clamp-1 text-xs text-muted-foreground dark:text-white/40">{r.text}</span>
+                          </button>
+                       ))}
+                    </div>
+                 )}
+              </div>
+
+              {/* Stats & Quick Actions */}
+              <div className="flex items-center gap-2">
+                 <div className="flex items-center gap-1.5 rounded-xl bg-card border border-black/5 dark:border-white/5 px-3.5 py-2 text-[11px] font-bold text-muted-foreground dark:text-white/60">
+                    <Layers className="h-3.5 w-3.5 text-primary" />
+                    <span>{(lecture?.flashcards?.length ?? 0)} Cards</span>
+                 </div>
+                 <div className="flex items-center gap-1.5 rounded-xl bg-card border border-black/5 dark:border-white/5 px-3.5 py-2 text-[11px] font-bold text-muted-foreground dark:text-white/60">
+                    <HelpCircle className="h-3.5 w-3.5 text-blue-400" />
+                    <span>{(lecture?.questions?.length ?? 0)} Quiz</span>
+                 </div>
+                 <Link href="/ai-chat" className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-wider text-white shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95 ml-auto">
+                    <Sparkles className="h-4 w-4" />
+                    Ask Dr. Q
+                 </Link>
+              </div>
+           </div>
         </div>
 
-        {/* quick access (above tabs) */}
-        <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <Link
-            href={`${base}/video`}
-            className="group flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/70 px-4 py-3 text-sm transition hover:bg-card hover:border-primary/35"
-          >
-            <span>
-              <span className="block font-semibold">Video</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">Watch lecture videos</span>
-            </span>
-            <span className="rounded-xl bg-primary/10 p-2 text-primary group-hover:bg-primary/15">
-              <Video className="h-4 w-4" />
-            </span>
-          </Link>
-          <Link
-            href={`${base}/attachments`}
-            className="group flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/70 px-4 py-3 text-sm transition hover:bg-card hover:border-primary/35"
-          >
-            <span>
-              <span className="block font-semibold">Files</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">Slides & attachments</span>
-            </span>
-            <span className="rounded-xl bg-primary/10 p-2 text-primary group-hover:bg-primary/15">
-              <FileText className="h-4 w-4" />
-            </span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => setActive("questions")}
-            className="group flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/70 px-4 py-3 text-left text-sm transition hover:bg-card hover:border-primary/35"
-          >
-            <span>
-              <span className="block font-semibold">Quiz</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">Practice MCQs</span>
-            </span>
-            <span className="rounded-xl bg-primary/10 p-2 text-primary group-hover:bg-primary/15">
-              <HelpCircle className="h-4 w-4" />
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActive("flashcards")}
-            className="group flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/70 px-4 py-3 text-left text-sm transition hover:bg-card hover:border-primary/35"
-          >
-            <span>
-              <span className="block font-semibold">Flashcards</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">Active recall</span>
-            </span>
-            <span className="rounded-xl bg-primary/10 p-2 text-primary group-hover:bg-primary/15">
-              <Layers className="h-4 w-4" />
-            </span>
-          </button>
-        </div>
-
-        {/* tabs */}
-        <div className="mb-4 flex justify-center md:justify-start">
-          <div className="flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card/70 p-1">
-            {tabs.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setActive(id)}
-                className={cn(
-                  "inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition",
-                  active === id
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
+        {/* --- DYNAMIC DASHBOARD GRID --- */}
+        {active === "overview" && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
+            {[
+              { id: "video", title: "Watch Video", sub: "Visual walk-through", icon: PlayCircle, color: "text-blue-500 dark:text-blue-400", href: `${base}/video` },
+              { id: "records", title: "Audio Records", sub: "Listen on the go", icon: Headphones, color: "text-emerald-500 dark:text-emerald-400", href: `${base}/record` },
+              { id: "attachments", title: "Lecture Files", sub: "Slides & PDF", icon: FileCode, color: "text-amber-500 dark:text-amber-400", href: `${base}/attachments` },
+              { id: "questions", title: "Self Quiz", sub: "Challenge yourself", icon: HelpCircle, color: "text-purple-500 dark:text-purple-400", action: () => setActive("questions") },
+              { id: "flashcards", title: "Flashcards", sub: "Active recall", icon: Layers, color: "text-pink-500 dark:text-pink-400", action: () => setActive("flashcards") },
+            ].map((item) => (
+              item.href ? (
+                <Link key={item.id} href={item.href} className="group relative rounded-[32px] bg-card border border-black/5 dark:border-white/10 p-6 transition-all hover:bg-primary/[0.02] dark:hover:bg-white/10 hover:border-primary/40 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                  <div className={cn("mb-4 inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-primary/5 dark:bg-white/5 transition-colors group-hover:bg-primary/20", item.color)}>
+                     <item.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground dark:text-white">{item.title}</h3>
+                  <p className="mt-1 text-xs font-medium text-muted-foreground dark:text-white/40">{item.sub}</p>
+                  <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <ArrowRight className="h-4 w-4 text-primary" />
+                  </div>
+                </Link>
+              ) : (
+                <button key={item.id} onClick={item.action} className="group relative rounded-[32px] bg-card border border-black/5 dark:border-white/10 p-6 transition-all hover:bg-primary/[0.02] dark:hover:bg-white/10 hover:border-primary/40 hover:-translate-y-1 shadow-sm hover:shadow-xl text-left">
+                  <div className={cn("mb-4 inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-primary/5 dark:bg-white/5 transition-colors group-hover:bg-primary/20", item.color)}>
+                     <item.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground dark:text-white">{item.title}</h3>
+                  <p className="mt-1 text-xs font-medium text-muted-foreground dark:text-white/40">{item.sub}</p>
+                </button>
+              )
             ))}
           </div>
+        )}
+
+        {/* --- PREMIUM TABS NAVIGATION --- */}
+        <div className="flex justify-center mb-10 overflow-x-auto pb-4 scrollbar-hide">
+           <div className="inline-flex gap-1.5 p-1.5 rounded-[24px] bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-black/5 dark:border-white/10 shadow-2xl">
+              {tabs.map((tab) => {
+                 const isActive = active === tab.id;
+                 return (
+                    <button
+                       key={tab.id}
+                       onClick={() => setActive(tab.id)}
+                       className={cn(
+                          "relative flex items-center gap-2.5 px-6 py-3 rounded-[18px] text-[13px] font-bold transition-all whitespace-nowrap",
+                          isActive 
+                            ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105 z-10" 
+                            : "text-muted-foreground dark:text-white/40 hover:text-foreground dark:hover:text-white/80 hover:bg-primary/5 dark:hover:bg-white/5"
+                       )}
+                    >
+                       <tab.icon className={cn("h-4 w-4", isActive ? "animate-pulse" : "opacity-70")} />
+                       {tab.label}
+                    </button>
+                 );
+              })}
+           </div>
         </div>
 
-        {/* content */}
-        <div key={active} className="min-h-0 flex-1 medqs-enter">
-          {active === "overview" ? (
-            <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {(Array.isArray(extras?.overviewCards) ? extras.overviewCards : []).slice(0, 12).map((c: any, i: number) => (
-                  <div key={i} className="rounded-2xl border border-border bg-card/70 p-4 transition hover:bg-card">
-                    <p className="text-sm font-semibold">{safeString(c?.title) || "Key concept"}</p>
-                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{safeString(c?.body)}</p>
-                  </div>
-                ))}
+        {/* --- CONTENT AREA --- */}
+        <div className="min-h-[500px] animate-in fade-in slide-in-from-bottom-6 duration-700">
+           {active === "overview" && (
+             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+               {(Array.isArray(extras?.overviewCards) ? extras.overviewCards : []).map((card: any, i: number) => (
+                 <div key={i} className="group relative rounded-[28px] bg-card border border-black/5 p-7 shadow-sm hover:shadow-xl hover:bg-white dark:hover:bg-card/60 transition-all hover:border-primary/20 overflow-hidden">
+                    <div className="absolute -top-10 -left-10 h-24 w-24 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-2 mb-4">
+                       <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-primary italic">Key Takeaway</span>
+                    </div>
+                    <h5 className="text-lg font-black text-foreground dark:text-white leading-snug mb-3">
+                       {safeString(card?.title) || "Key concept"}
+                    </h5>
+                    <p className="text-sm leading-relaxed text-muted-foreground dark:text-white/50 font-medium">
+                       {safeString(card?.body)}
+                    </p>
+                 </div>
+               ))}
+             </div>
+           )}
+
+           {active === "video" && (
+              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 text-center">
+                 <PlayCircle className="h-16 w-16 text-primary mb-6 animate-pulse" />
+                 <h3 className="text-2xl font-black text-foreground dark:text-white">Video Studio</h3>
+                 <p className="mt-2 text-muted-foreground dark:text-white/40 max-w-sm font-medium">Open the full video studio to watch, interact, and see timestamps.</p>
+                 <Link href={`${base}/video`} className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-primary px-8 py-4 text-base font-black text-white shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                    Open Player <ChevronRight className="h-5 w-5" />
+                 </Link>
               </div>
+           )}
 
-            </div>
-          ) : null}
-
-          {active === "video" ? (
-            <div className="rounded-2xl border border-border bg-card/70 p-4">
-              <p className="text-sm font-semibold">Video</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Open the video studio for playlists, likes, and comments.
-              </p>
-              <div className="mt-4">
-                <Link href={`${base}/video`} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
-                  <Video className="h-4 w-4" /> Open video
-                </Link>
+           {active === "records" && (
+              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 text-center">
+                 <Headphones className="h-16 w-16 text-emerald-500 dark:text-emerald-400 mb-6" />
+                 <h3 className="text-2xl font-black text-foreground dark:text-white">Audio Library</h3>
+                 <p className="mt-2 text-muted-foreground dark:text-white/40 max-w-sm font-medium">Listen to recorded audio directly or download for offline review.</p>
+                 <Link href={`${base}/record`} className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-emerald-500 px-8 py-4 text-base font-black text-white shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all">
+                    Open Records <ChevronRight className="h-5 w-5" />
+                 </Link>
               </div>
-            </div>
-          ) : null}
+           )}
 
-          {active === "attachments" ? (
-            <div className="rounded-2xl border border-border bg-card/70 p-4">
-              <p className="text-sm font-semibold">Attachments</p>
-              <p className="mt-1 text-xs text-muted-foreground">Open lecture files.</p>
-              <div className="mt-4">
-                <Link href={`${base}/attachments`} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
-                  <FileText className="h-4 w-4" /> View files
-                </Link>
+           {active === "attachments" && (
+              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 text-center">
+                 <FileText className="h-16 w-16 text-amber-500 dark:text-amber-400 mb-6" />
+                 <h3 className="text-2xl font-black text-foreground dark:text-white">Materials Hub</h3>
+                 <p className="mt-2 text-muted-foreground dark:text-white/40 max-w-sm font-medium">All relevant lecture slides, PDFs, and hand-outs for this lesson.</p>
+                 <Link href={`${base}/attachments`} className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-amber-500 px-8 py-4 text-base font-black text-white shadow-xl shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all">
+                    View Files <ChevronRight className="h-5 w-5" />
+                 </Link>
               </div>
-            </div>
-          ) : null}
+           )}
 
-          {active === "flashcards" ? (
-            <div className="border-0 bg-transparent p-0">
-              {Array.isArray(lecture?.flashcards) && lecture.flashcards.length > 0 ? (
-                <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" />
-              ) : (
-                <p className="rounded-2xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-                  No flashcards yet.
-                </p>
-              )}
-            </div>
-          ) : null}
+           {active === "flashcards" && (
+              <div className="animate-in fade-in zoom-in-95 duration-500 px-1">
+                 {Array.isArray(lecture?.flashcards) && lecture.flashcards.length > 0 ? (
+                    <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" />
+                 ) : (
+                    <div className="py-24 text-center rounded-[40px] border border-dashed border-black/10 dark:border-white/10">
+                       <p className="text-muted-foreground/40 font-bold">No flashcards available yet.</p>
+                    </div>
+                 )}
+              </div>
+           )}
 
-          {active === "questions" ? (
-            <div className="border-0 bg-transparent p-0">
-              {Array.isArray(lecture?.questions) && lecture.questions.length > 0 ? (
-                <LectureClient flashcards={[]} questions={lecture.questions} mode="questions" />
-              ) : (
-                <p className="rounded-2xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-                  No questions yet.
-                </p>
-              )}
-            </div>
-          ) : null}
+           {active === "questions" && (
+              <div className="animate-in fade-in zoom-in-95 duration-500 px-1">
+                 {Array.isArray(lecture?.questions) && lecture.questions.length > 0 ? (
+                    <LectureClient flashcards={[]} questions={lecture.questions} mode="questions" />
+                 ) : (
+                    <div className="py-24 text-center rounded-[40px] border border-dashed border-black/10 dark:border-white/10">
+                       <p className="text-muted-foreground/40 font-bold">No quiz available for this lecture.</p>
+                    </div>
+                 )}
+              </div>
+           )}
 
-          {active === "notes" ? (
-            <div className="rounded-2xl border border-border bg-card/70 p-5 md:p-7">
-              {safeString(lecture?.notesMarkdown).trim() ? (
-                <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display">
-                  <ReactMarkdown components={markdownComponentsWithImages}>
-                    {enhancePlainImageUrls(safeString(lecture?.notesMarkdown))}
-                  </ReactMarkdown>
-                </div>
-              ) : (
-                <p className="py-10 text-center text-sm text-muted-foreground">No notes yet.</p>
-              )}
-            </div>
-          ) : null}
+           {active === "notes" && (
+              <div className="rounded-[40px] border bg-white/40 dark:bg-white/5 border-black/5 dark:border-white/10 p-10 lg:p-14 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 left-0 p-12 opacity-[0.03] dark:opacity-5 pointer-events-none">
+                    <GraduationCap className="h-64 w-64" />
+                 </div>
+                 {safeString(lecture?.notesMarkdown).trim() ? (
+                    <div className="relative z-10 prose dark:prose-invert prose-lg max-w-none prose-p:text-foreground/80 dark:prose-p:text-white/70 prose-headings:text-foreground dark:prose-headings:text-white prose-headings:font-black prose-p:font-medium">
+                       <ReactMarkdown components={markdownComponentsWithImages}>
+                          {enhancePlainImageUrls(safeString(lecture?.notesMarkdown))}
+                       </ReactMarkdown>
+                    </div>
+                 ) : (
+                    <div className="py-24 text-center">
+                       <p className="text-muted-foreground/30 font-bold">No AI synthesized notes available.</p>
+                    </div>
+                 )}
+              </div>
+           )}
 
-          {active === "mindmaps" ? (
-            <div className="border-0 bg-transparent p-0">
-              <MindMapSection
-                graph={(extras?.mindMapGraph as MindMapGraph) ?? { nodes: [], edges: [] }}
-                markdown={safeString(extras?.mindMapsMarkdown)}
-              />
-            </div>
-          ) : null}
+           {active === "mindmaps" && (
+              <div className="animate-in fade-in duration-700">
+                 <MindMapSection
+                    graph={(extras?.mindMapGraph as MindMapGraph) ?? { nodes: [], edges: [] }}
+                    markdown={safeString(extras?.mindMapsMarkdown)}
+                 />
+              </div>
+           )}
 
-          {active === "cases" ? (
-            <div className="space-y-3">
-              {(Array.isArray(extras?.cases) ? extras.cases : []).map((c: any, i: number) => (
-                <div key={i} className="rounded-2xl border border-border bg-card/70 p-4">
-                  <p className="text-sm font-semibold">{safeString(c?.title) || `Case ${i + 1}`}</p>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{safeString(c?.vignette)}</p>
-                </div>
-              ))}
-              {(!Array.isArray(extras?.cases) || extras.cases.length === 0) && (
-                <p className="py-10 text-center text-sm text-muted-foreground">No cases yet.</p>
-              )}
-            </div>
-          ) : null}
+           {active === "mnemonics" && (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                 {(Array.isArray(extras?.mnemonics) ? extras.mnemonics : []).map((m: any, i: number) => (
+                    <div key={i} className="rounded-3xl bg-card border border-black/5 p-8 shadow-sm">
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-3 block">Mnemonic Hook</span>
+                       <h4 className="text-3xl font-black text-foreground dark:text-white mb-2 leading-none">{safeString(m?.word)}</h4>
+                       <p className="text-sm font-bold text-muted-foreground dark:text-white/40 mb-6">{safeString(m?.topic)}</p>
+                       {Array.isArray(m?.items) && (
+                          <ul className="space-y-3">
+                             {m.items.map((it: any, j: number) => (
+                                <li key={j} className="flex gap-4 items-center">
+                                   <span className="flex shrink-0 h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary text-sm font-black">{safeString(it?.l || it?.letter || "")}</span>
+                                   <span className="text-[13px] font-bold text-foreground/80 dark:text-white/70">{safeString(it?.t || it?.text || "")}</span>
+                                </li>
+                             ))}
+                          </ul>
+                       )}
+                    </div>
+                 ))}
+              </div>
+           )}
 
-          {active === "mnemonics" ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {(Array.isArray(extras?.mnemonics) ? extras.mnemonics : []).map((m: any, i: number) => (
-                <div key={i} className="rounded-2xl border border-border bg-card/70 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">{safeString(m?.title) || "Mnemonic"}</p>
-                  <p className="mt-2 font-display text-2xl font-black tracking-tight text-foreground">
-                    {safeString(m?.word)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">{safeString(m?.topic)}</p>
-                  {Array.isArray(m?.items) ? (
-                    <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-                      {m.items.slice(0, 12).map((it: any, j: number) => (
-                        <li key={j} className="flex gap-2">
-                          <span className="font-mono font-bold text-primary">{safeString(it?.l || it?.letter || "")}</span>
-                          <span className="flex-1">{safeString(it?.t || it?.text || "")}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              ))}
-              {(!Array.isArray(extras?.mnemonics) || extras.mnemonics.length === 0) && (
-                <p className="col-span-full py-10 text-center text-sm text-muted-foreground">No mnemonics yet.</p>
-              )}
-            </div>
-          ) : null}
+           {active === "cases" && (
+              <div className="space-y-6">
+                 {(Array.isArray(extras?.cases) ? extras.cases : []).map((c: any, i: number) => (
+                    <div key={i} className="rounded-[32px] bg-card border border-black/5 p-10 shadow-sm relative overflow-hidden">
+                       <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                          <HelpCircle className="h-40 w-40" />
+                       </div>
+                       <div className="flex items-center gap-3 mb-6">
+                          <div className="h-10 w-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
+                             <CircleDot className="h-6 w-6" />
+                          </div>
+                          <h4 className="text-xl font-black text-foreground dark:text-white">{safeString(c?.title) || `Clinical Case Study ${i + 1}`}</h4>
+                       </div>
+                       <p className="text-base leading-[1.8] text-muted-foreground dark:text-white/60 font-medium">
+                          {safeString(c?.vignette)}
+                       </p>
+                    </div>
+                 ))}
+              </div>
+           )}
         </div>
       </div>
 
+      {/* CSS Utilities for Animations */}
       <style jsx global>{`
-        @keyframes medqs-float {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) scale(1);
-          }
-          33% {
-            transform: translate3d(24px, -32px, 0) scale(1.04);
-          }
-          66% {
-            transform: translate3d(-18px, 22px, 0) scale(0.96);
-          }
-        }
-        .medqs-lecture-bg {
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(ellipse 80% 55% at 20% -10%, hsl(var(--primary) / 0.16), transparent 55%),
-            radial-gradient(ellipse 70% 55% at 110% 10%, hsl(330 90% 60% / 0.12), transparent 55%),
-            radial-gradient(ellipse 70% 60% at 50% 120%, hsl(160 84% 40% / 0.10), transparent 55%);
-        }
-        .medqs-orb {
-          position: absolute;
-          border-radius: 9999px;
-          filter: blur(72px);
-          opacity: 0.12;
-          animation: medqs-float 18s ease-in-out infinite;
-          background: hsl(var(--primary) / 0.55);
-        }
-        .medqs-orb--1 {
-          width: 520px;
-          height: 520px;
-          top: -140px;
-          left: -140px;
-          animation-delay: 0s;
-        }
-        .medqs-orb--2 {
-          width: 420px;
-          height: 420px;
-          bottom: -140px;
-          right: -120px;
-          background: hsl(330 90% 65% / 0.55);
-          animation-delay: -6s;
-        }
-        .medqs-orb--3 {
-          width: 340px;
-          height: 340px;
-          top: 40%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background: hsl(160 84% 45% / 0.45);
-          animation-delay: -12s;
-        }
-        .medqs-enter { animation: medqs-fadeup 260ms ease both; }
-        @keyframes medqs-fadeup {
+        @keyframes medqs-enter {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        .medqs-enter {
+          animation: medqs-enter 0.5s ease-out forwards;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>
   );
 }
-

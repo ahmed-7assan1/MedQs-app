@@ -125,7 +125,9 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
           TOP BAR
       ══════════════════════════════════════════════ */}
       <header
-        className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center border-b border-white/5 bg-background/85 backdrop-blur-[14px]"
+        className={cn(
+          "fixed top-0 left-0 right-0 z-40 hidden h-14 items-center border-b border-white/5 bg-background/85 backdrop-blur-[14px] lg:flex"
+        )}
         style={{ boxShadow: "0 1px 12px rgba(0,0,0,0.18)" }}
       >
         <div className="flex h-full w-full items-center gap-0 px-6 lg:px-10">
@@ -185,17 +187,6 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
             <div className="hidden sm:block mr-1">
               <GlobalSearch isGuest={isGuest} />
             </div>
-
-            {/* Theme toggle */}
-            <button
-              onClick={toggleAppearance}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
-              title="Toggle theme"
-            >
-              {mounted && isDark()
-                ? <Sun className="h-[17px] w-[17px]" />
-                : <Moon className="h-[17px] w-[17px]" />}
-            </button>
 
             {/* Notifications */}
             {!isGuest && (
@@ -378,7 +369,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                   {[NAV[3], NAV[4]].map(({ href, label, icon: Icon }) => {
                     const active = isActive(href);
                     return (
-                      <Link key={href} href={href} onClick={() => setMobileOpen(false)}
+                      <Link key={href} href={href} onClick={setMobileClose}
                         className={cn(
                           "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
                           active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -396,20 +387,20 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
               <div>
                 <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 border-l-2 border-primary/50 pl-3">Tools</p>
                 <div className="space-y-0.5">
-                  <Link href="/taskat" onClick={() => setMobileOpen(false)}
+                  <Link href="/taskat" onClick={setMobileClose}
                     className={cn("flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
                       isActive("/taskat") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}>
                     <Clock className={cn("h-[18px] w-[18px]", isActive("/taskat") && "text-primary")} />
                     Taskat
                   </Link>
                   {!isGuest && (
-                    <Link href="/ai-chat" onClick={() => setMobileOpen(false)}
+                    <Link href="/ai-chat" onClick={setMobileClose}
                       className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-amber-500 hover:bg-amber-500/10 transition-all">
                       <Sparkles className="h-[18px] w-[18px]" /> Study with Dr. Q
                     </Link>
                   )}
                   {isAdmin && (
-                    <Link href="/admin/dashboard" onClick={() => setMobileOpen(false)}
+                    <Link href="/admin/dashboard" onClick={setMobileClose}
                       className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-violet-500 hover:bg-violet-500/10 transition-all">
                       <ShieldCheck className="h-[18px] w-[18px]" /> {PLATFORM_COPY.doctorPanel}
                     </Link>

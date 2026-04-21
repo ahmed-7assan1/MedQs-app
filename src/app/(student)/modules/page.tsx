@@ -87,7 +87,7 @@ export default async function ModulesPage() {
   }
 
   return (
-    <StudentPageShell maxWidthClass="max-w-5xl">
+    <StudentPageShell maxWidthClass="max-w-5xl" noTopPaddingMobile>
       {/* ── Page Header ── */}
       <div className="mb-8">
         <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Curriculum</p>
@@ -119,7 +119,7 @@ export default async function ModulesPage() {
       {!isGuest && isAdmin && user?.semesterId ? (
         <ModuleInlineManager
           semesterId={user.semesterId}
-          initialModules={modules.map((m) => ({ id: m.id, name: m.name }))}
+          initialModules={modules.map((m: any) => ({ id: m.id, name: m.name }))}
         />
       ) : null}
 
@@ -141,10 +141,10 @@ export default async function ModulesPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {modules.map((mod, i) => {
-            const lecturesFlat = mod.subjects.flatMap((s) => s.lectures);
-            const allQ = lecturesFlat.flatMap((l) => l.questions);
-            const allQCount = lecturesFlat.reduce((a, l) => a + l._count.questions, 0);
+          {modules.map((mod: any, i: number) => {
+            const lecturesFlat = mod.subjects.flatMap((s: any) => s.lectures);
+            const allQ = lecturesFlat.flatMap((l: any) => l.questions);
+            const allQCount = lecturesFlat.reduce((a: number, l: any) => a + l._count.questions, 0);
             const corrQ = correctByModule[mod.id]?.size ?? 0;
             const modPct = allQCount > 0 ? Math.round((corrQ / allQCount) * 100) : 0;
             const totalLectures = lecturesFlat.length;

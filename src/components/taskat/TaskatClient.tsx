@@ -1,16 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
 import { 
-  CheckCircle2, 
-  Circle, 
   ClipboardList,
   LayoutGrid,
-  ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  Target
+  Target,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CurriculumChecklist } from "./CurriculumChecklist";
@@ -25,112 +21,100 @@ interface TaskatClientProps {
 
 export function TaskatClient({ userId, initialCurriculum, initialSubjects }: TaskatClientProps) {
   const [activeTab, setActiveTab] = useState<"checklist" | "daily">("daily");
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [dayProgress, setDayProgress] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const handleProgressUpdate = (pct: number) => {
     setDayProgress(pct);
   };
 
   return (
-    <StudentPageShell maxWidthClass="max-w-6xl">
-      {/* Premium Header */}
-      <div className="relative mb-6 overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/50 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 p-6 md:p-10 shadow-2xl backdrop-blur-3xl transition-all duration-500">
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-indigo-500/5 pointer-events-none" />
-        
-        <div className="relative z-10 flex flex-col items-center justify-between gap-6 md:flex-row md:gap-10">
-          <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-              <div className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400">
-                <Target className="h-4 w-4" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-600/60 dark:text-sky-400/60">Productivity Hub</span>
-            </div>
-            <h1 className="font-display text-3xl font-extrabold tracking-tight md:text-5xl dark:text-white text-slate-900 leading-tight">
-              Taskat <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-indigo-600 dark:from-sky-400 dark:to-indigo-400">تاسكات</span>
-            </h1>
-            <p className="mt-3 max-w-sm text-sm md:text-base font-medium leading-relaxed dark:text-slate-400 text-slate-600">
-              Your personal mastery lab. Plan, track, and dominate your degree.
-            </p>
+    <StudentPageShell maxWidthClass="max-w-5xl" className="pt-0 lg:pt-10" noTopPaddingMobile>
+      {/* 1. Simplified Compact Header */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 px-2 lg:px-0">
+        <div className="space-y-1.5 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+            <Target className="h-4 w-4 text-primary opacity-60" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Productivity Lab</span>
           </div>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
+            Taskat <span className="text-primary italic">تاسكات</span>
+          </h1>
+          <p className="text-sm font-medium text-muted-foreground/70 max-w-sm">
+            Track your daily focus and academic progress.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-6 md:gap-8 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] bg-slate-50/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5">
-            <div className="relative flex h-24 w-24 md:h-28 md:w-28 items-center justify-center">
-              <svg className="absolute h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
-                <circle
-                  cx="18" cy="18" r="16"
-                  fill="none"
-                  className="stroke-slate-200 dark:stroke-white/5"
-                  strokeWidth="3"
-                />
-                <motion.circle
-                  cx="18" cy="18" r="16"
-                  fill="none"
-                  stroke="currentColor"
-                  className="text-sky-500"
-                  strokeWidth="3"
-                  strokeDasharray="100"
-                  initial={{ strokeDashoffset: 100 }}
-                  animate={{ strokeDashoffset: 100 - dayProgress }}
-                  strokeLinecap="round"
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                />
-              </svg>
-              <div className="flex flex-col items-center">
-                <span className="text-2xl md:text-3xl font-bold font-display dark:text-white text-slate-900">{Math.round(dayProgress)}%</span>
-                <span className="text-[9px] uppercase tracking-widest dark:text-white/40 text-slate-500 font-bold">Today</span>
-              </div>
-            </div>
-            <div className="h-12 md:h-16 w-px bg-slate-200 dark:bg-white/10" />
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[9px] font-black uppercase tracking-wider dark:text-white/30 text-slate-400">Mission</p>
-              <p className="text-base md:text-lg font-display font-bold text-sky-600 dark:text-sky-400">
-                {dayProgress === 100 ? "Victory!" : dayProgress > 0 ? "Active" : "Ready"}
-              </p>
-            </div>
+        {/* Minimalist Progress Indicator */}
+        <div className="flex items-center gap-6 p-4 rounded-3xl bg-card border border-border/50 shadow-sm transition-all hover:shadow-md">
+          <div className="relative h-16 w-16 flex items-center justify-center">
+            <svg className="absolute h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="16" fill="none" className="stroke-muted" strokeWidth="3" />
+              <motion.circle
+                cx="18" cy="18" r="16" fill="none" stroke="currentColor"
+                className="text-primary" strokeWidth="3" strokeDasharray="100"
+                initial={{ strokeDashoffset: 100 }}
+                animate={{ strokeDashoffset: 100 - dayProgress }}
+                strokeLinecap="round" transition={{ duration: 1, ease: "easeOut" }}
+              />
+            </svg>
+            <span className="text-base font-black text-foreground">{Math.round(dayProgress)}%</span>
+          </div>
+          <div className="space-y-0.5 pr-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Today's Progress</p>
+            <p className="text-lg font-black text-primary">
+              {dayProgress === 100 ? "Victory!" : dayProgress > 50 ? "Almost there" : "Keep going"}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Main Tabs Container */}
-      <div className="mb-10 space-y-8">
+      {/* 2. Sleek Tab Switcher */}
+      <div className="mb-10 flex flex-col space-y-8">
         <div className="flex justify-center">
-          <div className="flex gap-1.5 rounded-2xl bg-white/50 dark:bg-white/5 p-1.5 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 shadow-lg">
+          <div className="inline-flex items-center p-1.5 rounded-2xl bg-muted/40 border border-border/50 backdrop-blur-md">
             <button
               onClick={() => setActiveTab("daily")}
               className={cn(
-                "flex items-center gap-2.5 rounded-xl px-8 py-3 text-sm font-bold transition-all duration-300",
+                "relative flex items-center gap-2.5 px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300",
                 activeTab === "daily" 
-                  ? "bg-sky-500 text-white shadow-xl shadow-sky-500/30 scale-105" 
-                  : "dark:text-white/60 text-slate-500 hover:text-sky-600 dark:hover:text-white hover:bg-white/10"
+                  ? "bg-card text-foreground shadow-md border border-border/10" 
+                  : "text-muted-foreground/60 hover:text-foreground"
               )}
             >
               <ClipboardList className="h-4 w-4" />
               Daily Focus
+              {activeTab === "daily" && (
+                <motion.div layoutId="tab-pill" className="absolute inset-0 bg-primary/5 rounded-xl -z-10" />
+              )}
             </button>
             <button
               onClick={() => setActiveTab("checklist")}
               className={cn(
-                "flex items-center gap-2.5 rounded-xl px-8 py-3 text-sm font-bold transition-all duration-300",
+                "relative flex items-center gap-2.5 px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300",
                 activeTab === "checklist" 
-                  ? "bg-sky-500 text-white shadow-xl shadow-sky-500/30 scale-105" 
-                  : "dark:text-white/60 text-slate-500 hover:text-sky-600 dark:hover:text-white hover:bg-white/10"
+                  ? "bg-card text-foreground shadow-md border border-border/10" 
+                  : "text-muted-foreground/60 hover:text-foreground"
               )}
             >
               <LayoutGrid className="h-4 w-4" />
-              Academic Tracker
+              Tracker
+              {activeTab === "checklist" && (
+                <motion.div layoutId="tab-pill" className="absolute inset-0 bg-primary/5 rounded-xl -z-10" />
+              )}
             </button>
           </div>
         </div>
 
+        {/* 3. Content Area */}
         <AnimatePresence mode="wait">
           {activeTab === "daily" ? (
             <motion.div
               key="daily"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.4, ease: "circOut" }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
             >
               <DailyFocus 
                 userId={userId}
@@ -144,10 +128,10 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
           ) : (
             <motion.div
               key="checklist"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.4, ease: "circOut" }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
             >
               <CurriculumChecklist modules={initialCurriculum} subjects={initialSubjects} />
             </motion.div>

@@ -26,26 +26,7 @@ export default async function LectureHubPage({
 
   return (
     <div className="min-h-0 flex-1">
-      <nav className="mx-auto w-full max-w-6xl px-3 pt-4 text-sm text-muted-foreground sm:px-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/modules" className="hover:text-foreground">
-            Modules
-          </Link>
-          <span>/</span>
-          <Link href={`/modules/${params.moduleId}`} className="hover:text-foreground truncate max-w-[140px]">
-            {lecture.subject.module.name}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/modules/${params.moduleId}/subjects/${lecture.subjectId}`}
-            className="hover:text-foreground truncate max-w-[140px]"
-          >
-            {lecture.subject.name}
-          </Link>
-          <span>/</span>
-          <span className="font-medium text-foreground truncate max-w-[220px]">{lecture.title}</span>
-        </div>
-      </nav>
+      {/* Breadcrumbs moved inside LectureExperienceClient for integrated hero treatment */}
 
       {isAdmin ? (
         <div className="mx-auto w-full max-w-6xl px-3 pt-4 sm:px-6">
