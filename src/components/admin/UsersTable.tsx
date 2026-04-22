@@ -76,7 +76,7 @@ export function UsersTable({
             <input
               type="text" value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name or email…"
-              className="w-full rounded-xl border border-border/60 bg-card py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="w-full rounded-xl border border-white/[0.03] bg-card py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             />
           </div>
           <button type="submit"
@@ -100,10 +100,10 @@ export function UsersTable({
       </div>
 
       {/* ── Desktop table ── */}
-      <div className="hidden overflow-hidden rounded-2xl border border-border/60 bg-card sm:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-white/[0.02] bg-card sm:block">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border/60 bg-muted/30">
+            <tr className="border-b border-white/[0.02] bg-muted/30">
               <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">User</th>
               <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">University</th>
               <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Rank</th>
@@ -113,7 +113,7 @@ export function UsersTable({
               <th className="px-4 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/40">
+          <tbody className="divide-y divide-white/[0.02]">
             {users.map((user) => {
               const roleInfo = ROLE_STYLE[user.role] ?? ROLE_STYLE.STUDENT;
               const RoleIcon = roleInfo.icon;
@@ -183,7 +183,7 @@ export function UsersTable({
           const roleInfo = ROLE_STYLE[user.role] ?? ROLE_STYLE.STUDENT;
           const RoleIcon = roleInfo.icon;
           return (
-            <div key={user.id} className="rounded-2xl border border-border/60 bg-card p-4">
+            <div key={user.id} className="rounded-2xl border border-white/[0.02] bg-card p-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-sm font-bold text-blue-500">
                   {user.name?.[0]?.toUpperCase() ?? "?"}
@@ -233,13 +233,13 @@ export function UsersTable({
           <div className="flex items-center gap-1">
             <button disabled={page <= 1}
               onClick={() => router.push(`/admin/users?q=${search}&page=${page - 1}`)}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/60 hover:bg-muted disabled:opacity-40 transition-colors">
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.03] hover:bg-muted disabled:opacity-40 transition-colors">
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="px-3 text-xs font-medium">{page} / {totalPages}</span>
             <button disabled={page >= totalPages}
               onClick={() => router.push(`/admin/users?q=${search}&page=${page + 1}`)}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/60 hover:bg-muted disabled:opacity-40 transition-colors">
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.03] hover:bg-muted disabled:opacity-40 transition-colors">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>

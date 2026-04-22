@@ -14,7 +14,7 @@ export function SiteFooter() {
 
   return (
     <footer
-      className="mt-auto hidden md:block border-t border-border/40 bg-background/50 backdrop-blur-md w-full py-4 px-6 md:px-12"
+      className="mt-auto hidden md:block border-t border-white/[0.05] bg-background/50 backdrop-blur-md w-full py-4 px-6 md:px-12"
       role="contentinfo"
     >
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-[11px] font-bold uppercase tracking-widest">
@@ -23,7 +23,7 @@ export function SiteFooter() {
         <div className="flex items-center gap-6 text-muted-foreground/60">
            <span className="text-foreground font-black italic">{siteName}</span>
            <span className="opacity-40">&copy; {year} ALL RIGHTS RESERVED.</span>
-           <div className="hidden lg:flex items-center gap-4 border-l border-border/40 pl-6">
+           <div className="hidden lg:flex items-center gap-4 border-l border-white/[0.05] pl-6">
               <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
            </div>
@@ -32,7 +32,7 @@ export function SiteFooter() {
         {/* Center: Creator Branding */}
         <div className="flex items-center gap-3 order-3 md:order-2">
            <span className="text-muted-foreground/40 text-[9px] font-black">Powered by</span>
-           <div className="flex items-center gap-2 px-3 py-1 bg-muted/40 rounded-lg border border-border/40 hover:border-primary/20 transition-all cursor-default group">
+           <div className="flex items-center gap-2 px-3 py-1 bg-muted/40 rounded-lg border border-white/[0.05] hover:border-primary/20 transition-all cursor-default group">
               <span className="group-hover:text-primary transition-colors italic">DR.HULK</span>
               {hulkLogoUrl && (
                 <img src={hulkLogoUrl} alt="Dr. Hulk" className="w-4 h-4 object-contain brightness-90 grayscale group-hover:grayscale-0 group-hover:brightness-100 transition-all" />

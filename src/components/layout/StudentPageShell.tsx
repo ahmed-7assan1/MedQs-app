@@ -40,7 +40,7 @@ export function StudentPageShell({
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">{subtitle}</p>
           ) : null}
           <div
-            className="mt-6 h-px w-full max-w-lg bg-gradient-to-r from-primary/45 via-border/80 to-transparent"
+            className="mt-6 h-px w-full max-w-lg bg-white/[0.08]"
             aria-hidden
           />
         </header>

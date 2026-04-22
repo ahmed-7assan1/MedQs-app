@@ -163,7 +163,7 @@ export default async function ModulesPage() {
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className={cn(
-                  "relative h-full overflow-hidden rounded-2xl border bg-card p-5 transition-all duration-200",
+                  "relative h-full overflow-hidden rounded-2xl border border-white/[0.05] bg-card p-5 transition-all duration-200",
                   "border-l-[3px] hover:-translate-y-[2px] hover:shadow-lg",
                   accent.border,
                   accent.shadow,

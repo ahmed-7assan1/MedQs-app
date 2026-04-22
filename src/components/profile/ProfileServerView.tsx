@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { getUserRankInfo } from "@/lib/engagement";
 import { Trophy, BookOpen, MessageSquare, Calendar, Pencil, Phone, Mail } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { UserPosts } from "@/components/profile/UserPosts";
 import { SavedPostsSection } from "@/components/profile/SavedPostsSection";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
@@ -79,185 +80,195 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
   if (!isPrivateForViewer && user.semester) subtitleParts.push(user.semester.name);
 
   return (
-    <StudentPageShell
-      maxWidthClass="max-w-2xl"
-      eyebrow="Student profile"
-      title={user.name ?? "Member"}
-      subtitle={subtitleParts.length ? subtitleParts.join(" · ") : undefined}
-    >
-      <div className="mb-6 rounded-2xl border border-border/70 bg-card p-6 shadow-md shadow-black/[0.04] ring-1 ring-black/[0.04] dark:shadow-black/20 dark:ring-white/[0.06]">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            {user.image ? (
-              <img
-                src={user.image}
-                alt=""
-                className="h-20 w-20 flex-shrink-0 rounded-2xl object-cover ring-2 ring-primary/20"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-2xl font-bold text-primary ring-2 ring-primary/15">
-                {user.name?.[0]?.toUpperCase()}
-              </div>
-            )}
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                {user.nickname && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                    @{user.nickname}
-                  </span>
-                )}
-                {user.rank && (
-                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                    {user.rank.badge} {user.rank.label}
-                  </span>
+    <div className="min-h-screen bg-[#0F0E16] text-white selection:bg-[#534AB7]/30 pb-20">
+      <div className="mx-auto max-w-[680px] p-4 md:py-8 space-y-6">
+        
+        {/* Profile Card */}
+        <div className="rounded-3xl border border-white/[0.02] bg-white/[0.02] p-6 lg:p-8 relative overflow-hidden backdrop-blur-xl">
+          {/* Subtle gradient glow */}
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-[#534AB7]/20 rounded-full blur-[80px] pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="h-28 w-28 md:h-32 md:w-32 rounded-[28px] overflow-hidden border border-white/[0.1] bg-[#534AB7]/10 p-1 shadow-2xl shadow-[#534AB7]/20">
+                {user.image ? (
+                  <img
+                    src={user.image}
+                    alt=""
+                    className="h-full w-full rounded-[24px] object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="h-full w-full rounded-[24px] bg-[#534AB7]/20 flex items-center justify-center text-4xl font-bold text-[#AFA9EC]">
+                    {user.name?.[0]?.toUpperCase()}
+                  </div>
                 )}
               </div>
-              {!isPrivateForViewer && user.bio && (
-                <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-muted-foreground">{user.bio}</p>
-              )}
-              <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                {!isPrivateForViewer && user.university && <span>{user.university.name}</span>}
-                {!isPrivateForViewer && user.semester && <span>{user.semester.name}</span>}
-                {!isPrivateForViewer && user.phoneVisible && user.phone && (
-                  <span className="inline-flex items-center gap-1">
-                    <Phone className="h-3 w-3 opacity-70" />
-                    {user.phone}
-                  </span>
-                )}
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  Joined{" "}
-                  {new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-                </span>
-              </div>
-              {!isPrivateForViewer && (user.instagramUrl || user.facebookUrl) && (
-                <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  {user.instagramUrl && (
-                    <a
-                      href={user.instagramUrl}
-                      className="rounded-full bg-muted px-2 py-1 hover:bg-muted/70"
-                      target="_blank"
-                      rel="noopener noreferrer"
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-1">
+                    {user.name ?? "Member"}
+                  </h1>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-3">
+                    {user.handle && (
+                      <span className="text-[#AFA9EC] text-sm font-medium bg-[#534AB7]/10 px-2.5 py-0.5 rounded-lg border border-[#534AB7]/20">
+                        @{user.handle}
+                      </span>
+                    )}
+                    {!user.handle && user.nickname && (
+                      <span className="text-[#AFA9EC] text-sm font-medium bg-[#534AB7]/10 px-2.5 py-0.5 rounded-lg border border-[#534AB7]/20">
+                        @{user.nickname}
+                      </span>
+                    )}
+                    {user.rank && (
+                      <span className="rounded-lg bg-orange-500/10 px-2.5 py-0.5 text-[13px] font-bold text-orange-400 border border-orange-500/20 uppercase tracking-widest flex items-center gap-1.5">
+                        <span className="text-base leading-none">{user.rank.badge}</span>
+                        {user.rank.label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  {!isOwn && !isPrivateForViewer && (
+                    <Link
+                      href={`/messages/${targetId}`}
+                      className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/[0.04] text-white/70 border border-white/[0.1] hover:bg-white/[0.08] hover:text-white transition-all"
                     >
-                      Instagram
-                    </a>
+                      <Mail className="h-4 w-4" />
+                    </Link>
                   )}
-                  {user.facebookUrl && (
-                    <a
-                      href={user.facebookUrl}
-                      className="rounded-full bg-muted px-2 py-1 hover:bg-muted/70"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {!isOwn && (
+                    <FollowButton userId={targetId} />
+                  )}
+                  {isOwn && (
+                    <Link
+                      href="/profile/edit"
+                      className="px-5 h-10 flex items-center justify-center gap-2 rounded-xl bg-white/[0.04] text-sm font-medium text-white border border-white/[0.1] hover:bg-white/[0.08] transition-all"
                     >
-                      Facebook
-                    </a>
+                      <Pencil className="h-4 w-4 text-white/50" />
+                      Edit Profile
+                    </Link>
                   )}
                 </div>
-              )}
-              {isPrivateForViewer && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  This profile is private. Only basic information is visible.
+              </div>
+
+              {!isPrivateForViewer && user.bio && (
+                <p className="mt-4 text-[15px] leading-relaxed text-white/70 max-w-lg mx-auto md:mx-0">
+                  {user.bio}
                 </p>
               )}
+
+              <div className="mt-5 flex flex-wrap justify-center md:justify-start gap-4 text-[13px] text-white/40">
+                {!isPrivateForViewer && user.university && (
+                  <span className="flex items-center gap-1.5">
+                    <BookOpen className="h-4 w-4 opacity-50" />
+                    {user.university.name}
+                  </span>
+                )}
+                {!isPrivateForViewer && user.semester && (
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 opacity-50" />
+                    {user.semester.name}
+                  </span>
+                )}
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 opacity-50" />
+                  Joined {new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                </span>
+                {isPrivateForViewer && (
+                  <span className="flex items-center gap-1.5 text-orange-400/80 bg-orange-400/10 px-2 py-0.5 rounded-md border border-orange-400/20">
+                    Private profile
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-start">
-            {!isOwn && !isPrivateForViewer && (
-              <Link
-                href={`/messages/${targetId}`}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/60"
+        {/* Stats Row */}
+        {!isPrivateForViewer && (
+          <div className="grid grid-cols-3 gap-3 md:gap-4">
+            {[
+              { label: "Points", value: user.points, icon: Trophy, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20" },
+              { label: "Quizzes", value: user._count.quizAttempts, icon: BookOpen, color: "text-[#AFA9EC]", bg: "bg-[#534AB7]/10", border: "border-[#534AB7]/20" },
+              { label: "Posts", value: user._count.posts, icon: MessageSquare, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
+            ].map(({ label, value, icon: Icon, color, bg, border }) => (
+              <div
+                key={label}
+                className="relative overflow-hidden rounded-2xl border border-white/[0.02] bg-white/[0.02] p-4 md:p-5 flex flex-col items-center justify-center transition-all hover:bg-white/[0.04]"
               >
-                <Mail className="h-3.5 w-3.5" />
-                Message
-              </Link>
-            )}
-            {!isOwn && (
-              <FollowButton userId={targetId} />
-            )}
-            {isOwn && (
-              <Link
-                href="/profile/edit"
-                className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/60"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Edit
-              </Link>
+                <div className={cn("h-8 w-8 rounded-full mb-3 flex items-center justify-center border", bg, border)}>
+                  <Icon className={cn("h-4 w-4", color)} />
+                </div>
+                <p className="font-display text-2xl md:text-3xl font-bold text-white mb-0.5">{value}</p>
+                <p className="text-[11px] uppercase tracking-wider font-semibold text-white/30">{label}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Rank Progress */}
+        {!isPrivateForViewer && rankInfo && (
+          <div className="rounded-3xl border border-white/[0.02] bg-white/[0.02] p-6 lg:p-8 relative overflow-hidden">
+            <h2 className="mb-5 font-display text-[17px] font-bold text-white tracking-tight">Rank Progress</h2>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-white/[0.04] text-3xl border border-white/[0.1] shadow-inner">
+                {rankInfo.rank?.badge ?? "🎓"}
+              </div>
+              <div>
+                <p className="font-bold text-lg text-white">{rankInfo.rank?.label ?? "Newbie"}</p>
+                <p className="text-[13px] text-white/40">{rankInfo.points} points earned</p>
+              </div>
+            </div>
+
+            {rankInfo.nextRank ? (
+              <div>
+                <div className="mb-2.5 flex justify-between text-[13px] font-medium text-white/50">
+                  <span>Next: {rankInfo.nextRank.label}</span>
+                  <span className="text-[#AFA9EC]">{rankInfo.progress}%</span>
+                </div>
+                <div className="h-3 overflow-hidden rounded-full bg-white/[0.04] border border-white/[0.02]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#534AB7]/50 to-[#534AB7] transition-all duration-1000 shadow-[0_0_10px_rgba(83,74,183,0.5)]"
+                    style={{ width: `${rankInfo.progress}%` }}
+                  />
+                </div>
+                <p className="mt-3 text-[12px] text-white/30 font-medium">
+                  {rankInfo.nextRank.minPoints - rankInfo.points} points until next rank
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl bg-amber-500/10 px-4 py-3 text-sm text-amber-400 font-medium border border-amber-500/20 inline-block">
+                Maximum rank achieved — you're Elite!
+              </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Saved Posts */}
+        {isOwn && (
+          <div className="rounded-3xl border border-white/[0.02] bg-white/[0.02] p-6 lg:p-8">
+            <h2 className="mb-5 font-display text-[17px] font-bold text-white tracking-tight">Saved Posts</h2>
+            <SavedPostsSection />
+          </div>
+        )}
+
+        {/* User Posts */}
+        {!isPrivateForViewer && (
+          <div className="rounded-3xl border border-white/[0.02] bg-white/[0.02] p-6 lg:p-8">
+            <h2 className="mb-5 font-display text-[17px] font-bold text-white tracking-tight">Recent Activity</h2>
+            <UserPosts posts={posts} isOwn={isOwn} />
+          </div>
+        )}
       </div>
-
-      {!isPrivateForViewer && (
-        <div className="mb-6 grid grid-cols-3 gap-3">
-          {[
-            { label: "Points", value: user.points, icon: Trophy, color: "text-amber-500" },
-            { label: "Quizzes", value: user._count.quizAttempts, icon: BookOpen, color: "text-primary" },
-            { label: "Posts", value: user._count.posts, icon: MessageSquare, color: "text-violet-500" },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl border border-border/70 bg-card p-4 text-center shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.05]"
-            >
-              <Icon className={`mx-auto mb-2 h-5 w-5 ${color}`} />
-              <p className="font-display text-2xl font-bold">{value}</p>
-              <p className="text-xs text-muted-foreground">{label}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {!isPrivateForViewer && rankInfo && (
-        <div className="rounded-xl border border-border/70 bg-card p-5 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.05]">
-          <h2 className="mb-4 font-display text-lg font-semibold">Rank Progress</h2>
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-2xl dark:bg-amber-900/30">
-              {rankInfo.rank?.badge ?? "🎓"}
-            </div>
-            <div>
-              <p className="font-semibold">{rankInfo.rank?.label ?? "Newbie"}</p>
-              <p className="text-sm text-muted-foreground">{rankInfo.points} points earned</p>
-            </div>
-          </div>
-
-          {rankInfo.nextRank ? (
-            <>
-              <div className="mb-1.5 flex justify-between text-xs text-muted-foreground">
-                <span>Progress to {rankInfo.nextRank.label}</span>
-                <span>{rankInfo.progress}%</span>
-              </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-700"
-                  style={{ width: `${rankInfo.progress}%` }}
-                />
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {rankInfo.nextRank.minPoints - rankInfo.points} points until {rankInfo.nextRank.label}
-              </p>
-            </>
-          ) : (
-            <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
-              Maximum rank achieved — you&apos;re Elite!
-            </div>
-          )}
-        </div>
-      )}
-
-      {isOwn && (
-        <div className="mt-6">
-          <h2 className="mb-3 font-display text-xl font-semibold">Saved from forum</h2>
-          <SavedPostsSection />
-        </div>
-      )}
-
-      {!isPrivateForViewer && (
-        <div className="mt-6">
-          <h2 className="mb-3 font-display text-xl font-semibold">Forum Posts</h2>
-          <UserPosts posts={posts} isOwn={isOwn} />
-        </div>
-      )}
-    </StudentPageShell>
+    </div>
   );
 }
+

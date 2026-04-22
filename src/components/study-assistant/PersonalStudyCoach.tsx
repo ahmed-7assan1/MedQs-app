@@ -227,7 +227,7 @@ export function PersonalStudyCoach() {
             {recentQuizAttempts.slice(0, 8).map((a) => (
               <li
                 key={a.id}
-                className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2"
+                className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg border border-white/[0.02] bg-muted/20 px-3 py-2"
               >
                 <span className="font-medium text-foreground">{a.pastPaper?.title ?? "Quiz"}</span>
                 <span className="text-xs text-muted-foreground">
@@ -425,3 +425,4 @@ export function PersonalStudyCoach() {
     </div>
   );
 }
+

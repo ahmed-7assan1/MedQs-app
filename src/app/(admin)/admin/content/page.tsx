@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import {
   Building2, Calendar, BookOpen, FlaskConical, GraduationCap,
-  Plus, ChevronDown, Loader2, Trash2, Check, X, ShieldAlert, Layers, Zap
+  Plus, ChevronDown, Loader2, Trash2, Check, X, ShieldAlert, Layers, Zap, Radio
 } from "lucide-react";
 import { SmartArchitectDialog } from "@/components/admin/SmartArchitectDialog";
+import { SmartPlaylistSyncDialog } from "@/components/admin/SmartPlaylistSyncDialog";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
@@ -35,6 +36,7 @@ export default function AdminContentPage() {
   const [deleting,     setDeleting]        = useState<string | null>(null);
   const [isSuperAdmin, setIsSuperAdmin]    = useState(false);
   const [architectTarget, setArchitectTarget] = useState<Semester | null>(null);
+  const [syncTarget, setSyncTarget] = useState<Semester | null>(null);
 
   const refreshData = async () => {
     try {
@@ -248,6 +250,7 @@ export default function AdminContentPage() {
             onAdd={startAdd}
             onDelete={commitDelete}
             onArchitect={setArchitectTarget}
+            onSync={setSyncTarget}
             addingKey={adding}
             addVal={addVal}
             onAddValChange={setAddVal}
@@ -267,8 +270,22 @@ export default function AdminContentPage() {
           }}
         />
 
+        {syncTarget && (
+          <SmartPlaylistSyncDialog 
+            isOpen={!!syncTarget}
+            onClose={() => setSyncTarget(null)}
+            semesterId={syncTarget.id}
+            semesterName={syncTarget.name}
+            onSuccess={() => {
+              toast.success("Curriculum synced successfully!");
+              refreshData();
+              setSyncTarget(null);
+            }}
+          />
+        )}
+
         {isSuperAdmin && (
-          <div className="rounded-2xl border border-dashed border-border/60 bg-muted/5 p-8 flex flex-col items-center justify-center text-center">
+          <div className="rounded-2xl border border-dashed border-white/[0.02] bg-muted/5 p-8 flex flex-col items-center justify-center text-center">
              <Building2 className="h-10 w-10 text-muted-foreground opacity-20 mb-3" />
              <p className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-widest leading-none">Global Root</p>
              <button
@@ -293,7 +310,7 @@ export default function AdminContentPage() {
   );
 }
 
-function UniversityNode({ uni, faculties, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+function UniversityNode({ uni, faculties, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, onSync, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
   const open = expanded.has(uni.id);
   const uniFaculties = faculties.filter((f: any) => f.universityId === uni.id);
   const uniYears = years.filter((y: any) => y.universityId === uni.id && !y.facultyId);
@@ -301,7 +318,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
   return (
     <div className={cn(
       "overflow-hidden rounded-2xl border transition-all duration-300",
-      open ? "border-blue-500/30 bg-card shadow-lg ring-1 ring-blue-500/10" : "border-border/60 bg-card hover:border-border/80"
+      open ? "border-blue-500/30 bg-card shadow-lg ring-1 ring-blue-500/10" : "border-white/[0.02] bg-card hover:border-white/[0.03]"
     )}>
       <div className="flex cursor-pointer items-center justify-between p-5" onClick={() => onToggle(uni.id)}>
         <div className="flex items-center gap-4 min-w-0">
@@ -329,7 +346,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
       </div>
 
       {open && (
-        <div className="border-t border-border/40 bg-muted/5 p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="border-t border-white/[0.05] bg-muted/5 p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
            {addingKey === `uni-${uni.id}-fac` && (
               <div className="flex items-center gap-2 mb-2 p-2 rounded-xl bg-card border border-blue-500/30">
                 <input autoFocus placeholder="Faculty Name…" className="flex-1 bg-transparent text-sm px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`uni-${uni.id}-fac`)} />
@@ -339,7 +356,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
            )}
 
            {uniFaculties.length === 0 && uniYears.length === 0 && (
-             <div className="py-8 text-center bg-muted/20 rounded-xl border border-dashed border-border/60">
+             <div className="py-8 text-center bg-muted/20 rounded-xl border border-dashed border-white/[0.02]">
                 <p className="text-xs text-muted-foreground italic font-medium opacity-60">No children defined for this node.</p>
              </div>
            )}
@@ -358,6 +375,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
                 onAdd={onAdd}
                 onDelete={onDelete}
                 onArchitect={onArchitect}
+                onSync={onSync}
                 addingKey={addingKey}
                 addVal={addVal}
                 onAddValChange={onAddValChange}
@@ -381,6 +399,7 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
                 onAdd={onAdd}
                 onDelete={onDelete}
                 onArchitect={onArchitect}
+                onSync={onSync}
                 addingKey={addingKey}
                 addVal={addVal}
                 onAddValChange={onAddValChange}
@@ -395,18 +414,18 @@ function UniversityNode({ uni, faculties, years, semesters, modules, subjects, e
   );
 }
 
-function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, onSync, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
   const open = expanded.has(fac.id);
   const facYears = years.filter((y: any) => y.facultyId === fac.id);
 
   return (
     <div className={cn(
       "rounded-2xl border transition-all duration-300",
-      open ? "border-emerald-500/30 bg-card/60 shadow-md ring-1 ring-emerald-500/10" : "border-border/40 bg-card hover:border-border/60"
+      open ? "border-emerald-500/30 bg-card/60 shadow-md ring-1 ring-emerald-500/10" : "border-white/[0.05] bg-card hover:border-white/[0.02]"
     )}>
       <div className="flex items-center justify-between p-3.5 cursor-pointer" onClick={() => onToggle(fac.id)}>
          <div className="flex items-center gap-3">
-            <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg shadow-sm border border-border/40", open ? "bg-emerald-600 text-white" : "bg-emerald-500/10 text-emerald-600")}>
+            <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg shadow-sm border border-white/[0.05]", open ? "bg-emerald-600 text-white" : "bg-emerald-500/10 text-emerald-600")}>
                <GraduationCap className="h-5 w-5" />
             </div>
             <span className="text-sm font-bold tracking-tight text-foreground/90">{fac.name}</span>
@@ -434,7 +453,7 @@ function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onTog
              </div>
            )}
            {facYears.sort((a: any, b: any) => (a.yearNumber ?? 0) - (b.yearNumber ?? 0)).map((year: any) => (
-             <YearNode key={year.id} year={year} semesters={semesters} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} isSuperAdmin={isSuperAdmin} onAdd={onAdd} onDelete={onDelete} onArchitect={onArchitect} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} deletingId={deletingId} />
+             <YearNode key={year.id} year={year} semesters={semesters} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} isSuperAdmin={isSuperAdmin} onAdd={onAdd} onDelete={onDelete} onArchitect={onArchitect} onSync={onSync} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} deletingId={deletingId} />
            ))}
         </div>
       )}
@@ -442,7 +461,7 @@ function FacultyNode({ fac, years, semesters, modules, subjects, expanded, onTog
   );
 }
 
-function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
+function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSuperAdmin, onAdd, onDelete, onArchitect, onSync, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd, deletingId }: any) {
   const open = expanded.has(year.id);
   const yearSemesters = semesters.filter((s: any) => s.academicYearId === year.id);
 
@@ -463,7 +482,7 @@ function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSu
       </div>
 
       {open && (
-        <div className="pl-6 border-l border-border/40 ml-3.5 mt-1 pb-2 space-y-2 animate-in fade-in slide-in-from-left-1 duration-200">
+        <div className="pl-6 border-l border-white/[0.05] ml-3.5 mt-1 pb-2 space-y-2 animate-in fade-in slide-in-from-left-1 duration-200">
            {addingKey === `sem-${year.id}` && (
              <div className="flex items-center gap-1.5 p-1 rounded-lg border border-blue-500/20 bg-background/50">
                 <input placeholder="Semester name…" className="flex-1 bg-transparent text-[11px] px-2 focus:outline-none" value={addVal} onChange={(e) => onAddValChange(e.target.value)} onKeyDown={e => e.key === "Enter" && onCommitAdd(`sem-${year.id}`)} />
@@ -472,7 +491,7 @@ function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSu
              </div>
            )}
            {yearSemesters.map((sem: any) => (
-              <SemesterNode key={sem.id} sem={sem} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} onArchitect={onArchitect} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
+              <SemesterNode key={sem.id} sem={sem} modules={modules} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} onArchitect={onArchitect} onSync={onSync} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
            ))}
         </div>
       )}
@@ -480,7 +499,7 @@ function YearNode({ year, semesters, modules, subjects, expanded, onToggle, isSu
   );
 }
 
-function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDelete, onArchitect, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd }: any) {
+function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDelete, onArchitect, onSync, addingKey, addVal, onAddValChange, onCommitAdd, onCancelAdd }: any) {
   const open = expanded.has(sem.id);
   const semModules = modules.filter((m: any) => m.semesterId === sem.id);
   const regularModules = semModules.filter((m: any) => m.name !== DIRECT_MODULE);
@@ -495,6 +514,7 @@ function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDel
              <span className="text-xs font-bold text-foreground/70 uppercase tracking-tighter">{sem.name}</span>
           </div>
           <div className="flex items-center gap-1.5 opacity-0 group-hover/sem:opacity-100 transition-all">
+             <button onClick={(e) => { e.stopPropagation(); onSync(sem); }} className="h-6 w-6 flex items-center justify-center rounded-md text-emerald-500/70 hover:bg-emerald-500/10 hover:text-emerald-500" title="Smart AI Sync"><Radio className="h-3 w-3" /></button>
              <button onClick={(e) => { e.stopPropagation(); onArchitect(sem); }} className="h-6 w-6 flex items-center justify-center rounded-md text-blue-500/70 hover:bg-blue-500/10 hover:text-blue-500"><Zap className="h-3 w-3" /></button>
              <button onClick={(e) => { e.stopPropagation(); onAdd(`sem-${sem.id}-mod`); }} className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-muted"><Plus className="h-3 w-3" /></button>
              <button onClick={(e) => { e.stopPropagation(); onDelete("sem", sem.id, sem.name); }} className="h-6 w-6 flex items-center justify-center rounded-md text-red-500/50 hover:bg-red-500/10 hover:text-red-500"><Trash2 className="h-3 w-3" /></button>
@@ -515,7 +535,7 @@ function SemesterNode({ sem, modules, subjects, expanded, onToggle, onAdd, onDel
                <ModuleNode key={mod.id} mod={mod} subjects={subjects} expanded={expanded} onToggle={onToggle} onAdd={onAdd} onDelete={onDelete} addingKey={addingKey} addVal={addVal} onAddValChange={onAddValChange} onCommitAdd={onCommitAdd} onCancelAdd={onCancelAdd} />
             ))}
 
-            <div className="mt-2 pl-1 border-t border-dashed border-border/40 pt-2 space-y-1">
+            <div className="mt-2 pl-1 border-t border-dashed border-white/[0.05] pt-2 space-y-1">
                <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Independent Subjects</p>
@@ -544,7 +564,7 @@ function ModuleNode({ mod, subjects, expanded, onToggle, onAdd, onDelete, adding
 
   return (
     <div className="group/mod">
-       <div className={cn("flex items-center justify-between p-2 px-3 rounded-xl border transition-all cursor-pointer", open ? "bg-emerald-500/5 border-emerald-500/20 shadow-sm" : "bg-card border-border/60 hover:bg-muted/30")} onClick={() => onToggle(mod.id)}>
+       <div className={cn("flex items-center justify-between p-2 px-3 rounded-xl border transition-all cursor-pointer", open ? "bg-emerald-500/5 border-emerald-500/20 shadow-sm" : "bg-card border-white/[0.02] hover:bg-muted/30")} onClick={() => onToggle(mod.id)}>
           <div className="flex items-center gap-2.5">
              <BookOpen className={cn("h-3.5 w-3.5", open ? "text-emerald-500" : "text-muted-foreground/50")} />
              <span className="text-[11px] font-bold text-foreground/80">{mod.name}</span>
@@ -586,3 +606,4 @@ function SubjectNode({ sub, onDelete }: any) {
     </div>
   );
 }
+

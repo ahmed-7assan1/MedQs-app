@@ -11,10 +11,13 @@ export type ForumPostJson = {
   forumId: string;
   createdAt: string;
   updatedAt: string;
+  expiresAt: string | null;
+  isPinned: boolean;
   author: {
     id: string;
     name: string;
     image: string | null;
+    handle: string | null;
     rank?: { label: string; badge: string | null };
   };
   _count: { likes: number; comments: number };
@@ -30,10 +33,13 @@ type PostRow = {
   forumId: string;
   createdAt: Date;
   updatedAt: Date;
+  expiresAt: Date | null;
+  isPinned: boolean;
   author: {
     id: string;
     name: string;
     image: string | null;
+    handle: string | null;
     rank?: { label: string; badge: string | null } | null;
   };
   _count: { likes: number; comments: number };
@@ -44,11 +50,13 @@ export async function loadForumPostsForUser(options: {
   userId: string;
   page?: number;
   limit?: number;
+  isChatMessage?: boolean;
+  isForumPost?: boolean;
 }): Promise<
   | { ok: true; posts: ForumPostJson[] }
   | { ok: false; status: number; error: string; details?: string; code?: string }
 > {
-  const { userId, page = 1, limit = 20 } = options;
+  const { userId, page = 1, limit = 20, isChatMessage, isForumPost } = options;
   const forumId = options.forumId.trim();
   if (!forumId) return { ok: false, status: 400, error: "Missing forum id" };
 
@@ -82,6 +90,8 @@ export async function loadForumPostsForUser(options: {
         where: {
           forumId,
           universityId: viewer.universityId,
+          isChatMessage,
+          isForumPost,
           OR: [
             { audience: "UNIVERSITY" },
             {
@@ -92,6 +102,15 @@ export async function loadForumPostsForUser(options: {
               ],
             },
           ],
+          AND: [
+            {
+              OR: [
+                { isPinned: true },
+                { expiresAt: { gt: new Date() } },
+                { expiresAt: null }
+              ]
+            }
+          ]
         },
         orderBy: { createdAt: "desc" },
         skip,
@@ -102,6 +121,7 @@ export async function loadForumPostsForUser(options: {
               id: true,
               name: true,
               image: true,
+              handle: true,
               rank: { select: { label: true, badge: true } },
             },
           },
@@ -131,7 +151,7 @@ export async function loadForumPostsForUser(options: {
           take: limit,
           include: {
             author: {
-              select: { id: true, name: true, image: true },
+              select: { id: true, name: true, image: true, handle: true },
             },
             _count: { select: { likes: true, comments: true } },
           },
@@ -157,7 +177,7 @@ export async function loadForumPostsForUser(options: {
           skip,
           take: limit,
           include: {
-            author: { select: { id: true, name: true, image: true } },
+            author: { select: { id: true, name: true, image: true, handle: true } },
           },
         });
         posts = bare.map((p) => ({
@@ -191,10 +211,13 @@ export async function loadForumPostsForUser(options: {
       forumId: p.forumId,
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
+      expiresAt: p.expiresAt ? p.expiresAt.toISOString() : null,
+      isPinned: p.isPinned,
       author: {
         id: p.author.id,
         name: p.author.name,
         image: p.author.image,
+        handle: p.author.handle,
         ...(p.author.rank ? { rank: p.author.rank } : {}),
       },
       _count: p._count,

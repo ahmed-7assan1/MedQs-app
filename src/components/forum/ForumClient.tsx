@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { PostCard } from "./PostCard";
+import { PostCardRedesigned } from "./PostCardRedesigned";
+import { PostComposerRedesigned } from "./PostComposerRedesigned";
 import {
   MessageSquare,
   Send,
@@ -199,24 +200,31 @@ export function ForumClient({
     return forumList.filter((f) => f.name.toLowerCase().includes(q));
   }, [threadQuery, forumList]);
 
-  async function submitPost(content: string, imageUrl: string): Promise<boolean> {
-    if (!activeForum) return false;
+  async function submitPost(
+    content: string, 
+    imageUrl: string, 
+    options?: { isForumPost?: boolean; isChatMessage?: boolean; forumId?: string }
+  ): Promise<boolean> {
+    const targetForumId = options?.forumId || activeForum?.id;
+    if (!targetForumId) return false;
     const trimmed = content.trim();
     const img = imageUrl.trim();
     if (!trimmed && !img) return false;
-    if (activeForum.status === "READ_ONLY") {
+    if (activeForum?.status === "READ_ONLY") {
       toast.error("This forum is read-only");
       return false;
     }
     setPosting(true);
     try {
-      const res = await fetch(`/api/v1/forums/${activeForum.id}/posts`, {
+      const res = await fetch(`/api/v1/forums/${targetForumId}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: trimmed,
           imageUrl: img || undefined,
           audience: postAudience,
+          isForumPost: options?.isForumPost,
+          isChatMessage: options?.isChatMessage,
         }),
       });
       if (res.ok) {
@@ -236,7 +244,7 @@ export function ForumClient({
   }
 
   async function handlePost() {
-    const ok = await submitPost(postContent, postImageUrl);
+    const ok = await submitPost(postContent, postImageUrl, { isForumPost: true, isChatMessage: false });
     if (ok) {
       setPostContent("");
       setPostImageUrl("");
@@ -245,7 +253,7 @@ export function ForumClient({
   }
 
   async function handleDiscussionSend() {
-    const ok = await submitPost(discussionDraft, postImageUrl);
+    const ok = await submitPost(discussionDraft, postImageUrl, { isForumPost: false, isChatMessage: true });
     if (ok) {
       setDiscussionDraft("");
       setPostImageUrl("");
@@ -404,602 +412,476 @@ export function ForumClient({
   return (
     <div
       className={cn(
-        "flex w-full flex-col",
+        "flex w-full flex-col font-sans",
         isChatTab
-          ? "min-h-0 flex-1 px-2 pb-0 pt-3 sm:px-4 md:pt-4"
-          : "mx-auto max-w-3xl px-4 py-8 md:px-6"
+          ? "min-h-0 flex-1 px-0 pb-0 pt-3 md:pt-4"
+          : "mx-auto max-w-[700px] px-4 py-10"
       )}
     >
-      <div className={cn("mb-6 flex items-start justify-between gap-3", isChatTab && "mb-3 shrink-0")}>
-        <div>
-          <h1 className={cn("font-display font-bold", isChatTab ? "text-2xl md:text-3xl" : "text-3xl")}>Community</h1>
-          {!isChatTab ? (
-            <p className="mt-1 text-sm text-muted-foreground">
-              Feed for updates · <strong className="font-medium text-foreground">Discussions</strong> is a group chat layout (newest at the
-              bottom).
-            </p>
-          ) : (
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Simple chat layout — pick a group on the left. Newest messages at the bottom.
-            </p>
-          )}
-        </div>
-        <div className="relative shrink-0">
-          <button
-            type="button"
-            aria-label="Forum options"
-            aria-expanded={privateForumMenuOpen}
-            onClick={(e) => {
-              e.stopPropagation();
-              setPrivateForumMenuOpen((o) => !o);
-            }}
-            className="rounded-lg border border-border bg-card p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <MoreVertical className="h-5 w-5" />
-          </button>
-          {privateForumMenuOpen && (
-            <div
-              className="absolute right-0 z-30 mt-1 min-w-[200px] rounded-lg border border-border bg-card py-1 shadow-lg"
-              onClick={(e) => e.stopPropagation()}
+      {/* Header & Navigation */}
+      <div className={cn("px-4", isChatTab ? "mb-4 shrink-0" : "mb-8")}>
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <h1 className={cn("font-display font-bold text-white tracking-tight", isChatTab ? "text-2xl" : "text-4xl")}>
+            Community
+          </h1>
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              aria-label="Forum options"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPrivateForumMenuOpen((o) => !o);
+              }}
+              className="rounded-xl border border-white/[0.03] bg-white/5 p-2.5 text-white/60 hover:bg-white/10 hover:text-white transition-all shadow-lg backdrop-blur-md"
             >
-              <button
-                type="button"
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
-                onClick={() => {
-                  setPrivateFormOpen(true);
-                  setPrivateForumMenuOpen(false);
-                }}
+              <MoreVertical className="h-5 w-5" />
+            </button>
+            {privateForumMenuOpen && (
+              <div
+                className="absolute right-0 z-50 mt-2 min-w-[220px] rounded-2xl border border-white/[0.03] bg-[#12111A]/95 p-1.5 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in duration-200"
+                onClick={(e) => e.stopPropagation()}
               >
-                <Users className="h-4 w-4 opacity-70" />
-                Create private forum
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className={cn("mb-5 flex flex-wrap items-center justify-between gap-3", isChatTab && "mb-3 shrink-0")}>
-        <div className="inline-flex rounded-xl border border-border bg-background p-1 text-sm">
-          <button
-            onClick={() => setTab("feed")}
-            className={cn(
-              "rounded-lg px-3 py-1.5 font-semibold",
-              tab === "feed" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
-            )}
-          >
-            Feed
-          </button>
-          <button
-            onClick={() => setTab("discussions")}
-            className={cn(
-              "rounded-lg px-3 py-1.5 font-semibold",
-              tab === "discussions" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
-            )}
-          >
-            Chat
-          </button>
-        </div>
-
-        {tab === "feed" ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <MedqsSelect
-              value={feedMode}
-              onChange={(e) => setFeedMode(e.target.value as any)}
-              className="min-w-[9.5rem]"
-            >
-              <option value="university">University</option>
-              <option value="following">Following</option>
-            </MedqsSelect>
-            <MedqsSelect
-              value={postAudience}
-              onChange={(e) => setPostAudience(e.target.value as any)}
-              className="min-w-[12rem]"
-              title="Who can see your post?"
-            >
-              <option value="UNIVERSITY">Audience: University</option>
-              <option value="FOLLOWERS">Audience: Followers</option>
-            </MedqsSelect>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setMobileThreadsOpen(true)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
-            >
-              Groups
-            </button>
-            <MedqsSelect
-              value={discussionScope}
-              onChange={(e) => setDiscussionScope(e.target.value as any)}
-              className="min-w-[10rem]"
-              title="Discussion scope"
-            >
-              <option value="semester">Semester</option>
-              <option value="global">University</option>
-            </MedqsSelect>
-          </div>
-        )}
-      </div>
-      {pendingInvites.length > 0 && (
-        <div
-          className={cn(
-            "mb-6 rounded-xl border border-amber-300/50 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-900/20",
-            isChatTab && "shrink-0"
-          )}
-        >
-          <p className="mb-2 text-sm font-semibold">Pending private forum invites</p>
-          <div className="space-y-2">
-            {pendingInvites.map((invite) => (
-              <div key={invite.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
-                <p className="text-xs">
-                  <span className="font-semibold">{invite.sender.name}</span> invited you to{" "}
-                  <span className="font-semibold">{invite.forum.name}</span>
-                </p>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => handleInvite(invite.id, "decline")}
-                    disabled={handlingInviteId === invite.id}
-                    className="rounded-md border border-border px-2 py-1 text-xs hover:bg-muted"
-                  >
-                    Decline
-                  </button>
-                  <button
-                    onClick={() => handleInvite(invite.id, "accept")}
-                    disabled={handlingInviteId === invite.id}
-                    className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground disabled:opacity-60"
-                  >
-                    {handlingInviteId === invite.id ? "..." : "Accept"}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                  onClick={() => {
+                    setPrivateFormOpen(true);
+                    setPrivateForumMenuOpen(false);
+                  }}
+                >
+                  <Users className="h-4 w-4 opacity-50" />
+                  <span className="font-medium">Create private forum</span>
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
-      )}
 
-      {privateFormOpen && (
-        <div className={cn("mb-6 rounded-xl border border-border bg-card p-4", isChatTab && "shrink-0")}>
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold">Create private study forum</p>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="inline-flex rounded-2xl border border-white/[0.02] bg-white/5 p-1.5 backdrop-blur-md">
             <button
-              type="button"
-              onClick={() => setPrivateFormOpen(false)}
-              className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
-            >
-              Close
-            </button>
-          </div>
-          <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-            <input
-              value={newForumName}
-              onChange={(e) => setNewForumName(e.target.value)}
-              placeholder="Forum name (e.g. Pharma Team A)"
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <div className="relative">
-              <input
-                value={inviteQuery}
-                onChange={(e) => setInviteQuery(e.target.value)}
-                placeholder="Search friends by username or ID"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              {inviteResults.length > 0 && (
-                <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-border bg-card p-1 shadow-lg">
-                  {inviteResults.map((u) => (
-                    <button
-                      key={u.id}
-                      onClick={() => addInviteToken(u.studentId || u.nickname || u.name)}
-                      className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted"
-                    >
-                      <span>{u.name}</span>
-                      <span className="text-muted-foreground">@{u.nickname || u.studentId || "user"}</span>
-                    </button>
-                  ))}
-                </div>
+              onClick={() => setTab("feed")}
+              className={cn(
+                "rounded-xl px-6 py-2 text-sm font-bold transition-all duration-300",
+                tab === "feed" 
+                  ? "bg-[#534AB7] text-white shadow-lg shadow-[#534AB7]/40" 
+                  : "text-white/40 hover:text-white/70"
               )}
-            </div>
-            <button
-              onClick={handleCreateForum}
-              disabled={creatingForum || !newForumName.trim()}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
             >
-              {creatingForum ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlusCircle className="h-4 w-4" />}
-              Create
+              Feed
+            </button>
+            <button
+              onClick={() => setTab("discussions")}
+              className={cn(
+                "rounded-xl px-6 py-2 text-sm font-bold transition-all duration-300",
+                tab === "discussions" 
+                  ? "bg-[#534AB7] text-white shadow-lg shadow-[#534AB7]/40" 
+                  : "text-white/40 hover:text-white/70"
+              )}
+            >
+              Chat
             </button>
           </div>
-          <input
-            value={inviteTokens}
-            onChange={(e) => setInviteTokens(e.target.value)}
-            placeholder="Selected invites (comma separated IDs/usernames)"
-            className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
-      )}
 
-      {/* Telegram-style threads list (desktop) + chat (right) */}
-      {isChatTab ? (
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 md:grid-cols-[320px_1fr] md:gap-4">
-          {/* Left: threads */}
-          <aside className="hidden min-h-0 flex-col overflow-hidden rounded-xl border border-border/80 bg-card/60 backdrop-blur-sm md:flex">
-            <div className="border-b border-border/70 p-3">
-              <input
-                value={threadQuery}
-                onChange={(e) => setThreadQuery(e.target.value)}
-                placeholder="Search groups…"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              {filteredForums.map((forum) => {
-                const active = activeForum?.id === forum.id;
-                return (
-                  <button
-                    key={forum.id}
-                    type="button"
-                    onClick={() => setActiveForum(forum)}
-                    className={cn(
-                      "flex w-full items-center gap-3 border-b border-border/60 px-3 py-3 text-left transition-colors",
-                      active ? "bg-primary/10" : "hover:bg-muted/50"
-                    )}
-                  >
-                    <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
-                      {forum.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className={cn("truncate text-sm font-semibold", active ? "text-foreground" : "text-foreground")}>
-                        {forum.name}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {forum.status === "READ_ONLY" ? "Read-only" : "Tap to open"}
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
-                      {forum._count.posts}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </aside>
-
-          {/* Mobile: threads drawer */}
-          {mobileThreadsOpen ? (
-            <div className="fixed inset-0 z-[200] md:hidden">
-              <div className="absolute inset-0 bg-black/40" onClick={() => setMobileThreadsOpen(false)} />
-              <div className="absolute left-0 top-0 h-full w-[min(360px,92vw)] border-r border-border bg-background">
-                <div className="flex items-center justify-between border-b border-border p-3">
-                  <p className="text-sm font-semibold">Groups</p>
-                  <button
-                    type="button"
-                    onClick={() => setMobileThreadsOpen(false)}
-                    className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs hover:bg-muted"
-                  >
-                    Close
-                  </button>
-                </div>
-                <div className="p-3">
-                  <input
-                    value={threadQuery}
-                    onChange={(e) => setThreadQuery(e.target.value)}
-                    placeholder="Search groups…"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div className="min-h-0 overflow-y-auto">
-                  {filteredForums.map((forum) => {
-                    const active = activeForum?.id === forum.id;
-                    return (
-                      <button
-                        key={forum.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveForum(forum);
-                          setMobileThreadsOpen(false);
-                        }}
-                        className={cn(
-                          "flex w-full items-center gap-3 border-b border-border/60 px-3 py-3 text-left transition-colors",
-                          active ? "bg-primary/10" : "hover:bg-muted/50"
-                        )}
-                      >
-                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
-                          {forum.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold">{forum.name}</p>
-                          <p className="truncate text-xs text-muted-foreground">{forum.status === "READ_ONLY" ? "Read-only" : "Tap to open"}</p>
-                        </div>
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
-                          {forum._count.posts}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Right: chat */}
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/80 bg-muted/10 shadow-sm dark:bg-muted/5">
-            <div className="flex items-center justify-between gap-3 border-b border-border bg-background/70 px-3 py-2.5 backdrop-blur-md">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{activeForum?.name ?? "Chat"}</p>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  {activeForum?.status === "READ_ONLY" ? "Read-only" : "Online · messages sync instantly"}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {tab === "feed" ? (
+              <>
+                <MedqsSelect
+                  value={feedMode}
+                  onChange={(e) => setFeedMode(e.target.value as any)}
+                  className="min-w-[140px] rounded-xl border-white/[0.03] bg-white/5 text-sm font-semibold h-10"
+                >
+                  <option value="university">University</option>
+                  <option value="following">Following</option>
+                </MedqsSelect>
+                <MedqsSelect
+                  value={postAudience}
+                  onChange={(e) => setPostAudience(e.target.value as any)}
+                  className="min-w-[160px] rounded-xl border-white/[0.03] bg-white/5 text-sm font-semibold h-10"
+                >
+                  <option value="UNIVERSITY">Public: Univ</option>
+                  <option value="FOLLOWERS">Public: Mixed</option>
+                </MedqsSelect>
+              </>
+            ) : (
+              <>
                 <button
                   type="button"
                   onClick={() => setMobileThreadsOpen(true)}
-                  className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+                  className="md:hidden flex items-center gap-2 rounded-xl border border-white/[0.03] bg-white/5 px-4 py-2 text-xs font-bold text-white/70 hover:bg-white/10 active:scale-95 transition-all"
                 >
+                  <List className="h-4 w-4" />
                   Groups
                 </button>
+                <MedqsSelect
+                  value={discussionScope}
+                  onChange={(e) => setDiscussionScope(e.target.value as any)}
+                  className="min-w-[140px] rounded-xl border-white/[0.03] bg-white/5 text-sm font-semibold h-10"
+                >
+                  <option value="semester">Semester</option>
+                  <option value="global">University</option>
+                </MedqsSelect>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Invites & Alerts */}
+      <div className={cn("px-4", isChatTab && "shrink-0")}>
+        {pendingInvites.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 sm:p-5 backdrop-blur-md">
+            <h3 className="text-xs font-black uppercase tracking-widest text-amber-500 mb-4 flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+              Pending Invitations
+            </h3>
+            <div className="grid gap-3">
+              {pendingInvites.map((invite) => (
+                <div key={invite.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/[0.02] bg-white/5 p-4 transition-all hover:bg-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-white/90 font-bold">
+                        {invite.sender.name}
+                      </p>
+                      <p className="text-xs text-white/40">
+                        Invited you to join <span className="text-white/60 font-semibold">{invite.forum.name}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => handleInvite(invite.id, "decline")}
+                      disabled={handlingInviteId === invite.id}
+                      className="flex-1 sm:flex-none rounded-lg px-4 py-2 text-xs font-bold text-white/30 hover:bg-white/5 transition-all"
+                    >
+                      Decline
+                    </button>
+                    <button
+                      onClick={() => handleInvite(invite.id, "accept")}
+                      disabled={handlingInviteId === invite.id}
+                      className="flex-1 sm:flex-none rounded-lg bg-amber-500 px-4 py-2 text-xs font-black text-black hover:bg-amber-400 active:scale-95 transition-all shadow-lg shadow-amber-500/40"
+                    >
+                      {handlingInviteId === invite.id ? "..." : "Accept"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {privateFormOpen && (
+          <div className="mb-10 rounded-3xl border border-white/[0.03] bg-[#0F0E16] p-6 sm:p-8 shadow-2xl animate-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-xl font-bold text-white">Create Study Cluster</h3>
+                <p className="text-sm text-white/40">Build a private space for your team</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setPrivateFormOpen(false)}
+                className="rounded-xl bg-white/5 p-2 text-white/30 hover:bg-white/10 hover:text-white transition-all"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
-            {/* Chat timeline + composer (existing block) */}
-            {/* Posts + discussion chat layout */}
-            {loading ? (
-              <div className="flex min-h-0 flex-1 flex-col">
-                <ForumPostListSkeleton count={4} />
+            <div className="grid gap-6 md:grid-cols-[1.5fr_1fr_auto] items-end">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-1">Cluster Name</label>
+                <input
+                  value={newForumName}
+                  onChange={(e) => setNewForumName(e.target.value)}
+                  placeholder="e.g. Surgery Prep Group"
+                  className="w-full h-12 rounded-2xl border border-white/[0.03] bg-white/5 px-4 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#534AB7]/50 focus:bg-white/[0.08] transition-all"
+                />
               </div>
-            ) : activeForum ? (
-              <>
-                <div
-                  ref={chatScrollRef}
-                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3 sm:px-4 sm:py-4"
-                >
-                  <div className="mx-auto w-full max-w-4xl space-y-5">
-                    {discussionPostsChronological.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <MessageSquare className="mb-2 h-10 w-10 text-muted-foreground opacity-30" />
-                        <p className="text-sm font-medium text-muted-foreground">No messages yet</p>
-                        <p className="text-xs text-muted-foreground">Say hello using the box below.</p>
-                      </div>
-                    ) : (
-                      discussionPostsChronological.map((post) => (
-                        <PostCard
-                          key={post.id}
-                          post={post}
-                          currentUserId={currentUserId}
-                          forumName={activeForum.name}
-                          variant="chat"
-                        />
-                      ))
-                    )}
-                  </div>
-                </div>
-                {activeForum.status !== "READ_ONLY" ? (
-                  <div className="shrink-0 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] backdrop-blur-md md:pb-3">
-                    <div className="mx-auto flex max-w-4xl items-end gap-2">
-                      <label className="mb-1 flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border bg-muted/40 transition-colors hover:bg-muted">
-                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) uploadForumImage(file);
-                            e.currentTarget.value = "";
-                          }}
-                        />
-                      </label>
-                      <textarea
-                        ref={discussionInputRef}
-                        value={discussionDraft}
-                        onChange={(e) => setDiscussionDraft(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            void handleDiscussionSend();
-                          }
-                        }}
-                        rows={1}
-                        placeholder="Message…"
-                        className="max-h-40 min-h-[44px] flex-1 resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-relaxed shadow-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-                      />
+              <div className="relative space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-1">Add Members</label>
+                <input
+                  value={inviteQuery}
+                  onChange={(e) => setInviteQuery(e.target.value)}
+                  placeholder="Search student username..."
+                  className="w-full h-12 rounded-2xl border border-white/[0.03] bg-white/5 px-4 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#534AB7]/50 transition-all"
+                />
+                {inviteResults.length > 0 && (
+                  <div className="absolute top-[calc(100%+8px)] z-[60] w-full max-h-60 overflow-y-auto rounded-2xl border border-white/[0.03] bg-[#12111A] p-1 shadow-2xl backdrop-blur-xl">
+                    {inviteResults.map((u) => (
                       <button
-                        type="button"
-                        onClick={() => void handleDiscussionSend()}
-                        disabled={posting || (!discussionDraft.trim() && !postImageUrl.trim())}
-                        className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                        key={u.id}
+                        onClick={() => addInviteToken(u.studentId || u.nickname || u.name)}
+                        className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all group"
                       >
-                        {posting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                        <span className="font-bold">{u.name}</span>
+                        <span className="text-xs text-white/20 font-medium group-hover:text-white/40">@{u.nickname || u.studentId}</span>
                       </button>
-                    </div>
-                    {postImageUrl ? (
-                      <div className="mx-auto mt-2 flex max-w-4xl items-center gap-2 text-xs text-muted-foreground">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={normalizeImageUrl(postImageUrl)}
-                          alt=""
-                          className="h-12 w-12 rounded-lg border object-cover"
-                        />
-                        <button type="button" onClick={() => setPostImageUrl("")} className="text-primary hover:underline">
-                          Remove image
-                        </button>
-                      </div>
-                    ) : null}
+                    ))}
                   </div>
-                ) : null}
-              </>
-            ) : (
-              <div className="flex flex-1 items-center justify-center p-8 text-sm text-muted-foreground">
-                Select a group to start chatting.
-              </div>
-            )}
-          </section>
-        </div>
-      ) : null}
-
-      {/* Feed composer (rich post) — Discussions uses chat bar below the message list */}
-      {activeForum && activeForum.status !== "READ_ONLY" && tab === "feed" && (
-        <div className="mb-6 rounded-xl border border-border bg-card p-4">
-          {!composing ? (
-            <button
-              type="button"
-              onClick={() => setComposing(true)}
-              className="flex w-full items-center gap-3 text-sm text-muted-foreground"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                <MessageSquare className="h-4 w-4" />
-              </div>
-              <span className="flex-1 rounded-lg bg-muted px-3 py-2 text-left transition-colors hover:bg-muted/80">
-                Share something with your peers...
-              </span>
-            </button>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-xs text-muted-foreground">
-                Type markdown on the left — formatted preview updates live on the right.
-              </p>
-              <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Write
-                  </label>
-                  <textarea
-                    autoFocus
-                    value={postContent}
-                    onChange={(e) => setPostContent(e.target.value)}
-                    placeholder="**Bold**, lists, links… (Markdown)"
-                    rows={10}
-                    className="min-h-[200px] w-full flex-1 resize-y rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Preview
-                  </label>
-                  <div className="min-h-[200px] rounded-xl border border-border bg-muted/40 px-3 py-2.5 dark:bg-muted/20">
-                    <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-p:leading-relaxed prose-img:my-3">
-                      <ReactMarkdown components={markdownComponentsWithImages}>
-                        {postContent.trim()
-                          ? enhancePlainImageUrls(postContent)
-                          : "_Start typing to see formatting…_"}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <input
-                value={postImageUrl}
-                onChange={(e) => setPostImageUrl(e.target.value)}
-                placeholder="Optional image URL (or upload below)"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-              />
-              <div className="flex items-center gap-2">
-                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  {uploadingImage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-                  Upload image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) uploadForumImage(file);
-                      e.currentTarget.value = "";
-                    }}
-                  />
-                </label>
-                {postImageUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setPostImageUrl("")}
-                    className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
-                  >
-                    <X className="h-3.5 w-3.5" /> Remove image
-                  </button>
                 )}
               </div>
-              {postImageUrl ? (
-                <div className="overflow-hidden rounded-lg border border-border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={normalizeImageUrl(postImageUrl)}
-                    alt=""
-                    className="max-h-48 w-full object-contain"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-              ) : null}
-              <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => injectFormat("bold")} className="rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  <Type className="mr-1 inline h-3.5 w-3.5" /> Bold
-                </button>
-                <button type="button" onClick={() => injectFormat("italic")} className="rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  <Type className="mr-1 inline h-3.5 w-3.5" /> Italic
-                </button>
-                <button type="button" onClick={() => injectFormat("link")} className="rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  <Link2 className="mr-1 inline h-3.5 w-3.5" /> Link
-                </button>
-                <button type="button" onClick={() => injectBlock("h3")} className="rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  <Type className="mr-1 inline h-3.5 w-3.5" /> H3
-                </button>
-                <button type="button" onClick={() => injectBlock("list")} className="rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  <List className="mr-1 inline h-3.5 w-3.5" /> List
-                </button>
-                <button type="button" onClick={() => injectBlock("quote")} className="rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  <Quote className="mr-1 inline h-3.5 w-3.5" /> Quote
-                </button>
-                <button type="button" onClick={() => injectBlock("code")} className="rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted">
-                  <Code2 className="mr-1 inline h-3.5 w-3.5" /> Code
-                </button>
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setComposing(false);
-                    setPostContent("");
-                    setPostImageUrl("");
-                  }}
-                  className="rounded-lg px-4 py-2 text-sm transition-colors hover:bg-muted"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handlePost()}
-                  disabled={posting || (!postContent.trim() && !postImageUrl.trim())}
-                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
-                >
-                  {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  {posting ? "Posting..." : "Post"}
-                </button>
-              </div>
+              <button
+                onClick={handleCreateForum}
+                disabled={creatingForum || !newForumName.trim()}
+                className="h-12 w-full md:w-auto px-8 rounded-2xl bg-[#534AB7] text-sm font-black text-white shadow-xl shadow-[#534AB7]/30 hover:bg-[#6056CD] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:scale-100 transition-all"
+              >
+                {creatingForum ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Create"}
+              </button>
             </div>
-          )}
-        </div>
-      )}
+            {inviteTokens && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {inviteTokens.split(",").map((t, i) => t.trim() && (
+                  <div key={i} className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-1.5 border border-white/[0.02]">
+                    <span className="text-xs font-bold text-white/60">{t.trim()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-      {/* Feed layout */}
-      {tab === "feed" && loading ? (
-        <ForumPostListSkeleton count={4} />
-      ) : tab === "feed" && posts.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-12 text-center">
-          <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground opacity-30" />
-          <p className="font-medium">No posts yet</p>
-          <p className="text-sm text-muted-foreground">Be the first to post!</p>
-        </div>
-      ) : tab === "feed" ? (
-        <div className="space-y-4">
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              currentUserId={currentUserId}
-              forumName={activeForum?.name}
-              variant="card"
+      {/* Main Content Area */}
+      <div className="flex-1 min-h-0">
+        {isChatTab ? (
+          <div className="grid h-full grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-4 lg:gap-6 px-4">
+            {/* Thread List - Aside */}
+            <aside className="hidden md:flex flex-col min-h-0 bg-[#0F0E16]/40 rounded-3xl border border-white/[0.02] overflow-hidden backdrop-blur-sm self-start max-h-full">
+              <div className="p-4 border-b border-white/[0.02] bg-white/5">
+                <div className="relative">
+                  <input
+                    value={threadQuery}
+                    onChange={(e) => setThreadQuery(e.target.value)}
+                    placeholder="Filter Groups..."
+                    className="w-full h-10 rounded-xl bg-black/40 border border-white/[0.03] px-4 pl-10 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-[#534AB7]"
+                  />
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20" />
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-2.5 space-y-1 custom-scrollbar">
+                {filteredForums.map((forum) => {
+                  const active = activeForum?.id === forum.id;
+                  return (
+                    <button
+                      key={forum.id}
+                      onClick={() => setActiveForum(forum)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all group",
+                        active 
+                          ? "bg-[#534AB7]/20 border border-[#534AB7]/30 ring-1 ring-[#534AB7]/20" 
+                          : "hover:bg-white/5 border border-transparent"
+                      )}
+                    >
+                      <div className={cn(
+                        "h-10 w-10 flex items-center justify-center rounded-xl transition-all",
+                        active ? "bg-[#534AB7] text-white shadow-lg shadow-[#534AB7]/40" : "bg-white/5 text-white/20 group-hover:bg-white/10 group-hover:text-white/40"
+                      )}>
+                        {forum.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className={cn("truncate text-sm font-bold", active ? "text-white" : "text-white/50 group-hover:text-white/80")}>
+                          {forum.name}
+                        </p>
+                        <p className="truncate text-[10px] font-black uppercase tracking-widest text-white/20 uppercase">
+                          {forum.status === "READ_ONLY" ? "Archived" : "Live Feed"}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-black text-white/20">
+                        {forum._count.posts}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </aside>
+
+            {/* Mobile Drawer */}
+            {mobileThreadsOpen && (
+              <div className="fixed inset-0 z-[100] md:hidden animate-in fade-in duration-300">
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileThreadsOpen(false)} />
+                <div className="absolute left-0 top-0 h-full w-[300px] bg-[#0F0E16] border-r border-white/[0.03] flex flex-col shadow-2xl animate-in slide-in-from-left duration-500">
+                  <div className="p-6 border-b border-white/[0.02] flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-white">Groups</h3>
+                    <button onClick={() => setMobileThreadsOpen(false)} className="text-white/30 hover:text-white">
+                      <X className="h-6 w-6" />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                    {filteredForums.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => { setActiveForum(f); setMobileThreadsOpen(false); }}
+                        className={cn("flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all", activeForum?.id === f.id ? "bg-[#534AB7] text-white shadow-xl" : "bg-white/5 text-white/40")}
+                      >
+                         <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-black/20">
+                            {f.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
+                         </div>
+                         <span className="font-bold">{f.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chat Panel */}
+            <section className="flex flex-col h-full bg-[#0F0E16]/60 rounded-3xl md:rounded-[32px] border border-white/[0.03] overflow-hidden shadow-2xl backdrop-blur-md">
+                {/* Chat Header */}
+                <header className="flex items-center justify-between px-6 py-5 border-b border-white/[0.03] bg-white/5 backdrop-blur-xl">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-[#534AB7]/10 text-[#534AB7] border border-[#534AB7]/20">
+                       {activeForum?.type === "GLOBAL" ? <Globe className="h-6 w-6" /> : <Users className="h-6 w-6" />}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-black text-white truncate leading-tight">
+                        {activeForum?.name ?? "Select Communication Pool"}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#10B981]">Real-time Active</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                     <button className="hidden sm:flex rounded-xl bg-white/5 p-2.5 text-white/30 hover:bg-white/10 hover:text-white transition-all">
+                       <Send className="h-5 w-5 rotate-45" />
+                     </button>
+                  </div>
+                </header>
+
+                {/* Messages Space */}
+                <div className="flex-1 flex flex-col min-h-0 bg-gradient-to-b from-transparent to-black/20">
+                  {loading ? (
+                    <div className="flex-1 p-6 space-y-6">
+                      <ForumPostListSkeleton count={4} />
+                    </div>
+                  ) : activeForum ? (
+                    <>
+                      <div
+                        ref={chatScrollRef}
+                        className="flex-1 overflow-y-auto px-6 py-8 space-y-8 custom-scrollbar scroll-smooth"
+                      >
+                        {discussionPostsChronological.length === 0 ? (
+                          <div className="flex h-full flex-col items-center justify-center text-center opacity-20 py-20 translate-y-[-20px]">
+                            <div className="h-24 w-24 flex items-center justify-center rounded-ull mb-6 bg-white/5 ring-1 ring-white/10">
+                               <MessageSquare className="h-12 w-12" />
+                            </div>
+                            <h4 className="text-xl font-bold text-white mb-2 italic">Radio Silence...</h4>
+                            <p className="text-sm font-medium w-64">Initialize the sequence by being the first to broadcast a message here.</p>
+                          </div>
+                        ) : (
+                          discussionPostsChronological.map((post) => (
+                            <PostCardRedesigned 
+                              key={post.id} 
+                              post={post} 
+                              currentUserId={currentUserId} 
+                            />
+                          ))
+                        )}
+                        <div className="h-2 w-full" />
+                      </div>
+
+                      {activeForum.status !== "READ_ONLY" && (
+                        <div className="p-5 border-t border-white/[0.02] bg-black/40">
+                          <div className="flex items-end gap-3 rounded-2xl bg-white/5 p-2.5 border border-white/[0.02] focus-within:border-[#534AB7]/50 focus-within:ring-4 focus-within:ring-[#534AB7]/10 transition-all ease-out duration-300">
+                            <textarea
+                              ref={discussionInputRef}
+                              value={discussionDraft}
+                              onChange={(e) => setDiscussionDraft(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault();
+                                  void handleDiscussionSend();
+                                }
+                              }}
+                              placeholder="Coordinate thoughts here..."
+                              className="flex-1 min-h-[46px] max-h-40 bg-transparent border-none px-3 py-3 text-sm font-medium text-white placeholder:text-white/20 focus:ring-0 resize-none leading-relaxed"
+                            />
+                            <button
+                              onClick={handleDiscussionSend}
+                              disabled={posting || !discussionDraft.trim()}
+                              className="h-12 w-12 shrink-0 flex items-center justify-center bg-[#534AB7] text-white rounded-2xl transition-all shadow-xl shadow-[#534AB7]/40 hover:bg-[#6056CD] hover:scale-105 active:scale-95 disabled:opacity-20 disabled:scale-100 disabled:shadow-none"
+                            >
+                              {posting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
+                      <div className="h-32 w-32 flex items-center justify-center rounded-[40px] bg-white/5 ring-1 ring-white/10 mb-8 border border-white/[0.02] shadow-2xl">
+                         <Users className="h-16 w-16" />
+                      </div>
+                      <h4 className="text-2xl font-black text-white italic mb-2 tracking-tighter">Connection Pending</h4>
+                      <p className="text-sm font-bold text-white/40 max-w-[280px]">Select a discussion vector from the left console to establish real-time link.</p>
+                    </div>
+                  )}
+                </div>
+            </section>
+          </div>
+        ) : (
+          /* Standard Feed View */
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20">
+            <PostComposerRedesigned 
+              user={{ name: "Student Profile", image: null }} 
+              onPost={async (c, img, opts) => submitPost(c, img, opts)}
+              uploadImage={async (f) => {
+                const uploaded = await uploadFiles("forumImage", { files: [f] });
+                return fileUrlFromUt(uploaded[0]);
+              }}
+              forums={forumList}
             />
-          ))}
-        </div>
-      ) : null}
+            
+            <div className="grid gap-6">
+              {posts.map((p) => (
+                <PostCardRedesigned 
+                  key={p.id} 
+                  post={p} 
+                  currentUserId={currentUserId} 
+                />
+              ))}
+            </div>
+
+            {!loading && posts.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-40 text-center opacity-10">
+                <MessageSquare className="h-24 w-24 mb-6" />
+                <h4 className="text-3xl font-black tracking-tighter uppercase italic">No Signals Found</h4>
+                <p className="text-sm font-bold mt-2">Broadcast the first transmission to initialize this sector.</p>
+              </div>
+            )}
+            
+            {loading && (
+              <div className="space-y-10">
+                <ForumPostListSkeleton count={3} />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Styled Custom Scrollbar CSS */}
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(83, 74, 183, 0.4);
+        }
+      `}</style>
     </div>
   );
 }
+

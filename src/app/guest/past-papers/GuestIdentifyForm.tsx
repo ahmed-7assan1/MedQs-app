@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, GraduationCap, School, BookOpen, User, ChevronRight, ChevronLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 export function GuestIdentifyForm() {
   const router = useRouter();
@@ -65,7 +66,7 @@ export function GuestIdentifyForm() {
   }
 
   return (
-    <div className="mx-auto max-w-xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
+    <div className="mx-auto max-w-xl rounded-3xl border border-border bg-card shadow-2xl">
       <div className="bg-primary/5 p-6 md:p-8">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -113,13 +114,13 @@ export function GuestIdentifyForm() {
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-2xl bg-muted/30 p-4 border border-border/50">
+              <div className="space-y-4 rounded-2xl bg-muted/30 p-4 border border-white/[0.02]">
                 <div className="space-y-1.5">
                   <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     <School className="h-3.5 w-3.5" />
                     University
                   </label>
-                  <select
+                  <MedqsSelect
                     value={universityId}
                     onChange={(e) => {
                       setUniversityId(e.target.value);
@@ -127,23 +128,23 @@ export function GuestIdentifyForm() {
                       setAcademicYearId("");
                       setSemesterId("");
                     }}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm"
+                    placeholder="Select University"
+                    className="w-full"
                     required
                   >
-                    <option value="">Select University</option>
                     {hierarchy.map((u) => (
                       <option key={u.id} value={u.id}>
                         {u.name}
                       </option>
                     ))}
-                  </select>
+                  </MedqsSelect>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Faculty / College
                   </label>
-                  <select
+                  <MedqsSelect
                     value={facultyId}
                     onChange={(e) => {
                       setFacultyId(e.target.value);
@@ -151,16 +152,16 @@ export function GuestIdentifyForm() {
                       setSemesterId("");
                     }}
                     disabled={!universityId}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm disabled:opacity-40"
+                    placeholder="Select Faculty"
+                    className="w-full"
                     required
                   >
-                    <option value="">Select Faculty</option>
                     {selectedUni?.faculties?.map((f: any) => (
                       <option key={f.id} value={f.id}>
                         {f.name}
                       </option>
                     ))}
-                  </select>
+                  </MedqsSelect>
                 </div>
               </div>
 
@@ -188,42 +189,42 @@ export function GuestIdentifyForm() {
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Academic Year
                   </label>
-                  <select
+                  <MedqsSelect
                     value={academicYearId}
                     onChange={(e) => {
                       setAcademicYearId(e.target.value);
                       setSemesterId("");
                     }}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm"
+                    placeholder="Select Year"
+                    className="w-full"
                     required
                   >
-                    <option value="">Select Year</option>
                     {selectedFac?.academicYears?.map((y: any) => (
                       <option key={y.id} value={y.id}>
                         Year {y.yearNumber}
                       </option>
                     ))}
-                  </select>
+                  </MedqsSelect>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Semester
                   </label>
-                  <select
+                  <MedqsSelect
                     value={semesterId}
                     onChange={(e) => setSemesterId(e.target.value)}
                     disabled={!academicYearId}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm disabled:opacity-40"
+                    placeholder="Select Semester"
+                    className="w-full"
                     required
                   >
-                    <option value="">Select Semester</option>
                     {selectedYear?.semesters?.map((s: any) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
                       </option>
                     ))}
-                  </select>
+                  </MedqsSelect>
                 </div>
               </div>
 
@@ -251,4 +252,5 @@ export function GuestIdentifyForm() {
     </div>
   );
 }
+
 

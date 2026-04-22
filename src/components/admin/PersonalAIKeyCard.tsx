@@ -81,7 +81,7 @@ export function PersonalAIKeyCard() {
   return (
     <div className={cn(
       "rounded-2xl border p-6 space-y-4 backdrop-blur-sm shadow-sm",
-      "bg-card border-black/5 dark:bg-white/5 dark:border-white/10"
+      "bg-card border-black/5 dark:bg-white/5 dark:border-white/[0.03]"
     )}>
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export function PersonalAIKeyCard() {
         </div>
       ) : (
         /* No key — show add prompt */
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/30 dark:bg-white/5 border border-black/5 dark:border-white/10">
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/30 dark:bg-white/5 border border-black/5 dark:border-white/[0.03]">
           <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
           <span className="text-sm text-muted-foreground dark:text-white/50">No personal key - using default system key</span>
           <button
@@ -150,7 +150,7 @@ export function PersonalAIKeyCard() {
               placeholder="AIzaSy..."
               className={cn(
                 "w-full rounded-xl px-4 py-3 text-sm outline-none font-mono transition-all pr-12 border",
-                "bg-muted/50 border-black/5 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-white/30",
+                "bg-muted/50 border-black/5 dark:bg-white/5 dark:border-white/[0.03] dark:text-white dark:placeholder:text-white/30",
                 "focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30"
               )}
             />
@@ -194,3 +194,4 @@ export function PersonalAIKeyCard() {
     </div>
   );
 }
+

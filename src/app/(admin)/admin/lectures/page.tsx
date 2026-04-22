@@ -120,22 +120,22 @@ export default function AdminLecturesPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-24">
       {/* ── Premium Header ── */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between mb-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-blue-500">Curriculum Assets</p>
-          <h1 className="font-display text-2xl font-bold md:text-3xl">Lectures</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage educational sessions, video content, and active-recall resources.
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#534AB7] mb-2">Curriculum Assets</p>
+          <h1 className="font-display text-3xl font-bold md:text-4xl text-white tracking-tight">Lectures Directory</h1>
+          <p className="mt-2 text-sm text-white/50 max-w-lg">
+            Manage educational sessions, video content, and active-recall resources in a unified dark interface.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
-            <Video className="h-4 w-4 text-primary" />
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-2 rounded-2xl border border-white/[0.02] bg-white/[0.02] px-4 py-2.5 text-sm font-semibold text-white/60 sm:flex">
+            <Video className="h-4 w-4 text-[#534AB7]" />
             <span>{lectures.length.toLocaleString()} Items</span>
           </div>
           <button
             onClick={() => setShowForm((p) => !p)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 transition-all font-display"
+            className="flex items-center gap-2 rounded-2xl bg-[#534AB7] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#534AB7]/20 hover:-translate-y-0.5 active:translate-y-0 transition-all font-display"
           >
             {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             {showForm ? "Cancel" : "Add Lecture"}
@@ -144,17 +144,19 @@ export default function AdminLecturesPage() {
       </div>
 
       {/* Scope Filter Section */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-blue-500" />
-            <span className="text-sm font-bold tracking-tight">Scope Config</span>
+      <div className="rounded-[2rem] border border-white/[0.02] bg-white/[0.02] p-6 shadow-sm">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#534AB7]/10 text-[#534AB7]">
+              <Layers className="h-5 w-5" />
+            </div>
+            <span className="text-lg font-bold tracking-tight text-white">Scope Config</span>
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Define subject scope to list content</p>
+          <p className="hidden sm:block text-[10px] font-bold uppercase tracking-widest text-white/30">Define subject scope to list content</p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Module Selection</label>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Module Selection</label>
             <MedqsSelect
               value={selectedModule}
               onChange={(e) => {
@@ -162,33 +164,31 @@ export default function AdminLecturesPage() {
                 setSelectedSubject("");
                 setLectures([]);
               }}
-              className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+              className="w-full h-12 rounded-xl border-white/[0.02] bg-black/40 text-white focus:ring-[#534AB7]/40"
             >
               <option value="">Choose Module…</option>
               {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
             </MedqsSelect>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Subject Selection</label>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Subject Selection</label>
             <MedqsSelect
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
               disabled={!selectedModule}
-              className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+              className="w-full h-12 rounded-xl border-white/[0.02] bg-black/40 text-white focus:ring-[#534AB7]/40"
             >
               <option value="">Choose Subject…</option>
               {filteredSubjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </MedqsSelect>
           </div>
-          <div className="space-y-1.5 flex flex-col justify-end">
+          <div className="space-y-2 flex flex-col justify-end">
              <button 
                onClick={() => {
-                 // Trigger a simple cross-link to library for discovery context
-                 // In a more complex setup, this could open a search modal
                  toast.success("Tip: Use Medical Library to discovery & import entire lectures!");
                  window.open("/admin/medical-library", "_blank");
                }}
-               className="flex items-center justify-center gap-2 h-11 px-4 rounded-xl border border-primary/30 bg-primary/5 text-primary text-[11px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
+               className="flex items-center justify-center gap-2 h-12 px-5 rounded-xl border border-[#534AB7]/30 bg-[#534AB7]/10 text-[#534AB7] text-[11px] font-black uppercase tracking-widest hover:bg-[#534AB7] hover:text-white transition-all w-full lg:w-auto"
              >
                <Library className="h-4 w-4" />
                Discover Library
@@ -199,49 +199,49 @@ export default function AdminLecturesPage() {
 
       {/* Create form */}
       {showForm && (
-        <div className="rounded-2xl border border-blue-500/20 bg-card p-6 shadow-xl shadow-blue-500/5 ring-1 ring-blue-500/10 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-              <Plus className="h-5 w-5" />
+        <div className="rounded-[2rem] border border-[#534AB7]/20 bg-white/[0.02] p-8 shadow-xl space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+           <div className="flex items-center gap-4 border-b border-white/[0.02] pb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#534AB7]/10 text-[#534AB7]">
+              <Plus className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="font-display text-lg font-bold tracking-tight">New Educational Session</h2>
-              <p className="text-xs text-muted-foreground">Configure the session title and attach media resources.</p>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-white">New Educational Session</h2>
+              <p className="text-sm text-white/50">Configure the session title and attach media resources.</p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Lecture Title *</label>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Lecture Title *</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Clinical Approach to Shock"
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 px-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Video Resource (Embed Link)</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Video Resource (Embed Link)</label>
               <div className="relative">
-                <Video className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Video className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                 <input
                   type="text"
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
                   placeholder="https://youtube.com/watch?v=…"
-                  className="w-full h-11 rounded-xl border-border/60 bg-background/50 pl-10 pr-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                  className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 pl-10 pr-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Starter Study Cards</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Starter Study Cards</label>
                 <button
                   type="button"
                   onClick={() => setNewCards([...newCards, { front: "", back: "" }])}
-                  className="text-[10px] font-bold text-blue-500 uppercase hover:underline"
+                  className="text-[10px] font-bold text-[#534AB7] uppercase hover:underline"
                 >
                   + Add Item
                 </button>
@@ -251,19 +251,19 @@ export default function AdminLecturesPage() {
                   <div key={i} className="flex gap-2">
                     <input
                       placeholder="Card Front (Term)"
-                      className="flex-1 h-10 rounded-xl border-border/60 bg-background/50 px-3 text-xs focus:ring-blue-500/40 focus:outline-none"
+                      className="flex-1 h-11 rounded-xl border border-white/[0.02] bg-black/40 px-3 text-xs text-white focus:ring-[#534AB7]/40 focus:outline-none"
                       value={c.front}
                       onChange={(e) => setNewCards(prev => prev.map((x, j) => j === i ? { ...x, front: e.target.value } : x))}
                     />
                     <input
                       placeholder="Card Back (Info)"
-                      className="flex-1 h-10 rounded-xl border-border/60 bg-background/50 px-3 text-xs focus:ring-blue-500/40 focus:outline-none"
+                      className="flex-1 h-11 rounded-xl border border-white/[0.02] bg-black/40 px-3 text-xs text-white focus:ring-[#534AB7]/40 focus:outline-none"
                       value={c.back}
                       onChange={(e) => setNewCards(prev => prev.map((x, j) => j === i ? { ...x, back: e.target.value } : x))}
                     />
                     <button
                       onClick={() => setNewCards(prev => prev.filter((_, j) => i !== j))}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all shadow-sm"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all shadow-sm"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -273,15 +273,15 @@ export default function AdminLecturesPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-border/60 pt-5">
-            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground">Discard Session</button>
+          <div className="flex items-center justify-between border-t border-white/[0.02] pt-6">
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-bold text-white/40 hover:text-white">Discard Session</button>
             <button
               onClick={createLecture}
               disabled={saving}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 disabled:opacity-60 transition-all font-display"
+              className="flex items-center gap-2 rounded-2xl bg-[#534AB7] px-8 py-3 text-sm font-bold text-white shadow-lg shadow-[#534AB7]/30 hover:-translate-y-0.5 disabled:opacity-60 transition-all font-display"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Save className="h-4 w-4 text-white" />}
-              Publish Session
+             Build Course
             </button>
           </div>
         </div>
@@ -293,20 +293,20 @@ export default function AdminLecturesPage() {
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       ) : !selectedSubject ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
-            <Layers className="h-8 w-8 text-muted-foreground opacity-30" />
+        <div className="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-white/[0.02] py-24 text-center bg-white/[0.02]">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] mb-4">
+            <Layers className="h-8 w-8 text-white/30" />
           </div>
-          <p className="font-display text-lg font-bold">Scope Undefined</p>
-          <p className="max-w-xs text-sm text-muted-foreground mt-1">Please select a module and subject to manage curriculum content.</p>
+          <p className="font-display text-lg font-bold text-white">Scope Undefined</p>
+          <p className="max-w-xs text-sm text-white/40 mt-1">Please select a module and subject to manage curriculum content.</p>
         </div>
       ) : lectures.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
-            <BookOpen className="h-8 w-8 text-muted-foreground opacity-30" />
+        <div className="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-white/[0.02] py-24 text-center bg-white/[0.02]">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] mb-4">
+            <BookOpen className="h-8 w-8 text-white/30" />
           </div>
-          <p className="font-display text-lg font-bold">Subject is Empty</p>
-          <p className="max-w-xs text-sm text-muted-foreground mt-1">Start building the curriculum by adding the first lecture session.</p>
+          <p className="font-display text-lg font-bold text-white">Subject is Empty</p>
+          <p className="max-w-xs text-sm text-white/40 mt-1">Start building the curriculum by adding the first lecture session.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -466,23 +466,23 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
 
   return (
     <div className={cn(
-      "overflow-hidden rounded-2xl border transition-all duration-300",
-      expanded ? "border-blue-500/30 bg-card shadow-lg ring-1 ring-blue-500/10" : "border-border/60 bg-card hover:border-border/80"
+      "overflow-hidden rounded-3xl border transition-all duration-300",
+      expanded ? "border-[#534AB7]/30 bg-white/[0.02] shadow-lg ring-1 ring-[#534AB7]/10" : "border-white/[0.02] bg-[#110f17] hover:border-white/[0.15]"
     )}>
       <div className="flex cursor-pointer items-center justify-between p-5" onClick={onExpand}>
         <div className="flex items-center gap-4 min-w-0">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 shadow-inner">
-            <BookOpen className="h-6 w-6 text-blue-500" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-[#534AB7]/10 shadow-inner">
+            <BookOpen className="h-6 w-6 text-[#534AB7]" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-display text-lg font-bold truncate">{lecture.title}</h3>
+            <h3 className="font-display text-lg font-bold truncate text-white">{lecture.title}</h3>
             <div className="mt-1 flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <Video className={cn("h-3.5 w-3.5", lecture.videoUrl ? "text-blue-500" : "text-muted-foreground/30")} />
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-white/50">
+                <Video className={cn("h-3.5 w-3.5", lecture.videoUrl ? "text-[#534AB7]" : "text-white/20")} />
                 <span>{lecture.videoUrl ? "Active Media" : "Text Only"}</span>
               </div>
-              <span className="h-1 w-1 rounded-full bg-border" />
-              <span className="text-xs font-bold text-muted-foreground/70 uppercase tracking-tighter">Session {index + 1}</span>
+              <span className="h-1 w-1 rounded-full bg-white/20" />
+              <span className="text-xs font-bold text-white/30 uppercase tracking-tighter">Session {index + 1}</span>
             </div>
           </div>
         </div>
@@ -500,17 +500,17 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
       </div>
 
       {expanded && (
-        <div className="border-t border-border/40 p-6 space-y-8 animate-in fade-in slide-in-from-top-2 duration-400">
+        <div className="border-t border-white/[0.02] p-6 space-y-8 animate-in fade-in slide-in-from-top-2 duration-400">
            {/* Session Config */}
-           <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Session Configuration</p>
+           <div className="rounded-2xl border border-white/[0.02] bg-black/20 p-5 space-y-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Session Configuration</p>
               <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto]">
                   <div className="space-y-1">
                     <input
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       placeholder="Session Title"
-                      className="w-full h-11 rounded-xl border border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                      className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 px-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -518,13 +518,13 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
                       value={editVideo}
                       onChange={(e) => setEditVideo(e.target.value)}
                       placeholder="Video Asset URL"
-                      className="w-full h-11 rounded-xl border border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                      className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 px-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
                     />
                   </div>
                   <button
                     onClick={saveLectureMeta}
                     disabled={savingLecture}
-                    className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 h-11 text-xs font-bold text-white shadow shadow-blue-500/30 hover:opacity-90 disabled:opacity-60 transition-all uppercase tracking-widest"
+                    className="flex items-center gap-2 rounded-xl bg-[#534AB7] px-6 h-12 text-xs font-bold text-white shadow-lg shadow-[#534AB7]/30 hover:-translate-y-0.5 disabled:opacity-60 transition-all uppercase tracking-widest"
                   >
                     {savingLecture ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save
@@ -539,7 +539,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
                   <FileText className="h-4 w-4 text-blue-500" />
                   Learning Handouts
                 </h4>
-                <label className="flex items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-tight hover:bg-muted cursor-pointer transition-all">
+                <label className="flex items-center gap-2 rounded-lg border border-white/[0.02] bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-tight hover:bg-muted cursor-pointer transition-all">
                   {uploadingFile ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                   {uploadingFile ? "Syncing…" : "Upload File"}
                   <input type="file" className="hidden" onChange={(e) => {
@@ -551,7 +551,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
               </div>
               
               {files.length === 0 ? (
-                <div className="py-4 text-center rounded-xl border border-dashed border-border/40 bg-muted/5">
+                <div className="py-4 text-center rounded-xl border border-dashed border-white/[0.05] bg-muted/5">
                   <p className="text-xs text-muted-foreground italic tracking-tight opacity-60">Empty handout bank</p>
                 </div>
               ) : (
@@ -572,8 +572,8 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
            {/* Flashcards */}
            <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
-                <h4 className="font-display text-sm font-bold flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-blue-500" />
+                <h4 className="font-display text-sm font-bold flex items-center gap-2 text-white">
+                  <Layers className="h-4 w-4 text-[#534AB7]" />
                   Flashcard Bank ({cards.length})
                 </h4>
               </div>
@@ -584,7 +584,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
                     return (
                         <div key={card.id} className={cn(
                           "group relative rounded-2xl border p-4 transition-all duration-200",
-                          isEditing ? "border-blue-500/40 bg-blue-500/5 ring-1 ring-blue-500/10 scale-[1.02]" : "border-border/60 bg-background/50 hover:border-border"
+                          isEditing ? "border-[#534AB7]/40 bg-[#534AB7]/5 ring-1 ring-[#534AB7]/10 scale-[1.02]" : "border-white/[0.02] bg-black/40 hover:border-white/[0.15]"
                         )}>
                            {isEditing ? (
                              <div className="space-y-3">
@@ -614,8 +614,8 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
                                 <p className="text-xs line-clamp-2">{card.back}</p>
                                 
                                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                   <button onClick={(e) => { e.stopPropagation(); startEditCard(card); }} className="h-7 w-7 flex items-center justify-center rounded-lg bg-white shadow-sm border border-border/60 text-muted-foreground hover:text-blue-500"><Pencil className="h-3.5 w-3.5" /></button>
-                                   <button onClick={(e) => { e.stopPropagation(); deleteCard(card.id); }} className="h-7 w-7 flex items-center justify-center rounded-lg bg-white shadow-sm border border-border/60 text-muted-foreground hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+                                   <button onClick={(e) => { e.stopPropagation(); startEditCard(card); }} className="h-7 w-7 flex items-center justify-center rounded-lg bg-white shadow-sm border border-white/[0.02] text-muted-foreground hover:text-blue-500"><Pencil className="h-3.5 w-3.5" /></button>
+                                   <button onClick={(e) => { e.stopPropagation(); deleteCard(card.id); }} className="h-7 w-7 flex items-center justify-center rounded-lg bg-white shadow-sm border border-white/[0.02] text-muted-foreground hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
                                 </div>
                              </div>
                            )}
@@ -624,7 +624,7 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
                  })}
                  
                  {/* Quick Add Card */}
-                 <div className="rounded-2xl border border-dashed border-border/60 bg-muted/5 p-4 space-y-3 flex flex-col justify-center min-h-[140px]">
+                 <div className="rounded-2xl border border-dashed border-white/[0.02] bg-muted/5 p-4 space-y-3 flex flex-col justify-center min-h-[140px]">
                     <textarea 
                       placeholder="Type term…" 
                       className="bg-transparent border-none p-0 text-xs font-bold focus:ring-0 min-h-[40px] placeholder:font-normal"
@@ -662,7 +662,7 @@ function LectureFileRow({ file, renaming, onRename, onDelete }: {
 }) {
   const [name, setName] = useState(file.name);
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-background/50 px-4 py-2.5 group transition-all hover:border-border hover:shadow-sm">
+    <div className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-background/50 px-4 py-2.5 group transition-all hover:border-border hover:shadow-sm">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/5 text-blue-500">
         <FileText className="h-4 w-4" />
       </div>
@@ -692,3 +692,5 @@ function LectureFileRow({ file, renaming, onRename, onDelete }: {
     </div>
   );
 }
+
+

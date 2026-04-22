@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
           id: v.id,
           videoId: videoId,
           title: v.title,
-          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null,
+          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null,
           lectureId: v.lecture.id,
           lectureTitle: v.lecture.title,
           moduleId: v.lecture.subject.moduleId,

@@ -107,7 +107,7 @@ export default async function DashboardPage() {
 
       {/* ── Continue Card ── */}
       {lastLectureActivity?.lecture?.subject?.moduleId && (
-        <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-border/40 bg-card px-5 py-4 dark:border-white/[0.06]">
+        <div className="mb-5 flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl px-5 py-5 shadow-xl">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-[#534AB7] dark:text-purple-400 mb-0.5">
               Continue where you left off
@@ -138,7 +138,7 @@ export default async function DashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2">
 
             {/* Weekly Activity */}
-            <div className="rounded-xl border border-border/40 bg-card p-5 dark:border-white/[0.06]">
+            <div className="rounded-xl border border-white/[0.02] bg-card p-5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Weekly Activity</p>
               <div className="flex items-end gap-1.5 h-28">
                 {chartDays.map((d, i) => {
@@ -172,7 +172,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Module Progress */}
-            <div className="rounded-xl border border-border/40 bg-card p-5 dark:border-white/[0.06]">
+            <div className="rounded-xl border border-white/[0.02] bg-card p-5">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Module Progress</p>
                 <span className="text-xs font-bold text-[#534AB7] dark:text-purple-400">{overallPct}%</span>
@@ -216,7 +216,7 @@ export default async function DashboardPage() {
 
           {/* Recommended Modules */}
           {recommended.length > 0 && (
-            <div className="rounded-xl border border-border/40 bg-card p-5 dark:border-white/[0.06]">
+            <div className="rounded-xl border border-white/[0.02] bg-card p-5">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Focus Next</p>
                 <Link href="/modules" className="text-[10px] font-semibold text-[#534AB7] dark:text-purple-400 hover:underline">
@@ -228,7 +228,7 @@ export default async function DashboardPage() {
                   <Link
                     key={m.id}
                     href="/modules"
-                    className="group rounded-lg border border-border/40 bg-muted/20 p-3 hover:border-[#534AB7]/30 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 transition-colors dark:border-white/[0.06]"
+                    className="group rounded-lg border border-white/[0.02] bg-muted/20 p-3 hover:border-[#534AB7]/30 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 transition-colors"
                   >
                     <p className="text-xs font-semibold leading-snug truncate group-hover:text-[#534AB7] dark:group-hover:text-purple-400 transition-colors">
                       {m.name}
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
 
           {/* Quick Start Quiz */}
           {quickPaper && (
-            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/40 bg-card px-5 py-4 dark:border-white/[0.06]">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl px-5 py-5 shadow-xl">
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Quick Start</p>
                 <p className="truncate text-sm font-semibold">{quickPaper.title}</p>
@@ -271,7 +271,7 @@ export default async function DashboardPage() {
               <Link
                 key={href}
                 href={href}
-                className="group flex items-center gap-3 rounded-xl border border-border/40 bg-card px-4 py-3.5 text-sm font-semibold transition-colors hover:border-[#534AB7]/30 hover:bg-purple-50/20 dark:border-white/[0.06] dark:hover:bg-purple-900/10 min-h-[44px]"
+                className="group flex items-center gap-3 rounded-xl border border-white/[0.02] bg-card px-4 py-3.5 text-sm font-semibold transition-colors hover:border-[#534AB7]/30 hover:bg-purple-50/20 dark:hover:bg-purple-900/10 min-h-[44px]"
               >
                 <Icon className="h-4 w-4 text-muted-foreground group-hover:text-[#534AB7] transition-colors" />
                 <span className="group-hover:text-[#534AB7] dark:group-hover:text-purple-300 transition-colors">{label}</span>
@@ -303,7 +303,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Daily Target */}
-          <div className="min-w-[200px] shrink-0 rounded-xl border border-border/40 bg-card p-4 dark:border-white/[0.06] lg:min-w-0">
+          <div className="min-w-[200px] shrink-0 rounded-xl border border-white/[0.02] bg-card p-4 lg:min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Daily Target</p>
             <div className="flex items-baseline gap-1 mb-1">
               <span className="text-2xl font-bold tabular-nums">{todayItemCount}</span>
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Your Rank */}
-          <div className="min-w-[200px] shrink-0 rounded-xl border border-border/40 bg-card p-4 dark:border-white/[0.06] lg:min-w-0">
+          <div className="min-w-[200px] shrink-0 rounded-xl border border-white/[0.02] bg-card p-4 lg:min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Your Rank</p>
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl">{rankBadge}</span>
@@ -340,7 +340,7 @@ export default async function DashboardPage() {
 
           {/* Recent Attempts */}
           {recentAttempts.length > 0 && (
-            <div className="min-w-[240px] shrink-0 rounded-xl border border-border/40 bg-card p-4 dark:border-white/[0.06] lg:min-w-0">
+            <div className="min-w-[240px] shrink-0 rounded-xl border border-white/[0.02] bg-card p-4 lg:min-w-0">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Recent Attempts</p>
                 <Link href="/past-papers" className="text-[10px] text-[#534AB7] dark:text-purple-400 hover:underline font-semibold">
@@ -381,7 +381,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <DashboardDrQFab />
+      <DashboardDrQFab isAdmin={(session?.user as any)?.role === "ADMIN" || (session?.user as any)?.role === "SUPER_ADMIN"} />
     </StudentPageShell>
   );
 }
@@ -402,9 +402,11 @@ function StatCard({
 }) {
   return (
     <div
-      className="rounded-xl border border-border/40 bg-card p-4 dark:border-white/[0.06]"
-      style={{ borderLeft: `3px solid ${accent}` }}
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-4 shadow-xl transition-transform hover:scale-[1.02]"
+      style={{ borderLeft: `4px solid ${accent}` }}
     >
+      {/* Soft Inner Glow */}
+      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none" />
       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{label}</p>
       <p className="text-2xl font-bold tabular-nums leading-none" style={{ color: accent }}>
         {value}
@@ -422,3 +424,4 @@ function StatCard({
     </div>
   );
 }
+

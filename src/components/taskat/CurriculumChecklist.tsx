@@ -72,7 +72,7 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
         {modules.map((module) => (
           <div 
             key={module.id} 
-            className="overflow-hidden rounded-[2.5rem] border border-slate-200/60 dark:border-white/10 bg-white dark:bg-slate-900/40 shadow-xl backdrop-blur-3xl transition-all duration-300 hover:border-sky-500/20"
+            className="overflow-hidden rounded-[2.5rem] border border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-slate-900/40 shadow-xl backdrop-blur-3xl transition-all duration-300 hover:border-sky-500/20"
           >
             <button
               onClick={() => toggleModule(module.id)}
@@ -103,7 +103,7 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden border-t border-slate-100 dark:border-white/5"
+                  className="overflow-hidden border-t border-slate-100 dark:border-white/[0.02]"
                 >
                   <div className="space-y-4 p-6 bg-slate-50/30 dark:bg-black/20">
                     {module.subjects.map((subject: any) => (
@@ -134,7 +134,7 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
             {subjects.map((subject) => (
               <div 
                  key={subject.id} 
-                 className="overflow-hidden rounded-[2.5rem] border border-slate-200/60 dark:border-white/10 bg-white dark:bg-slate-900/40 shadow-xl"
+                 className="overflow-hidden rounded-[2.5rem] border border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-slate-900/40 shadow-xl"
               >
                 <SubjectItem 
                   subject={subject} 
@@ -171,7 +171,7 @@ function SubjectItem({ subject, isExpanded, toggle, completionStates, onToggleLe
   return (
     <div className={cn(
         "rounded-[1.5rem] transition-all duration-300", 
-        !standalone && "border border-slate-200/50 dark:border-white/5 bg-white/50 dark:bg-white/[0.03] hover:border-sky-500/30"
+        !standalone && "border border-slate-200/50 dark:border-white/[0.02] bg-white/50 dark:bg-white/[0.03] hover:border-sky-500/30"
     )}>
       <button
         onClick={toggle}
@@ -256,3 +256,4 @@ function SubjectItem({ subject, isExpanded, toggle, completionStates, onToggleLe
     </div>
   );
 }
+

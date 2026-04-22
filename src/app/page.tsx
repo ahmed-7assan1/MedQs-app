@@ -86,12 +86,12 @@ export default async function LandingPage() {
               <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
             <Link href="/modules"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/70 bg-background/40 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-foreground backdrop-blur-xl transition-colors hover:bg-muted/20">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.03] bg-background/40 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-foreground backdrop-blur-xl transition-colors hover:bg-muted/20">
               <Play className="h-4 w-4 fill-current" />
               Preview Curriculum
             </Link>
             <Link href="/guest/past-papers"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/50 bg-background/20 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-muted-foreground backdrop-blur-xl transition-all hover:bg-muted/10 hover:text-foreground">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.02] bg-background/20 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-muted-foreground backdrop-blur-xl transition-all hover:bg-muted/10 hover:text-foreground">
               Browse as Guest
             </Link>
           </div>
@@ -292,7 +292,7 @@ export default async function LandingPage() {
               </div>
 
               <div className="flex-shrink-0">
-                <div className="w-72 overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
+                <div className="w-72 overflow-hidden rounded-2xl border border-white/[0.02] bg-card/80 p-5 shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
                   <div className="mb-3 flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
                     <span className="text-xs font-medium text-muted-foreground">Dr. Q — AI Assistant</span>
@@ -307,7 +307,7 @@ export default async function LandingPage() {
                     </div>
                     <div className="mt-2 flex gap-1.5">
                       {["📝 Take notes", "🎯 Quiz me", "🔎 Deeper"].map(t => (
-                        <span key={t} className="rounded-full border border-border/60 bg-muted/40 px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
+                        <span key={t} className="rounded-full border border-white/[0.02] bg-muted/40 px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
                           {t}
                         </span>
                       ))}
@@ -339,7 +339,7 @@ export default async function LandingPage() {
               { text: "Finally a platform built specifically for medical students, not generic Q&A. The leaderboard keeps me motivated!", name: "Fatima H.", role: "2nd Year, Alexandria University", stars: 5, color: "#059669" },
             ].map(({ text, name, role, stars, color }) => (
               <div key={name}
-                className="relative rounded-2xl border border-border/60 bg-card p-6 dark:bg-slate-900/50"
+                className="relative rounded-2xl border border-white/[0.02] bg-card p-6 dark:bg-slate-900/50"
                 style={{ borderLeft: `3px solid ${color}` }}>
                 <div className="mb-4 flex gap-0.5">
                   {Array(stars).fill(0).map((_, i) => (
@@ -366,7 +366,7 @@ export default async function LandingPage() {
       {/* ── FACULTY SECTION ── */}
       <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24">
         <ScrollReveal>
-          <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/50 p-[clamp(30px,5vw,56px)] dark:bg-slate-900/50">
+          <div className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-card/50 p-[clamp(30px,5vw,56px)] dark:bg-slate-900/50">
             <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2"
               style={{ background: "radial-gradient(ellipse at right, rgba(26,107,204,0.08), transparent 70%)" }} />
 
@@ -382,13 +382,13 @@ export default async function LandingPage() {
                 <p className="mb-5 text-base leading-relaxed text-muted-foreground">
                   {PLATFORM_COPY.landingForDoctorsBody}
                 </p>
-                <p dir="rtl" className="rounded-xl border border-border/40 bg-black/5 p-4 text-sm leading-relaxed text-muted-foreground dark:bg-black/20">
+                <p dir="rtl" className="rounded-xl border border-white/[0.05] bg-black/5 p-4 text-sm leading-relaxed text-muted-foreground dark:bg-black/20">
                   {PLATFORM_COPY.landingForDoctorsArabic}
                 </p>
               </div>
 
               <div className="flex-none">
-                <div className="rounded-2xl border border-border/60 bg-background/60 p-8 backdrop-blur-xl shadow-xl dark:bg-white/5">
+                <div className="rounded-2xl border border-white/[0.02] bg-background/60 p-8 backdrop-blur-xl shadow-xl dark:bg-white/5">
                   <Link href="/login"
                     className="flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-[0_8px_28px_rgba(37,99,235,0.35)] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(37,99,235,0.45)]">
                     Staff Login
@@ -431,7 +431,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="relative z-10 border-t border-border/40 bg-card/20 pb-10 pt-14">
+      <footer className="relative z-10 border-t border-white/[0.05] bg-card/20 pb-10 pt-14">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
             <div className="lg:col-span-2">
@@ -465,7 +465,7 @@ export default async function LandingPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border/30 pt-7">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.02] pt-7">
             <p className="text-xs text-muted-foreground">© 2026 MedQs. Excellence in medical education.</p>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               Crafted with <Heart className="h-3.5 w-3.5 animate-pulse text-rose-500" /> for future healthcare leaders
@@ -476,3 +476,5 @@ export default async function LandingPage() {
     </div>
   );
 }
+
+

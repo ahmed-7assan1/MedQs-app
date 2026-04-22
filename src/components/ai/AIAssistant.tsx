@@ -221,6 +221,51 @@ export function AIAssistantPanel({
   const [attachImages, setAttachImages] = useState<ChatImage[]>([]);
   const [attachPdf, setAttachPdf] = useState<PendingPdf | null>(null);
   const [attachTexts, setAttachTexts] = useState<PendingText[]>([]);
+  const [lang, setLang] = useState<"en" | "ar">("ar"); // Default to Arabic as requested
+  const labels = {
+    en: {
+      drq: "Dr. Q",
+      placeholder: "Ask a medical question...",
+      thinking: "Thinking...",
+      newTopic: "New topic",
+      disclaimer: "Study aid only — not diagnosis or treatment.",
+      storageNote: "Topics are stored on this device only",
+      suggestions: SUGGESTIONS,
+      retry: "Retry last message",
+      limitReached: "Daily limit reached. Earn more points to unlock more messages.",
+      rankPrefix: "messages today",
+      unlimited: "Unlimited",
+      howHelp: "How can I help you today?",
+      medicalTutor: "Medical-only tutor. Attach images, a PDF (slides), or text notes. Your conversation topics are saved in this browser — not on our servers.",
+      showTopics: "Show topics",
+      hideTopics: "Hide topics",
+      close: "Close assistant"
+    },
+    ar: {
+      drq: "د. كيو",
+      placeholder: "اسأل سؤالاً طبياً...",
+      thinking: "جاري التفكير...",
+      newTopic: "موضوع جديد",
+      disclaimer: "وسيلة مساعدة للدراسة فقط - وليس للتشخيص أو العلاج.",
+      storageNote: "يتم تخزين المحادثات على هذا الجهاز فقط",
+      suggestions: [
+        "اشرح هذا الموضوع بأسلوب مبسط",
+        "أعطني طريقة لحفظ الأعصاب القحفية",
+        "لخص النقاط الرئيسية من آخر محاضرة",
+        "اقترح اختباراً من 10 أسئلة في الكارديو"
+      ],
+      retry: "إعادة محاولة إرسال الرسالة",
+      limitReached: "تم الوصول للحد اليومي. احصل على نقاط أكثر لفتح المزيد من الرسائل.",
+      rankPrefix: "رسالة اليوم",
+      unlimited: "غير محدود",
+      howHelp: "كيف يمكنني مساعدتك اليوم؟",
+      medicalTutor: "مساعد طبي ذكي. يمكنك إرفاق صور، ملفات PDF، أو ملاحظات نصية. محادثاتك تُحفظ على متصفحك فقط وليس على خوادمنا.",
+      showTopics: "عرض المواضيع",
+      hideTopics: "إخفاء المواضيع",
+      close: "إغلاق المساعد"
+    }
+  };
+  const t = labels[lang];
 
   useLayoutEffect(() => {
     if (!fullPage || !embedded) return;
@@ -488,13 +533,16 @@ export function AIAssistantPanel({
     <div
       id="medqs-ai-panel"
       className={cn(
+        "ai-glass-panel flex flex-col overflow-hidden transition-all duration-300",
         embedded
           ? fullPage
-            ? "flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-transparent shadow-none"
-            : "flex flex-col rounded-2xl border border-border bg-card shadow-sm"
-          : "fixed bottom-6 right-6 z-50 flex origin-bottom-right flex-col rounded-2xl border border-border bg-card shadow-2xl transition-all duration-300",
-        !embedded && (open ? "pointer-events-auto scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0")
+            ? "min-h-0 flex-1 border-0 bg-transparent shadow-none"
+            : "rounded-2xl border border-primary/20 shadow-sm"
+          : "fixed bottom-6 right-6 z-50 origin-bottom-right rounded-2xl border border-primary/20 shadow-2xl",
+        !embedded && (open ? "pointer-events-auto scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0"),
+        lang === "ar" && "font-arabic"
       )}
+      dir={lang === "ar" ? "rtl" : "ltr"}
       style={
         embedded
           ? fullPage
@@ -503,59 +551,65 @@ export function AIAssistantPanel({
           : { width: "min(calc(100vw - 2rem), 480px)", height: "min(calc(100dvh - 4rem), 680px)" }
       }
       role="dialog"
-      aria-label="AI study assistant"
+      aria-label={t.drq}
     >
       {inner}
     </div>
   );
 
   const header = (
-    <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
+    <div className="flex items-center gap-2.5 border-b border-primary/10 px-4 py-3 bg-primary/5">
       {fullPage && embedded ? (
         <button
           type="button"
           onClick={() => setSidebarOpen((s) => !s)}
-          className="rounded-lg border border-border p-2 text-muted-foreground hover:bg-muted"
-          aria-label={sidebarOpen ? "Hide topics" : "Show topics"}
+          className="rounded-lg border border-primary/10 p-2 text-primary hover:bg-primary/10"
+          aria-label={sidebarOpen ? t.hideTopics : t.showTopics}
         >
           {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
         </button>
       ) : null}
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-        <Sparkles className="h-4 w-4 text-primary" aria-hidden />
+      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+        <div className="ai-glow-orb absolute" />
+        <Sparkles className="h-5 w-5 text-primary" aria-hidden />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold">Dr. Q</p>
-        {usage && (
-          <p className="text-[10px] text-muted-foreground">
-            {usage.limit === -1
-              ? `${usage.rankLabel} · Unlimited`
-              : `${usage.used}/${usage.limit} messages today · ${usage.rankLabel}`}
-          </p>
-        )}
-        {fullPage && embedded ? (
-          <p className="text-[10px] text-muted-foreground">Topics are stored on this device only</p>
-        ) : null}
-        <p className="line-clamp-2 text-[9px] leading-snug text-amber-800/95 dark:text-amber-400/95">
-          Study aid only — not diagnosis or treatment.
+        <p className="text-sm font-bold tracking-tight">{t.drq}</p>
+        <div className="flex items-center gap-2">
+          {usage && (
+            <p className="text-[10px] text-muted-foreground">
+              {usage.limit === -1
+                ? `${usage.rankLabel} · ${t.unlimited}`
+                : `${usage.used}/${usage.limit} ${t.rankPrefix} · ${usage.rankLabel}`}
+            </p>
+          )}
+          <button
+            onClick={() => setLang(l => l === "en" ? "ar" : "en")}
+            className="text-[9px] font-bold text-primary hover:underline uppercase"
+          >
+            {lang === "en" ? "العربية" : "English"}
+          </button>
+        </div>
+        <p className="line-clamp-2 text-[9px] leading-snug font-medium text-amber-600 dark:text-amber-400">
+          {t.disclaimer}
         </p>
       </div>
       {fullPage && embedded ? (
         <button
           type="button"
           onClick={newThread}
-          className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1.5 text-xs font-medium hover:bg-muted"
+          className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
         >
           <Plus className="h-3.5 w-3.5" />
-          New topic
+          {t.newTopic}
         </button>
       ) : null}
       {!embedded && (
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
-          aria-label="Close assistant"
+          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-primary/10"
+          aria-label={t.close}
         >
           <ChevronDown className="h-4 w-4" aria-hidden />
         </button>
@@ -566,19 +620,19 @@ export function AIAssistantPanel({
   const messagesArea = (
     <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
       {messages.length === 0 && (
-        <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-            <Sparkles className="h-6 w-6 text-primary" aria-hidden />
+        <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 transition-transform hover:scale-110">
+            <div className="ai-glow-orb absolute h-8 w-8" />
+            <Sparkles className="h-8 w-8 text-primary" aria-hidden />
           </div>
-          <div>
-            <p className="text-sm font-semibold">Study assistant</p>
-            <p className="mt-1 max-w-[280px] text-xs leading-relaxed text-muted-foreground">
-              Medical-only tutor. Attach images, a PDF (slides), or text notes. Your conversation topics are saved in
-              this browser — not on our servers.
+          <div className="space-y-1">
+            <p className="text-lg font-bold tracking-tight text-foreground">{t.howHelp}</p>
+            <p className="mx-auto max-w-[320px] text-xs leading-relaxed text-muted-foreground font-medium">
+              {t.medicalTutor}
             </p>
           </div>
-          <div className="flex max-w-full flex-wrap justify-center gap-1.5 px-1">
-            {SUGGESTIONS.map((q) => (
+          <div className="flex max-w-full flex-wrap justify-center gap-2 px-1">
+            {t.suggestions.map((q) => (
               <button
                 key={q}
                 type="button"
@@ -586,7 +640,7 @@ export function AIAssistantPanel({
                   setInput(q);
                   inputRef.current?.focus();
                 }}
-                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                className="rounded-xl border border-primary/10 bg-primary/5 px-3 py-1.5 text-[11px] font-medium text-primary transition-all hover:bg-primary/10 hover:shadow-sm"
               >
                 {q}
               </button>
@@ -611,7 +665,7 @@ export function AIAssistantPanel({
                   a.kind === "image" ? (
                     <div
                       key={j}
-                      className="overflow-hidden rounded-lg border border-white/20 bg-black/10"
+                      className="overflow-hidden rounded-lg border border-white/[0.02] bg-black/10"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={a.preview} alt="" className="max-h-40 max-w-[200px] object-contain" />
@@ -640,9 +694,13 @@ export function AIAssistantPanel({
 
       {loading && (
         <div className="flex justify-start">
-          <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm bg-muted px-3 py-2.5">
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-hidden />
-            <span className="text-xs text-muted-foreground">Thinking…</span>
+          <div className="flex items-center gap-2.5 rounded-2xl rounded-bl-sm bg-primary/5 px-4 py-2.5 border border-primary/10">
+            <div className="flex gap-1">
+              <div className="ai-thinking-dot" />
+              <div className="ai-thinking-dot" />
+              <div className="ai-thinking-dot" />
+            </div>
+            <span className="text-xs font-bold text-primary animate-pulse">{t.thinking}</span>
           </div>
         </div>
       )}
@@ -652,10 +710,10 @@ export function AIAssistantPanel({
           <button
             type="button"
             onClick={retryLast}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-primary transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-bold text-primary transition-all hover:bg-primary/10"
           >
             <RotateCcw className="h-3.5 w-3.5" aria-hidden />
-            Retry last message
+            {t.retry}
           </button>
         </div>
       )}
@@ -667,8 +725,8 @@ export function AIAssistantPanel({
   const composer = (
     <div className="border-t border-border p-3">
       {limitReached ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-center text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
-          Daily limit reached. Earn more points to unlock more messages.
+        <div className="rounded-xl border border-amber-200 bg-amber-50/50 px-3 py-2.5 text-center text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+          {t.limitReached}
         </div>
       ) : (
         <div className="space-y-2">
@@ -764,10 +822,10 @@ export function AIAssistantPanel({
                   void send();
                 }
               }}
-              placeholder="Ask a medical question…"
+              placeholder={t.placeholder}
               rows={fullPage ? 2 : 1}
-              aria-label="Message to assistant"
-              className="max-h-32 min-h-[42px] flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              aria-label={t.placeholder}
+              className="max-h-32 min-h-[42px] flex-1 resize-none rounded-xl border border-primary/10 bg-background px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
             <button
               type="button"
@@ -913,3 +971,5 @@ export function AIAssistantPanel({
     </>
   );
 }
+
+

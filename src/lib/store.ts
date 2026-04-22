@@ -99,3 +99,34 @@ export const useSidebarStore = create<SidebarStore>((set) => ({
   close: () => set({ isOpen: false }),
   toggle: () => set((state) => ({ isOpen: !state.isOpen })),
 }));
+
+// ─── Audio store ──────────────────────────────────────────────────────────────
+
+interface AudioTrack {
+  id: string;
+  url: string;
+  title: string;
+  artist?: string;
+  image?: string;
+  isSpotify?: boolean;
+}
+
+interface AudioStore {
+  currentTrack: AudioTrack | null;
+  isPlaying: boolean;
+  isMinimized: boolean;
+  setTrack: (track: AudioTrack) => void;
+  setIsPlaying: (playing: boolean) => void;
+  setMinimized: (min: boolean) => void;
+  stop: () => void;
+}
+
+export const useAudioStore = create<AudioStore>((set) => ({
+  currentTrack: null,
+  isPlaying: false,
+  isMinimized: false,
+  setTrack: (track) => set({ currentTrack: track, isPlaying: true, isMinimized: false }),
+  setIsPlaying: (isPlaying) => set({ isPlaying }),
+  setMinimized: (isMinimized) => set({ isMinimized }),
+  stop: () => set({ currentTrack: null, isPlaying: false }),
+}));

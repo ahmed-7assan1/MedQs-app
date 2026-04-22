@@ -1,0 +1,21 @@
+2026/04/21-00:52:27.474 7c88 Reusing MANIFEST C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\.moodle_profile\Default\Session Storage/MANIFEST-000001
+2026/04/21-00:52:27.475 7c88 Recovering log #8
+2026/04/21-00:52:27.477 7c88 Reusing old log C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\.moodle_profile\Default\Session Storage/000008.log 
+2026/04/21-00:52:42.302 9d4 Level-0 table #12: started
+2026/04/21-00:52:42.309 9d4 Level-0 table #12: 47582 bytes OK
+2026/04/21-00:52:42.313 9d4 Delete type=0 #8
+2026/04/21-00:54:01.644 9d4 Level-0 table #14: started
+2026/04/21-00:54:01.652 9d4 Level-0 table #14: 42391 bytes OK
+2026/04/21-00:54:01.656 9d4 Delete type=0 #11
+2026/04/21-00:54:10.981 9d4 Level-0 table #16: started
+2026/04/21-00:54:10.987 9d4 Level-0 table #16: 8067 bytes OK
+2026/04/21-00:54:10.992 9d4 Delete type=0 #13
+2026/04/21-00:54:10.993 9d4 Compacting 4@0 + 1@1 files
+2026/04/21-00:54:11.003 9d4 Generated table #17@0: 139 keys, 105120 bytes
+2026/04/21-00:54:11.003 9d4 Compacted 4@0 + 1@1 files => 105120 bytes
+2026/04/21-00:54:11.005 9d4 compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/04/21-00:54:11.006 9d4 Delete type=2 #7
+2026/04/21-00:54:11.006 9d4 Delete type=2 #9
+2026/04/21-00:54:11.006 9d4 Delete type=2 #12
+2026/04/21-00:54:11.006 9d4 Delete type=2 #14
+2026/04/21-00:54:11.007 9d4 Delete type=2 #16

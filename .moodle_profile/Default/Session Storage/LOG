@@ -1,0 +1,6 @@
+2026/04/21-00:58:03.998 47cc Reusing MANIFEST C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\.moodle_profile\Default\Session Storage/MANIFEST-000001
+2026/04/21-00:58:04.000 47cc Recovering log #15
+2026/04/21-00:58:04.002 47cc Reusing old log C:\Users\Admin\Downloads\medqs-app (5)\medqs-app\.moodle_profile\Default\Session Storage/000015.log 
+2026/04/21-00:58:18.330 5ecc Level-0 table #20: started
+2026/04/21-00:58:18.341 5ecc Level-0 table #20: 47699 bytes OK
+2026/04/21-00:58:18.344 5ecc Delete type=0 #15

@@ -14,6 +14,7 @@ import {
   Rewind,
   Settings2,
 } from "lucide-react";
+import { CustomAudioPlayer } from "./CustomAudioPlayer";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -163,140 +164,14 @@ export function LectureRecordStudio({
         {active ? (
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
             
-            {/* Visualizer Header or Spotify Iframe */}
-            {spotifyEmbed ? (
-              <div className="w-full bg-primary/5 border-b border-primary/20 p-6 flex flex-col items-center justify-center min-h-[260px]">
-                <iframe
-                  style={{ borderRadius: "12px", border: "0", maxWidth: "100%" }}
-                  src={spotifyEmbed}
-                  width="100%"
-                  height="152"
-                  frameBorder="0"
-                  allowFullScreen
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                ></iframe>
-              </div>
-            ) : (
-              <div className="relative w-full bg-gradient-to-b from-primary/10 to-primary/5 border-b border-border/50 p-6 flex flex-col items-center justify-center min-h-[260px] overflow-hidden">
-                <audio
-                  ref={audioRef}
-                  src={active.url}
-                  onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
-                  onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
-                  onEnded={() => setIsPlaying(false)}
-                  className="hidden"
-                />
-
-                <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-xl">
-                  {/* Spinning Disc / Icon */}
-                  <div className={cn(
-                    "relative flex items-center justify-center w-24 h-24 rounded-full bg-card shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-primary/20 transition-transform duration-700",
-                    isPlaying ? "scale-105 shadow-[0_0_40px_rgba(var(--primary),0.3)]" : "scale-100"
-                  )}>
-                    <Headphones className={cn(
-                      "h-10 w-10 text-primary transition-all duration-700",
-                      isPlaying ? "opacity-100 scale-110" : "opacity-70"
-                    )} />
-                  </div>
-
-                  {/* Track Info */}
-                  <div className="text-center w-full px-4">
-                    <h3 className="font-display font-bold text-2xl truncate mb-1">{active.title}</h3>
-                    <p className="text-sm font-medium text-muted-foreground">MedQs Interactive Audio Stream</p>
-                  </div>
-
-                  {/* Scrubber & Controls */}
-                  <div className="w-full flex flex-col gap-3">
-                    <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
-                      <span className="w-10 text-right">{formatTime(currentTime)}</span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={duration || 100}
-                        value={currentTime}
-                        onChange={handleSeek}
-                        className="flex-1 h-2 bg-muted/60 rounded-full appearance-none cursor-pointer accent-primary hover:accent-primary/80 transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                      <span className="w-10">{formatTime(duration)}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2">
-                      {/* Volume */}
-                      <div className="flex items-center gap-2 group w-28">
-                        <button onClick={toggleMute} className="text-muted-foreground hover:text-foreground transition-colors p-1">
-                          {muted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                        </button>
-                        <input
-                          type="range"
-                          min={0}
-                          max={1}
-                          step={0.01}
-                          value={muted ? 0 : volume}
-                          onChange={changeVolume}
-                          className="w-16 h-1.5 bg-muted rounded-full appearance-none cursor-pointer accent-primary opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                        />
-                      </div>
-
-                      {/* Playback Controls */}
-                      <div className="flex items-center gap-4">
-                        <button onClick={() => handleSkip(-10)} className="p-2 text-muted-foreground hover:text-primary transition-colors focus:outline-none">
-                          <Rewind className="h-5 w-5" />
-                        </button>
-                        <button onClick={togglePlay} className="h-14 w-14 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 hover:bg-primary/90 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                          {isPlaying ? <Pause className="h-6 w-6 ml-0" /> : <Play className="h-6 w-6 ml-1" />}
-                        </button>
-                        <button onClick={() => handleSkip(10)} className="p-2 text-muted-foreground hover:text-primary transition-colors focus:outline-none">
-                          <FastForward className="h-5 w-5" />
-                        </button>
-                      </div>
-
-                      {/* Speed / Extras */}
-                      <div className="relative w-28 flex justify-end">
-                        <button 
-                          onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 text-xs font-semibold hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                        >
-                          <Settings2 className="h-3.5 w-3.5" />
-                          {playbackRate}x
-                        </button>
-
-                        <AnimatePresence>
-                          {showSpeedMenu && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 10 }}
-                              className="absolute bottom-full mb-2 right-0 bg-popover border border-border shadow-xl rounded-xl p-1.5 flex flex-col gap-1 min-w-[80px] z-50"
-                            >
-                              {[0.75, 1, 1.25, 1.5, 2].map((rate) => (
-                                <button
-                                  key={rate}
-                                  onClick={() => changeSpeed(rate)}
-                                  className={cn(
-                                    "px-3 py-1.5 text-xs font-medium rounded-lg text-left transition-colors",
-                                    playbackRate === rate ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                                  )}
-                                >
-                                  {rate}x {rate === 1 && "(Normal)"}
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Background abstract waves */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center">
-                  <svg viewBox="0 0 800 400" className="w-[120%] h-auto">
-                    <path d="M0,200 C200,100 400,300 600,200 C800,100 1000,200 1000,200 L1000,400 L0,400 Z" fill="currentColor" />
-                  </svg>
-                </div>
-              </div>
-            )}
+            {/* Custom Premium Audio Player */}
+            <div className="w-full bg-black/40 border-b border-white/5 p-6">
+              <CustomAudioPlayer 
+                key={active.id}
+                url={active.url} 
+                title={active.title} 
+              />
+            </div>
 
             <div className="p-4 md:p-6 bg-card flex flex-col gap-4">
               <div className="flex items-start justify-between gap-4">
@@ -360,7 +235,7 @@ export function LectureRecordStudio({
                   key={r.id}
                   onClick={() => setActiveId(r.id)}
                   className={cn(
-                    "w-full text-left p-3 pt-3.5 pb-3.5 flex items-start gap-3 transition-colors group relative border-b border-border/40 last:border-0",
+                    "w-full text-left p-3 pt-3.5 pb-3.5 flex items-start gap-3 transition-colors group relative border-b border-white/[0.05] last:border-0",
                     isActive ? "bg-primary/5" : "hover:bg-muted/60"
                   )}
                 >
@@ -408,3 +283,4 @@ export function LectureRecordStudio({
     </div>
   );
 }
+

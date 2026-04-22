@@ -53,7 +53,7 @@ export function ConfirmationModal({
       {/* Modal Content */}
       <div
         className={cn(
-          "relative w-full max-w-md overflow-hidden rounded-[24px] border border-black/5 dark:border-white/10 bg-card/95 dark:bg-[#16161a]/95 p-6 shadow-2xl transition-all duration-300 transform",
+          "relative w-full max-w-md overflow-hidden rounded-[24px] border border-black/5 dark:border-white/[0.03] bg-card/95 dark:bg-[#16161a]/95 p-6 shadow-2xl transition-all duration-300 transform",
           isOpen ? "scale-100 opacity-100 translate-y-0" : "scale-95 opacity-0 translate-y-4"
         )}
       >
@@ -127,3 +127,4 @@ export function ConfirmationModal({
     </div>
   );
 }
+

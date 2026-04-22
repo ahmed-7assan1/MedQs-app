@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useTaskPersistence } from "./useTaskPersistence";
 import { DateStrip } from "./DateStrip";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 interface DailyFocusProps {
   userId: string;
@@ -157,7 +158,7 @@ export function DailyFocus({
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/60 dark:border-white/10 bg-white dark:bg-slate-900/60 p-6 md:p-10 shadow-3xl backdrop-blur-3xl"
+            className="rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-slate-900/60 p-6 md:p-10 shadow-3xl backdrop-blur-3xl"
           >
             <div className="mb-8 flex justify-center gap-3">
               <button
@@ -193,23 +194,23 @@ export function DailyFocus({
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="E.g. Study Anatomy Chapter 3"
-                    className="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/40 px-6 py-4 dark:text-white text-slate-900 placeholder:text-slate-300 dark:placeholder:text-white/10 focus:outline-none focus:ring-4 focus:ring-sky-500/20 transition-all font-medium"
+                    className="w-full rounded-2xl border border-slate-200 dark:border-white/[0.03] bg-slate-50/50 dark:bg-black/40 px-6 py-4 dark:text-white text-slate-900 placeholder:text-slate-300 dark:placeholder:text-white/10 focus:outline-none focus:ring-4 focus:ring-sky-500/20 transition-all font-medium"
                     autoFocus
                   />
                 </div>
               ) : (
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Select Course Content</label>
-                  <select
+                  <MedqsSelect
                     value={selectedLectureId}
                     onChange={(e) => setSelectedLectureId(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/40 px-6 py-4 dark:text-white text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/20 appearance-none font-medium"
+                    placeholder="Choose a lecture from your degree..."
+                    className="w-full"
                   >
-                    <option value="" disabled className="bg-white dark:bg-slate-900">Choose a lecture from your degree...</option>
                     {allLectures.map(l => (
-                      <option key={l.id} value={l.id} className="bg-white dark:bg-slate-900">{l.title}</option>
+                      <option key={l.id} value={l.id}>{l.title}</option>
                     ))}
-                  </select>
+                  </MedqsSelect>
                 </div>
               )}
 
@@ -221,7 +222,7 @@ export function DailyFocus({
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
                     placeholder="Set Time (e.g. 09:00 AM)"
-                    className="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/40 pl-14 pr-6 py-4 dark:text-white text-slate-900 placeholder:text-slate-300 dark:placeholder:text-white/10 focus:outline-none focus:ring-4 focus:ring-sky-500/20 transition-all font-medium"
+                    className="w-full rounded-2xl border border-slate-200 dark:border-white/[0.03] bg-slate-50/50 dark:bg-black/40 pl-14 pr-6 py-4 dark:text-white text-slate-900 placeholder:text-slate-300 dark:placeholder:text-white/10 focus:outline-none focus:ring-4 focus:ring-sky-500/20 transition-all font-medium"
                   />
                 </div>
                 <div className="flex gap-3">
@@ -255,8 +256,8 @@ export function DailyFocus({
             className={cn(
                "group relative flex items-center gap-6 rounded-[2rem] border p-6 transition-all duration-300 shadow-sm",
                task.completed 
-                ? "border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]" 
-                : "border-slate-200/60 dark:border-white/10 bg-white dark:bg-white/[0.06] hover:shadow-xl hover:border-sky-500/30 dark:hover:border-white/20"
+                ? "border-slate-100 dark:border-white/[0.02] bg-slate-50/50 dark:bg-white/[0.02]" 
+                : "border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-white/[0.06] hover:shadow-xl hover:border-sky-500/30 dark:hover:border-white/[0.02]"
             )}
           >
             <button
@@ -268,7 +269,7 @@ export function DailyFocus({
                   <CheckCircle2 className="h-5 w-5" />
                 </div>
               ) : (
-                <div className="h-8 w-8 rounded-xl border-2 border-slate-200 dark:border-white/20 bg-white/50 dark:bg-black/20 hover:border-sky-500 transition-colors" />
+                <div className="h-8 w-8 rounded-xl border-2 border-slate-200 dark:border-white/[0.02] bg-white/50 dark:bg-black/20 hover:border-sky-500 transition-colors" />
               )}
             </button>
 
@@ -325,3 +326,5 @@ export function DailyFocus({
     </div>
   );
 }
+
+

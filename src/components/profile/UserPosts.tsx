@@ -34,7 +34,7 @@ export function UserPosts({ posts, isOwn }: { posts: Item[]; isOwn: boolean }) {
 
   if (list.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+      <div className="rounded-2xl border border-transparent bg-white/[0.02] py-12 text-center text-[13px] font-medium text-white/30">
         No forum posts yet.
       </div>
     );
@@ -43,24 +43,24 @@ export function UserPosts({ posts, isOwn }: { posts: Item[]; isOwn: boolean }) {
   return (
     <div className="space-y-3">
       {list.map((post) => (
-        <div key={post.id} className="rounded-xl border border-border bg-card p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
+        <div key={post.id} className="rounded-2xl border border-white/[0.02] bg-white/[0.02] p-5 transition-all hover:bg-white/[0.04]">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[12px] uppercase tracking-wider text-white/30 font-semibold">
               {post.forum?.name ? `${post.forum.name} · ` : ""}
-              {new Date(post.createdAt).toLocaleString()}
+              {new Date(post.createdAt).toLocaleDateString()}
             </p>
             {isOwn && (
               <button
                 disabled={deleting === post.id}
                 onClick={() => removePost(post.id)}
-                className="rounded-md border border-border px-2 py-1 text-xs text-red-500 hover:bg-red-500/10 disabled:opacity-60"
+                className="rounded-lg bg-red-500/10 px-3 py-1.5 text-[11px] font-medium text-red-500 hover:bg-red-500/20 disabled:opacity-60 transition-colors"
               >
-                {deleting === post.id ? "Deleting..." : "Delete"}
+                {deleting === post.id ? "Deleting..." : "Delete Post"}
               </button>
             )}
           </div>
           {post.content?.trim() ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none prose-img:my-3">
+            <div className="prose prose-sm prose-invert max-w-none text-white/90 prose-img:my-3">
               <ReactMarkdown components={markdownComponentsWithImages}>
                 {enhancePlainImageUrls(post.content)}
               </ReactMarkdown>
@@ -71,7 +71,7 @@ export function UserPosts({ posts, isOwn }: { posts: Item[]; isOwn: boolean }) {
             <img
               src={normalizeImageUrl(post.imageUrl)}
               alt=""
-              className={`max-h-72 w-full rounded-lg border border-border bg-muted/20 object-contain ${post.content?.trim() ? "mt-3" : ""}`}
+              className={`max-h-72 w-full rounded-xl border border-white/[0.02] bg-white/[0.02] object-contain ${post.content?.trim() ? "mt-4" : ""}`}
               loading="lazy"
               referrerPolicy="no-referrer"
             />
@@ -84,3 +84,4 @@ export function UserPosts({ posts, isOwn }: { posts: Item[]; isOwn: boolean }) {
     </div>
   );
 }
+

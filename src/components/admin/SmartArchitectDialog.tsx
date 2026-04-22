@@ -272,10 +272,10 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl" onClick={!isCommitting ? onClose : undefined} />
       
-      <div className="relative flex h-full max-h-[850px] w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-900 text-white shadow-2xl animate-in zoom-in-95 duration-500">
+      <div className="relative flex h-full max-h-[850px] w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] border border-white/[0.03] bg-slate-900 text-white shadow-2xl animate-in zoom-in-95 duration-500">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/5 bg-white/5 p-6 md:px-10">
+        <div className="flex items-center justify-between border-b border-white/[0.02] bg-white/5 p-6 md:px-10">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-400 shadow-inner">
                <Zap className="h-6 w-6" />
@@ -305,7 +305,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                  <p className="text-slate-400">Upload your Student Guide (PDF) or paste the schedule text below. Our AI will handle the rest.</p>
                </div>
 
-               <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5 mx-auto max-w-lg">
+               <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/[0.02] mx-auto max-w-lg">
                  <button
                    onClick={() => setScope("semester")}
                    className={cn("flex-1 py-3 text-sm font-bold rounded-xl transition-all", scope === "semester" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "text-slate-400 hover:text-white")}
@@ -324,7 +324,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                  onClick={() => fileInputRef.current?.click()}
                  className={cn(
                    "group relative cursor-pointer rounded-[2rem] border-2 border-dashed p-10 text-center transition-all duration-300",
-                   file ? "border-blue-500 bg-blue-500/5" : "border-white/10 hover:border-blue-500/40 hover:bg-white/5"
+                   file ? "border-blue-500 bg-blue-500/5" : "border-white/[0.03] hover:border-blue-500/40 hover:bg-white/5"
                  )}
                >
                  <input 
@@ -346,13 +346,13 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                </div>
 
                <div className="relative">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5" /></div>
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/[0.02]" /></div>
                   <div className="relative flex justify-center text-xs uppercase font-black tracking-widest text-slate-600"><span className="bg-slate-900 px-4">OR PASTE TEXT</span></div>
                </div>
 
                <textarea 
                   placeholder="Paste schedule contents here..."
-                  className="w-full min-h-[200px] rounded-[1.5rem] bg-white/5 border border-white/10 p-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
+                  className="w-full min-h-[200px] rounded-[1.5rem] bg-white/5 border border-white/[0.03] p-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                />
@@ -384,7 +384,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
           {/* STEP 3: PREVIEW */}
           {step === "preview" && structure && (
             <div className="space-y-8 animate-in slide-in-from-right-4">
-               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 bg-slate-900/90 backdrop-blur-md pb-4 pt-2 z-10 border-b border-white/5">
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 bg-slate-900/90 backdrop-blur-md pb-4 pt-2 z-10 border-b border-white/[0.02]">
                   <div>
                     <h3 className="text-2xl font-bold tracking-tight">Review & Refine</h3>
                     <p className="text-sm text-slate-400">The AI identified <b>{structure.modules.length} modules</b>. You can customize them before building.</p>
@@ -410,7 +410,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
 
                <div className="space-y-6">
                   {structure.modules.map((mod, mIdx) => (
-                    <div key={mIdx} className="group rounded-[2rem] border border-white/10 bg-white/5 overflow-hidden transition-all hover:bg-white/10">
+                    <div key={mIdx} className="group rounded-[2rem] border border-white/[0.03] bg-white/5 overflow-hidden transition-all hover:bg-white/10">
                        <div className="flex items-center justify-between bg-white/5 p-4 px-6">
                           <div className="flex items-center gap-4 flex-1">
                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
@@ -430,7 +430,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
 
                        <div className="p-6 space-y-4">
                           {mod.subjects.map((subj, sIdx) => (
-                            <div key={sIdx} className="pl-6 border-l-2 border-white/10 space-y-3">
+                            <div key={sIdx} className="pl-6 border-l-2 border-white/[0.03] space-y-3">
                                <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-3">
                                      <BookOpen className="h-4 w-4 text-blue-400" />
@@ -453,7 +453,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                                     const fileCount = typeof lec === 'object' ? (Array.isArray(lec.fileUrls) && lec.fileUrls.length > 0 ? lec.fileUrls.length : (lec.fileUrl ? 1 : 0)) : 0;
                                     const recordCount = typeof lec === 'object' ? (Array.isArray(lec.recordUrls) ? lec.recordUrls.length : 0) : 0;
                                     return (
-                                     <div key={lIdx} className="group/lec flex items-center justify-between gap-2 p-2 px-3 rounded-xl bg-white/5 border border-white/5 hover:border-blue-500/30 transition-all">
+                                     <div key={lIdx} className="group/lec flex items-center justify-between gap-2 p-2 px-3 rounded-xl bg-white/5 border border-white/[0.02] hover:border-blue-500/30 transition-all">
                                         <div className="flex items-center gap-2 flex-1">
                                            <Layers className="h-3 w-3 text-slate-500 shrink-0" />
                                            <input 
@@ -503,7 +503,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                   
                   <button 
                     onClick={addModule}
-                    className="w-full py-4 border-2 border-dashed border-white/10 rounded-[1.5rem] text-slate-500 hover:bg-white/5 hover:border-blue-500/20 hover:text-blue-500 transition-all text-sm font-bold flex items-center justify-center gap-2"
+                    className="w-full py-4 border-2 border-dashed border-white/[0.03] rounded-[1.5rem] text-slate-500 hover:bg-white/5 hover:border-blue-500/20 hover:text-blue-500 transition-all text-sm font-bold flex items-center justify-center gap-2"
                   >
                     <Plus className="h-4 w-4" /> Add Custom Module
                   </button>
@@ -537,7 +537,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
               <div className="w-full max-w-xl bg-card border border-primary/20 p-8 rounded-3xl space-y-6 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
                 
-                <div className="flex items-center gap-4 border-b border-border/50 pb-6">
+                <div className="flex items-center gap-4 border-b border-white/[0.02] pb-6">
                   <div className="h-14 w-14 rounded-2xl bg-primary/20 flex items-center justify-center shadow-[0_0_20px_rgba(var(--primary),0.3)]">
                     <Bot className="h-7 w-7 text-primary animate-bounce" />
                   </div>
@@ -552,7 +552,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Pipeline Status</span>
                     <span className="text-xl font-bold text-primary">{Math.min(agentIndex + 1, agentTasks.length)} <span className="text-muted-foreground text-sm">/ {agentTasks.length}</span></span>
                   </div>
-                  <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
+                  <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-white/[0.02]">
                     <div 
                       className="h-full bg-primary transition-all duration-500 ease-out" 
                       style={{ width: `${Math.max(2, ((agentIndex) / Math.max(1, agentTasks.length)) * 100)}%` }} 
@@ -601,7 +601,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
         </div>
 
         {/* Footer info */}
-        <div className="border-t border-white/5 bg-slate-950 p-4 px-10 flex items-center justify-center">
+        <div className="border-t border-white/[0.02] bg-slate-950 p-4 px-10 flex items-center justify-center">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">
               MedQs Intelligence Engine · Powered by Gemini Pro
             </p>
@@ -610,3 +610,5 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
     </div>
   );
 }
+
+

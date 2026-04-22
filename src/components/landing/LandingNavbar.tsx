@@ -21,7 +21,7 @@ export function LandingNavbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/30 bg-white/80 backdrop-blur-2xl dark:border-white/[0.06] dark:bg-[#0b0f1a]/85">
+    <nav className="sticky top-0 z-50 border-b border-white/[0.02] bg-white/80 backdrop-blur-2xl dark:border-white/[0.02] dark:bg-[#0b0f1a]/85">
       <div className="mx-auto flex h-[60px] max-w-6xl items-center justify-between px-4 sm:px-6">
 
         {/* Logo */}
@@ -41,7 +41,7 @@ export function LandingNavbar() {
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/50 bg-background/60 text-muted-foreground transition-all hover:bg-muted hover:text-foreground dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 dark:hover:text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.02] bg-background/60 text-muted-foreground transition-all hover:bg-muted hover:text-foreground dark:border-white/[0.03] dark:bg-white/5 dark:hover:bg-white/10 dark:hover:text-white"
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -69,3 +69,5 @@ export function LandingNavbar() {
     </nav>
   );
 }
+
+

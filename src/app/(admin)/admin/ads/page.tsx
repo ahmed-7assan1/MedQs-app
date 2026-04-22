@@ -108,7 +108,7 @@ export default function AdminAdsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground sm:flex">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-white/[0.02] bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground sm:flex">
             <Megaphone className="h-4 w-4 text-primary" />
             <span>{ads.length} Running Banners</span>
           </div>
@@ -124,7 +124,7 @@ export default function AdminAdsPage() {
 
       {/* Create form */}
       {showForm && (
-        <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 space-y-6">
+        <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 space-y-6">
           <div className="flex items-center gap-2">
              <Plus className="h-4 w-4 text-blue-500" />
              <h2 className="text-sm font-bold tracking-tight">Deployment Config</h2>
@@ -134,17 +134,17 @@ export default function AdminAdsPage() {
             <div className="space-y-1.5">
               <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Banner Asset *</label>
               {form.imageUrl ? (
-                <div className="group relative overflow-hidden rounded-xl border border-border/40 aspect-[21/9] bg-background">
+                <div className="group relative overflow-hidden rounded-xl border border-white/[0.05] aspect-[21/9] bg-background">
                   <img src={form.imageUrl} alt="Preview" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
-                      className="rounded-xl bg-white/20 backdrop-blur-md px-4 py-2 text-xs font-bold text-white border border-white/20 hover:bg-white/30 transition-all">
+                      className="rounded-xl bg-white/20 backdrop-blur-md px-4 py-2 text-xs font-bold text-white border border-white/[0.02] hover:bg-white/30 transition-all">
                       Repleace Asset
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="aspect-[21/9] overflow-hidden rounded-xl border border-border/60">
+                <div className="aspect-[21/9] overflow-hidden rounded-xl border border-white/[0.02]">
                    <FileUploader
                      folder="ad"
                      accept="image/jpeg,image/png,image/webp"
@@ -160,7 +160,7 @@ export default function AdminAdsPage() {
                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Redirect Destination</label>
                  <input type="url" value={form.linkUrl} onChange={(e) => setForm((f) => ({ ...f, linkUrl: e.target.value }))}
                    placeholder="https://example.com/promo"
-                   className="w-full h-11 rounded-xl border border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none" />
+                   className="w-full h-11 rounded-xl border border-white/[0.02] bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none" />
                </div>
 
                <div className="space-y-1.5">
@@ -170,7 +170,7 @@ export default function AdminAdsPage() {
                  <MedqsSelect
                    value={form.semesterId}
                    onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
-                   className="w-full h-11 rounded-xl border border-border/60 bg-background/50 text-sm"
+                   className="w-full h-11 rounded-xl border border-white/[0.02] bg-background/50 text-sm"
                  >
                    <option value="">Broadcast to All Users</option>
                    {semesters.map((s) => (
@@ -200,7 +200,7 @@ export default function AdminAdsPage() {
           <p className="text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">Querying Marketing Engine…</p>
         </div>
       ) : ads.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border/60 py-20 text-center bg-card/10">
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-white/[0.02] py-20 text-center bg-card/10">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
              <Megaphone className="h-8 w-8 text-muted-foreground opacity-30" />
           </div>
@@ -212,7 +212,7 @@ export default function AdminAdsPage() {
           {ads.map((ad) => (
             <div key={ad.id} className={cn(
               "group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-2xl hover:-translate-y-1",
-              ad.active ? "border-border/60" : "border-border/30 opacity-60 grayscale-[0.8]"
+              ad.active ? "border-white/[0.02]" : "border-white/[0.02] opacity-60 grayscale-[0.8]"
             )}>
               <div className="relative aspect-[21/9] overflow-hidden">
                  <img src={ad.imageUrl} alt="Ad banner" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -220,7 +220,7 @@ export default function AdminAdsPage() {
                  
                  <div className="absolute top-3 left-3 flex gap-2">
                     <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md",
-                      ad.active ? "bg-emerald-500/80 text-white border border-emerald-400/50" : "bg-muted/80 text-muted-foreground border border-border/40")}>
+                      ad.active ? "bg-emerald-500/80 text-white border border-emerald-400/50" : "bg-muted/80 text-muted-foreground border border-white/[0.05]")}>
                       {ad.active ? <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" /> : null}
                       {ad.active ? "Live" : "Inactive"}
                     </span>
@@ -253,12 +253,12 @@ export default function AdminAdsPage() {
                 
                 <div className="flex items-center gap-2">
                   <button onClick={() => toggleActive(ad)}
-                    className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-all border border-border/40",
+                    className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-all border border-white/[0.05]",
                       ad.active ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white" : "bg-muted text-muted-foreground hover:bg-foreground hover:text-background")}>
                     {ad.active ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                   </button>
                   <button onClick={() => deleteAd(ad.id)}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-background/50 text-muted-foreground transition-all hover:bg-red-500 hover:text-white hover:border-red-500">
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.05] bg-background/50 text-muted-foreground transition-all hover:bg-red-500 hover:text-white hover:border-red-500">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -266,7 +266,7 @@ export default function AdminAdsPage() {
 
               {ad.semesterId && (
                 <div className="px-4 pb-4">
-                   <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-1.5 border border-border/40">
+                   <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-1.5 border border-white/[0.05]">
                       <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-sm" />
                       <p className="text-[10px] font-bold text-muted-foreground truncate uppercase tracking-tighter">Segment: {semesters.find(s => s.id === ad.semesterId)?.name || ad.semesterId}</p>
                    </div>
@@ -279,3 +279,6 @@ export default function AdminAdsPage() {
     </div>
   );
 }
+
+
+

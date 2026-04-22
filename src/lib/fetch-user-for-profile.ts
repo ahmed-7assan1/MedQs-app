@@ -13,6 +13,7 @@ export type ProfileViewUser = {
   points: number;
   hideRank: boolean;
   nickname: string | null;
+  handle: string | null;
   isPrivate: boolean;
   instagramUrl: string | null;
   facebookUrl: string | null;
@@ -31,6 +32,7 @@ const FALLBACK: Pick<
   | "isPrivate"
   | "instagramUrl"
   | "facebookUrl"
+  | "handle"
 > = {
   phone: null,
   phoneVisible: false,
@@ -39,6 +41,7 @@ const FALLBACK: Pick<
   isPrivate: false,
   instagramUrl: null,
   facebookUrl: null,
+  handle: null,
 };
 
 const SELECT_FULL = {
@@ -52,6 +55,7 @@ const SELECT_FULL = {
   points: true,
   hideRank: true,
   nickname: true,
+  handle: true,
   isPrivate: true,
   instagramUrl: true,
   facebookUrl: true,
@@ -119,6 +123,7 @@ function asProfileView(
     points: row.points as number,
     hideRank: filled.hideRank ?? false,
     nickname: (filled.nickname ?? null) as string | null,
+    handle: (filled.handle ?? null) as string | null,
     isPrivate: filled.isPrivate ?? false,
     instagramUrl: (filled.instagramUrl ?? null) as string | null,
     facebookUrl: (filled.facebookUrl ?? null) as string | null,

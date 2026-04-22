@@ -45,7 +45,7 @@ export function AdminStudentBar() {
       <div className="pointer-events-auto flex flex-col items-end gap-3">
         {open ? (
           <div
-            className="mb-2 max-h-[min(70vh,440px)] w-[min(calc(100vw-2rem),15rem)] overflow-y-auto rounded-2xl border border-border/40 bg-card/95 p-2 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
+            className="mb-2 max-h-[min(70vh,440px)] w-[min(calc(100vw-2rem),15rem)] overflow-y-auto rounded-2xl border border-white/[0.02] bg-card/95 p-2 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
             role="menu"
             aria-label={PLATFORM_COPY.doctorShortcutsMenu}
           >
@@ -69,7 +69,7 @@ export function AdminStudentBar() {
           type="button"
           onClick={() => setOpen((o) => !o)}
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/90 text-primary-foreground shadow-[0_8px_30px_rgb(var(--primary-rgb)/0.2)] backdrop-blur-md transition-all hover:scale-110 active:scale-95",
+            "flex h-12 w-12 items-center justify-center rounded-full border border-white/[0.02] bg-primary/90 text-primary-foreground shadow-[0_8px_30px_rgb(var(--primary-rgb)/0.2)] backdrop-blur-md transition-all hover:scale-110 active:scale-95",
             open && "rotate-45"
           )}
           aria-expanded={open}
@@ -80,3 +80,4 @@ export function AdminStudentBar() {
     </div>
   );
 }
+

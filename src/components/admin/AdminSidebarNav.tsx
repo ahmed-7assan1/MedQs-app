@@ -75,7 +75,7 @@ export function AdminSidebarNav() {
                   className={cn(
                     "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-all duration-150",
                     active
-                      ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/10 font-semibold text-blue-500 dark:text-blue-400 shadow-[inset_0_0_0_1px_rgba(37,99,235,0.25)]"
+                      ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/10 font-semibold text-blue-500 dark:text-blue-400 shadow-[inset_0_0_0_1px_rgba(37,99,235,0.1)]"
                       : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   )}
                   aria-current={active ? "page" : undefined}

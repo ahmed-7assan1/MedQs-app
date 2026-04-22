@@ -3,7 +3,7 @@
 import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpenText, MessagesSquare, CircleUser, Clapperboard } from "lucide-react";
+import { House, BookOpenText, MessageSquare, Clapperboard, Settings2, PlusCircle, LayoutDashboard, Compass, Sparkles, BookCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS: {
@@ -31,16 +31,16 @@ const TABS: {
     match: (p) => p.startsWith("/videos"),
   },
   {
-    href: "/forum",
-    label: "Community",
-    icon: MessagesSquare,
-    match: (p) => p.startsWith("/forum"),
+    href: "/quizzes",
+    label: "Quizzes",
+    icon: BookCheck,
+    match: (p) => p.startsWith("/quizzes") || p.startsWith("/quiz"),
   },
   {
-    href: "/profile/me",
-    label: "Profile",
-    icon: CircleUser,
-    match: (p) => p.startsWith("/profile"),
+    href: "/ai-chat",
+    label: "Dr. Q",
+    icon: Sparkles,
+    match: (p) => p.startsWith("/ai-chat"),
   },
 ];
 
@@ -55,7 +55,7 @@ export function MobileBottomNav() {
       <nav
         className={cn(
           "pointer-events-auto mx-4 mb-1 w-full max-w-[420px]",
-          "rounded-[22px] border border-border/40 dark:border-white/[0.08]",
+          "rounded-[22px] border border-white/[0.05] dark:border-white/[0.02]",
           "bg-background/85 dark:bg-[#141418]/92",
           "shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_48px_rgba(0,0,0,0.55)]",
           "backdrop-blur-2xl px-2 py-2"
@@ -127,3 +127,4 @@ export function MobileBottomNav() {
     </div>
   );
 }
+

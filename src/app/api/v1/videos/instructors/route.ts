@@ -132,9 +132,13 @@ export async function GET(req: NextRequest) {
       let name = instructor.name;
       let thumbnail = instructor.thumbnail;
 
-      if (name.includes("Ahmed Jumaa") || name.includes("أحمد جمعة")) {
-        name = "Dr. Q";
-        thumbnail = platformLogo;
+      if (name.includes("Ahmed Jumaa") || name.includes("أحمد جمعة") || name.includes("د. كيو")) {
+        return {
+          ...instructor,
+          name: "د. كيو",
+          subscribers: "12.8K",
+          thumbnail: `https://unavatar.io/youtube/@DrQ_MedQs`
+        };
       }
       
       if (!thumbnail || thumbnail.includes("placeholder")) {
@@ -143,10 +147,6 @@ export async function GET(req: NextRequest) {
 
       return { ...instructor, name, thumbnail };
     });
-
-    brandedUnified.sort((a, b) => (a.isFollowing === b.isFollowing ? a.name.localeCompare(b.name) : a.isFollowing ? -1 : 1));
-
-    return NextResponse.json(brandedUnified);
 
     brandedUnified.sort((a, b) => (a.isFollowing === b.isFollowing ? a.name.localeCompare(b.name) : a.isFollowing ? -1 : 1));
 

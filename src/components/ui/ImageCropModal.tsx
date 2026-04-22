@@ -114,9 +114,9 @@ export function ImageCropModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onCancel()}
     >
-      <div className="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0e1117] shadow-2xl">
+      <div className="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-white/[0.03] bg-[#0e1117] shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-white/[0.03] px-5 py-4">
           <div>
             <h2 className="text-sm font-semibold text-white">Crop Photo</h2>
             <p className="text-xs text-white/50">Drag to reposition · Scroll to zoom</p>
@@ -186,10 +186,10 @@ export function ImageCropModal({
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-2 border-t border-white/10 px-5 py-4">
+        <div className="flex gap-2 border-t border-white/[0.03] px-5 py-4">
           <button
             onClick={onCancel}
-            className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5"
+            className="flex-1 rounded-xl border border-white/[0.03] py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5"
           >
             Cancel
           </button>
@@ -206,3 +206,4 @@ export function ImageCropModal({
     </div>
   );
 }
+

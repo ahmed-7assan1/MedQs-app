@@ -23,6 +23,7 @@ export type ModuleProgressItem = {
 export type DashboardData = {
   user: {
     name: string | null;
+    image: string | null;
     semesterId: string | null;
     university: { name: string } | null;
     semester: { name: string } | null;
@@ -46,7 +47,7 @@ export type DashboardData = {
     lecture: {
       id: string;
       title: string;
-      subject: { moduleId: string; name: string };
+      subject: { moduleId: string | null; name: string };
     };
   } | null;
 };

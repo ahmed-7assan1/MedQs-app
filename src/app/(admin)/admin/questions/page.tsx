@@ -257,7 +257,7 @@ export default function AdminQuestionsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-white/[0.02] bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
             <HelpCircle className="h-4 w-4 text-primary" />
             <span>{questions.length.toLocaleString()} Items</span>
           </div>
@@ -268,7 +268,7 @@ export default function AdminQuestionsPage() {
               setAddOpen(false);
             }}
             disabled={filtered.length === 0}
-            className="flex items-center gap-2 rounded-xl border border-border/60 bg-card px-4 py-2.5 text-sm font-semibold transition-all hover:bg-muted disabled:opacity-40"
+            className="flex items-center gap-2 rounded-xl border border-white/[0.02] bg-card px-4 py-2.5 text-sm font-semibold transition-all hover:bg-muted disabled:opacity-40"
           >
             <Settings className="h-4 w-4 text-blue-500" />
             Export Settings
@@ -322,7 +322,7 @@ export default function AdminQuestionsPage() {
                   setPickSubject("");
                   setPickLecture("");
                 }}
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+                className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50 focus:ring-blue-500/40"
               >
                 <option value="">Select Module…</option>
                 {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
@@ -337,7 +337,7 @@ export default function AdminQuestionsPage() {
                   setPickLecture("");
                 }}
                 disabled={!pickModule}
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+                className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50 focus:ring-blue-500/40"
               >
                 <option value="">Select Subject…</option>
                 {filteredSubjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -349,7 +349,7 @@ export default function AdminQuestionsPage() {
                 value={pickLecture}
                 onChange={(e) => setPickLecture(e.target.value)}
                 disabled={!pickSubject}
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+                className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50 focus:ring-blue-500/40"
               >
                 <option value="">Select Lecture…</option>
                 {lectures.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
@@ -364,7 +364,7 @@ export default function AdminQuestionsPage() {
               onChange={(e) => setBody(e.target.value)}
               rows={3}
               placeholder="Type question stem here (Markdown supported)…"
-              className="w-full rounded-xl border border-border/60 bg-background/50 px-4 py-3 text-sm focus:ring-blue-500/40 focus:outline-none min-h-[100px]"
+              className="w-full rounded-xl border border-white/[0.02] bg-background/50 px-4 py-3 text-sm focus:ring-blue-500/40 focus:outline-none min-h-[100px]"
             />
           </div>
 
@@ -377,17 +377,17 @@ export default function AdminQuestionsPage() {
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="External Image URL (or upload)"
-                    className="flex-1 rounded-xl border border-border/60 bg-background/50 px-4 py-2.5 text-sm focus:ring-blue-500/40 focus:outline-none"
+                    className="flex-1 rounded-xl border border-white/[0.02] bg-background/50 px-4 py-2.5 text-sm focus:ring-blue-500/40 focus:outline-none"
                    />
                    <button
                     type="button"
                     onClick={() => setDrawOpen(true)}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-background/50 text-muted-foreground hover:bg-muted"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.02] bg-background/50 text-muted-foreground hover:bg-muted"
                     title="Sketch a figure"
                    >
                     <Pencil className="h-4 w-4" />
                    </button>
-                   <label className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border/60 bg-background/50 text-muted-foreground hover:bg-muted" title="Upload file">
+                   <label className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/[0.02] bg-background/50 text-muted-foreground hover:bg-muted" title="Upload file">
                     {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
                     <input
                       type="file"
@@ -401,14 +401,14 @@ export default function AdminQuestionsPage() {
                     />
                    </label>
                    {imageUrl && (
-                    <button type="button" onClick={() => setImageUrl("")} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-red-500/10 text-red-500 hover:bg-red-500/20">
+                    <button type="button" onClick={() => setImageUrl("")} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.02] bg-red-500/10 text-red-500 hover:bg-red-500/20">
                       <Trash2 className="h-4 w-4" />
                     </button>
                    )}
                  </div>
 
                  {imageUrl && (
-                  <div className="aspect-video w-full overflow-hidden rounded-xl border border-border/60 bg-muted/20 relative group">
+                  <div className="aspect-video w-full overflow-hidden rounded-xl border border-white/[0.02] bg-muted/20 relative group">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={imageUrl} alt="Question figure" className="h-full w-full object-contain p-2" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -422,7 +422,7 @@ export default function AdminQuestionsPage() {
                     <MedqsSelect
                       value={stemLayout}
                       onChange={(e) => setStemLayout(e.target.value as any)}
-                      className="w-full h-10 rounded-xl border-border/60 bg-background/50 text-xs"
+                      className="w-full h-10 rounded-xl border-white/[0.02] bg-background/50 text-xs"
                     >
                       <option value="STANDARD">Standard: Image above text</option>
                       <option value="IMAGE_OVERLAY">Overlay: Text on image (clinical)</option>
@@ -437,7 +437,7 @@ export default function AdminQuestionsPage() {
                 {choices.map((c, i) => (
                   <div key={c.key} className={cn(
                     "relative flex items-center gap-3 rounded-xl border p-2.5 transition-all",
-                    answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-border/60 bg-background/30"
+                    answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-white/[0.02] bg-background/30"
                   )}>
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/40 text-[10px] font-bold font-mono">
                       {c.key}
@@ -472,7 +472,7 @@ export default function AdminQuestionsPage() {
               <MedqsSelect
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value as any)}
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50"
+                className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50"
               >
                 <option value="EASY">Level: Easy — Straightforward facts</option>
                 <option value="MEDIUM">Level: Medium — Clinical application</option>
@@ -485,12 +485,12 @@ export default function AdminQuestionsPage() {
                 value={explanation}
                 onChange={(e) => setExplanation(e.target.value)}
                 placeholder="Explain why the correct answer is the right one…"
-                className="w-full h-11 rounded-xl border border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                className="w-full h-11 rounded-xl border border-white/[0.02] bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-border/60 pt-5">
+          <div className="flex items-center justify-between border-t border-white/[0.02] pt-5">
             <button
               type="button"
               onClick={() => setAddOpen(false)}
@@ -512,7 +512,7 @@ export default function AdminQuestionsPage() {
       )}
 
       {/* ── Filter Card ── */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+      <div className="rounded-2xl border border-white/[0.02] bg-card p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4 text-blue-500" />
@@ -525,7 +525,7 @@ export default function AdminQuestionsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search in loaded list…"
-              className="w-full rounded-xl border border-border/60 bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="w-full rounded-xl border border-white/[0.02] bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             />
           </div>
         </div>
@@ -540,7 +540,7 @@ export default function AdminQuestionsPage() {
                 setFilterSubject("");
                 setFilterLecture("");
               }}
-              className="w-full h-10 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+              className="w-full h-10 rounded-xl border-white/[0.02] bg-background/50 focus:ring-blue-500/40"
             >
               <option value="">Any Module</option>
               {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
@@ -555,7 +555,7 @@ export default function AdminQuestionsPage() {
                 setFilterLecture("");
               }}
               disabled={!filterModule}
-              className="w-full h-10 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+              className="w-full h-10 rounded-xl border-white/[0.02] bg-background/50 focus:ring-blue-500/40"
             >
               <option value="">Any Subject</option>
               {filterSubjectsByModule.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -567,7 +567,7 @@ export default function AdminQuestionsPage() {
               value={filterLecture}
               onChange={(e) => setFilterLecture(e.target.value)}
               disabled={!filterSubject}
-              className="w-full h-10 rounded-xl border-border/60 bg-background/50 focus:ring-blue-500/40"
+              className="w-full h-10 rounded-xl border-white/[0.02] bg-background/50 focus:ring-blue-500/40"
             >
               <option value="">All Lectures</option>
               {filterLectures.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
@@ -581,7 +581,7 @@ export default function AdminQuestionsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.02] py-24 text-center bg-muted/5">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
             <HelpCircle className="h-8 w-8 text-muted-foreground opacity-30" />
           </div>
@@ -606,7 +606,7 @@ export default function AdminQuestionsPage() {
               return (
                 <div key={q.id} className={cn(
                   "overflow-hidden rounded-2xl border transition-all duration-200",
-                  open ? "border-blue-500/30 bg-card shadow-lg shadow-blue-500/5 ring-1 ring-blue-500/10" : "border-border/60 bg-card hover:border-border hover:shadow-md"
+                  open ? "border-blue-500/30 bg-card shadow-lg shadow-blue-500/5 ring-1 ring-blue-500/10" : "border-white/[0.02] bg-card hover:border-border hover:shadow-md"
                 )}>
                   <div
                     className="flex cursor-pointer items-center gap-4 px-5 py-4"
@@ -657,9 +657,9 @@ export default function AdminQuestionsPage() {
                   </div>
 
                   {open && (
-                    <div className="border-t border-border/40 px-5 pb-5 pt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="border-t border-white/[0.05] px-5 pb-5 pt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       {q.imageUrl ? (
-                        <div className="max-w-md overflow-hidden rounded-xl border border-border/60 shadow-inner bg-muted/20">
+                        <div className="max-w-md overflow-hidden rounded-xl border border-white/[0.02] shadow-inner bg-muted/20">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={q.imageUrl} alt="" className="max-h-64 w-full object-contain p-2" />
                         </div>
@@ -672,7 +672,7 @@ export default function AdminQuestionsPage() {
                             value={q.body}
                             onChange={(e) => patchQuestion(q.id, { body: e.target.value })}
                             rows={3}
-                            className="w-full rounded-xl border border-border/60 bg-background/50 px-4 py-3 text-sm focus:ring-blue-500/40 focus:outline-none"
+                            className="w-full rounded-xl border border-white/[0.02] bg-background/50 px-4 py-3 text-sm focus:ring-blue-500/40 focus:outline-none"
                             placeholder="Type stem here..."
                           />
                         </div>
@@ -681,7 +681,7 @@ export default function AdminQuestionsPage() {
                           {q.choices.map((c, idx) => (
                             <div key={c.key} className={cn(
                               "relative flex items-center gap-3 rounded-xl border p-3 transition-all",
-                              q.answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-border/60 bg-background/30"
+                              q.answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-white/[0.02] bg-background/30"
                             )}>
                               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/40 text-[10px] font-bold font-mono">
                                 {c.key}
@@ -698,7 +698,7 @@ export default function AdminQuestionsPage() {
                                   name={`answer-${q.id}`}
                                   checked={q.answer === c.key}
                                   onChange={() => patchQuestion(q.id, { answer: c.key })}
-                                  className="h-4 w-4 rounded-full border-border/60 text-emerald-500 focus:ring-emerald-500/40"
+                                  className="h-4 w-4 rounded-full border-white/[0.02] text-emerald-500 focus:ring-emerald-500/40"
                                 />
                                 <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">Right</span>
                               </label>
@@ -713,7 +713,7 @@ export default function AdminQuestionsPage() {
                             <MedqsSelect
                               value={q.difficulty}
                               onChange={(e) => patchQuestion(q.id, { difficulty: e.target.value })}
-                              className="w-full h-10 rounded-xl border-border/60 bg-background/50"
+                              className="w-full h-10 rounded-xl border-white/[0.02] bg-background/50"
                             >
                               <option value="EASY">EASY</option>
                               <option value="MEDIUM">MEDIUM</option>
@@ -725,13 +725,13 @@ export default function AdminQuestionsPage() {
                             <input
                               value={q.explanation ?? ""}
                               onChange={(e) => patchQuestion(q.id, { explanation: e.target.value })}
-                              className="w-full h-10 rounded-xl border border-border/60 bg-background/50 px-4 text-sm"
+                              className="w-full h-10 rounded-xl border border-white/[0.02] bg-background/50 px-4 text-sm"
                               placeholder="Why is it right?"
                             />
                           </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between border-t border-border/60">
+                        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between border-t border-white/[0.02]">
                           <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                             <span className="font-bold uppercase tracking-widest">Linked ID:</span>
                             <code className="rounded bg-muted px-1.5 py-0.5 font-mono">{q.id}</code>
@@ -754,7 +754,7 @@ export default function AdminQuestionsPage() {
           </div>
 
           {filtered.length > PAGE_SIZE && (
-            <div className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row border-t border-border/40 px-2 mt-4">
+            <div className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row border-t border-white/[0.05] px-2 mt-4">
               <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 Page {safeListPage + 1} of {totalPages}
               </p>
@@ -763,7 +763,7 @@ export default function AdminQuestionsPage() {
                   type="button"
                   disabled={safeListPage <= 0}
                   onClick={() => setListPage((p) => Math.max(0, p - 1))}
-                  className="flex h-10 items-center justify-center rounded-xl border border-border/60 bg-card px-4 text-xs font-bold transition-all hover:bg-muted disabled:opacity-40"
+                  className="flex h-10 items-center justify-center rounded-xl border border-white/[0.02] bg-card px-4 text-xs font-bold transition-all hover:bg-muted disabled:opacity-40"
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" /> Prev
                 </button>
@@ -773,7 +773,7 @@ export default function AdminQuestionsPage() {
                     return (
                       <button key={p} onClick={() => setListPage(p)} className={cn(
                         "h-10 w-10 rounded-xl text-xs font-bold transition-all",
-                        safeListPage === p ? "bg-blue-600 text-white shadow shadow-blue-500/40" : "border border-border/60 bg-card hover:bg-muted"
+                        safeListPage === p ? "bg-blue-600 text-white shadow shadow-blue-500/40" : "border border-white/[0.02] bg-card hover:bg-muted"
                       )}>
                         {p + 1}
                       </button>
@@ -784,7 +784,7 @@ export default function AdminQuestionsPage() {
                   type="button"
                   disabled={safeListPage >= totalPages - 1}
                   onClick={() => setListPage((p) => Math.min(totalPages - 1, p + 1))}
-                  className="flex h-10 items-center justify-center rounded-xl border border-border/60 bg-card px-4 text-xs font-bold transition-all hover:bg-muted disabled:opacity-40"
+                  className="flex h-10 items-center justify-center rounded-xl border border-white/[0.02] bg-card px-4 text-xs font-bold transition-all hover:bg-muted disabled:opacity-40"
                 >
                   Next <ChevronRight className="h-4 w-4 ml-1" />
                 </button>
@@ -804,3 +804,4 @@ export default function AdminQuestionsPage() {
     </div>
   );
 }
+

@@ -4,6 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { isAdminRole } from "@/lib/tenant";
 import { generateJsonWithFallback } from "@/lib/ai-router";
 
+function semanticMatch(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  const tA = a.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const tB = b.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!tA || !tB) return false;
+  if (tA === tB) return true;
+  if (tA.includes(tB) && tA.length - tB.length < 8) return true;
+  if (tB.includes(tA) && tB.length - tA.length < 8) return true;
+  return false;
+}
+
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
@@ -292,49 +303,72 @@ ${cap}`;
           await tx.module.deleteMany({ where: { semesterId } });
         }
 
+        const existingModules = await tx.module.findMany({ 
+           where: { semesterId },
+           include: { subjects: { include: { lectures: true } } }
+        });
+
         for (const mData of structure.modules) {
-          const module = await tx.module.create({
-            data: {
-              name: String(mData.name).trim(),
-              semesterId
-            }
-          });
+          const mName = String(mData.name).trim();
+          let module = !wipesExisting ? existingModules.find((em: any) => semanticMatch(em.name, mName)) : null;
+
+          if (!module) {
+            module = await tx.module.create({
+              data: { name: mName, semesterId }
+            });
+            existingModules.push({ ...module, subjects: [] });
+          }
 
           for (const sData of mData.subjects || []) {
-            const subject = await tx.subject.create({
-              data: {
-                name: String(sData.name).trim(),
-                moduleId: module.id
-              }
-            });
+            const sName = String(sData.name).trim();
+            let subject = !wipesExisting ? module.subjects?.find((es: any) => semanticMatch(es.name, sName)) : null;
+
+            if (!subject) {
+               subject = await tx.subject.create({
+                 data: { name: sName, moduleId: module.id }
+               });
+               if (!module.subjects) module.subjects = [];
+               module.subjects.push({ ...subject, lectures: [] });
+            }
 
             if (Array.isArray(sData.lectures) && sData.lectures.length > 0) {
+              // Calculate next order
+              let nextOrder = subject.lectures?.length || 0;
+
               for (let i = 0; i < sData.lectures.length; i++) {
                 const lecData = sData.lectures[i];
-                // Type safety fallback
                 const title = typeof lecData === 'string' ? lecData : lecData.title;
                 if (!title) continue;
+                
+                const lName = String(title).trim();
+                let lecture = !wipesExisting ? subject.lectures?.find((el: any) => semanticMatch(el.title, lName)) : null;
 
-                const lecture = await tx.lecture.create({
-                  data: {
-                    title: String(title).trim(),
-                    subjectId: subject.id,
-                    order: i
-                  }
-                });
+                if (!lecture) {
+                   lecture = await tx.lecture.create({
+                     data: { title: lName, subjectId: subject.id, order: nextOrder++ }
+                   });
+                   if (!subject.lectures) subject.lectures = [];
+                   subject.lectures.push(lecture);
+                } else {
+                   // Optional: If lecture already exists, we might want to skip creating duplicate videos/files
+                   // For now, we just attach new resources to the existing lecture unless we check for dupes below
+                }
 
                 if (typeof lecData === 'object') {
                   // Handle extracted videos
                   const videosToCreate = Array.isArray(lecData.extractedVideos) ? lecData.extractedVideos : [];
                   for (const v of videosToCreate) {
-                     await tx.lectureVideo.create({
-                        data: {
-                           lectureId: lecture.id,
-                           title: v.title,
-                           url: v.url,
-                           sourceType: "external"
-                        }
-                     });
+                     const exists = await tx.lectureVideo.findFirst({ where: { lectureId: lecture.id, url: v.url } });
+                     if (!exists) {
+                       await tx.lectureVideo.create({
+                          data: {
+                             lectureId: lecture.id,
+                             title: v.title,
+                             url: v.url,
+                             sourceType: "external"
+                          }
+                       });
+                     }
                   }
 
                   // Handle remaining fileUrls array
@@ -343,20 +377,18 @@ ${cap}`;
                      for (const fUrl of lecData.fileUrls) {
                         if (typeof fUrl === 'string' && fUrl && !addedFiles.has(fUrl)) {
                            addedFiles.add(fUrl);
-                           await tx.lectureFile.create({
-                              data: {
-                                lectureId: lecture.id,
-                                name: "Lecture Material",
-                                url: fUrl,
-                                mimeType: "application/pdf"
-                              }
-                           });
-                           // Collect as MANUS agent task
-                           agentTasks.push({
-                              lectureId: lecture.id,
-                              lectureTitle: lecture.title,
-                              url: fUrl
-                           });
+                           const exists = await tx.lectureFile.findFirst({ where: { lectureId: lecture.id, url: fUrl } });
+                           if (!exists) {
+                             await tx.lectureFile.create({
+                                data: {
+                                  lectureId: lecture.id,
+                                  name: "Lecture Material",
+                                  url: fUrl,
+                                  mimeType: "application/pdf"
+                                }
+                             });
+                             agentTasks.push({ lectureId: lecture.id, lectureTitle: lecture.title, url: fUrl });
+                           }
                         }
                      }
                   }
@@ -367,14 +399,17 @@ ${cap}`;
                      for (const rUrl of lecData.recordUrls) {
                         if (typeof rUrl === 'string' && rUrl && !addedRecords.has(rUrl)) {
                            addedRecords.add(rUrl);
-                           await (tx as any).lectureRecord.create({
-                              data: {
-                                lectureId: lecture.id,
-                                title: "Lecture Record",
-                                url: rUrl,
-                                sourceType: rUrl.includes('spotify.com') ? "spotify" : "external"
-                              }
-                           });
+                           const exists = await (tx as any).lectureRecord?.findFirst({ where: { lectureId: lecture.id, url: rUrl } }).catch(() => null);
+                           if (!exists && (tx as any).lectureRecord) {
+                             await (tx as any).lectureRecord.create({
+                                data: {
+                                  lectureId: lecture.id,
+                                  title: "Lecture Record",
+                                  url: rUrl,
+                                  sourceType: rUrl.includes('spotify.com') ? "spotify" : "external"
+                                }
+                             });
+                           }
                         }
                      }
                   }

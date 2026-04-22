@@ -30,11 +30,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="flex min-h-screen bg-background">
 
           {/* ── Desktop Sidebar ──────────────────────────────────────── */}
-          <aside className="hidden w-60 shrink-0 border-r border-border/60 md:flex md:flex-col"
+          <aside className="hidden w-60 shrink-0 border-r border-white/[0.02] md:flex md:flex-col"
             style={{ background: "hsl(var(--card)/0.7)", backdropFilter: "blur(16px)" }}>
 
             {/* Logo header */}
-            <div className="flex h-14 items-center gap-2.5 border-b border-border/60 px-4">
+            <div className="flex h-14 items-center gap-2.5 px-4">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/30">
                 <MedQsLogoMark className="h-5 w-5 shrink-0 brightness-0 invert" title="MedQs" />
               </div>
@@ -51,7 +51,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </nav>
 
             {/* Back to student view */}
-            <div className="border-t border-border/60 p-3">
+            <div className="border-t border-white/[0.02] p-3">
               <Link href="/dashboard-app"
                 className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground">
                 <ArrowLeft className="h-3.5 w-3.5 shrink-0" aria-hidden />

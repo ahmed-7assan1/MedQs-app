@@ -67,7 +67,7 @@ function CommentItem({
 
   const bubble =
     variant === "chat"
-      ? "rounded-2xl border border-border/70 bg-background/90 px-3 py-2 shadow-sm"
+      ? "rounded-2xl border border-white/[0.03] bg-background/90 px-3 py-2 shadow-sm"
       : "";
 
   return (
@@ -269,7 +269,7 @@ export function CommentThread({ postId, currentUserId, initialCount, variant = "
         <div
           className={cn(
             "animate-fade-in space-y-3",
-            isChat ? "mt-2 rounded-2xl border border-border/60 bg-muted/20 px-3 py-3 dark:bg-muted/10" : "border-t border-border/50 bg-muted/10 px-4 pb-3 pt-3"
+            isChat ? "mt-2 rounded-2xl border border-white/[0.02] bg-muted/20 px-3 py-3 dark:bg-muted/10" : "border-t border-white/[0.02] bg-muted/10 px-4 pb-3 pt-3"
           )}
         >
           {loading ? (
@@ -354,3 +354,5 @@ export function CommentThread({ postId, currentUserId, initialCount, variant = "
     </div>
   );
 }
+
+

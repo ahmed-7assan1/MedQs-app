@@ -46,7 +46,7 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
         </div>
 
         {/* Minimalist Progress Indicator */}
-        <div className="flex items-center gap-6 p-4 rounded-3xl bg-card border border-border/50 shadow-sm transition-all hover:shadow-md">
+        <div className="flex items-center gap-6 p-4 rounded-3xl bg-card border border-white/[0.02] shadow-sm transition-all hover:shadow-md">
           <div className="relative h-16 w-16 flex items-center justify-center">
             <svg className="absolute h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="16" fill="none" className="stroke-muted" strokeWidth="3" />
@@ -72,13 +72,13 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
       {/* 2. Sleek Tab Switcher */}
       <div className="mb-10 flex flex-col space-y-8">
         <div className="flex justify-center">
-          <div className="inline-flex items-center p-1.5 rounded-2xl bg-muted/40 border border-border/50 backdrop-blur-md">
+          <div className="inline-flex items-center p-1.5 rounded-2xl bg-muted/40 border border-white/[0.02] backdrop-blur-md">
             <button
               onClick={() => setActiveTab("daily")}
               className={cn(
                 "relative flex items-center gap-2.5 px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300",
                 activeTab === "daily" 
-                  ? "bg-card text-foreground shadow-md border border-border/10" 
+                  ? "bg-card text-foreground shadow-md border border-white/[0.02]" 
                   : "text-muted-foreground/60 hover:text-foreground"
               )}
             >
@@ -93,7 +93,7 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
               className={cn(
                 "relative flex items-center gap-2.5 px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300",
                 activeTab === "checklist" 
-                  ? "bg-card text-foreground shadow-md border border-border/10" 
+                  ? "bg-card text-foreground shadow-md border border-white/[0.02]" 
                   : "text-muted-foreground/60 hover:text-foreground"
               )}
             >
@@ -141,3 +141,4 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
     </StudentPageShell>
   );
 }
+

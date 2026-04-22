@@ -141,7 +141,7 @@ export function QuestionCard({
   return (
     <article
       className={cn(
-        "rounded-2xl border border-border/90 bg-card shadow-[0_4px_24px_rgb(0_0_0/0.05)] dark:shadow-[0_8px_32px_rgb(0_0_0/0.25)]",
+        "rounded-2xl border border-white/[0.02] bg-card shadow-[0_4px_24px_rgb(0_0_0/0.05)] dark:shadow-[0_8px_32px_rgb(0_0_0/0.25)]",
         protectContent && "select-none"
       )}
       aria-labelledby={stemId}
@@ -152,7 +152,7 @@ export function QuestionCard({
         if (protectContent) e.preventDefault();
       }}
     >
-      <div className="border-b border-border/80 bg-muted/20 px-5 py-3 md:px-6">
+      <div className="px-5 py-3 md:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
@@ -217,7 +217,7 @@ export function QuestionCard({
       <div className="space-y-5 p-5 md:p-6">
         <div id={stemId} className="space-y-4">
           {layout === "IMAGE_OVERLAY" && question.imageUrl ? (
-            <figure className="relative overflow-hidden rounded-xl border border-border bg-black/5 dark:bg-black/40">
+            <figure className="relative overflow-hidden rounded-xl border border-white/[0.02] bg-black/5 dark:bg-black/40">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={normalizeImageUrl(question.imageUrl)}
@@ -238,7 +238,7 @@ export function QuestionCard({
           ) : (
             <>
               {question.imageUrl ? (
-                <figure className="overflow-hidden rounded-xl border border-border bg-muted/20">
+                <figure className="overflow-hidden rounded-xl border border-white/[0.02] bg-muted/20">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={normalizeImageUrl(question.imageUrl)}
@@ -294,7 +294,7 @@ export function QuestionCard({
                 onKeyDown={(e) => handleChoiceKeyDown(e, choiceIndex)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left text-sm transition-all duration-150 md:text-[15px]",
-                  !showResult && !isSelected && "border-border hover:border-primary/45 hover:bg-primary/[0.04]",
+                  !showResult && !isSelected && "border-white/[0.02] hover:border-primary/45 hover:bg-primary/[0.04]",
                   !showResult && isSelected && "border-primary ring-2 ring-primary/25 bg-primary/10 font-semibold shadow-sm",
                   isCorrect && "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 font-semibold",
                   isWrong && "border-red-400 bg-red-50 dark:bg-red-950/35",
@@ -334,13 +334,13 @@ export function QuestionCard({
               disabled={showResult}
               rows={6}
               className={cn(
-                "w-full rounded-xl border border-border bg-background px-3.5 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/25 md:text-[15px]",
+                "w-full rounded-xl border border-white/[0.02] bg-background px-3.5 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/25 md:text-[15px]",
                 showResult && "opacity-90"
               )}
               placeholder="Write your answer in your own words. AI compares it to the model answer and awards partial credit by concept stages."
             />
             {showResult && essayReview ? (
-              <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm">
+              <div className="space-y-2 rounded-xl border border-primary/10 bg-primary/[0.06] px-4 py-3 text-sm">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">AI grading</span>
                   <span className="font-display text-lg font-bold tabular-nums text-primary">{essayReview.scorePercent}%</span>
@@ -360,7 +360,7 @@ export function QuestionCard({
                   </ul>
                 ) : null}
                 {essayReview.feedback ? (
-                  <div className="border-t border-border/60 pt-2 text-sm leading-relaxed text-foreground">
+                  <div className="border-t border-white/[0.02] pt-2 text-sm leading-relaxed text-foreground">
                     <ReactMarkdown
                       components={{
                         p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -377,7 +377,7 @@ export function QuestionCard({
         )}
 
         {showResult && question.explanation?.trim() && (
-          <section className="rounded-xl border border-border/80 bg-muted/25 px-4 py-3" aria-label="Author explanation">
+          <section className="rounded-xl border border-white/[0.02] bg-muted/25 px-4 py-3" aria-label="Author explanation">
             <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Explanation</h3>
             <div className="mt-2 text-sm leading-relaxed text-foreground">
               <ReactMarkdown
@@ -393,7 +393,7 @@ export function QuestionCard({
         )}
 
         {showAiPanel && !examMode && (
-          <div className="border-t border-border pt-4">
+          <div className="border-t border-white/[0.02] pt-4">
             <button
               type="button"
               onClick={handleExplain}
@@ -410,7 +410,7 @@ export function QuestionCard({
             </button>
 
             {explainOpen && explanation && (
-              <div className="mt-3 rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm leading-relaxed animate-fade-in">
+              <div className="mt-3 rounded-xl border border-primary/10 bg-primary/[0.06] px-4 py-3 text-sm leading-relaxed animate-fade-in">
                 <ReactMarkdown
                   components={{
                     p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -427,3 +427,4 @@ export function QuestionCard({
     </article>
   );
 }
+

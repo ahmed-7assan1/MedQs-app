@@ -23,7 +23,7 @@ export default async function TaskatPage() {
   if (!user?.semesterId) {
     return (
       <div className="flex h-screen items-center justify-center p-6 text-center">
-        <div className="max-w-md space-y-4 rounded-3xl border border-white/10 bg-slate-900/50 p-8 shadow-2xl backdrop-blur-xl">
+        <div className="max-w-md space-y-4 rounded-3xl border border-white/[0.03] bg-slate-900/50 p-8 shadow-2xl backdrop-blur-xl">
           <h1 className="text-2xl font-bold font-display">Semster not set</h1>
           <p className="text-muted-foreground">Please complete your profile setup to access your curriculum checklist.</p>
         </div>
@@ -80,3 +80,4 @@ export default async function TaskatPage() {
     />
   );
 }
+

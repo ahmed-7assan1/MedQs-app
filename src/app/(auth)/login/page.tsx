@@ -90,7 +90,7 @@ export default async function LoginPage() {
               await signIn("google", { redirectTo: "/dashboard" });
             }}>
               <button type="submit"
-                className="group flex w-full items-center gap-4 rounded-2xl border border-border/60 bg-background/80 px-5 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-blue-500/40 hover:bg-muted/40 hover:shadow-md active:scale-[0.98] dark:bg-white/5 dark:hover:bg-white/8">
+                className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.02] bg-background/80 px-5 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-blue-500/40 hover:bg-muted/40 hover:shadow-md active:scale-[0.98] dark:bg-white/5 dark:hover:bg-white/8">
                 {/* Custom G icon (not Google branded) */}
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
                   <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24" aria-hidden>
@@ -108,7 +108,7 @@ export default async function LoginPage() {
               await signIn("facebook", { redirectTo: "/dashboard" });
             }}>
               <button type="submit"
-                className="group flex w-full items-center gap-4 rounded-2xl border border-border/60 bg-background/80 px-5 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-blue-600/40 hover:bg-muted/40 hover:shadow-md active:scale-[0.98] dark:bg-white/5 dark:hover:bg-white/8">
+                className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.02] bg-background/80 px-5 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-blue-600/40 hover:bg-muted/40 hover:shadow-md active:scale-[0.98] dark:bg-white/5 dark:hover:bg-white/8">
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1877F2] to-[#0d65d9] shadow-sm">
                   <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24" aria-hidden>
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -122,14 +122,14 @@ export default async function LoginPage() {
 
           {/* Divider */}
           <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 border-t border-border/60" />
+            <div className="flex-1 border-t border-white/[0.02]" />
             <span className="text-xs text-muted-foreground">or</span>
-            <div className="flex-1 border-t border-border/60" />
+            <div className="flex-1 border-t border-white/[0.02]" />
           </div>
 
           {/* Guest access */}
           <Link href="/guest/past-papers"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border/60 bg-background/40 px-5 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-muted/30 hover:text-foreground dark:bg-white/3 dark:hover:bg-white/6">
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/[0.02] bg-background/40 px-5 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-muted/30 hover:text-foreground dark:bg-white/3 dark:hover:bg-white/6">
             Browse as Guest (no account)
           </Link>
 
@@ -142,7 +142,7 @@ export default async function LoginPage() {
           </p>
 
           {/* Doctor hint */}
-          <p className="mt-3 rounded-xl border border-border/40 bg-muted/30 px-3 py-2.5 text-center text-[11px] leading-relaxed text-muted-foreground dark:bg-white/3">
+          <p className="mt-3 rounded-xl border border-white/[0.05] bg-muted/30 px-3 py-2.5 text-center text-[11px] leading-relaxed text-muted-foreground dark:bg-white/3">
             {PLATFORM_COPY.loginDoctorHint}{" "}
             <Link href="/doctor" className="font-semibold text-blue-500 hover:underline">
               {PLATFORM_COPY.landingForDoctorsCta}
@@ -153,3 +153,4 @@ export default async function LoginPage() {
     </div>
   );
 }
+

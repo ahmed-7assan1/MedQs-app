@@ -86,7 +86,7 @@ export default function AdminDuplicatesPage() {
           <button
             onClick={loadDuplicates}
             disabled={loading}
-            className="flex items-center gap-2 rounded-xl bg-card border border-border/60 px-5 py-2.5 text-sm font-bold text-foreground shadow-sm hover:bg-muted/50 disabled:opacity-50 transition-all font-display"
+            className="flex items-center gap-2 rounded-xl bg-card border border-white/[0.02] px-5 py-2.5 text-sm font-bold text-foreground shadow-sm hover:bg-muted/50 disabled:opacity-50 transition-all font-display"
           >
             <RefreshCw className={cn("h-4 w-4 text-rose-500", loading && "animate-spin")} />
             {loading ? "Scanning System…" : "Initalize Scan"}
@@ -103,7 +103,7 @@ export default function AdminDuplicatesPage() {
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest animate-pulse">Analyzing Curricular Nodes…</p>
         </div>
       ) : groups.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 py-24 text-center bg-card/10">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/[0.02] py-24 text-center bg-card/10">
           <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 shadow-inner">
             <CopyX className="h-10 w-10 text-emerald-500" />
           </div>
@@ -125,8 +125,8 @@ export default function AdminDuplicatesPage() {
           
           <div className="grid gap-6">
             {groups.map((group, groupIndex) => (
-              <div key={group.normalizedKey} className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all hover:border-rose-500/30 hover:shadow-xl">
-                <div className="border-b border-border/40 bg-muted/20 p-5">
+              <div key={group.normalizedKey} className="group relative overflow-hidden rounded-2xl border border-white/[0.02] bg-card shadow-sm transition-all hover:border-rose-500/30 hover:shadow-xl">
+                <div className="border-b border-white/[0.05] bg-muted/20 p-5">
                   <div className="flex items-start justify-between gap-6">
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Common Content Path</p>
@@ -159,7 +159,7 @@ export default function AdminDuplicatesPage() {
                       
                       <div className="flex items-center gap-2 shrink-0 lg:w-auto w-full">
                          <a href={`/admin/questions?search=${encodeURIComponent(q.id)}`} target="_blank" 
-                            className="flex-1 lg:flex-none h-11 flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-background/50 px-4 text-xs font-bold hover:bg-muted transition-all">
+                            className="flex-1 lg:flex-none h-11 flex items-center justify-center gap-2 rounded-xl border border-white/[0.02] bg-background/50 px-4 text-xs font-bold hover:bg-muted transition-all">
                             <ExternalLink className="h-4 w-4 text-blue-500" />
                             View Source
                          </a>
@@ -183,3 +183,4 @@ export default function AdminDuplicatesPage() {
     </div>
   );
 }
+

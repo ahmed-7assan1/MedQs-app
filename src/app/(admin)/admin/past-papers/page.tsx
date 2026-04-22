@@ -194,7 +194,7 @@ export default function AdminPastPapersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-white/[0.02] bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
             <FileText className="h-4 w-4 text-primary" />
             <span>{papers.length.toLocaleString()} Papers</span>
           </div>
@@ -229,7 +229,7 @@ export default function AdminPastPapersPage() {
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 placeholder="e.g. Final Anatomy Exam 2024"
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50 px-4 text-sm focus:ring-blue-500/40 focus:outline-none"
               />
             </div>
 
@@ -238,7 +238,7 @@ export default function AdminPastPapersPage() {
               <MedqsSelect
                 value={form.semesterId}
                 onChange={(e) => setForm((f) => ({ ...f, semesterId: e.target.value }))}
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50"
+                className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50"
               >
                 <option value="">Select Semester…</option>
                 {semesters.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -250,7 +250,7 @@ export default function AdminPastPapersPage() {
               <MedqsSelect
                 value={form.moduleId}
                 onChange={(e) => setForm((f) => ({ ...f, moduleId: e.target.value }))}
-                className="w-full h-11 rounded-xl border-border/60 bg-background/50"
+                className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50"
               >
                 <option value="">Select Module…</option>
                 {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
@@ -266,12 +266,12 @@ export default function AdminPastPapersPage() {
                   value={form.timeLimitMin}
                   onChange={(e) => setForm((f) => ({ ...f, timeLimitMin: e.target.value }))}
                   placeholder="e.g. 60"
-                  className="w-full h-11 rounded-xl border-border/60 bg-background/50 pl-10 pr-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+                  className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50 pl-10 pr-4 text-sm focus:ring-blue-500/40 focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-background/30 p-3">
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.02] bg-background/30 p-3">
               <div>
                 <p className="text-sm font-bold">Interactive Mode</p>
                 <p className="text-[10px] text-muted-foreground">Enable student quiz logic</p>
@@ -352,7 +352,7 @@ export default function AdminPastPapersPage() {
             )}
           </div>
 
-          <div className="flex items-center justify-between border-t border-border/60 pt-5">
+          <div className="flex items-center justify-between border-t border-white/[0.02] pt-5">
             <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground">Discard</button>
             <button
               onClick={handleCreate}
@@ -372,7 +372,7 @@ export default function AdminPastPapersPage() {
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       ) : papers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 py-24 text-center bg-muted/5">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.02] py-24 text-center bg-muted/5">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20 mb-4">
             <FileText className="h-8 w-8 text-muted-foreground opacity-30" />
           </div>
@@ -382,7 +382,7 @@ export default function AdminPastPapersPage() {
       ) : (
         <div className="space-y-3">
           {papers.map(paper => (
-            <div key={paper.id} className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 transition-all hover:border-blue-500/40 hover:shadow-lg">
+            <div key={paper.id} className="group relative overflow-hidden rounded-2xl border border-white/[0.02] bg-card p-5 transition-all hover:border-blue-500/40 hover:shadow-lg">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-4 min-w-0">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 shadow-inner">
@@ -424,7 +424,7 @@ export default function AdminPastPapersPage() {
                         onClick={btn.onClick}
                         className={cn(
                           "rounded-lg px-2 py-1 text-[9px] font-bold uppercase tracking-widest transition-all",
-                          btn.active ? "bg-blue-600 text-white shadow shadow-blue-500/30" : "border border-border/60 text-muted-foreground hover:bg-muted"
+                          btn.active ? "bg-blue-600 text-white shadow shadow-blue-500/30" : "border border-white/[0.02] text-muted-foreground hover:bg-muted"
                         )}
                       >
                         {btn.label}
@@ -433,7 +433,7 @@ export default function AdminPastPapersPage() {
                   </div>
                   <button
                     onClick={() => handleDelete(paper.id, paper.title)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background/50 text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 sm:self-end"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.02] bg-background/50 text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 sm:self-end"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -446,3 +446,4 @@ export default function AdminPastPapersPage() {
     </div>
   );
 }
+

@@ -23,6 +23,7 @@ export default function EditProfilePage() {
 
   const [form, setForm] = useState({
     name: "",
+    handle: "",
     nickname: "",
     bio: "",
     phone: "",
@@ -96,6 +97,7 @@ export default function EditProfilePage() {
         if (me && typeof me === "object") {
           setForm({
             name:          me.name          ?? "",
+            handle:        me.handle        ?? "",
             nickname:      me.nickname      ?? "",
             bio:           me.bio           ?? "",
             phone:         me.phone         ?? "",
@@ -162,6 +164,7 @@ export default function EditProfilePage() {
     try {
       const payload = {
         ...form,
+        handle:       form.handle.trim()       || null,
         nickname:     form.nickname.trim()     || null,
         studentId:    form.studentId.trim()    || null,
         instagramUrl: form.instagramUrl.trim() || null,
@@ -240,31 +243,38 @@ export default function EditProfilePage() {
         </div>
 
         {/* Personal info */}
-        <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-          <div className="flex items-center gap-2"><User className="h-4 w-4 text-primary" /><h2 className="font-semibold">Personal Info</h2></div>
+        <div className="rounded-2xl border border-white/[0.02] bg-white/[0.02] p-5 lg:p-6 space-y-5">
+          <div className="flex items-center gap-2"><User className="h-4 w-4 text-[#AFA9EC]" /><h2 className="font-semibold text-white">Personal Info</h2></div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Display name</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Display Name</label>
             <input type="text" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+              className="w-full rounded-xl border border-white/[0.02] bg-white/[0.04] px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#534AB7] transition-all" />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Username</label>
-            <input type="text" value={form.nickname} onChange={(e) => setForm((f) => ({ ...f, nickname: e.target.value.replace(/\s+/g, "") }))}
-              placeholder="no spaces, e.g. med.student7"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">@Handle (Unique)</label>
+            <input type="text" value={form.handle} onChange={(e) => setForm((f) => ({ ...f, handle: e.target.value.replace(/\s+/g, "").toLowerCase() }))}
+              placeholder="e.g. med.student7"
+              className="w-full rounded-xl border border-white/[0.02] bg-white/[0.04] px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#534AB7] transition-all" />
+            <p className="mt-1.5 text-[11px] text-white/30">Your unique public identifier.</p>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Student ID</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Nickname</label>
+            <input type="text" value={form.nickname} onChange={(e) => setForm((f) => ({ ...f, nickname: e.target.value }))}
+              placeholder="e.g. Doc"
+              className="w-full rounded-xl border border-white/[0.02] bg-white/[0.04] px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#534AB7] transition-all" />
+          </div>
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Student ID</label>
             <input type="text" value={form.studentId} onChange={(e) => setForm((f) => ({ ...f, studentId: e.target.value.replace(/\s+/g, "") }))}
               placeholder="At least 6 chars"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+              className="w-full rounded-xl border border-white/[0.02] bg-white/[0.04] px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#534AB7] transition-all" />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Bio <span className="opacity-60">(optional)</span></label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Bio <span className="opacity-60">(optional)</span></label>
             <textarea value={form.bio} onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))} rows={3} maxLength={500}
               placeholder="Tell other students about yourself..."
-              className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground" />
-            <p className="mt-1 text-right text-xs text-muted-foreground">{form.bio.length}/500</p>
+              className="w-full resize-none rounded-xl border border-white/[0.02] bg-white/[0.04] px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#534AB7] placeholder:text-white/20 transition-all" />
+            <p className="mt-1.5 text-right text-[11px] text-white/30">{form.bio.length}/500</p>
           </div>
         </div>
 
@@ -427,3 +437,4 @@ export default function EditProfilePage() {
     </StudentPageShell>
   );
 }
+

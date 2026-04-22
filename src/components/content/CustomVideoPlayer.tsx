@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play, Pause, Volume2, VolumeX, Maximize, Minimize,
   Settings, Check, Gauge, RotateCcw, Languages, ChevronRight, ArrowLeft, CheckCircle2,
-  VideoOff
+  VideoOff, SkipBack, SkipForward, Info, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -66,7 +66,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
   const [buffering, setBuffering] = useState(false);
   const [buffered, setBuffered] = useState(0);
@@ -89,14 +89,11 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
 
   useEffect(() => {
     setMounted(true);
-
-    // Pre-load YouTube API script globally
     if (typeof window !== "undefined" && !document.querySelector('script[src*="youtube.com/iframe_api"]')) {
       const tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
       document.head.appendChild(tag);
     }
-
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onFsChange);
     return () => {
@@ -108,33 +105,28 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
 
   useEffect(() => {
     if (!ytId || !mounted || !iframeLoaded) return;
-
     const initPlayer = () => {
       if (!iframeRef.current || !ytId) return;
-
       ytPlayerRef.current = new (window as any).YT.Player(iframeRef.current, {
         videoId: ytId,
         playerVars: {
-          autoplay: playing ? 1 : 0,
+          autoplay: 0,
           controls: 0,
-          rel: 0,
           modestbranding: 1,
           enablejsapi: 1,
           origin: typeof window !== "undefined" ? window.location.origin : undefined,
-          widget_referrer: typeof window !== "undefined" ? window.location.href : undefined,
+          iv_load_policy: 3,
+          disablekb: 1,
+          rel: 0,
         },
         events: {
           onReady: (event: any) => {
             setDuration(event.target.getDuration?.() ?? 0);
             event.target.setVolume(volume * 100);
-            setVideoReady(true); // Show the iframe as soon as it's ready
-
-            // Fetch initial settings
+            setVideoReady(true);
             const rawQualities = event.target.getAvailableQualityLevels?.() ?? [];
             setAvailableQualities(rawQualities.filter((q: string) => q !== "auto"));
-            setAvailableRates(event.target.getAvailablePlaybackRates?.() ?? [1, 1.25, 1.5, 2]);
-
-            // Autoplay logic
+            setAvailableRates(event.target.getAvailablePlaybackRates?.() ?? [0.5, 0.75, 1, 1.25, 1.5, 2]);
             if (playing) {
               event.target.unMute();
               event.target.playVideo();
@@ -146,54 +138,40 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
               setPlaying(true);
               setVideoReady(true);
               setBuffering(false);
-              ytPlayerRef.current?.unMute();
-              setDuration(ytPlayerRef.current?.getDuration?.() ?? 0);
-
-              // Update qualities in case they changed
-              const rawQualities = ytPlayerRef.current?.getAvailableQualityLevels?.() ?? [];
-              setAvailableQualities(rawQualities.filter((q: string) => q !== "auto"));
-
+              if (ytPlayerRef.current?.unMute) ytPlayerRef.current.unMute();
               if (progressTimer.current) clearInterval(progressTimer.current);
               progressTimer.current = setInterval(() => {
-                const cur = ytPlayerRef.current?.getCurrentTime?.() ?? 0;
-                const dur = ytPlayerRef.current?.getDuration?.() ?? 1;
-                const loaded = ytPlayerRef.current?.getVideoLoadedFraction?.() ?? 0;
+                const cur = ytPlayerRef.current?.getCurrentTime ? ytPlayerRef.current.getCurrentTime() : 0;
+                const dur = ytPlayerRef.current?.getDuration ? ytPlayerRef.current.getDuration() : 1;
+                const loaded = ytPlayerRef.current?.getVideoLoadedFraction ? ytPlayerRef.current.getVideoLoadedFraction() : 0;
                 setPlayed(cur / dur);
                 setBuffered(loaded);
               }, 250);
             } else if (e.data === YT.PlayerState.BUFFERING) {
-              setPlaying(false);
               setBuffering(true);
             } else if (e.data === YT.PlayerState.ENDED) {
               setPlaying(false);
               setVideoReady(false);
-              setIframeLoaded(false); // Kill and reset to thumbnail
+              setIframeLoaded(false);
             } else if (e.data === YT.PlayerState.PAUSED) {
               setPlaying(false);
               setBuffering(false);
-              if (progressTimer.current) clearInterval(progressTimer.current);
             }
           },
           onError: (e: any) => {
-            // 101 or 150 means owner disabled playback in embedded players
-            if (e.data === 150 || e.data === 101) {
-              setPlaybackRestricted(true);
-            }
+            if (e.data === 150 || e.data === 101) setPlaybackRestricted(true);
           }
         },
       });
     };
-
-    if ((window as any).YT?.Player) {
-      initPlayer();
-    } else {
-      const existingCallback = (window as any).onYouTubeIframeAPIReady;
-      (window as any).onYouTubeIframeAPIReady = () => {
-        if (existingCallback) existingCallback();
+    const checkApiAndInit = (attempts = 0) => {
+      if ((window as any).YT?.Player) {
         initPlayer();
-      };
-    }
-
+      } else if (attempts < 20) {
+        setTimeout(() => checkApiAndInit(attempts + 1), 200);
+      }
+    };
+    checkApiAndInit();
     return () => {
       if (progressTimer.current) clearInterval(progressTimer.current);
       try { ytPlayerRef.current?.destroy?.(); } catch (_) { }
@@ -205,122 +183,72 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
     setShowControls(true);
     if (hideTimeout.current) clearTimeout(hideTimeout.current);
     if (playing) {
-      hideTimeout.current = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
+      hideTimeout.current = setTimeout(() => setShowControls(false), 3000);
     }
   }, [playing]);
+
+  const seekRelative = (seconds: number) => {
+    if (ytId && ytPlayerRef.current?.getCurrentTime) {
+      const cur = ytPlayerRef.current.getCurrentTime();
+      const dur = ytPlayerRef.current.getDuration() || 0;
+      const next = Math.max(0, Math.min(dur, cur + seconds));
+      ytPlayerRef.current.seekTo(next, true);
+      setPlayed(next / (dur || 1));
+    }
+  };
+
+  const handleContainerClick = (e: React.MouseEvent) => {
+    if (!showControls) {
+      setShowControls(true);
+      resetHideTimer();
+      return;
+    }
+    setShowControls(true);
+    resetHideTimer();
+  };
 
   const togglePlayPause = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (ytId) {
-      if (!iframeLoaded) {
-        setIframeLoaded(true);
+      if (!videoReady) {
         setPlaying(true);
         return;
       }
       if (playing) {
-        ytPlayerRef.current?.pauseVideo();
+        if (ytPlayerRef.current?.pauseVideo) ytPlayerRef.current.pauseVideo();
+        setPlaying(false);
       } else {
-        ytPlayerRef.current?.unMute();
-        ytPlayerRef.current?.playVideo();
+        if (ytPlayerRef.current?.playVideo) ytPlayerRef.current.playVideo();
+        setPlaying(true);
       }
     } else if (videoRef.current) {
       if (playing) videoRef.current.pause();
       else videoRef.current.play();
     }
-  }, [ytId, iframeLoaded, playing]);
-
-  const handleMuteToggle = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    const next = !muted;
-    setMuted(next);
-    if (ytId && ytPlayerRef.current) {
-      next ? ytPlayerRef.current.mute() : ytPlayerRef.current.unMute();
-    } else if (videoRef.current) {
-      videoRef.current.muted = next;
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = parseFloat(e.target.value);
-    setVolume(v);
-    setMuted(v === 0);
-    if (ytId && ytPlayerRef.current) {
-      ytPlayerRef.current.setVolume(v * 100);
-      if (v > 0) ytPlayerRef.current.unMute();
-    } else if (videoRef.current) {
-      videoRef.current.volume = v;
-    }
-  };
+  }, [ytId, videoReady, playing]);
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
     setPlayed(val);
     if (ytId && ytPlayerRef.current) {
-      const dur = ytPlayerRef.current.getDuration?.() ?? 0;
-      ytPlayerRef.current.seekTo(val * dur, true);
+      const dur = ytPlayerRef.current?.getDuration ? ytPlayerRef.current.getDuration() : 0;
+      if (ytPlayerRef.current?.seekTo) ytPlayerRef.current.seekTo(val * dur, true);
     } else if (videoRef.current && duration > 0) {
       videoRef.current.currentTime = val * duration;
     }
   };
 
-  const cyclePlaybackRate = (e: React.MouseEvent) => {
+  const handleMuteToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const rates = availableRates.length > 0 ? availableRates : [0.75, 1, 1.25, 1.5, 2];
-    const nextIdx = (rates.indexOf(playbackRate) + 1) % rates.length;
-    const next = rates[nextIdx];
-    setPlaybackRate(next);
-    if (ytId && ytPlayerRef.current) ytPlayerRef.current.setPlaybackRate(next);
-    else if (videoRef.current) videoRef.current.playbackRate = next;
-  };
-
-  const updateQuality = (q: string) => {
-    setSelectedQuality(q);
+    const next = !muted;
+    setMuted(next);
     if (ytId && ytPlayerRef.current) {
-      ytPlayerRef.current.setPlaybackQuality(q);
-      // Force re-buffer
-      const cur = ytPlayerRef.current.getCurrentTime?.() ?? 0;
-      ytPlayerRef.current.seekTo(cur, true);
-    }
-    setSettingsView("main");
-  };
-
-  const updateRate = (r: number) => {
-    setPlaybackRate(r);
-    if (ytId && ytPlayerRef.current) ytPlayerRef.current.setPlaybackRate(r);
-    else if (videoRef.current) videoRef.current.playbackRate = r;
-    setSettingsView("main");
-  };
-
-  const toggleCaption = (track: any) => {
-    if (ytId && ytPlayerRef.current) {
-      if (track === null) {
-        ytPlayerRef.current.unloadModule("captions");
-        ytPlayerRef.current.unloadModule("cc");
-        setCurrentTrackCode(null);
+      if (next) {
+        if (ytPlayerRef.current?.mute) ytPlayerRef.current.mute();
       } else {
-        ytPlayerRef.current.loadModule("captions");
-        ytPlayerRef.current.setOption("captions", "track", { languageCode: track.languageCode });
-        setCurrentTrackCode(track.languageCode);
+        if (ytPlayerRef.current?.unMute) ytPlayerRef.current.unMute();
       }
     }
-    setSettingsView("main");
-  };
-
-  const handleSettingsToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!showSettings && ytId && ytPlayerRef.current) {
-      // Refresh options when opening
-      setAvailableQualities(ytPlayerRef.current.getAvailableQualityLevels?.() ?? []);
-      setAvailableRates(ytPlayerRef.current.getAvailablePlaybackRates?.() ?? []);
-      try {
-        const tracks = ytPlayerRef.current.getOption?.("captions", "tracklist") ?? [];
-        setCaptionTracks(tracks);
-      } catch (_) { }
-    }
-    setShowSettings(!showSettings);
-    setSettingsView("main");
   };
 
   const toggleFullscreen = (e?: React.MouseEvent) => {
@@ -332,22 +260,12 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
 
   const [hoverPosition, setHoverPosition] = useState<number | null>(null);
 
-  const handleProgressHover = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    setHoverPosition(Math.max(0, Math.min(1, pos)));
-  };
-
-  const handleProgressLeave = () => {
-    setHoverPosition(null);
-  };
-
-  if (!mounted) return <div className="aspect-video w-full animate-pulse bg-neutral-900 rounded-xl" />;
+  if (!mounted) return <div className="aspect-video w-full animate-pulse bg-neutral-900 rounded-[14px]" />;
 
   return (
     <div
       ref={wrapperRef}
-      className="relative flex h-full w-full flex-col overflow-hidden bg-black rounded-[14px]"
+      className="group relative flex h-full w-full flex-col overflow-hidden bg-black rounded-[20px] shadow-2xl border border-white/[0.02]"
       style={{ aspectRatio: "16/9" }}
       onMouseMove={resetHideTimer}
       onMouseLeave={() => {
@@ -355,79 +273,304 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         setShowSettings(false);
         setHoverPosition(null);
       }}
-      onClick={() => setShowSettings(false)}
     >
-      {/* ... previous video layers ... */}
-      {/* 2. CENTER BUFFERING RING ... */}
-      {/* 4. CUSTOM CONTROLS OVERLAY */}
-      <div
-        className={cn(
-          "absolute inset-x-0 bottom-0 z-50 transition-all duration-300 px-4 pb-4 md:pb-6",
-          showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-        )}
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)", height: "auto", minHeight: "120px" }}
+      <div 
+        className="absolute inset-0 z-0 bg-black cursor-pointer"
+        onClick={handleContainerClick}
       >
-        {/* ... Row 1: Controls ... */}
-        {/* Row 2: Progress Bar (Now BOTTOM) */}
-        <div 
-          className="group relative flex h-1.5 cursor-pointer items-center rounded-full bg-white/10 transition-all hover:h-2"
-          onMouseMove={handleProgressHover}
-          onMouseLeave={handleProgressLeave}
-        >
-          {/* Seek Preview Overlay */}
-          <AnimatePresence>
-            {hoverPosition !== null && duration > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.9 }}
-                animate={{ opacity: 1, y: -20, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                className="absolute z-50 flex flex-col items-center gap-2 pointer-events-none"
-                style={{ left: `${hoverPosition * 100}%`, transform: "translateX(-50%)" }}
+        {!videoReady && ytId && (
+          <div className="absolute inset-0 z-10 bg-black">
+            <img 
+              src={`https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`} 
+              className="h-full w-full object-cover opacity-60 blur-[1px]" 
+              alt=""
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <button 
+                onClick={togglePlayPause}
+                className="group/play relative flex h-20 w-20 items-center justify-center rounded-full bg-red-600 text-white shadow-[0_0_50px_rgba(220,38,38,0.4)] transition-all hover:scale-110 hover:bg-red-500"
               >
-                {/* Thumbnail Preview */}
-                <div className="w-32 md:w-40 aspect-video rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black">
-                  {ytId ? (
-                    <img 
-                      src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
-                      className="w-full h-full object-cover"
-                      alt="Preview"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-neutral-800">
-                      <Play className="h-6 w-6 text-white/20" />
-                    </div>
-                  )}
-                  {/* Timestamp Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[11px] font-bold text-white border border-white/10">
-                      {formatTime(hoverPosition * duration)}
+                {playing ? (
+                  <Loader2 className="h-10 w-10 animate-spin" />
+                ) : (
+                  <Play className="ml-1.5 h-10 w-10 fill-current" />
+                )}
+              </button>
+              {!playing && <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Click to start lecture</p>}
+            </div>
+          </div>
+        )}
+        {ytId && (
+          <div
+            ref={iframeRef}
+            className="h-full w-full"
+            style={{ 
+              visibility: iframeLoaded ? "visible" : "hidden"
+            }}
+          />
+        )}
+
+        {!videoReady && (
+          <>
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/80 to-transparent z-[5] pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent z-[5] pointer-events-none" />
+          </>
+        )}
+
+        {/* Persistent Brand Overlay (Masks YouTube Logo) */}
+        <div className="absolute bottom-6 right-6 z-[12] pointer-events-none">
+          <div className="flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-3 py-1.5 border border-white/10 shadow-xl">
+            <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center">
+              <Play className="h-3 w-3 fill-white text-white ml-0.5" />
+            </div>
+            <span className="text-[10px] font-bold tracking-widest text-white uppercase">MedQs Studio</span>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {showControls && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-[40] flex items-center justify-center gap-6 md:gap-12 bg-black/20 backdrop-blur-[1px]"
+              onClick={(e) => { e.stopPropagation(); setShowControls(false); }}
+            >
+              <button 
+                onClick={(e) => { e.stopPropagation(); seekRelative(-10); }}
+                className="group/seek flex flex-col items-center gap-2 text-white/80 transition-all hover:scale-110 hover:text-white"
+              >
+                <div className="flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-full bg-black/40 border border-white/10">
+                  <SkipBack className="h-8 w-8 fill-current" />
+                </div>
+                <span className="text-xs font-bold">10s</span>
+              </button>
+
+              <button 
+                onClick={togglePlayPause}
+                className="group/play flex h-24 w-24 items-center justify-center rounded-full bg-red-600 text-white shadow-[0_0_50px_rgba(220,38,38,0.4)] transition-all hover:scale-110 hover:bg-red-500"
+              >
+                {playing ? (
+                  <Pause className="h-10 w-10 md:h-12 md:w-12 fill-current" />
+                ) : (
+                  <Play className="ml-2 h-10 w-10 md:h-12 md:w-12 fill-current" />
+                )}
+              </button>
+
+              <button 
+                onClick={(e) => { e.stopPropagation(); seekRelative(10); }}
+                className="group/seek flex flex-col items-center gap-2 text-white/80 transition-all hover:scale-110 hover:text-white"
+              >
+                <div className="flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-full bg-black/40 border border-white/10">
+                  <SkipForward className="h-8 w-8 fill-current" />
+                </div>
+                <span className="text-xs font-bold">10s</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* BUFFERING & RESTRICTED OVERLAYS */}
+      {buffering && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-[2px] pointer-events-none">
+          <div className="h-12 w-12 rounded-full border-4 border-white/10 border-t-red-600 animate-spin" />
+        </div>
+      )}
+      
+      {playbackRestricted && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#0A0A0B] p-8 text-center">
+          <VideoOff className="mb-4 h-16 w-16 text-white/20" />
+          <h3 className="mb-2 text-xl font-bold text-white">Embedded Playback Disabled</h3>
+          <p className="mb-6 text-sm text-white/40 max-w-sm">
+            The owner of this video has restricted playback to YouTube only.
+          </p>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-red-600 px-8 py-3 text-sm font-black text-white transition-all hover:bg-red-500 hover:scale-105"
+          >
+            Watch on YouTube
+          </a>
+        </div>
+      )}
+
+      {/* CLICK RECEIVER */}
+      <div className="absolute inset-0 z-30 cursor-pointer" onClick={togglePlayPause} onDoubleClick={toggleFullscreen} />
+
+      {/* PREMIUM CONTROLS OVERLAY */}
+      <AnimatePresence>
+        {showControls && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute inset-x-0 bottom-0 z-50 flex flex-col gap-4 px-5 pb-5 pt-20"
+            style={{ 
+              background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 70%, transparent 100%)",
+              pointerEvents: "auto" 
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Row: Title or Header (Optional) */}
+            {title && isFullscreen && (
+              <div className="absolute top-6 left-6 flex items-center gap-4 text-white drop-shadow-lg">
+                <Info className="h-5 w-5 text-red-500" />
+                <span className="font-bold tracking-tight">{title}</span>
+              </div>
+            )}
+
+            {/* Bottom Controls Container */}
+            <div className="flex flex-col gap-4">
+              
+              {/* Row 1: Seeker Bar */}
+              <div className="group relative flex h-1.5 w-full cursor-pointer items-center rounded-full bg-white/10 transition-all hover:h-2">
+                <div 
+                  className="absolute left-0 top-0 h-full rounded-full bg-white/10 pointer-events-none" 
+                  style={{ width: `${buffered * 100}%` }} 
+                />
+                <div 
+                  className="absolute left-0 top-0 h-full rounded-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all pointer-events-none" 
+                  style={{ width: `${played * 100}%` }} 
+                >
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-3.5 w-3.5 scale-0 rounded-full bg-white shadow-xl transition-transform group-hover:scale-100" />
+                </div>
+                <input
+                  type="range" min={0} max={1} step="any" value={played}
+                  onChange={handleSeek}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+
+              {/* Row 2: Icons and Meta */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 md:gap-6">
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); seekRelative(-10); }} className="text-white/70 hover:text-red-500 transition-colors">
+                      <SkipBack className="h-5 w-5" />
+                    </button>
+                    <button onClick={togglePlayPause} className="text-white hover:text-red-500 transition-colors">
+                      {playing ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current" />}
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); seekRelative(10); }} className="text-white/70 hover:text-red-500 transition-colors">
+                      <SkipForward className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  {/* Volume */}
+                  <div className="group/vol flex items-center gap-2">
+                    <button onClick={handleMuteToggle} className="text-white hover:text-red-500 transition-colors">
+                      {muted || volume === 0 ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
+                    </button>
+                    <div className="w-0 overflow-hidden transition-all duration-300 group-hover/vol:w-20 md:group-hover/vol:w-24">
+                      <input 
+                        type="range" min={0} max={1} step="0.01" value={volume}
+                        onChange={(e) => {
+                          const v = parseFloat(e.target.value);
+                          setVolume(v);
+                          if (ytPlayerRef.current?.setVolume) ytPlayerRef.current.setVolume(v * 100);
+                        }}
+                        className="h-1 w-full accent-red-600"
+                      />
                     </div>
                   </div>
-                </div>
-                {/* Carrot */}
-                <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white/20" />
-              </motion.div>
-            )}
-          </AnimatePresence>
 
-          <div
-            className="pointer-events-none absolute left-0 top-0 h-full rounded-full bg-white/10"
-            style={{ width: `${buffered * 100}%` }}
-          />
-          <div
-            className="pointer-events-none absolute left-0 top-0 h-full rounded-full bg-red-600 transition-all"
-            style={{ width: `${played * 100}%` }}
-          >
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 h-3 w-3 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-          </div>
-          <input
-            type="range" min={0} max={1} step="any" value={played}
-            onChange={handleSeek}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-        </div>
-      </div>
+                  {/* Time Display */}
+                  <div className="text-[13px] font-bold text-white/90 tabular-nums">
+                    <span>{formatTime(played * duration)}</span>
+                    <span className="mx-1.5 opacity-30">/</span>
+                    <span className="opacity-50">{formatTime(duration)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 md:gap-5">
+                  {/* Speed Picker (Shortcut) */}
+                  <button 
+                    onClick={() => {
+                      const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+                      const idx = (rates.indexOf(playbackRate) + 1) % rates.length;
+                      const next = rates[idx];
+                      setPlaybackRate(next);
+                      if (ytPlayerRef.current?.setPlaybackRate) ytPlayerRef.current.setPlaybackRate(next);
+                    }}
+                    className="flex h-8 min-w-[50px] items-center justify-center rounded-lg bg-white/5 px-2.5 text-[11px] font-black tracking-widest text-white transition-all hover:bg-white/10 hover:text-red-500"
+                  >
+                    {playbackRate}x
+                  </button>
+
+                  {/* Settings */}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setShowSettings(!showSettings); }}
+                    className={cn("text-white transition-all hover:text-red-500", showSettings && "rotate-90 text-red-500")}
+                  >
+                    <Settings className="h-6 w-6" />
+                  </button>
+
+                  {/* Fullscreen */}
+                  <button onClick={toggleFullscreen} className="text-white hover:text-red-500 transition-colors">
+                    {isFullscreen ? <Minimize className="h-6 w-6" /> : <Maximize className="h-6 w-6" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Menu Popup */}
+            <AnimatePresence>
+              {showSettings && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                  className="absolute bottom-28 right-5 w-64 rounded-2xl border border-white/[0.05] bg-neutral-900/90 p-2 shadow-2xl backdrop-blur-xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {settingsView === "main" ? (
+                    <div className="flex flex-col gap-1">
+                      <button onClick={() => setSettingsView("quality")} className="flex items-center justify-between rounded-xl px-4 py-3 hover:bg-white/5">
+                        <div className="flex items-center gap-3"><Gauge className="h-4 w-4" /><span className="text-sm font-bold">Quality</span></div>
+                        <div className="flex items-center gap-1 text-xs text-white/40">{mapYouTubeQuality(selectedQuality)} <ChevronRight className="h-3 w-3" /></div>
+                      </button>
+                      <button onClick={() => setSettingsView("speed")} className="flex items-center justify-between rounded-xl px-4 py-3 hover:bg-white/5">
+                        <div className="flex items-center gap-3"><Gauge className="h-4 w-4" /><span className="text-sm font-bold">Speed</span></div>
+                        <div className="flex items-center gap-1 text-xs text-white/40">{playbackRate}x <ChevronRight className="h-3 w-3" /></div>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      <button onClick={() => setSettingsView("main")} className="flex items-center gap-3 border-b border-white/[0.05] px-4 py-3 hover:bg-white/5">
+                        <ArrowLeft className="h-4 w-4" /><span className="text-sm font-bold">Back</span>
+                      </button>
+                      <div className="max-h-60 overflow-y-auto py-2">
+                        {settingsView === "quality" && availableQualities.map(q => (
+                          <button key={q} onClick={() => { 
+                            setSelectedQuality(q); 
+                            if (ytPlayerRef.current?.setPlaybackQualityRange) {
+                              ytPlayerRef.current.setPlaybackQualityRange(q, q);
+                            } else if (ytPlayerRef.current?.setPlaybackQuality) {
+                              ytPlayerRef.current.setPlaybackQuality(q);
+                            }
+                            setSettingsView("main"); 
+                          }} className="flex w-full items-center justify-between px-4 py-2.5 text-sm hover:bg-white/5">
+                            <span>{mapYouTubeQuality(q)}</span>
+                            {selectedQuality === q && <Check className="h-4 w-4 text-red-500" />}
+                          </button>
+                        ))}
+                        {settingsView === "speed" && availableRates.map(r => (
+                          <button key={r} onClick={() => { setPlaybackRate(r); if (ytPlayerRef.current?.setPlaybackRate) ytPlayerRef.current.setPlaybackRate(r); setSettingsView("main"); }} className="flex w-full items-center justify-between px-4 py-2.5 text-sm hover:bg-white/5">
+                            <span>{r}x</span>
+                            {playbackRate === r && <Check className="h-4 w-4 text-red-500" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-

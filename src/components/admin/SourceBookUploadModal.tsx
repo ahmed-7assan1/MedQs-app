@@ -60,8 +60,8 @@ export function SourceBookUploadModal({ isOpen, onClose, onSuccess, facultyId }:
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-border/50 bg-card shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="flex items-center justify-between border-b border-white/5 p-6 bg-slate-900 text-white">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-white/[0.02] bg-card shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="flex items-center justify-between border-b border-white/[0.02] p-6 bg-slate-900 text-white">
           <div className="flex items-center gap-3">
              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/20">
                 <Book className="h-5 w-5 text-blue-400" />
@@ -86,7 +86,7 @@ export function SourceBookUploadModal({ isOpen, onClose, onSuccess, facultyId }:
 
               <label className={cn(
                 "group relative flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-[2rem] border-2 border-dashed transition-all",
-                file ? "border-primary/40 bg-primary/5 shadow-inner" : "border-border/60 hover:border-primary/40 hover:bg-muted/50"
+                file ? "border-primary/40 bg-primary/5 shadow-inner" : "border-white/[0.02] hover:border-primary/40 hover:bg-muted/50"
               )}>
                 <div className="flex flex-col items-center gap-2">
                   {file ? (
@@ -146,7 +146,7 @@ export function SourceBookUploadModal({ isOpen, onClose, onSuccess, facultyId }:
 
 function AnalysisLoaderItem({ label, status }: { label: string, status: "done" | "active" | "pending" }) {
   return (
-    <div className="flex items-center justify-between rounded-xl bg-muted/30 px-4 py-3 border border-border/10">
+    <div className="flex items-center justify-between rounded-xl bg-muted/30 px-4 py-3 border border-white/[0.02]">
       <span className={cn("text-xs font-bold", status === "pending" ? "text-muted-foreground/40" : "text-foreground")}>{label}</span>
       {status === "done" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
       {status === "active" && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
@@ -154,3 +154,6 @@ function AnalysisLoaderItem({ label, status }: { label: string, status: "done" |
     </div>
   );
 }
+
+
+

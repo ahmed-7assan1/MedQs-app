@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
   const result = await prisma.post.deleteMany({
     where: {
       createdAt: { lt: cutoff },
+      isPinned: false,
       author: { role: { notIn: ["ADMIN", "SUPER_ADMIN"] } },
     },
   });

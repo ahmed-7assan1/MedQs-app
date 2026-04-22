@@ -26,6 +26,9 @@ const POST_SCHEMA = z
         z.union([z.string().url("Invalid image URL"), z.literal("")]).optional()
       ),
     audience: z.enum(["UNIVERSITY", "FOLLOWERS"]).optional(),
+    isForumPost: z.boolean().optional().default(true),
+    isChatMessage: z.boolean().optional().default(false),
+    chatForumId: z.string().optional(),
   })
   .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()), {
     message: "Post cannot be empty",
@@ -122,14 +125,21 @@ export async function POST(
   const { content, imageUrl } = parsed.data;
   const audience = parsed.data.audience ?? "UNIVERSITY";
 
+  // Calculate expiry (10 days from now)
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 10);
+
   const post = await prisma.post.create({
     data: {
       content,
       imageUrl: imageUrl?.trim() || undefined,
       authorId: session.user.id,
-      forumId,
+      forumId: (parsed.data.isChatMessage && parsed.data.chatForumId) ? parsed.data.chatForumId : forumId,
       universityId,
       audience,
+      expiresAt,
+      isForumPost: parsed.data.isForumPost,
+      isChatMessage: parsed.data.isChatMessage,
     },
     include: {
       author: {

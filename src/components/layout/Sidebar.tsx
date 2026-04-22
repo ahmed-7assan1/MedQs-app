@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import {
   LayoutDashboard, BookOpen, MessageSquare, Clock, Settings, LogOut,
   ShieldCheck, Bell, X, Sparkles, HelpCircle, Library, User,
-  Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video
+  Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video, Mic2
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore, useSidebarStore } from "@/lib/store";
@@ -27,6 +27,7 @@ export const NAV = [
   { href: "/study-tools", label: "Study Tools", icon: BarChart3 },
   { href: "/past-papers", label: "Quizzes", icon: HelpCircle },
   { href: "/videos", label: "Videos", icon: Video },
+  { href: "/podcasts", label: "Podcasts", icon: Mic2 },
   { href: "/forum", label: "Community", icon: MessageSquare },
   { href: "/taskat", label: "Taskat", icon: Clock },
 ];
@@ -126,7 +127,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
       ══════════════════════════════════════════════ */}
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-40 hidden h-14 items-center border-b border-white/5 bg-background/85 backdrop-blur-[14px] lg:flex"
+          "fixed top-0 left-0 right-0 z-40 hidden h-14 items-center border-b border-transparent bg-background/85 backdrop-blur-[14px] lg:flex"
         )}
         style={{ boxShadow: "0 1px 12px rgba(0,0,0,0.18)" }}
       >
@@ -143,7 +144,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
           </Link>
 
           {/* Vertical divider */}
-          <div className="mr-4 h-5 w-px bg-border/60 flex-shrink-0 hidden lg:block" />
+          <div className="mr-4 h-5 w-px bg-white/[0.02] flex-shrink-0 hidden lg:block" />
 
           {/* ── Desktop Nav ── */}
           <nav className="hidden lg:flex items-center gap-0.5 flex-1">
@@ -206,8 +207,8 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                 </button>
 
                 {notifOpen && (
-                  <div className="absolute right-0 top-11 z-50 w-80 rounded-2xl border border-border/80 bg-card/95 shadow-2xl backdrop-blur-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
-                    <div className="flex items-center justify-between border-b border-border/50 px-4 py-3 bg-muted/20">
+                  <div className="absolute right-0 top-11 z-50 w-80 rounded-2xl border border-white/[0.03] bg-card/95 shadow-2xl backdrop-blur-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
+                    <div className="flex items-center justify-between border-b border-white/[0.02] px-4 py-3 bg-muted/20">
                       <span className="text-sm font-semibold">Notifications</span>
                       {totalUnread > 0 && (
                         <button onClick={markAllRead} className="text-[11px] font-semibold text-primary hover:underline" >Mark all read</button>
@@ -222,7 +223,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                           <p className="text-sm">No notifications</p>
                         </div>
                       ) : notifications.map(n => (
-                        <div key={n.id} className={cn("border-b border-border/30 px-4 py-3 text-sm hover:bg-muted/40 transition-colors", !n.read && "bg-primary/5")}>
+                        <div key={n.id} className={cn("border-b border-white/[0.03] px-4 py-3 text-sm hover:bg-muted/40 transition-colors", !n.read && "bg-primary/5")}>
                           <p className="font-medium leading-tight">{n.title}</p>
                           <p className="mt-0.5 text-xs text-muted-foreground">{n.body}</p>
                         </div>
@@ -250,10 +251,10 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                 </button>
 
                 {userOpen && (
-                  <div className="absolute right-0 top-11 z-50 w-56 rounded-2xl border border-border/80 bg-card/95 shadow-2xl backdrop-blur-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
-                    <div className="border-b border-border/50 px-4 py-3 bg-muted/20">
-                      <p className="text-sm font-bold truncate">{userName}</p>
-                      <p className="text-xs text-muted-foreground">{isAdmin ? "Admin Account" : "Student"}</p>
+                  <div className="absolute right-0 top-11 z-[60] w-56 rounded-2xl border border-white/[0.03] bg-card/95 shadow-2xl backdrop-blur-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
+                    <div className="border-b border-white/[0.02] px-4 py-3 bg-muted/20">
+                      <p className="text-sm font-bold truncate text-foreground">{userName}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{isAdmin ? "Admin Account" : "Student account"}</p>
                     </div>
                     <div className="py-1.5">
                       <Link href="/profile/me" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
@@ -267,7 +268,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                       </Link>
                       {isAdmin && (
                         <Link href="/admin/dashboard" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
-                          <ShieldCheck className="h-4 w-4 text-violet-500" /> {PLATFORM_COPY.doctorPanel}
+                          <ShieldCheck className="h-4 w-4 text-blue-500" /> {PLATFORM_COPY.doctorPanel}
                         </Link>
                       )}
                       {!isGuest && (
@@ -276,7 +277,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                         </Link>
                       )}
                     </div>
-                    <div className="border-t border-border/50 py-1.5">
+                    <div className="border-t border-white/[0.02] py-1.5">
                       <button onClick={() => signOut({ callbackUrl: "/login" })} className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] font-medium text-red-500 hover:bg-red-500/10 transition-colors">
                         <LogOut className="h-4 w-4" /> Sign out
                       </button>
@@ -290,10 +291,10 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
               </Link>
             )}
 
-            {/* Mobile hamburger - HIDDEN (handled by BottomNav) */}
+            {/* Mobile hamburger - Handle by BottomNav but kept here for fallback visibility */}
             <button
               onClick={toggleMobile}
-              className="hidden lg:hidden items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+              className="flex lg:hidden items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
               aria-label="Open menu"
             >
               <div className="flex flex-col gap-[5px] w-[17px]">
@@ -320,11 +321,11 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
 
           {/* Panel */}
           <div
-            className="absolute right-0 top-0 bottom-0 w-72 max-w-[90vw] flex flex-col bg-card border-l border-border/60 shadow-2xl"
+            className="absolute right-0 top-0 bottom-0 w-72 max-w-[90vw] flex flex-col bg-card border-l border-white/[0.02] shadow-2xl"
             style={{ animation: "slideInFromRight 280ms cubic-bezier(0.16,1,0.3,1)" }}
           >
             {/* Panel header */}
-            <div className="flex h-14 items-center justify-between border-b border-border/50 px-5">
+            <div className="flex h-14 items-center justify-between px-5">
               <div className="flex items-center gap-2">
                 {logoUrl?.trim()
                   ? <img src={logoUrl} alt={siteName} className="h-7 w-7 rounded-md object-contain dark:brightness-0 dark:invert" />
@@ -348,7 +349,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
                   {[NAV[0], NAV[1], NAV[2]].map(({ href, label, icon: Icon }) => {
                     const active = isActive(href);
                     return (
-                      <Link key={href} href={href} onClick={() => setMobileOpen(false)}
+                      <Link key={href} href={href} onClick={setMobileClose}
                         className={cn(
                           "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
                           active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -366,7 +367,49 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
               <div>
                 <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 border-l-2 border-primary/50 pl-3">Practice</p>
                 <div className="space-y-0.5">
-                  {[NAV[3], NAV[4]].map(({ href, label, icon: Icon }) => {
+                  {[NAV[3]].map(({ href, label, icon: Icon }) => {
+                    const active = isActive(href);
+                    return (
+                      <Link key={href} href={href} onClick={setMobileClose}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
+                          active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                        )}>
+                        <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", active && "text-primary")} />
+                        <span>{label}</span>
+                        {active && <span className="ml-auto h-2 w-2 rounded-full bg-primary" />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Section 3: MEDIA */}
+              <div>
+                <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 border-l-2 border-primary/50 pl-3">Media</p>
+                <div className="space-y-0.5">
+                  {[NAV[4], NAV[5]].map(({ href, label, icon: Icon }) => {
+                    const active = isActive(href);
+                    return (
+                      <Link key={href} href={href} onClick={setMobileClose}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
+                          active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                        )}>
+                        <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", active && "text-primary")} />
+                        <span>{label}</span>
+                        {active && <span className="ml-auto h-2 w-2 rounded-full bg-primary" />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Section 4: COMMUNITY */}
+              <div>
+                <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 border-l-2 border-primary/50 pl-3">Community</p>
+                <div className="space-y-0.5">
+                  {[NAV[6]].map(({ href, label, icon: Icon }) => {
                     const active = isActive(href);
                     return (
                       <Link key={href} href={href} onClick={setMobileClose}
@@ -387,12 +430,20 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
               <div>
                 <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 border-l-2 border-primary/50 pl-3">Tools</p>
                 <div className="space-y-0.5">
-                  <Link href="/taskat" onClick={setMobileClose}
-                    className={cn("flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
-                      isActive("/taskat") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}>
-                    <Clock className={cn("h-[18px] w-[18px]", isActive("/taskat") && "text-primary")} />
-                    Taskat
-                  </Link>
+                  {[NAV[7]].map(({ href, label, icon: Icon }) => {
+                    const active = isActive(href);
+                    return (
+                      <Link key={href} href={href} onClick={setMobileClose}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
+                          active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                        )}>
+                        <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", active && "text-primary")} />
+                        <span>{label}</span>
+                        {active && <span className="ml-auto h-2 w-2 rounded-full bg-primary" />}
+                      </Link>
+                    );
+                  })}
                   {!isGuest && (
                     <Link href="/ai-chat" onClick={setMobileClose}
                       className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-amber-500 hover:bg-amber-500/10 transition-all">
@@ -409,14 +460,14 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
               </div>
 
               {/* Mobile search */}
-              <div className="border-t border-border/40 pt-3">
+              <div className="border-t border-white/[0.02] pt-3">
                 <GlobalSearch isGuest={isGuest} />
               </div>
             </nav>
 
             {/* Bottom: user info */}
             {!isGuest && (
-              <div className="border-t border-border/50 p-4">
+              <div className="border-t border-white/[0.02] p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 ring-2 ring-primary/20">
                     {userImage
@@ -462,3 +513,4 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQ
     </>
   );
 }
+

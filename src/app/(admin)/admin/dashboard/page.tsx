@@ -133,7 +133,7 @@ export default async function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link href="/admin/users"
-            className="flex items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground transition-all hover:border-blue-500/40 hover:text-blue-500">
+            className="flex items-center gap-1.5 rounded-xl border border-white/[0.02] bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground transition-all hover:border-blue-500/40 hover:text-blue-500">
             <Users className="h-4 w-4" />
             <span>{userCount.toLocaleString()} users</span>
           </Link>
@@ -149,7 +149,7 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map(({ label, value, icon: Icon, color, bg, border, trend }) => (
           <div key={label}
-            className={`relative overflow-hidden rounded-2xl border-l-4 ${border} border border-border/60 bg-gradient-to-br ${bg} p-4`}>
+            className={`relative overflow-hidden rounded-2xl border-l-4 ${border} border border-white/[0.02] bg-gradient-to-br ${bg} p-4`}>
             <div className={`mb-2 inline-flex rounded-xl p-2 bg-background/60 ${color}`}>
               <Icon className="h-4 w-4" />
             </div>
@@ -164,7 +164,7 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-5 lg:grid-cols-3">
 
         {/* 7-day signups chart */}
-        <div className="rounded-2xl border border-border/60 bg-card p-5 lg:col-span-1">
+        <div className="rounded-2xl border border-white/[0.02] bg-card p-5 lg:col-span-1">
           <div className="mb-4 flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">New Students</p>
@@ -197,12 +197,12 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/60 bg-card p-5 lg:col-span-2">
+        <div className="rounded-2xl border border-white/[0.02] bg-card p-5 lg:col-span-2">
           <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Quick Actions</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {quickActions.map(({ href, icon: Icon, label, desc, color, bg }) => (
               <Link key={href} href={href}
-                className="group flex flex-col gap-2 rounded-xl border border-border/60 bg-background/60 p-3 transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-md">
+                className="group flex flex-col gap-2 rounded-xl border border-white/[0.02] bg-background/60 p-3 transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-md">
                 <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${bg}`}>
                   <Icon className={`h-4.5 w-4.5 ${color}`} />
                 </div>
@@ -218,8 +218,8 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* ── Recent sign-ups ───────────────────────────────────────── */}
-      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/60 bg-muted/20 px-5 py-3.5">
+      <div className="rounded-2xl border border-white/[0.02] bg-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-white/[0.02] bg-muted/20 px-5 py-3.5">
           <div className="flex items-center gap-2">
             <Star className="h-4 w-4 text-amber-500" />
             <p className="font-semibold">Recent Sign-ups</p>

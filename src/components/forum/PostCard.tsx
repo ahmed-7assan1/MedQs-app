@@ -133,7 +133,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
               "mt-1 rounded-2xl border px-3.5 py-2.5 text-left shadow-sm",
               isOwn
                 ? "border-primary/25 bg-primary text-primary-foreground"
-                : "border-border/80 bg-muted/60 dark:bg-muted/25"
+                : "border-white/[0.02] bg-muted/60 dark:bg-muted/25"
             )}
           >
             <div
@@ -151,7 +151,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
               <img
                 src={normalizeImageUrl(post.imageUrl)}
                 alt=""
-                className="mt-2 max-h-56 w-full rounded-xl border border-white/20 object-contain"
+                className="mt-2 max-h-56 w-full rounded-xl border border-white/[0.03] object-contain"
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
@@ -161,7 +161,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
                 <Lock className="h-3 w-3" /> Replies locked
               </p>
             )}
-            <div className={cn("mt-2 flex flex-wrap items-center gap-2 border-t pt-2", isOwn ? "border-white/20" : "border-border/60")}>
+            <div className={cn("mt-2 flex flex-wrap items-center gap-2 border-t pt-2", isOwn ? "border-white/[0.02]" : "border-white/[0.02]")}>
               <button
                 type="button"
                 onClick={handleLike}
@@ -206,7 +206,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
                   <div
                     role="menu"
                     className={cn(
-                      "absolute z-50 mt-1 min-w-[160px] rounded-xl border border-border bg-card py-1 shadow-lg",
+                      "absolute z-50 mt-1 min-w-[160px] rounded-xl border border-white/[0.03] bg-card py-1 shadow-lg",
                       isOwn ? "left-0" : "right-0"
                     )}
                   >
@@ -238,7 +238,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
   }
 
   return (
-    <article className="overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:border-border/80">
+    <article className="overflow-hidden rounded-xl border border-white/[0.02] bg-card transition-all duration-200 hover:border-white/[0.03]">
       {/* Author */}
       <div className="flex items-start justify-between px-5 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
@@ -279,7 +279,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
           {menuOpen ? (
             <div
               role="menu"
-              className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-xl border border-border bg-card py-1 shadow-lg"
+              className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-xl border border-white/[0.03] bg-card py-1 shadow-lg"
             >
               <button
                 type="button"
@@ -311,7 +311,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
           <img
             src={normalizeImageUrl(post.imageUrl)}
             alt=""
-            className="mt-3 max-h-80 w-full rounded-lg border border-border bg-muted/20 object-contain"
+            className="mt-3 max-h-80 w-full rounded-lg border border-white/[0.02] bg-muted/20 object-contain"
             loading="lazy"
             referrerPolicy="no-referrer"
           />
@@ -327,7 +327,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
       )}
 
       {/* Like + Share bar */}
-      <div className="flex items-center gap-1 border-t border-border px-5 py-2.5">
+      <div className="flex items-center gap-1 border-t border-white/[0.02] px-5 py-2.5">
         <button
           onClick={handleLike}
           disabled={liking || post.interactionsDisabled}
@@ -363,3 +363,5 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
     </article>
   );
 }
+
+

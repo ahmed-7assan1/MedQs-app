@@ -8,6 +8,7 @@ import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -90,6 +91,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
             {!isGuest && <OnboardingTutorial />}
             <CookieConsentBanner />
             <BottomNav />
+            <PersistentAudioPlayer />
           </div>
         </div>
       </>

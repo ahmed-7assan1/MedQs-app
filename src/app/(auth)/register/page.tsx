@@ -250,7 +250,7 @@ export default function RegisterPage() {
                         "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
                         selectedUni?.id === uni.id
                           ? "border-blue-500/50 bg-blue-500/8"
-                          : "border-border/60 bg-card hover:border-blue-500/30 dark:bg-white/3"
+                          : "border-white/[0.02] bg-card hover:border-blue-500/30 dark:bg-white/3"
                       )}>
                       <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl"
                         style={{ background: "rgba(26,107,204,0.1)", borderLeft: "3px solid #1A6BCC" }}>
@@ -289,7 +289,7 @@ export default function RegisterPage() {
                         "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
                         selectedFaculty?.id === fac.id
                           ? "border-purple-500/50 bg-purple-500/8"
-                          : "border-border/60 bg-card hover:border-purple-500/30 dark:bg-white/3"
+                          : "border-white/[0.02] bg-card hover:border-purple-500/30 dark:bg-white/3"
                       )}>
                       <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl"
                         style={{ background: "rgba(139,92,246,0.1)", borderLeft: "3px solid #8b5cf6" }}>
@@ -334,7 +334,7 @@ export default function RegisterPage() {
                         "flex flex-col items-center rounded-xl border p-3 text-center transition-all hover:-translate-y-0.5 active:scale-[0.98]",
                         selectedYear?.id === year.id
                           ? "border-amber-500/50 bg-amber-500/8"
-                          : "border-border/60 bg-card hover:border-amber-500/30 dark:bg-white/3"
+                          : "border-white/[0.02] bg-card hover:border-amber-500/30 dark:bg-white/3"
                       )}>
                       <Calendar className={cn("mb-1 h-5 w-5", selectedYear?.id === year.id ? "text-amber-500" : "text-muted-foreground")} />
                       <span className="text-xs font-bold">Year {year.yearNumber}</span>
@@ -359,7 +359,7 @@ export default function RegisterPage() {
                           "flex w-full items-center gap-3 rounded-xl border p-3.5 text-left transition-all hover:-translate-y-0.5 active:scale-[0.98]",
                           selectedSem?.id === sem.id
                             ? "border-violet-500/50 bg-violet-500/8"
-                            : "border-border/60 bg-card hover:border-violet-500/30 dark:bg-white/3"
+                            : "border-white/[0.02] bg-card hover:border-violet-500/30 dark:bg-white/3"
                         )}>
                         <BookOpen className={cn("h-4 w-4 flex-shrink-0", selectedSem?.id === sem.id ? "text-violet-500" : "text-muted-foreground")} />
                         <span className="flex-1 font-medium">{sem.name}</span>
@@ -396,7 +396,7 @@ export default function RegisterPage() {
                     Username <span className="text-red-500">*</span>
                   </label>
                   <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="e.g. ahmed.m" maxLength={30}
-                    className="w-full rounded-xl border border-border/60 bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-white/5" />
+                    className="w-full rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-white/5" />
                   <p className="mt-1 text-[11px] text-muted-foreground">Letters, numbers, dot, underscore, dash only</p>
                 </div>
 
@@ -406,7 +406,7 @@ export default function RegisterPage() {
                     University / Faculty ID <span className="text-red-500">*</span>
                   </label>
                   <input value={studentId} onChange={e => setStudentId(e.target.value)} placeholder="Your official student number" maxLength={24}
-                    className="w-full rounded-xl border border-border/60 bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:bg-white/5" />
+                    className="w-full rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:bg-white/5" />
                   <p className="mt-1 text-[11px] text-muted-foreground">Min 6 characters</p>
                 </div>
 
@@ -415,7 +415,7 @@ export default function RegisterPage() {
                     Bio <span className="ml-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px]">optional</span>
                   </label>
                   <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell classmates a bit about yourself…" maxLength={200} rows={2}
-                    className="w-full resize-none rounded-xl border border-border/60 bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 dark:bg-white/5" />
+                    className="w-full resize-none rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 dark:bg-white/5" />
                 </div>
 
                 <div>
@@ -424,7 +424,7 @@ export default function RegisterPage() {
                     Phone <span className="ml-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px]">optional · private</span>
                   </label>
                   <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20 10 XXXX XXXX" maxLength={20} type="tel"
-                    className="w-full rounded-xl border border-border/60 bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 dark:bg-white/5" />
+                    className="w-full rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 dark:bg-white/5" />
                 </div>
 
                 <button onClick={handleFinish} disabled={saving}
@@ -457,3 +457,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

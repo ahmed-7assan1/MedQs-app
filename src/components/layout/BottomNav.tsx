@@ -41,6 +41,9 @@ const NAV_ITEMS = [
 export function BottomNav() {
   const pathname = usePathname() ?? "";
 
+  // Hide BottomNav on immersive media pages
+  if (pathname.startsWith("/videos") || pathname.startsWith("/podcasts")) return null;
+
   return (
     <div
       className="pointer-events-none fixed inset-x-0 bottom-0 z-[118] flex justify-center md:hidden"
@@ -49,7 +52,7 @@ export function BottomNav() {
       <nav
         className={cn(
           "pointer-events-auto mx-4 mb-1 w-full max-w-[440px]",
-          "rounded-[22px] border border-border/40 dark:border-white/[0.08]",
+          "rounded-[22px] border border-white/[0.05] dark:border-white/[0.02]",
           "bg-background/85 dark:bg-[#141418]/92",
           "shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_48px_rgba(0,0,0,0.55)]",
           "backdrop-blur-2xl px-2 py-2"
@@ -121,3 +124,4 @@ export function BottomNav() {
     </div>
   );
 }
+

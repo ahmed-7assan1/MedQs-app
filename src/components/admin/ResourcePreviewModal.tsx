@@ -42,10 +42,10 @@ export function ResourcePreviewModal({ resource, isOpen, onClose, onImport }: Re
       />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-4xl overflow-hidden rounded-[2.5rem] border border-border/50 bg-card/90 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-4xl overflow-hidden rounded-[2.5rem] border border-white/[0.02] bg-card/90 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border/50 px-8 py-6">
+        <div className="flex items-center justify-between border-b border-white/[0.02] px-8 py-6">
           <div className="flex items-center gap-4">
             <div className={cn(
               "flex h-12 w-12 items-center justify-center rounded-2xl ring-1 ring-border/50 shadow-inner",
@@ -95,7 +95,7 @@ export function ResourcePreviewModal({ resource, isOpen, onClose, onImport }: Re
                 )}
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                 <div className="rounded-2xl border border-border/40 bg-muted/30 p-4">
+                 <div className="rounded-2xl border border-white/[0.05] bg-muted/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Metadata</p>
                     <div className="space-y-2">
                        <div className="flex justify-between text-xs font-semibold">
@@ -108,7 +108,7 @@ export function ResourcePreviewModal({ resource, isOpen, onClose, onImport }: Re
                        </div>
                     </div>
                  </div>
-                 <div className="rounded-2xl border border-border/40 bg-muted/30 p-4">
+                 <div className="rounded-2xl border border-white/[0.05] bg-muted/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Content Includes</p>
                     <ul className="space-y-1.5">
                        <li className="flex items-center gap-2 text-xs font-bold text-foreground/80">
@@ -125,7 +125,7 @@ export function ResourcePreviewModal({ resource, isOpen, onClose, onImport }: Re
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-border/60 bg-muted/20 p-8 text-center">
+              <div className="rounded-3xl border border-white/[0.02] bg-muted/20 p-8 text-center">
                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-green-500/10 text-green-500 mb-4 shadow-inner">
                     <ListChecks className="h-8 w-8" />
                  </div>
@@ -145,7 +145,7 @@ export function ResourcePreviewModal({ resource, isOpen, onClose, onImport }: Re
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border/50 bg-muted/30 px-8 py-6 flex items-center justify-between">
+        <div className="border-t border-white/[0.02] bg-muted/30 px-8 py-6 flex items-center justify-between">
            <p className="text-xs text-muted-foreground font-medium hidden sm:block">
              Verify that this content aligns with your curriculum before importing.
            </p>
@@ -171,10 +171,12 @@ export function ResourcePreviewModal({ resource, isOpen, onClose, onImport }: Re
 
 function PreviewStat({ icon: Icon, label, value }: { icon: any, label: string, value: string }) {
   return (
-    <div className="rounded-2xl border border-border/40 bg-card p-4 text-center">
+    <div className="rounded-2xl border border-white/[0.05] bg-card p-4 text-center">
       <Icon className="h-5 w-5 text-muted-foreground/40 mx-auto mb-2" />
       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
       <p className="text-sm font-black mt-1">{value}</p>
     </div>
   );
 }
+
+

@@ -138,7 +138,7 @@ function MindMapCanvas({
       ref={containerRef}
       className={cn(
         "relative min-h-[min(52vh,520px)] w-full overflow-hidden rounded-3xl backdrop-blur-md shadow-2xl border",
-        "bg-white/40 dark:bg-black/20 border-black/5 dark:border-white/10"
+        "bg-white/40 dark:bg-black/20 border-black/5 dark:border-white/[0.03]"
       )}
       onPointerDown={(e) => {
         if ((e.target as HTMLElement)?.closest?.("[data-node]")) return;
@@ -196,7 +196,7 @@ function MindMapCanvas({
                 baseCls,
                 selCls,
                 shape === "circle" ? "rounded-full" : "rounded-2xl",
-                "border-black/5 dark:border-white/10 hover:border-primary/50"
+                "border-black/5 dark:border-white/[0.03] hover:border-primary/50"
               )}
               style={{
                 left: p.x - w / 2,
@@ -213,7 +213,7 @@ function MindMapCanvas({
       </div>
 
       <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-3">
-        <div className="rounded-full bg-black/5 dark:bg-black/40 backdrop-blur-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-white/50 border border-black/5 dark:border-white/5">
+        <div className="rounded-full bg-black/5 dark:bg-black/40 backdrop-blur-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-white/50 border border-black/5 dark:border-white/[0.02]">
            Scroll to zoom • Drag to move
         </div>
       </div>
@@ -312,7 +312,7 @@ function MindMapFocusCard({ graph, selectedId }: { graph: MindMapGraph; selected
   return (
     <div className={cn(
       "flex h-full min-h-[220px] flex-col gap-4 rounded-[28px] p-6 border shadow-2xl relative overflow-hidden",
-      "bg-gradient-to-br from-white to-slate-50 dark:from-white/5 dark:to-transparent border-black/5 dark:border-white/10"
+      "bg-gradient-to-br from-white to-slate-50 dark:from-white/5 dark:to-transparent border-black/5 dark:border-white/[0.03]"
     )}>
       <div className="absolute top-0 right-0 p-8 opacity-5">
          <Sparkles className="h-24 w-24" />
@@ -372,7 +372,7 @@ function MindMapSection({ graph, markdown }: { graph: MindMapGraph; markdown: st
       ) : null}
 
       {md ? (
-        <div className="rounded-[32px] bg-card/40 p-8 border border-black/5 dark:border-white/5 shadow-xl">
+        <div className="rounded-[32px] bg-card/40 p-8 border border-black/5 dark:border-white/[0.02] shadow-xl">
           <div className="flex items-center gap-2 mb-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
              <NotebookPen className="h-3 w-3" />
              Written Synthesis
@@ -530,17 +530,17 @@ export function LectureExperienceClient({
                     placeholder="Search inside lecture..."
                     className={cn(
                       "w-full h-12 rounded-2xl border text-sm transition-all pl-11 pr-4 outline-none",
-                      "bg-white/50 border-black/5 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-white/20",
+                      "bg-white/50 border-black/5 dark:bg-white/5 dark:border-white/[0.03] dark:text-white dark:placeholder:text-white/20",
                       "focus:bg-white dark:focus:bg-white/10 focus:border-primary/50"
                     )}
                  />
                  {showResults && filtered.length > 0 && (
-                    <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-black/5 dark:border-white/10 bg-white/95 dark:bg-black/90 backdrop-blur-2xl shadow-2xl animate-in fade-in zoom-in-95">
+                    <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-black/5 dark:border-white/[0.03] bg-white/95 dark:bg-black/90 backdrop-blur-2xl shadow-2xl animate-in fade-in zoom-in-95">
                        {filtered.map((r, idx) => (
                           <button
                              key={`${r.tab}-${idx}`}
                              onClick={() => { setActive(r.tab); setShowResults(false); }}
-                             className="flex w-full flex-col gap-1 border-b border-black/5 dark:border-white/5 px-5 py-4 text-left hover:bg-black/5 dark:hover:bg-white/5"
+                             className="flex w-full flex-col gap-1 border-b border-black/5 dark:border-white/[0.02] px-5 py-4 text-left hover:bg-black/5 dark:hover:bg-white/5"
                           >
                              <div className="flex items-center gap-2">
                                 <span className="text-[9px] font-black uppercase tracking-wider text-primary border border-primary/40 px-1.5 py-0.5 rounded-md">{r.tab}</span>
@@ -555,11 +555,11 @@ export function LectureExperienceClient({
 
               {/* Stats & Quick Actions */}
               <div className="flex items-center gap-2">
-                 <div className="flex items-center gap-1.5 rounded-xl bg-card border border-black/5 dark:border-white/5 px-3.5 py-2 text-[11px] font-bold text-muted-foreground dark:text-white/60">
+                 <div className="flex items-center gap-1.5 rounded-xl bg-card border border-black/5 dark:border-white/[0.02] px-3.5 py-2 text-[11px] font-bold text-muted-foreground dark:text-white/60">
                     <Layers className="h-3.5 w-3.5 text-primary" />
                     <span>{(lecture?.flashcards?.length ?? 0)} Cards</span>
                  </div>
-                 <div className="flex items-center gap-1.5 rounded-xl bg-card border border-black/5 dark:border-white/5 px-3.5 py-2 text-[11px] font-bold text-muted-foreground dark:text-white/60">
+                 <div className="flex items-center gap-1.5 rounded-xl bg-card border border-black/5 dark:border-white/[0.02] px-3.5 py-2 text-[11px] font-bold text-muted-foreground dark:text-white/60">
                     <HelpCircle className="h-3.5 w-3.5 text-blue-400" />
                     <span>{(lecture?.questions?.length ?? 0)} Quiz</span>
                  </div>
@@ -582,7 +582,7 @@ export function LectureExperienceClient({
               { id: "flashcards", title: "Flashcards", sub: "Active recall", icon: Layers, color: "text-pink-500 dark:text-pink-400", action: () => setActive("flashcards") },
             ].map((item) => (
               item.href ? (
-                <Link key={item.id} href={item.href} className="group relative rounded-[32px] bg-card border border-black/5 dark:border-white/10 p-6 transition-all hover:bg-primary/[0.02] dark:hover:bg-white/10 hover:border-primary/40 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <Link key={item.id} href={item.href} className="group relative rounded-[32px] bg-card border border-black/5 dark:border-white/[0.03] p-6 transition-all hover:bg-primary/[0.02] dark:hover:bg-white/10 hover:border-primary/40 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <div className={cn("mb-4 inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-primary/5 dark:bg-white/5 transition-colors group-hover:bg-primary/20", item.color)}>
                      <item.icon className="h-6 w-6" />
                   </div>
@@ -593,7 +593,7 @@ export function LectureExperienceClient({
                   </div>
                 </Link>
               ) : (
-                <button key={item.id} onClick={item.action} className="group relative rounded-[32px] bg-card border border-black/5 dark:border-white/10 p-6 transition-all hover:bg-primary/[0.02] dark:hover:bg-white/10 hover:border-primary/40 hover:-translate-y-1 shadow-sm hover:shadow-xl text-left">
+                <button key={item.id} onClick={item.action} className="group relative rounded-[32px] bg-card border border-black/5 dark:border-white/[0.03] p-6 transition-all hover:bg-primary/[0.02] dark:hover:bg-white/10 hover:border-primary/40 hover:-translate-y-1 shadow-sm hover:shadow-xl text-left">
                   <div className={cn("mb-4 inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-primary/5 dark:bg-white/5 transition-colors group-hover:bg-primary/20", item.color)}>
                      <item.icon className="h-6 w-6" />
                   </div>
@@ -607,7 +607,7 @@ export function LectureExperienceClient({
 
         {/* --- PREMIUM TABS NAVIGATION --- */}
         <div className="flex justify-center mb-10 overflow-x-auto pb-4 scrollbar-hide">
-           <div className="inline-flex gap-1.5 p-1.5 rounded-[24px] bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-black/5 dark:border-white/10 shadow-2xl">
+           <div className="inline-flex gap-1.5 p-1.5 rounded-[24px] bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-black/5 dark:border-white/[0.03] shadow-2xl">
               {tabs.map((tab) => {
                  const isActive = active === tab.id;
                  return (
@@ -652,7 +652,7 @@ export function LectureExperienceClient({
            )}
 
            {active === "video" && (
-              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 text-center">
+              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/[0.03] text-center">
                  <PlayCircle className="h-16 w-16 text-primary mb-6 animate-pulse" />
                  <h3 className="text-2xl font-black text-foreground dark:text-white">Video Studio</h3>
                  <p className="mt-2 text-muted-foreground dark:text-white/40 max-w-sm font-medium">Open the full video studio to watch, interact, and see timestamps.</p>
@@ -663,7 +663,7 @@ export function LectureExperienceClient({
            )}
 
            {active === "records" && (
-              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 text-center">
+              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/[0.03] text-center">
                  <Headphones className="h-16 w-16 text-emerald-500 dark:text-emerald-400 mb-6" />
                  <h3 className="text-2xl font-black text-foreground dark:text-white">Audio Library</h3>
                  <p className="mt-2 text-muted-foreground dark:text-white/40 max-w-sm font-medium">Listen to recorded audio directly or download for offline review.</p>
@@ -674,7 +674,7 @@ export function LectureExperienceClient({
            )}
 
            {active === "attachments" && (
-              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 text-center">
+              <div className="flex flex-col items-center justify-center py-20 rounded-[40px] bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/[0.03] text-center">
                  <FileText className="h-16 w-16 text-amber-500 dark:text-amber-400 mb-6" />
                  <h3 className="text-2xl font-black text-foreground dark:text-white">Materials Hub</h3>
                  <p className="mt-2 text-muted-foreground dark:text-white/40 max-w-sm font-medium">All relevant lecture slides, PDFs, and hand-outs for this lesson.</p>
@@ -689,7 +689,7 @@ export function LectureExperienceClient({
                  {Array.isArray(lecture?.flashcards) && lecture.flashcards.length > 0 ? (
                     <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" />
                  ) : (
-                    <div className="py-24 text-center rounded-[40px] border border-dashed border-black/10 dark:border-white/10">
+                    <div className="py-24 text-center rounded-[40px] border border-dashed border-black/10 dark:border-white/[0.03]">
                        <p className="text-muted-foreground/40 font-bold">No flashcards available yet.</p>
                     </div>
                  )}
@@ -701,7 +701,7 @@ export function LectureExperienceClient({
                  {Array.isArray(lecture?.questions) && lecture.questions.length > 0 ? (
                     <LectureClient flashcards={[]} questions={lecture.questions} mode="questions" />
                  ) : (
-                    <div className="py-24 text-center rounded-[40px] border border-dashed border-black/10 dark:border-white/10">
+                    <div className="py-24 text-center rounded-[40px] border border-dashed border-black/10 dark:border-white/[0.03]">
                        <p className="text-muted-foreground/40 font-bold">No quiz available for this lecture.</p>
                     </div>
                  )}
@@ -709,7 +709,7 @@ export function LectureExperienceClient({
            )}
 
            {active === "notes" && (
-              <div className="rounded-[40px] border bg-white/40 dark:bg-white/5 border-black/5 dark:border-white/10 p-10 lg:p-14 shadow-2xl relative overflow-hidden">
+              <div className="rounded-[40px] border bg-white/40 dark:bg-white/5 border-black/5 dark:border-white/[0.03] p-10 lg:p-14 shadow-2xl relative overflow-hidden">
                  <div className="absolute top-0 left-0 p-12 opacity-[0.03] dark:opacity-5 pointer-events-none">
                     <GraduationCap className="h-64 w-64" />
                  </div>
@@ -801,3 +801,4 @@ export function LectureExperienceClient({
     </div>
   );
 }
+

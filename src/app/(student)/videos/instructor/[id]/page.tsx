@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { 
   ArrowLeft, Play, Users, CheckCircle2, 
   Heart, Loader2, Video, Bookmark, Sparkles, LayoutGrid,
-  ChevronRight, GraduationCap, Share2, Subscriptions
+  ChevronRight, GraduationCap, Share2, Bell
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import toast from "react-hot-toast";
 
 interface InstructorData {
@@ -94,7 +95,7 @@ export default function InstructorProfilePage({ params }: { params: { id: string
   return (
     <div className="min-h-screen bg-background pb-32">
       {/* 1. Profile Header */}
-      <div className="relative border-b border-border/40 overflow-hidden">
+      <div className="relative border-b border-white/[0.02] overflow-hidden">
         {/* Banner Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[300px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2" />
         
@@ -158,14 +159,14 @@ export default function InstructorProfilePage({ params }: { params: { id: string
                   className={cn(
                     "flex-1 md:flex-none h-12 px-8 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2.5",
                     instructor.isFollowing 
-                      ? "bg-muted text-foreground border border-border/80" 
+                      ? "bg-muted text-foreground border border-white/[0.03]" 
                       : "bg-primary text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95"
                   )}
                 >
                   <Heart className={cn("h-4.5 w-4.5", instructor.isFollowing && "fill-current text-red-500")} />
                   {instructor.isFollowing ? "Subscribed" : "Subscribe"}
                 </button>
-                <button className="h-12 w-12 rounded-2xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                <button className="h-12 w-12 rounded-2xl bg-card border border-white/[0.02] flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                   <Share2 className="h-5 w-5" />
                 </button>
               </div>
@@ -181,7 +182,7 @@ export default function InstructorProfilePage({ params }: { params: { id: string
             <h2 className="text-xl md:text-2xl font-bold tracking-tight">Academic Lectures</h2>
             <p className="text-xs font-medium text-muted-foreground">High-yield content by {instructor.name}</p>
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-muted/40 rounded-xl border border-border/50 text-[10px] font-bold text-primary uppercase tracking-widest">
+          <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-muted/40 rounded-xl border border-white/[0.02] text-[10px] font-bold text-primary uppercase tracking-widest">
             <GraduationCap className="h-4 w-4" /> Academic Focus
           </div>
         </div>
@@ -195,11 +196,11 @@ export default function InstructorProfilePage({ params }: { params: { id: string
                   {/* Thumbnail Card */}
                   <Link 
                     href={href} 
-                    className="relative aspect-video rounded-2xl overflow-hidden bg-muted border border-border/10 group-hover:border-primary/20 transition-all shadow-sm group-hover:shadow-md group-hover:shadow-primary/5"
+                    className="relative aspect-video rounded-2xl overflow-hidden bg-muted border border-white/[0.02] group-hover:border-primary/20 transition-all shadow-sm group-hover:shadow-md group-hover:shadow-primary/5"
                   >
                     <img src={video.thumbnail!} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={video.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
-                      <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                      <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/[0.05]">
                         <Play className="h-5 w-5 text-white fill-white ml-0.5" />
                       </div>
                     </div>
@@ -226,7 +227,7 @@ export default function InstructorProfilePage({ params }: { params: { id: string
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-24 text-center space-y-5 bg-card border border-dashed border-border rounded-[2.5rem]">
+          <div className="flex flex-col items-center justify-center py-24 text-center space-y-5 bg-card border border-dashed border-white/[0.03] rounded-[2.5rem]">
             <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center text-primary/30">
               <Video className="h-8 w-8" />
             </div>

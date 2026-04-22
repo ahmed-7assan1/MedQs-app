@@ -80,7 +80,7 @@ export default function AdminChannelsPage() {
 
       {/* Add Form */}
       {showAdd && (
-        <div className="bg-card border border-border/60 rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4">
+        <div className="bg-card border border-white/[0.02] rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4">
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex-1 relative">
               <Youtube className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -89,7 +89,7 @@ export default function AdminChannelsPage() {
                 placeholder="Paste Channel URL or @Handle..."
                 value={urlOrId}
                 onChange={(e) => setUrlOrId(e.target.value)}
-                className="w-full pl-12 pr-4 h-12 rounded-xl border-border/60 bg-muted/50 focus:ring-primary/40 focus:outline-none text-sm"
+                className="w-full pl-12 pr-4 h-12 rounded-xl border-white/[0.02] bg-muted/50 focus:ring-primary/40 focus:outline-none text-sm"
               />
             </div>
             <button
@@ -109,14 +109,14 @@ export default function AdminChannelsPage() {
 
       {/* Stats Quick View */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl border border-border/60 bg-card overflow-hidden relative">
+        <div className="p-5 rounded-2xl border border-white/[0.02] bg-card overflow-hidden relative">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Youtube className="h-12 w-12" />
           </div>
           <p className="text-3xl font-bold">{channels.length}</p>
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Curated Channels</p>
         </div>
-        <div className="p-5 rounded-2xl border border-border/60 bg-card overflow-hidden relative">
+        <div className="p-5 rounded-2xl border border-white/[0.02] bg-card overflow-hidden relative">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Users className="h-12 w-12" />
           </div>
@@ -133,9 +133,9 @@ export default function AdminChannelsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {channels.map((channel) => (
-            <div key={channel.id} className="group p-5 rounded-2xl border border-border/60 bg-card hover:border-primary/30 transition-all relative overflow-hidden">
+            <div key={channel.id} className="group p-5 rounded-2xl border border-white/[0.02] bg-card hover:border-primary/30 transition-all relative overflow-hidden">
                <div className="flex items-center gap-4">
-                  <div className="h-14 w-14 rounded-full border-2 border-border/20 overflow-hidden shrink-0">
+                  <div className="h-14 w-14 rounded-full border-2 border-white/[0.03] overflow-hidden shrink-0">
                     <img src={channel.thumbnail} alt={channel.name} className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -162,12 +162,12 @@ export default function AdminChannelsPage() {
                   <a 
                     href={`https://youtube.com/${channel.handle || "channel/" + channel.youtubeId}`}
                     target="_blank"
-                    className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg border border-border/60 text-[10px] font-bold uppercase tracking-widest hover:bg-muted transition-all"
+                    className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg border border-white/[0.02] text-[10px] font-bold uppercase tracking-widest hover:bg-muted transition-all"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     YouTube
                   </a>
-                  <button className="h-9 w-9 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">
+                  <button className="h-9 w-9 flex items-center justify-center rounded-lg border border-white/[0.02] text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">
                     <Trash2 className="h-4 w-4" />
                   </button>
                </div>
@@ -178,3 +178,4 @@ export default function AdminChannelsPage() {
     </div>
   );
 }
+

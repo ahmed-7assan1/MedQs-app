@@ -117,21 +117,58 @@ html[data-theme="dark"] .medqs-logo {
 }
 
 .dark {
-  --background: 225 15% 9%;
+  --background: 247 22% 7%; /* #0F0E16 approx */
   --foreground: 210 20% 98%;
-  /* Card is calm dark neutral */
-  --card: 225 15% 11%;
+  --card: 0 0% 100% / 0.04;
   --card-foreground: 210 20% 98%;
-  --primary: 210 100% 55%;
+  --primary: 245 42% 51%; /* #534AB7 */
   --primary-foreground: 0 0% 100%;
-  --muted: 225 10% 16%;
-  --muted-foreground: 215 15% 60%;
-  --secondary: 225 10% 14%;
+  --muted: 0 0% 100% / 0.04;
+  --muted-foreground: 245 48% 80%; /* #AFA9EC */
+  --secondary: 0 0% 100% / 0.02;
   --secondary-foreground: 210 20% 98%;
-  --accent: 210 100% 55%;
+  --accent: 250 100% 95% / 0.04;
   --accent-foreground: 0 0% 100%;
-  --border: 225 10% 20%;
-  --input: 225 10% 20%;
+  --border: 247 22% 15%;
+  --input: 247 22% 15%;
+  --ring: 245 42% 51%;
+}
+
+/* ── Dr. Q Redesign Design System (AI Chat Page) ── */
+.drq-redesign-root {
+  --drq-bg: #12111A;
+  --drq-surface: rgba(255, 255, 255, 0.06);
+  --drq-border: rgba(255, 255, 255, 0.08);
+  --drq-primary: #534AB7;
+  --drq-purple-light: #AFA9EC;
+  --drq-radius-m: 14px;
+  --drq-radius-s: 8px;
+  --drq-radius-xs: 4px;
+}
+
+.drq-redesign-root {
+  background-color: var(--drq-bg);
+  color: white;
+}
+
+.bg-drq-bg {
+  background-color: var(--drq-bg);
+}
+
+.bg-drq-surface {
+  background-color: var(--drq-surface);
+}
+
+.border-drq-border {
+  border-color: var(--drq-border);
+}
+
+.text-drq-purple-light {
+  color: var(--drq-purple-light);
+}
+
+.bg-drq-primary {
+  background-color: var(--drq-primary);
 }
 
 @keyframes fire-flicker {
@@ -187,7 +224,7 @@ html[data-theme="dark"] body,
 /* ── Base ── */
 @layer base {
   * {
-    @apply border-border box-border;
+    @apply box-border;
   }
 
   html {
@@ -202,11 +239,16 @@ html[data-theme="dark"] body,
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-size: 15px;
+    font-weight: 400; /* Restricted to 400/500 */
     line-height: 1.65;
     letter-spacing: -0.01em;
     min-height: 100dvh;
     min-height: 100vh;
     /* fallback */
+  }
+
+  strong, b {
+    font-weight: 500 !important;
   }
 
   /* Explicit Arabic / RTL: Tajawal first */
@@ -1496,12 +1538,56 @@ select,
 }
 
 .ss-focus-shimmer {
-  background-image: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.04) 0%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0.04) 100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--primary) / 0.05) 50%,
+    transparent 100%
+  );
   background-size: 200% 100%;
-  animation: ss-focus-shimmer 1.6s ease-in-out infinite;
+  animation: ss-focus-shimmer 2s infinite linear;
+}
+
+/* ── Dr. Q AI Animations ── */
+@keyframes ai-orb-pulse {
+  0% { transform: scale(1); opacity: 0.8; filter: blur(8px); }
+  50% { transform: scale(1.15); opacity: 1; filter: blur(12px); }
+  100% { transform: scale(1); opacity: 0.8; filter: blur(8px); }
+}
+
+@keyframes ai-thinking-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.ai-glow-orb {
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, hsl(var(--primary)), transparent);
+  border-radius: 50%;
+  animation: ai-orb-pulse 2s ease-in-out infinite;
+}
+
+.ai-thinking-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  animation: ai-thinking-bounce 0.8s ease-in-out infinite;
+}
+
+.ai-thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+.ai-thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+.ai-glass-panel {
+  background: rgba(var(--background), 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .ai-glass-panel {
+  background: rgba(0, 0, 0, 0.65);
 }
 
 /* Landing — scroll-driven blocks */

@@ -41,9 +41,9 @@ export function SavedPostsSection() {
 
   if (posts.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-8 text-center">
-        <Bookmark className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
-        <p className="text-sm font-medium text-foreground">Saved posts</p>
+      <div className="rounded-2xl border border-transparent bg-white/[0.02] px-4 py-8 text-center text-white">
+        <Bookmark className="mx-auto mb-2 h-8 w-8 text-white/20" />
+        <p className="text-sm font-medium text-white/70">Saved posts</p>
         <p className="mt-1 text-xs text-muted-foreground">
           Use the ··· menu on a forum post to save it here for quick access.
         </p>
@@ -56,7 +56,7 @@ export function SavedPostsSection() {
       {posts.map((p) => (
         <div
           key={p.id}
-          className="flex gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.05]"
+          className="flex gap-3 rounded-2xl border border-white/[0.02] bg-white/[0.02] p-5 shadow-sm transition-all hover:bg-white/[0.04]"
         >
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -95,3 +95,4 @@ export function SavedPostsSection() {
     </div>
   );
 }
+

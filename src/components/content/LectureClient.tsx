@@ -249,7 +249,7 @@ function QuestionItem({
           </div>
           <div className="min-w-0 space-y-4">
             {question.imageUrl ? (
-              <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/20">
+              <div className="overflow-hidden rounded-xl border border-white/[0.02] bg-muted/20">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={normalizeImageUrl(question.imageUrl)}
@@ -349,7 +349,7 @@ function QuestionItem({
       </div>
 
       {/* Explain */}
-      <div className={cn(immersive ? "mt-8 border-t border-border/70 pt-6" : "border-t border-border px-4 py-2.5")}>
+      <div className={cn(immersive ? "mt-8 border-t border-white/[0.03] pt-6" : "border-t border-border px-4 py-2.5")}>
         <button onClick={handleExplain} disabled={loadingExplain}
           className={cn(
             "flex items-center gap-1.5 font-medium text-primary transition-colors hover:text-primary/80 disabled:opacity-60",
@@ -539,3 +539,4 @@ export function LectureClient({ flashcards, questions, mode = "both" }: Props) {
     </div>
   );
 }
+

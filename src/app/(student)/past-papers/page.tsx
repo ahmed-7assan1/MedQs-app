@@ -126,7 +126,7 @@ export default async function PastPapersPage() {
 
             return (
               <div key={paper.id}
-                className="overflow-hidden rounded-2xl border border-border/60 bg-card transition-all hover:border-blue-500/30 hover:shadow-lg dark:bg-slate-900/50"
+                className="overflow-hidden rounded-2xl border border-white/[0.02] bg-card transition-all hover:border-blue-500/30 hover:shadow-lg dark:bg-slate-900/50"
                 style={{ borderLeft: `3px solid ${done ? scoreColor : "#1A6BCC"}` }}>
 
                 {/* Main row */}
@@ -180,7 +180,7 @@ export default async function PastPapersPage() {
                   <div className="flex flex-shrink-0 items-center gap-2">
                     {isAdmin && (
                       <Link href={`/admin/quiz-creator?paperId=${paper.id}`}
-                        className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-white/[0.02] bg-background/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         title="Manage quiz">
                         <Settings2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Link>
@@ -196,12 +196,12 @@ export default async function PastPapersPage() {
 
                 {/* Previous attempts */}
                 {paper.attempts.length > 0 && (
-                  <div className="border-t border-border/40 bg-muted/20 px-5 py-3">
+                  <div className="border-t border-white/[0.05] bg-muted/20 px-5 py-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[11px] font-medium text-muted-foreground">Previous:</span>
                       {paper.attempts.map((attempt: any) => (
                         <Link key={attempt.id} href={`/quiz/attempt/${attempt.id}`}
-                          className="flex items-center gap-1.5 rounded-lg border border-border/50 bg-background/60 px-2.5 py-1 text-[11px] transition-colors hover:border-primary/30 hover:bg-muted">
+                          className="flex items-center gap-1.5 rounded-lg border border-white/[0.02] bg-background/60 px-2.5 py-1 text-[11px] transition-colors hover:border-primary/30 hover:bg-muted">
                           <Eye className="h-3 w-3 text-muted-foreground" />
                           <span className="font-bold" style={{
                             color: attempt.score >= 70 ? "#059669" : attempt.score >= 50 ? "#d97706" : "#dc2626"
@@ -227,3 +227,5 @@ export default async function PastPapersPage() {
     </StudentPageShell>
   );
 }
+
+

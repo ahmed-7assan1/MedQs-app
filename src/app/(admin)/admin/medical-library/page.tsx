@@ -14,6 +14,7 @@ import { useSession } from "next-auth/react";
 import { ResourcePreviewModal } from "@/components/admin/ResourcePreviewModal";
 import { SourceBookUploadModal } from "@/components/admin/SourceBookUploadModal";
 import { SyllabusModal } from "@/components/admin/SyllabusModal";
+import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 export default function MedicalLibraryPage() {
   const { data: session } = useSession();
@@ -151,17 +152,19 @@ export default function MedicalLibraryPage() {
           </div>
 
           {!isAdmin && (
-            <div className="group relative flex flex-col gap-2 rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all hover:bg-white/10">
+            <div className="group relative flex flex-col gap-2 rounded-[2rem] border border-white/[0.03] bg-white/5 p-6 backdrop-blur-xl transition-all hover:bg-white/10">
               <label className="text-[10px] font-black uppercase tracking-widest text-blue-400/80">Active Sector</label>
-              <select 
+              <MedqsSelect 
                 value={category}
                 onChange={(e) => setCategory(e.target.value as FacultyCategory)}
-                className="w-full appearance-none bg-transparent font-display text-xl font-bold outline-none cursor-pointer"
+                className="w-full"
               >
                 {Object.entries(FACULTY_CATEGORY_LABELS).map(([val, labels]) => (
-                  <option key={val} value={val} className="text-black">{labels.ar} ({labels.en})</option>
+                  <option key={val} value={val} className="text-black">
+                    {labels.ar} ({labels.en})
+                  </option>
                 ))}
-              </select>
+              </MedqsSelect>
               <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40 group-hover:translate-x-1 transition-transform" />
             </div>
           )}
@@ -170,8 +173,8 @@ export default function MedicalLibraryPage() {
 
       {/* ── Interactive Navigation ── */}
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/10 pb-4">
-          <div className="flex gap-4 p-1 rounded-2xl bg-muted/20 backdrop-blur-md border border-border/10">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-white/[0.02] pb-4">
+          <div className="flex gap-4 p-1 rounded-2xl bg-muted/20 backdrop-blur-md border border-white/[0.02]">
             <TabButton active={activeTab === "library"} onClick={() => setActiveTab("library")} label="Global Discovery" icon={Globe} />
             <TabButton active={activeTab === "source-books"} onClick={() => setActiveTab("source-books")} label="My Curriculum" icon={Book} />
           </div>
@@ -194,7 +197,7 @@ export default function MedicalLibraryPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && fetchResources()}
                   placeholder="Search by module name (e.g. CNS, Respiratory)..."
-                  className="w-full rounded-[2.5rem] border border-border/40 bg-card p-6 pl-16 text-lg font-medium shadow-2xl shadow-primary/5 outline-none ring-primary/20 transition-all focus:ring-4"
+                  className="w-full rounded-[2.5rem] border border-white/[0.05] bg-card p-6 pl-16 text-lg font-medium shadow-2xl shadow-primary/5 outline-none ring-primary/20 transition-all focus:ring-4"
                 />
                 <button 
                   onClick={fetchResources}
@@ -211,7 +214,7 @@ export default function MedicalLibraryPage() {
                     <button 
                       key={m} 
                       onClick={() => { setSearch(m); fetchResources(); }}
-                      className="px-4 py-1.5 rounded-full border border-border/50 bg-card/50 text-xs font-bold hover:bg-primary hover:text-white transition-all"
+                      className="px-4 py-1.5 rounded-full border border-white/[0.02] bg-card/50 text-xs font-bold hover:bg-primary hover:text-white transition-all"
                     >
                       {m}
                     </button>
@@ -229,7 +232,7 @@ export default function MedicalLibraryPage() {
                 <p className="text-sm font-bold animate-pulse text-muted-foreground uppercase tracking-widest">Aggregating Content...</p>
               </div>
             ) : resources.length === 0 ? (
-              <div className="flex h-96 flex-col items-center justify-center rounded-[3rem] border-2 border-dashed border-border/50 bg-muted/10 p-12 text-center group">
+              <div className="flex h-96 flex-col items-center justify-center rounded-[3rem] border-2 border-dashed border-white/[0.02] bg-muted/10 p-12 text-center group">
                 <div className="mb-6 rounded-full bg-muted/20 p-8 group-hover:scale-110 transition-transform duration-500">
                   <Library className="h-12 w-12 text-muted-foreground" />
                 </div>
@@ -351,7 +354,7 @@ function DiscoveryCard({ resource, onPreview, onImport }: { resource: any, onPre
   const Icon = resource.type === "VIDEO" ? PlayCircle : FileText;
 
   return (
-    <div className="group relative overflow-hidden rounded-[2rem] border border-border/50 bg-card p-1 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] hover:ring-2 hover:ring-primary/20">
+    <div className="group relative overflow-hidden rounded-[2rem] border border-white/[0.02] bg-card p-1 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] hover:ring-2 hover:ring-primary/20">
       <div className="bg-muted/30 p-6 rounded-t-[1.8rem]">
         <div className="flex items-start justify-between mb-6">
           <div className={cn(
@@ -361,7 +364,7 @@ function DiscoveryCard({ resource, onPreview, onImport }: { resource: any, onPre
             <Icon className="h-7 w-7" />
           </div>
           <div className="flex flex-col items-end gap-1.5">
-            <div className="text-[10px] font-black px-2.5 py-1 rounded-full bg-card shadow-sm border border-border/50 uppercase tracking-tighter text-muted-foreground">
+            <div className="text-[10px] font-black px-2.5 py-1 rounded-full bg-card shadow-sm border border-white/[0.02] uppercase tracking-tighter text-muted-foreground">
               {new Date(resource.createdAt).getFullYear()}
             </div>
             {resource.originType && (
@@ -384,7 +387,7 @@ function DiscoveryCard({ resource, onPreview, onImport }: { resource: any, onPre
 
       <div className="p-4 bg-muted/5 flex flex-col gap-3">
         {resource.moduleName && (
-           <div className="flex items-center justify-between px-2 pt-1 border-t border-border/10">
+           <div className="flex items-center justify-between px-2 pt-1 border-t border-white/[0.02]">
               <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40">Topic Group</span>
               <span className="text-[11px] font-black text-primary">{resource.moduleName}</span>
            </div>
@@ -411,7 +414,7 @@ function DiscoveryCard({ resource, onPreview, onImport }: { resource: any, onPre
 
 function CurriculumBookCard({ book, onDelete, onViewSyllabus }: { book: any, onDelete: (id: string) => void, onViewSyllabus: () => void }) {
   return (
-    <div className="group relative overflow-hidden rounded-[2.5rem] border border-border/50 bg-card/60 p-8 transition-all hover:shadow-2xl hover:bg-card">
+    <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/[0.02] bg-card/60 p-8 transition-all hover:shadow-2xl hover:bg-card">
        <button 
          onClick={() => onDelete(book.id)}
          className="absolute top-6 right-6 p-3 rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/20"
@@ -452,7 +455,7 @@ function CurriculumBookCard({ book, onDelete, onViewSyllabus }: { book: any, onD
 
 function ModuleStat({ label, value }: { label: string, value: any }) {
   return (
-    <div className="rounded-2xl border border-border/30 bg-muted/10 p-4">
+    <div className="rounded-2xl border border-white/[0.02] bg-muted/10 p-4">
       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</p>
       <p className="text-xl font-black mt-1">{value}</p>
     </div>
@@ -472,3 +475,5 @@ function EmptySyllabusState() {
     </div>
   );
 }
+
+

@@ -31,7 +31,7 @@ export default function AIToolsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
+          <div className="hidden items-center gap-1.5 rounded-xl border border-white/[0.02] bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground sm:flex">
             <Cpu className="h-4 w-4 text-primary" />
             <span>Multi-Model Parallel</span>
           </div>
@@ -39,7 +39,7 @@ export default function AIToolsPage() {
       </div>
 
       {/* ── Model Selector Card ── */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm border-l-4 border-l-blue-500">
+      <div className="rounded-2xl border border-white/[0.02] bg-card p-5 shadow-sm border-l-4 border-l-blue-500">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4 text-blue-500" />
@@ -50,7 +50,7 @@ export default function AIToolsPage() {
         <MedqsSelect
           value={providerChoice}
           onChange={(e) => setProviderChoice(e.target.value as AIProviderChoice)}
-          className="w-full h-12 rounded-xl border-border/60 bg-background/50 text-sm font-semibold"
+          className="w-full h-12 rounded-xl border-white/[0.02] bg-background/50 text-sm font-semibold"
         >
           <option value="auto">Auto-Orchestration (Best Available)</option>
           <option value="gemini">Google Gemini 1.5 Pro</option>
@@ -124,7 +124,7 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
   }
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
+    <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
            <Wand2 className="h-5 w-5" />
@@ -142,7 +142,7 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
              value={body}
              onChange={(e) => setBody(e.target.value)}
              placeholder="e.g. A 28-year-old female presents with persistent tachycardia..."
-             className="w-full min-h-[140px] resize-none rounded-xl border border-border/60 bg-background/50 p-4 text-sm focus:ring-blue-500/40 focus:outline-none"
+             className="w-full min-h-[140px] resize-none rounded-xl border border-white/[0.02] bg-background/50 p-4 text-sm focus:ring-blue-500/40 focus:outline-none"
            />
         </div>
 
@@ -156,8 +156,8 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
         </button>
 
         {suggestion && edited && (
-          <div className="space-y-4 rounded-xl border border-border/40 bg-muted/5 p-4 animate-in fade-in zoom-in-95">
-             <div className="flex items-center justify-between border-b border-border/40 pb-3">
+          <div className="space-y-4 rounded-xl border border-white/[0.05] bg-muted/5 p-4 animate-in fade-in zoom-in-95">
+             <div className="flex items-center justify-between border-b border-white/[0.05] pb-3">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Draft Review</span>
                 <MedqsSelect
                   value={edited.difficulty}
@@ -173,7 +173,7 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
              <div className="space-y-2">
                 {edited.choices.map((c, i) => (
                   <div key={c.key} className="flex gap-2">
-                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-[10px] font-bold font-mono">{c.key}</div>
+                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.02] bg-background text-[10px] font-bold font-mono">{c.key}</div>
                      <input
                         value={c.text}
                         onChange={(e) => setEdited(p => {
@@ -182,11 +182,11 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
                            next[i].text = e.target.value;
                            return { ...p, choices: next };
                         })}
-                        className="flex-1 rounded-lg border border-border/40 bg-background/50 px-3 py-1.5 text-xs focus:outline-none"
+                        className="flex-1 rounded-lg border border-white/[0.05] bg-background/50 px-3 py-1.5 text-xs focus:outline-none"
                      />
                      <button
                         onClick={() => setEdited(p => p ? { ...p, answer: c.key } : p)}
-                        className={cn("h-9 w-9 shrink-0 flex items-center justify-center rounded-lg border border-border/40 transition-all", edited.answer === c.key ? "bg-emerald-500 text-white border-emerald-500" : "bg-background text-muted-foreground")}
+                        className={cn("h-9 w-9 shrink-0 flex items-center justify-center rounded-lg border border-white/[0.05] transition-all", edited.answer === c.key ? "bg-emerald-500 text-white border-emerald-500" : "bg-background text-muted-foreground")}
                      >
                         <Check className="h-4 w-4" />
                      </button>
@@ -199,7 +199,7 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
                 <textarea
                    value={edited.explanation}
                    onChange={e => setEdited(p => p ? { ...p, explanation: e.target.value } : p)}
-                   className="w-full text-xs bg-background/50 border border-border/40 rounded-lg p-3 focus:outline-none min-h-[80px]"
+                   className="w-full text-xs bg-background/50 border border-white/[0.05] rounded-lg p-3 focus:outline-none min-h-[80px]"
                 />
              </div>
 
@@ -208,7 +208,7 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
              </div>
 
              <div className="flex gap-2 pt-2">
-                <button onClick={() => setExportOpen(true)} className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-card text-xs font-bold hover:bg-muted transition-all"><FileText className="h-4 w-4 text-blue-500" /> Export</button>
+                <button onClick={() => setExportOpen(true)} className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl border border-white/[0.02] bg-card text-xs font-bold hover:bg-muted transition-all"><FileText className="h-4 w-4 text-blue-500" /> Export</button>
                 <button onClick={handleSave} disabled={!lectureId} className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 text-xs font-bold text-white shadow shadow-emerald-500/20 disabled:opacity-40"><Save className="h-4 w-4" /> Save Asset</button>
              </div>
           </div>
@@ -279,7 +279,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
   }
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
+    <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
            <Upload className="h-5 w-5" />
@@ -293,7 +293,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
       <div className="flex-1 space-y-4">
         <label className={cn(
           "relative group flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all",
-          file ? "border-violet-500/40 bg-violet-500/5 ring-1 ring-violet-500/10" : "border-border/60 hover:bg-muted/50 hover:border-violet-400"
+          file ? "border-violet-500/40 bg-violet-500/5 ring-1 ring-violet-500/10" : "border-white/[0.02] hover:bg-muted/50 hover:border-violet-400"
         )}>
            {file ? <FileText className="h-8 w-8 text-violet-500 mb-1" /> : <Upload className="h-8 w-8 text-muted-foreground/30 mb-1" />}
            <p className="text-sm font-bold tracking-tight">{file ? file.name : "Drop document bundle"}</p>
@@ -312,7 +312,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
 
         {questions.length > 0 && (
           <div className="space-y-4 animate-in fade-in zoom-in-95">
-             <div className="flex items-center justify-between border-b border-border/40 pb-3">
+             <div className="flex items-center justify-between border-b border-white/[0.05] pb-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Found {questions.length} Items</p>
                 <button onClick={() => setQuestions([])} className="text-[10px] text-red-500 font-bold uppercase hover:underline">Clear</button>
              </div>
@@ -320,7 +320,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
              <div className="space-y-3">
                 <AiQuestionPlacementPicker key={`pdf-${placementKey}`} radioGroupName="ai-placement-pdf" onChange={setLectureId} disabled={saving} />
                 <div className="flex gap-2">
-                   <button onClick={() => setExportOpen(true)} className="flex-1 h-10 rounded-xl border border-border/60 bg-card text-xs font-bold flex items-center justify-center gap-2">
+                   <button onClick={() => setExportOpen(true)} className="flex-1 h-10 rounded-xl border border-white/[0.02] bg-card text-xs font-bold flex items-center justify-center gap-2">
                       <FileText className="h-4 w-4 text-blue-500" /> Export Bundle
                    </button>
                    <button onClick={handleSaveAll} disabled={saving || !lectureId} className="flex-1 h-10 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow shadow-emerald-500/20 flex items-center justify-center gap-2">
@@ -331,7 +331,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
 
              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
                 {questions.map((q, i) => (
-                  <div key={i} className={cn("p-3 rounded-xl border text-xs transition-all", expanded.has(i) ? "border-violet-500/30 bg-violet-500/5 ring-1 ring-violet-500/10" : "border-border/40 bg-background/50")}>
+                  <div key={i} className={cn("p-3 rounded-xl border text-xs transition-all", expanded.has(i) ? "border-violet-500/30 bg-violet-500/5 ring-1 ring-violet-500/10" : "border-white/[0.05] bg-background/50")}>
                      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(p => { const n = new Set(p); n.has(i) ? n.delete(i) : n.add(i); return n; })}>
                         <div className="min-w-0 pr-4">
                            <span className="font-bold text-muted-foreground mr-2">#{i+1}</span>
@@ -385,7 +385,7 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
   }
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
+    <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm flex flex-col h-full space-y-5">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
            <BookOpen className="h-5 w-5" />
@@ -403,7 +403,7 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
         <div className="space-y-4">
            <label className={cn(
             "relative group flex h-28 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all",
-            file ? "border-indigo-500/40 bg-indigo-500/5" : "border-border/60 hover:bg-muted/50"
+            file ? "border-indigo-500/40 bg-indigo-500/5" : "border-white/[0.02] hover:bg-muted/50"
           )}>
              <BookOpen className="h-7 w-7 text-muted-foreground/30 mb-1" />
              <p className="text-xs font-bold tracking-tight">{file ? file.name : "Select Input File"}</p>
@@ -414,7 +414,7 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
              <textarea 
                value={instructions} onChange={e => setInstructions(e.target.value)} 
                placeholder="e.g. Focus on mechanism of action and side effects..."
-               className="w-full min-h-[70px] bg-background/50 border border-border/60 rounded-xl p-3 text-xs focus:outline-none"
+               className="w-full min-h-[70px] bg-background/50 border border-white/[0.02] rounded-xl p-3 text-xs focus:outline-none"
              />
           </div>
           <button
@@ -430,14 +430,14 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
         <div className="space-y-4 animate-in fade-in zoom-in-95">
            <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase text-muted-foreground">Synthesized Title</label>
-              <input value={notes.title} onChange={e => setNotes({...notes, title: e.target.value})} className="w-full bg-background/50 border border-border/40 rounded-lg h-9 px-3 text-sm font-bold" />
+              <input value={notes.title} onChange={e => setNotes({...notes, title: e.target.value})} className="w-full bg-background/50 border border-white/[0.05] rounded-lg h-9 px-3 text-sm font-bold" />
            </div>
            <textarea 
              value={notes.content} onChange={e => setNotes({...notes, content: e.target.value})}
-             className="w-full min-h-[140px] bg-background/50 border border-border/40 rounded-xl p-3 text-xs font-mono"
+             className="w-full min-h-[140px] bg-background/50 border border-white/[0.05] rounded-xl p-3 text-xs font-mono"
            />
            <div className="flex gap-2">
-              <button onClick={() => {setNotes(null); setFile(null);}} className="flex-1 h-10 rounded-xl border border-border/60 bg-card text-xs font-bold">Discard</button>
+              <button onClick={() => {setNotes(null); setFile(null);}} className="flex-1 h-10 rounded-xl border border-white/[0.02] bg-card text-xs font-bold">Discard</button>
               <button className="flex-1 h-10 rounded-xl bg-blue-600 text-white text-xs font-bold shadow shadow-blue-500/20 flex items-center justify-center gap-2"><FileText className="h-4 w-4" /> Download DOCX</button>
            </div>
         </div>
@@ -470,7 +470,7 @@ function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderCho
   }
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm flex flex-col h-full space-y-5 lg:col-span-2">
+    <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm flex flex-col h-full space-y-5 lg:col-span-2">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-500">
            <Layers className="h-5 w-5" />
@@ -484,13 +484,13 @@ function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderCho
       <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
          <div className="space-y-4">
             <AiQuestionPlacementPicker radioGroupName="ai-lecture-enhance" onChange={setLectureId} disabled={loading} />
-            <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/20 border border-border/40">
+            <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/20 border border-white/[0.05]">
                <label className="flex items-center gap-2.5 cursor-pointer py-1.5">
-                  <input type="checkbox" checked={wantNotes} onChange={e => setWantNotes(e.target.checked)} className="h-4 w-4 rounded border-border/60 text-sky-600 focus:ring-sky-500" />
+                  <input type="checkbox" checked={wantNotes} onChange={e => setWantNotes(e.target.checked)} className="h-4 w-4 rounded border-white/[0.02] text-sky-600 focus:ring-sky-500" />
                   <span className="text-xs font-bold text-foreground/80">Populate Summary</span>
                </label>
                <label className="flex items-center gap-2.5 cursor-pointer py-1.5">
-                  <input type="checkbox" checked={wantFlashcards} onChange={e => setWantFlashcards(e.target.checked)} className="h-4 w-4 rounded border-border/60 text-sky-600 focus:ring-sky-500" />
+                  <input type="checkbox" checked={wantFlashcards} onChange={e => setWantFlashcards(e.target.checked)} className="h-4 w-4 rounded border-white/[0.02] text-sky-600 focus:ring-sky-500" />
                   <span className="text-xs font-bold text-foreground/80">Generate Study Cards</span>
                </label>
             </div>
@@ -501,7 +501,7 @@ function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderCho
                <textarea
                  value={instructions} onChange={e => setInstructions(e.target.value)}
                  placeholder="e.g. Keep notes concise and use clinical case examples where possible..."
-                 className="w-full min-h-[140px] bg-background/50 border border-border/60 rounded-2xl p-4 text-sm focus:outline-none"
+                 className="w-full min-h-[140px] bg-background/50 border border-white/[0.02] rounded-2xl p-4 text-sm focus:outline-none"
                />
             </div>
             <button
@@ -517,3 +517,4 @@ function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderCho
     </div>
   );
 }
+

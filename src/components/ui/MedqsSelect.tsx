@@ -11,6 +11,8 @@ interface MedqsSelectProps {
   disabled?: boolean;
   children?: React.ReactNode;
   placeholder?: string;
+  title?: string;
+  required?: boolean;
 }
 
 /**
@@ -24,6 +26,8 @@ export function MedqsSelect({
   disabled,
   children,
   placeholder,
+  title,
+  required,
 }: MedqsSelectProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -63,6 +67,7 @@ export function MedqsSelect({
       {/* Trigger Button */}
       <button
         type="button"
+        title={title}
         onClick={() => !disabled && setOpen((p) => !p)}
         disabled={disabled}
         className={cn(
@@ -90,7 +95,7 @@ export function MedqsSelect({
         <div
           className={cn(
             "absolute z-[9999] mt-1.5 w-full overflow-hidden",
-            "rounded-xl border border-border/60 bg-popover shadow-xl shadow-black/20",
+            "rounded-xl border border-white/[0.02] bg-popover shadow-xl shadow-black/20",
             "backdrop-blur-xl",
             "animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 duration-150"
           )}
@@ -124,3 +129,4 @@ export function MedqsSelect({
 
 // Legacy forwardRef export for backward compat with old native <select> usage
 export { MedqsSelect as default };
+

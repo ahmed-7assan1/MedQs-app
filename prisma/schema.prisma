@@ -123,6 +123,19 @@ model Semester {
   academicYear   AcademicYear    @relation(fields: [academicYearId], references: [id])
   subjects       Subject[]
   users          User[]
+  playlistSyncs  PlaylistSyncTask[]
+}
+
+model PlaylistSyncTask {
+  id          String   @id @default(uuid())
+  playlistUrl String
+  semesterId  String
+  mediaType   String   // 'video' or 'podcast'
+  editionYear String?
+  lastSynced  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  
+  semester    Semester @relation(fields: [semesterId], references: [id], onDelete: Cascade)
 }
 
 model Module {
@@ -384,6 +397,7 @@ model User {
   id                    String                 @id @default(uuid())
   name                  String
   nickname              String?
+  handle                String?                @unique
   email                 String                 @unique
   emailVerified         DateTime?
   image                 String?
@@ -520,6 +534,10 @@ model Post {
   forumId              String
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
+  expiresAt            DateTime?
+  isPinned             Boolean      @default(false)
+  isForumPost          Boolean      @default(true)
+  isChatMessage        Boolean      @default(false)
   audience             PostAudience @default(UNIVERSITY)
   universityId         String
   comments             Comment[]
