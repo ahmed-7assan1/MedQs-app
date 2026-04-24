@@ -45,7 +45,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // MedQs brand — deep teal / clinical slate
+        // MedOneX brand — deep teal / clinical slate
         medq: {
           50: "#f0fdfa",
           100: "#ccfbf1",

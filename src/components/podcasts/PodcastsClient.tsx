@@ -63,7 +63,7 @@ export function PodcastsClient({ records }: { records: RecordItem[] }) {
 
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6 animate-in fade-in slide-in-from-bottom-4 w-max">
             <Mic2 className="h-3.5 w-3.5" />
-            MedQs Audio Library
+            MedOneX Audio Library
           </div>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
             Podcasts.

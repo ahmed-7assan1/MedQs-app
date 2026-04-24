@@ -49,7 +49,7 @@ export function LoginScreen({ navigation }: any) {
            <View style={tw`w-20 h-20 bg-blue-600 rounded-[28px] items-center justify-center shadow-lg shadow-blue-200 mb-6`}>
               <Sparkles color="white" size={40} />
            </View>
-           <Text style={tw`text-4xl font-extrabold text-slate-900 tracking-tight`}>MedQs</Text>
+           <Text style={tw`text-4xl font-extrabold text-slate-900 tracking-tight`}>MedOneX</Text>
            <Text style={tw`text-slate-400 mt-2 font-medium`}>Professional Medical Education</Text>
         </View>
 
@@ -106,7 +106,7 @@ export function LoginScreen({ navigation }: any) {
         </EliteCard>
 
         <View style={tw`flex-row justify-center mt-10`}>
-          <Text style={tw`text-slate-400 font-medium`}>New to MedQs? </Text>
+          <Text style={tw`text-slate-400 font-medium`}>New to MedOneX? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
             <Text style={[tw`font-bold`, { color: EliteTheme.colors.primary }]}>Create Account</Text>
           </TouchableOpacity>

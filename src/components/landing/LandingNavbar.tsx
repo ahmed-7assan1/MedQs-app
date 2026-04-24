@@ -27,10 +27,10 @@ export function LandingNavbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 decoration-transparent">
           <span className="inline-flex items-center dark:[filter:brightness(0)_invert(1)]">
-            <MedQsLogoMark className="h-8 w-8 shrink-0" title="MedQs" />
+            <MedQsLogoMark className="h-8 w-8 shrink-0" title="MedOneX" />
           </span>
           <span className="inline-flex items-center leading-none text-[16px] font-bold tracking-tight text-foreground dark:text-white">
-            MedQs
+            MedOneX
           </span>
         </Link>
 

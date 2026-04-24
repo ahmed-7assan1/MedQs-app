@@ -19,7 +19,7 @@ function iconMime(src: string): string {
 }
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  let siteName = "MedQs";
+  let siteName = "MedOneX";
   let themeColor = DEFAULT_PRIMARY;
 
   let pwaIcon: string | null = null;

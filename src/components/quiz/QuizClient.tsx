@@ -325,7 +325,7 @@ export function QuizClient({
                 animate={{ width: logoHover ? "auto" : 0, opacity: logoHover ? 1 : 0 }}
                 className="overflow-hidden whitespace-nowrap font-display text-sm font-bold tracking-tight text-foreground/90"
               >
-                <div className="pr-2">{siteName || "MedQs"}</div>
+                <div className="pr-2">{siteName || "MedOneX"}</div>
               </motion.div>
             </Link>
 

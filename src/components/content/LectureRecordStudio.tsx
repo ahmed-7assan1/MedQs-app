@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useAudioStore } from "@/lib/store";
 import {
   Headphones,
   Trash2,
@@ -58,32 +59,13 @@ export function LectureRecordStudio({
   isAdmin?: boolean;
   hubUrl?: string;
 }) {
+  const { currentTrack, isPlaying, duration: storeDuration } = useAudioStore();
   const [records, setRecords] = useState(initialRecords);
   const [activeId, setActiveId] = useState(selectedRecordId || initialRecords[0]?.id || "");
   const active = useMemo(() => records.find((r) => r.id === activeId) ?? null, [records, activeId]);
   
-  const spotifyEmbed = active ? getSpotifyEmbedUrl(active.url) : null;
-
-  // Audio Player State
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
-
-  // Sync Audio when active track changes
-  useEffect(() => {
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.load();
-    }
-  }, [active?.url]);
+  const isCurrentActive = currentTrack?.url === active?.url;
+  const duration = isCurrentActive ? storeDuration : 0;
 
   async function deleteRecord(id: string) {
     if (!confirm("Remove this audio track?")) return;
@@ -100,50 +82,6 @@ export function LectureRecordStudio({
       toast.error(e.message || "Failed to delete");
     }
   }
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => toast.error("Could not play this audio source natively. Try external link."));
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    setCurrentTime(val);
-    if (audioRef.current) audioRef.current.currentTime = val;
-  };
-
-  const handleSkip = (amount: number) => {
-    if (!audioRef.current) return;
-    const next = Math.max(0, Math.min(duration, currentTime + amount));
-    audioRef.current.currentTime = next;
-    setCurrentTime(next);
-  };
-
-  const toggleMute = () => {
-    if (!audioRef.current) return;
-    audioRef.current.muted = !muted;
-    setMuted(!muted);
-  };
-
-  const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    setVolume(val);
-    if (audioRef.current) {
-      audioRef.current.volume = val;
-      if (val > 0 && muted) toggleMute();
-    }
-  };
-
-  const changeSpeed = (rate: number) => {
-    setPlaybackRate(rate);
-    if (audioRef.current) audioRef.current.playbackRate = rate;
-    setShowSpeedMenu(false);
-  };
 
   if (records.length === 0) {
     return (
@@ -181,7 +119,7 @@ export function LectureRecordStudio({
                     <span className="flex items-center gap-1.5 text-primary font-medium bg-primary/10 px-2 py-0.5 rounded-full">
                       Audio Stream
                     </span>
-                    {!spotifyEmbed && (
+                    {duration > 0 && (
                       <>
                         <span>•</span>
                         <span>{formatTime(duration)}</span>
@@ -240,21 +178,19 @@ export function LectureRecordStudio({
                   )}
                 >
                   <div className="flex items-center justify-center w-6 opacity-60 font-mono text-xs mt-0.5 relative">
-                    {isActive ? (
-                      isPlaying ? (
-                        <div className="flex items-end gap-[2px] h-3 w-3">
-                          {[0, 1, 2].map((idx) => (
-                            <motion.div
-                              key={idx}
-                              animate={{ height: ["20%", "100%", "20%"] }}
-                              transition={{ duration: 0.6, repeat: Infinity, delay: idx * 0.1, ease: "easeInOut" }}
-                              className="w-[2px] bg-primary rounded-full"
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <Play className="h-3.5 w-3.5 text-primary ml-0.5" />
-                      )
+                    {currentTrack?.url === r.url && isPlaying ? (
+                      <div className="flex items-end gap-[2px] h-3 w-3">
+                        {[0, 1, 2].map((idx) => (
+                          <motion.div
+                            key={idx}
+                            animate={{ height: ["20%", "100%", "20%"] }}
+                            transition={{ duration: 0.6, repeat: Infinity, delay: idx * 0.1, ease: "easeInOut" }}
+                            className="w-[2px] bg-primary rounded-full"
+                          />
+                        ))}
+                      </div>
+                    ) : isActive ? (
+                      <Play className="h-3.5 w-3.5 text-primary ml-0.5" />
                     ) : (
                       <span className="text-muted-foreground">{i + 1}</span>
                     )}

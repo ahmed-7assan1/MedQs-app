@@ -1,4 +1,4 @@
-// types/index.ts — MedQs shared TypeScript types
+// types/index.ts — MedOneX shared TypeScript types
 
 export type UserRole = "STUDENT" | "ADMIN" | "SUPER_ADMIN";
 export type Theme = "LIGHT" | "DARK" | "SYSTEM";

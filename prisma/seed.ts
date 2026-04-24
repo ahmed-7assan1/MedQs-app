@@ -3,13 +3,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding MedQs database...");
+  console.log("🌱 Seeding MedOneX database...");
 
   await prisma.siteConfig.upsert({
     where: { id: "default" },
     update: {},
     create: {
-      id: "default", siteName: "MedQs", primaryColor: "#0d9488",
+      id: "default", siteName: "MedOneX", primaryColor: "#0d9488",
       enableAI: true, enableForum: true, enableAds: true, enableNotifs: true,
     },
   });

@@ -34,7 +34,7 @@ interface NavbarProps {
   logoUrl?: string;
 }
 
-export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedQs", logoUrl }: NavbarProps) {
+export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedOneX", logoUrl }: NavbarProps) {
   const pathname = usePathname();
   const { theme, setTheme } = useThemeStore();
   const { unread } = useNotificationStore();

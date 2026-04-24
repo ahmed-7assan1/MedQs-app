@@ -24,7 +24,7 @@ export function LeftSidebar({ threads, activeId, onSelect, onNew, user }: LeftSi
       <div className="flex flex-col gap-6 p-6">
         <div className="flex items-center gap-2">
            <div className="h-8 w-8 rounded-lg bg-drq-primary flex items-center justify-center text-white font-bold">Q</div>
-           <span className="font-display text-xl font-bold text-white">MedQs</span>
+           <span className="font-display text-xl font-bold text-white">MedOneX</span>
         </div>
 
         <nav className="flex flex-col gap-1">

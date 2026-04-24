@@ -133,7 +133,6 @@ exports.Prisma.SiteConfigScalarFieldEnum = {
   enableAds: 'enableAds',
   enableNotifs: 'enableNotifs',
   enableLeaderboard: 'enableLeaderboard',
-  enableCreativeStudio: 'enableCreativeStudio',
   updatedAt: 'updatedAt',
   fontArabic: 'fontArabic',
   fontSans: 'fontSans',
@@ -146,7 +145,8 @@ exports.Prisma.SiteConfigScalarFieldEnum = {
   telegramUrl: 'telegramUrl',
   twitterUrl: 'twitterUrl',
   whatsappUrl: 'whatsappUrl',
-  youtubeUrl: 'youtubeUrl'
+  youtubeUrl: 'youtubeUrl',
+  enableCreativeStudio: 'enableCreativeStudio'
 };
 
 exports.Prisma.FeatureFlagScalarFieldEnum = {
@@ -390,7 +390,6 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
   nickname: 'nickname',
-  handle: 'handle',
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
@@ -408,12 +407,13 @@ exports.Prisma.UserScalarFieldEnum = {
   rankId: 'rankId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  personalGeminiKey: 'personalGeminiKey',
   facebookUrl: 'facebookUrl',
   instagramUrl: 'instagramUrl',
   isPrivate: 'isPrivate',
   canManageReports: 'canManageReports',
-  facultyId: 'facultyId'
+  facultyId: 'facultyId',
+  personalGeminiKey: 'personalGeminiKey',
+  handle: 'handle'
 };
 
 exports.Prisma.UserLectureActivityScalarFieldEnum = {
@@ -469,12 +469,12 @@ exports.Prisma.PostScalarFieldEnum = {
   forumId: 'forumId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  audience: 'audience',
+  universityId: 'universityId',
   expiresAt: 'expiresAt',
   isPinned: 'isPinned',
-  isForumPost: 'isForumPost',
   isChatMessage: 'isChatMessage',
-  audience: 'audience',
-  universityId: 'universityId'
+  isForumPost: 'isForumPost'
 };
 
 exports.Prisma.CommentScalarFieldEnum = {

@@ -20,7 +20,7 @@ const LOADING_CONFIG: Record<string, { icon: any; text: string; color: string }>
   "/past-papers": { icon: HelpCircle, text: "Fetching questions", color: "text-purple-500" },
   "/settings": { icon: Settings, text: "Loading preferences", color: "text-slate-500" },
   "/profile": { icon: User, text: "Opening your profile", color: "text-sky-500" },
-  "default": { icon: Stethoscope, text: "MedQs is preparing", color: "text-primary" }
+  "default": { icon: Stethoscope, text: "MedOneX is preparing", color: "text-primary" }
 };
 
 export default function GlobalLoading() {
@@ -128,7 +128,7 @@ export default function GlobalLoading() {
         animate={{ opacity: 0.1 }}
         className="absolute bottom-12 flex items-center gap-2 grayscale"
       >
-        <span className="text-xs font-black tracking-[0.3em] uppercase">MedQs Premium</span>
+        <span className="text-xs font-black tracking-[0.3em] uppercase">MedOneX</span>
       </motion.div>
     </div>
   );

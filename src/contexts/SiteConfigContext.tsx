@@ -15,7 +15,7 @@ interface PublicSiteConfig {
   hulkLogoUrl?: string | null;
 }
 
-const DEFAULT: PublicSiteConfig = { siteName: "MedQs", logoUrl: null, logoUrlDark: null, primaryColor: "#2563eb" };
+const DEFAULT: PublicSiteConfig = { siteName: "MedOneX", logoUrl: null, logoUrlDark: null, primaryColor: "#2563eb" };
 
 const SiteConfigContext = createContext<PublicSiteConfig>(DEFAULT);
 

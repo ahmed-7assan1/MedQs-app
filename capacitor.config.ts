@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.medqs.app',
-  appName: 'MedQs',
+  appName: 'MedOneX',
   webDir: 'public',
   server: {
     url: 'https://med-qs0.vercel.app',

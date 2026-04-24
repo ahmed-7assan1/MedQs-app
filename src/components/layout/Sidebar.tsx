@@ -32,7 +32,7 @@ export const NAV = [
   { href: "/taskat", label: "Taskat", icon: Clock },
 ];
 
-export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedQs", logoUrl, isGuest, unreadCount = 0 }: SidebarProps) {
+export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedOneX", logoUrl, isGuest, unreadCount = 0 }: SidebarProps) {
   const pathname = usePathname();
   const { unread } = useNotificationStore();
   const { theme, setTheme } = useThemeStore();

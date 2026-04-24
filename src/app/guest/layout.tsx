@@ -10,7 +10,7 @@ export default async function GuestQuizLayout({ children }: { children: React.Re
   const site = await prisma.siteConfig
     .findFirst({ select: { siteName: true, logoUrl: true } })
     .catch(() => null);
-  const name = site?.siteName ?? "MedQs";
+  const name = site?.siteName ?? "MedOneX";
 
   return (
     <SiteConfigProvider initial={{ siteName: name, logoUrl: site?.logoUrl ?? null }}>

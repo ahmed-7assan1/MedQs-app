@@ -13,16 +13,28 @@ import dynamic from "next/dynamic";
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 export function PersistentAudioPlayer() {
-  const { currentTrack, isPlaying, isMinimized, setIsPlaying, setMinimized, stop } = useAudioStore();
+  const { currentTrack, isPlaying, isMinimized, setIsPlaying, setMinimized, setProgress, stop } = useAudioStore();
   const [mounted, setMounted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
   
-  const isYouTube = currentTrack?.url?.includes("youtube.com") || currentTrack?.url?.includes("youtu.be");
+  const isYouTube = useMemo(() => {
+    if (!currentTrack?.url) return false;
+    const url = currentTrack.url.toLowerCase();
+    return (
+      url.includes("youtube.com") || 
+      url.includes("youtu.be") || 
+      url.includes("youtube-nocookie.com")
+    );
+  }, [currentTrack?.url]);
   
-  // Track playback time
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  // Local state for immediate responsiveness
+  const [localCurrentTime, setLocalCurrentTime] = useState(0);
+  const [localDuration, setLocalDuration] = useState(0);
+
+  useEffect(() => {
+    setProgress(localCurrentTime, localDuration);
+  }, [localCurrentTime, localDuration, setProgress]);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -37,12 +49,22 @@ export function PersistentAudioPlayer() {
   useEffect(() => {
     if (!audioRef.current || !currentTrack || currentTrack.isSpotify || isYouTube) return;
     
+    // Reset state when track changes
+    setLocalCurrentTime(0);
+    setLocalDuration(0);
+    
+    // Explicitly load the new source
+    audioRef.current.load();
+
     if (isPlaying) {
-      audioRef.current.play().catch(() => setIsPlaying(false));
+      audioRef.current.play().catch((err) => {
+        console.error("[PersistentAudioPlayer] Playback failed:", err);
+        setIsPlaying(false);
+      });
     } else {
       audioRef.current.pause();
     }
-  }, [isPlaying, currentTrack, setIsPlaying, isYouTube]);
+  }, [isPlaying, currentTrack?.url, setIsPlaying, isYouTube]); // Depend on currentTrack.url specifically
 
   if (!mounted || !currentTrack) return null;
 
@@ -92,7 +114,6 @@ export function PersistentAudioPlayer() {
                     loading="lazy"
                     className="relative z-10"
                   ></iframe>
-                  {/* Hiding Spotify Logo Overlay */}
                   <div className="absolute top-2 right-2 h-8 w-8 bg-[#282828] z-20 rounded-full" /> 
                 </div>
               </div>
@@ -120,7 +141,9 @@ export function PersistentAudioPlayer() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <h4 className="text-[13px] font-bold text-white truncate leading-tight">{currentTrack.title}</h4>
-                  <p className="text-[11px] text-white/40 truncate mt-0.5">{currentTrack.artist || "Academic Audio"}</p>
+                  <p className="text-[11px] text-white/40 truncate mt-0.5">
+                    {isYouTube ? "YouTube Audio" : (currentTrack.artist || "Academic Audio")}
+                  </p>
                 </div>
 
                 {/* Controls */}
@@ -152,45 +175,64 @@ export function PersistentAudioPlayer() {
             )}
           </div>
           
-          {/* Progress Bar (Native Only) */}
+          {/* Progress Bar (Native & YouTube) */}
           {!currentTrack.isSpotify && (
              <div className="h-1 w-full bg-white/5">
                 <div 
                   className="h-full bg-primary transition-all duration-300"
-                  style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
+                  style={{ width: `${(localCurrentTime / (localDuration || 1)) * 100}%` }}
                 />
              </div>
           )}
         </div>
 
-        {/* Hidden Native Audio Element (For raw audio files) */}
+        {/* Hidden Native Audio Element */}
         {!currentTrack.isSpotify && !isYouTube && (
           <audio
             ref={audioRef}
             src={currentTrack.url}
-            onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
-            onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
+            onTimeUpdate={() => setLocalCurrentTime(audioRef.current?.currentTime || 0)}
+            onLoadedMetadata={() => setLocalDuration(audioRef.current?.duration || 0)}
             onEnded={() => setIsPlaying(false)}
             className="hidden"
           />
         )}
 
-        {/* Hidden React Player for YouTube Audio */}
+        {/* YouTube Audio Player (Tiny but not hidden to avoid browser blocks) */}
         {isYouTube && (
-          <div className="hidden">
+          <div 
+            className="pointer-events-none absolute" 
+            style={{ 
+              opacity: 0.01, 
+              width: "128px", 
+              height: "128px", 
+              left: "-9999px",
+              top: "-9999px",
+              overflow: 'hidden' 
+            }}
+          >
             <ReactPlayer
+              key={currentTrack.url}
               ref={ytPlayerRef}
               url={currentTrack.url}
               playing={isPlaying}
-              onProgress={({ playedSeconds }: any) => setCurrentTime(playedSeconds)}
-              onDuration={(d: number) => setDuration(d)}
+              onProgress={({ playedSeconds }: any) => setLocalCurrentTime(playedSeconds)}
+              onDuration={(d: number) => setLocalDuration(d)}
               onEnded={() => setIsPlaying(false)}
-              width="0"
-              height="0"
+              onError={(e: any) => console.error("YouTube Player Error:", e)}
+              width="100%"
+              height="100%"
               config={{
                 youtube: {
-                  playerVars: { autoplay: 1 }
-                } as any
+                  playerVars: { 
+                    autoplay: 1,
+                    controls: 0,
+                    showinfo: 0,
+                    modestbranding: 1,
+                    origin: typeof window !== "undefined" ? window.location.origin : undefined,
+                    playsinline: 1
+                  }
+                }
               }}
             />
           </div>

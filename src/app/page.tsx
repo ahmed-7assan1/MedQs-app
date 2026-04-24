@@ -334,7 +334,7 @@ export default async function LandingPage() {
 
           <div className="grid gap-5 md:grid-cols-3">
             {[
-              { text: "MedQs completely changed how I prepare for exams. The structured curriculum and past papers are next level.", name: "Sara M.", role: "3rd Year Medical Student", stars: 5, color: "#1A6BCC" },
+              { text: "MedOneX completely changed how I prepare for exams. The structured curriculum and past papers are next level.", name: "Sara M.", role: "3rd Year Medical Student", stars: 5, color: "#1A6BCC" },
               { text: "The AI assistant explains everything so clearly. I use it every day before my clinical sessions.", name: "Ahmed K.", role: "Clinical Year, Cairo University", stars: 5, color: "#6B48CC" },
               { text: "Finally a platform built specifically for medical students, not generic Q&A. The leaderboard keeps me motivated!", name: "Fatima H.", role: "2nd Year, Alexandria University", stars: 5, color: "#059669" },
             ].map(({ text, name, role, stars, color }) => (
@@ -417,7 +417,7 @@ export default async function LandingPage() {
                 Ready to Excel?
               </h2>
               <p className="mx-auto mb-8 max-w-md text-base leading-relaxed text-muted-foreground">
-                Join thousands of medical students who are studying smarter and achieving better results with MedQs.
+                Join thousands of medical students who are studying smarter and achieving better results with MedOneX.
               </p>
               <Link href="/register"
                 className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-10 py-4 text-base font-bold text-white shadow-[0_14px_48px_-8px_rgba(37,99,235,0.6)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_56px_-8px_rgba(37,99,235,0.7)]">
@@ -436,7 +436,7 @@ export default async function LandingPage() {
           <div className="mb-12 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
             <div className="lg:col-span-2">
               <Link href="/" className="mb-5 flex items-center gap-3 decoration-transparent">
-                <MedQsLogoMark className="h-8 w-8 shrink-0" title="MedQs" />
+                <MedQsLogoMark className="h-8 w-8 shrink-0" title="MedOneX" />
               </Link>
               <p className="max-w-[300px] text-sm leading-relaxed text-muted-foreground">
                 Elevating medical education with precision tools, structured curriculums, and an unstoppable community.
@@ -466,7 +466,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.02] pt-7">
-            <p className="text-xs text-muted-foreground">© 2026 MedQs. Excellence in medical education.</p>
+            <p className="text-xs text-muted-foreground">© 2026 MedOneX. Excellence in medical education.</p>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               Crafted with <Heart className="h-3.5 w-3.5 animate-pulse text-rose-500" /> for future healthcare leaders
             </div>

@@ -16,7 +16,7 @@ export default function AppError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[MedQs]", error);
+    console.error("[MedOneX]", error);
   }, [error]);
 
   const message = error instanceof Error ? error.message : String(error ?? "Unknown error");

@@ -6,7 +6,7 @@
  * 
  * This script will:
  * - Scrape CNS & ENR, Research, and ECE 3 from MNU LMS.
- * - Auto-upload files to your MedQs storage.
+ * - Auto-upload files to your MedOneX storage.
  * - Sync the structure to your database.
  */
 
@@ -40,7 +40,7 @@ require('dotenv').config();
 const CONFIG = {
     LMS_URL: 'https://lms.mansnu.edu.eg/moodle2026/',
     TARGET_SEMESTER_ID: '5f8dece2-6980-4a76-95ad-69d5850eb39b',
-    MEDQS_API: 'http://localhost:3000/api/v1/admin/sync/moodle', 
+    MEDONEX_API: 'http://localhost:3000/api/v1/admin/sync/moodle', 
     COURSES: ['Central Nervous', 'Research', 'Early Clinical Experience 3'],
     UPLOAD_TOKEN: process.env.UPLOADTHING_TOKEN,
     // Persistence: This folder will store your login session
@@ -50,7 +50,7 @@ const CONFIG = {
 const utapi = new UTApi({ token: CONFIG.UPLOAD_TOKEN });
 
 async function run() {
-    console.log("--- MedQs Moodle Bridge Starting ---");
+    console.log("--- MedOneX Moodle Bridge Starting ---");
     
     // Create profile dir if doesn't exist
     if (!fs.existsSync(CONFIG.USER_DATA_DIR)) fs.mkdirSync(CONFIG.USER_DATA_DIR);
@@ -164,14 +164,14 @@ async function run() {
             results.push(moduleData);
         }
 
-        // 3. SYNC TO MEDQS
-        console.log("\n--- Extraction Finished. Syncing to MedQs Database ---");
-        const syncResponse = await axios.post(CONFIG.MEDQS_API, {
+        // 3. SYNC TO MEDONEX
+        console.log("\n--- Extraction Finished. Syncing to MedOneX Database ---");
+        const syncResponse = await axios.post(CONFIG.MEDONEX_API, {
             semesterId: CONFIG.TARGET_SEMESTER_ID,
             modules: results
         }, {
             headers: {
-                'x-admin-sync-key': process.env.ADMIN_SYNC_KEY || "medqs_secret_sync_2026"
+                'x-admin-sync-key': process.env.ADMIN_SYNC_KEY || "medonex_secret_sync_2026"
             }
         });
 

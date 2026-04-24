@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * Redesigned for a professional, immersive, single-row experience.
  */
 export function SiteFooter() {
-  const { siteName = "MedQs", facebookUrl, twitterUrl, youtubeUrl, instagramUrl, telegramUrl, whatsappUrl, hulkLogoUrl } = useSiteConfig();
+  const { siteName = "MedOneX", facebookUrl, twitterUrl, youtubeUrl, instagramUrl, telegramUrl, whatsappUrl, hulkLogoUrl } = useSiteConfig();
   const year = new Date().getFullYear();
 
   return (

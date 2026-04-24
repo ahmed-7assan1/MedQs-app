@@ -115,9 +115,12 @@ interface AudioStore {
   currentTrack: AudioTrack | null;
   isPlaying: boolean;
   isMinimized: boolean;
+  currentTime: number;
+  duration: number;
   setTrack: (track: AudioTrack) => void;
   setIsPlaying: (playing: boolean) => void;
   setMinimized: (min: boolean) => void;
+  setProgress: (current: number, total: number) => void;
   stop: () => void;
 }
 
@@ -125,8 +128,11 @@ export const useAudioStore = create<AudioStore>((set) => ({
   currentTrack: null,
   isPlaying: false,
   isMinimized: false,
-  setTrack: (track) => set({ currentTrack: track, isPlaying: true, isMinimized: false }),
+  currentTime: 0,
+  duration: 0,
+  setTrack: (track) => set({ currentTrack: track, isPlaying: true, isMinimized: false, currentTime: 0, duration: 0 }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),
   setMinimized: (isMinimized) => set({ isMinimized }),
-  stop: () => set({ currentTrack: null, isPlaying: false }),
+  setProgress: (currentTime, duration) => set({ currentTime, duration }),
+  stop: () => set({ currentTrack: null, isPlaying: false, currentTime: 0, duration: 0 }),
 }));

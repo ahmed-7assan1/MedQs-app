@@ -323,7 +323,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
             <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center">
               <Play className="h-3 w-3 fill-white text-white ml-0.5" />
             </div>
-            <span className="text-[10px] font-bold tracking-widest text-white uppercase">MedQs Studio</span>
+            <span className="text-[10px] font-bold tracking-widest text-white uppercase">MedOneX Studio</span>
           </div>
         </div>
 

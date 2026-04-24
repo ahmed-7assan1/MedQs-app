@@ -5485,9 +5485,9 @@ export namespace Prisma {
     guestQuizUsers: number
     modules: number
     pastPapers: number
+    playlistSyncs: number
     subjects: number
     users: number
-    playlistSyncs: number
   }
 
   export type SemesterCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5496,9 +5496,9 @@ export namespace Prisma {
     guestQuizUsers?: boolean | SemesterCountOutputTypeCountGuestQuizUsersArgs
     modules?: boolean | SemesterCountOutputTypeCountModulesArgs
     pastPapers?: boolean | SemesterCountOutputTypeCountPastPapersArgs
+    playlistSyncs?: boolean | SemesterCountOutputTypeCountPlaylistSyncsArgs
     subjects?: boolean | SemesterCountOutputTypeCountSubjectsArgs
     users?: boolean | SemesterCountOutputTypeCountUsersArgs
-    playlistSyncs?: boolean | SemesterCountOutputTypeCountPlaylistSyncsArgs
   }
 
   // Custom InputTypes
@@ -5550,6 +5550,13 @@ export namespace Prisma {
   /**
    * SemesterCountOutputType without action
    */
+  export type SemesterCountOutputTypeCountPlaylistSyncsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PlaylistSyncTaskWhereInput
+  }
+
+  /**
+   * SemesterCountOutputType without action
+   */
   export type SemesterCountOutputTypeCountSubjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SubjectWhereInput
   }
@@ -5559,13 +5566,6 @@ export namespace Prisma {
    */
   export type SemesterCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
-  }
-
-  /**
-   * SemesterCountOutputType without action
-   */
-  export type SemesterCountOutputTypeCountPlaylistSyncsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: PlaylistSyncTaskWhereInput
   }
 
 
@@ -5647,8 +5647,8 @@ export namespace Prisma {
   export type LectureCountOutputType = {
     flashcards: number
     files: number
-    videos: number
     records: number
+    videos: number
     questions: number
     activities: number
   }
@@ -5656,8 +5656,8 @@ export namespace Prisma {
   export type LectureCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     flashcards?: boolean | LectureCountOutputTypeCountFlashcardsArgs
     files?: boolean | LectureCountOutputTypeCountFilesArgs
-    videos?: boolean | LectureCountOutputTypeCountVideosArgs
     records?: boolean | LectureCountOutputTypeCountRecordsArgs
+    videos?: boolean | LectureCountOutputTypeCountVideosArgs
     questions?: boolean | LectureCountOutputTypeCountQuestionsArgs
     activities?: boolean | LectureCountOutputTypeCountActivitiesArgs
   }
@@ -5690,15 +5690,15 @@ export namespace Prisma {
   /**
    * LectureCountOutputType without action
    */
-  export type LectureCountOutputTypeCountVideosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: LectureVideoWhereInput
+  export type LectureCountOutputTypeCountRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LectureRecordWhereInput
   }
 
   /**
    * LectureCountOutputType without action
    */
-  export type LectureCountOutputTypeCountRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: LectureRecordWhereInput
+  export type LectureCountOutputTypeCountVideosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LectureVideoWhereInput
   }
 
   /**
@@ -6432,7 +6432,6 @@ export namespace Prisma {
     enableAds: boolean | null
     enableNotifs: boolean | null
     enableLeaderboard: boolean | null
-    enableCreativeStudio: boolean | null
     updatedAt: Date | null
     fontArabic: string | null
     fontSans: string | null
@@ -6446,6 +6445,7 @@ export namespace Prisma {
     twitterUrl: string | null
     whatsappUrl: string | null
     youtubeUrl: string | null
+    enableCreativeStudio: boolean | null
   }
 
   export type SiteConfigMaxAggregateOutputType = {
@@ -6459,7 +6459,6 @@ export namespace Prisma {
     enableAds: boolean | null
     enableNotifs: boolean | null
     enableLeaderboard: boolean | null
-    enableCreativeStudio: boolean | null
     updatedAt: Date | null
     fontArabic: string | null
     fontSans: string | null
@@ -6473,6 +6472,7 @@ export namespace Prisma {
     twitterUrl: string | null
     whatsappUrl: string | null
     youtubeUrl: string | null
+    enableCreativeStudio: boolean | null
   }
 
   export type SiteConfigCountAggregateOutputType = {
@@ -6486,7 +6486,6 @@ export namespace Prisma {
     enableAds: number
     enableNotifs: number
     enableLeaderboard: number
-    enableCreativeStudio: number
     updatedAt: number
     fontArabic: number
     fontSans: number
@@ -6500,6 +6499,7 @@ export namespace Prisma {
     twitterUrl: number
     whatsappUrl: number
     youtubeUrl: number
+    enableCreativeStudio: number
     _all: number
   }
 
@@ -6515,7 +6515,6 @@ export namespace Prisma {
     enableAds?: true
     enableNotifs?: true
     enableLeaderboard?: true
-    enableCreativeStudio?: true
     updatedAt?: true
     fontArabic?: true
     fontSans?: true
@@ -6529,6 +6528,7 @@ export namespace Prisma {
     twitterUrl?: true
     whatsappUrl?: true
     youtubeUrl?: true
+    enableCreativeStudio?: true
   }
 
   export type SiteConfigMaxAggregateInputType = {
@@ -6542,7 +6542,6 @@ export namespace Prisma {
     enableAds?: true
     enableNotifs?: true
     enableLeaderboard?: true
-    enableCreativeStudio?: true
     updatedAt?: true
     fontArabic?: true
     fontSans?: true
@@ -6556,6 +6555,7 @@ export namespace Prisma {
     twitterUrl?: true
     whatsappUrl?: true
     youtubeUrl?: true
+    enableCreativeStudio?: true
   }
 
   export type SiteConfigCountAggregateInputType = {
@@ -6569,7 +6569,6 @@ export namespace Prisma {
     enableAds?: true
     enableNotifs?: true
     enableLeaderboard?: true
-    enableCreativeStudio?: true
     updatedAt?: true
     fontArabic?: true
     fontSans?: true
@@ -6583,6 +6582,7 @@ export namespace Prisma {
     twitterUrl?: true
     whatsappUrl?: true
     youtubeUrl?: true
+    enableCreativeStudio?: true
     _all?: true
   }
 
@@ -6669,7 +6669,6 @@ export namespace Prisma {
     enableAds: boolean
     enableNotifs: boolean
     enableLeaderboard: boolean
-    enableCreativeStudio: boolean
     updatedAt: Date
     fontArabic: string | null
     fontSans: string | null
@@ -6683,6 +6682,7 @@ export namespace Prisma {
     twitterUrl: string | null
     whatsappUrl: string | null
     youtubeUrl: string | null
+    enableCreativeStudio: boolean
     _count: SiteConfigCountAggregateOutputType | null
     _min: SiteConfigMinAggregateOutputType | null
     _max: SiteConfigMaxAggregateOutputType | null
@@ -6713,7 +6713,6 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
-    enableCreativeStudio?: boolean
     updatedAt?: boolean
     fontArabic?: boolean
     fontSans?: boolean
@@ -6727,6 +6726,7 @@ export namespace Prisma {
     twitterUrl?: boolean
     whatsappUrl?: boolean
     youtubeUrl?: boolean
+    enableCreativeStudio?: boolean
   }, ExtArgs["result"]["siteConfig"]>
 
   export type SiteConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6740,7 +6740,6 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
-    enableCreativeStudio?: boolean
     updatedAt?: boolean
     fontArabic?: boolean
     fontSans?: boolean
@@ -6754,6 +6753,7 @@ export namespace Prisma {
     twitterUrl?: boolean
     whatsappUrl?: boolean
     youtubeUrl?: boolean
+    enableCreativeStudio?: boolean
   }, ExtArgs["result"]["siteConfig"]>
 
   export type SiteConfigSelectScalar = {
@@ -6767,7 +6767,6 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
-    enableCreativeStudio?: boolean
     updatedAt?: boolean
     fontArabic?: boolean
     fontSans?: boolean
@@ -6781,6 +6780,7 @@ export namespace Prisma {
     twitterUrl?: boolean
     whatsappUrl?: boolean
     youtubeUrl?: boolean
+    enableCreativeStudio?: boolean
   }
 
 
@@ -6798,7 +6798,6 @@ export namespace Prisma {
       enableAds: boolean
       enableNotifs: boolean
       enableLeaderboard: boolean
-      enableCreativeStudio: boolean
       updatedAt: Date
       fontArabic: string | null
       fontSans: string | null
@@ -6815,6 +6814,7 @@ export namespace Prisma {
       twitterUrl: string | null
       whatsappUrl: string | null
       youtubeUrl: string | null
+      enableCreativeStudio: boolean
     }, ExtArgs["result"]["siteConfig"]>
     composites: {}
   }
@@ -7218,7 +7218,6 @@ export namespace Prisma {
     readonly enableAds: FieldRef<"SiteConfig", 'Boolean'>
     readonly enableNotifs: FieldRef<"SiteConfig", 'Boolean'>
     readonly enableLeaderboard: FieldRef<"SiteConfig", 'Boolean'>
-    readonly enableCreativeStudio: FieldRef<"SiteConfig", 'Boolean'>
     readonly updatedAt: FieldRef<"SiteConfig", 'DateTime'>
     readonly fontArabic: FieldRef<"SiteConfig", 'String'>
     readonly fontSans: FieldRef<"SiteConfig", 'String'>
@@ -7232,6 +7231,7 @@ export namespace Prisma {
     readonly twitterUrl: FieldRef<"SiteConfig", 'String'>
     readonly whatsappUrl: FieldRef<"SiteConfig", 'String'>
     readonly youtubeUrl: FieldRef<"SiteConfig", 'String'>
+    readonly enableCreativeStudio: FieldRef<"SiteConfig", 'Boolean'>
   }
     
 
@@ -12875,10 +12875,10 @@ export namespace Prisma {
     guestQuizUsers?: boolean | Semester$guestQuizUsersArgs<ExtArgs>
     modules?: boolean | Semester$modulesArgs<ExtArgs>
     pastPapers?: boolean | Semester$pastPapersArgs<ExtArgs>
+    playlistSyncs?: boolean | Semester$playlistSyncsArgs<ExtArgs>
     academicYear?: boolean | AcademicYearDefaultArgs<ExtArgs>
     subjects?: boolean | Semester$subjectsArgs<ExtArgs>
     users?: boolean | Semester$usersArgs<ExtArgs>
-    playlistSyncs?: boolean | Semester$playlistSyncsArgs<ExtArgs>
     _count?: boolean | SemesterCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["semester"]>
 
@@ -12901,10 +12901,10 @@ export namespace Prisma {
     guestQuizUsers?: boolean | Semester$guestQuizUsersArgs<ExtArgs>
     modules?: boolean | Semester$modulesArgs<ExtArgs>
     pastPapers?: boolean | Semester$pastPapersArgs<ExtArgs>
+    playlistSyncs?: boolean | Semester$playlistSyncsArgs<ExtArgs>
     academicYear?: boolean | AcademicYearDefaultArgs<ExtArgs>
     subjects?: boolean | Semester$subjectsArgs<ExtArgs>
     users?: boolean | Semester$usersArgs<ExtArgs>
-    playlistSyncs?: boolean | Semester$playlistSyncsArgs<ExtArgs>
     _count?: boolean | SemesterCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SemesterIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12919,10 +12919,10 @@ export namespace Prisma {
       guestQuizUsers: Prisma.$GuestQuizUserPayload<ExtArgs>[]
       modules: Prisma.$ModulePayload<ExtArgs>[]
       pastPapers: Prisma.$PastPaperPayload<ExtArgs>[]
+      playlistSyncs: Prisma.$PlaylistSyncTaskPayload<ExtArgs>[]
       academicYear: Prisma.$AcademicYearPayload<ExtArgs>
       subjects: Prisma.$SubjectPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
-      playlistSyncs: Prisma.$PlaylistSyncTaskPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -13297,10 +13297,10 @@ export namespace Prisma {
     guestQuizUsers<T extends Semester$guestQuizUsersArgs<ExtArgs> = {}>(args?: Subset<T, Semester$guestQuizUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GuestQuizUserPayload<ExtArgs>, T, "findMany"> | Null>
     modules<T extends Semester$modulesArgs<ExtArgs> = {}>(args?: Subset<T, Semester$modulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "findMany"> | Null>
     pastPapers<T extends Semester$pastPapersArgs<ExtArgs> = {}>(args?: Subset<T, Semester$pastPapersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PastPaperPayload<ExtArgs>, T, "findMany"> | Null>
+    playlistSyncs<T extends Semester$playlistSyncsArgs<ExtArgs> = {}>(args?: Subset<T, Semester$playlistSyncsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlaylistSyncTaskPayload<ExtArgs>, T, "findMany"> | Null>
     academicYear<T extends AcademicYearDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AcademicYearDefaultArgs<ExtArgs>>): Prisma__AcademicYearClient<$Result.GetResult<Prisma.$AcademicYearPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     subjects<T extends Semester$subjectsArgs<ExtArgs> = {}>(args?: Subset<T, Semester$subjectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubjectPayload<ExtArgs>, T, "findMany"> | Null>
     users<T extends Semester$usersArgs<ExtArgs> = {}>(args?: Subset<T, Semester$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
-    playlistSyncs<T extends Semester$playlistSyncsArgs<ExtArgs> = {}>(args?: Subset<T, Semester$playlistSyncsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlaylistSyncTaskPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13751,6 +13751,26 @@ export namespace Prisma {
   }
 
   /**
+   * Semester.playlistSyncs
+   */
+  export type Semester$playlistSyncsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlaylistSyncTask
+     */
+    select?: PlaylistSyncTaskSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PlaylistSyncTaskInclude<ExtArgs> | null
+    where?: PlaylistSyncTaskWhereInput
+    orderBy?: PlaylistSyncTaskOrderByWithRelationInput | PlaylistSyncTaskOrderByWithRelationInput[]
+    cursor?: PlaylistSyncTaskWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PlaylistSyncTaskScalarFieldEnum | PlaylistSyncTaskScalarFieldEnum[]
+  }
+
+  /**
    * Semester.subjects
    */
   export type Semester$subjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13788,26 +13808,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
-  }
-
-  /**
-   * Semester.playlistSyncs
-   */
-  export type Semester$playlistSyncsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PlaylistSyncTask
-     */
-    select?: PlaylistSyncTaskSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PlaylistSyncTaskInclude<ExtArgs> | null
-    where?: PlaylistSyncTaskWhereInput
-    orderBy?: PlaylistSyncTaskOrderByWithRelationInput | PlaylistSyncTaskOrderByWithRelationInput[]
-    cursor?: PlaylistSyncTaskWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: PlaylistSyncTaskScalarFieldEnum | PlaylistSyncTaskScalarFieldEnum[]
   }
 
   /**
@@ -16953,8 +16953,8 @@ export namespace Prisma {
     flashcards?: boolean | Lecture$flashcardsArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     files?: boolean | Lecture$filesArgs<ExtArgs>
-    videos?: boolean | Lecture$videosArgs<ExtArgs>
     records?: boolean | Lecture$recordsArgs<ExtArgs>
+    videos?: boolean | Lecture$videosArgs<ExtArgs>
     PastPaper?: boolean | Lecture$PastPaperArgs<ExtArgs>
     questions?: boolean | Lecture$questionsArgs<ExtArgs>
     activities?: boolean | Lecture$activitiesArgs<ExtArgs>
@@ -16988,8 +16988,8 @@ export namespace Prisma {
     flashcards?: boolean | Lecture$flashcardsArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     files?: boolean | Lecture$filesArgs<ExtArgs>
-    videos?: boolean | Lecture$videosArgs<ExtArgs>
     records?: boolean | Lecture$recordsArgs<ExtArgs>
+    videos?: boolean | Lecture$videosArgs<ExtArgs>
     PastPaper?: boolean | Lecture$PastPaperArgs<ExtArgs>
     questions?: boolean | Lecture$questionsArgs<ExtArgs>
     activities?: boolean | Lecture$activitiesArgs<ExtArgs>
@@ -17005,8 +17005,8 @@ export namespace Prisma {
       flashcards: Prisma.$FlashcardPayload<ExtArgs>[]
       subject: Prisma.$SubjectPayload<ExtArgs>
       files: Prisma.$LectureFilePayload<ExtArgs>[]
-      videos: Prisma.$LectureVideoPayload<ExtArgs>[]
       records: Prisma.$LectureRecordPayload<ExtArgs>[]
+      videos: Prisma.$LectureVideoPayload<ExtArgs>[]
       PastPaper: Prisma.$PastPaperPayload<ExtArgs> | null
       questions: Prisma.$QuestionPayload<ExtArgs>[]
       activities: Prisma.$UserLectureActivityPayload<ExtArgs>[]
@@ -17387,8 +17387,8 @@ export namespace Prisma {
     flashcards<T extends Lecture$flashcardsArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$flashcardsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FlashcardPayload<ExtArgs>, T, "findMany"> | Null>
     subject<T extends SubjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SubjectDefaultArgs<ExtArgs>>): Prisma__SubjectClient<$Result.GetResult<Prisma.$SubjectPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     files<T extends Lecture$filesArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$filesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LectureFilePayload<ExtArgs>, T, "findMany"> | Null>
-    videos<T extends Lecture$videosArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$videosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LectureVideoPayload<ExtArgs>, T, "findMany"> | Null>
     records<T extends Lecture$recordsArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$recordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LectureRecordPayload<ExtArgs>, T, "findMany"> | Null>
+    videos<T extends Lecture$videosArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$videosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LectureVideoPayload<ExtArgs>, T, "findMany"> | Null>
     PastPaper<T extends Lecture$PastPaperArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$PastPaperArgs<ExtArgs>>): Prisma__PastPaperClient<$Result.GetResult<Prisma.$PastPaperPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     questions<T extends Lecture$questionsArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$questionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuestionPayload<ExtArgs>, T, "findMany"> | Null>
     activities<T extends Lecture$activitiesArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLectureActivityPayload<ExtArgs>, T, "findMany"> | Null>
@@ -17787,26 +17787,6 @@ export namespace Prisma {
   }
 
   /**
-   * Lecture.videos
-   */
-  export type Lecture$videosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the LectureVideo
-     */
-    select?: LectureVideoSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: LectureVideoInclude<ExtArgs> | null
-    where?: LectureVideoWhereInput
-    orderBy?: LectureVideoOrderByWithRelationInput | LectureVideoOrderByWithRelationInput[]
-    cursor?: LectureVideoWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: LectureVideoScalarFieldEnum | LectureVideoScalarFieldEnum[]
-  }
-
-  /**
    * Lecture.records
    */
   export type Lecture$recordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -17824,6 +17804,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: LectureRecordScalarFieldEnum | LectureRecordScalarFieldEnum[]
+  }
+
+  /**
+   * Lecture.videos
+   */
+  export type Lecture$videosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LectureVideo
+     */
+    select?: LectureVideoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LectureVideoInclude<ExtArgs> | null
+    where?: LectureVideoWhereInput
+    orderBy?: LectureVideoOrderByWithRelationInput | LectureVideoOrderByWithRelationInput[]
+    cursor?: LectureVideoWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LectureVideoScalarFieldEnum | LectureVideoScalarFieldEnum[]
   }
 
   /**
@@ -32071,7 +32071,6 @@ export namespace Prisma {
     id: string | null
     name: string | null
     nickname: string | null
-    handle: string | null
     email: string | null
     emailVerified: Date | null
     image: string | null
@@ -32089,19 +32088,19 @@ export namespace Prisma {
     rankId: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    personalGeminiKey: string | null
     facebookUrl: string | null
     instagramUrl: string | null
     isPrivate: boolean | null
     canManageReports: boolean | null
     facultyId: string | null
+    personalGeminiKey: string | null
+    handle: string | null
   }
 
   export type UserMaxAggregateOutputType = {
     id: string | null
     name: string | null
     nickname: string | null
-    handle: string | null
     email: string | null
     emailVerified: Date | null
     image: string | null
@@ -32119,19 +32118,19 @@ export namespace Prisma {
     rankId: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    personalGeminiKey: string | null
     facebookUrl: string | null
     instagramUrl: string | null
     isPrivate: boolean | null
     canManageReports: boolean | null
     facultyId: string | null
+    personalGeminiKey: string | null
+    handle: string | null
   }
 
   export type UserCountAggregateOutputType = {
     id: number
     name: number
     nickname: number
-    handle: number
     email: number
     emailVerified: number
     image: number
@@ -32149,12 +32148,13 @@ export namespace Prisma {
     rankId: number
     createdAt: number
     updatedAt: number
-    personalGeminiKey: number
     facebookUrl: number
     instagramUrl: number
     isPrivate: number
     canManageReports: number
     facultyId: number
+    personalGeminiKey: number
+    handle: number
     _all: number
   }
 
@@ -32171,7 +32171,6 @@ export namespace Prisma {
     id?: true
     name?: true
     nickname?: true
-    handle?: true
     email?: true
     emailVerified?: true
     image?: true
@@ -32189,19 +32188,19 @@ export namespace Prisma {
     rankId?: true
     createdAt?: true
     updatedAt?: true
-    personalGeminiKey?: true
     facebookUrl?: true
     instagramUrl?: true
     isPrivate?: true
     canManageReports?: true
     facultyId?: true
+    personalGeminiKey?: true
+    handle?: true
   }
 
   export type UserMaxAggregateInputType = {
     id?: true
     name?: true
     nickname?: true
-    handle?: true
     email?: true
     emailVerified?: true
     image?: true
@@ -32219,19 +32218,19 @@ export namespace Prisma {
     rankId?: true
     createdAt?: true
     updatedAt?: true
-    personalGeminiKey?: true
     facebookUrl?: true
     instagramUrl?: true
     isPrivate?: true
     canManageReports?: true
     facultyId?: true
+    personalGeminiKey?: true
+    handle?: true
   }
 
   export type UserCountAggregateInputType = {
     id?: true
     name?: true
     nickname?: true
-    handle?: true
     email?: true
     emailVerified?: true
     image?: true
@@ -32249,12 +32248,13 @@ export namespace Prisma {
     rankId?: true
     createdAt?: true
     updatedAt?: true
-    personalGeminiKey?: true
     facebookUrl?: true
     instagramUrl?: true
     isPrivate?: true
     canManageReports?: true
     facultyId?: true
+    personalGeminiKey?: true
+    handle?: true
     _all?: true
   }
 
@@ -32348,7 +32348,6 @@ export namespace Prisma {
     id: string
     name: string
     nickname: string | null
-    handle: string | null
     email: string
     emailVerified: Date | null
     image: string | null
@@ -32366,12 +32365,13 @@ export namespace Prisma {
     rankId: string | null
     createdAt: Date
     updatedAt: Date
-    personalGeminiKey: string | null
     facebookUrl: string | null
     instagramUrl: string | null
     isPrivate: boolean
     canManageReports: boolean
     facultyId: string | null
+    personalGeminiKey: string | null
+    handle: string | null
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -32397,7 +32397,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     nickname?: boolean
-    handle?: boolean
     email?: boolean
     emailVerified?: boolean
     image?: boolean
@@ -32415,12 +32414,13 @@ export namespace Prisma {
     rankId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    personalGeminiKey?: boolean
     facebookUrl?: boolean
     instagramUrl?: boolean
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: boolean
+    personalGeminiKey?: boolean
+    handle?: boolean
     aiUsageLogs?: boolean | User$aiUsageLogsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
     channelFollows?: boolean | User$channelFollowsArgs<ExtArgs>
@@ -32459,7 +32459,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     nickname?: boolean
-    handle?: boolean
     email?: boolean
     emailVerified?: boolean
     image?: boolean
@@ -32477,12 +32476,13 @@ export namespace Prisma {
     rankId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    personalGeminiKey?: boolean
     facebookUrl?: boolean
     instagramUrl?: boolean
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: boolean
+    personalGeminiKey?: boolean
+    handle?: boolean
     faculty?: boolean | User$facultyArgs<ExtArgs>
     rank?: boolean | User$rankArgs<ExtArgs>
     semester?: boolean | User$semesterArgs<ExtArgs>
@@ -32493,7 +32493,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     nickname?: boolean
-    handle?: boolean
     email?: boolean
     emailVerified?: boolean
     image?: boolean
@@ -32511,12 +32510,13 @@ export namespace Prisma {
     rankId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    personalGeminiKey?: boolean
     facebookUrl?: boolean
     instagramUrl?: boolean
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: boolean
+    personalGeminiKey?: boolean
+    handle?: boolean
   }
 
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -32599,7 +32599,6 @@ export namespace Prisma {
       id: string
       name: string
       nickname: string | null
-      handle: string | null
       email: string
       emailVerified: Date | null
       image: string | null
@@ -32617,12 +32616,13 @@ export namespace Prisma {
       rankId: string | null
       createdAt: Date
       updatedAt: Date
-      personalGeminiKey: string | null
       facebookUrl: string | null
       instagramUrl: string | null
       isPrivate: boolean
       canManageReports: boolean
       facultyId: string | null
+      personalGeminiKey: string | null
+      handle: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -33050,7 +33050,6 @@ export namespace Prisma {
     readonly id: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
     readonly nickname: FieldRef<"User", 'String'>
-    readonly handle: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly emailVerified: FieldRef<"User", 'DateTime'>
     readonly image: FieldRef<"User", 'String'>
@@ -33068,12 +33067,13 @@ export namespace Prisma {
     readonly rankId: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
-    readonly personalGeminiKey: FieldRef<"User", 'String'>
     readonly facebookUrl: FieldRef<"User", 'String'>
     readonly instagramUrl: FieldRef<"User", 'String'>
     readonly isPrivate: FieldRef<"User", 'Boolean'>
     readonly canManageReports: FieldRef<"User", 'Boolean'>
     readonly facultyId: FieldRef<"User", 'String'>
+    readonly personalGeminiKey: FieldRef<"User", 'String'>
+    readonly handle: FieldRef<"User", 'String'>
   }
     
 
@@ -38853,12 +38853,12 @@ export namespace Prisma {
     forumId: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    expiresAt: Date | null
-    isPinned: boolean | null
-    isForumPost: boolean | null
-    isChatMessage: boolean | null
     audience: $Enums.PostAudience | null
     universityId: string | null
+    expiresAt: Date | null
+    isPinned: boolean | null
+    isChatMessage: boolean | null
+    isForumPost: boolean | null
   }
 
   export type PostMaxAggregateOutputType = {
@@ -38870,12 +38870,12 @@ export namespace Prisma {
     forumId: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    expiresAt: Date | null
-    isPinned: boolean | null
-    isForumPost: boolean | null
-    isChatMessage: boolean | null
     audience: $Enums.PostAudience | null
     universityId: string | null
+    expiresAt: Date | null
+    isPinned: boolean | null
+    isChatMessage: boolean | null
+    isForumPost: boolean | null
   }
 
   export type PostCountAggregateOutputType = {
@@ -38887,12 +38887,12 @@ export namespace Prisma {
     forumId: number
     createdAt: number
     updatedAt: number
-    expiresAt: number
-    isPinned: number
-    isForumPost: number
-    isChatMessage: number
     audience: number
     universityId: number
+    expiresAt: number
+    isPinned: number
+    isChatMessage: number
+    isForumPost: number
     _all: number
   }
 
@@ -38906,12 +38906,12 @@ export namespace Prisma {
     forumId?: true
     createdAt?: true
     updatedAt?: true
-    expiresAt?: true
-    isPinned?: true
-    isForumPost?: true
-    isChatMessage?: true
     audience?: true
     universityId?: true
+    expiresAt?: true
+    isPinned?: true
+    isChatMessage?: true
+    isForumPost?: true
   }
 
   export type PostMaxAggregateInputType = {
@@ -38923,12 +38923,12 @@ export namespace Prisma {
     forumId?: true
     createdAt?: true
     updatedAt?: true
-    expiresAt?: true
-    isPinned?: true
-    isForumPost?: true
-    isChatMessage?: true
     audience?: true
     universityId?: true
+    expiresAt?: true
+    isPinned?: true
+    isChatMessage?: true
+    isForumPost?: true
   }
 
   export type PostCountAggregateInputType = {
@@ -38940,12 +38940,12 @@ export namespace Prisma {
     forumId?: true
     createdAt?: true
     updatedAt?: true
-    expiresAt?: true
-    isPinned?: true
-    isForumPost?: true
-    isChatMessage?: true
     audience?: true
     universityId?: true
+    expiresAt?: true
+    isPinned?: true
+    isChatMessage?: true
+    isForumPost?: true
     _all?: true
   }
 
@@ -39030,12 +39030,12 @@ export namespace Prisma {
     forumId: string
     createdAt: Date
     updatedAt: Date
-    expiresAt: Date | null
-    isPinned: boolean
-    isForumPost: boolean
-    isChatMessage: boolean
     audience: $Enums.PostAudience
     universityId: string
+    expiresAt: Date | null
+    isPinned: boolean
+    isChatMessage: boolean
+    isForumPost: boolean
     _count: PostCountAggregateOutputType | null
     _min: PostMinAggregateOutputType | null
     _max: PostMaxAggregateOutputType | null
@@ -39064,12 +39064,12 @@ export namespace Prisma {
     forumId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    expiresAt?: boolean
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: boolean
     universityId?: boolean
+    expiresAt?: boolean
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
     comments?: boolean | Post$commentsArgs<ExtArgs>
     likes?: boolean | Post$likesArgs<ExtArgs>
     author?: boolean | UserDefaultArgs<ExtArgs>
@@ -39087,12 +39087,12 @@ export namespace Prisma {
     forumId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    expiresAt?: boolean
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: boolean
     universityId?: boolean
+    expiresAt?: boolean
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
     author?: boolean | UserDefaultArgs<ExtArgs>
     forum?: boolean | ForumDefaultArgs<ExtArgs>
     university?: boolean | UniversityDefaultArgs<ExtArgs>
@@ -39107,12 +39107,12 @@ export namespace Prisma {
     forumId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    expiresAt?: boolean
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: boolean
     universityId?: boolean
+    expiresAt?: boolean
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
   }
 
   export type PostInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -39147,12 +39147,12 @@ export namespace Prisma {
       forumId: string
       createdAt: Date
       updatedAt: Date
-      expiresAt: Date | null
-      isPinned: boolean
-      isForumPost: boolean
-      isChatMessage: boolean
       audience: $Enums.PostAudience
       universityId: string
+      expiresAt: Date | null
+      isPinned: boolean
+      isChatMessage: boolean
+      isForumPost: boolean
     }, ExtArgs["result"]["post"]>
     composites: {}
   }
@@ -39559,12 +39559,12 @@ export namespace Prisma {
     readonly forumId: FieldRef<"Post", 'String'>
     readonly createdAt: FieldRef<"Post", 'DateTime'>
     readonly updatedAt: FieldRef<"Post", 'DateTime'>
-    readonly expiresAt: FieldRef<"Post", 'DateTime'>
-    readonly isPinned: FieldRef<"Post", 'Boolean'>
-    readonly isForumPost: FieldRef<"Post", 'Boolean'>
-    readonly isChatMessage: FieldRef<"Post", 'Boolean'>
     readonly audience: FieldRef<"Post", 'PostAudience'>
     readonly universityId: FieldRef<"Post", 'String'>
+    readonly expiresAt: FieldRef<"Post", 'DateTime'>
+    readonly isPinned: FieldRef<"Post", 'Boolean'>
+    readonly isChatMessage: FieldRef<"Post", 'Boolean'>
+    readonly isForumPost: FieldRef<"Post", 'Boolean'>
   }
     
 
@@ -58276,7 +58276,6 @@ export namespace Prisma {
     enableAds: 'enableAds',
     enableNotifs: 'enableNotifs',
     enableLeaderboard: 'enableLeaderboard',
-    enableCreativeStudio: 'enableCreativeStudio',
     updatedAt: 'updatedAt',
     fontArabic: 'fontArabic',
     fontSans: 'fontSans',
@@ -58289,7 +58288,8 @@ export namespace Prisma {
     telegramUrl: 'telegramUrl',
     twitterUrl: 'twitterUrl',
     whatsappUrl: 'whatsappUrl',
-    youtubeUrl: 'youtubeUrl'
+    youtubeUrl: 'youtubeUrl',
+    enableCreativeStudio: 'enableCreativeStudio'
   };
 
   export type SiteConfigScalarFieldEnum = (typeof SiteConfigScalarFieldEnum)[keyof typeof SiteConfigScalarFieldEnum]
@@ -58608,7 +58608,6 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     nickname: 'nickname',
-    handle: 'handle',
     email: 'email',
     emailVerified: 'emailVerified',
     image: 'image',
@@ -58626,12 +58625,13 @@ export namespace Prisma {
     rankId: 'rankId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    personalGeminiKey: 'personalGeminiKey',
     facebookUrl: 'facebookUrl',
     instagramUrl: 'instagramUrl',
     isPrivate: 'isPrivate',
     canManageReports: 'canManageReports',
-    facultyId: 'facultyId'
+    facultyId: 'facultyId',
+    personalGeminiKey: 'personalGeminiKey',
+    handle: 'handle'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -58705,12 +58705,12 @@ export namespace Prisma {
     forumId: 'forumId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    audience: 'audience',
+    universityId: 'universityId',
     expiresAt: 'expiresAt',
     isPinned: 'isPinned',
-    isForumPost: 'isForumPost',
     isChatMessage: 'isChatMessage',
-    audience: 'audience',
-    universityId: 'universityId'
+    isForumPost: 'isForumPost'
   };
 
   export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
@@ -59230,7 +59230,6 @@ export namespace Prisma {
     enableAds?: BoolFilter<"SiteConfig"> | boolean
     enableNotifs?: BoolFilter<"SiteConfig"> | boolean
     enableLeaderboard?: BoolFilter<"SiteConfig"> | boolean
-    enableCreativeStudio?: BoolFilter<"SiteConfig"> | boolean
     updatedAt?: DateTimeFilter<"SiteConfig"> | Date | string
     fontArabic?: StringNullableFilter<"SiteConfig"> | string | null
     fontSans?: StringNullableFilter<"SiteConfig"> | string | null
@@ -59244,6 +59243,7 @@ export namespace Prisma {
     twitterUrl?: StringNullableFilter<"SiteConfig"> | string | null
     whatsappUrl?: StringNullableFilter<"SiteConfig"> | string | null
     youtubeUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    enableCreativeStudio?: BoolFilter<"SiteConfig"> | boolean
   }
 
   export type SiteConfigOrderByWithRelationInput = {
@@ -59257,7 +59257,6 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
-    enableCreativeStudio?: SortOrder
     updatedAt?: SortOrder
     fontArabic?: SortOrderInput | SortOrder
     fontSans?: SortOrderInput | SortOrder
@@ -59271,6 +59270,7 @@ export namespace Prisma {
     twitterUrl?: SortOrderInput | SortOrder
     whatsappUrl?: SortOrderInput | SortOrder
     youtubeUrl?: SortOrderInput | SortOrder
+    enableCreativeStudio?: SortOrder
   }
 
   export type SiteConfigWhereUniqueInput = Prisma.AtLeast<{
@@ -59287,7 +59287,6 @@ export namespace Prisma {
     enableAds?: BoolFilter<"SiteConfig"> | boolean
     enableNotifs?: BoolFilter<"SiteConfig"> | boolean
     enableLeaderboard?: BoolFilter<"SiteConfig"> | boolean
-    enableCreativeStudio?: BoolFilter<"SiteConfig"> | boolean
     updatedAt?: DateTimeFilter<"SiteConfig"> | Date | string
     fontArabic?: StringNullableFilter<"SiteConfig"> | string | null
     fontSans?: StringNullableFilter<"SiteConfig"> | string | null
@@ -59301,6 +59300,7 @@ export namespace Prisma {
     twitterUrl?: StringNullableFilter<"SiteConfig"> | string | null
     whatsappUrl?: StringNullableFilter<"SiteConfig"> | string | null
     youtubeUrl?: StringNullableFilter<"SiteConfig"> | string | null
+    enableCreativeStudio?: BoolFilter<"SiteConfig"> | boolean
   }, "id">
 
   export type SiteConfigOrderByWithAggregationInput = {
@@ -59314,7 +59314,6 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
-    enableCreativeStudio?: SortOrder
     updatedAt?: SortOrder
     fontArabic?: SortOrderInput | SortOrder
     fontSans?: SortOrderInput | SortOrder
@@ -59328,6 +59327,7 @@ export namespace Prisma {
     twitterUrl?: SortOrderInput | SortOrder
     whatsappUrl?: SortOrderInput | SortOrder
     youtubeUrl?: SortOrderInput | SortOrder
+    enableCreativeStudio?: SortOrder
     _count?: SiteConfigCountOrderByAggregateInput
     _max?: SiteConfigMaxOrderByAggregateInput
     _min?: SiteConfigMinOrderByAggregateInput
@@ -59347,7 +59347,6 @@ export namespace Prisma {
     enableAds?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
     enableNotifs?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
     enableLeaderboard?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
-    enableCreativeStudio?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
     updatedAt?: DateTimeWithAggregatesFilter<"SiteConfig"> | Date | string
     fontArabic?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     fontSans?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
@@ -59361,6 +59360,7 @@ export namespace Prisma {
     twitterUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     whatsappUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     youtubeUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    enableCreativeStudio?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
   }
 
   export type FeatureFlagWhereInput = {
@@ -59719,10 +59719,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserListRelationFilter
     modules?: ModuleListRelationFilter
     pastPapers?: PastPaperListRelationFilter
+    playlistSyncs?: PlaylistSyncTaskListRelationFilter
     academicYear?: XOR<AcademicYearRelationFilter, AcademicYearWhereInput>
     subjects?: SubjectListRelationFilter
     users?: UserListRelationFilter
-    playlistSyncs?: PlaylistSyncTaskListRelationFilter
   }
 
   export type SemesterOrderByWithRelationInput = {
@@ -59734,10 +59734,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserOrderByRelationAggregateInput
     modules?: ModuleOrderByRelationAggregateInput
     pastPapers?: PastPaperOrderByRelationAggregateInput
+    playlistSyncs?: PlaylistSyncTaskOrderByRelationAggregateInput
     academicYear?: AcademicYearOrderByWithRelationInput
     subjects?: SubjectOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
-    playlistSyncs?: PlaylistSyncTaskOrderByRelationAggregateInput
   }
 
   export type SemesterWhereUniqueInput = Prisma.AtLeast<{
@@ -59752,10 +59752,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserListRelationFilter
     modules?: ModuleListRelationFilter
     pastPapers?: PastPaperListRelationFilter
+    playlistSyncs?: PlaylistSyncTaskListRelationFilter
     academicYear?: XOR<AcademicYearRelationFilter, AcademicYearWhereInput>
     subjects?: SubjectListRelationFilter
     users?: UserListRelationFilter
-    playlistSyncs?: PlaylistSyncTaskListRelationFilter
   }, "id">
 
   export type SemesterOrderByWithAggregationInput = {
@@ -59968,8 +59968,8 @@ export namespace Prisma {
     flashcards?: FlashcardListRelationFilter
     subject?: XOR<SubjectRelationFilter, SubjectWhereInput>
     files?: LectureFileListRelationFilter
-    videos?: LectureVideoListRelationFilter
     records?: LectureRecordListRelationFilter
+    videos?: LectureVideoListRelationFilter
     PastPaper?: XOR<PastPaperNullableRelationFilter, PastPaperWhereInput> | null
     questions?: QuestionListRelationFilter
     activities?: UserLectureActivityListRelationFilter
@@ -59987,8 +59987,8 @@ export namespace Prisma {
     flashcards?: FlashcardOrderByRelationAggregateInput
     subject?: SubjectOrderByWithRelationInput
     files?: LectureFileOrderByRelationAggregateInput
-    videos?: LectureVideoOrderByRelationAggregateInput
     records?: LectureRecordOrderByRelationAggregateInput
+    videos?: LectureVideoOrderByRelationAggregateInput
     PastPaper?: PastPaperOrderByWithRelationInput
     questions?: QuestionOrderByRelationAggregateInput
     activities?: UserLectureActivityOrderByRelationAggregateInput
@@ -60009,8 +60009,8 @@ export namespace Prisma {
     flashcards?: FlashcardListRelationFilter
     subject?: XOR<SubjectRelationFilter, SubjectWhereInput>
     files?: LectureFileListRelationFilter
-    videos?: LectureVideoListRelationFilter
     records?: LectureRecordListRelationFilter
+    videos?: LectureVideoListRelationFilter
     PastPaper?: XOR<PastPaperNullableRelationFilter, PastPaperWhereInput> | null
     questions?: QuestionListRelationFilter
     activities?: UserLectureActivityListRelationFilter
@@ -61107,7 +61107,6 @@ export namespace Prisma {
     id?: StringFilter<"User"> | string
     name?: StringFilter<"User"> | string
     nickname?: StringNullableFilter<"User"> | string | null
-    handle?: StringNullableFilter<"User"> | string | null
     email?: StringFilter<"User"> | string
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
     image?: StringNullableFilter<"User"> | string | null
@@ -61125,12 +61124,13 @@ export namespace Prisma {
     rankId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    personalGeminiKey?: StringNullableFilter<"User"> | string | null
     facebookUrl?: StringNullableFilter<"User"> | string | null
     instagramUrl?: StringNullableFilter<"User"> | string | null
     isPrivate?: BoolFilter<"User"> | boolean
     canManageReports?: BoolFilter<"User"> | boolean
     facultyId?: StringNullableFilter<"User"> | string | null
+    personalGeminiKey?: StringNullableFilter<"User"> | string | null
+    handle?: StringNullableFilter<"User"> | string | null
     aiUsageLogs?: AIUsageLogListRelationFilter
     accounts?: AccountListRelationFilter
     channelFollows?: ChannelFollowListRelationFilter
@@ -61168,7 +61168,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     nickname?: SortOrderInput | SortOrder
-    handle?: SortOrderInput | SortOrder
     email?: SortOrder
     emailVerified?: SortOrderInput | SortOrder
     image?: SortOrderInput | SortOrder
@@ -61186,12 +61185,13 @@ export namespace Prisma {
     rankId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    personalGeminiKey?: SortOrderInput | SortOrder
     facebookUrl?: SortOrderInput | SortOrder
     instagramUrl?: SortOrderInput | SortOrder
     isPrivate?: SortOrder
     canManageReports?: SortOrder
     facultyId?: SortOrderInput | SortOrder
+    personalGeminiKey?: SortOrderInput | SortOrder
+    handle?: SortOrderInput | SortOrder
     aiUsageLogs?: AIUsageLogOrderByRelationAggregateInput
     accounts?: AccountOrderByRelationAggregateInput
     channelFollows?: ChannelFollowOrderByRelationAggregateInput
@@ -61227,8 +61227,8 @@ export namespace Prisma {
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    handle?: string
     email?: string
+    handle?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
@@ -61250,12 +61250,12 @@ export namespace Prisma {
     rankId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    personalGeminiKey?: StringNullableFilter<"User"> | string | null
     facebookUrl?: StringNullableFilter<"User"> | string | null
     instagramUrl?: StringNullableFilter<"User"> | string | null
     isPrivate?: BoolFilter<"User"> | boolean
     canManageReports?: BoolFilter<"User"> | boolean
     facultyId?: StringNullableFilter<"User"> | string | null
+    personalGeminiKey?: StringNullableFilter<"User"> | string | null
     aiUsageLogs?: AIUsageLogListRelationFilter
     accounts?: AccountListRelationFilter
     channelFollows?: ChannelFollowListRelationFilter
@@ -61287,13 +61287,12 @@ export namespace Prisma {
     followers?: UserFollowListRelationFilter
     lectureActivities?: UserLectureActivityListRelationFilter
     tasks?: UserTaskListRelationFilter
-  }, "id" | "handle" | "email">
+  }, "id" | "email" | "handle">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     nickname?: SortOrderInput | SortOrder
-    handle?: SortOrderInput | SortOrder
     email?: SortOrder
     emailVerified?: SortOrderInput | SortOrder
     image?: SortOrderInput | SortOrder
@@ -61311,12 +61310,13 @@ export namespace Prisma {
     rankId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    personalGeminiKey?: SortOrderInput | SortOrder
     facebookUrl?: SortOrderInput | SortOrder
     instagramUrl?: SortOrderInput | SortOrder
     isPrivate?: SortOrder
     canManageReports?: SortOrder
     facultyId?: SortOrderInput | SortOrder
+    personalGeminiKey?: SortOrderInput | SortOrder
+    handle?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -61331,7 +61331,6 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"User"> | string
     name?: StringWithAggregatesFilter<"User"> | string
     nickname?: StringNullableWithAggregatesFilter<"User"> | string | null
-    handle?: StringNullableWithAggregatesFilter<"User"> | string | null
     email?: StringWithAggregatesFilter<"User"> | string
     emailVerified?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -61349,12 +61348,13 @@ export namespace Prisma {
     rankId?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    personalGeminiKey?: StringNullableWithAggregatesFilter<"User"> | string | null
     facebookUrl?: StringNullableWithAggregatesFilter<"User"> | string | null
     instagramUrl?: StringNullableWithAggregatesFilter<"User"> | string | null
     isPrivate?: BoolWithAggregatesFilter<"User"> | boolean
     canManageReports?: BoolWithAggregatesFilter<"User"> | boolean
     facultyId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    personalGeminiKey?: StringNullableWithAggregatesFilter<"User"> | string | null
+    handle?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type UserLectureActivityWhereInput = {
@@ -61694,12 +61694,12 @@ export namespace Prisma {
     forumId?: StringFilter<"Post"> | string
     createdAt?: DateTimeFilter<"Post"> | Date | string
     updatedAt?: DateTimeFilter<"Post"> | Date | string
-    expiresAt?: DateTimeNullableFilter<"Post"> | Date | string | null
-    isPinned?: BoolFilter<"Post"> | boolean
-    isForumPost?: BoolFilter<"Post"> | boolean
-    isChatMessage?: BoolFilter<"Post"> | boolean
     audience?: EnumPostAudienceFilter<"Post"> | $Enums.PostAudience
     universityId?: StringFilter<"Post"> | string
+    expiresAt?: DateTimeNullableFilter<"Post"> | Date | string | null
+    isPinned?: BoolFilter<"Post"> | boolean
+    isChatMessage?: BoolFilter<"Post"> | boolean
+    isForumPost?: BoolFilter<"Post"> | boolean
     comments?: CommentListRelationFilter
     likes?: LikeListRelationFilter
     author?: XOR<UserRelationFilter, UserWhereInput>
@@ -61716,12 +61716,12 @@ export namespace Prisma {
     forumId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    expiresAt?: SortOrderInput | SortOrder
-    isPinned?: SortOrder
-    isForumPost?: SortOrder
-    isChatMessage?: SortOrder
     audience?: SortOrder
     universityId?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    isPinned?: SortOrder
+    isChatMessage?: SortOrder
+    isForumPost?: SortOrder
     comments?: CommentOrderByRelationAggregateInput
     likes?: LikeOrderByRelationAggregateInput
     author?: UserOrderByWithRelationInput
@@ -61741,12 +61741,12 @@ export namespace Prisma {
     forumId?: StringFilter<"Post"> | string
     createdAt?: DateTimeFilter<"Post"> | Date | string
     updatedAt?: DateTimeFilter<"Post"> | Date | string
-    expiresAt?: DateTimeNullableFilter<"Post"> | Date | string | null
-    isPinned?: BoolFilter<"Post"> | boolean
-    isForumPost?: BoolFilter<"Post"> | boolean
-    isChatMessage?: BoolFilter<"Post"> | boolean
     audience?: EnumPostAudienceFilter<"Post"> | $Enums.PostAudience
     universityId?: StringFilter<"Post"> | string
+    expiresAt?: DateTimeNullableFilter<"Post"> | Date | string | null
+    isPinned?: BoolFilter<"Post"> | boolean
+    isChatMessage?: BoolFilter<"Post"> | boolean
+    isForumPost?: BoolFilter<"Post"> | boolean
     comments?: CommentListRelationFilter
     likes?: LikeListRelationFilter
     author?: XOR<UserRelationFilter, UserWhereInput>
@@ -61763,12 +61763,12 @@ export namespace Prisma {
     forumId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    expiresAt?: SortOrderInput | SortOrder
-    isPinned?: SortOrder
-    isForumPost?: SortOrder
-    isChatMessage?: SortOrder
     audience?: SortOrder
     universityId?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    isPinned?: SortOrder
+    isChatMessage?: SortOrder
+    isForumPost?: SortOrder
     _count?: PostCountOrderByAggregateInput
     _max?: PostMaxOrderByAggregateInput
     _min?: PostMinOrderByAggregateInput
@@ -61786,12 +61786,12 @@ export namespace Prisma {
     forumId?: StringWithAggregatesFilter<"Post"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Post"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Post"> | Date | string
-    expiresAt?: DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
-    isPinned?: BoolWithAggregatesFilter<"Post"> | boolean
-    isForumPost?: BoolWithAggregatesFilter<"Post"> | boolean
-    isChatMessage?: BoolWithAggregatesFilter<"Post"> | boolean
     audience?: EnumPostAudienceWithAggregatesFilter<"Post"> | $Enums.PostAudience
     universityId?: StringWithAggregatesFilter<"Post"> | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
+    isPinned?: BoolWithAggregatesFilter<"Post"> | boolean
+    isChatMessage?: BoolWithAggregatesFilter<"Post"> | boolean
+    isForumPost?: BoolWithAggregatesFilter<"Post"> | boolean
   }
 
   export type CommentWhereInput = {
@@ -63020,7 +63020,6 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
-    enableCreativeStudio?: boolean
     updatedAt?: Date | string
     fontArabic?: string | null
     fontSans?: string | null
@@ -63034,6 +63033,7 @@ export namespace Prisma {
     twitterUrl?: string | null
     whatsappUrl?: string | null
     youtubeUrl?: string | null
+    enableCreativeStudio?: boolean
   }
 
   export type SiteConfigUncheckedCreateInput = {
@@ -63047,7 +63047,6 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
-    enableCreativeStudio?: boolean
     updatedAt?: Date | string
     fontArabic?: string | null
     fontSans?: string | null
@@ -63061,6 +63060,7 @@ export namespace Prisma {
     twitterUrl?: string | null
     whatsappUrl?: string | null
     youtubeUrl?: string | null
+    enableCreativeStudio?: boolean
   }
 
   export type SiteConfigUpdateInput = {
@@ -63074,7 +63074,6 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
-    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63088,6 +63087,7 @@ export namespace Prisma {
     twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SiteConfigUncheckedUpdateInput = {
@@ -63101,7 +63101,6 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
-    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63115,6 +63114,7 @@ export namespace Prisma {
     twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SiteConfigCreateManyInput = {
@@ -63128,7 +63128,6 @@ export namespace Prisma {
     enableAds?: boolean
     enableNotifs?: boolean
     enableLeaderboard?: boolean
-    enableCreativeStudio?: boolean
     updatedAt?: Date | string
     fontArabic?: string | null
     fontSans?: string | null
@@ -63142,6 +63141,7 @@ export namespace Prisma {
     twitterUrl?: string | null
     whatsappUrl?: string | null
     youtubeUrl?: string | null
+    enableCreativeStudio?: boolean
   }
 
   export type SiteConfigUpdateManyMutationInput = {
@@ -63155,7 +63155,6 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
-    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63169,6 +63168,7 @@ export namespace Prisma {
     twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SiteConfigUncheckedUpdateManyInput = {
@@ -63182,7 +63182,6 @@ export namespace Prisma {
     enableAds?: BoolFieldUpdateOperationsInput | boolean
     enableNotifs?: BoolFieldUpdateOperationsInput | boolean
     enableLeaderboard?: BoolFieldUpdateOperationsInput | boolean
-    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     fontArabic?: NullableStringFieldUpdateOperationsInput | string | null
     fontSans?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63196,6 +63195,7 @@ export namespace Prisma {
     twitterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type FeatureFlagCreateInput = {
@@ -63562,10 +63562,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateInput = {
@@ -63577,9 +63577,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUpdateInput = {
@@ -63590,10 +63590,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateInput = {
@@ -63605,9 +63605,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterCreateManyInput = {
@@ -63814,8 +63814,8 @@ export namespace Prisma {
     flashcards?: FlashcardCreateNestedManyWithoutLectureInput
     subject: SubjectCreateNestedOneWithoutLecturesInput
     files?: LectureFileCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
@@ -63832,8 +63832,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
@@ -63850,8 +63850,8 @@ export namespace Prisma {
     flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
     subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
     files?: LectureFileUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
@@ -63868,8 +63868,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
@@ -64995,7 +64995,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -65010,11 +65009,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -65052,7 +65052,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -65070,12 +65069,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -65109,7 +65109,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65124,11 +65123,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -65166,7 +65166,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65184,12 +65183,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -65223,7 +65223,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -65241,19 +65240,19 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65268,18 +65267,18 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65297,12 +65296,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserLectureActivityCreateInput = {
@@ -65621,11 +65621,11 @@ export namespace Prisma {
     interactionsDisabled?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
     comments?: CommentCreateNestedManyWithoutPostInput
     likes?: LikeCreateNestedManyWithoutPostInput
     author: UserCreateNestedOneWithoutPostsInput
@@ -65642,12 +65642,12 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -65659,11 +65659,11 @@ export namespace Prisma {
     interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUpdateManyWithoutPostNestedInput
     likes?: LikeUpdateManyWithoutPostNestedInput
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
@@ -65680,12 +65680,12 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -65699,12 +65699,12 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
   }
 
   export type PostUpdateManyMutationInput = {
@@ -65714,11 +65714,11 @@ export namespace Prisma {
     interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type PostUncheckedUpdateManyInput = {
@@ -65730,12 +65730,12 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CommentCreateInput = {
@@ -67035,7 +67035,6 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
-    enableCreativeStudio?: SortOrder
     updatedAt?: SortOrder
     fontArabic?: SortOrder
     fontSans?: SortOrder
@@ -67049,6 +67048,7 @@ export namespace Prisma {
     twitterUrl?: SortOrder
     whatsappUrl?: SortOrder
     youtubeUrl?: SortOrder
+    enableCreativeStudio?: SortOrder
   }
 
   export type SiteConfigMaxOrderByAggregateInput = {
@@ -67062,7 +67062,6 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
-    enableCreativeStudio?: SortOrder
     updatedAt?: SortOrder
     fontArabic?: SortOrder
     fontSans?: SortOrder
@@ -67076,6 +67075,7 @@ export namespace Prisma {
     twitterUrl?: SortOrder
     whatsappUrl?: SortOrder
     youtubeUrl?: SortOrder
+    enableCreativeStudio?: SortOrder
   }
 
   export type SiteConfigMinOrderByAggregateInput = {
@@ -67089,7 +67089,6 @@ export namespace Prisma {
     enableAds?: SortOrder
     enableNotifs?: SortOrder
     enableLeaderboard?: SortOrder
-    enableCreativeStudio?: SortOrder
     updatedAt?: SortOrder
     fontArabic?: SortOrder
     fontSans?: SortOrder
@@ -67103,6 +67102,7 @@ export namespace Prisma {
     twitterUrl?: SortOrder
     whatsappUrl?: SortOrder
     youtubeUrl?: SortOrder
+    enableCreativeStudio?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -67574,6 +67574,12 @@ export namespace Prisma {
     none?: PastPaperWhereInput
   }
 
+  export type PlaylistSyncTaskListRelationFilter = {
+    every?: PlaylistSyncTaskWhereInput
+    some?: PlaylistSyncTaskWhereInput
+    none?: PlaylistSyncTaskWhereInput
+  }
+
   export type AcademicYearRelationFilter = {
     is?: AcademicYearWhereInput
     isNot?: AcademicYearWhereInput
@@ -67585,12 +67591,6 @@ export namespace Prisma {
     none?: SubjectWhereInput
   }
 
-  export type PlaylistSyncTaskListRelationFilter = {
-    every?: PlaylistSyncTaskWhereInput
-    some?: PlaylistSyncTaskWhereInput
-    none?: PlaylistSyncTaskWhereInput
-  }
-
   export type ModuleOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -67599,11 +67599,11 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type SubjectOrderByRelationAggregateInput = {
+  export type PlaylistSyncTaskOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type PlaylistSyncTaskOrderByRelationAggregateInput = {
+  export type SubjectOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -67739,16 +67739,16 @@ export namespace Prisma {
     none?: LectureFileWhereInput
   }
 
-  export type LectureVideoListRelationFilter = {
-    every?: LectureVideoWhereInput
-    some?: LectureVideoWhereInput
-    none?: LectureVideoWhereInput
-  }
-
   export type LectureRecordListRelationFilter = {
     every?: LectureRecordWhereInput
     some?: LectureRecordWhereInput
     none?: LectureRecordWhereInput
+  }
+
+  export type LectureVideoListRelationFilter = {
+    every?: LectureVideoWhereInput
+    some?: LectureVideoWhereInput
+    none?: LectureVideoWhereInput
   }
 
   export type PastPaperNullableRelationFilter = {
@@ -67776,11 +67776,11 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type LectureVideoOrderByRelationAggregateInput = {
+  export type LectureRecordOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type LectureRecordOrderByRelationAggregateInput = {
+  export type LectureVideoOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -68758,7 +68758,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     nickname?: SortOrder
-    handle?: SortOrder
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
@@ -68776,12 +68775,13 @@ export namespace Prisma {
     rankId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    personalGeminiKey?: SortOrder
     facebookUrl?: SortOrder
     instagramUrl?: SortOrder
     isPrivate?: SortOrder
     canManageReports?: SortOrder
     facultyId?: SortOrder
+    personalGeminiKey?: SortOrder
+    handle?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -68792,7 +68792,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     nickname?: SortOrder
-    handle?: SortOrder
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
@@ -68810,19 +68809,19 @@ export namespace Prisma {
     rankId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    personalGeminiKey?: SortOrder
     facebookUrl?: SortOrder
     instagramUrl?: SortOrder
     isPrivate?: SortOrder
     canManageReports?: SortOrder
     facultyId?: SortOrder
+    personalGeminiKey?: SortOrder
+    handle?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     nickname?: SortOrder
-    handle?: SortOrder
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
@@ -68840,12 +68839,13 @@ export namespace Prisma {
     rankId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    personalGeminiKey?: SortOrder
     facebookUrl?: SortOrder
     instagramUrl?: SortOrder
     isPrivate?: SortOrder
     canManageReports?: SortOrder
     facultyId?: SortOrder
+    personalGeminiKey?: SortOrder
+    handle?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -69088,12 +69088,12 @@ export namespace Prisma {
     forumId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    expiresAt?: SortOrder
-    isPinned?: SortOrder
-    isForumPost?: SortOrder
-    isChatMessage?: SortOrder
     audience?: SortOrder
     universityId?: SortOrder
+    expiresAt?: SortOrder
+    isPinned?: SortOrder
+    isChatMessage?: SortOrder
+    isForumPost?: SortOrder
   }
 
   export type PostMaxOrderByAggregateInput = {
@@ -69105,12 +69105,12 @@ export namespace Prisma {
     forumId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    expiresAt?: SortOrder
-    isPinned?: SortOrder
-    isForumPost?: SortOrder
-    isChatMessage?: SortOrder
     audience?: SortOrder
     universityId?: SortOrder
+    expiresAt?: SortOrder
+    isPinned?: SortOrder
+    isChatMessage?: SortOrder
+    isForumPost?: SortOrder
   }
 
   export type PostMinOrderByAggregateInput = {
@@ -69122,12 +69122,12 @@ export namespace Prisma {
     forumId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    expiresAt?: SortOrder
-    isPinned?: SortOrder
-    isForumPost?: SortOrder
-    isChatMessage?: SortOrder
     audience?: SortOrder
     universityId?: SortOrder
+    expiresAt?: SortOrder
+    isPinned?: SortOrder
+    isChatMessage?: SortOrder
+    isForumPost?: SortOrder
   }
 
   export type EnumPostAudienceWithAggregatesFilter<$PrismaModel = never> = {
@@ -70559,6 +70559,13 @@ export namespace Prisma {
     connect?: PastPaperWhereUniqueInput | PastPaperWhereUniqueInput[]
   }
 
+  export type PlaylistSyncTaskCreateNestedManyWithoutSemesterInput = {
+    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
+    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
+    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+  }
+
   export type AcademicYearCreateNestedOneWithoutSemestersInput = {
     create?: XOR<AcademicYearCreateWithoutSemestersInput, AcademicYearUncheckedCreateWithoutSemestersInput>
     connectOrCreate?: AcademicYearCreateOrConnectWithoutSemestersInput
@@ -70577,13 +70584,6 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutSemesterInput | UserCreateOrConnectWithoutSemesterInput[]
     createMany?: UserCreateManySemesterInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
-  }
-
-  export type PlaylistSyncTaskCreateNestedManyWithoutSemesterInput = {
-    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
-    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
-    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
-    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
   }
 
   export type AdBannerUncheckedCreateNestedManyWithoutSemesterInput = {
@@ -70621,6 +70621,13 @@ export namespace Prisma {
     connect?: PastPaperWhereUniqueInput | PastPaperWhereUniqueInput[]
   }
 
+  export type PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput = {
+    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
+    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
+    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+  }
+
   export type SubjectUncheckedCreateNestedManyWithoutSemesterInput = {
     create?: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput> | SubjectCreateWithoutSemesterInput[] | SubjectUncheckedCreateWithoutSemesterInput[]
     connectOrCreate?: SubjectCreateOrConnectWithoutSemesterInput | SubjectCreateOrConnectWithoutSemesterInput[]
@@ -70633,13 +70640,6 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutSemesterInput | UserCreateOrConnectWithoutSemesterInput[]
     createMany?: UserCreateManySemesterInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
-  }
-
-  export type PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput = {
-    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
-    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
-    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
-    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
   }
 
   export type AdBannerUpdateManyWithoutSemesterNestedInput = {
@@ -70712,6 +70712,20 @@ export namespace Prisma {
     deleteMany?: PastPaperScalarWhereInput | PastPaperScalarWhereInput[]
   }
 
+  export type PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput = {
+    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
+    upsert?: PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput[]
+    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
+    set?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    disconnect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    delete?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    update?: PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput[]
+    updateMany?: PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput | PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput[]
+    deleteMany?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
+  }
+
   export type AcademicYearUpdateOneRequiredWithoutSemestersNestedInput = {
     create?: XOR<AcademicYearCreateWithoutSemestersInput, AcademicYearUncheckedCreateWithoutSemestersInput>
     connectOrCreate?: AcademicYearCreateOrConnectWithoutSemestersInput
@@ -70746,20 +70760,6 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutSemesterInput | UserUpdateWithWhereUniqueWithoutSemesterInput[]
     updateMany?: UserUpdateManyWithWhereWithoutSemesterInput | UserUpdateManyWithWhereWithoutSemesterInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
-  }
-
-  export type PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput = {
-    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
-    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
-    upsert?: PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput[]
-    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
-    set?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    disconnect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    delete?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    update?: PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput[]
-    updateMany?: PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput | PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput[]
-    deleteMany?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
   }
 
   export type AdBannerUncheckedUpdateManyWithoutSemesterNestedInput = {
@@ -70832,6 +70832,20 @@ export namespace Prisma {
     deleteMany?: PastPaperScalarWhereInput | PastPaperScalarWhereInput[]
   }
 
+  export type PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput = {
+    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
+    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
+    upsert?: PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput[]
+    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
+    set?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    disconnect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    delete?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
+    update?: PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput[]
+    updateMany?: PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput | PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput[]
+    deleteMany?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
+  }
+
   export type SubjectUncheckedUpdateManyWithoutSemesterNestedInput = {
     create?: XOR<SubjectCreateWithoutSemesterInput, SubjectUncheckedCreateWithoutSemesterInput> | SubjectCreateWithoutSemesterInput[] | SubjectUncheckedCreateWithoutSemesterInput[]
     connectOrCreate?: SubjectCreateOrConnectWithoutSemesterInput | SubjectCreateOrConnectWithoutSemesterInput[]
@@ -70858,20 +70872,6 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutSemesterInput | UserUpdateWithWhereUniqueWithoutSemesterInput[]
     updateMany?: UserUpdateManyWithWhereWithoutSemesterInput | UserUpdateManyWithWhereWithoutSemesterInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
-  }
-
-  export type PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput = {
-    create?: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput> | PlaylistSyncTaskCreateWithoutSemesterInput[] | PlaylistSyncTaskUncheckedCreateWithoutSemesterInput[]
-    connectOrCreate?: PlaylistSyncTaskCreateOrConnectWithoutSemesterInput | PlaylistSyncTaskCreateOrConnectWithoutSemesterInput[]
-    upsert?: PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput[]
-    createMany?: PlaylistSyncTaskCreateManySemesterInputEnvelope
-    set?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    disconnect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    delete?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    connect?: PlaylistSyncTaskWhereUniqueInput | PlaylistSyncTaskWhereUniqueInput[]
-    update?: PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput | PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput[]
-    updateMany?: PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput | PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput[]
-    deleteMany?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
   }
 
   export type SemesterCreateNestedOneWithoutPlaylistSyncsInput = {
@@ -71080,18 +71080,18 @@ export namespace Prisma {
     connect?: LectureFileWhereUniqueInput | LectureFileWhereUniqueInput[]
   }
 
-  export type LectureVideoCreateNestedManyWithoutLectureInput = {
-    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
-    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
-    createMany?: LectureVideoCreateManyLectureInputEnvelope
-    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-  }
-
   export type LectureRecordCreateNestedManyWithoutLectureInput = {
     create?: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput> | LectureRecordCreateWithoutLectureInput[] | LectureRecordUncheckedCreateWithoutLectureInput[]
     connectOrCreate?: LectureRecordCreateOrConnectWithoutLectureInput | LectureRecordCreateOrConnectWithoutLectureInput[]
     createMany?: LectureRecordCreateManyLectureInputEnvelope
     connect?: LectureRecordWhereUniqueInput | LectureRecordWhereUniqueInput[]
+  }
+
+  export type LectureVideoCreateNestedManyWithoutLectureInput = {
+    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
+    createMany?: LectureVideoCreateManyLectureInputEnvelope
+    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
   }
 
   export type PastPaperCreateNestedOneWithoutQuizLectureInput = {
@@ -71128,18 +71128,18 @@ export namespace Prisma {
     connect?: LectureFileWhereUniqueInput | LectureFileWhereUniqueInput[]
   }
 
-  export type LectureVideoUncheckedCreateNestedManyWithoutLectureInput = {
-    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
-    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
-    createMany?: LectureVideoCreateManyLectureInputEnvelope
-    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-  }
-
   export type LectureRecordUncheckedCreateNestedManyWithoutLectureInput = {
     create?: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput> | LectureRecordCreateWithoutLectureInput[] | LectureRecordUncheckedCreateWithoutLectureInput[]
     connectOrCreate?: LectureRecordCreateOrConnectWithoutLectureInput | LectureRecordCreateOrConnectWithoutLectureInput[]
     createMany?: LectureRecordCreateManyLectureInputEnvelope
     connect?: LectureRecordWhereUniqueInput | LectureRecordWhereUniqueInput[]
+  }
+
+  export type LectureVideoUncheckedCreateNestedManyWithoutLectureInput = {
+    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
+    createMany?: LectureVideoCreateManyLectureInputEnvelope
+    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
   }
 
   export type PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput = {
@@ -71198,20 +71198,6 @@ export namespace Prisma {
     deleteMany?: LectureFileScalarWhereInput | LectureFileScalarWhereInput[]
   }
 
-  export type LectureVideoUpdateManyWithoutLectureNestedInput = {
-    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
-    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
-    upsert?: LectureVideoUpsertWithWhereUniqueWithoutLectureInput | LectureVideoUpsertWithWhereUniqueWithoutLectureInput[]
-    createMany?: LectureVideoCreateManyLectureInputEnvelope
-    set?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    disconnect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    delete?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    update?: LectureVideoUpdateWithWhereUniqueWithoutLectureInput | LectureVideoUpdateWithWhereUniqueWithoutLectureInput[]
-    updateMany?: LectureVideoUpdateManyWithWhereWithoutLectureInput | LectureVideoUpdateManyWithWhereWithoutLectureInput[]
-    deleteMany?: LectureVideoScalarWhereInput | LectureVideoScalarWhereInput[]
-  }
-
   export type LectureRecordUpdateManyWithoutLectureNestedInput = {
     create?: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput> | LectureRecordCreateWithoutLectureInput[] | LectureRecordUncheckedCreateWithoutLectureInput[]
     connectOrCreate?: LectureRecordCreateOrConnectWithoutLectureInput | LectureRecordCreateOrConnectWithoutLectureInput[]
@@ -71224,6 +71210,20 @@ export namespace Prisma {
     update?: LectureRecordUpdateWithWhereUniqueWithoutLectureInput | LectureRecordUpdateWithWhereUniqueWithoutLectureInput[]
     updateMany?: LectureRecordUpdateManyWithWhereWithoutLectureInput | LectureRecordUpdateManyWithWhereWithoutLectureInput[]
     deleteMany?: LectureRecordScalarWhereInput | LectureRecordScalarWhereInput[]
+  }
+
+  export type LectureVideoUpdateManyWithoutLectureNestedInput = {
+    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
+    upsert?: LectureVideoUpsertWithWhereUniqueWithoutLectureInput | LectureVideoUpsertWithWhereUniqueWithoutLectureInput[]
+    createMany?: LectureVideoCreateManyLectureInputEnvelope
+    set?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    disconnect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    delete?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    update?: LectureVideoUpdateWithWhereUniqueWithoutLectureInput | LectureVideoUpdateWithWhereUniqueWithoutLectureInput[]
+    updateMany?: LectureVideoUpdateManyWithWhereWithoutLectureInput | LectureVideoUpdateManyWithWhereWithoutLectureInput[]
+    deleteMany?: LectureVideoScalarWhereInput | LectureVideoScalarWhereInput[]
   }
 
   export type PastPaperUpdateOneWithoutQuizLectureNestedInput = {
@@ -71292,20 +71292,6 @@ export namespace Prisma {
     deleteMany?: LectureFileScalarWhereInput | LectureFileScalarWhereInput[]
   }
 
-  export type LectureVideoUncheckedUpdateManyWithoutLectureNestedInput = {
-    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
-    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
-    upsert?: LectureVideoUpsertWithWhereUniqueWithoutLectureInput | LectureVideoUpsertWithWhereUniqueWithoutLectureInput[]
-    createMany?: LectureVideoCreateManyLectureInputEnvelope
-    set?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    disconnect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    delete?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
-    update?: LectureVideoUpdateWithWhereUniqueWithoutLectureInput | LectureVideoUpdateWithWhereUniqueWithoutLectureInput[]
-    updateMany?: LectureVideoUpdateManyWithWhereWithoutLectureInput | LectureVideoUpdateManyWithWhereWithoutLectureInput[]
-    deleteMany?: LectureVideoScalarWhereInput | LectureVideoScalarWhereInput[]
-  }
-
   export type LectureRecordUncheckedUpdateManyWithoutLectureNestedInput = {
     create?: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput> | LectureRecordCreateWithoutLectureInput[] | LectureRecordUncheckedCreateWithoutLectureInput[]
     connectOrCreate?: LectureRecordCreateOrConnectWithoutLectureInput | LectureRecordCreateOrConnectWithoutLectureInput[]
@@ -71318,6 +71304,20 @@ export namespace Prisma {
     update?: LectureRecordUpdateWithWhereUniqueWithoutLectureInput | LectureRecordUpdateWithWhereUniqueWithoutLectureInput[]
     updateMany?: LectureRecordUpdateManyWithWhereWithoutLectureInput | LectureRecordUpdateManyWithWhereWithoutLectureInput[]
     deleteMany?: LectureRecordScalarWhereInput | LectureRecordScalarWhereInput[]
+  }
+
+  export type LectureVideoUncheckedUpdateManyWithoutLectureNestedInput = {
+    create?: XOR<LectureVideoCreateWithoutLectureInput, LectureVideoUncheckedCreateWithoutLectureInput> | LectureVideoCreateWithoutLectureInput[] | LectureVideoUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: LectureVideoCreateOrConnectWithoutLectureInput | LectureVideoCreateOrConnectWithoutLectureInput[]
+    upsert?: LectureVideoUpsertWithWhereUniqueWithoutLectureInput | LectureVideoUpsertWithWhereUniqueWithoutLectureInput[]
+    createMany?: LectureVideoCreateManyLectureInputEnvelope
+    set?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    disconnect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    delete?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    connect?: LectureVideoWhereUniqueInput | LectureVideoWhereUniqueInput[]
+    update?: LectureVideoUpdateWithWhereUniqueWithoutLectureInput | LectureVideoUpdateWithWhereUniqueWithoutLectureInput[]
+    updateMany?: LectureVideoUpdateManyWithWhereWithoutLectureInput | LectureVideoUpdateManyWithWhereWithoutLectureInput[]
+    deleteMany?: LectureVideoScalarWhereInput | LectureVideoScalarWhereInput[]
   }
 
   export type PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput = {
@@ -75082,11 +75082,11 @@ export namespace Prisma {
     interactionsDisabled?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
     comments?: CommentCreateNestedManyWithoutPostInput
     likes?: LikeCreateNestedManyWithoutPostInput
     author: UserCreateNestedOneWithoutPostsInput
@@ -75102,11 +75102,11 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -75151,7 +75151,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -75166,11 +75165,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -75207,7 +75207,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -75224,12 +75223,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -75497,12 +75497,12 @@ export namespace Prisma {
     forumId?: StringFilter<"Post"> | string
     createdAt?: DateTimeFilter<"Post"> | Date | string
     updatedAt?: DateTimeFilter<"Post"> | Date | string
-    expiresAt?: DateTimeNullableFilter<"Post"> | Date | string | null
-    isPinned?: BoolFilter<"Post"> | boolean
-    isForumPost?: BoolFilter<"Post"> | boolean
-    isChatMessage?: BoolFilter<"Post"> | boolean
     audience?: EnumPostAudienceFilter<"Post"> | $Enums.PostAudience
     universityId?: StringFilter<"Post"> | string
+    expiresAt?: DateTimeNullableFilter<"Post"> | Date | string | null
+    isPinned?: BoolFilter<"Post"> | boolean
+    isChatMessage?: BoolFilter<"Post"> | boolean
+    isForumPost?: BoolFilter<"Post"> | boolean
   }
 
   export type UniversityYearIdFormatUpsertWithWhereUniqueWithoutUniversityInput = {
@@ -75556,7 +75556,6 @@ export namespace Prisma {
     id?: StringFilter<"User"> | string
     name?: StringFilter<"User"> | string
     nickname?: StringNullableFilter<"User"> | string | null
-    handle?: StringNullableFilter<"User"> | string | null
     email?: StringFilter<"User"> | string
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
     image?: StringNullableFilter<"User"> | string | null
@@ -75574,12 +75573,13 @@ export namespace Prisma {
     rankId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    personalGeminiKey?: StringNullableFilter<"User"> | string | null
     facebookUrl?: StringNullableFilter<"User"> | string | null
     instagramUrl?: StringNullableFilter<"User"> | string | null
     isPrivate?: BoolFilter<"User"> | boolean
     canManageReports?: BoolFilter<"User"> | boolean
     facultyId?: StringNullableFilter<"User"> | string | null
+    personalGeminiKey?: StringNullableFilter<"User"> | string | null
+    handle?: StringNullableFilter<"User"> | string | null
   }
 
   export type AcademicYearCreateWithoutFacultyInput = {
@@ -75719,7 +75719,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -75734,11 +75733,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -75775,7 +75775,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -75793,11 +75792,12 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -76130,9 +76130,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutAcademicYearInput = {
@@ -76143,9 +76143,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutAcademicYearInput = {
@@ -76439,6 +76439,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PlaylistSyncTaskCreateWithoutSemesterInput = {
+    id?: string
+    playlistUrl: string
+    mediaType: string
+    editionYear?: string | null
+    lastSynced?: Date | string
+    createdAt?: Date | string
+  }
+
+  export type PlaylistSyncTaskUncheckedCreateWithoutSemesterInput = {
+    id?: string
+    playlistUrl: string
+    mediaType: string
+    editionYear?: string | null
+    lastSynced?: Date | string
+    createdAt?: Date | string
+  }
+
+  export type PlaylistSyncTaskCreateOrConnectWithoutSemesterInput = {
+    where: PlaylistSyncTaskWhereUniqueInput
+    create: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput>
+  }
+
+  export type PlaylistSyncTaskCreateManySemesterInputEnvelope = {
+    data: PlaylistSyncTaskCreateManySemesterInput | PlaylistSyncTaskCreateManySemesterInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AcademicYearCreateWithoutSemestersInput = {
     id?: string
     yearNumber: number
@@ -76488,7 +76516,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -76503,11 +76530,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -76544,7 +76572,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -76561,12 +76588,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -76603,34 +76631,6 @@ export namespace Prisma {
 
   export type UserCreateManySemesterInputEnvelope = {
     data: UserCreateManySemesterInput | UserCreateManySemesterInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type PlaylistSyncTaskCreateWithoutSemesterInput = {
-    id?: string
-    playlistUrl: string
-    mediaType: string
-    editionYear?: string | null
-    lastSynced?: Date | string
-    createdAt?: Date | string
-  }
-
-  export type PlaylistSyncTaskUncheckedCreateWithoutSemesterInput = {
-    id?: string
-    playlistUrl: string
-    mediaType: string
-    editionYear?: string | null
-    lastSynced?: Date | string
-    createdAt?: Date | string
-  }
-
-  export type PlaylistSyncTaskCreateOrConnectWithoutSemesterInput = {
-    where: PlaylistSyncTaskWhereUniqueInput
-    create: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput>
-  }
-
-  export type PlaylistSyncTaskCreateManySemesterInputEnvelope = {
-    data: PlaylistSyncTaskCreateManySemesterInput | PlaylistSyncTaskCreateManySemesterInput[]
     skipDuplicates?: boolean
   }
 
@@ -76747,6 +76747,35 @@ export namespace Prisma {
     randomizeQuestions?: BoolFilter<"PastPaper"> | boolean
   }
 
+  export type PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput = {
+    where: PlaylistSyncTaskWhereUniqueInput
+    update: XOR<PlaylistSyncTaskUpdateWithoutSemesterInput, PlaylistSyncTaskUncheckedUpdateWithoutSemesterInput>
+    create: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput>
+  }
+
+  export type PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput = {
+    where: PlaylistSyncTaskWhereUniqueInput
+    data: XOR<PlaylistSyncTaskUpdateWithoutSemesterInput, PlaylistSyncTaskUncheckedUpdateWithoutSemesterInput>
+  }
+
+  export type PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput = {
+    where: PlaylistSyncTaskScalarWhereInput
+    data: XOR<PlaylistSyncTaskUpdateManyMutationInput, PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterInput>
+  }
+
+  export type PlaylistSyncTaskScalarWhereInput = {
+    AND?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
+    OR?: PlaylistSyncTaskScalarWhereInput[]
+    NOT?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
+    id?: StringFilter<"PlaylistSyncTask"> | string
+    playlistUrl?: StringFilter<"PlaylistSyncTask"> | string
+    semesterId?: StringFilter<"PlaylistSyncTask"> | string
+    mediaType?: StringFilter<"PlaylistSyncTask"> | string
+    editionYear?: StringNullableFilter<"PlaylistSyncTask"> | string | null
+    lastSynced?: DateTimeFilter<"PlaylistSyncTask"> | Date | string
+    createdAt?: DateTimeFilter<"PlaylistSyncTask"> | Date | string
+  }
+
   export type AcademicYearUpsertWithoutSemestersInput = {
     update: XOR<AcademicYearUpdateWithoutSemestersInput, AcademicYearUncheckedUpdateWithoutSemestersInput>
     create: XOR<AcademicYearCreateWithoutSemestersInput, AcademicYearUncheckedCreateWithoutSemestersInput>
@@ -76813,35 +76842,6 @@ export namespace Prisma {
   export type UserUpdateManyWithWhereWithoutSemesterInput = {
     where: UserScalarWhereInput
     data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutSemesterInput>
-  }
-
-  export type PlaylistSyncTaskUpsertWithWhereUniqueWithoutSemesterInput = {
-    where: PlaylistSyncTaskWhereUniqueInput
-    update: XOR<PlaylistSyncTaskUpdateWithoutSemesterInput, PlaylistSyncTaskUncheckedUpdateWithoutSemesterInput>
-    create: XOR<PlaylistSyncTaskCreateWithoutSemesterInput, PlaylistSyncTaskUncheckedCreateWithoutSemesterInput>
-  }
-
-  export type PlaylistSyncTaskUpdateWithWhereUniqueWithoutSemesterInput = {
-    where: PlaylistSyncTaskWhereUniqueInput
-    data: XOR<PlaylistSyncTaskUpdateWithoutSemesterInput, PlaylistSyncTaskUncheckedUpdateWithoutSemesterInput>
-  }
-
-  export type PlaylistSyncTaskUpdateManyWithWhereWithoutSemesterInput = {
-    where: PlaylistSyncTaskScalarWhereInput
-    data: XOR<PlaylistSyncTaskUpdateManyMutationInput, PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterInput>
-  }
-
-  export type PlaylistSyncTaskScalarWhereInput = {
-    AND?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
-    OR?: PlaylistSyncTaskScalarWhereInput[]
-    NOT?: PlaylistSyncTaskScalarWhereInput | PlaylistSyncTaskScalarWhereInput[]
-    id?: StringFilter<"PlaylistSyncTask"> | string
-    playlistUrl?: StringFilter<"PlaylistSyncTask"> | string
-    semesterId?: StringFilter<"PlaylistSyncTask"> | string
-    mediaType?: StringFilter<"PlaylistSyncTask"> | string
-    editionYear?: StringNullableFilter<"PlaylistSyncTask"> | string | null
-    lastSynced?: DateTimeFilter<"PlaylistSyncTask"> | Date | string
-    createdAt?: DateTimeFilter<"PlaylistSyncTask"> | Date | string
   }
 
   export type SemesterCreateWithoutPlaylistSyncsInput = {
@@ -76919,10 +76919,10 @@ export namespace Prisma {
     forums?: ForumCreateNestedManyWithoutSemesterInput
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutModulesInput = {
@@ -76933,9 +76933,9 @@ export namespace Prisma {
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutModulesInput = {
@@ -77041,10 +77041,10 @@ export namespace Prisma {
     forums?: ForumUpdateManyWithoutSemesterNestedInput
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutModulesInput = {
@@ -77055,9 +77055,9 @@ export namespace Prisma {
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type PastPaperUpsertWithWhereUniqueWithoutModuleInput = {
@@ -77102,8 +77102,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardCreateNestedManyWithoutLectureInput
     files?: LectureFileCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
@@ -77119,8 +77119,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
@@ -77163,9 +77163,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutSubjectsInput = {
@@ -77177,8 +77177,8 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
-    users?: UserUncheckedCreateNestedManyWithoutSemesterInput
     playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
+    users?: UserUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutSubjectsInput = {
@@ -77260,9 +77260,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutSubjectsInput = {
@@ -77274,8 +77274,8 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
-    users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
     playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
+    users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type FlashcardCreateWithoutLectureInput = {
@@ -77345,6 +77345,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type LectureRecordCreateWithoutLectureInput = {
+    id?: string
+    title: string
+    url: string
+    sourceType?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type LectureRecordUncheckedCreateWithoutLectureInput = {
+    id?: string
+    title: string
+    url: string
+    sourceType?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type LectureRecordCreateOrConnectWithoutLectureInput = {
+    where: LectureRecordWhereUniqueInput
+    create: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput>
+  }
+
+  export type LectureRecordCreateManyLectureInputEnvelope = {
+    data: LectureRecordCreateManyLectureInput | LectureRecordCreateManyLectureInput[]
+    skipDuplicates?: boolean
+  }
+
   export type LectureVideoCreateWithoutLectureInput = {
     id?: string
     title: string
@@ -77384,34 +77412,6 @@ export namespace Prisma {
 
   export type LectureVideoCreateManyLectureInputEnvelope = {
     data: LectureVideoCreateManyLectureInput | LectureVideoCreateManyLectureInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type LectureRecordCreateWithoutLectureInput = {
-    id?: string
-    title: string
-    url: string
-    sourceType?: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type LectureRecordUncheckedCreateWithoutLectureInput = {
-    id?: string
-    title: string
-    url: string
-    sourceType?: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type LectureRecordCreateOrConnectWithoutLectureInput = {
-    where: LectureRecordWhereUniqueInput
-    create: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput>
-  }
-
-  export type LectureRecordCreateManyLectureInputEnvelope = {
-    data: LectureRecordCreateManyLectureInput | LectureRecordCreateManyLectureInput[]
     skipDuplicates?: boolean
   }
 
@@ -77616,6 +77616,35 @@ export namespace Prisma {
     lectureId?: StringFilter<"LectureFile"> | string
   }
 
+  export type LectureRecordUpsertWithWhereUniqueWithoutLectureInput = {
+    where: LectureRecordWhereUniqueInput
+    update: XOR<LectureRecordUpdateWithoutLectureInput, LectureRecordUncheckedUpdateWithoutLectureInput>
+    create: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput>
+  }
+
+  export type LectureRecordUpdateWithWhereUniqueWithoutLectureInput = {
+    where: LectureRecordWhereUniqueInput
+    data: XOR<LectureRecordUpdateWithoutLectureInput, LectureRecordUncheckedUpdateWithoutLectureInput>
+  }
+
+  export type LectureRecordUpdateManyWithWhereWithoutLectureInput = {
+    where: LectureRecordScalarWhereInput
+    data: XOR<LectureRecordUpdateManyMutationInput, LectureRecordUncheckedUpdateManyWithoutLectureInput>
+  }
+
+  export type LectureRecordScalarWhereInput = {
+    AND?: LectureRecordScalarWhereInput | LectureRecordScalarWhereInput[]
+    OR?: LectureRecordScalarWhereInput[]
+    NOT?: LectureRecordScalarWhereInput | LectureRecordScalarWhereInput[]
+    id?: StringFilter<"LectureRecord"> | string
+    title?: StringFilter<"LectureRecord"> | string
+    url?: StringFilter<"LectureRecord"> | string
+    sourceType?: StringFilter<"LectureRecord"> | string
+    lectureId?: StringFilter<"LectureRecord"> | string
+    createdAt?: DateTimeFilter<"LectureRecord"> | Date | string
+    updatedAt?: DateTimeFilter<"LectureRecord"> | Date | string
+  }
+
   export type LectureVideoUpsertWithWhereUniqueWithoutLectureInput = {
     where: LectureVideoWhereUniqueInput
     update: XOR<LectureVideoUpdateWithoutLectureInput, LectureVideoUncheckedUpdateWithoutLectureInput>
@@ -77648,35 +77677,6 @@ export namespace Prisma {
     lectureId?: StringFilter<"LectureVideo"> | string
     createdAt?: DateTimeFilter<"LectureVideo"> | Date | string
     updatedAt?: DateTimeFilter<"LectureVideo"> | Date | string
-  }
-
-  export type LectureRecordUpsertWithWhereUniqueWithoutLectureInput = {
-    where: LectureRecordWhereUniqueInput
-    update: XOR<LectureRecordUpdateWithoutLectureInput, LectureRecordUncheckedUpdateWithoutLectureInput>
-    create: XOR<LectureRecordCreateWithoutLectureInput, LectureRecordUncheckedCreateWithoutLectureInput>
-  }
-
-  export type LectureRecordUpdateWithWhereUniqueWithoutLectureInput = {
-    where: LectureRecordWhereUniqueInput
-    data: XOR<LectureRecordUpdateWithoutLectureInput, LectureRecordUncheckedUpdateWithoutLectureInput>
-  }
-
-  export type LectureRecordUpdateManyWithWhereWithoutLectureInput = {
-    where: LectureRecordScalarWhereInput
-    data: XOR<LectureRecordUpdateManyMutationInput, LectureRecordUncheckedUpdateManyWithoutLectureInput>
-  }
-
-  export type LectureRecordScalarWhereInput = {
-    AND?: LectureRecordScalarWhereInput | LectureRecordScalarWhereInput[]
-    OR?: LectureRecordScalarWhereInput[]
-    NOT?: LectureRecordScalarWhereInput | LectureRecordScalarWhereInput[]
-    id?: StringFilter<"LectureRecord"> | string
-    title?: StringFilter<"LectureRecord"> | string
-    url?: StringFilter<"LectureRecord"> | string
-    sourceType?: StringFilter<"LectureRecord"> | string
-    lectureId?: StringFilter<"LectureRecord"> | string
-    createdAt?: DateTimeFilter<"LectureRecord"> | Date | string
-    updatedAt?: DateTimeFilter<"LectureRecord"> | Date | string
   }
 
   export type PastPaperUpsertWithoutQuizLectureInput = {
@@ -77807,8 +77807,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     subject: SubjectCreateNestedOneWithoutLecturesInput
     files?: LectureFileCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
@@ -77824,8 +77824,8 @@ export namespace Prisma {
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
@@ -77857,8 +77857,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
     files?: LectureFileUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
@@ -77874,8 +77874,8 @@ export namespace Prisma {
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
@@ -77891,8 +77891,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardCreateNestedManyWithoutLectureInput
     subject: SubjectCreateNestedOneWithoutLecturesInput
-    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
@@ -77908,8 +77908,8 @@ export namespace Prisma {
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
@@ -77941,8 +77941,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
     subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
-    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
@@ -77958,8 +77958,8 @@ export namespace Prisma {
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
@@ -78289,7 +78289,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -78304,11 +78303,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -78345,7 +78345,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -78363,12 +78362,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -78499,7 +78499,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78514,11 +78513,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -78555,7 +78555,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78573,12 +78572,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -78654,7 +78654,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -78669,11 +78668,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -78710,7 +78710,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -78728,12 +78727,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -78819,7 +78819,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78834,11 +78833,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -78875,7 +78875,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78893,12 +78892,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -78981,8 +78981,8 @@ export namespace Prisma {
     flashcards?: FlashcardCreateNestedManyWithoutLectureInput
     subject: SubjectCreateNestedOneWithoutLecturesInput
     files?: LectureFileCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
   }
@@ -78998,8 +78998,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
   }
@@ -79105,8 +79105,8 @@ export namespace Prisma {
     flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
     subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
     files?: LectureFileUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
   }
@@ -79122,8 +79122,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
   }
@@ -79240,8 +79240,8 @@ export namespace Prisma {
     flashcards?: FlashcardCreateNestedManyWithoutLectureInput
     subject: SubjectCreateNestedOneWithoutLecturesInput
     files?: LectureFileCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
   }
@@ -79257,8 +79257,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
   }
@@ -79275,10 +79275,10 @@ export namespace Prisma {
     forums?: ForumCreateNestedManyWithoutSemesterInput
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutPastPapersInput = {
@@ -79289,9 +79289,9 @@ export namespace Prisma {
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutPastPapersInput = {
@@ -79404,8 +79404,8 @@ export namespace Prisma {
     flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
     subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
     files?: LectureFileUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
   }
@@ -79421,8 +79421,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
   }
@@ -79445,10 +79445,10 @@ export namespace Prisma {
     forums?: ForumUpdateManyWithoutSemesterNestedInput
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutPastPapersInput = {
@@ -79459,9 +79459,9 @@ export namespace Prisma {
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type QuestionReportUpsertWithWhereUniqueWithoutPastPaperInput = {
@@ -79604,7 +79604,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -79619,11 +79618,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -79660,7 +79660,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -79678,12 +79677,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -79834,7 +79834,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79849,11 +79848,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -79890,7 +79890,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79908,12 +79907,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -79987,7 +79987,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -80002,11 +80001,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -80043,7 +80043,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -80061,12 +80060,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -80162,7 +80162,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80177,11 +80176,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -80218,7 +80218,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80236,12 +80235,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -80306,10 +80306,10 @@ export namespace Prisma {
     forums?: ForumCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutGuestQuizUsersInput = {
@@ -80320,9 +80320,9 @@ export namespace Prisma {
     forums?: ForumUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutGuestQuizUsersInput = {
@@ -80456,10 +80456,10 @@ export namespace Prisma {
     forums?: ForumUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutGuestQuizUsersInput = {
@@ -80470,9 +80470,9 @@ export namespace Prisma {
     forums?: ForumUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type UniversityUpsertWithoutGuestQuizUsersInput = {
@@ -80618,7 +80618,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -80633,11 +80632,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -80674,7 +80674,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -80692,12 +80691,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -80860,7 +80860,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80875,11 +80874,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -80916,7 +80916,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80934,12 +80933,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -80988,7 +80988,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -81003,11 +81002,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -81044,7 +81044,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -81062,12 +81061,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -81116,7 +81116,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81131,11 +81130,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -81172,7 +81172,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81190,12 +81189,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -81734,11 +81734,11 @@ export namespace Prisma {
     interactionsDisabled?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
     comments?: CommentCreateNestedManyWithoutPostInput
     likes?: LikeCreateNestedManyWithoutPostInput
     forum: ForumCreateNestedOneWithoutPostsInput
@@ -81753,12 +81753,12 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -82034,9 +82034,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutUsersInput = {
@@ -82048,8 +82048,8 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
-    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutUsersInput = {
@@ -82816,9 +82816,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutUsersInput = {
@@ -82830,8 +82830,8 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
-    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type UniversityUpsertWithoutUsersInput = {
@@ -82982,8 +82982,8 @@ export namespace Prisma {
     flashcards?: FlashcardCreateNestedManyWithoutLectureInput
     subject: SubjectCreateNestedOneWithoutLecturesInput
     files?: LectureFileCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
   }
@@ -82999,8 +82999,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
-    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
   }
@@ -83014,7 +83014,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -83029,11 +83028,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -83070,7 +83070,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -83088,12 +83087,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -83149,8 +83149,8 @@ export namespace Prisma {
     flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
     subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
     files?: LectureFileUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
   }
@@ -83166,8 +83166,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
   }
@@ -83187,7 +83187,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83202,11 +83201,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -83243,7 +83243,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83261,12 +83260,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -83299,7 +83299,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -83314,11 +83313,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -83355,7 +83355,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -83373,12 +83372,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -83416,7 +83416,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -83431,11 +83430,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -83472,7 +83472,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -83490,12 +83489,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -83544,7 +83544,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83559,11 +83558,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -83600,7 +83600,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83618,12 +83617,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -83667,7 +83667,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83682,11 +83681,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -83723,7 +83723,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83741,12 +83740,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -83782,10 +83782,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutForumsInput = {
@@ -83796,9 +83796,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutForumsInput = {
@@ -83854,11 +83854,11 @@ export namespace Prisma {
     interactionsDisabled?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
     comments?: CommentCreateNestedManyWithoutPostInput
     likes?: LikeCreateNestedManyWithoutPostInput
     author: UserCreateNestedOneWithoutPostsInput
@@ -83873,12 +83873,12 @@ export namespace Prisma {
     authorId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -83957,10 +83957,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutForumsInput = {
@@ -83971,9 +83971,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type UniversityUpsertWithoutForumsInput = {
@@ -84106,7 +84106,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -84121,11 +84120,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -84162,7 +84162,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -84180,12 +84179,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -84271,7 +84271,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84286,11 +84285,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -84327,7 +84327,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84345,12 +84344,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -84414,7 +84414,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -84429,11 +84428,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -84470,7 +84470,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -84488,12 +84487,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -84531,7 +84531,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -84546,11 +84545,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -84587,7 +84587,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -84605,12 +84604,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -84696,7 +84696,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84711,11 +84710,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -84752,7 +84752,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84770,12 +84769,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -84819,7 +84819,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84834,11 +84833,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -84875,7 +84875,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84893,12 +84892,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -84983,7 +84983,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -84998,11 +84997,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -85039,7 +85039,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -85057,12 +85056,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -85215,7 +85215,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85230,11 +85229,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -85271,7 +85271,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85289,12 +85288,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -85411,7 +85411,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -85426,11 +85425,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -85467,7 +85467,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -85485,12 +85484,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -85590,11 +85590,11 @@ export namespace Prisma {
     interactionsDisabled?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
     likes?: LikeCreateNestedManyWithoutPostInput
     author: UserCreateNestedOneWithoutPostsInput
     forum: ForumCreateNestedOneWithoutPostsInput
@@ -85610,12 +85610,12 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
 
@@ -85700,7 +85700,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85715,11 +85714,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -85756,7 +85756,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85774,12 +85773,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -85875,11 +85875,11 @@ export namespace Prisma {
     interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     likes?: LikeUpdateManyWithoutPostNestedInput
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
@@ -85895,12 +85895,12 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
 
@@ -85971,7 +85971,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -85986,11 +85985,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -86027,7 +86027,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -86045,12 +86044,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -86088,7 +86088,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -86103,11 +86102,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -86144,7 +86144,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -86162,12 +86161,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -86216,7 +86216,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86231,11 +86230,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -86272,7 +86272,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86290,12 +86289,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -86339,7 +86339,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86354,11 +86353,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -86395,7 +86395,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86413,12 +86412,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -86454,11 +86454,11 @@ export namespace Prisma {
     interactionsDisabled?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
     comments?: CommentCreateNestedManyWithoutPostInput
     author: UserCreateNestedOneWithoutPostsInput
     forum: ForumCreateNestedOneWithoutPostsInput
@@ -86474,12 +86474,12 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
   }
 
@@ -86492,7 +86492,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -86507,11 +86506,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -86548,7 +86548,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -86566,12 +86565,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -86623,11 +86623,11 @@ export namespace Prisma {
     interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUpdateManyWithoutPostNestedInput
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
@@ -86643,12 +86643,12 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
   }
 
@@ -86667,7 +86667,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86682,11 +86681,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -86723,7 +86723,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86741,12 +86740,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -86806,7 +86806,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -86821,11 +86820,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -86862,7 +86862,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -86880,12 +86879,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -86967,7 +86967,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86982,11 +86981,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -87023,7 +87023,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87041,12 +87040,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -87079,7 +87079,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87094,11 +87093,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -87135,7 +87135,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87153,12 +87152,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -87207,7 +87207,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87222,11 +87221,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -87263,7 +87263,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87281,12 +87280,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -87319,7 +87319,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87334,11 +87333,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -87375,7 +87375,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87393,12 +87392,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -87447,7 +87447,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87462,11 +87461,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -87503,7 +87503,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87521,12 +87520,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -87559,7 +87559,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87574,11 +87573,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -87615,7 +87615,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87632,12 +87631,13 @@ export namespace Prisma {
     semesterId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -87697,7 +87697,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87712,11 +87711,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -87753,7 +87753,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87771,12 +87770,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -87825,7 +87825,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87840,11 +87839,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -87881,7 +87881,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87899,12 +87898,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -87937,7 +87937,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -87952,11 +87951,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutAuthorInput
@@ -87993,7 +87993,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -88011,12 +88010,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
@@ -88065,7 +88065,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88080,11 +88079,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutAuthorNestedInput
@@ -88121,7 +88121,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88139,12 +88138,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
@@ -88180,10 +88180,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutSemesterInput
     modules?: ModuleCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
     academicYear: AcademicYearCreateNestedOneWithoutSemestersInput
     subjects?: SubjectCreateNestedManyWithoutSemesterInput
     users?: UserCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterUncheckedCreateWithoutAdBannersInput = {
@@ -88194,9 +88194,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutSemesterInput
     modules?: ModuleUncheckedCreateNestedManyWithoutSemesterInput
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutSemesterInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutSemesterInput
     users?: UserUncheckedCreateNestedManyWithoutSemesterInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedCreateNestedManyWithoutSemesterInput
   }
 
   export type SemesterCreateOrConnectWithoutAdBannersInput = {
@@ -88263,10 +88263,10 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     academicYear?: AcademicYearUpdateOneRequiredWithoutSemestersNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutAdBannersInput = {
@@ -88277,9 +88277,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type UniversityUpsertWithoutAdBannersInput = {
@@ -88333,7 +88333,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -88348,11 +88347,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutAuthorInput
@@ -88389,7 +88389,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -88407,12 +88406,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
@@ -88461,7 +88461,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88476,11 +88475,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutAuthorNestedInput
@@ -88517,7 +88517,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88535,12 +88534,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
@@ -88573,7 +88573,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -88588,11 +88587,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -88629,7 +88629,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -88647,12 +88646,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -88701,7 +88701,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88716,11 +88715,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -88757,7 +88757,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88775,12 +88774,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -88813,7 +88813,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -88828,11 +88827,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -88869,7 +88869,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -88887,12 +88886,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -88941,7 +88941,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88956,11 +88955,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -88997,7 +88997,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -89015,12 +89014,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -89053,7 +89053,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -89068,11 +89067,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -89109,7 +89109,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -89127,12 +89126,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -89181,7 +89181,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -89196,11 +89195,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -89237,7 +89237,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -89255,12 +89254,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -89561,7 +89561,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -89576,11 +89575,12 @@ export namespace Prisma {
     studentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutAuthorInput
@@ -89617,7 +89617,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -89635,12 +89634,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
@@ -89724,7 +89724,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -89739,11 +89738,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutAuthorNestedInput
@@ -89780,7 +89780,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -89798,12 +89797,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
@@ -89901,11 +89901,11 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    audience?: $Enums.PostAudience
     expiresAt?: Date | string | null
     isPinned?: boolean
-    isForumPost?: boolean
     isChatMessage?: boolean
-    audience?: $Enums.PostAudience
+    isForumPost?: boolean
   }
 
   export type UniversityYearIdFormatCreateManyUniversityInput = {
@@ -89920,7 +89920,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -89937,12 +89936,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
   }
 
   export type AcademicYearUpdateWithoutUniversityInput = {
@@ -90154,11 +90154,11 @@ export namespace Prisma {
     interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUpdateManyWithoutPostNestedInput
     likes?: LikeUpdateManyWithoutPostNestedInput
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
@@ -90174,11 +90174,11 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -90192,11 +90192,11 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type UniversityYearIdFormatUpdateWithoutUniversityInput = {
@@ -90227,7 +90227,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90242,11 +90241,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -90283,7 +90283,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90300,12 +90299,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -90339,7 +90339,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90356,12 +90355,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AcademicYearCreateManyFacultyInput = {
@@ -90396,7 +90396,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -90414,11 +90413,12 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
   }
 
   export type AcademicYearUpdateWithoutFacultyInput = {
@@ -90515,7 +90515,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90530,11 +90529,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -90571,7 +90571,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90589,11 +90588,12 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -90627,7 +90627,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90645,11 +90644,12 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SemesterCreateManyAcademicYearInput = {
@@ -90665,9 +90665,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUpdateManyWithoutSemesterNestedInput
     users?: UserUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateWithoutAcademicYearInput = {
@@ -90678,9 +90678,9 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutSemesterNestedInput
     modules?: ModuleUncheckedUpdateManyWithoutSemesterNestedInput
     pastPapers?: PastPaperUncheckedUpdateManyWithoutSemesterNestedInput
+    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutSemesterNestedInput
     users?: UserUncheckedUpdateManyWithoutSemesterNestedInput
-    playlistSyncs?: PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterNestedInput
   }
 
   export type SemesterUncheckedUpdateManyWithoutAcademicYearInput = {
@@ -90742,6 +90742,15 @@ export namespace Prisma {
     randomizeQuestions?: boolean
   }
 
+  export type PlaylistSyncTaskCreateManySemesterInput = {
+    id?: string
+    playlistUrl: string
+    mediaType: string
+    editionYear?: string | null
+    lastSynced?: Date | string
+    createdAt?: Date | string
+  }
+
   export type SubjectCreateManySemesterInput = {
     id?: string
     name: string
@@ -90753,7 +90762,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -90770,21 +90778,13 @@ export namespace Prisma {
     rankId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
-  }
-
-  export type PlaylistSyncTaskCreateManySemesterInput = {
-    id?: string
-    playlistUrl: string
-    mediaType: string
-    editionYear?: string | null
-    lastSynced?: Date | string
-    createdAt?: Date | string
+    personalGeminiKey?: string | null
+    handle?: string | null
   }
 
   export type AdBannerUpdateWithoutSemesterInput = {
@@ -90965,6 +90965,33 @@ export namespace Prisma {
     randomizeQuestions?: BoolFieldUpdateOperationsInput | boolean
   }
 
+  export type PlaylistSyncTaskUpdateWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    playlistUrl?: StringFieldUpdateOperationsInput | string
+    mediaType?: StringFieldUpdateOperationsInput | string
+    editionYear?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSynced?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlaylistSyncTaskUncheckedUpdateWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    playlistUrl?: StringFieldUpdateOperationsInput | string
+    mediaType?: StringFieldUpdateOperationsInput | string
+    editionYear?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSynced?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    playlistUrl?: StringFieldUpdateOperationsInput | string
+    mediaType?: StringFieldUpdateOperationsInput | string
+    editionYear?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSynced?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SubjectUpdateWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -90992,7 +91019,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -91007,11 +91033,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -91048,7 +91075,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -91065,12 +91091,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -91104,7 +91131,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -91121,39 +91147,13 @@ export namespace Prisma {
     rankId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type PlaylistSyncTaskUpdateWithoutSemesterInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    playlistUrl?: StringFieldUpdateOperationsInput | string
-    mediaType?: StringFieldUpdateOperationsInput | string
-    editionYear?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSynced?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type PlaylistSyncTaskUncheckedUpdateWithoutSemesterInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    playlistUrl?: StringFieldUpdateOperationsInput | string
-    mediaType?: StringFieldUpdateOperationsInput | string
-    editionYear?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSynced?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type PlaylistSyncTaskUncheckedUpdateManyWithoutSemesterInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    playlistUrl?: StringFieldUpdateOperationsInput | string
-    mediaType?: StringFieldUpdateOperationsInput | string
-    editionYear?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSynced?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PastPaperCreateManyModuleInput = {
@@ -91290,8 +91290,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
     files?: LectureFileUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
@@ -91307,8 +91307,8 @@ export namespace Prisma {
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
-    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
@@ -91337,6 +91337,15 @@ export namespace Prisma {
     mimeType: string
   }
 
+  export type LectureRecordCreateManyLectureInput = {
+    id?: string
+    title: string
+    url: string
+    sourceType?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type LectureVideoCreateManyLectureInput = {
     id?: string
     title: string
@@ -91347,15 +91356,6 @@ export namespace Prisma {
     commentsCount?: number
     sharesCount?: number
     sortOrder?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type LectureRecordCreateManyLectureInput = {
-    id?: string
-    title: string
-    url: string
-    sourceType?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -91422,6 +91422,33 @@ export namespace Prisma {
     mimeType?: StringFieldUpdateOperationsInput | string
   }
 
+  export type LectureRecordUpdateWithoutLectureInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LectureRecordUncheckedUpdateWithoutLectureInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LectureRecordUncheckedUpdateManyWithoutLectureInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    sourceType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type LectureVideoUpdateWithoutLectureInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -91464,33 +91491,6 @@ export namespace Prisma {
     commentsCount?: IntFieldUpdateOperationsInput | number
     sharesCount?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type LectureRecordUpdateWithoutLectureInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    sourceType?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type LectureRecordUncheckedUpdateWithoutLectureInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    sourceType?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type LectureRecordUncheckedUpdateManyWithoutLectureInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    sourceType?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -92002,12 +92002,12 @@ export namespace Prisma {
     forumId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
   }
 
   export type PrivateForumInviteCreateManyReceiverInput = {
@@ -92406,11 +92406,11 @@ export namespace Prisma {
     interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUpdateManyWithoutPostNestedInput
     likes?: LikeUpdateManyWithoutPostNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
@@ -92425,12 +92425,12 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -92443,12 +92443,12 @@ export namespace Prisma {
     forumId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type PrivateForumInviteUpdateWithoutReceiverInput = {
@@ -92710,12 +92710,12 @@ export namespace Prisma {
     authorId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    isPinned?: boolean
-    isForumPost?: boolean
-    isChatMessage?: boolean
     audience?: $Enums.PostAudience
     universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
   }
 
   export type PrivateForumInviteCreateManyForumInput = {
@@ -92738,11 +92738,11 @@ export namespace Prisma {
     interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
-    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUpdateManyWithoutPostNestedInput
     likes?: LikeUpdateManyWithoutPostNestedInput
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
@@ -92757,12 +92757,12 @@ export namespace Prisma {
     authorId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -92775,12 +92775,12 @@ export namespace Prisma {
     authorId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isForumPost?: BoolFieldUpdateOperationsInput | boolean
-    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
     universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type PrivateForumInviteUpdateWithoutForumInput = {
@@ -92946,7 +92946,6 @@ export namespace Prisma {
     id?: string
     name: string
     nickname?: string | null
-    handle?: string | null
     email: string
     emailVerified?: Date | string | null
     image?: string | null
@@ -92963,19 +92962,19 @@ export namespace Prisma {
     semesterId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    personalGeminiKey?: string | null
     facebookUrl?: string | null
     instagramUrl?: string | null
     isPrivate?: boolean
     canManageReports?: boolean
     facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
   }
 
   export type UserUpdateWithoutRankInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -92990,11 +92989,12 @@ export namespace Prisma {
     studentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -93031,7 +93031,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -93048,12 +93047,13 @@ export namespace Prisma {
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -93087,7 +93087,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     nickname?: NullableStringFieldUpdateOperationsInput | string | null
-    handle?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
@@ -93104,12 +93103,13 @@ export namespace Prisma {
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
     instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type LibraryResourceCreateManySourceBookInput = {

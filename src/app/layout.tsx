@@ -13,7 +13,7 @@ import "../styles/globals.css";
 // Fetch site config server-side — cached per request by Next.js
 async function getSiteConfig() {
   const fallback = {
-    siteName: "MedQs",
+    siteName: "MedOneX",
     logoUrl: null,
     pwaIconUrl: null,
     faviconUrl: null,
@@ -128,14 +128,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const config = await getSiteConfig();
   const title = `${config.siteName} — The Ultimate Medical Education Platform`;
   const description =
-    "Elevate your medical studies with MedQs: Curated lectures, interactive MCQs, smart spaced repetition, AI-powered study assistance, and a community of doctors and students.";
+    "Elevate your medical studies with MedOneX: Curated lectures, interactive MCQs, smart spaced repetition, AI-powered study assistance, and a community of doctors and students.";
   const base = safeMetadataBase();
   const ogImage = base ? `${base.origin}/og-image.png` : "https://med-qs0.vercel.app/og-image.png";
   return {
     metadataBase: base,
     title: { default: title, template: `%s | ${config.siteName}` },
     description,
-    keywords: ["Medical Education", "Medical Students", "MCQ", "Clinical Cases", "Medical University", "MedQs", "Med Students Forum"],
+    keywords: ["Medical Education", "Medical Students", "MCQ", "Clinical Cases", "Medical University", "MedOneX", "Med Students Forum"],
     applicationName: config.siteName,
     authors: [{ name: config.siteName }],
     creator: config.siteName,
@@ -231,7 +231,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
         {/* Dynamic primary color CSS variables */}
         <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />
-        {/* JSON-LD — tells Google the site name is MedQs, not Vercel */}
+        {/* JSON-LD — tells Google the site name is MedOneX, not Vercel */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

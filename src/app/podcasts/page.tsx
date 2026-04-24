@@ -3,8 +3,8 @@ import { PodcastsClient } from "@/components/podcasts/PodcastsClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Podcasts | MedQs Audio Library",
-  description: "Listen to professional medical lectures and discussions on the go with the MedQs Audio Hub.",
+  title: "Podcasts | MedOneX Audio Library",
+  description: "Listen to professional medical lectures and discussions on the go with the MedOneX Audio Hub.",
 };
 
 export const dynamic = "force-dynamic";
@@ -42,7 +42,7 @@ export default async function PodcastsPage() {
       url: r.url,
       sourceType: r.sourceType,
       image: spotifyData?.image || null,
-      artist: spotifyData?.artist || "MedQs Audio",
+      artist: spotifyData?.artist || "MedOneX Audio",
       createdAt: r.createdAt.toISOString(),
       lecture: {
         id: r.lecture.id,

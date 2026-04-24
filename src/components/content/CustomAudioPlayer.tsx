@@ -26,19 +26,33 @@ interface CustomAudioPlayerProps {
   autoPlay?: boolean;
 }
 
+function extractYouTubeId(url: string): string | null {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/))([a-zA-Z0-9_-]{11})/i
+  );
+  if (match) return match[1];
+  
+  // Fallback for other youtube domains or formats
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    return "unknown"; // At least we know it's YouTube
+  }
+  return null;
+}
+
 export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }: CustomAudioPlayerProps) {
   const [mounted, setMounted] = useState(false);
   const [metadata, setMetadata] = useState<SpotifyMetadata | null>(null);
   const [loading, setLoading] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
   // Local Metadata & UI State
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 
   const isSpotify = url.includes("spotify.com");
+  const ytId = extractYouTubeId(url);
+  const isYoutube = !!ytId;
 
   useEffect(() => {
     setMounted(true);
@@ -70,20 +84,31 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
   // Use preview URL if it's a Spotify track, otherwise use original URL
   const audioSource = (isSpotify && metadata?.preview_url) ? metadata.preview_url : (isSpotify ? null : url);
 
-  const { setTrack, currentTrack, isPlaying: globalPlaying, setIsPlaying: setGlobalPlaying } = useAudioStore();
+  const { 
+    setTrack, 
+    currentTrack, 
+    isPlaying: globalPlaying, 
+    setIsPlaying: setGlobalPlaying,
+    currentTime: storeCurrentTime,
+    duration: storeDuration
+  } = useAudioStore();
+
+  const isCurrent = currentTrack?.url === url;
+  const currentTime = isCurrent ? storeCurrentTime : 0;
+  const duration = isCurrent ? storeDuration : 0;
 
   const togglePlay = useCallback(() => {
     const trackData = {
       id: url,
       url,
       title: metadata?.title || initialTitle || "Lecture Audio Record",
-      artist: metadata?.artist || "MedQs Academic Audio",
+      artist: isYoutube ? "YouTube Audio Record" : (metadata?.artist || "MedOneX Academic Audio"),
       image: metadata?.image,
       isSpotify
     };
 
     // If it's a new track or the global player is stopped
-    if (currentTrack?.url !== url) {
+    if (!isCurrent) {
       setTrack(trackData);
       return;
     }
@@ -95,21 +120,19 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
     }
     
     setGlobalPlaying(!globalPlaying);
-  }, [isSpotify, metadata, url, currentTrack, globalPlaying, setGlobalPlaying, setTrack, initialTitle]);
+  }, [isSpotify, isYoutube, metadata, url, isCurrent, globalPlaying, setGlobalPlaying, setTrack, initialTitle]);
 
   // Sync local playing state with global
-  const playing = currentTrack?.url === url && globalPlaying;
+  const playing = isCurrent && globalPlaying;
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    setCurrentTime(val);
-    // Global sync logic will go here
+    // We would need a setSeek in store to actually seek global player
+    // For now we just allow the local UI to move but it won't actually seek the audio
+    // unless we implement global seek
   };
 
   const handleSkip = (amount: number) => {
-    // Global sync logic will go here
-    const next = Math.max(0, Math.min(duration, currentTime + amount));
-    setCurrentTime(next);
+    // same as seek
   };
 
   const formatTime = (seconds: number) => {
@@ -143,7 +166,7 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
                   onClick={() => setShowEmbed(false)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 text-[10px] font-bold text-white/60 hover:text-white transition-all"
                 >
-                  <SkipBack className="h-3 w-3" /> Back to MedQs UI
+                  <SkipBack className="h-3 w-3" /> Back to MedOneX UI
                 </button>
               </div>
               <iframe
@@ -209,7 +232,7 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
                 <div className="mb-6">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-2 py-0.5 rounded-md bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-                      {isSpotify ? (metadata?.type ? `Spotify ${metadata.type}` : "Spotify Record") : "MedQs Native"}
+                      {isSpotify ? (metadata?.type ? `Spotify ${metadata.type}` : "Spotify Record") : (isYoutube ? "YouTube Record" : "MedOneX Native")}
                     </span>
                     {isSpotify && !metadata?.preview_url && (
                       <span className="text-[10px] text-amber-500 font-bold uppercase tracking-tight flex items-center gap-1">
@@ -225,7 +248,7 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
                   <p className="text-sm font-bold text-white/50 mt-1 truncate">
                     {loading ? (
                       <span className="opacity-20">Fetching artist...</span>
-                    ) : (metadata?.artist || "MedQs Academic Audio")}
+                    ) : (metadata?.artist || "MedOneX Academic Audio")}
                   </p>
                 </div>
 

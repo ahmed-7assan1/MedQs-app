@@ -9,31 +9,31 @@ datasource db {
 }
 
 model SiteConfig {
-  id                  String   @id @default(uuid())
-  siteName            String   @default("MedQs")
-  logoUrl             String?
-  faviconUrl          String?
-  primaryColor        String   @default("#0d9488")
-  enableAI            Boolean  @default(true)
-  enableForum         Boolean  @default(true)
-  enableAds           Boolean  @default(true)
-  enableNotifs        Boolean  @default(true)
-  enableLeaderboard   Boolean  @default(true)
-  enableCreativeStudio Boolean @default(false)
-  updatedAt           DateTime @updatedAt
-  fontArabic          String?
-  fontSans            String?
-  aiPreferredProvider String   @default("auto")
+  id                   String   @id @default(uuid())
+  siteName             String   @default("MedOneX")
+  logoUrl              String?
+  faviconUrl           String?
+  primaryColor         String   @default("#0d9488")
+  enableAI             Boolean  @default(true)
+  enableForum          Boolean  @default(true)
+  enableAds            Boolean  @default(true)
+  enableNotifs         Boolean  @default(true)
+  enableLeaderboard    Boolean  @default(true)
+  updatedAt            DateTime @updatedAt
+  fontArabic           String?
+  fontSans             String?
+  aiPreferredProvider  String   @default("auto")
   /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
-  pwaIconUrl          String?
-  logoUrlDark         String?
-  facebookUrl         String?
-  hulkLogoUrl         String?
-  instagramUrl        String?
-  telegramUrl         String?
-  twitterUrl          String?
-  whatsappUrl         String?
-  youtubeUrl          String?
+  pwaIconUrl           String?
+  logoUrlDark          String?
+  facebookUrl          String?
+  hulkLogoUrl          String?
+  instagramUrl         String?
+  telegramUrl          String?
+  twitterUrl           String?
+  whatsappUrl          String?
+  youtubeUrl           String?
+  enableCreativeStudio Boolean  @default(false)
 }
 
 model FeatureFlag {
@@ -114,7 +114,7 @@ model AcademicYear {
 }
 
 model Semester {
-  id             String          @id @default(uuid())
+  id             String             @id @default(uuid())
   name           String
   academicYearId String
   adBanners      AdBanner[]
@@ -122,21 +122,20 @@ model Semester {
   guestQuizUsers GuestQuizUser[]
   modules        Module[]
   pastPapers     PastPaper[]
-  academicYear   AcademicYear    @relation(fields: [academicYearId], references: [id])
+  playlistSyncs  PlaylistSyncTask[]
+  academicYear   AcademicYear       @relation(fields: [academicYearId], references: [id])
   subjects       Subject[]
   users          User[]
-  playlistSyncs  PlaylistSyncTask[]
 }
 
 model PlaylistSyncTask {
   id          String   @id @default(uuid())
   playlistUrl String
   semesterId  String
-  mediaType   String   // 'video' or 'podcast'
+  mediaType   String
   editionYear String?
   lastSynced  DateTime @default(now())
   createdAt   DateTime @default(now())
-  
   semester    Semester @relation(fields: [semesterId], references: [id], onDelete: Cascade)
 }
 
@@ -175,8 +174,8 @@ model Lecture {
   flashcards    Flashcard[]
   subject       Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   files         LectureFile[]
-  videos        LectureVideo[]
   records       LectureRecord[]
+  videos        LectureVideo[]
   PastPaper     PastPaper?
   questions     Question[]
   activities    UserLectureActivity[]
@@ -220,14 +219,14 @@ model LectureVideo {
 }
 
 model LectureRecord {
-  id             String      @id @default(uuid())
-  title          String
-  url            String
-  sourceType     String      @default("spotify") // spotify, soundcloud, generic
-  lectureId      String
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  lecture        Lecture     @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  title      String
+  url        String
+  sourceType String   @default("spotify")
+  lectureId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
 
   @@index([lectureId])
 }
@@ -399,7 +398,6 @@ model User {
   id                    String                 @id @default(uuid())
   name                  String
   nickname              String?
-  handle                String?                @unique
   email                 String                 @unique
   emailVerified         DateTime?
   image                 String?
@@ -417,12 +415,13 @@ model User {
   rankId                String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
-  personalGeminiKey     String?
   facebookUrl           String?
   instagramUrl          String?
   isPrivate             Boolean                @default(false)
   canManageReports      Boolean                @default(false)
   facultyId             String?
+  personalGeminiKey     String?
+  handle                String?                @unique
   aiUsageLogs           AIUsageLog[]
   accounts              Account[]
   channelFollows        ChannelFollow[]
@@ -536,12 +535,12 @@ model Post {
   forumId              String
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
-  expiresAt            DateTime?
-  isPinned             Boolean      @default(false)
-  isForumPost          Boolean      @default(true)
-  isChatMessage        Boolean      @default(false)
   audience             PostAudience @default(UNIVERSITY)
   universityId         String
+  expiresAt            DateTime?
+  isPinned             Boolean      @default(false)
+  isChatMessage        Boolean      @default(false)
+  isForumPost          Boolean      @default(true)
   comments             Comment[]
   likes                Like[]
   author               User         @relation(fields: [authorId], references: [id])

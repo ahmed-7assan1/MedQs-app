@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const TUTORIAL_STEPS = [
   {
-    title: "Welcome to MedQs! 🎉",
+    title: "Welcome to MedOneX! 🎉",
     desc: "Your new command center for medical studies. Let's take a quick tour so you can master your modules faster.",
   },
   {

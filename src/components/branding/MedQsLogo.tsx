@@ -6,11 +6,11 @@ import { useSiteConfig } from "@/contexts/SiteConfigContext";
 type LogoVariant = "default" | "onDark";
 
 /** FALLBACK static path — used when no logo URL is stored in DB yet */
-const STATIC_LOGO = "/logo.png.png";
+const STATIC_LOGO = "/logo.png";
 
 /**
- * MedQsLogoMark — reads the logo URL from SiteConfigContext (set by admin).
- * Falls back to /logo.png.png.
+ * MedOneXLogoMark — reads the logo URL from SiteConfigContext (set by admin).
+ * Falls back to /logo.png.
  * In light mode the logo gets a white bg chip so transparent-bg PNGs look clean.
  * In dark mode it renders as-is.
  */
@@ -40,14 +40,14 @@ export function MedQsLogoMark({
       {/* Light Mode Logo */}
       <img
         src={srcLight}
-        alt={title ?? siteName ?? "MedQs"}
+        alt={title ?? siteName ?? "MedOneX"}
         className="h-full w-full max-h-full max-w-full object-contain dark:hidden"
         referrerPolicy="no-referrer"
       />
       {/* Dark Mode Logo */}
       <img
         src={srcDark}
-        alt={title ?? siteName ?? "MedQs"}
+        alt={title ?? siteName ?? "MedOneX"}
         className="h-full w-full max-h-full max-w-full object-contain hidden dark:block"
         referrerPolicy="no-referrer"
       />
@@ -63,7 +63,7 @@ export function MedQsWordmark({
   className?: string;
   variant?: LogoVariant;
 }) {
-  // Logo image already contains "MedQs" text — no need to render duplicate text.
+  // Logo image already contains "MedOneX" text — no need to render duplicate text.
   return null;
 }
 
@@ -92,7 +92,7 @@ export function MedQsLogoLockup({
       <div className={cn("flex items-center justify-center", iconClassName)}>
         <img
           src={src}
-          alt={siteName ?? "MedQs"}
+          alt={siteName ?? "MedOneX"}
           className="w-[200px] max-w-full object-contain"
           referrerPolicy="no-referrer"
         />
