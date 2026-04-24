@@ -1,0 +1,844 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SiteConfig {
+  id                   String   @id @default(uuid())
+  siteName             String   @default("MedQs")
+  logoUrl              String?
+  faviconUrl           String?
+  primaryColor         String   @default("#0d9488")
+  enableAI             Boolean  @default(true)
+  enableForum          Boolean  @default(true)
+  enableAds            Boolean  @default(true)
+  enableNotifs         Boolean  @default(true)
+  enableLeaderboard    Boolean  @default(true)
+  enableCreativeStudio Boolean  @default(false)
+  updatedAt            DateTime @updatedAt
+  fontArabic           String?
+  fontSans             String?
+  aiPreferredProvider  String   @default("auto")
+  /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
+  pwaIconUrl           String?
+  logoUrlDark          String?
+  facebookUrl          String?
+  hulkLogoUrl          String?
+  instagramUrl         String?
+  telegramUrl          String?
+  twitterUrl           String?
+  whatsappUrl          String?
+  youtubeUrl           String?
+}
+
+model FeatureFlag {
+  id           String      @id @default(uuid())
+  key          String
+  enabled      Boolean     @default(false)
+  payload      Json?
+  universityId String?
+  updatedAt    DateTime    @updatedAt
+  university   University? @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([universityId, key])
+  @@index([key])
+}
+
+model University {
+  id             String                   @id @default(uuid())
+  name           String
+  logoUrl        String?
+  idMinLength    Int                      @default(6)
+  idMaxLength    Int                      @default(10)
+  createdAt      DateTime                 @default(now())
+  academicYears  AcademicYear[]
+  adBanners      AdBanner[]
+  comments       Comment[]
+  faculties      Faculty[]
+  featureFlags   FeatureFlag[]
+  forums         Forum[]
+  guestQuizUsers GuestQuizUser[]
+  posts          Post[]
+  yearIdFormats  UniversityYearIdFormat[]
+  users          User[]
+}
+
+/// Faculty (كليه) — optional sub-division of a University.
+/// When present, AcademicYears are grouped under a Faculty.
+/// If a University has no Faculties, the old flat structure is preserved (facultyId = null).
+model Faculty {
+  id             String          @id @default(uuid())
+  name           String
+  logoUrl        String?
+  universityId   String
+  createdAt      DateTime        @default(now())
+  category       FacultyCategory @default(OTHER)
+  academicYears  AcademicYear[]
+  university     University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  guestQuizUsers GuestQuizUser[]
+  sourceBooks    SourceBook[]
+  users          User[]
+
+  @@index([universityId])
+  @@index([category])
+}
+
+model UniversityYearIdFormat {
+  id           String     @id @default(uuid())
+  universityId String
+  yearNumber   Int
+  minLength    Int        @default(6)
+  maxLength    Int        @default(10)
+  prefix       String?
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([universityId, yearNumber])
+}
+
+model AcademicYear {
+  id           String     @id @default(uuid())
+  yearNumber   Int
+  universityId String
+  facultyId    String?
+  faculty      Faculty?   @relation(fields: [facultyId], references: [id])
+  university   University @relation(fields: [universityId], references: [id])
+  semesters    Semester[]
+
+  @@unique([universityId, yearNumber, facultyId])
+  @@index([facultyId])
+}
+
+model Semester {
+  id             String             @id @default(uuid())
+  name           String
+  academicYearId String
+  adBanners      AdBanner[]
+  forums         Forum[]
+  guestQuizUsers GuestQuizUser[]
+  modules        Module[]
+  pastPapers     PastPaper[]
+  academicYear   AcademicYear       @relation(fields: [academicYearId], references: [id])
+  subjects       Subject[]
+  users          User[]
+  playlistSyncs  PlaylistSyncTask[]
+}
+
+model PlaylistSyncTask {
+  id          String   @id @default(uuid())
+  playlistUrl String
+  semesterId  String
+  mediaType   String // 'video' or 'podcast'
+  editionYear String?
+  lastSynced  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  semester Semester @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+}
+
+model Module {
+  id         String      @id @default(uuid())
+  name       String
+  semesterId String
+  semester   Semester    @relation(fields: [semesterId], references: [id])
+  pastPapers PastPaper[]
+  subjects   Subject[]
+}
+
+model Subject {
+  id               String    @id @default(uuid())
+  name             String
+  moduleId         String?
+  isQuizSystemBank Boolean   @default(false)
+  semesterId       String?
+  lectures         Lecture[]
+  module           Module?   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  semester         Semester? @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId, isQuizSystemBank])
+  @@index([semesterId])
+}
+
+model Lecture {
+  id            String                @id @default(uuid())
+  title         String
+  videoUrl      String?
+  order         Int                   @default(0)
+  subjectId     String
+  notesMarkdown String?
+  extras        Json?
+  uiConfig      Json?
+  flashcards    Flashcard[]
+  subject       Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  files         LectureFile[]
+  videos        LectureVideo[]
+  records       LectureRecord[]
+  PastPaper     PastPaper?
+  questions     Question[]
+  activities    UserLectureActivity[]
+}
+
+model Flashcard {
+  id        String  @id @default(uuid())
+  front     String
+  back      String
+  lectureId String
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+}
+
+model LectureFile {
+  id        String  @id @default(uuid())
+  name      String
+  url       String
+  mimeType  String
+  lectureId String
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+}
+
+model LectureVideo {
+  id             String                @id @default(uuid())
+  title          String
+  url            String
+  sourceType     String                @default("external")
+  sharingEnabled Boolean               @default(true)
+  likesCount     Int                   @default(0)
+  commentsCount  Int                   @default(0)
+  sharesCount    Int                   @default(0)
+  sortOrder      Int                   @default(0)
+  lectureId      String
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  lecture        Lecture               @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  comments       LectureVideoComment[]
+  likes          LectureVideoLike[]
+
+  @@index([lectureId, sortOrder])
+}
+
+model LectureRecord {
+  id         String   @id @default(uuid())
+  title      String
+  url        String
+  sourceType String   @default("spotify") // spotify, soundcloud, generic
+  lectureId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  @@index([lectureId])
+}
+
+model LectureVideoComment {
+  id        String                @id @default(uuid())
+  content   String
+  videoId   String
+  userId    String
+  createdAt DateTime              @default(now())
+  parentId  String?
+  parent    LectureVideoComment?  @relation("VideoCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   LectureVideoComment[] @relation("VideoCommentReplies")
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     LectureVideo          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([videoId, createdAt])
+  @@index([userId])
+}
+
+model LectureVideoLike {
+  id      String       @id @default(uuid())
+  videoId String
+  userId  String
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video   LectureVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([videoId, userId])
+  @@index([userId])
+}
+
+model Question {
+  id             String             @id @default(uuid())
+  body           String
+  choices        Json
+  answer         String
+  explanation    String?
+  aiExplanation  String?
+  difficulty     Difficulty         @default(MEDIUM)
+  lectureId      String
+  createdAt      DateTime           @default(now())
+  imageUrl       String?
+  stemLayout     QuestionStemLayout @default(STANDARD)
+  essayReference String?
+  questionType   String             @default("MCQ")
+  lecture        Lecture            @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  reports        QuestionReport[]
+  attemptItems   QuizAttemptItem[]
+  savedBy        SavedQuestion[]
+}
+
+model PastPaper {
+  id                      String           @id @default(uuid())
+  title                   String
+  pdfUrl                  String?
+  isInteractive           Boolean          @default(false)
+  timeLimitMin            Int?
+  semesterId              String
+  moduleId                String
+  createdAt               DateTime         @default(now())
+  aiExplanationEnabled    Boolean          @default(true)
+  allowAiDuringQuiz       Boolean          @default(false)
+  restrictCopyPaste       Boolean          @default(false)
+  secureExamMode          Boolean          @default(false)
+  trackFocusLoss          Boolean          @default(false)
+  kind                    PastPaperKind    @default(MODULE_QUESTION_BANK)
+  quizLectureId           String?          @unique
+  googleSheetsSyncEnabled Boolean          @default(false)
+  isPrivate               Boolean          @default(false)
+  randomizeQuestions      Boolean          @default(false)
+  module                  Module           @relation(fields: [moduleId], references: [id])
+  quizLecture             Lecture?         @relation(fields: [quizLectureId], references: [id])
+  semester                Semester         @relation(fields: [semesterId], references: [id])
+  questionReports         QuestionReport[]
+  attempts                QuizAttempt[]
+}
+
+model QuestionReport {
+  id          String     @id @default(uuid())
+  questionId  String
+  userId      String
+  note        String?
+  pastPaperId String?
+  createdAt   DateTime   @default(now())
+  pastPaper   PastPaper? @relation(fields: [pastPaperId], references: [id])
+  question    Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@index([userId, createdAt])
+}
+
+model SavedQuestion {
+  id         String   @id @default(uuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId, createdAt])
+}
+
+model GuestQuizUser {
+  id                String        @id @default(uuid())
+  displayName       String
+  externalStudentId String        @unique
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  facultyId         String?
+  semesterId        String?
+  universityId      String?
+  faculty           Faculty?      @relation(fields: [facultyId], references: [id])
+  semester          Semester?     @relation(fields: [semesterId], references: [id])
+  university        University?   @relation(fields: [universityId], references: [id])
+  quizAttempts      QuizAttempt[]
+
+  @@index([createdAt])
+}
+
+model QuizAttempt {
+  id              String            @id @default(uuid())
+  score           Int
+  timeTaken       Int               @default(0)
+  userId          String?
+  pastPaperId     String
+  createdAt       DateTime          @default(now())
+  focusLossCount  Int               @default(0)
+  guestQuizUserId String?
+  guestQuizUser   GuestQuizUser?    @relation(fields: [guestQuizUserId], references: [id], onDelete: Cascade)
+  pastPaper       PastPaper         @relation(fields: [pastPaperId], references: [id], onDelete: Cascade)
+  user            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           QuizAttemptItem[]
+
+  @@index([userId])
+  @@index([guestQuizUserId])
+  @@index([pastPaperId])
+}
+
+model StudyAssistantProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  scheduleText      String?
+  hobbies           String?
+  dailyStudyMinutes Int      @default(120)
+  worshipMinutes    Int      @default(30)
+  otherRoutines     String?
+  currentPlanJson   Json?
+  progressJson      Json?
+  weekStartIso      String?
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttemptItem {
+  id         String      @id @default(uuid())
+  chosen     String?
+  isCorrect  Boolean
+  attemptId  String
+  questionId String
+  /// AI rubric for ESSAY: scorePercent, stagesMet/Total, feedback, stageNotes
+  essayGrade Json?
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                    String                 @id @default(uuid())
+  name                  String
+  nickname              String?
+  handle                String?                @unique
+  email                 String                 @unique
+  emailVerified         DateTime?
+  image                 String?
+  bio                   String?
+  phone                 String?
+  phoneVisible          Boolean                @default(false)
+  hideRank              Boolean                @default(false)
+  theme                 Theme                  @default(SYSTEM)
+  role                  Role                   @default(STUDENT)
+  points                Int                    @default(0)
+  password              String?
+  studentId             String?
+  universityId          String?
+  semesterId            String?
+  rankId                String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  personalGeminiKey     String?
+  facebookUrl           String?
+  instagramUrl          String?
+  isPrivate             Boolean                @default(false)
+  canManageReports      Boolean                @default(false)
+  facultyId             String?
+  aiUsageLogs           AIUsageLog[]
+  accounts              Account[]
+  channelFollows        ChannelFollow[]
+  comments              Comment[]
+  commentLikes          CommentLike[]
+  dmReceived            DirectMessage[]        @relation("DmReceived")
+  dmSent                DirectMessage[]        @relation("DmSent")
+  documentTemplates     DocumentTemplate[]
+  engagementLogs        EngagementLog[]
+  videoComments         LectureVideoComment[]
+  videoLikes            LectureVideoLike[]
+  likes                 Like[]
+  notifications         Notification[]
+  notifMutes            NotificationMute?
+  posts                 Post[]
+  receivedInvites       PrivateForumInvite[]   @relation("InviteReceiver")
+  sentInvites           PrivateForumInvite[]   @relation("InviteSender")
+  forumMemberships      PrivateForumMember[]
+  questionReports       QuestionReport[]
+  quizAttempts          QuizAttempt[]
+  savedQuestions        SavedQuestion[]
+  sessions              Session[]
+  studyAssistantProfile StudyAssistantProfile?
+  faculty               Faculty?               @relation(fields: [facultyId], references: [id])
+  rank                  Rank?                  @relation(fields: [rankId], references: [id])
+  semester              Semester?              @relation(fields: [semesterId], references: [id])
+  university            University?            @relation(fields: [universityId], references: [id])
+  following             UserFollow[]           @relation("UserFollows")
+  followers             UserFollow[]           @relation("UserFollowers")
+  lectureActivities     UserLectureActivity[]
+  tasks                 UserTask[]
+}
+
+model UserLectureActivity {
+  id           String   @id @default(uuid())
+  userId       String
+  lectureId    String
+  source       String?
+  lastViewedAt DateTime @default(now())
+  isCompleted  Boolean  @default(false)
+  lecture      Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lectureId])
+  @@index([userId, lastViewedAt])
+  @@index([lectureId])
+}
+
+model DirectMessage {
+  id         String   @id @default(uuid())
+  body       String
+  read       Boolean  @default(false)
+  senderId   String
+  receiverId String
+  createdAt  DateTime @default(now())
+  receiver   User     @relation("DmReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User     @relation("DmSent", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([receiverId, read])
+  @@index([senderId, receiverId, createdAt])
+}
+
+model Forum {
+  id           String               @id @default(uuid())
+  name         String
+  type         ForumType
+  status       ForumStatus          @default(OPEN)
+  semesterId   String?
+  createdBy    String?
+  createdAt    DateTime             @default(now())
+  universityId String
+  semester     Semester?            @relation(fields: [semesterId], references: [id])
+  university   University           @relation(fields: [universityId], references: [id])
+  posts        Post[]
+  invites      PrivateForumInvite[]
+  members      PrivateForumMember[]
+
+  @@index([universityId, type, status])
+}
+
+model PrivateForumMember {
+  id      String @id @default(uuid())
+  forumId String
+  userId  String
+  forum   Forum  @relation(fields: [forumId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([forumId, userId])
+}
+
+model PrivateForumInvite {
+  id         String   @id @default(uuid())
+  forumId    String
+  senderId   String
+  receiverId String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  forum      Forum    @relation(fields: [forumId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("InviteReceiver", fields: [receiverId], references: [id])
+  sender     User     @relation("InviteSender", fields: [senderId], references: [id])
+
+  @@unique([forumId, receiverId])
+}
+
+model Post {
+  id                   String       @id @default(uuid())
+  content              String
+  imageUrl             String?
+  interactionsDisabled Boolean      @default(false)
+  authorId             String
+  forumId              String
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  expiresAt            DateTime?
+  isPinned             Boolean      @default(false)
+  isForumPost          Boolean      @default(true)
+  isChatMessage        Boolean      @default(false)
+  audience             PostAudience @default(UNIVERSITY)
+  universityId         String
+  comments             Comment[]
+  likes                Like[]
+  author               User         @relation(fields: [authorId], references: [id])
+  forum                Forum        @relation(fields: [forumId], references: [id])
+  university           University   @relation(fields: [universityId], references: [id])
+
+  @@index([universityId, createdAt])
+  @@index([forumId, createdAt])
+  @@index([audience, createdAt])
+}
+
+model Comment {
+  id           String        @id @default(uuid())
+  content      String
+  authorId     String
+  postId       String
+  parentId     String?
+  createdAt    DateTime      @default(now())
+  universityId String
+  author       User          @relation(fields: [authorId], references: [id])
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      Comment[]     @relation("CommentReplies")
+  post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  university   University    @relation(fields: [universityId], references: [id])
+  likes        CommentLike[]
+
+  @@index([universityId, createdAt])
+}
+
+model UserFollow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId, createdAt])
+  @@index([followerId, createdAt])
+}
+
+model Like {
+  id     String @id @default(uuid())
+  userId String
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, postId])
+}
+
+model CommentLike {
+  id        String  @id @default(uuid())
+  userId    String
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, commentId])
+}
+
+model Notification {
+  id        String       @id @default(uuid())
+  title     String
+  body      String
+  channel   NotifChannel @default(SYSTEM)
+  read      Boolean      @default(false)
+  userId    String
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id])
+}
+
+model NotificationMute {
+  id         String  @id @default(uuid())
+  muteAll    Boolean @default(false)
+  muteForum  Boolean @default(false)
+  mutePostId String?
+  userId     String  @unique
+  user       User    @relation(fields: [userId], references: [id])
+}
+
+model Rank {
+  id        String  @id
+  label     String
+  minPoints Int
+  badge     String?
+  users     User[]
+}
+
+model EngagementLog {
+  id        String   @id @default(uuid())
+  action    String
+  points    Int
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model AIUsageLog {
+  id     String @id @default(uuid())
+  type   String
+  userId String
+  date   String
+  count  Int    @default(1)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, type, date])
+}
+
+model AdBanner {
+  id           String      @id @default(uuid())
+  imageUrl     String
+  linkUrl      String?
+  active       Boolean     @default(true)
+  universityId String?
+  semesterId   String?
+  createdAt    DateTime    @default(now())
+  semester     Semester?   @relation(fields: [semesterId], references: [id])
+  university   University? @relation(fields: [universityId], references: [id])
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model DocumentTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  fileUrl   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserTask {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  time        String?  @db.VarChar(50)
+  completed   Boolean  @default(false)
+  date        DateTime @default(now())
+  lectureId   String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model SourceBook {
+  id               String            @id @default(uuid())
+  title            String
+  author           String?
+  fileUrl          String?
+  fullText         String?
+  analysisJson     Json?
+  facultyId        String
+  semesterId       String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  libraryResources LibraryResource[]
+  faculty          Faculty           @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+
+  @@index([facultyId])
+}
+
+model LibraryResource {
+  id           String          @id @default(uuid())
+  type         String
+  title        String
+  url          String?
+  payload      Json?
+  category     FacultyCategory
+  sourceBookId String?
+  originUniId  String?
+  sharedBy     String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  sourceBook   SourceBook?     @relation(fields: [sourceBookId], references: [id])
+
+  @@index([category])
+  @@index([sourceBookId])
+}
+
+model AllowedChannel {
+  id          String          @id @default(uuid())
+  youtubeId   String          @unique
+  name        String
+  handle      String?
+  thumbnail   String?
+  description String?
+  subscribers String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  follows     ChannelFollow[]
+}
+
+model ChannelFollow {
+  id        String         @id @default(uuid())
+  userId    String
+  channelId String
+  createdAt DateTime       @default(now())
+  channel   AllowedChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId])
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum ForumType {
+  GLOBAL
+  SEMESTER
+  PRIVATE
+}
+
+enum ForumStatus {
+  OPEN
+  CLOSED
+  READ_ONLY
+}
+
+enum PostAudience {
+  UNIVERSITY
+  FOLLOWERS
+}
+
+enum NotifChannel {
+  SYSTEM
+  FORUM
+  BROADCAST
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionStemLayout {
+  STANDARD
+  IMAGE_OVERLAY
+}
+
+enum PastPaperKind {
+  MODULE_QUESTION_BANK
+  ADMIN_AUTHORED_QUIZ
+}
+
+enum FacultyCategory {
+  HUMAN_MEDICINE
+  DENTAL_MEDICINE
+  PHARMACY
+  PHYSICAL_THERAPY
+  OTHER
+}

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/landing");
+  if (!session?.user?.id) redirect("/");
   await redirectIncompleteStudentToRegister(session);
   redirect("/dashboard-app");
 }

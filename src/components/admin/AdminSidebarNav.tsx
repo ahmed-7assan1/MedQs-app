@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BookOpen, HelpCircle, Layers, Zap,
   MessageSquare, Users, Settings, Megaphone, Video, Youtube,
-  FileText, GraduationCap, Copy, Library
+  FileText, GraduationCap, Copy, Library, ArrowRightLeft, Sparkles, Wand2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,10 @@ const NAV_GROUPS: {
       { href: "/admin/questions",    label: "Questions",    icon: HelpCircle },
       { href: "/admin/duplicates",   label: "Duplicates",   icon: Copy },
       { href: "/admin/quiz-creator", label: "Quiz Creator", icon: Layers },
+      { href: "/admin/quiz-manager", label: "Quiz Manager", icon: ArrowRightLeft },
+      { href: "/admin/pdf-tools",    label: "PDF Tools",    icon: FileText, badge: "NEW" },
       { href: "/admin/ai-tools",     label: "AI Tools",     icon: Zap, badge: "AI" },
+      { href: "/admin/creative-studio", label: "Creative Studio", icon: Wand2, badge: "NEW" },
     ],
   },
   {

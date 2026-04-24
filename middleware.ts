@@ -13,7 +13,7 @@ const API_PUBLIC_PREFIXES = [
 ];
 
 /** Logged-out users may open these (no account). Quiz list uses `/guest/past-papers`. */
-const GUEST_BROWSABLE = ["/landing", "/modules", "/leaderboard", "/forum", "/profile"];
+const GUEST_BROWSABLE = ["/", "/modules", "/leaderboard", "/forum", "/profile"];
 
 const AUTH_REQUIRED = ["/profile/edit", "/notifications", "/quiz", "/register"];
 
@@ -48,7 +48,7 @@ export default auth((req) => {
   }
 
   if (!isLoggedIn && pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/landing", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   if (!isLoggedIn) {
@@ -87,6 +87,11 @@ export default auth((req) => {
   const semesterId = (session!.user as { semesterId?: string | null }).semesterId;
   if (!semesterId && !isAdmin && !pathname.startsWith("/api") && pathname !== "/register") {
     return NextResponse.redirect(new URL("/register", req.url));
+  }
+
+  if (pathname.startsWith("/admin") && pathname.includes("_")) {
+    const fixedPath = pathname.replace(/_/g, "-");
+    return NextResponse.redirect(new URL(fixedPath, req.url));
   }
 
   if (pathname.startsWith("/admin") && !isAdmin) {

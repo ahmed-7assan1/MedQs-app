@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Listen to professional medical lectures and discussions on the go with the MedQs Audio Hub.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function PodcastsPage() {
   const records = await prisma.lectureRecord.findMany({
     orderBy: { createdAt: "desc" },

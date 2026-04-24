@@ -14,12 +14,25 @@ export async function GET(req: Request) {
 
   // If a specific year is requested (onboarding), allow it if authenticated.
   // Otherwise, fallback to the user's session scope.
+  let where: Record<string, unknown> | undefined = undefined;
+  if (academicYearId) {
+    where = { academicYearId };
+  } else if (!isSuperAdmin(scope.role)) {
+    if (scope.facultyId) {
+      // Scoped admin: only semesters from their faculty
+      where = {
+        academicYear: {
+          universityId: scope.universityId!,
+          facultyId: scope.facultyId,
+        },
+      };
+    } else {
+      where = { academicYear: { universityId: scope.universityId! } };
+    }
+  }
+
   const semesters = await prisma.semester.findMany({
-    where: academicYearId 
-      ? { academicYearId } 
-      : (isSuperAdmin(scope.role)
-        ? undefined
-        : { academicYear: { universityId: scope.universityId! } }),
+    where,
     orderBy: { name: "asc" },
   });
 

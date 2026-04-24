@@ -13,12 +13,29 @@ export async function GET() {
     return fail({ error: "Forbidden", status: 403 });
   }
 
-  const modules = await prisma.module.findMany({
-    where: isSuperAdmin(scope.role)
-      ? undefined
-      : {
-          semester: { academicYear: { universityId: scope.universityId! } },
+  // Build the where clause — ADMIN sees only their faculty's modules
+  let where: Record<string, unknown> | undefined = undefined;
+  if (!isSuperAdmin(scope.role)) {
+    if (scope.facultyId) {
+      // Scoped admin: filter by facultyId (through academicYear)
+      where = {
+        semester: {
+          academicYear: {
+            universityId: scope.universityId!,
+            facultyId: scope.facultyId,
+          },
         },
+      };
+    } else {
+      // Admin without facultyId: fallback to university-wide filter
+      where = {
+        semester: { academicYear: { universityId: scope.universityId! } },
+      };
+    }
+  }
+
+  const modules = await prisma.module.findMany({
+    where,
     orderBy: { name: "asc" },
     include: { semester: { select: { id: true, name: true } } },
   });

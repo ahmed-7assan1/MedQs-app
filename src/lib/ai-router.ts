@@ -17,6 +17,59 @@ export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
 const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 150_000;
 
+/** In-memory quota exhaustion tracker — key → timestamp of last 429 */
+const geminiQuotaExhaustedAt = new Map<string, number>();
+
+/** Mark a key as quota-exhausted now */
+function markKeyExhausted(key: string): void {
+  geminiQuotaExhaustedAt.set(key, Date.now());
+}
+
+/** True if the key is fresh (either never exhausted, or reset period has passed).
+ *  Gemini free-tier quotas reset at UTC midnight — we use 24h as a safe window. */
+function isKeyFresh(key: string): boolean {
+  const t = geminiQuotaExhaustedAt.get(key);
+  if (!t) return true;
+  const now = Date.now();
+  // Check if we've crossed a UTC midnight since exhaustion
+  const exhaustedDate = new Date(t);
+  const nowDate = new Date(now);
+  // Reset if it's been >= 24h OR if UTC day has changed
+  const dayChanged =
+    exhaustedDate.getUTCFullYear() !== nowDate.getUTCFullYear() ||
+    exhaustedDate.getUTCMonth() !== nowDate.getUTCMonth() ||
+    exhaustedDate.getUTCDate() !== nowDate.getUTCDate();
+  if (dayChanged || now - t > 24 * 60 * 60 * 1000) {
+    geminiQuotaExhaustedAt.delete(key);
+    return true;
+  }
+  return false;
+}
+
+/** Collect all configured Gemini keys (up to 10), filtering out exhausted ones first.
+ *  If all are exhausted, return them all so we can still attempt (they might have reset). */
+function getGeminiKeys(personalKey?: string): string[] {
+  const envKeys: string[] = [];
+  // Check GEMINI_API_KEY (no number suffix — backwards compat)
+  const base = process.env.GEMINI_API_KEY?.trim();
+  if (base) envKeys.push(base);
+  // GEMINI_API_KEY_2 through GEMINI_API_KEY_10
+  for (let i = 2; i <= 10; i++) {
+    const k = process.env[`GEMINI_API_KEY_${i}`]?.trim();
+    if (k) envKeys.push(k);
+  }
+
+  const allKeys: string[] = [];
+  if (personalKey?.trim()) allKeys.push(personalKey.trim());
+  allKeys.push(...envKeys);
+
+  if (allKeys.length === 0) return [];
+
+  // Prefer fresh keys; if all exhausted, return all (will try anyway)
+  const fresh = allKeys.filter((k) => isKeyFresh(k));
+  return fresh.length > 0 ? fresh : allKeys;
+}
+
 /** Thrown when no provider API keys are set (e.g. missing GEMINI_API_KEY on Vercel). */
 export class AIConfigurationError extends Error {
   constructor(message: string) {
@@ -70,36 +123,18 @@ async function callGemini(
   pdfs: ChatPdfPart[] = [],
   personalKey?: string
 ): Promise<ProviderResult> {
-  // No key needed check here — handled below in the dual-key loop
-  void personalKey; // used below
-
   const textPart = `${systemPrompt}\n\nStudent: ${message}`;
   const parts: Record<string, unknown>[] = [{ text: textPart }];
   for (const img of images) {
     if (!img.data || !img.mimeType) continue;
-    parts.push({
-      inline_data: {
-        mime_type: img.mimeType,
-        data: img.data,
-      },
-    });
+    parts.push({ inline_data: { mime_type: img.mimeType, data: img.data } });
   }
   for (const pdf of pdfs) {
     if (!pdf.data) continue;
-    parts.push({
-      inline_data: {
-        mime_type: "application/pdf",
-        data: pdf.data,
-      },
-    });
+    parts.push({ inline_data: { mime_type: "application/pdf", data: pdf.data } });
   }
 
-  const keys: string[] = [
-    personalKey?.trim(),
-    process.env.GEMINI_API_KEY?.trim(),
-    process.env.GEMINI_API_KEY_2?.trim(),
-  ].filter(Boolean) as string[];
-
+  const keys = getGeminiKeys(personalKey);
   if (keys.length === 0) throw new Error("No Gemini API keys configured");
 
   const body = JSON.stringify({ contents: [{ parts }] });
@@ -108,7 +143,7 @@ async function callGemini(
 
   for (let k = 0; k < keys.length; k++) {
     const key = keys[k]!;
-    const keyLabel = k === 0 ? "KEY_1" : "KEY_2";
+    const keyLabel = k === 0 && personalKey?.trim() === key ? "PERSONAL" : `KEY_${k + 1}`;
     let keyQuotaExhausted = false;
 
     for (let i = 0; i < chain.length; i++) {
@@ -131,13 +166,12 @@ async function callGemini(
         const isModelIssue = res.status === 404 || res.status === 503 || /not found|not supported|overloaded/i.test(apiMsg);
 
         if (isQuota) {
-          // Entire key quota is exhausted - break model loop and try next key
+          markKeyExhausted(key);
+          console.warn(`[AI Router] ${keyLabel} quota exhausted, trying next key...`);
           keyQuotaExhausted = true;
-          console.warn(`[AI Router] ${keyLabel} quota exhausted, switching to next key...`);
           break;
         }
         if (isModelIssue && i < chain.length - 1) continue;
-        // For other errors on last model, try next key if available
         if (k < keys.length - 1) { keyQuotaExhausted = true; break; }
         throw new Error(lastErr);
       }
@@ -151,7 +185,7 @@ async function callGemini(
       return { provider: `gemini:${model}:${keyLabel}`, text };
     }
 
-    if (!keyQuotaExhausted) break; // success already returned above
+    if (!keyQuotaExhausted) break;
   }
 
   throw new Error(lastErr);

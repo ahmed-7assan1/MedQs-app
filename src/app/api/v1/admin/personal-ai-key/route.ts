@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // GET: fetch current personal key (masked)
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+  const session = await auth();
+  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as any)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -26,8 +25,8 @@ export async function GET() {
 
 // POST: save or clear personal key
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+  const session = await auth();
+  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as any)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

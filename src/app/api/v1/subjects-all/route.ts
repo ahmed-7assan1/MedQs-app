@@ -10,12 +10,28 @@ export async function GET() {
   if (!scope) return fail({ error: "Unauthorized", status: 401 });
   if (!isSuperAdmin(scope.role) && !scope.universityId) return fail({ error: "Forbidden", status: 403 });
 
-  const subjects = await prisma.subject.findMany({
-    where: isSuperAdmin(scope.role)
-      ? undefined
-      : {
-          module: { semester: { academicYear: { universityId: scope.universityId! } } },
+  let where: Record<string, unknown> | undefined = undefined;
+  if (!isSuperAdmin(scope.role)) {
+    if (scope.facultyId) {
+      where = {
+        module: {
+          semester: {
+            academicYear: {
+              universityId: scope.universityId!,
+              facultyId: scope.facultyId,
+            },
+          },
         },
+      };
+    } else {
+      where = {
+        module: { semester: { academicYear: { universityId: scope.universityId! } } },
+      };
+    }
+  }
+
+  const subjects = await prisma.subject.findMany({
+    where,
     orderBy: { name: "asc" },
   });
   return ok({

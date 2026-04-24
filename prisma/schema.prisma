@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -18,6 +19,7 @@ model SiteConfig {
   enableAds           Boolean  @default(true)
   enableNotifs        Boolean  @default(true)
   enableLeaderboard   Boolean  @default(true)
+  enableCreativeStudio Boolean @default(false)
   updatedAt           DateTime @updatedAt
   fontArabic          String?
   fontSans            String?

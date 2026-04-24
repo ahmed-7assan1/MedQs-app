@@ -29,6 +29,7 @@ interface SiteConfig {
   pwaIconUrl: string;
   primaryColor: string; enableAI: boolean; enableForum: boolean;
   enableAds: boolean; enableNotifs: boolean; enableLeaderboard: boolean;
+  enableCreativeStudio: boolean;
   aiPreferredProvider: "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
   fontSans: string; fontArabic: string;
   facebookUrl?: string; twitterUrl?: string; youtubeUrl?: string;
@@ -39,6 +40,7 @@ interface SiteConfig {
 const DEFAULTS: SiteConfig = {
   siteName: "MedQs", logoUrl: "", logoUrlDark: "", faviconUrl: "", pwaIconUrl: "", primaryColor: "#0d9488",
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
+  enableCreativeStudio: false,
   aiPreferredProvider: "auto",
   fontSans: "Plus Jakarta Sans", fontArabic: "Tajawal",
   facebookUrl: "", twitterUrl: "", youtubeUrl: "",
@@ -284,12 +286,13 @@ export default function AdminSettingsPage() {
     { id: "export",   label: "Export & Notif", icon: Megaphone },
   ];
 
-  const toggles: { key: keyof SiteConfig; label: string; desc: string }[] = [
-    { key: "enableAI",          label: "AI Features",   desc: "Student explain button & admin AI tools" },
-    { key: "enableForum",       label: "Community",      desc: "Global and semester discussions" },
-    { key: "enableAds",         label: "Advertisements", desc: "Show ad banners to students" },
-    { key: "enableNotifs",      label: "Notifications",  desc: "In-app notifications" },
-    { key: "enableLeaderboard", label: "Leaderboard",    desc: "Student rankings and points" },
+  const toggles: { key: keyof SiteConfig; label: string; desc: string; superAdminOnly?: boolean }[] = [
+    { key: "enableAI",             label: "AI Features",      desc: "Student explain button & admin AI tools" },
+    { key: "enableForum",          label: "Community",         desc: "Global and semester discussions" },
+    { key: "enableAds",            label: "Advertisements",    desc: "Show ad banners to students" },
+    { key: "enableNotifs",         label: "Notifications",     desc: "In-app notifications" },
+    { key: "enableLeaderboard",    label: "Leaderboard",       desc: "Student rankings and points" },
+    { key: "enableCreativeStudio", label: "Creative Studio",   desc: "Allow all admins to access Pollinations.ai Creative Studio", superAdminOnly: true },
   ];
 
   if (loading) return (
@@ -520,18 +523,24 @@ export default function AdminSettingsPage() {
                     <span className="text-sm font-bold tracking-tight">Active Components</span>
                  </div>
                  <div className="grid gap-3">
-                    {toggles.map(({ key, label, desc }) => {
+                    {toggles.map(({ key, label, desc, superAdminOnly }) => {
                        const enabled = config[key] as boolean;
+                       const locked = superAdminOnly && !isSuperAdmin;
                        return (
-                          <div key={key} className="flex items-center justify-between rounded-xl border border-white/[0.02] bg-background/30 p-4 transition-all hover:bg-background/50">
+                          <div key={key} className={cn("flex items-center justify-between rounded-xl border border-white/[0.02] bg-background/30 p-4 transition-all", !locked && "hover:bg-background/50", locked && "opacity-50")}>
                              <div>
-                                <p className="text-sm font-bold">{label}</p>
+                                <div className="flex items-center gap-2">
+                                   <p className="text-sm font-bold">{label}</p>
+                                   {superAdminOnly && <span className="text-[9px] font-bold uppercase bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded border border-amber-500/20">Super Admin</span>}
+                                </div>
                                 <p className="text-[10px] text-muted-foreground/70">{desc}</p>
                              </div>
                              <button
-                                onClick={() => setConfig(c => ({ ...c, [key]: !enabled }))}
+                                disabled={locked}
+                                onClick={() => !locked && setConfig(c => ({ ...c, [key]: !enabled }))}
                                 className={cn(
                                    "relative flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                                   locked && "cursor-not-allowed",
                                    enabled ? "bg-emerald-600 shadow-sm shadow-emerald-500/30" : "bg-muted"
                                 )}
                              >

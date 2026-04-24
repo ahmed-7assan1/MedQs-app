@@ -43,7 +43,23 @@ const nextConfig = {
       { protocol: "https", hostname: "uploadthing.com" },
       { protocol: "https", hostname: "*.uploadthing.com" },
       { protocol: "https", hostname: "www.transparenttextures.com" },
+      { protocol: "https", hostname: "image.pollinations.ai" },
     ],
+  },
+
+  async redirects() {
+    return [
+      {
+        source: "/admin/pdf_tools",
+        destination: "/admin/pdf-tools",
+        permanent: true,
+      },
+      {
+        source: "/admin/creative_studio",
+        destination: "/admin/creative-studio",
+        permanent: true,
+      },
+    ];
   },
 
   // ── Experimental ─────────────────────────────────────────────────────────────

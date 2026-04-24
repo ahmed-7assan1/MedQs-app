@@ -12,35 +12,30 @@ import "../styles/globals.css";
 
 // Fetch site config server-side — cached per request by Next.js
 async function getSiteConfig() {
+  const fallback = {
+    siteName: "MedQs",
+    logoUrl: null,
+    pwaIconUrl: null,
+    faviconUrl: null,
+    primaryColor: "#0d9488",
+    enableAI: true,
+    enableForum: true,
+    enableAds: true,
+    enableNotifs: true,
+    fontSans: "Plus Jakarta Sans",
+    fontArabic: "Tajawal",
+  };
+
   try {
-    const config = await prisma.siteConfig.findFirst();
-    return config ?? {
-      siteName: "MedQs",
-      logoUrl: null,
-      pwaIconUrl: null,
-      faviconUrl: null,
-      primaryColor: "#0d9488",
-      enableAI: true,
-      enableForum: true,
-      enableAds: true,
-      enableNotifs: true,
-      fontSans: "Plus Jakarta Sans",
-      fontArabic: "Tajawal",
-    };
-  } catch {
-    return {
-      siteName: "MedQs",
-      logoUrl: null,
-      pwaIconUrl: null,
-      faviconUrl: null,
-      primaryColor: "#0d9488",
-      enableAI: true,
-      enableForum: true,
-      enableAds: true,
-      enableNotifs: true,
-      fontSans: "Plus Jakarta Sans",
-      fontArabic: "Tajawal",
-    };
+    // Add a timeout to prevent the entire app from hanging on Prisma/DB issues
+    const config = await Promise.race([
+      prisma.siteConfig.findFirst(),
+      new Promise<null>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000))
+    ]);
+    return config ?? fallback;
+  } catch (err) {
+    console.error("[Layout] SiteConfig fetch failed or timed out:", err);
+    return fallback;
   }
 }
 
