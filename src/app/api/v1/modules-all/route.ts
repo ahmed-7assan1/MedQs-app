@@ -43,5 +43,8 @@ export async function GET() {
     result: modules,
     tenantKey: scope.universityId,
     actor: { id: scope.userId, role: scope.role ?? "STUDENT" },
+    headers: {
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+    }
   });
 }

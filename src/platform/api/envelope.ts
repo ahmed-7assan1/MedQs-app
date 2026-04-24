@@ -22,6 +22,7 @@ export function ok<T>(args: {
   tenantKey?: string | null;
   actor?: ApiActor | null;
   status?: number;
+  headers?: Record<string, string>;
 }) {
   const body: ApiEnvelope<T> = {
     requestId: getRequestId(),
@@ -30,7 +31,10 @@ export function ok<T>(args: {
     result: args.result,
     errors: [],
   };
-  return NextResponse.json(body, { status: args.status ?? 200 });
+  return NextResponse.json(body, { 
+    status: args.status ?? 200,
+    headers: args.headers 
+  });
 }
 
 export function fail(args: {

@@ -90,7 +90,11 @@ export async function GET(req: NextRequest) {
        channelThumbnail: channelMetadata[v.videoId]?.thumbnail || null
     }));
 
-    return NextResponse.json(final);
+    return NextResponse.json(final, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
   } catch (error) {
     console.error("Curriculum Videos Error:", error);
     return NextResponse.json({ error: "Failed to fetch curriculum videos" }, { status: 500 });
