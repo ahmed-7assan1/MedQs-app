@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpenText, Clapperboard, HelpCircle, MessagesSquare, CircleUser, Clock } from "lucide-react";
+import { House, BookOpenText, Clapperboard, HelpCircle, MessageSquare, CircleUser, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
