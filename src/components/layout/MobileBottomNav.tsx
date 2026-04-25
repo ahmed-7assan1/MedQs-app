@@ -3,7 +3,7 @@
 import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpenText, MessageSquare, Clapperboard, Settings2, PlusCircle, LayoutDashboard, Compass, Sparkles, BookCheck } from "lucide-react";
+import { House, BookOpenText, MessageSquare, Clapperboard, Settings2, PlusCircle, LayoutDashboard, Compass, Sparkles, BookCheck, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS: {
@@ -25,10 +25,10 @@ const TABS: {
     match: (p) => p.startsWith("/modules"),
   },
   {
-    href: "/videos",
-    label: "Videos",
-    icon: Clapperboard,
-    match: (p) => p.startsWith("/videos"),
+    href: "/taskat",
+    label: "Tasks",
+    icon: Clock,
+    match: (p) => p.startsWith("/taskat"),
   },
   {
     href: "/quizzes",
