@@ -1,8 +1,14 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./App.{js,jsx,ts,tsx}", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'inter-regular': 'Inter_400Regular',
+        'inter-bold': 'Inter_700Bold',
+        'inter-black': 'Inter_900Black',
+        'outfit-regular': 'Outfit_400Regular',
+        'outfit-bold': 'Outfit_700Bold',
+        'outfit-black': 'Outfit_900Black',
+      },
+    },
   },
-  plugins: [],
 };

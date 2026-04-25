@@ -1,141 +1,306 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, SafeAreaView } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, Image, SafeAreaView,
+  RefreshControl, FlatList, Dimensions, ActivityIndicator, Alert, StatusBar
+} from 'react-native';
 import tw from 'twrnc';
+import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../store/useAuthStore';
-import { EliteTheme } from '../constants/Theme';
-import { EliteCard } from '../components/ui/EliteCard';
-import { 
-  Search, Bell, MapPin, ChevronRight, 
-  Stethoscope, Brain, Heart, Activity, 
-  Eye, Droplet 
+import { useThemeStore } from '../store/useThemeStore';
+import { mobileApi } from '../lib/api';
+import { Skeleton } from '../components/ui/Skeleton';
+import {
+  Bell, ChevronRight, Trophy, BookOpen,
+  PlayCircle, CheckCircle2, Circle, Clock,
+  ArrowUpRight, AlertCircle, LayoutDashboard, Brain
 } from 'lucide-react-native';
 
-import { Skeleton } from '../components/ui/Skeleton';
+const { width } = Dimensions.get('window');
 
-export function HomeScreen() {
+// ─── Sub-Components ──────────────────────────────────────────────────────────
+
+const SectionHeader = ({ title, onSeeAll }: { title: string; onSeeAll?: () => void }) => {
+  const { primaryColor } = useThemeStore();
+  return (
+    <View style={tw`flex-row justify-between items-center mb-4 px-6`}>
+      <Text style={tw`text-xl font-outfit-black text-white`}>{title}</Text>
+      {onSeeAll && (
+        <TouchableOpacity onPress={onSeeAll}>
+          <Text style={[tw`font-inter-bold text-sm`, { color: primaryColor }]}>See All</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+const StatItem = ({ label, value, icon: Icon, color }: any) => (
+  <View style={tw`w-[48%] bg-[#0D1117] border border-[#1E2D4D] rounded-3xl p-4 mb-4`}>
+    <View style={[tw`w-10 h-10 rounded-2xl items-center justify-center mb-3`, { backgroundColor: color + '20' }]}>
+      <Icon color={color} size={20} />
+    </View>
+    <Text style={tw`text-white text-lg font-inter-black`}>{value}</Text>
+    <Text style={tw`text-slate-500 text-xs font-inter-bold uppercase tracking-widest`}>{label}</Text>
+  </View>
+);
+
+// ─── Main HomeScreen ─────────────────────────────────────────────────────────
+
+export function HomeScreen({ navigation }: any) {
   const { user } = useAuthStore();
-  const [loading, setLoading] = React.useState(true);
+  const { primaryColor, primaryLight } = useThemeStore();
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [homeData, setHomeData] = useState<any>(null);
+
+  const fetchData = useCallback(async (isRefreshing = false) => {
+    if (!isRefreshing) setLoading(true);
+    setError(null);
+    try {
+      const data = await mobileApi.getHome();
+      setHomeData(data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to connect. Check your internet.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
-  const categories = [
-    { name: 'Anatomy', icon: Stethoscope, color: '#f8fafc', iconColor: '#3b82f6' },
-    { name: 'Physiology', icon: Heart, color: '#fef2f2', iconColor: '#ef4444' },
-    { name: 'Neurology', icon: Brain, color: '#f5f3ff', iconColor: '#8b5cf6' },
-    { name: 'Pathology', icon: Activity, color: '#ecfdf5', iconColor: '#10b981' },
-    { name: 'Surgery', icon: Droplet, color: '#fffbeb', iconColor: '#f59e0b' },
-    { name: 'More', icon: ChevronRight, color: '#f1f5f9', iconColor: '#64748b' },
-  ];
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData(true);
+  };
+
+  const handlePress = (target: string, params?: any) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate(target, params);
+  };
+
+  const toggleTask = async (taskId: string, completed: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      await mobileApi.toggleTask(taskId, !completed);
+      // Optimistic update
+      setHomeData((prev: any) => ({
+        ...prev,
+        todayTasks: prev.todayTasks.map((t: any) =>
+          t.id === taskId ? { ...t, completed: !completed } : t
+        )
+      }));
+    } catch (err) {
+      Alert.alert('Error', 'Failed to update task');
+    }
+  };
+
+  if (error && !homeData) {
+    return (
+      <SafeAreaView style={tw`flex-1 bg-[#07090F] justify-center items-center px-10`}>
+        <AlertCircle color="#ef4444" size={64} style={tw`mb-4`} />
+        <Text style={tw`text-white text-xl font-bold text-center mb-2`}>Connection Error</Text>
+        <Text style={tw`text-slate-400 text-center mb-8`}>{error}</Text>
+        <TouchableOpacity
+          onPress={() => fetchData()}
+          style={[tw`px-10 py-4 rounded-2xl`, { backgroundColor: primaryColor }]}
+        >
+          <Text style={tw`text-white font-black`}>Try Again</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-white`}>
-      <ScrollView contentContainerStyle={tw`pb-32 px-6 pt-10`}>
-        {/* Header Section */}
-        <View style={tw`flex-row justify-between items-center mb-6`}>
+    <SafeAreaView style={tw`flex-1 bg-[#07090F]`}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={tw`pb-32 pt-6`}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+        }
+      >
+        {/* ── Header ── */}
+        <View style={tw`flex-row justify-between items-center mb-8 px-6`}>
           <View>
-             <Text style={tw`text-slate-900 text-2xl font-bold`}>Hello, {user?.name?.split(' ')[0] || 'Doctor'}</Text>
-             <View style={tw`flex-row items-center mt-1`}>
-                <MapPin color={EliteTheme.colors.primary} size={14} />
-                <Text style={tw`text-slate-400 text-xs ml-1 font-medium`}>{user?.university?.name || 'MedQs Platform'}</Text>
-             </View>
+            <Text style={tw`text-slate-400 text-sm font-inter-bold uppercase tracking-widest mb-1`}>Welcome back</Text>
+            <Text style={tw`text-white text-2xl font-outfit-black`}>
+              Hi, {homeData?.user?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Doctor'} 👋
+            </Text>
           </View>
-          <View style={tw`flex-row space-x-3 items-center`}>
-            <TouchableOpacity style={tw`p-2 bg-slate-50 rounded-full border border-slate-100`}>
-              <Bell color={EliteTheme.colors.text} size={20} />
-            </TouchableOpacity>
-            <View style={tw`w-10 h-10 rounded-full bg-slate-200 border-2 border-slate-50 overflow-hidden`}>
-               <Image 
-                 source={{ uri: user?.image || 'https://ui-avatars.com/api/?name=' + (user?.name || 'Doctor') }} 
-                 style={tw`w-full h-full`}
-               />
-            </View>
-          </View>
-        </View>
-
-        {/* Search Bar */}
-        <View style={tw`flex-row items-center bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3.5 mb-8`}>
-           <Search color="#94a3b8" size={20} style={tw`mr-3`} />
-           <TextInput 
-             placeholder="Search for subjects or MCQs"
-             placeholderTextColor="#94a3b8"
-             style={tw`flex-1 text-slate-900 font-medium`}
-           />
-        </View>
-
-        {/* Category Grid */}
-        {loading ? (
-          <View style={tw`flex-row flex-wrap justify-between mb-8`}>
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <View key={i} style={tw`w-[30%] items-center mb-6`}>
-                 <Skeleton width={64} height={64} borderRadius={24} style={tw`mb-2`} />
-                 <Skeleton width={40} height={12} />
+          <TouchableOpacity
+            onPress={() => handlePress('Notifications')}
+            style={tw`p-3 bg-[#0D1117] rounded-2xl border border-[#1E2D4D] relative`}
+          >
+            <Bell color="white" size={24} />
+            {homeData?.unreadNotifs > 0 && (
+              <View style={tw`absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full items-center justify-center border-2 border-[#07090F]`}>
+                <Text style={tw`text-white text-[10px] font-bold`}>{homeData.unreadNotifs}</Text>
               </View>
-            ))}
-          </View>
-        ) : (
-          <View style={tw`flex-row flex-wrap justify-between mb-8`}>
-            {categories.map((cat, idx) => (
-              <TouchableOpacity key={idx} style={tw`w-[30%] items-center mb-6`}>
-                 <View style={[tw`w-16 h-16 rounded-3xl items-center justify-center mb-2`, { backgroundColor: cat.color }]}>
-                    <cat.icon color={cat.iconColor} size={26} />
-                 </View>
-                 <Text style={tw`text-slate-600 text-xs font-bold`}>{cat.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Hero Card */}
-        {loading ? (
-          <Skeleton height={100} borderRadius={32} style={tw`mb-8`} />
-        ) : (
-          <EliteCard style={tw`bg-[#10b981] p-0 overflow-hidden mb-8 shadow-lg shadow-emerald-200`}>
-            <View style={tw`flex-row p-5`}>
-               <View style={tw`bg-white/20 p-3 rounded-2xl items-center justify-center mr-4 w-16 h-20`}>
-                 <Text style={tw`text-white font-bold text-xs uppercase`}>Mon</Text>
-                 <Text style={tw`text-white font-bold text-2xl`}>21</Text>
-                 <Text style={tw`text-white font-bold text-xs`}>Jan</Text>
-               </View>
-               <View style={tw`flex-1 justify-center`}>
-                  <Text style={tw`text-white/80 text-xs font-bold uppercase tracking-widest`}>Next Session</Text>
-                  <Text style={tw`text-white text-xl font-bold`}>Clinical Cardiology</Text>
-                  <Text style={tw`text-white/70 text-xs mt-1 font-medium`}>Specialized Lecture • 12:15 PM</Text>
-               </View>
-            </View>
-          </EliteCard>
-        )}
-
-        {/* List Section: Recommended */}
-        <View style={tw`flex-row justify-between items-center mb-4`}>
-           <Text style={tw`text-xl font-bold text-slate-900`}>Recommended</Text>
-           <TouchableOpacity>
-              <Text style={[tw`font-bold text-sm`, { color: EliteTheme.colors.primary }]}>See All</Text>
-           </TouchableOpacity>
+            )}
+          </TouchableOpacity>
         </View>
 
-        <EliteCard style={tw`flex-row items-center p-4`}>
-          <Image 
-            source={{ uri: 'https://ui-avatars.com/api/?name=Dr+Ahmed&background=3b82f6&color=fff' }}
-            style={tw`w-14 h-14 rounded-2xl mr-4`}
-          />
-          <View style={tw`flex-1`}>
-             <Text style={tw`text-slate-900 font-bold text-lg`}>Dr. Ahmed Hassan</Text>
-             <Text style={tw`text-slate-400 text-xs font-medium`}>Cardiologist • Professor</Text>
-             <View style={tw`flex-row items-center mt-2`}>
-                <View style={tw`bg-emerald-50 px-2 py-0.5 rounded-full`}>
-                   <Text style={tw`text-emerald-600 text-[10px] font-bold`}>Verified</Text>
-                </View>
-                <Text style={tw`text-slate-300 mx-2`}>•</Text>
-                <Text style={tw`text-slate-500 text-[10px] font-bold`}>1,2k reviews</Text>
-             </View>
+        {/* ── Ads Carousel ── */}
+        {loading ? (
+          <View style={tw`px-6 mb-8`}>
+            <Skeleton height={160} borderRadius={24} />
           </View>
-          <TouchableOpacity style={tw`p-2`}>
-             <ChevronRight color="#cbd5e1" size={24} />
-          </TouchableOpacity>
-        </EliteCard>
+        ) : homeData?.adBanners?.length > 0 && (
+          <FlatList
+            data={homeData.adBanners}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => item.linkUrl && Alert.alert('External Link', item.linkUrl)}
+                style={[tw`px-6`, { width }]}
+              >
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={[tw`w-full h-40 rounded-3xl`, { backgroundColor: '#0D1117' }]}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            )}
+            style={tw`mb-8`}
+          />
+        )}
+
+        {/* ── Stats Grid ── */}
+        <View style={tw`flex-row flex-wrap justify-between px-6 mb-4`}>
+          {loading ? (
+            [1, 2, 3, 4].map(i => <View key={i} style={tw`w-[48%] mb-4`}><Skeleton height={100} borderRadius={24} /></View>)
+          ) : (
+            <>
+              <StatItem label="Points" value={homeData?.stats?.points || 0} icon={Trophy} color="#fbbf24" />
+              <StatItem label="Global Rank" value={`#${homeData?.stats?.rank?.label || 'N/A'}`} icon={ArrowUpRight} color={primaryLight} />
+              <StatItem label="Total Quizzes" value={homeData?.stats?.totalAttempts || 0} icon={BookOpen} color="#6366f1" />
+              <StatItem label="Avg. Score" value={`${homeData?.stats?.avgScore || 0}%`} icon={CheckCircle2} color="#10b981" />
+            </>
+          )}
+        </View>
+
+        {/* ── Continue Learning ── */}
+        <SectionHeader title="Continue Learning" onSeeAll={() => handlePress('Lectures')} />
+        <View style={tw`px-6 mb-8`}>
+          {loading ? (
+            <Skeleton height={80} borderRadius={24} />
+          ) : homeData?.recentActivity?.length > 0 ? (
+            homeData.recentActivity.slice(0, 3).map((act: any) => (
+              <TouchableOpacity
+                key={act.id}
+                onPress={() => handlePress('LectureDetail', { lectureId: act.lecture.id })}
+                style={tw`flex-row items-center bg-[#0D1117] p-4 rounded-3xl mb-3 border border-[#1E2D4D]`}
+              >
+                <View style={tw`w-12 h-12 rounded-xl bg-teal-500/10 items-center justify-center mr-4`}>
+                  <PlayCircle color="#2dd4bf" size={24} />
+                </View>
+                <View style={tw`flex-1`}>
+                  <Text style={tw`text-white font-bold text-base`} numberOfLines={1}>{act.lecture.title}</Text>
+                  <Text style={tw`text-slate-500 text-xs`}>{act.lecture.subject.name}</Text>
+                </View>
+                <ChevronRight color="#3B4A6B" size={20} />
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={tw`bg-[#0D1117] p-8 rounded-3xl items-center border border-dashed border-[#1E2D4D]`}>
+              <Brain color="#3B4A6B" size={32} style={tw`mb-2`} />
+              <Text style={tw`text-slate-400 font-bold`}>No activity yet. Start a lecture!</Text>
+            </View>
+          )}
+        </View>
+
+        {/* ── Recommended Quizzes ── */}
+        <SectionHeader title="Recommended Quiz" onSeeAll={() => handlePress('Quizzes')} />
+        <View style={tw`px-6 mb-8`}>
+          {loading ? (
+            <Skeleton height={120} borderRadius={24} />
+          ) : homeData?.suggestedPapers?.length > 0 ? (
+            <FlatList
+              data={homeData.suggestedPapers}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handlePress('QuizPlayer', { pastPaperId: item.id })}
+                  style={tw`bg-[#0D1117] p-5 rounded-3xl mr-4 border border-[#1E2D4D] w-64`}
+                >
+                  <View style={tw`bg-indigo-500/10 self-start px-3 py-1 rounded-full mb-3`}>
+                    <Text style={tw`text-indigo-400 text-[10px] font-black uppercase`}>{item.module.name}</Text>
+                  </View>
+                  <Text style={tw`text-white font-black text-lg mb-4`} numberOfLines={2}>{item.title}</Text>
+                  <View style={tw`flex-row items-center justify-between mt-auto`}>
+                    <View style={tw`flex-row items-center`}>
+                      <Clock color="#3B4A6B" size={12} style={tw`mr-1`} />
+                      <Text style={tw`text-slate-500 text-xs`}>20-30 mins</Text>
+                    </View>
+                    <Text style={[tw`font-bold text-xs`, { color: primaryLight }]}>Start Now →</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          ) : (
+            <Text style={tw`text-slate-500 italic`}>No quizzes found for your semester.</Text>
+          )}
+        </View>
+
+        {/* ── Today's Tasks ── */}
+        <SectionHeader title="Today's Tasks" onSeeAll={() => handlePress('Taskat')} />
+        <View style={tw`px-6 mb-8`}>
+          {loading ? (
+            <Skeleton height={60} borderRadius={24} />
+          ) : homeData?.todayTasks?.length > 0 ? (
+            homeData.todayTasks.map((task: any) => (
+              <TouchableOpacity
+                key={task.id}
+                onPress={() => toggleTask(task.id, task.completed)}
+                style={[tw`flex-row items-center bg-[#0D1117] p-4 rounded-2xl mb-2 border`, { borderColor: task.completed ? primaryColor + '40' : '#1E2D4D' }]}
+              >
+                {task.completed ? <CheckCircle2 color={primaryColor} size={22} /> : <Circle color="#3B4A6B" size={22} />}
+                <View style={tw`flex-1 ml-4`}>
+                  <Text style={[tw`text-white font-bold`, task.completed && tw`text-slate-500 line-through`]}>{task.title}</Text>
+                  {task.time && <Text style={tw`text-slate-500 text-xs`}>{task.time}</Text>}
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <TouchableOpacity onPress={() => handlePress('Taskat')} style={tw`bg-[#0D1117] p-5 rounded-2xl border border-dashed border-[#1E2D4D] items-center`}>
+              <Text style={tw`text-slate-400 font-bold`}>+ Add your first task</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* ── Mini Leaderboard ── */}
+        <SectionHeader title="Top Performers" onSeeAll={() => handlePress('Leaderboard')} />
+        <View style={tw`px-6 mb-10`}>
+          <View style={tw`bg-[#0D1117] rounded-[32px] p-6 border border-[#1E2D4D]`}>
+            {loading ? (
+              [1, 2, 3].map(i => <Skeleton key={i} mb={4} height={50} />)
+            ) : homeData?.topUsers?.length > 0 ? (
+              homeData.topUsers.map((u: any, idx: number) => (
+                <View key={u.id} style={[tw`flex-row items-center mb-4`, idx === 2 && tw`mb-0`]}>
+                  <Text style={tw`text-slate-500 font-black mr-4 w-4`}>{idx + 1}</Text>
+                  <Image source={{ uri: u.image || `https://ui-avatars.com/api/?name=${u.name}&background=0D1117&color=fff` }} style={tw`w-10 h-10 rounded-full bg-slate-800 mr-4`} />
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-white font-bold`}>{u.name}</Text>
+                    <Text style={tw`text-slate-500 text-[10px] uppercase font-bold`}>{u.rank?.label || 'Student'}</Text>
+                  </View>
+                  <Text style={[tw`font-black`, { color: primaryLight }]}>{u.points} pts</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={tw`text-slate-500 text-center`}>No rankings yet.</Text>
+            )}
+          </View>
+        </View>
 
       </ScrollView>
     </SafeAreaView>

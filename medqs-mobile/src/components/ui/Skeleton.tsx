@@ -6,10 +6,11 @@ interface SkeletonProps {
   width?: number | string;
   height?: number | string;
   borderRadius?: number;
+  mb?: number;
   style?: ViewStyle;
 }
 
-export function Skeleton({ width = '100%', height = 20, borderRadius = 8, style }: SkeletonProps) {
+export function Skeleton({ width = '100%', height = 20, borderRadius = 8, mb = 0, style }: SkeletonProps) {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -27,11 +28,11 @@ export function Skeleton({ width = '100%', height = 20, borderRadius = 8, style 
         }),
       ])
     ).start();
-  }, []);
+  }, [animatedValue]);
 
   const opacity = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.3, 0.7],
+    outputRange: [0.1, 0.3],
   });
 
   return (
@@ -41,8 +42,9 @@ export function Skeleton({ width = '100%', height = 20, borderRadius = 8, style 
           width: width as any,
           height: height as any,
           borderRadius,
-          backgroundColor: '#e2e8f0',
+          backgroundColor: '#1E2D4D',
           opacity,
+          marginBottom: mb * 4,
         },
         style,
       ]}

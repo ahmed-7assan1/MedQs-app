@@ -107,14 +107,14 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
         </div>
 
         {/* 3. Content Area */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout" initial={false}>
           {activeTab === "daily" ? (
             <motion.div
               key="daily"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
             >
               <DailyFocus 
                 userId={userId}
@@ -128,10 +128,10 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
           ) : (
             <motion.div
               key="checklist"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
             >
               <CurriculumChecklist modules={initialCurriculum} subjects={initialSubjects} />
             </motion.div>

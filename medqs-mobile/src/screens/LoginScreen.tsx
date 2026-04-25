@@ -1,117 +1,148 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView, Image } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity,
+  SafeAreaView, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
+} from 'react-native';
 import tw from 'twrnc';
 import { useAuthStore } from '../store/useAuthStore';
-import { EliteTheme } from '../constants/Theme';
-import { EliteCard } from '../components/ui/EliteCard';
-import { Mail, Lock, LogIn, Sparkles } from 'lucide-react-native';
+import { useThemeStore } from '../store/useThemeStore';
+import { mobileApi } from '../lib/api';
+import { storage } from '../lib/storage';
+import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react-native';
 
-import { config } from '../constants/Config';
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000';
 
 export function LoginScreen({ navigation }: any) {
+  const { login } = useAuthStore();
+  const { primaryColor, loadConfig } = useThemeStore();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const login = useAuthStore(state => state.login);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleLogin() {
-    if (!email || !password) {
-      setError('Please fill in all fields');
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter your email and password');
       return;
     }
+    setError(null);
     setLoading(true);
-    setError('');
+
     try {
-      const res = await fetch(`${config.API_BASE}/mobile/login`, {
+      // Use NextAuth credentials endpoint
+      const res = await fetch(`${API_BASE}/api/auth/callback/credentials`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email: email.trim().toLowerCase(), password, redirect: 'false', callbackUrl: '/' }),
+        credentials: 'include',
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login failed');
-      
-      await login(data.user, data.token);
+
+      // After credentials login, fetch user data from our mobile API
+      const statsRes = await mobileApi.getUserStats();
+      if (!statsRes?.user) throw new Error('Login failed');
+
+      // Save session cookie for subsequent requests
+      const cookieHeader = res.headers.get('set-cookie');
+      if (cookieHeader) {
+        const match = cookieHeader.match(/authjs\.session-token=([^;]+)/);
+        if (match) await storage.setItem('sessionToken', match[1]);
+      }
+
+      await login(statsRes.user);
+      // Load site config with user's university
+      await loadConfig(statsRes.user.universityId);
+
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-white`}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={tw`flex-1 p-6 justify-center`}
-      >
-        <View style={tw`items-center mb-12`}>
-           <View style={tw`w-20 h-20 bg-blue-600 rounded-[28px] items-center justify-center shadow-lg shadow-blue-200 mb-6`}>
-              <Sparkles color="white" size={40} />
-           </View>
-           <Text style={tw`text-4xl font-extrabold text-slate-900 tracking-tight`}>MedOneX</Text>
-           <Text style={tw`text-slate-400 mt-2 font-medium`}>Professional Medical Education</Text>
-        </View>
+    <SafeAreaView style={tw`flex-1 bg-[#07090F]`}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={tw`flex-1`}>
+        <ScrollView contentContainerStyle={tw`flex-grow justify-center px-6 py-10`} keyboardShouldPersistTaps="handled">
 
-        <EliteCard variant="elevated" style={tw`p-6`}>
-          <Text style={tw`text-xl font-bold text-slate-900 mb-6`}>Welcome Back</Text>
-          
-          {error ? (
-            <View style={tw`bg-red-50 p-3 rounded-xl mb-4 border border-red-100`}>
-               <Text style={tw`text-red-600 text-xs font-bold text-center`}>{error}</Text>
+          {/* Header */}
+          <View style={tw`items-center mb-12`}>
+            <View style={[tw`w-20 h-20 rounded-[32px] items-center justify-center mb-5`, { backgroundColor: primaryColor + '20', borderWidth: 1, borderColor: primaryColor + '40' }]}>
+              <Lock color={primaryColor} size={36} />
             </View>
-          ) : null}
-
-          <View style={tw`gap-4`}>
-             <View>
-                <Text style={tw`text-slate-500 font-bold mb-2 text-xs uppercase`}>Email Address</Text>
-                <View style={tw`flex-row items-center bg-slate-50 rounded-2xl px-4 py-3 border border-slate-100`}>
-                  <Mail color={EliteTheme.colors.textMuted} size={18} style={tw`mr-3`} />
-                  <TextInput 
-                    placeholder="email@example.com"
-                    placeholderTextColor="#94a3af"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={email}
-                    onChangeText={setEmail}
-                    style={tw`flex-1 text-slate-900 font-medium`}
-                  />
-                </View>
-             </View>
-
-             <View>
-                <Text style={tw`text-slate-500 font-bold mb-2 text-xs uppercase`}>Password</Text>
-                <View style={tw`flex-row items-center bg-slate-50 rounded-2xl px-4 py-3 border border-slate-100`}>
-                  <Lock color={EliteTheme.colors.textMuted} size={18} style={tw`mr-3`} />
-                  <TextInput 
-                    placeholder="••••••••"
-                    placeholderTextColor="#94a3af"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                    style={tw`flex-1 text-slate-900 font-medium`}
-                  />
-                </View>
-             </View>
-
-             <TouchableOpacity 
-               style={[tw`p-5 rounded-3xl mt-4 items-center justify-center flex-row shadow-lg`, { backgroundColor: EliteTheme.colors.primary }]}
-               onPress={handleLogin}
-               disabled={loading}
-             >
-               {loading ? <ActivityIndicator color="white" style={tw`mr-2`} /> : <LogIn color="white" size={20} style={tw`mr-2`} />}
-               <Text style={tw`text-white font-bold text-lg`}>Sign In</Text>
-             </TouchableOpacity>
+            <Text style={tw`text-white text-3xl font-black`}>Welcome Back 👋</Text>
+            <Text style={tw`text-slate-400 mt-2 text-base`}>Login to continue your journey</Text>
           </View>
-        </EliteCard>
 
-        <View style={tw`flex-row justify-center mt-10`}>
-          <Text style={tw`text-slate-400 font-medium`}>New to MedOneX? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={[tw`font-bold`, { color: EliteTheme.colors.primary }]}>Create Account</Text>
+          {/* Error */}
+          {error && (
+            <View style={tw`flex-row items-center bg-red-500/10 border border-red-500/30 rounded-2xl px-4 py-3 mb-6`}>
+              <AlertCircle color="#f87171" size={18} style={tw`mr-2`} />
+              <Text style={tw`text-red-400 font-bold flex-1`}>{error}</Text>
+            </View>
+          )}
+
+          {/* Email */}
+          <View style={tw`mb-4`}>
+            <Text style={tw`text-slate-400 text-sm font-bold mb-2 uppercase tracking-widest`}>Email</Text>
+            <View style={tw`flex-row items-center bg-[#0D1117] border border-[#1E2D4D] rounded-2xl px-4`}>
+              <Mail color="#3B4A6B" size={18} style={tw`mr-3`} />
+              <TextInput
+                value={email}
+                onChangeText={(t) => { setEmail(t); setError(null); }}
+                placeholder="your@email.com"
+                placeholderTextColor="#3B4A6B"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={tw`flex-1 py-4 text-white text-base`}
+                accessibilityLabel="Email input"
+              />
+            </View>
+          </View>
+
+          {/* Password */}
+          <View style={tw`mb-8`}>
+            <Text style={tw`text-slate-400 text-sm font-bold mb-2 uppercase tracking-widest`}>Password</Text>
+            <View style={tw`flex-row items-center bg-[#0D1117] border border-[#1E2D4D] rounded-2xl px-4`}>
+              <Lock color="#3B4A6B" size={18} style={tw`mr-3`} />
+              <TextInput
+                value={password}
+                onChangeText={(t) => { setPassword(t); setError(null); }}
+                placeholder="••••••••"
+                placeholderTextColor="#3B4A6B"
+                secureTextEntry={!showPw}
+                style={tw`flex-1 py-4 text-white text-base`}
+                accessibilityLabel="Password input"
+              />
+              <TouchableOpacity onPress={() => setShowPw(!showPw)} accessibilityLabel={showPw ? 'Hide password' : 'Show password'}>
+                {showPw ? <EyeOff color="#3B4A6B" size={18} /> : <Eye color="#3B4A6B" size={18} />}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Login Button */}
+          <TouchableOpacity
+            onPress={handleLogin}
+            disabled={loading}
+            style={[tw`py-4 rounded-2xl items-center mb-5`, { backgroundColor: loading ? primaryColor + '80' : primaryColor }]}
+            accessibilityLabel="Login button"
+          >
+            {loading
+              ? <ActivityIndicator color="white" />
+              : <Text style={tw`text-white font-black text-lg`}>Login</Text>
+            }
           </TouchableOpacity>
-        </View>
 
+          {/* Register */}
+          <TouchableOpacity onPress={() => navigation.navigate('Register')} style={tw`items-center`} accessibilityLabel="Create new account">
+            <Text style={tw`text-slate-400`}>
+              Don't have an account?{' '}
+              <Text style={[tw`font-black`, { color: primaryColor }]}>Register now</Text>
+            </Text>
+          </TouchableOpacity>
+
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

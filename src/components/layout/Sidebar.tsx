@@ -352,7 +352,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
           {/* Panel */}
           <div
             className="absolute right-0 top-0 bottom-0 w-72 max-w-[90vw] flex flex-col bg-card border-l border-white/[0.02] shadow-2xl"
-            style={{ animation: "slideInFromRight 280ms cubic-bezier(0.16,1,0.3,1)" }}
+            style={{ animation: "slideInFromRight 200ms cubic-bezier(0.16,1,0.3,1)" }}
           >
             {/* Panel header */}
             <div className="flex h-14 items-center justify-between px-5">

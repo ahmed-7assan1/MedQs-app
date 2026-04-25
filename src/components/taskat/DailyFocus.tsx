@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { 
   Plus, 
   Trash2, 
@@ -58,6 +58,20 @@ export function DailyFocus({
     onProgressUpdate((completed / tasks.length) * 100);
   }, [tasks, onProgressUpdate]);
 
+  // Flatten all lectures for selection - memoized for performance
+  const allLectures = useMemo(() => {
+    const list: any[] = [];
+    initialCurriculum.forEach(m => {
+      m.subjects.forEach((s: any) => {
+        s.lectures.forEach((l: any) => list.push(l));
+      });
+    });
+    initialSubjects.forEach(s => {
+      s.lectures.forEach((l: any) => list.push(l));
+    });
+    return list;
+  }, [initialCurriculum, initialSubjects]);
+
   const handleAddTask = async () => {
     if (taskType === "general" && !newTitle.trim()) return;
     if (taskType === "lecture" && !selectedLectureId) return;
@@ -100,17 +114,6 @@ export function DailyFocus({
       }
     }
   };
-
-  // Flatten all lectures for selection
-  const allLectures: any[] = [];
-  initialCurriculum.forEach(m => {
-    m.subjects.forEach((s: any) => {
-      s.lectures.forEach((l: any) => allLectures.push(l));
-    });
-  });
-  initialSubjects.forEach(s => {
-    s.lectures.forEach((l: any) => allLectures.push(l));
-  });
 
   return (
     <div className="space-y-8">
@@ -247,63 +250,16 @@ export function DailyFocus({
 
       {/* Tasks List */}
       <div className="grid gap-4">
-        {tasks.map((task) => (
-          <motion.div
-            layout
-            key={task.id}
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            className={cn(
-               "group relative flex items-center gap-6 rounded-[2rem] border p-6 transition-all duration-300 shadow-sm",
-               task.completed 
-                ? "border-slate-100 dark:border-white/[0.02] bg-slate-50/50 dark:bg-white/[0.02]" 
-                : "border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-white/[0.06] hover:shadow-xl hover:border-sky-500/30 dark:hover:border-white/[0.02]"
-            )}
-          >
-            <button
-              onClick={() => handleToggleTask(task.id)}
-              className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all"
-            >
-              {task.completed ? (
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/40">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-              ) : (
-                <div className="h-8 w-8 rounded-xl border-2 border-slate-200 dark:border-white/[0.02] bg-white/50 dark:bg-black/20 hover:border-sky-500 transition-colors" />
-              )}
-            </button>
-
-            <div className="flex-1 min-w-0">
-              <h4 className={cn(
-                "text-lg font-black transition-all truncate",
-                task.completed ? "dark:text-white/20 text-slate-300 line-through" : "dark:text-white text-slate-900"
-              )}>
-                {task.title}
-              </h4>
-              <div className="flex items-center gap-4 mt-2">
-                {task.time && (
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-sky-600/70 dark:text-sky-400/70">
-                    <Clock className="h-3.5 w-3.5" />
-                    {task.time}
-                  </div>
-                )}
-                {task.lectureId && (
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-600/70 dark:text-indigo-400/70">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    Academic Goal
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={() => deleteTask(task.id)}
-              className="opacity-0 group-hover:opacity-100 p-3 rounded-2xl dark:text-white/20 text-slate-300 hover:text-red-500 hover:bg-red-500/10 transition-all"
-            >
-              <Trash2 className="h-5 w-5" />
-            </button>
-          </motion.div>
-        ))}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {tasks.map((task) => (
+            <TaskItem 
+              key={task.id} 
+              task={task} 
+              onToggle={handleToggleTask} 
+              onDelete={deleteTask} 
+            />
+          ))}
+        </AnimatePresence>
 
         {!loading && tasks.length === 0 && !isAdding && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -326,5 +282,68 @@ export function DailyFocus({
     </div>
   );
 }
+
+const TaskItem = memo(({ task, onToggle, onDelete }: any) => {
+  return (
+    <motion.div
+      layout="position"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      className={cn(
+          "group relative flex items-center gap-6 rounded-[2rem] border p-6 transition-all duration-300 shadow-sm",
+          task.completed 
+          ? "border-slate-100 dark:border-white/[0.02] bg-slate-50/50 dark:bg-white/[0.02]" 
+          : "border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-white/[0.06] hover:shadow-xl hover:border-sky-500/30 dark:hover:border-white/[0.02]"
+      )}
+    >
+      <button
+        onClick={() => onToggle(task.id)}
+        className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all"
+      >
+        {task.completed ? (
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/40">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+        ) : (
+          <div className="h-8 w-8 rounded-xl border-2 border-slate-200 dark:border-white/[0.02] bg-white/50 dark:bg-black/20 hover:border-sky-500 transition-colors" />
+        )}
+      </button>
+
+      <div className="flex-1 min-w-0">
+        <h4 className={cn(
+          "text-lg font-black transition-all truncate",
+          task.completed ? "dark:text-white/20 text-slate-300 line-through" : "dark:text-white text-slate-900"
+        )}>
+          {task.title}
+        </h4>
+        <div className="flex items-center gap-4 mt-2">
+          {task.time && (
+            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-sky-600/70 dark:text-sky-400/70">
+              <Clock className="h-3.5 w-3.5" />
+              {task.time}
+            </div>
+          )}
+          {task.lectureId && (
+            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-600/70 dark:text-indigo-400/70">
+              <BookOpen className="h-3.5 w-3.5" />
+              Academic Goal
+            </div>
+          )}
+        </div>
+      </div>
+
+      <button
+        onClick={() => onDelete(task.id)}
+        className="opacity-0 group-hover:opacity-100 p-3 rounded-2xl dark:text-white/20 text-slate-300 hover:text-red-500 hover:bg-red-500/10 transition-all"
+      >
+        <Trash2 className="h-5 w-5" />
+      </button>
+    </motion.div>
+  );
+});
+
+TaskItem.displayName = "TaskItem";
 
 

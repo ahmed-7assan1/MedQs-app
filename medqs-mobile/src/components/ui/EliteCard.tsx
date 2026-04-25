@@ -14,22 +14,26 @@ export function EliteCard({ children, style, variant = 'default', noPadding = fa
   const getVariantStyles = () => {
     switch (variant) {
       case 'elevated':
-        return EliteTheme.shadows.medium;
+        return EliteTheme.shadows.glow;
       case 'glass':
         return {
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backgroundColor: 'rgba(30, 41, 59, 0.7)', // Slate 800 with opacity
           borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.3)',
+          borderColor: EliteTheme.colors.borderLight,
         };
       default:
-        return EliteTheme.shadows.soft;
+        return {
+          backgroundColor: EliteTheme.colors.surface,
+          borderWidth: 1,
+          borderColor: EliteTheme.colors.border,
+        };
     }
   };
 
   return (
     <View
       style={[
-        tw`bg-white rounded-[32px]`,
+        tw`rounded-[24px]`,
         !noPadding && tw`p-5`,
         getVariantStyles() as ViewStyle,
         style,

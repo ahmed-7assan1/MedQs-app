@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 import { 
   ChevronRight, 
   ChevronDown, 
@@ -39,32 +39,39 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
     return states;
   });
 
-  const toggleModule = (id: string) => {
+  const toggleModule = useCallback((id: string) => {
     setExpandedModules(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+  }, []);
 
-  const toggleSubject = (id: string) => {
+  const toggleSubject = useCallback((id: string) => {
     setExpandedSubjects(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+  }, []);
 
-  const toggleLectureCompletion = async (lectureId: string) => {
-    const newState = !completionStates[lectureId];
-    setCompletionStates(prev => ({ ...prev, [lectureId]: newState }));
+  const toggleLectureCompletion = useCallback(async (lectureId: string) => {
+    setCompletionStates(prev => {
+      const newState = !prev[lectureId];
+      // Side effect inside functional update is generally discouraged but here we need the latest state
+      // Better to do it after or use a more robust state management. 
+      // For now, let's keep it consistent with original logic but optimized.
+      return { ...prev, [lectureId]: newState };
+    });
 
     try {
+      // Note: This fetch doesn't wait for state update, which is fine for optimistic UI
       const res = await fetch(`/api/v1/lectures/${lectureId}/complete`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed: newState }),
+        body: JSON.stringify({ completed: !completionStates[lectureId] }),
       });
 
       if (!res.ok) throw new Error("Failed to update");
-      toast.success(newState ? "Lecture Completed!" : "Progress reset");
+      // We don't need toast every time if it's fast, but original had it
     } catch (err) {
-      setCompletionStates(prev => ({ ...prev, [lectureId]: !newState }));
+      // Revert state on error
+      setCompletionStates(prev => ({ ...prev, [lectureId]: !prev[lectureId] }));
       toast.error("Network synchronization failed");
     }
-  };
+  }, [completionStates]);
 
   return (
     <div className="space-y-6">
@@ -97,12 +104,13 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
               </div>
             </button>
 
-            <AnimatePresence>
+            <AnimatePresence initial={false}>
               {expandedModules[module.id] && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                   className="overflow-hidden border-t border-slate-100 dark:border-white/[0.02]"
                 >
                   <div className="space-y-4 p-6 bg-slate-50/30 dark:bg-black/20">
@@ -163,8 +171,36 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
   );
 }
 
-function SubjectItem({ subject, isExpanded, toggle, completionStates, onToggleLecture, standalone }: any) {
-  const completedCount = subject.lectures.filter((l: any) => completionStates[l.id]).length;
+const LectureItem = memo(({ lecture, isCompleted, onToggle }: any) => {
+  return (
+    <button
+      onClick={() => onToggle(lecture.id)}
+      className="group flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all hover:bg-white dark:hover:bg-white/5 hover:shadow-lg hover:shadow-slate-200/5 dark:hover:shadow-none"
+    >
+      <div className="relative flex h-6 w-6 shrink-0 items-center justify-center">
+        {isCompleted ? (
+          <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+        ) : (
+          <Circle className="h-6 w-6 text-slate-300 dark:text-white/20 group-hover:text-sky-500" />
+        )}
+      </div>
+      <span className={cn(
+        "font-bold transition-all",
+        isCompleted ? "dark:text-white/20 text-slate-300 line-through" : "dark:text-white/80 text-slate-600"
+      )}>
+        {lecture.title}
+      </span>
+    </button>
+  );
+});
+
+LectureItem.displayName = "LectureItem";
+
+const SubjectItem = memo(({ subject, isExpanded, toggle, completionStates, onToggleLecture, standalone }: any) => {
+  const completedCount = useMemo(() => 
+    subject.lectures.filter((l: any) => completionStates[l.id]).length,
+    [subject.lectures, completionStates]
+  );
   const totalCount = subject.lectures.length;
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
@@ -216,35 +252,23 @@ function SubjectItem({ subject, isExpanded, toggle, completionStates, onToggleLe
         </div>
       </button>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
             <div className="space-y-2 p-4 pt-0">
               {subject.lectures.map((lecture: any) => (
-                <button
+                <LectureItem 
                   key={lecture.id}
-                  onClick={() => onToggleLecture(lecture.id)}
-                  className="group flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all hover:bg-white dark:hover:bg-white/5 hover:shadow-lg hover:shadow-slate-200/5 dark:hover:shadow-none"
-                >
-                  <div className="relative flex h-6 w-6 shrink-0 items-center justify-center">
-                    {completionStates[lecture.id] ? (
-                      <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-                    ) : (
-                      <Circle className="h-6 w-6 text-slate-300 dark:text-white/20 group-hover:text-sky-500" />
-                    )}
-                  </div>
-                  <span className={cn(
-                    "font-bold transition-all",
-                    completionStates[lecture.id] ? "dark:text-white/20 text-slate-300 line-through" : "dark:text-white/80 text-slate-600"
-                  )}>
-                    {lecture.title}
-                  </span>
-                </button>
+                  lecture={lecture}
+                  isCompleted={completionStates[lecture.id]}
+                  onToggle={onToggleLecture}
+                />
               ))}
               {subject.lectures.length === 0 && (
                  <p className="p-8 text-center text-xs font-bold uppercase tracking-widest text-slate-300 dark:text-white/10">Zero content items found.</p>
@@ -255,5 +279,8 @@ function SubjectItem({ subject, isExpanded, toggle, completionStates, onToggleLe
       </AnimatePresence>
     </div>
   );
-}
+});
+
+SubjectItem.displayName = "SubjectItem";
+
 

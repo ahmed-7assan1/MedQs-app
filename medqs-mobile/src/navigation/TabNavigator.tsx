@@ -1,19 +1,23 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, SafeAreaView } from 'react-native';
+import { View, TouchableOpacity, Text, SafeAreaView, Platform } from 'react-native';
 import tw from 'twrnc';
 import { EliteTheme } from '../constants/Theme';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, BookOpen, PenTool, User } from 'lucide-react-native';
+import { Home, BookOpen, MessageSquare, User, CheckSquare, Layers, PlaySquare } from 'lucide-react-native';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LibraryScreen } from '../screens/LibraryScreen';
-import { QuizzesScreen } from '../screens/QuizzesScreen';
+import { CommunityScreen } from '../screens/CommunityScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { VideoHubScreen } from '../screens/VideoHubScreen';
 
 const Tab = createBottomTabNavigator();
 
 function MyTabBar({ state, descriptors, navigation }: any) {
   return (
-    <View style={tw`absolute bottom-8 left-10 right-10 flex-row bg-[#0f172a] rounded-full p-2 items-center justify-between shadow-lg`}>
+    <View style={[
+      tw`absolute bottom-6 left-6 right-6 flex-row rounded-[32px] p-2 items-center justify-between shadow-2xl`,
+      { height: 70, borderTopWidth: 0, backgroundColor: 'rgba(15, 23, 42, 0.85)' }
+    ]}>
       {state.routes.map((route: any, index: any) => {
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
@@ -32,15 +36,15 @@ function MyTabBar({ state, descriptors, navigation }: any) {
           <TouchableOpacity
             key={index}
             onPress={onPress}
-            style={tw`flex-1 items-center justify-center py-2 h-12`}
+            style={tw`flex-1 items-center justify-center`}
           >
             <View style={[
-              tw`p-2 px-4 rounded-full flex-row items-center`,
-              isFocused ? tw`bg-white` : {}
+              tw`p-2.5 px-4 rounded-2xl flex-row items-center`,
+              isFocused ? { backgroundColor: EliteTheme.colors.primary } : {}
             ]}>
-              <Icon color={isFocused ? "#0f172a" : "#94a3b8"} size={22} />
+              <Icon color={isFocused ? "white" : EliteTheme.colors.textMuted} size={20} />
               {isFocused && (
-                <Text style={tw`text-[#0f172a] font-bold ml-2 text-xs`}>{label}</Text>
+                <Text style={tw`text-white font-bold ml-2 text-[10px] uppercase tracking-tighter`}>{label}</Text>
               )}
             </View>
           </TouchableOpacity>
@@ -56,6 +60,7 @@ export function TabNavigator() {
       tabBar={props => <MyTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        sceneContainerStyle: { backgroundColor: EliteTheme.colors.background }
       }}
     >
       <Tab.Screen 
@@ -66,12 +71,17 @@ export function TabNavigator() {
       <Tab.Screen 
         name="Library" 
         component={LibraryScreen} 
-        options={{ tabBarIcon: (props) => <BookOpen {...props} /> }}
+        options={{ tabBarIcon: (props) => <Layers {...props} /> }}
       />
       <Tab.Screen 
-        name="Quizzes" 
-        component={QuizzesScreen} 
-        options={{ tabBarIcon: (props) => <PenTool {...props} /> }}
+        name="Video Hub" 
+        component={VideoHubScreen} 
+        options={{ tabBarIcon: (props) => <PlaySquare {...props} /> }}
+      />
+      <Tab.Screen 
+        name="Community" 
+        component={CommunityScreen} 
+        options={{ tabBarIcon: (props) => <MessageSquare {...props} /> }}
       />
       <Tab.Screen 
         name="Profile" 

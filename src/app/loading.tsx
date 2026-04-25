@@ -33,103 +33,42 @@ export default function GlobalLoading() {
 
   if (!mounted) return null;
 
-  // Find matching config or use default
   const configKey = Object.keys(LOADING_CONFIG).find(key => pathname?.startsWith(key)) || "default";
   const { icon: Icon, text, color } = LOADING_CONFIG[configKey];
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background transition-colors duration-1000">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background"
+    >
       <div className="relative flex flex-col items-center">
-        {/* Subtle Ambient Glow */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.05 }}
-          className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 blur-[120px] rounded-full", color.replace("text-", "bg-"))}
-          style={{ width: '400px', height: '400px' }}
-        />
-        
-        {/* Main Animated Icon */}
+        {/* Simplified Icon */}
         <div className="relative z-10">
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ 
-              type: "spring",
-              stiffness: 260,
-              damping: 20 
-            }}
-            className={cn("relative p-6 rounded-[32px] bg-white/[0.02] border border-white/5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]", color)}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={cn("p-5 rounded-[28px] bg-white/[0.02] border border-white/5 backdrop-blur-md shadow-xl", color)}
           >
-            <Icon size={48} strokeWidth={1.5} className="animate-pulse" />
+            <Icon size={40} strokeWidth={2} className="animate-pulse" />
           </motion.div>
-
-          {/* Orbiting Particles */}
-          {[...Array(3)].map((_, i) => (
-            <motion.div
-              key={i}
-              className={cn("absolute top-1/2 left-1/2 h-2 w-2 rounded-full", color.replace("text-", "bg-"))}
-              animate={{
-                x: [0, Math.cos(i * 120) * 60, 0],
-                y: [0, Math.sin(i * 120) * 60, 0],
-                scale: [1, 1.5, 1],
-                opacity: [0, 1, 0]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: i * 0.4,
-                ease: "easeInOut"
-              }}
-            />
-          ))}
         </div>
         
         {/* Loading Content */}
-        <div className="mt-12 flex flex-col items-center gap-4 text-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-1"
-          >
-            <h3 className="text-sm font-black tracking-widest uppercase opacity-40">{text}</h3>
-            <div className="flex gap-1 justify-center">
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  animate={{ opacity: [0, 1, 0] }}
-                  transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
-                  className={cn("h-1.5 w-1.5 rounded-full", color.replace("text-", "bg-"))}
-                />
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Premium Loading Line */}
-          <div className="h-0.5 w-48 overflow-hidden rounded-full bg-white/5">
+        <div className="mt-8 flex flex-col items-center gap-3 text-center">
+          <h3 className="text-[10px] font-black tracking-widest uppercase opacity-40">{text}</h3>
+          
+          <div className="h-0.5 w-32 overflow-hidden rounded-full bg-white/5">
             <motion.div 
               className={cn("h-full", color.replace("text-", "bg-"))}
-              animate={{
-                x: ["-100%", "200%"]
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
+              animate={{ x: ["-100%", "200%"] }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             />
           </div>
         </div>
       </div>
-
-      {/* Modern Watermark */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.1 }}
-        className="absolute bottom-12 flex items-center gap-2 grayscale"
-      >
-        <span className="text-xs font-black tracking-[0.3em] uppercase">MedOneX</span>
-      </motion.div>
-    </div>
+    </motion.div>
   );
 }

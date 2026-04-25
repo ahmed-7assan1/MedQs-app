@@ -1,49 +1,81 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../lib/storage';
+import { mobileApi } from '../lib/api';
 
-interface User {
+// ─── Full schema-accurate User shape ─────────────────────────────────────────
+export interface AuthUser {
   id: string;
   name: string;
+  nickname?: string;
   email: string;
   image?: string;
-  role: string;
+  role: 'STUDENT' | 'ADMIN' | 'SUPER_ADMIN';
+  points: number;
+  theme: 'LIGHT' | 'DARK' | 'SYSTEM';
+  semesterId?: string;
+  facultyId?: string;
+  universityId?: string;
+  handle?: string;
+  bio?: string;
+  rank?: { id: string; label: string; badge?: string };
+  university?: { id: string; name: string };
+  semester?: { id: string; name: string };
+  faculty?: { id: string; name: string; category: string };
 }
 
 interface AuthState {
-  user: User | null;
-  token: string | null;
+  user: AuthUser | null;
   isLoading: boolean;
-  login: (user: User, token: string) => Promise<void>;
+  login: (user: AuthUser) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  updateUser: (partial: Partial<AuthUser>) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  token: null,
   isLoading: true,
-  login: async (user, token) => {
-    await SecureStore.setItemAsync('token', token);
-    await SecureStore.setItemAsync('user', JSON.stringify(user));
-    set({ user, token });
+
+  login: async (user) => {
+    await storage.setItem('user', JSON.stringify(user));
+    set({ user, isLoading: false });
   },
+
   logout: async () => {
-    await SecureStore.deleteItemAsync('token');
-    await SecureStore.deleteItemAsync('user');
-    set({ user: null, token: null });
+    await storage.removeItem('user');
+    await storage.removeItem('sessionToken');
+    await storage.removeItem('siteConfig');
+    set({ user: null });
   },
+
   checkAuth: async () => {
     try {
-      const token = await SecureStore.getItemAsync('token');
-      const userStr = await SecureStore.getItemAsync('user');
-      
-      if (token && userStr) {
-        set({ token, user: JSON.parse(userStr), isLoading: false });
+      const userStr = await storage.getItem('user');
+      if (userStr) {
+        const user: AuthUser = JSON.parse(userStr);
+        set({ user, isLoading: false });
+        // Refresh user stats in background
+        try {
+          const fresh = await mobileApi.getUserStats();
+          if (fresh?.user) {
+            const updated = { ...user, ...fresh.user };
+            await storage.setItem('user', JSON.stringify(updated));
+            set({ user: updated });
+          }
+        } catch {}
       } else {
-        set({ isLoading: false });
+        set({ user: null, isLoading: false });
       }
     } catch {
-      set({ isLoading: false });
+      set({ user: null, isLoading: false });
     }
+  },
+
+  updateUser: (partial) => {
+    const current = get().user;
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    set({ user: updated });
+    storage.setItem('user', JSON.stringify(updated));
   },
 }));
