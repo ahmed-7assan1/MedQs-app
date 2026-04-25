@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
 
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch the latest forum posts for the community feed
-    const posts = await db.forumPost.findMany({
+    const posts = await prisma.forumPost.findMany({
       take: 20,
       orderBy: { createdAt: 'desc' },
       include: {
@@ -47,8 +47,8 @@ export async function GET(req: NextRequest) {
     }));
 
     // Fetch basic stats for the community header
-    const totalUsers = await db.user.count();
-    const activeDiscussions = await db.forumPost.count({
+    const totalUsers = await prisma.user.count();
+    const activeDiscussions = await prisma.forumPost.count({
       where: {
         createdAt: {
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // last 7 days

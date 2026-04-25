@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
 
@@ -18,10 +18,10 @@ export async function GET(req: NextRequest) {
       totalModules,
       recentUsers
     ] = await Promise.all([
-      db.user.count(),
-      db.quiz.count(),
-      db.module.count(),
-      db.user.findMany({
+      prisma.user.count(),
+      prisma.quiz.count(),
+      prisma.module.count(),
+      prisma.user.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
         select: {

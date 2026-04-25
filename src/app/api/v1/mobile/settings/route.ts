@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
 
@@ -14,7 +14,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const { name, bio, image } = body;
 
-    const user = await db.user.update({
+    const user = await prisma.user.update({
       where: { id: token.id },
       data: {
         ...(name && { name }),
