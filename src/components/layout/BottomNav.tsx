@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpenText, Clapperboard, HelpCircle, MessagesSquare, CircleUser } from "lucide-react";
+import { House, BookOpenText, Clapperboard, HelpCircle, MessagesSquare, CircleUser, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -19,10 +19,10 @@ const NAV_ITEMS = [
     match: (p: string) => p.startsWith("/modules"),
   },
   {
-    href: "/videos",
-    label: "Videos",
-    icon: Clapperboard,
-    match: (p: string) => p.startsWith("/videos"),
+    href: "/taskat",
+    label: "Tasks",
+    icon: Clock,
+    match: (p: string) => p.startsWith("/taskat"),
   },
   {
     href: "/past-papers",
