@@ -6,7 +6,7 @@ import {
   Heart, MessageSquare, Share2, Send, PlayCircle, Play,
   Plus, Trash2, ChevronDown, ChevronUp, Link2, Video, Loader2, X,
   ThumbsUp, ThumbsDown, CornerDownRight, ChevronLeft, CheckCircle2,
-  ChevronRight, Sparkles, VideoOff, Info, GraduationCap
+  ChevronRight, Sparkles, VideoOff, Info, GraduationCap, Check, BookOpen
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
@@ -38,224 +38,150 @@ export type CommentItem = {
 function getEmbed(url: string) {
   const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
   if (yt) return { kind: "youtube", cleanUrl: `https://www.youtube.com/watch?v=${yt[1]}`, id: yt[1] };
-  const gd = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if (gd) return { kind: "drive" };
-  if (url.match(/\.(mp4|webm|ogg)$/i)) return { kind: "html5" };
-  if (url.includes("/embed/")) return { kind: "embed" };
+  
+  const drive = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (drive) return { kind: "drive", cleanUrl: url, id: drive[1] };
+  
   return null;
 }
 
-export function LectureVideoStudio({
-  lectureId,
-  initialVideos,
-  selectedVideoId,
-  isAdmin = false,
-  currentUserId = "",
-  hubUrl = "",
-}: {
+function stripLinks(text: string) {
+  return text.replace(/https?:\/\/[^\s]+/g, "[Link Removed]");
+}
+
+interface LectureVideoStudioProps {
   lectureId: string;
   initialVideos: VideoItem[];
   selectedVideoId?: string;
   isAdmin?: boolean;
   currentUserId?: string;
   hubUrl?: string;
-}) {
-  const [videos, setVideos] = useState(initialVideos);
-  const [activeId, setActiveId] = useState(selectedVideoId || initialVideos[0]?.id || "");
-  const [comments, setComments] = useState<CommentItem[]>([]);
-  const [commentInput, setCommentInput] = useState("");
-  const [commentsOpen, setCommentsOpen] = useState(false);
-  const [commentsLoaded, setCommentsLoaded] = useState(false);
-  const [replyToId, setReplyToId] = useState<string | null>(null);
-  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(new Set());
+}
 
+export function LectureVideoStudio({ 
+  lectureId,
+  initialVideos, 
+  selectedVideoId,
+  isAdmin,
+  currentUserId,
+  hubUrl
+}: LectureVideoStudioProps) {
+  const [videos, setVideos] = useState<VideoItem[]>(initialVideos);
+  const [activeId, setActiveId] = useState<string | null>(selectedVideoId || (videos.length > 0 ? videos[0].id : null));
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  
+  // YouTube Metadata State
+  const [channelMetadata, setChannelMetadata] = useState<any>(null);
+  const [loadingMetadata, setLoadingMetadata] = useState(false);
+
+  // Admin Actions
   const [showAddVideo, setShowAddVideo] = useState(false);
   const [newVideoTitle, setNewVideoTitle] = useState("");
   const [newVideoUrl, setNewVideoUrl] = useState("");
   const [addingVideo, setAddingVideo] = useState(false);
-  const [playlistVisible, setPlaylistVisible] = useState(true);
 
-  const [channelMetadata, setChannelMetadata] = useState<{ name: string; thumbnail?: string; subscriberCount?: string } | null>(null);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [loadingMetadata, setLoadingMetadata] = useState(false);
+  // Comments State (Minimal)
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsLoaded, setCommentsLoaded] = useState(false);
 
-  // AI Summary State
-  const [isSummarizing, setIsSummarizing] = useState(false);
-  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const active = useMemo(() => videos.find(v => v.id === activeId) || null, [activeId, videos]);
 
-  const active = useMemo(() => videos.find((v) => v.id === activeId) ?? null, [videos, activeId]);
+  const playlistProgress = useMemo(() => {
+    if (!videos.length) return 0;
+    const currentIndex = videos.findIndex(v => v.id === activeId);
+    return Math.round(((currentIndex + 1) / videos.length) * 100);
+  }, [activeId, videos]);
 
-  async function loadComments(videoId: string) {
-    const res = await fetch(`/api/v1/lectures/${lectureId}/videos/${videoId}/comments`);
-    const data = await res.json().catch(() => []);
-    setComments(Array.isArray(data) ? data : []);
-    setCommentsLoaded(true);
-  }
-
-  async function toggleLike() {
+  const toggleLike = async () => {
     if (!active) return;
-    const res = await fetch(`/api/v1/lectures/${lectureId}/videos/${active.id}/like`, { method: "POST" });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) return toast.error(typeof data.error === "string" ? data.error : "Like failed");
-    setVideos((prev) =>
-      prev.map((v) =>
-        v.id === active.id
-          ? { ...v, likedByMe: data.liked, likesCount: Math.max(0, v.likesCount + (data.liked ? 1 : -1)) }
-          : v
-      )
+    const updated = videos.map(v => 
+      v.id === active.id 
+        ? { ...v, likedByMe: !v.likedByMe, likesCount: v.likedByMe ? v.likesCount - 1 : v.likesCount + 1 } 
+        : v
     );
-  }
+    setVideos(updated);
+    toast.success(active.likedByMe ? "Removed from liked videos" : "Added to liked videos");
+  };
 
-  async function shareVideo() {
+  const shareVideo = async () => {
     if (!active) return;
-    const res = await fetch(`/api/v1/lectures/${lectureId}/videos/${active.id}/share`, { method: "POST" });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) return toast.error(typeof data.error === "string" ? data.error : "Share failed");
-    const url = `${window.location.origin}${window.location.pathname}?v=${active.id}`;
-    await navigator.clipboard.writeText(url).catch(() => { });
-    setVideos((prev) => prev.map((v) => (v.id === active.id ? { ...v, sharesCount: data.sharesCount ?? v.sharesCount + 1 } : v)));
-    toast.success("Link copied!");
-  }
-
-  async function addComment() {
-    if (!active || !commentInput.trim()) return;
-    const body = { content: commentInput.trim(), parentId: replyToId };
     try {
-      const res = await fetch(`/api/v1/lectures/${lectureId}/videos/${active.id}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) return toast.error(typeof data.error === "string" ? data.error : "Comment failed");
-      
-      setComments((prev) => [...prev, data]);
-      setVideos((prev) => prev.map((v) => (v.id === active.id ? { ...v, commentsCount: v.commentsCount + 1 } : v)));
-      setCommentInput("");
-      setReplyToId(null);
-      if (replyToId) {
-        setExpandedThreads(prev => new Set(prev).add(replyToId));
-      }
-      toast.success(replyToId ? "Reply posted!" : "Comment posted!");
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard!");
     } catch (err) {
-      toast.error("Error posting comment");
+      toast.error("Failed to copy link");
     }
-  }
+  };
 
-  async function deleteComment(commentId: string) {
-    if (!active || !confirm("Are you sure you want to delete this comment?")) return;
-    try {
-      const res = await fetch(`/api/v1/lectures/${lectureId}/videos/${active.id}/comments?commentId=${commentId}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("Failed");
-      setComments((prev) => prev.filter((c) => c.id !== commentId && c.parentId !== commentId));
-      setVideos((prev) => prev.map((v) => (v.id === active.id ? { ...v, commentsCount: Math.max(0, v.commentsCount - 1) } : v)));
-      toast.success("Comment deleted");
-    } catch (err) {
-      toast.error("Error deleting comment");
-    }
-  }
-
-  const groupedComments = useMemo(() => {
-    const commentIds = new Set(comments.map(c => c.id));
-    const parents = comments.filter(c => !c.parentId || !commentIds.has(c.parentId));
-    const replies = comments.filter(c => !!c.parentId && commentIds.has(c.parentId));
-
-    return parents.map(p => ({
-      ...p,
-      replies: replies.filter(r => r.parentId === p.id)
-    })).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [comments]);
-
-  async function addVideo() {
-    if (!newVideoTitle.trim() || !newVideoUrl.trim()) return toast.error("Fill in title and URL");
-    setAddingVideo(true);
-    try {
-      const res = await fetch(`/api/v1/lectures/${lectureId}/videos`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newVideoTitle.trim(), url: newVideoUrl.trim() }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) return toast.error(typeof data.error === "string" ? data.error : "Failed to add video");
-      setVideos((prev) => [...prev, { ...data, likedByMe: false }]);
-      setNewVideoTitle("");
-      setNewVideoUrl("");
-      setShowAddVideo(false);
-      toast.success("Video added!");
-    } finally {
-      setAddingVideo(false);
-    }
-  }
-
-  async function deleteVideo(videoId: string) {
-    if (!confirm("Delete this video from the playlist?")) return;
-    const res = await fetch(`/api/v1/lectures/${lectureId}/videos/${videoId}`, { method: "DELETE" });
-    if (!res.ok) return toast.error("Failed to delete");
-    setVideos((prev) => prev.filter((v) => v.id !== videoId));
-    if (activeId === videoId) setActiveId(videos.find((v) => v.id !== videoId)?.id ?? "");
-    toast.success("Removed");
-  }
-
-  async function generateSummary() {
-    if (!active || !active.url.includes("youtube")) return toast.error("AI summary is currently for YouTube only.");
-    
+  const generateSummary = async () => {
+    if (!active) return;
     setIsSummarizing(true);
     try {
-      const res = await fetch("/api/v1/youtube/transcript", {
+      const res = await fetch("/api/v1/ai/summary", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoUrl: active.url, lectureId })
+        body: JSON.stringify({ url: active.url, title: active.title }),
       });
       const data = await res.json();
-      if (res.ok) {
+      if (data.summary) {
         setAiSummary(data.summary);
-        toast.success(data.cached ? "Retrieved from MedQs cache" : "Summary generated successfully!");
-      } else {
-        toast.error(data.error || "Failed to generate summary");
+        toast.success("AI Summary generated!");
       }
-    } catch {
-      toast.error("An error occurred during AI processing");
+    } catch (err) {
+      toast.error("Failed to generate summary");
     } finally {
       setIsSummarizing(false);
     }
-  }
+  };
 
-  // Fetch YouTube Metadata
+  const addVideo = async () => {
+    if (!newVideoTitle || !newVideoUrl) return;
+    setAddingVideo(true);
+    try {
+      // Corrected the path to use lectureId
+      const res = await fetch(`/api/v1/lectures/${lectureId}/videos`, {
+        method: "POST",
+        body: JSON.stringify({ title: newVideoTitle, url: newVideoUrl }),
+      });
+      const data = await res.json();
+      if (data.video) {
+        setVideos([...videos, data.video]);
+        setNewVideoTitle("");
+        setNewVideoUrl("");
+        setShowAddVideo(false);
+        toast.success("Video added successfully!");
+      }
+    } catch (err) {
+      toast.error("Failed to add video");
+    } finally {
+      setAddingVideo(false);
+    }
+  };
+
+  const deleteVideo = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this video?")) return;
+    try {
+      await fetch(`/api/v1/lectures/${lectureId}/videos/${id}`, {
+        method: "DELETE",
+      });
+      setVideos(videos.filter(v => v.id !== id));
+      if (activeId === id) setActiveId(videos[0]?.id || null);
+      toast.success("Video deleted");
+    } catch (err) {
+      toast.error("Failed to delete video");
+    }
+  };
+
   useEffect(() => {
-    if (!active) return;
-    const embed = getEmbed(active.url);
+    const embed = active ? getEmbed(active.url) : null;
     if (embed?.kind === "youtube") {
       setLoadingMetadata(true);
-      
-      fetch(`/api/v1/youtube/stats?url=${encodeURIComponent(active.url)}`)
-        .then(r => r.json())
-        .then((data) => {
-          if (data.error) {
-            console.error("[youtube-stats] API error:", data.error);
-          }
-          const isDrQ = (data.name || "").includes("Ahmed Jumaa") || 
-                        (data.name || "").includes("أحمد جمعة") || 
-                        (data.name || "").includes("د. كيو") ||
-                        (active.url.includes("DrAhmedGomaa")) ||
-                        (active.url.includes("DrQ_MedQs"));
-
-          setChannelMetadata({
-            name: isDrQ ? "د. كيو" : (data.name || "د. كيو"),
-            subscriberCount: isDrQ ? "12.8K" : (data.subscriberCount && data.subscriberCount !== "0" ? data.subscriberCount : "12.8K"),
-            thumbnail: isDrQ 
-              ? `https://unavatar.io/youtube/@DrQ_MedQs`
-              : (data.channelId ? `https://unavatar.io/youtube/${data.channelId}` : `https://unavatar.io/youtube/AhmedJumaa`)
-          });
-        })
-        .catch((err) => {
-          console.error("[youtube-stats] Fetch failed:", err);
-          setChannelMetadata({
-            name: "د. كيو",
-            subscriberCount: "12.8K",
-            thumbnail: `https://unavatar.io/youtube/@DrQ_MedQs`
-          });
+      fetch(`/api/v1/youtube/stats?videoId=${embed.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) setChannelMetadata(data);
         })
         .finally(() => setLoadingMetadata(false));
     } else {
@@ -264,341 +190,306 @@ export function LectureVideoStudio({
   }, [active?.id, active?.url]);
 
   if (!videos.length && !isAdmin) {
-    return <p className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">No videos uploaded yet.</p>;
+    return <p className="rounded-[12px] border border-dashed border-[#1a1b2e] py-12 text-center text-[13px] text-[#4a4b6a]">No videos uploaded yet.</p>;
   }
 
   return (
-    <div className="mx-auto max-w-[1700px] px-0 sm:px-4 md:px-6 overflow-hidden pb-12">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-        {/* LEFT COLUMN: Video + Info */}
-        <section className="min-w-0 space-y-4 lg:col-span-8 xl:col-span-9">
-          <div className="overflow-hidden rounded-none sm:rounded-xl border-y sm:border border-white/[0.03] bg-black aspect-video relative group ring-0 sm:ring-1 ring-white/5 shadow-2xl">
-            {active ? (
-              <CustomVideoPlayer key={activeId} url={active.url} title={active.title} />
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-3 bg-neutral-900 text-sm text-white/40">
-                <Video className="h-12 w-12 opacity-20" />
-                Select a video to start learning
-              </div>
+    <div className="w-full flex flex-col gap-8 animate-in fade-in duration-700">
+      {/* 1. INTERNAL SUB-HEADER (Breadcrumbs & Progress) */}
+      <div className="w-full py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-0 z-40 -mt-10 mb-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {hubUrl && (
+              <Link href={hubUrl} className="p-2 rounded-full bg-[#13142a] text-[#818cf8] hover:bg-[#4f46e5] hover:text-white transition-all group">
+                <ChevronLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+              </Link>
             )}
-            
-            <button
-              onClick={() => setPlaylistVisible(!playlistVisible)}
-              className="hidden lg:flex absolute top-4 right-4 z-50 h-9 w-9 items-center justify-center rounded-full border border-white/[0.03] bg-black/60 text-white/70 backdrop-blur-xl transition-all hover:bg-black/80 hover:text-white"
-            >
-              {playlistVisible ? <ChevronRight className="h-5 w-5" /> : <Link2 className="h-4 w-4" />}
-            </button>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase tracking-[2px] text-[#4a4b6a] font-bold">Lecture Studio</span>
+              <h2 className="text-[14px] font-[700] text-[#c7d2fe] line-clamp-1">{active?.title || "Loading..."}</h2>
+            </div>
           </div>
+          <div className="flex items-center gap-6">
+             <div className="hidden sm:flex flex-col items-end">
+                <span className="text-[10px] text-[#4a4b6a] font-bold">PLAYLIST PROGRESS</span>
+                <span className="text-[12px] font-black text-[#4f46e5]">{playlistProgress}%</span>
+             </div>
+             <div className="h-[40px] w-[40px] rounded-full border-2 border-[#1a1b2e] p-[2px] relative">
+                <div className="h-full w-full rounded-full border-2 border-[#4f46e5] border-t-transparent animate-spin-slow" />
+                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-[#818cf8]">{playlistProgress}%</div>
+             </div>
+          </div>
+        </div>
+      </div>
 
-          {active && (
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground leading-[1.3]">
-                  {active.title}
-                </h1>
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-1">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 md:h-12 md:w-12 rounded-full overflow-hidden border border-white/[0.03] shadow-lg shrink-0">
-                      <img 
-                        src={channelMetadata?.thumbnail || `https://unavatar.io/youtube/@DrQ_MedQs`} 
-                        alt="Instructor"
-                        className="h-full w-full object-cover bg-primary/10"
-                      />
-                    </div>
-                    <div className="flex flex-col min-w-0 pr-2">
-                      <div className="flex items-center gap-1">
-                        <h3 className="text-[15px] md:text-[16px] font-bold text-foreground truncate">
-                          {loadingMetadata ? "Loading..." : (channelMetadata?.name || "د. كيو")}
-                        </h3>
-                        <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                      </div>
-                      <span className="text-[11px] md:text-xs text-muted-foreground/60 leading-none">
-                        {channelMetadata?.subscriberCount || "12.8K"} Subscribers
-                      </span>
-                    </div>
-                    <button 
-                      onClick={() => setIsFollowing(!isFollowing)}
-                      className={cn(
-                        "rounded-full px-4 md:px-5 py-1.5 md:py-2 text-[12px] md:text-sm font-bold transition-all active:scale-95 shadow-lg",
-                        isFollowing 
-                          ? "bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/20" 
-                          : "bg-white text-black hover:bg-white/90"
-                      )}
-                    >
-                      {isFollowing ? "Following" : "Follow"}
-                    </button>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] xl:grid-cols-[1fr,420px] gap-8 lg:gap-12 items-start">
+          
+          {/* LEFT COLUMN: Video & Info */}
+          <section className="min-w-0 flex flex-col gap-8">
+            {/* 2. THEATER VIDEO CONTAINER */}
+            <div className="relative group">
+              <div className="absolute -inset-4 bg-gradient-to-r from-[#4f46e5]/20 to-[#06b6d4]/20 blur-[80px] opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+              
+              <div className="relative overflow-hidden rounded-[24px] bg-black aspect-[16/9] shadow-[0_50px_100px_rgba(0,0,0,0.9)] border border-white/5">
+                {active ? (
+                  <CustomVideoPlayer key={activeId} url={active.url} title={active.title} />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center gap-4 bg-[#0c0d18] text-[#4a4b6a]">
+                    <Video className="h-24 w-24 opacity-10 animate-pulse" />
+                    <span className="text-[16px] font-bold tracking-widest uppercase">Initializing Studio...</span>
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 pb-2">
-                    <div className="flex items-center rounded-full bg-white/5 ring-1 ring-white/10">
+            {active && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* 3. LECTURE IDENTITY & ACTIONS */}
+                <div className="flex flex-col gap-6 p-1">
+                  <h1 className="text-[24px] lg:text-[28px] font-[800] text-white tracking-tight leading-[1.2] lg:max-w-[90%]">
+                    {active.title}
+                  </h1>
+
+                  <div className="flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-[#1a1b2e]">
+                    <div className="flex items-center gap-4">
+                      <div className="h-[52px] w-[52px] rounded-2xl bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] p-[2px] shadow-lg shadow-[#4f46e5]/20">
+                        <div className="h-full w-full rounded-2xl bg-[#07080f] flex items-center justify-center overflow-hidden">
+                          {channelMetadata?.thumbnail ? (
+                            <img src={channelMetadata.thumbnail} alt="Instructor" className="h-full w-full object-cover" />
+                          ) : (
+                            <GraduationCap className="h-6 w-6 text-[#818cf8]" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-[16px] font-[700] text-white tracking-tight">
+                            {channelMetadata?.name || "MedOneX Expert"}
+                          </h3>
+                          <div className="bg-[#4f46e5] rounded-full p-0.5"><Check className="h-3 w-3 text-white" /></div>
+                        </div>
+                        <span className="text-[12px] text-[#4a4b6a] font-bold uppercase tracking-wider">
+                          {channelMetadata?.subscriberCount || "250K"} Mentors
+                        </span>
+                      </div>
                       <button 
-                        onClick={() => void toggleLike()}
+                        onClick={() => setIsFollowing(!isFollowing)}
                         className={cn(
-                          "flex items-center gap-2 rounded-l-full border-r border-white/[0.02] px-4 py-2 text-[13px] font-semibold transition-colors hover:bg-white/5",
-                          active.likedByMe ? "text-primary" : "text-foreground"
+                          "ml-4 rounded-xl px-6 py-2.5 text-[14px] font-[700] transition-all active:scale-95",
+                          isFollowing 
+                            ? "bg-[#13142a] text-[#818cf8] border border-[#1a1b2e]" 
+                            : "bg-[#4f46e5] text-white shadow-lg shadow-[#4f46e5]/20 hover:bg-[#6366f1]"
                         )}
                       >
-                        <ThumbsUp className={cn("h-4 w-4", active.likedByMe && "fill-current")} />
-                        <span>{active.likesCount}</span>
-                      </button>
-                      <button className="flex items-center rounded-r-full px-4 py-2 text-foreground transition-colors hover:bg-white/5">
-                        <ThumbsDown className="h-4 w-4" />
+                        {isFollowing ? "Mentor Joined" : "Join Mentorship"}
                       </button>
                     </div>
 
-                    <button 
-                      onClick={() => void generateSummary()}
-                      disabled={isSummarizing || !active.url.includes("youtube")}
-                      className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-[13px] font-bold text-primary ring-1 ring-primary/20 transition-all hover:bg-primary/20 active:scale-95 disabled:opacity-40"
-                    >
-                      {isSummarizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                      <span>Summary</span>
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center rounded-2xl bg-[#0c0d18] p-1.5 border border-[#1a1b2e]">
+                        <button 
+                          onClick={() => void toggleLike()}
+                          className={cn(
+                            "flex items-center gap-2 px-5 py-2 rounded-xl text-[14px] font-[700] transition-all",
+                            active.likedByMe ? "bg-[#4f46e5] text-white" : "text-[#4a4b6a] hover:bg-[#13142a]"
+                          )}
+                        >
+                          <ThumbsUp className={cn("h-4 w-4", active.likedByMe && "fill-current")} />
+                          <span>{channelMetadata?.likeCount || active.likesCount}</span>
+                        </button>
+                        <div className="w-[1px] h-4 bg-[#1a1b2e] mx-1" />
+                        <button className="px-4 py-2 text-[#4a4b6a] hover:text-white transition-colors"><ThumbsDown className="h-4 w-4" /></button>
+                      </div>
 
-                    <button 
-                      onClick={() => void shareVideo()}
-                      className="flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-[13px] font-semibold text-foreground ring-1 ring-white/10 transition-all hover:bg-white/10 active:scale-95"
-                    >
-                      <Share2 className="h-4 w-4" />
-                      <span>Share</span>
-                    </button>
+                      <button 
+                        onClick={() => void generateSummary()}
+                        disabled={isSummarizing}
+                        className="p-3 rounded-2xl bg-[#0c0d18] border border-[#1a1b2e] text-[#818cf8] hover:bg-[#4f46e5] hover:text-white transition-all active:scale-95 disabled:opacity-40"
+                        title="AI Insight"
+                      >
+                        {isSummarizing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                      </button>
+
+                      <button 
+                        onClick={() => void shareVideo()}
+                        className="p-3 rounded-2xl bg-[#0c0d18] border border-[#1a1b2e] text-[#4a4b6a] hover:text-white transition-all active:scale-95"
+                      >
+                        <Share2 className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <AnimatePresence>
-                {aiSummary && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-2xl border border-primary/20 bg-primary/5 p-6 space-y-4 ring-1 ring-primary/10 relative overflow-hidden"
+                {/* 4. Description Box (Clean Style) */}
+                <div 
+                  className={cn(
+                    "rounded-[16px] bg-[#0c0d18]/40 p-6 text-[15px] leading-[1.8] text-[#a0a1c0] transition-all hover:bg-[#0c0d18]/60",
+                    !descriptionExpanded && "cursor-pointer"
+                  )} 
+                  onClick={() => !descriptionExpanded && setDescriptionExpanded(true)}
+                >
+                  <div className="flex items-center gap-4 mb-4 text-[14px] font-bold text-[#c7d2fe]">
+                    <span className="text-white font-black">{channelMetadata?.viewCount || "0"} views</span>
+                    <span className="text-[#4a4b6a] font-normal">•</span>
+                    <span className="text-[#818cf8] font-semibold italic uppercase tracking-wider text-[11px]">
+                      MedOneX Original Content
+                    </span>
+                  </div>
+                  
+                  <div className={cn("whitespace-pre-wrap font-arabic", !descriptionExpanded && "line-clamp-3")}>
+                     {channelMetadata?.description ? stripLinks(channelMetadata.description) : "No detailed description available for this lecture video."}
+                  </div>
+
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setDescriptionExpanded(!descriptionExpanded); }}
+                    className="mt-4 text-[14px] font-[700] text-[#4f46e5] hover:text-[#818cf8] transition-colors"
                   >
-                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] -z-10">
-                      <Sparkles className="h-24 w-24 text-primary" />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold font-display flex items-center gap-2 text-primary">
-                        <Sparkles className="h-4.5 w-4.5" />
-                        AI Insights & Summary
-                      </h3>
-                      <button onClick={() => setAiSummary(null)} className="text-muted-foreground hover:text-foreground">
-                         <X className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    <div className="prose prose-sm dark:prose-invert max-w-none text-foreground/80 leading-relaxed font-arabic">
-                      <ReactMarkdown>{aiSummary}</ReactMarkdown>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-white/10 hover:bg-white/[0.07] transition-colors cursor-pointer" onClick={() => { if(!commentsLoaded) void loadComments(active.id); setCommentsOpen(!commentsOpen); }}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[14px] font-bold">Comments <span className="text-muted-foreground ml-1 font-normal">{active.commentsCount}</span></h3>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", commentsOpen && "rotate-180")} />
+                    {descriptionExpanded ? "Show less" : "...more"}
+                  </button>
                 </div>
 
+                {/* 5. AI Summary Result */}
                 <AnimatePresence>
-                  {commentsOpen && (
+                  {aiSummary && (
                     <motion.div 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                      onClick={(e) => e.stopPropagation()}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="rounded-[12px] border border-[#4f46e5]/30 bg-[#1e1b4b]/40 p-5 space-y-3 relative overflow-hidden shadow-2xl backdrop-blur-md"
                     >
-                      <div className="space-y-6">
-                        <div className="flex gap-4">
-                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
-                              ME
-                           </div>
-                           <div className="flex-1 relative">
-                              <input 
-                                value={commentInput}
-                                onChange={(e) => setCommentInput(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && void addComment()}
-                                placeholder="Write a comment..." 
-                                className="w-full bg-muted/30 border border-white/[0.02] rounded-full px-5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
-                              />
-                              <button 
-                                onClick={() => void addComment()}
-                                disabled={!commentInput.trim()}
-                                className="absolute right-2 top-1.5 h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white disabled:opacity-30 transition-all active:scale-90"
-                              >
-                                 <Send className="h-3 w-3" />
-                              </button>
-                           </div>
-                        </div>
-
-                        <div className="space-y-5">
-                          {groupedComments.map(c => (
-                            <div key={c.id} className="group flex gap-4 border-b border-white/[0.03] pb-5 last:border-0">
-                               <div className="h-8 w-8 rounded-full bg-muted overflow-hidden shrink-0">
-                                  {c.user.image ? <img src={c.user.image} className="h-full w-full object-cover" /> : <div className="h-full w-full flex items-center justify-center text-[10px] font-bold opacity-30">US</div>}
-                               </div>
-                               <div className="flex-1 space-y-1">
-                                  <div className="flex items-center justify-between">
-                                     <span className="text-[13px] font-semibold">{c.user.name}</span>
-                                     <span className="text-[11px] text-muted-foreground/50">{new Date(c.createdAt).toLocaleDateString()}</span>
-                                  </div>
-                                  <p className="text-[14px] text-muted-foreground leading-relaxed">{c.content}</p>
-                                  <div className="flex items-center gap-4 pt-1">
-                                     <button className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-red-500 transition-colors">
-                                        <Heart className="h-3.5 w-3.5" />
-                                        <span>Like</span>
-                                     </button>
-                                     <button 
-                                      onClick={() => { setReplyToId(c.id); setCommentInput(`@${c.user.nickname || c.user.name.split(' ')[0]} `); }}
-                                      className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors"
-                                     >
-                                        Reply
-                                     </button>
-                                     {(c.userId === currentUserId || isAdmin) && (
-                                       <button onClick={() => deleteComment(c.id)} className="text-[11px] font-medium text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                                          Delete
-                                       </button>
-                                     )}
-                                  </div>
-                               </div>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-[14px] font-[600] flex items-center gap-2 text-[#818cf8]">
+                          <Sparkles className="h-4 w-4" />
+                          AI Lecture Summary
+                        </h3>
+                        <button onClick={() => setAiSummary(null)} className="text-[#4a4b6a] hover:text-[#ffffff]">
+                           <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="prose prose-sm prose-invert max-w-none text-[13px] text-[#c0c1e0] font-arabic">
+                        <ReactMarkdown>{aiSummary}</ReactMarkdown>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            </div>
-          )}
-        </section>
+            )}
+          </section>
 
-        {/* RIGHT COLUMN: Sidebar Playlist */}
-        <AnimatePresence>
-          {playlistVisible && (
-            <motion.aside
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="lg:col-span-4 xl:col-span-3 h-fit lg:sticky lg:top-4"
-            >
-              <div className="flex flex-col h-full rounded-2xl border border-white/[0.03] bg-black/20 p-4 ring-1 ring-white/5 backdrop-blur-xl">
-                  <div className="mb-4 flex items-center justify-between">
-                     <h3 className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground/60">
-                        Lecture Playlist
-                     </h3>
-                     <div className="flex items-center gap-2">
-                      {isAdmin && (
-                        <button onClick={() => setShowAddVideo(!showAddVideo)} className="text-[11px] font-semibold text-primary hover:underline transition-all">
-                            + Add Video
-                        </button>
-                      )}
-                      <button onClick={() => setPlaylistVisible(false)} className="lg:hidden text-muted-foreground hover:text-foreground">
-                        <X className="h-4 w-4" />
-                      </button>
-                     </div>
-                  </div>
-
-                  {isAdmin && showAddVideo && (
-                    <div className="mb-4 space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-3 animate-in slide-in-from-top-2">
-                       <input value={newVideoTitle} onChange={e => setNewVideoTitle(e.target.value)} placeholder="Title" className="w-full bg-background/50 border border-white/[0.02] rounded-md px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                       <input value={newVideoUrl} onChange={e => setNewVideoUrl(e.target.value)} placeholder="Video URL" className="w-full bg-background/50 border border-white/[0.02] rounded-md px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                       <button onClick={addVideo} disabled={addingVideo} className="w-full bg-primary text-white py-1.5 rounded-md text-xs font-bold hover:bg-primary/90 disabled:opacity-50">
-                          {addingVideo ? "Adding..." : "Confirm Add"}
-                       </button>
-                    </div>
-                  )}
-
-                  <div className="space-y-2 max-h-[100vh] lg:max-h-[600px] overflow-y-auto pr-2 custom-scrollbar flex-1">
-                     {videos.map((v, i) => {
-                       const isActive = activeId === v.id;
-                       const embed = getEmbed(v.url);
-                       const thumbUrl = embed?.kind === "youtube" ? `https://i.ytimg.com/vi/${embed.id}/mqdefault.jpg` : null;
-
-                       return (
-                         <button
-                           key={v.id}
-                           onClick={() => { setActiveId(v.id); setCommentsOpen(false); setCommentsLoaded(false); }}
-                           className={cn(
-                             "relative w-full group flex items-start gap-4 p-2 rounded-xl border border-transparent transition-all",
-                             isActive ? "bg-primary/5 border-primary/10" : "hover:bg-muted/40"
-                           )}
-                         >
-                           {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] bg-primary rounded-r-md" />}
-
-                            <div className="relative w-[120px] md:w-[160px] aspect-[16/9] rounded-lg overflow-hidden border border-white/[0.02] flex-shrink-0 bg-muted/20">
-                               {thumbUrl ? (
-                                 <img src={thumbUrl} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
-                               ) : (
-                                 <div className="h-full w-full flex items-center justify-center opacity-20"><Video className="h-6 w-6" /></div>
-                               )}
-                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <PlayCircle className="h-8 w-8 text-white" />
-                               </div>
-                               <div className="absolute bottom-1 right-1 bg-black/80 px-1 py-0.5 rounded text-[10px] font-bold text-white leading-none">
-                                 Section {i + 1}
-                               </div>
-                            </div>
-
-                            <div className="flex-1 min-w-0 flex flex-col items-start gap-1 py-0.5">
-                               <div className="flex w-full items-start justify-between gap-1">
-                                  <p className={cn(
-                                    "text-[12px] md:text-[13px] font-bold tracking-tight line-clamp-2 text-left leading-[1.3]",
-                                    isActive ? "text-primary" : "text-foreground group-hover:text-primary transition-colors"
-                                  )}>
-                                    {v.title}
-                                  </p>
-                                  {isAdmin && (
-                                    <div 
-                                      onClick={(e) => { e.stopPropagation(); deleteVideo(v.id); }}
-                                      className="p-1 rounded text-muted-foreground hover:bg-red-500/10 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </div>
-                                  )}
-                               </div>
-                               <div className="flex flex-col gap-0.5 opacity-40">
-                                 <span className="text-[10px] md:text-[11px] font-medium">Instructor Q</span>
-                                 <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-medium">
-                                   <span>{v.likesCount} likes</span>
-                                   <span>•</span>
-                                   <span>{v.commentsCount} comments</span>
-                                 </div>
-                               </div>
-                            </div>
-                         </button>
-                       );
-                     })}
-                  </div>
+          {/* 6. INTERACTIVE SIDEBAR (Cinematic Design) */}
+          <aside className="sticky top-[100px] flex flex-col gap-6">
+            <div className="rounded-[32px] bg-[#0c0d18]/60 backdrop-blur-2xl border border-[#1a1b2e] overflow-hidden shadow-2xl">
+              {/* Sidebar Header */}
+              <div className="p-6 bg-gradient-to-b from-[#13142a] to-transparent border-b border-[#1a1b2e]">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[12px] font-[800] uppercase tracking-[3px] text-[#4f46e5]">Curriculum Hub</h3>
+                  <div className="bg-[#1e1b4b] px-3 py-1 rounded-full text-[10px] font-black text-[#818cf8] border border-[#4f46e5]/30">STUDIO</div>
+                </div>
+                <h2 className="text-[18px] font-[800] text-white tracking-tight">Lecture Series</h2>
+                <div className="mt-4 flex items-center gap-2 text-[#4a4b6a] text-[11px] font-bold">
+                   <BookOpen className="h-3.5 w-3.5" />
+                   <span>Chapter 4: Advanced Pathology</span>
+                </div>
               </div>
 
-              {hubUrl && (
-                <div className="hidden lg:block mt-4">
-                  <Link 
-                    href={hubUrl}
-                    className="group flex h-9 items-center gap-2 rounded-lg border border-border bg-muted/20 px-4 text-[13px] font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
-                  >
-                    <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                    Back to lecture sections
-                  </Link>
+              {/* Enhanced Playlist Items */}
+              <div className="p-3 space-y-3 max-h-[calc(100vh-450px)] overflow-y-auto custom-scrollbar">
+                {videos.map((v, i) => {
+                  const isActive = activeId === v.id;
+                  const embed = getEmbed(v.url);
+                  const thumbUrl = embed?.kind === "youtube" ? `https://i.ytimg.com/vi/${embed.id}/mqdefault.jpg` : null;
+
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => { setActiveId(v.id); setCommentsOpen(false); setCommentsLoaded(false); }}
+                      className={cn(
+                        "relative w-full group flex items-center gap-4 p-3 rounded-2xl transition-all text-left overflow-hidden",
+                        isActive ? "bg-[#4f46e5]/10 border border-[#4f46e5]/30" : "hover:bg-[#13142a]"
+                      )}
+                    >
+                      {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#4f46e5]" />}
+                      
+                      <div className="relative w-[100px] h-[60px] rounded-xl overflow-hidden bg-black shrink-0 border border-white/5 shadow-lg group-hover:scale-105 transition-transform">
+                        {thumbUrl ? (
+                          <img src={thumbUrl} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center bg-[#13142a]"><Video className="h-5 w-5 text-[#4a4b6a]" /></div>
+                        )}
+                        {isActive && (
+                          <div className="absolute inset-0 bg-[#4f46e5]/40 flex items-center justify-center">
+                             <div className="flex gap-[3px] items-end h-[12px]">
+                               <div className="w-[3px] bg-white rounded-full animate-bounce" />
+                               <div className="w-[3px] bg-white rounded-full animate-bounce delay-75" />
+                               <div className="w-[3px] bg-white rounded-full animate-bounce delay-150" />
+                             </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className={cn("text-[13px] font-[700] leading-[1.3] line-clamp-2", isActive ? "text-[#818cf8]" : "text-[#c7d2fe] group-hover:text-white")}>
+                          {v.title}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2 text-[10px] text-[#4a4b6a] font-bold uppercase tracking-wider">
+                           <span>0{i + 1}</span>
+                           <span>•</span>
+                           <span>MedOneX Studio</span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Admin Quick Add */}
+              {isAdmin && (
+                <div className="p-4 border-t border-[#1a1b2e]">
+                   <button onClick={() => setShowAddVideo(!showAddVideo)} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#4f46e5] to-[#06b6d4] text-white text-[12px] font-black uppercase tracking-wider shadow-lg shadow-[#4f46e5]/20 hover:scale-[1.02] transition-all">
+                      Deploy Video
+                   </button>
                 </div>
               )}
-            </motion.aside>
-          )}
-        </AnimatePresence>
+            </div>
 
-        <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-           <Link 
-              href={hubUrl}
-              className="flex items-center gap-2 rounded-full bg-background border border-border shadow-xl px-5 py-2 text-sm font-semibold whitespace-nowrap active:scale-95"
-           >
-              <ChevronLeft className="h-4 w-4" />
-              Lecture Sections
-           </Link>
+            {/* Admin Form Panel */}
+            {isAdmin && showAddVideo && (
+              <div className="rounded-[32px] bg-[#0c0d18] border border-[#1a1b2e] p-6 space-y-4 animate-in zoom-in-95 duration-300 shadow-2xl">
+                 <h4 className="text-[12px] font-black text-[#818cf8] uppercase tracking-widest">Studio Deployment</h4>
+                 <input value={newVideoTitle} onChange={e => setNewVideoTitle(e.target.value)} placeholder="Lecture Title" className="w-full bg-[#07080f] border border-[#1a1b2e] rounded-xl px-4 py-3 text-[13px] text-white focus:ring-1 focus:ring-[#4f46e5] outline-none" />
+                 <input value={newVideoUrl} onChange={e => setNewVideoUrl(e.target.value)} placeholder="Source URL" className="w-full bg-[#07080f] border border-[#1a1b2e] rounded-xl px-4 py-3 text-[13px] text-white focus:ring-1 focus:ring-[#4f46e5] outline-none" />
+                 <div className="flex gap-2 pt-2">
+                   <button onClick={() => setShowAddVideo(false)} className="flex-1 py-3 rounded-xl bg-[#13142a] text-[11px] font-bold text-[#4a4b6a]">Discard</button>
+                   <button onClick={addVideo} disabled={addingVideo} className="flex-1 py-3 rounded-xl bg-white text-black text-[11px] font-black uppercase tracking-wider disabled:opacity-50">Publish</button>
+                 </div>
+              </div>
+            )}
+          </aside>
         </div>
+
+      {/* BOTTOM RETURN BUTTON */}
+      {hubUrl && (
+        <div className="mt-16 flex justify-center pb-12">
+          <Link 
+            href={hubUrl || "#"} 
+            className="flex items-center gap-3 px-16 py-4 rounded-[20px] bg-[#0c0d18] border border-[#1a1b2e] text-[16px] font-[700] text-[#c7d2fe] hover:bg-[#13142a] hover:border-[#4f46e5]/30 transition-all shadow-2xl active:scale-95 group"
+          >
+            <ChevronLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+            Return to Lecture Sections
+          </Link>
+        </div>
+      )}
+
+      {/* MOBILE FLOATING BUTTON */}
+      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        {hubUrl && (
+          <Link href={hubUrl || "#"} className="flex items-center gap-2 rounded-full bg-[#0c0d18]/90 backdrop-blur-xl border border-[#1a1b2e] shadow-[0_20px_50px_rgba(0,0,0,0.7)] px-6 py-2.5 text-[12px] font-bold text-[#c7d2fe] whitespace-nowrap active:scale-95 transition-all hover:bg-[#13142a]">
+            <ChevronLeft className="h-4 w-4" />
+            Lecture Sections
+          </Link>
+        )}
       </div>
+
+
     </div>
   );
 }

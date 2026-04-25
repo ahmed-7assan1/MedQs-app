@@ -5,8 +5,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import {
   LayoutDashboard, BookOpen, MessageSquare, Clock, Settings, LogOut,
   ShieldCheck, Bell, X, Sparkles, HelpCircle, Library, User,
-  Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video, Mic2
+  Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video, Mic2,
+  Maximize, Minimize
 } from "lucide-react";
+
 import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore, useSidebarStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,8 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
   const [notifLoading, setNotifLoading] = useState(false);
   const { isOpen: mobileOpen, close: setMobileClose, toggle: toggleMobile } = useSidebarStore();
   const [userOpen, setUserOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
 
   const userRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -60,6 +64,21 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
 
   // Close mobile on escape
   useEffect(() => {
@@ -200,6 +219,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
                   )}
                 >
                   <Bell className="h-[17px] w-[17px]" />
+
                   {totalUnread > 0 && (
                     <span className="absolute right-[9px] top-[9px] flex h-2 w-2 rounded-full bg-red-500 ring-2 ring-background"
                       style={{ boxShadow: "0 0 6px rgba(239,68,68,0.8)" }} />
@@ -233,6 +253,16 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
                 )}
               </div>
             )}
+
+            {/* Fullscreen Toggle */}
+            <button
+              onClick={toggleFullscreen}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? <Minimize className="h-[17px] w-[17px]" /> : <Maximize className="h-[17px] w-[17px]" />}
+            </button>
+
 
             {/* User avatar */}
             {!isGuest ? (
@@ -484,11 +514,17 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
                     className="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted transition-colors">
                     <Settings className="h-3.5 w-3.5" /> Settings
                   </Link>
-                  <button onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="flex items-center justify-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/15 transition-colors">
-                    <LogOut className="h-3.5 w-3.5" /> Sign out
-                  </button>
-                </div>
+                    <button onClick={() => signOut({ callbackUrl: "/login" })}
+                      className="flex items-center justify-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/15 transition-colors">
+                      <LogOut className="h-3.5 w-3.5" /> Out
+                    </button>
+                    <button onClick={toggleFullscreen}
+                      className="col-span-2 flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted transition-colors">
+                      {isFullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
+                      {isFullscreen ? "Exit Fullscreen" : "Fullscreen Mode"}
+                    </button>
+                  </div>
+
                 <p className="mt-3 text-center text-[10px] text-muted-foreground/50">{siteName} · Medical Education Platform</p>
               </div>
             )}

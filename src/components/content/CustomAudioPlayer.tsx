@@ -10,6 +10,8 @@ import {
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { extractDriveId, getDriveStreamUrl } from "@/lib/lecture-navigation";
+
 
 interface SpotifyMetadata {
   title: string;
@@ -53,6 +55,9 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
   const isSpotify = url.includes("spotify.com");
   const ytId = extractYouTubeId(url);
   const isYoutube = !!ytId;
+  const driveId = extractDriveId(url);
+  const isDrive = !!driveId;
+
 
   useEffect(() => {
     setMounted(true);
@@ -98,14 +103,17 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
   const duration = isCurrent ? storeDuration : 0;
 
   const togglePlay = useCallback(() => {
+    const finalUrl = isDrive ? getDriveStreamUrl(driveId!) : url;
+
     const trackData = {
       id: url,
-      url,
+      url: finalUrl,
       title: metadata?.title || initialTitle || "Lecture Audio Record",
-      artist: isYoutube ? "YouTube Audio Record" : (metadata?.artist || "MedOneX Academic Audio"),
+      artist: isYoutube ? "YouTube Audio Record" : isDrive ? "Google Drive Audio" : (metadata?.artist || "MedOneX Academic Audio"),
       image: metadata?.image,
       isSpotify
     };
+
 
     // If it's a new track or the global player is stopped
     if (!isCurrent) {
@@ -232,8 +240,9 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
                 <div className="mb-6">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-2 py-0.5 rounded-md bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-                      {isSpotify ? (metadata?.type ? `Spotify ${metadata.type}` : "Spotify Record") : (isYoutube ? "YouTube Record" : "MedOneX Native")}
+                      {isSpotify ? (metadata?.type ? `Spotify ${metadata.type}` : "Spotify Record") : isYoutube ? "YouTube Record" : isDrive ? "Google Drive Record" : "MedOneX Native"}
                     </span>
+
                     {isSpotify && !metadata?.preview_url && (
                       <span className="text-[10px] text-amber-500 font-bold uppercase tracking-tight flex items-center gap-1">
                         <Info className="h-3 w-3" /> External Stream Only

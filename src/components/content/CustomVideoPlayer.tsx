@@ -31,9 +31,18 @@ function extractYouTubeId(url: string): string | null {
 }
 
 function extractGoogleDriveId(url: string): string | null {
-  const match = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  const match = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([^/&?]+)/);
   return match ? match[1] : null;
 }
+
+
+function getDriveStreamUrl(id: string): string {
+  return `/api/v1/drive/stream?id=${id}`;
+}
+
+
+
+
 
 function mapYouTubeQuality(q: string): string {
   const map: Record<string, string> = {
@@ -71,6 +80,9 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
   const [buffering, setBuffering] = useState(false);
   const [buffered, setBuffered] = useState(0);
   const [playbackRestricted, setPlaybackRestricted] = useState(false);
+  const [useNativeForDrive, setUseNativeForDrive] = useState(false);
+
+
 
   const ytPlayerRef = useRef<any>(null);
   const progressTimer = useRef<ReturnType<typeof setInterval>>();
@@ -85,7 +97,12 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
 
   const ytId = extractYouTubeId(url);
   const driveId = extractGoogleDriveId(url);
-  const isHtml5 = !ytId && !driveId && /\.(mp4|webm|ogg)$/i.test(url);
+  const isSharePoint = url.includes("sharepoint.com") || url.includes("onedrive.live.com");
+  const isEmbed = isSharePoint || url.includes("/embed/");
+
+  const driveStreamUrl = driveId ? getDriveStreamUrl(driveId) : null;
+  const isHtml5 = (!ytId && !driveId && /\.(mp4|webm|ogg)$/i.test(url)) || (driveId && useNativeForDrive);
+
 
   useEffect(() => {
     setMounted(true);
@@ -103,6 +120,19 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
     };
   }, []);
 
+  // Auto-fallback for slow Drive Premium Stream
+  useEffect(() => {
+    if (driveId && useNativeForDrive && !videoReady && mounted) {
+      const timer = setTimeout(() => {
+        if (!videoReady) {
+          console.log("Drive Premium Stream slow, falling back to Ghost Player");
+          setUseNativeForDrive(false);
+        }
+      }, 8000); // 8 seconds threshold
+      return () => clearTimeout(timer);
+    }
+  }, [driveId, useNativeForDrive, videoReady, mounted]);
+
   useEffect(() => {
     if (!ytId || !mounted || !iframeLoaded) return;
     const initPlayer = () => {
@@ -118,6 +148,8 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
           iv_load_policy: 3,
           disablekb: 1,
           rel: 0,
+          fs: 0,
+          autohide: 1,
         },
         events: {
           onReady: (event: any) => {
@@ -182,10 +214,26 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
   const resetHideTimer = useCallback(() => {
     setShowControls(true);
     if (hideTimeout.current) clearTimeout(hideTimeout.current);
+    
+    // Only set timer to hide if video is playing
+    hideTimeout.current = setTimeout(() => {
+      setPlaying(prevPlaying => {
+        if (prevPlaying) setShowControls(false);
+        return prevPlaying;
+      });
+    }, 3500);
+  }, []);
+
+  // Effect to handle initial hide or state changes
+  useEffect(() => {
     if (playing) {
-      hideTimeout.current = setTimeout(() => setShowControls(false), 3000);
+      resetHideTimer();
+    } else {
+      setShowControls(true);
+      if (hideTimeout.current) clearTimeout(hideTimeout.current);
     }
-  }, [playing]);
+  }, [playing, resetHideTimer]);
+
 
   const seekRelative = (seconds: number) => {
     if (ytId && ytPlayerRef.current?.getCurrentTime) {
@@ -194,17 +242,28 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
       const next = Math.max(0, Math.min(dur, cur + seconds));
       ytPlayerRef.current.seekTo(next, true);
       setPlayed(next / (dur || 1));
+    } else if (videoRef.current) {
+      const cur = videoRef.current.currentTime;
+      const dur = videoRef.current.duration || 0;
+      const next = Math.max(0, Math.min(dur, cur + seconds));
+      videoRef.current.currentTime = next;
+      setPlayed(next / (dur || 1));
     }
+    resetHideTimer();
   };
 
   const handleContainerClick = (e: React.MouseEvent) => {
-    if (!showControls) {
+    e.stopPropagation();
+    if (showControls) {
+      // Only allow hiding if the video is playing
+      if (playing) {
+        setShowControls(false);
+        if (hideTimeout.current) clearTimeout(hideTimeout.current);
+      }
+    } else {
       setShowControls(true);
       resetHideTimer();
-      return;
     }
-    setShowControls(true);
-    resetHideTimer();
   };
 
   const togglePlayPause = useCallback((e?: React.MouseEvent) => {
@@ -212,6 +271,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
     if (ytId) {
       if (!videoReady) {
         setPlaying(true);
+        resetHideTimer();
         return;
       }
       if (playing) {
@@ -220,12 +280,28 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
       } else {
         if (ytPlayerRef.current?.playVideo) ytPlayerRef.current.playVideo();
         setPlaying(true);
+        resetHideTimer();
+      }
+    } else if (driveId && !useNativeForDrive) {
+      // Send command to Drive Iframe (which uses YT player internally)
+      const iframe = wrapperRef.current?.querySelector('iframe');
+      if (iframe?.contentWindow) {
+        const cmd = playing ? 'pauseVideo' : 'playVideo';
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: cmd, args: [] }), '*');
+        setPlaying(!playing);
+        resetHideTimer();
       }
     } else if (videoRef.current) {
-      if (playing) videoRef.current.pause();
-      else videoRef.current.play();
+      if (playing) {
+        videoRef.current.pause();
+        setPlaying(false);
+      } else {
+        videoRef.current.play();
+        setPlaying(true);
+        resetHideTimer();
+      }
     }
-  }, [ytId, videoReady, playing]);
+  }, [ytId, driveId, useNativeForDrive, videoReady, playing, resetHideTimer]);
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
@@ -267,6 +343,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
       ref={wrapperRef}
       className="group relative flex h-full w-full flex-col overflow-hidden bg-black rounded-[20px] shadow-2xl border border-white/[0.02]"
       style={{ aspectRatio: "16/9" }}
+      onContextMenu={(e) => e.preventDefault()}
       onMouseMove={resetHideTimer}
       onMouseLeave={() => {
         if (playing) setShowControls(false);
@@ -274,10 +351,21 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         setHoverPosition(null);
       }}
     >
+      {/* SECURITY MASKS (Hides YouTube Branding & Controls) */}
+      {(ytId) && (
+        <>
+          <div className="absolute inset-x-0 top-0 z-[35] h-16 pointer-events-auto cursor-default" /> {/* Top title mask */}
+          <div className="absolute bottom-0 left-0 z-[35] h-14 w-48 pointer-events-auto cursor-default" /> {/* Bottom left logo mask */}
+          <div className="absolute bottom-0 right-0 z-[35] h-14 w-32 pointer-events-auto cursor-default" /> {/* Bottom right mask */}
+          <div className="absolute top-0 right-0 z-[35] h-20 w-40 pointer-events-auto cursor-default" /> {/* Top right share mask */}
+        </>
+      )}
+
       <div 
-        className="absolute inset-0 z-0 bg-black cursor-pointer"
-        onClick={handleContainerClick}
+        className={cn("absolute inset-0 z-0 bg-black", (ytId || isHtml5) && "cursor-pointer")}
+        onClick={(ytId || isHtml5) ? handleContainerClick : undefined}
       >
+
         {!videoReady && ytId && (
           <div className="absolute inset-0 z-10 bg-black">
             <img 
@@ -300,6 +388,24 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
             </div>
           </div>
         )}
+
+        {!videoReady && driveId && (
+          <div className="absolute inset-0 z-10 bg-[#07080f] flex flex-col items-center justify-center gap-6">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-red-600/20 blur-2xl animate-pulse" />
+              <button 
+                onClick={togglePlayPause}
+                className="group/play relative flex h-24 w-24 items-center justify-center rounded-full bg-red-600 text-white shadow-2xl transition-all hover:scale-110 hover:bg-red-500"
+              >
+                <Play className="ml-1.5 h-10 w-10 fill-current" />
+              </button>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-white text-lg font-bold tracking-tight">Ready to start your session?</p>
+              <p className="text-white/40 text-sm uppercase tracking-[0.2em] font-medium">Click to launch MedOneX Studio</p>
+            </div>
+          </div>
+        )}
         {ytId && (
           <div
             ref={iframeRef}
@@ -309,33 +415,88 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
             }}
           />
         )}
-
-        {!videoReady && (
-          <>
-            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/80 to-transparent z-[5] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent z-[5] pointer-events-none" />
-          </>
+        {driveId && !useNativeForDrive && (
+          <div className="absolute inset-0 z-[1] bg-black">
+            <iframe
+              src={`https://drive.google.com/file/d/${driveId}/preview`}
+              className="h-full w-full border-0"
+              allow="autoplay"
+              allowFullScreen
+              onLoad={() => setVideoReady(true)}
+            />
+            {/* Pop-out blocker mask */}
+            <div className="absolute top-0 right-0 z-20 h-16 w-16 bg-black pointer-events-auto cursor-default" />
+          </div>
         )}
 
-        {/* Persistent Brand Overlay (Masks YouTube Logo) */}
-        <div className="absolute bottom-6 right-6 z-[12] pointer-events-none">
+
+        {isSharePoint && (
+           <iframe
+             src={url.includes("action=embedview") ? url : `${url}${url.includes("?") ? "&" : "?"}action=embedview`}
+             className="absolute inset-0 h-full w-full border-0"
+             allowFullScreen
+             onLoad={() => setVideoReady(true)}
+           />
+        )}
+
+        {isHtml5 && (
+          <video
+            ref={videoRef}
+            src={driveId ? driveStreamUrl! : url}
+            className="absolute inset-0 h-full w-full object-contain"
+            playsInline
+            onTimeUpdate={(e) => {
+              const v = e.currentTarget;
+              setPlayed(v.currentTime / (v.duration || 1));
+              const b = v.buffered;
+              if (b.length > 0) setBuffered(b.end(b.length - 1) / v.duration);
+            }}
+            onLoadedMetadata={(e) => {
+              setDuration(e.currentTarget.duration);
+              setVideoReady(true);
+            }}
+            onWaiting={() => setBuffering(true)}
+            onPlaying={() => {
+              setBuffering(false);
+              setPlaying(true);
+            }}
+            onPause={() => setPlaying(false)}
+            onEnded={() => setPlaying(false)}
+            onRateChange={(e) => setPlaybackRate(e.currentTarget.playbackRate)}
+            onError={(e) => {
+              console.error("Video error:", e);
+            }}
+          />
+        )}
+
+        {/* Persistent Brand Overlay (Watermark) - Now Smart/Dynamic */}
+        <motion.div 
+          initial={false}
+          animate={{ 
+            bottom: showControls ? 100 : 24,
+            opacity: 1
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="absolute right-6 z-[60] pointer-events-none"
+        >
           <div className="flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-3 py-1.5 border border-white/10 shadow-xl">
             <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center">
               <Play className="h-3 w-3 fill-white text-white ml-0.5" />
             </div>
             <span className="text-[10px] font-bold tracking-widest text-white uppercase">MedOneX Studio</span>
           </div>
-        </div>
+        </motion.div>
 
         <AnimatePresence>
-          {showControls && (
+          {showControls && !driveId && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 z-[40] flex items-center justify-center gap-6 md:gap-12 bg-black/20 backdrop-blur-[1px]"
-              onClick={(e) => { e.stopPropagation(); setShowControls(false); }}
+              onClick={handleContainerClick}
             >
+
               <button 
                 onClick={(e) => { e.stopPropagation(); seekRelative(-10); }}
                 className="group/seek flex flex-col items-center gap-2 text-white/80 transition-all hover:scale-110 hover:text-white"
@@ -383,59 +544,63 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
           <VideoOff className="mb-4 h-16 w-16 text-white/20" />
           <h3 className="mb-2 text-xl font-bold text-white">Embedded Playback Disabled</h3>
           <p className="mb-6 text-sm text-white/40 max-w-sm">
-            The owner of this video has restricted playback to YouTube only.
+            Please contact the administrator to resolve this issue.
           </p>
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full bg-red-600 px-8 py-3 text-sm font-black text-white transition-all hover:bg-red-500 hover:scale-105"
-          >
-            Watch on YouTube
-          </a>
         </div>
+
       )}
 
-      {/* CLICK RECEIVER */}
-      <div className="absolute inset-0 z-30 cursor-pointer" onClick={togglePlayPause} onDoubleClick={toggleFullscreen} />
+      {/* CLICK RECEIVER (Captures screen clicks for UI toggle) */}
+      {(ytId || isHtml5) && (
+        <div 
+          className="absolute inset-0 z-30 cursor-pointer" 
+          onClick={handleContainerClick} 
+          onDoubleClick={toggleFullscreen} 
+        />
+      )}
 
       {/* PREMIUM CONTROLS OVERLAY */}
       <AnimatePresence>
-        {showControls && (
+        {showControls && (ytId || isHtml5) && !driveId && (
+
+
+
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute inset-x-0 bottom-0 z-50 flex flex-col gap-4 px-5 pb-5 pt-20"
+            className="absolute inset-x-0 bottom-0 z-50 flex flex-col gap-4 px-6 pb-6 pt-32"
             style={{ 
-              background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 70%, transparent 100%)",
+              background: "linear-gradient(to top, #07080f 0%, rgba(7, 8, 15, 0.9) 40%, rgba(7, 8, 15, 0.4) 70%, transparent 100%)",
               pointerEvents: "auto" 
             }}
             onClick={(e) => e.stopPropagation()}
           >
+
+
             {/* Top Row: Title or Header (Optional) */}
-            {title && isFullscreen && (
               <div className="absolute top-6 left-6 flex items-center gap-4 text-white drop-shadow-lg">
-                <Info className="h-5 w-5 text-red-500" />
-                <span className="font-bold tracking-tight">{title}</span>
+                <Info className="h-5 w-5 text-[#818cf8]" />
+                <span className="font-bold tracking-tight text-[16px]">{title}</span>
               </div>
-            )}
+
 
             {/* Bottom Controls Container */}
             <div className="flex flex-col gap-4">
               
               {/* Row 1: Seeker Bar */}
-              <div className="group relative flex h-1.5 w-full cursor-pointer items-center rounded-full bg-white/10 transition-all hover:h-2">
+              <div className="group relative flex h-1.5 w-full cursor-pointer items-center rounded-full bg-white/10 transition-all hover:h-2.5">
                 <div 
                   className="absolute left-0 top-0 h-full rounded-full bg-white/10 pointer-events-none" 
                   style={{ width: `${buffered * 100}%` }} 
                 />
                 <div 
-                  className="absolute left-0 top-0 h-full rounded-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all pointer-events-none" 
+                  className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-[#4f46e5] to-[#818cf8] shadow-[0_0_20px_rgba(79,70,229,0.5)] transition-all pointer-events-none" 
                   style={{ width: `${played * 100}%` }} 
                 >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-3.5 w-3.5 scale-0 rounded-full bg-white shadow-xl transition-transform group-hover:scale-100" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-4 w-4 scale-0 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-transform group-hover:scale-100" />
                 </div>
+
                 <input
                   type="range" min={0} max={1} step="any" value={played}
                   onChange={handleSeek}
@@ -447,9 +612,10 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 md:gap-6">
                   <div className="flex items-center gap-2">
-                    <button onClick={(e) => { e.stopPropagation(); seekRelative(-10); }} className="text-white/70 hover:text-red-500 transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); seekRelative(-10); }} className="text-white/70 hover:text-[#818cf8] transition-colors">
                       <SkipBack className="h-5 w-5" />
                     </button>
+
                     <button onClick={togglePlayPause} className="text-white hover:text-red-500 transition-colors">
                       {playing ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current" />}
                     </button>
@@ -511,7 +677,19 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
                   <button onClick={toggleFullscreen} className="text-white hover:text-red-500 transition-colors">
                     {isFullscreen ? <Minimize className="h-6 w-6" /> : <Maximize className="h-6 w-6" />}
                   </button>
+
+                  {/* Drive Fallback Toggle */}
+                  {driveId && (
+                    <button 
+                      onClick={() => setUseNativeForDrive(!useNativeForDrive)}
+                      className="ml-2 flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 text-[10px] font-bold text-white hover:bg-white/20 transition-all"
+                      title="Switch to original Drive player if video doesn't load"
+                    >
+                      {useNativeForDrive ? "Original Player" : "Premium UI"}
+                    </button>
+                  )}
                 </div>
+
               </div>
             </div>
 

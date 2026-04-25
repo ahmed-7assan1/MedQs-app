@@ -1,16 +1,35 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
+export function extractDriveId(url: string): string | null {
+  if (!url) return null;
+  const match = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([^/&?]+)/);
+
+  return match ? match[1] : null;
+}
+
+
+export function getDrivePreviewUrl(id: string): string {
+  return `https://drive.google.com/file/d/${id}/preview`;
+}
+
+export function getDriveStreamUrl(id: string): string {
+  return `https://drive.google.com/uc?export=download&id=${id}`;
+}
+
 export function getVideoEmbedInfo(url: string): { embedUrl: string; type: string } | null {
   if (!url) return null;
   const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
   if (yt) return { embedUrl: `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`, type: "YouTube" };
-  const gd = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if (gd) return { embedUrl: `https://drive.google.com/file/d/${gd[1]}/preview`, type: "Google Drive" };
+  
+  const driveId = extractDriveId(url);
+  if (driveId) return { embedUrl: getDrivePreviewUrl(driveId), type: "Google Drive" };
+  
   if (url.includes("t.me") || url.includes("telegram")) return { embedUrl: url, type: "Telegram" };
   if (url.includes("/embed/") || url.match(/\.(mp4|webm|ogg)$/i)) return { embedUrl: url, type: "Video" };
   return null;
 }
+
 
 /** Lecture must belong to the module in the URL (single query, avoids relation bugs). */
 export async function getLectureInModule(moduleId: string, lectureId: string) {

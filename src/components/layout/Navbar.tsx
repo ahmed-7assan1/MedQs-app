@@ -5,8 +5,10 @@ import { useState, useRef, useEffect } from "react";
 import {
   Bell, Sun, Moon, Monitor, Menu, X, Video,
   BookOpen, LayoutDashboard, MessageSquare, Clock, FileText,
-  User, Settings, LogOut, Trophy, ShieldCheck, BellOff, Mic2
+  User, Settings, LogOut, Trophy, ShieldCheck, BellOff, Mic2,
+  Maximize, Minimize
 } from "lucide-react";
+
 import { signOut } from "next-auth/react";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
@@ -41,7 +43,9 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedOn
   const [notifOpen, setNotifOpen]   = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
 
   // Close user menu on outside click
   useEffect(() => {
@@ -53,6 +57,21 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedOn
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
 
   const themeOptions = [
     { val: "light" as const, icon: Sun },
@@ -119,6 +138,16 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedOn
               </button>
             ))}
           </div>
+
+          {/* Fullscreen toggle */}
+          <button
+            onClick={toggleFullscreen}
+            className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg hover:bg-muted transition-colors text-white/60 hover:text-white"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+          </button>
+
 
           {/* Notifications bell */}
           <div className="relative">
@@ -236,7 +265,15 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedOn
                 <Icon className="h-3.5 w-3.5" /> {val}
               </button>
             ))}
+            <button
+              onClick={toggleFullscreen}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs capitalize transition-colors bg-muted text-muted-foreground hover:text-foreground"
+            >
+              {isFullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
+              {isFullscreen ? "Exit" : "Full"}
+            </button>
           </div>
+
         </div>
       )}
     </header>

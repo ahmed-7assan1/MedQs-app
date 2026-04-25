@@ -27,6 +27,13 @@ export function PersistentAudioPlayer() {
       url.includes("youtube-nocookie.com")
     );
   }, [currentTrack?.url]);
+
+  const finalAudioUrl = useMemo(() => {
+    if (!currentTrack?.url) return "";
+    const driveMatch = currentTrack.url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([^/&?]+)/);
+    if (driveMatch) return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+    return currentTrack.url;
+  }, [currentTrack?.url]);
   
   // Local state for immediate responsiveness
   const [localCurrentTime, setLocalCurrentTime] = useState(0);
@@ -55,6 +62,7 @@ export function PersistentAudioPlayer() {
     
     // Explicitly load the new source
     audioRef.current.load();
+
 
     if (isPlaying) {
       audioRef.current.play().catch((err) => {
@@ -190,7 +198,8 @@ export function PersistentAudioPlayer() {
         {!currentTrack.isSpotify && !isYouTube && (
           <audio
             ref={audioRef}
-            src={currentTrack.url}
+            src={finalAudioUrl}
+
             onTimeUpdate={() => setLocalCurrentTime(audioRef.current?.currentTime || 0)}
             onLoadedMetadata={() => setLocalDuration(audioRef.current?.duration || 0)}
             onEnded={() => setIsPlaying(false)}

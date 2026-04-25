@@ -5,8 +5,9 @@ import {
   Bell, Search, MapPin, ChevronDown, 
   BookOpen, Layers, Target, Activity, GraduationCap, ChevronRight,
   Sun, Moon, User, Settings, LogOut, Bookmark, Sparkles, ShieldCheck,
-  Video, Mic2, MessageSquare, Clock, HelpCircle
+  Video, Mic2, MessageSquare, Clock, HelpCircle, Maximize, Minimize
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -32,7 +33,9 @@ export function HomeTopBar({ userName, userImage, location = "Medical Platform",
   const [isScrolled, setIsScrolled] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
+
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +46,21 @@ export function HomeTopBar({ userName, userImage, location = "Medical Platform",
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
 
   // Close on outside click
   useEffect(() => {
@@ -147,6 +165,16 @@ export function HomeTopBar({ userName, userImage, location = "Medical Platform",
           <div className="flex items-center gap-2">
             {/* Search */}
             <GlobalSearch />
+
+            {/* Fullscreen Toggle */}
+            <button 
+              onClick={toggleFullscreen}
+              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/30 border border-white/[0.05] text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all active:scale-95"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? <Minimize className="h-[18px] w-[18px]" /> : <Maximize className="h-[18px] w-[18px]" />}
+            </button>
+
 
             {/* Theme Toggle */}
             <button 
