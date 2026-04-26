@@ -6,7 +6,7 @@ import {
   LayoutDashboard, BookOpen, MessageSquare, Clock, Settings, LogOut,
   ShieldCheck, Bell, X, Sparkles, HelpCircle, Library, User,
   Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video, Mic2,
-  Maximize, Minimize
+  Maximize, Minimize, Youtube
 } from "lucide-react";
 
 import { signOut } from "next-auth/react";
@@ -299,6 +299,11 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
                       {isAdmin && (
                         <Link href="/admin/dashboard" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
                           <ShieldCheck className="h-4 w-4 text-blue-500" /> {PLATFORM_COPY.doctorPanel}
+                        </Link>
+                      )}
+                      {isAdmin && (
+                        <Link href="/studio/sync" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
+                          <Youtube className="h-4 w-4 text-red-500" /> YouTube Sync Studio
                         </Link>
                       )}
                       {!isGuest && (
