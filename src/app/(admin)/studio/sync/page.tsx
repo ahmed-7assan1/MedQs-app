@@ -33,41 +33,47 @@ export default function YouTubeSyncPage() {
   const [tasks, setTasks] = useState<SyncTask[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Mock data for UI demonstration
-  useEffect(() => {
-    setTasks([
-      {
-        id: "1",
-        sourceUrl: "https://youtube.com/playlist?list=PL...",
-        targetPlaylistId: "PL-Target-123",
-        status: "COMPLETED",
-        progress: 100,
-        createdAt: "2024-03-20",
-        totalVideos: 12,
-        syncedVideos: 12,
-      },
-      {
-        id: "2",
-        sourceUrl: "https://youtube.com/playlist?list=ABC...",
-        targetPlaylistId: "PL-Target-456",
-        status: "PROCESSING",
-        progress: 45,
-        createdAt: "2024-03-21",
-        totalVideos: 20,
-        syncedVideos: 9,
+  // Fetch tasks
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch("/api/admin/youtube-sync");
+      if (res.ok) {
+        const data = await res.json();
+        setTasks(data);
       }
-    ]);
+    } catch (error) {
+      console.error("Failed to fetch tasks", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+    const interval = setInterval(fetchTasks, 5000); // Poll every 5s
+    return () => clearInterval(interval);
   }, []);
 
   const handleStartSync = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!sourceUrl) return;
+    
     setLoading(true);
-    // Logic to save task to database will go here
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/admin/youtube-sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sourceUrl, targetPlaylistId: targetId }),
+      });
+      
+      if (res.ok) {
+        setSourceUrl("");
+        setTargetId("");
+        fetchTasks();
+      }
+    } catch (error) {
+      console.error("Failed to create task", error);
+    } finally {
       setLoading(false);
-      setSourceUrl("");
-      setTargetId("");
-    }, 1500);
+    }
   };
 
   return (
@@ -145,11 +151,15 @@ export default function YouTubeSyncPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-card/50 border border-white/5 rounded-3xl p-5">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Total Synced</p>
-              <p className="text-2xl font-display font-bold text-white">1,248</p>
+              <p className="text-2xl font-display font-bold text-white">
+                {tasks.reduce((sum, t) => sum + (t.syncedVideos || 0), 0)}
+              </p>
             </div>
             <div className="bg-card/50 border border-white/5 rounded-3xl p-5">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Active Tasks</p>
-              <p className="text-2xl font-display font-bold text-primary">1</p>
+              <p className="text-2xl font-display font-bold text-primary">
+                {tasks.filter(t => t.status === "PROCESSING" || t.status === "PENDING").length}
+              </p>
             </div>
           </div>
         </div>
@@ -185,17 +195,22 @@ export default function YouTubeSyncPage() {
                       <span className={cn(
                         "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter",
                         task.status === "COMPLETED" ? "bg-green-500/20 text-green-500" : 
-                        task.status === "PROCESSING" ? "bg-blue-500/20 text-blue-500" : "bg-muted text-muted-foreground"
+                        task.status === "PROCESSING" ? "bg-blue-500/20 text-blue-500" : 
+                        task.status === "FAILED" ? "bg-red-500/20 text-red-500" : "bg-muted text-muted-foreground"
                       )}>
                         {task.status}
                       </span>
-                      <span className="text-[10px] text-muted-foreground">{task.createdAt}</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(task.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                     <p className="text-xs font-medium truncate text-white/80">{task.sourceUrl}</p>
-                    <div className="flex items-center gap-1.5 mt-2">
-                      <ArrowRightLeft className="w-3 h-3 text-muted-foreground" />
-                      <p className="text-[11px] text-muted-foreground">Target: {task.targetPlaylistId}</p>
-                    </div>
+                    {task.targetPlaylistId && (
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <ArrowRightLeft className="w-3 h-3 text-muted-foreground" />
+                        <p className="text-[11px] text-muted-foreground">Target: {task.targetPlaylistId}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-end gap-2 w-full sm:w-32">

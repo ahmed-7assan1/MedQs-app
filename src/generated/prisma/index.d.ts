@@ -270,6 +270,11 @@ export type AllowedChannel = $Result.DefaultSelection<Prisma.$AllowedChannelPayl
  * 
  */
 export type ChannelFollow = $Result.DefaultSelection<Prisma.$ChannelFollowPayload>
+/**
+ * Model YoutubeUploadTask
+ * 
+ */
+export type YoutubeUploadTask = $Result.DefaultSelection<Prisma.$YoutubeUploadTaskPayload>
 
 /**
  * Enums
@@ -1037,6 +1042,16 @@ export class PrismaClient<
     * ```
     */
   get channelFollow(): Prisma.ChannelFollowDelegate<ExtArgs>;
+
+  /**
+   * `prisma.youtubeUploadTask`: Exposes CRUD operations for the **YoutubeUploadTask** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more YoutubeUploadTasks
+    * const youtubeUploadTasks = await prisma.youtubeUploadTask.findMany()
+    * ```
+    */
+  get youtubeUploadTask(): Prisma.YoutubeUploadTaskDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1528,7 +1543,8 @@ export namespace Prisma {
     SourceBook: 'SourceBook',
     LibraryResource: 'LibraryResource',
     AllowedChannel: 'AllowedChannel',
-    ChannelFollow: 'ChannelFollow'
+    ChannelFollow: 'ChannelFollow',
+    YoutubeUploadTask: 'YoutubeUploadTask'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1544,7 +1560,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow" | "youtubeUploadTask"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5115,6 +5131,76 @@ export namespace Prisma {
           count: {
             args: Prisma.ChannelFollowCountArgs<ExtArgs>
             result: $Utils.Optional<ChannelFollowCountAggregateOutputType> | number
+          }
+        }
+      }
+      YoutubeUploadTask: {
+        payload: Prisma.$YoutubeUploadTaskPayload<ExtArgs>
+        fields: Prisma.YoutubeUploadTaskFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.YoutubeUploadTaskFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.YoutubeUploadTaskFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>
+          }
+          findFirst: {
+            args: Prisma.YoutubeUploadTaskFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.YoutubeUploadTaskFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>
+          }
+          findMany: {
+            args: Prisma.YoutubeUploadTaskFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>[]
+          }
+          create: {
+            args: Prisma.YoutubeUploadTaskCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>
+          }
+          createMany: {
+            args: Prisma.YoutubeUploadTaskCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.YoutubeUploadTaskCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>[]
+          }
+          delete: {
+            args: Prisma.YoutubeUploadTaskDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>
+          }
+          update: {
+            args: Prisma.YoutubeUploadTaskUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>
+          }
+          deleteMany: {
+            args: Prisma.YoutubeUploadTaskDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.YoutubeUploadTaskUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.YoutubeUploadTaskUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$YoutubeUploadTaskPayload>
+          }
+          aggregate: {
+            args: Prisma.YoutubeUploadTaskAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateYoutubeUploadTask>
+          }
+          groupBy: {
+            args: Prisma.YoutubeUploadTaskGroupByArgs<ExtArgs>
+            result: $Utils.Optional<YoutubeUploadTaskGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.YoutubeUploadTaskCountArgs<ExtArgs>
+            result: $Utils.Optional<YoutubeUploadTaskCountAggregateOutputType> | number
           }
         }
       }
@@ -58252,6 +58338,986 @@ export namespace Prisma {
 
 
   /**
+   * Model YoutubeUploadTask
+   */
+
+  export type AggregateYoutubeUploadTask = {
+    _count: YoutubeUploadTaskCountAggregateOutputType | null
+    _avg: YoutubeUploadTaskAvgAggregateOutputType | null
+    _sum: YoutubeUploadTaskSumAggregateOutputType | null
+    _min: YoutubeUploadTaskMinAggregateOutputType | null
+    _max: YoutubeUploadTaskMaxAggregateOutputType | null
+  }
+
+  export type YoutubeUploadTaskAvgAggregateOutputType = {
+    progress: number | null
+    totalVideos: number | null
+    syncedVideos: number | null
+  }
+
+  export type YoutubeUploadTaskSumAggregateOutputType = {
+    progress: number | null
+    totalVideos: number | null
+    syncedVideos: number | null
+  }
+
+  export type YoutubeUploadTaskMinAggregateOutputType = {
+    id: string | null
+    sourceUrl: string | null
+    targetPlaylistId: string | null
+    status: string | null
+    progress: number | null
+    totalVideos: number | null
+    syncedVideos: number | null
+    error: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type YoutubeUploadTaskMaxAggregateOutputType = {
+    id: string | null
+    sourceUrl: string | null
+    targetPlaylistId: string | null
+    status: string | null
+    progress: number | null
+    totalVideos: number | null
+    syncedVideos: number | null
+    error: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type YoutubeUploadTaskCountAggregateOutputType = {
+    id: number
+    sourceUrl: number
+    targetPlaylistId: number
+    status: number
+    progress: number
+    totalVideos: number
+    syncedVideos: number
+    error: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type YoutubeUploadTaskAvgAggregateInputType = {
+    progress?: true
+    totalVideos?: true
+    syncedVideos?: true
+  }
+
+  export type YoutubeUploadTaskSumAggregateInputType = {
+    progress?: true
+    totalVideos?: true
+    syncedVideos?: true
+  }
+
+  export type YoutubeUploadTaskMinAggregateInputType = {
+    id?: true
+    sourceUrl?: true
+    targetPlaylistId?: true
+    status?: true
+    progress?: true
+    totalVideos?: true
+    syncedVideos?: true
+    error?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type YoutubeUploadTaskMaxAggregateInputType = {
+    id?: true
+    sourceUrl?: true
+    targetPlaylistId?: true
+    status?: true
+    progress?: true
+    totalVideos?: true
+    syncedVideos?: true
+    error?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type YoutubeUploadTaskCountAggregateInputType = {
+    id?: true
+    sourceUrl?: true
+    targetPlaylistId?: true
+    status?: true
+    progress?: true
+    totalVideos?: true
+    syncedVideos?: true
+    error?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type YoutubeUploadTaskAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which YoutubeUploadTask to aggregate.
+     */
+    where?: YoutubeUploadTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of YoutubeUploadTasks to fetch.
+     */
+    orderBy?: YoutubeUploadTaskOrderByWithRelationInput | YoutubeUploadTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: YoutubeUploadTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` YoutubeUploadTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` YoutubeUploadTasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned YoutubeUploadTasks
+    **/
+    _count?: true | YoutubeUploadTaskCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: YoutubeUploadTaskAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: YoutubeUploadTaskSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: YoutubeUploadTaskMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: YoutubeUploadTaskMaxAggregateInputType
+  }
+
+  export type GetYoutubeUploadTaskAggregateType<T extends YoutubeUploadTaskAggregateArgs> = {
+        [P in keyof T & keyof AggregateYoutubeUploadTask]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateYoutubeUploadTask[P]>
+      : GetScalarType<T[P], AggregateYoutubeUploadTask[P]>
+  }
+
+
+
+
+  export type YoutubeUploadTaskGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: YoutubeUploadTaskWhereInput
+    orderBy?: YoutubeUploadTaskOrderByWithAggregationInput | YoutubeUploadTaskOrderByWithAggregationInput[]
+    by: YoutubeUploadTaskScalarFieldEnum[] | YoutubeUploadTaskScalarFieldEnum
+    having?: YoutubeUploadTaskScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: YoutubeUploadTaskCountAggregateInputType | true
+    _avg?: YoutubeUploadTaskAvgAggregateInputType
+    _sum?: YoutubeUploadTaskSumAggregateInputType
+    _min?: YoutubeUploadTaskMinAggregateInputType
+    _max?: YoutubeUploadTaskMaxAggregateInputType
+  }
+
+  export type YoutubeUploadTaskGroupByOutputType = {
+    id: string
+    sourceUrl: string
+    targetPlaylistId: string | null
+    status: string
+    progress: number
+    totalVideos: number
+    syncedVideos: number
+    error: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: YoutubeUploadTaskCountAggregateOutputType | null
+    _avg: YoutubeUploadTaskAvgAggregateOutputType | null
+    _sum: YoutubeUploadTaskSumAggregateOutputType | null
+    _min: YoutubeUploadTaskMinAggregateOutputType | null
+    _max: YoutubeUploadTaskMaxAggregateOutputType | null
+  }
+
+  type GetYoutubeUploadTaskGroupByPayload<T extends YoutubeUploadTaskGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<YoutubeUploadTaskGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof YoutubeUploadTaskGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], YoutubeUploadTaskGroupByOutputType[P]>
+            : GetScalarType<T[P], YoutubeUploadTaskGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type YoutubeUploadTaskSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sourceUrl?: boolean
+    targetPlaylistId?: boolean
+    status?: boolean
+    progress?: boolean
+    totalVideos?: boolean
+    syncedVideos?: boolean
+    error?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["youtubeUploadTask"]>
+
+  export type YoutubeUploadTaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sourceUrl?: boolean
+    targetPlaylistId?: boolean
+    status?: boolean
+    progress?: boolean
+    totalVideos?: boolean
+    syncedVideos?: boolean
+    error?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["youtubeUploadTask"]>
+
+  export type YoutubeUploadTaskSelectScalar = {
+    id?: boolean
+    sourceUrl?: boolean
+    targetPlaylistId?: boolean
+    status?: boolean
+    progress?: boolean
+    totalVideos?: boolean
+    syncedVideos?: boolean
+    error?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+
+  export type $YoutubeUploadTaskPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "YoutubeUploadTask"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      sourceUrl: string
+      targetPlaylistId: string | null
+      status: string
+      progress: number
+      totalVideos: number
+      syncedVideos: number
+      error: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["youtubeUploadTask"]>
+    composites: {}
+  }
+
+  type YoutubeUploadTaskGetPayload<S extends boolean | null | undefined | YoutubeUploadTaskDefaultArgs> = $Result.GetResult<Prisma.$YoutubeUploadTaskPayload, S>
+
+  type YoutubeUploadTaskCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<YoutubeUploadTaskFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: YoutubeUploadTaskCountAggregateInputType | true
+    }
+
+  export interface YoutubeUploadTaskDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['YoutubeUploadTask'], meta: { name: 'YoutubeUploadTask' } }
+    /**
+     * Find zero or one YoutubeUploadTask that matches the filter.
+     * @param {YoutubeUploadTaskFindUniqueArgs} args - Arguments to find a YoutubeUploadTask
+     * @example
+     * // Get one YoutubeUploadTask
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends YoutubeUploadTaskFindUniqueArgs>(args: SelectSubset<T, YoutubeUploadTaskFindUniqueArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one YoutubeUploadTask that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {YoutubeUploadTaskFindUniqueOrThrowArgs} args - Arguments to find a YoutubeUploadTask
+     * @example
+     * // Get one YoutubeUploadTask
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends YoutubeUploadTaskFindUniqueOrThrowArgs>(args: SelectSubset<T, YoutubeUploadTaskFindUniqueOrThrowArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first YoutubeUploadTask that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {YoutubeUploadTaskFindFirstArgs} args - Arguments to find a YoutubeUploadTask
+     * @example
+     * // Get one YoutubeUploadTask
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends YoutubeUploadTaskFindFirstArgs>(args?: SelectSubset<T, YoutubeUploadTaskFindFirstArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first YoutubeUploadTask that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {YoutubeUploadTaskFindFirstOrThrowArgs} args - Arguments to find a YoutubeUploadTask
+     * @example
+     * // Get one YoutubeUploadTask
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends YoutubeUploadTaskFindFirstOrThrowArgs>(args?: SelectSubset<T, YoutubeUploadTaskFindFirstOrThrowArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more YoutubeUploadTasks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {YoutubeUploadTaskFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all YoutubeUploadTasks
+     * const youtubeUploadTasks = await prisma.youtubeUploadTask.findMany()
+     * 
+     * // Get first 10 YoutubeUploadTasks
+     * const youtubeUploadTasks = await prisma.youtubeUploadTask.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const youtubeUploadTaskWithIdOnly = await prisma.youtubeUploadTask.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends YoutubeUploadTaskFindManyArgs>(args?: SelectSubset<T, YoutubeUploadTaskFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a YoutubeUploadTask.
+     * @param {YoutubeUploadTaskCreateArgs} args - Arguments to create a YoutubeUploadTask.
+     * @example
+     * // Create one YoutubeUploadTask
+     * const YoutubeUploadTask = await prisma.youtubeUploadTask.create({
+     *   data: {
+     *     // ... data to create a YoutubeUploadTask
+     *   }
+     * })
+     * 
+     */
+    create<T extends YoutubeUploadTaskCreateArgs>(args: SelectSubset<T, YoutubeUploadTaskCreateArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many YoutubeUploadTasks.
+     * @param {YoutubeUploadTaskCreateManyArgs} args - Arguments to create many YoutubeUploadTasks.
+     * @example
+     * // Create many YoutubeUploadTasks
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends YoutubeUploadTaskCreateManyArgs>(args?: SelectSubset<T, YoutubeUploadTaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many YoutubeUploadTasks and returns the data saved in the database.
+     * @param {YoutubeUploadTaskCreateManyAndReturnArgs} args - Arguments to create many YoutubeUploadTasks.
+     * @example
+     * // Create many YoutubeUploadTasks
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many YoutubeUploadTasks and only return the `id`
+     * const youtubeUploadTaskWithIdOnly = await prisma.youtubeUploadTask.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends YoutubeUploadTaskCreateManyAndReturnArgs>(args?: SelectSubset<T, YoutubeUploadTaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a YoutubeUploadTask.
+     * @param {YoutubeUploadTaskDeleteArgs} args - Arguments to delete one YoutubeUploadTask.
+     * @example
+     * // Delete one YoutubeUploadTask
+     * const YoutubeUploadTask = await prisma.youtubeUploadTask.delete({
+     *   where: {
+     *     // ... filter to delete one YoutubeUploadTask
+     *   }
+     * })
+     * 
+     */
+    delete<T extends YoutubeUploadTaskDeleteArgs>(args: SelectSubset<T, YoutubeUploadTaskDeleteArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one YoutubeUploadTask.
+     * @param {YoutubeUploadTaskUpdateArgs} args - Arguments to update one YoutubeUploadTask.
+     * @example
+     * // Update one YoutubeUploadTask
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends YoutubeUploadTaskUpdateArgs>(args: SelectSubset<T, YoutubeUploadTaskUpdateArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more YoutubeUploadTasks.
+     * @param {YoutubeUploadTaskDeleteManyArgs} args - Arguments to filter YoutubeUploadTasks to delete.
+     * @example
+     * // Delete a few YoutubeUploadTasks
+     * const { count } = await prisma.youtubeUploadTask.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends YoutubeUploadTaskDeleteManyArgs>(args?: SelectSubset<T, YoutubeUploadTaskDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more YoutubeUploadTasks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {YoutubeUploadTaskUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many YoutubeUploadTasks
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends YoutubeUploadTaskUpdateManyArgs>(args: SelectSubset<T, YoutubeUploadTaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one YoutubeUploadTask.
+     * @param {YoutubeUploadTaskUpsertArgs} args - Arguments to update or create a YoutubeUploadTask.
+     * @example
+     * // Update or create a YoutubeUploadTask
+     * const youtubeUploadTask = await prisma.youtubeUploadTask.upsert({
+     *   create: {
+     *     // ... data to create a YoutubeUploadTask
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the YoutubeUploadTask we want to update
+     *   }
+     * })
+     */
+    upsert<T extends YoutubeUploadTaskUpsertArgs>(args: SelectSubset<T, YoutubeUploadTaskUpsertArgs<ExtArgs>>): Prisma__YoutubeUploadTaskClient<$Result.GetResult<Prisma.$YoutubeUploadTaskPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of YoutubeUploadTasks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {YoutubeUploadTaskCountArgs} args - Arguments to filter YoutubeUploadTasks to count.
+     * @example
+     * // Count the number of YoutubeUploadTasks
+     * const count = await prisma.youtubeUploadTask.count({
+     *   where: {
+     *     // ... the filter for the YoutubeUploadTasks we want to count
+     *   }
+     * })
+    **/
+    count<T extends YoutubeUploadTaskCountArgs>(
+      args?: Subset<T, YoutubeUploadTaskCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], YoutubeUploadTaskCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a YoutubeUploadTask.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {YoutubeUploadTaskAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends YoutubeUploadTaskAggregateArgs>(args: Subset<T, YoutubeUploadTaskAggregateArgs>): Prisma.PrismaPromise<GetYoutubeUploadTaskAggregateType<T>>
+
+    /**
+     * Group by YoutubeUploadTask.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {YoutubeUploadTaskGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends YoutubeUploadTaskGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: YoutubeUploadTaskGroupByArgs['orderBy'] }
+        : { orderBy?: YoutubeUploadTaskGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, YoutubeUploadTaskGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetYoutubeUploadTaskGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the YoutubeUploadTask model
+   */
+  readonly fields: YoutubeUploadTaskFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for YoutubeUploadTask.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__YoutubeUploadTaskClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the YoutubeUploadTask model
+   */ 
+  interface YoutubeUploadTaskFieldRefs {
+    readonly id: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly sourceUrl: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly targetPlaylistId: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly status: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly progress: FieldRef<"YoutubeUploadTask", 'Int'>
+    readonly totalVideos: FieldRef<"YoutubeUploadTask", 'Int'>
+    readonly syncedVideos: FieldRef<"YoutubeUploadTask", 'Int'>
+    readonly error: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly createdAt: FieldRef<"YoutubeUploadTask", 'DateTime'>
+    readonly updatedAt: FieldRef<"YoutubeUploadTask", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * YoutubeUploadTask findUnique
+   */
+  export type YoutubeUploadTaskFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * Filter, which YoutubeUploadTask to fetch.
+     */
+    where: YoutubeUploadTaskWhereUniqueInput
+  }
+
+  /**
+   * YoutubeUploadTask findUniqueOrThrow
+   */
+  export type YoutubeUploadTaskFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * Filter, which YoutubeUploadTask to fetch.
+     */
+    where: YoutubeUploadTaskWhereUniqueInput
+  }
+
+  /**
+   * YoutubeUploadTask findFirst
+   */
+  export type YoutubeUploadTaskFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * Filter, which YoutubeUploadTask to fetch.
+     */
+    where?: YoutubeUploadTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of YoutubeUploadTasks to fetch.
+     */
+    orderBy?: YoutubeUploadTaskOrderByWithRelationInput | YoutubeUploadTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for YoutubeUploadTasks.
+     */
+    cursor?: YoutubeUploadTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` YoutubeUploadTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` YoutubeUploadTasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of YoutubeUploadTasks.
+     */
+    distinct?: YoutubeUploadTaskScalarFieldEnum | YoutubeUploadTaskScalarFieldEnum[]
+  }
+
+  /**
+   * YoutubeUploadTask findFirstOrThrow
+   */
+  export type YoutubeUploadTaskFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * Filter, which YoutubeUploadTask to fetch.
+     */
+    where?: YoutubeUploadTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of YoutubeUploadTasks to fetch.
+     */
+    orderBy?: YoutubeUploadTaskOrderByWithRelationInput | YoutubeUploadTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for YoutubeUploadTasks.
+     */
+    cursor?: YoutubeUploadTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` YoutubeUploadTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` YoutubeUploadTasks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of YoutubeUploadTasks.
+     */
+    distinct?: YoutubeUploadTaskScalarFieldEnum | YoutubeUploadTaskScalarFieldEnum[]
+  }
+
+  /**
+   * YoutubeUploadTask findMany
+   */
+  export type YoutubeUploadTaskFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * Filter, which YoutubeUploadTasks to fetch.
+     */
+    where?: YoutubeUploadTaskWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of YoutubeUploadTasks to fetch.
+     */
+    orderBy?: YoutubeUploadTaskOrderByWithRelationInput | YoutubeUploadTaskOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing YoutubeUploadTasks.
+     */
+    cursor?: YoutubeUploadTaskWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` YoutubeUploadTasks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` YoutubeUploadTasks.
+     */
+    skip?: number
+    distinct?: YoutubeUploadTaskScalarFieldEnum | YoutubeUploadTaskScalarFieldEnum[]
+  }
+
+  /**
+   * YoutubeUploadTask create
+   */
+  export type YoutubeUploadTaskCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * The data needed to create a YoutubeUploadTask.
+     */
+    data: XOR<YoutubeUploadTaskCreateInput, YoutubeUploadTaskUncheckedCreateInput>
+  }
+
+  /**
+   * YoutubeUploadTask createMany
+   */
+  export type YoutubeUploadTaskCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many YoutubeUploadTasks.
+     */
+    data: YoutubeUploadTaskCreateManyInput | YoutubeUploadTaskCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * YoutubeUploadTask createManyAndReturn
+   */
+  export type YoutubeUploadTaskCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many YoutubeUploadTasks.
+     */
+    data: YoutubeUploadTaskCreateManyInput | YoutubeUploadTaskCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * YoutubeUploadTask update
+   */
+  export type YoutubeUploadTaskUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * The data needed to update a YoutubeUploadTask.
+     */
+    data: XOR<YoutubeUploadTaskUpdateInput, YoutubeUploadTaskUncheckedUpdateInput>
+    /**
+     * Choose, which YoutubeUploadTask to update.
+     */
+    where: YoutubeUploadTaskWhereUniqueInput
+  }
+
+  /**
+   * YoutubeUploadTask updateMany
+   */
+  export type YoutubeUploadTaskUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update YoutubeUploadTasks.
+     */
+    data: XOR<YoutubeUploadTaskUpdateManyMutationInput, YoutubeUploadTaskUncheckedUpdateManyInput>
+    /**
+     * Filter which YoutubeUploadTasks to update
+     */
+    where?: YoutubeUploadTaskWhereInput
+  }
+
+  /**
+   * YoutubeUploadTask upsert
+   */
+  export type YoutubeUploadTaskUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * The filter to search for the YoutubeUploadTask to update in case it exists.
+     */
+    where: YoutubeUploadTaskWhereUniqueInput
+    /**
+     * In case the YoutubeUploadTask found by the `where` argument doesn't exist, create a new YoutubeUploadTask with this data.
+     */
+    create: XOR<YoutubeUploadTaskCreateInput, YoutubeUploadTaskUncheckedCreateInput>
+    /**
+     * In case the YoutubeUploadTask was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<YoutubeUploadTaskUpdateInput, YoutubeUploadTaskUncheckedUpdateInput>
+  }
+
+  /**
+   * YoutubeUploadTask delete
+   */
+  export type YoutubeUploadTaskDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+    /**
+     * Filter which YoutubeUploadTask to delete.
+     */
+    where: YoutubeUploadTaskWhereUniqueInput
+  }
+
+  /**
+   * YoutubeUploadTask deleteMany
+   */
+  export type YoutubeUploadTaskDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which YoutubeUploadTasks to delete
+     */
+    where?: YoutubeUploadTaskWhereInput
+  }
+
+  /**
+   * YoutubeUploadTask without action
+   */
+  export type YoutubeUploadTaskDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the YoutubeUploadTask
+     */
+    select?: YoutubeUploadTaskSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -58948,6 +60014,22 @@ export namespace Prisma {
   };
 
   export type ChannelFollowScalarFieldEnum = (typeof ChannelFollowScalarFieldEnum)[keyof typeof ChannelFollowScalarFieldEnum]
+
+
+  export const YoutubeUploadTaskScalarFieldEnum: {
+    id: 'id',
+    sourceUrl: 'sourceUrl',
+    targetPlaylistId: 'targetPlaylistId',
+    status: 'status',
+    progress: 'progress',
+    totalVideos: 'totalVideos',
+    syncedVideos: 'syncedVideos',
+    error: 'error',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type YoutubeUploadTaskScalarFieldEnum = (typeof YoutubeUploadTaskScalarFieldEnum)[keyof typeof YoutubeUploadTaskScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -63009,6 +64091,85 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"ChannelFollow"> | Date | string
   }
 
+  export type YoutubeUploadTaskWhereInput = {
+    AND?: YoutubeUploadTaskWhereInput | YoutubeUploadTaskWhereInput[]
+    OR?: YoutubeUploadTaskWhereInput[]
+    NOT?: YoutubeUploadTaskWhereInput | YoutubeUploadTaskWhereInput[]
+    id?: StringFilter<"YoutubeUploadTask"> | string
+    sourceUrl?: StringFilter<"YoutubeUploadTask"> | string
+    targetPlaylistId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    status?: StringFilter<"YoutubeUploadTask"> | string
+    progress?: IntFilter<"YoutubeUploadTask"> | number
+    totalVideos?: IntFilter<"YoutubeUploadTask"> | number
+    syncedVideos?: IntFilter<"YoutubeUploadTask"> | number
+    error?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    createdAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
+    updatedAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
+  }
+
+  export type YoutubeUploadTaskOrderByWithRelationInput = {
+    id?: SortOrder
+    sourceUrl?: SortOrder
+    targetPlaylistId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    totalVideos?: SortOrder
+    syncedVideos?: SortOrder
+    error?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type YoutubeUploadTaskWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: YoutubeUploadTaskWhereInput | YoutubeUploadTaskWhereInput[]
+    OR?: YoutubeUploadTaskWhereInput[]
+    NOT?: YoutubeUploadTaskWhereInput | YoutubeUploadTaskWhereInput[]
+    sourceUrl?: StringFilter<"YoutubeUploadTask"> | string
+    targetPlaylistId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    status?: StringFilter<"YoutubeUploadTask"> | string
+    progress?: IntFilter<"YoutubeUploadTask"> | number
+    totalVideos?: IntFilter<"YoutubeUploadTask"> | number
+    syncedVideos?: IntFilter<"YoutubeUploadTask"> | number
+    error?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    createdAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
+    updatedAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
+  }, "id">
+
+  export type YoutubeUploadTaskOrderByWithAggregationInput = {
+    id?: SortOrder
+    sourceUrl?: SortOrder
+    targetPlaylistId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    totalVideos?: SortOrder
+    syncedVideos?: SortOrder
+    error?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: YoutubeUploadTaskCountOrderByAggregateInput
+    _avg?: YoutubeUploadTaskAvgOrderByAggregateInput
+    _max?: YoutubeUploadTaskMaxOrderByAggregateInput
+    _min?: YoutubeUploadTaskMinOrderByAggregateInput
+    _sum?: YoutubeUploadTaskSumOrderByAggregateInput
+  }
+
+  export type YoutubeUploadTaskScalarWhereWithAggregatesInput = {
+    AND?: YoutubeUploadTaskScalarWhereWithAggregatesInput | YoutubeUploadTaskScalarWhereWithAggregatesInput[]
+    OR?: YoutubeUploadTaskScalarWhereWithAggregatesInput[]
+    NOT?: YoutubeUploadTaskScalarWhereWithAggregatesInput | YoutubeUploadTaskScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"YoutubeUploadTask"> | string
+    sourceUrl?: StringWithAggregatesFilter<"YoutubeUploadTask"> | string
+    targetPlaylistId?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
+    status?: StringWithAggregatesFilter<"YoutubeUploadTask"> | string
+    progress?: IntWithAggregatesFilter<"YoutubeUploadTask"> | number
+    totalVideos?: IntWithAggregatesFilter<"YoutubeUploadTask"> | number
+    syncedVideos?: IntWithAggregatesFilter<"YoutubeUploadTask"> | number
+    error?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"YoutubeUploadTask"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"YoutubeUploadTask"> | Date | string
+  }
+
   export type SiteConfigCreateInput = {
     id?: string
     siteName?: string
@@ -66973,6 +68134,97 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type YoutubeUploadTaskCreateInput = {
+    id?: string
+    sourceUrl: string
+    targetPlaylistId?: string | null
+    status?: string
+    progress?: number
+    totalVideos?: number
+    syncedVideos?: number
+    error?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type YoutubeUploadTaskUncheckedCreateInput = {
+    id?: string
+    sourceUrl: string
+    targetPlaylistId?: string | null
+    status?: string
+    progress?: number
+    totalVideos?: number
+    syncedVideos?: number
+    error?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type YoutubeUploadTaskUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: StringFieldUpdateOperationsInput | string
+    targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    totalVideos?: IntFieldUpdateOperationsInput | number
+    syncedVideos?: IntFieldUpdateOperationsInput | number
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type YoutubeUploadTaskUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: StringFieldUpdateOperationsInput | string
+    targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    totalVideos?: IntFieldUpdateOperationsInput | number
+    syncedVideos?: IntFieldUpdateOperationsInput | number
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type YoutubeUploadTaskCreateManyInput = {
+    id?: string
+    sourceUrl: string
+    targetPlaylistId?: string | null
+    status?: string
+    progress?: number
+    totalVideos?: number
+    syncedVideos?: number
+    error?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type YoutubeUploadTaskUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: StringFieldUpdateOperationsInput | string
+    targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    totalVideos?: IntFieldUpdateOperationsInput | number
+    syncedVideos?: IntFieldUpdateOperationsInput | number
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type YoutubeUploadTaskUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: StringFieldUpdateOperationsInput | string
+    targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    totalVideos?: IntFieldUpdateOperationsInput | number
+    syncedVideos?: IntFieldUpdateOperationsInput | number
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -69790,6 +71042,57 @@ export namespace Prisma {
     userId?: SortOrder
     channelId?: SortOrder
     createdAt?: SortOrder
+  }
+
+  export type YoutubeUploadTaskCountOrderByAggregateInput = {
+    id?: SortOrder
+    sourceUrl?: SortOrder
+    targetPlaylistId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    totalVideos?: SortOrder
+    syncedVideos?: SortOrder
+    error?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type YoutubeUploadTaskAvgOrderByAggregateInput = {
+    progress?: SortOrder
+    totalVideos?: SortOrder
+    syncedVideos?: SortOrder
+  }
+
+  export type YoutubeUploadTaskMaxOrderByAggregateInput = {
+    id?: SortOrder
+    sourceUrl?: SortOrder
+    targetPlaylistId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    totalVideos?: SortOrder
+    syncedVideos?: SortOrder
+    error?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type YoutubeUploadTaskMinOrderByAggregateInput = {
+    id?: SortOrder
+    sourceUrl?: SortOrder
+    targetPlaylistId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    totalVideos?: SortOrder
+    syncedVideos?: SortOrder
+    error?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type YoutubeUploadTaskSumOrderByAggregateInput = {
+    progress?: SortOrder
+    totalVideos?: SortOrder
+    syncedVideos?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -93477,6 +94780,10 @@ export namespace Prisma {
      * @deprecated Use ChannelFollowDefaultArgs instead
      */
     export type ChannelFollowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ChannelFollowDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use YoutubeUploadTaskDefaultArgs instead
+     */
+    export type YoutubeUploadTaskArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = YoutubeUploadTaskDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

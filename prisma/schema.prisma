@@ -841,3 +841,17 @@ enum FacultyCategory {
   PHYSICAL_THERAPY
   OTHER
 }
+
+
+model YoutubeUploadTask {
+  id               String   @id @default(uuid())
+  sourceUrl        String
+  targetPlaylistId String?
+  status           String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  progress         Int      @default(0)
+  totalVideos      Int      @default(0)
+  syncedVideos     Int      @default(0)
+  error            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

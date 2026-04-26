@@ -654,6 +654,19 @@ exports.Prisma.ChannelFollowScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.YoutubeUploadTaskScalarFieldEnum = {
+  id: 'id',
+  sourceUrl: 'sourceUrl',
+  targetPlaylistId: 'targetPlaylistId',
+  status: 'status',
+  progress: 'progress',
+  totalVideos: 'totalVideos',
+  syncedVideos: 'syncedVideos',
+  error: 'error',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -793,7 +806,8 @@ exports.Prisma.ModelName = {
   SourceBook: 'SourceBook',
   LibraryResource: 'LibraryResource',
   AllowedChannel: 'AllowedChannel',
-  ChannelFollow: 'ChannelFollow'
+  ChannelFollow: 'ChannelFollow',
+  YoutubeUploadTask: 'YoutubeUploadTask'
 };
 
 /**
