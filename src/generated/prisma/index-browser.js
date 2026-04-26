@@ -663,6 +663,8 @@ exports.Prisma.YoutubeUploadTaskScalarFieldEnum = {
   totalVideos: 'totalVideos',
   syncedVideos: 'syncedVideos',
   error: 'error',
+  entityId: 'entityId',
+  newVideoUrl: 'newVideoUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

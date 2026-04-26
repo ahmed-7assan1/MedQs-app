@@ -58370,6 +58370,8 @@ export namespace Prisma {
     totalVideos: number | null
     syncedVideos: number | null
     error: string | null
+    entityId: string | null
+    newVideoUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -58383,6 +58385,8 @@ export namespace Prisma {
     totalVideos: number | null
     syncedVideos: number | null
     error: string | null
+    entityId: string | null
+    newVideoUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -58396,6 +58400,8 @@ export namespace Prisma {
     totalVideos: number
     syncedVideos: number
     error: number
+    entityId: number
+    newVideoUrl: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -58423,6 +58429,8 @@ export namespace Prisma {
     totalVideos?: true
     syncedVideos?: true
     error?: true
+    entityId?: true
+    newVideoUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -58436,6 +58444,8 @@ export namespace Prisma {
     totalVideos?: true
     syncedVideos?: true
     error?: true
+    entityId?: true
+    newVideoUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -58449,6 +58459,8 @@ export namespace Prisma {
     totalVideos?: true
     syncedVideos?: true
     error?: true
+    entityId?: true
+    newVideoUrl?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -58549,6 +58561,8 @@ export namespace Prisma {
     totalVideos: number
     syncedVideos: number
     error: string | null
+    entityId: string | null
+    newVideoUrl: string | null
     createdAt: Date
     updatedAt: Date
     _count: YoutubeUploadTaskCountAggregateOutputType | null
@@ -58581,6 +58595,8 @@ export namespace Prisma {
     totalVideos?: boolean
     syncedVideos?: boolean
     error?: boolean
+    entityId?: boolean
+    newVideoUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["youtubeUploadTask"]>
@@ -58594,6 +58610,8 @@ export namespace Prisma {
     totalVideos?: boolean
     syncedVideos?: boolean
     error?: boolean
+    entityId?: boolean
+    newVideoUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["youtubeUploadTask"]>
@@ -58607,6 +58625,8 @@ export namespace Prisma {
     totalVideos?: boolean
     syncedVideos?: boolean
     error?: boolean
+    entityId?: boolean
+    newVideoUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -58624,6 +58644,8 @@ export namespace Prisma {
       totalVideos: number
       syncedVideos: number
       error: string | null
+      entityId: string | null
+      newVideoUrl: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["youtubeUploadTask"]>
@@ -59027,6 +59049,8 @@ export namespace Prisma {
     readonly totalVideos: FieldRef<"YoutubeUploadTask", 'Int'>
     readonly syncedVideos: FieldRef<"YoutubeUploadTask", 'Int'>
     readonly error: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly entityId: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly newVideoUrl: FieldRef<"YoutubeUploadTask", 'String'>
     readonly createdAt: FieldRef<"YoutubeUploadTask", 'DateTime'>
     readonly updatedAt: FieldRef<"YoutubeUploadTask", 'DateTime'>
   }
@@ -60025,6 +60049,8 @@ export namespace Prisma {
     totalVideos: 'totalVideos',
     syncedVideos: 'syncedVideos',
     error: 'error',
+    entityId: 'entityId',
+    newVideoUrl: 'newVideoUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -64103,6 +64129,8 @@ export namespace Prisma {
     totalVideos?: IntFilter<"YoutubeUploadTask"> | number
     syncedVideos?: IntFilter<"YoutubeUploadTask"> | number
     error?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    entityId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    newVideoUrl?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     createdAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
     updatedAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
   }
@@ -64116,6 +64144,8 @@ export namespace Prisma {
     totalVideos?: SortOrder
     syncedVideos?: SortOrder
     error?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    newVideoUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -64132,6 +64162,8 @@ export namespace Prisma {
     totalVideos?: IntFilter<"YoutubeUploadTask"> | number
     syncedVideos?: IntFilter<"YoutubeUploadTask"> | number
     error?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    entityId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    newVideoUrl?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     createdAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
     updatedAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
   }, "id">
@@ -64145,6 +64177,8 @@ export namespace Prisma {
     totalVideos?: SortOrder
     syncedVideos?: SortOrder
     error?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    newVideoUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: YoutubeUploadTaskCountOrderByAggregateInput
@@ -64166,6 +64200,8 @@ export namespace Prisma {
     totalVideos?: IntWithAggregatesFilter<"YoutubeUploadTask"> | number
     syncedVideos?: IntWithAggregatesFilter<"YoutubeUploadTask"> | number
     error?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
+    entityId?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
+    newVideoUrl?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"YoutubeUploadTask"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"YoutubeUploadTask"> | Date | string
   }
@@ -68143,6 +68179,8 @@ export namespace Prisma {
     totalVideos?: number
     syncedVideos?: number
     error?: string | null
+    entityId?: string | null
+    newVideoUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -68156,6 +68194,8 @@ export namespace Prisma {
     totalVideos?: number
     syncedVideos?: number
     error?: string | null
+    entityId?: string | null
+    newVideoUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -68169,6 +68209,8 @@ export namespace Prisma {
     totalVideos?: IntFieldUpdateOperationsInput | number
     syncedVideos?: IntFieldUpdateOperationsInput | number
     error?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -68182,6 +68224,8 @@ export namespace Prisma {
     totalVideos?: IntFieldUpdateOperationsInput | number
     syncedVideos?: IntFieldUpdateOperationsInput | number
     error?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -68195,6 +68239,8 @@ export namespace Prisma {
     totalVideos?: number
     syncedVideos?: number
     error?: string | null
+    entityId?: string | null
+    newVideoUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -68208,6 +68254,8 @@ export namespace Prisma {
     totalVideos?: IntFieldUpdateOperationsInput | number
     syncedVideos?: IntFieldUpdateOperationsInput | number
     error?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -68221,6 +68269,8 @@ export namespace Prisma {
     totalVideos?: IntFieldUpdateOperationsInput | number
     syncedVideos?: IntFieldUpdateOperationsInput | number
     error?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -71053,6 +71103,8 @@ export namespace Prisma {
     totalVideos?: SortOrder
     syncedVideos?: SortOrder
     error?: SortOrder
+    entityId?: SortOrder
+    newVideoUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -71072,6 +71124,8 @@ export namespace Prisma {
     totalVideos?: SortOrder
     syncedVideos?: SortOrder
     error?: SortOrder
+    entityId?: SortOrder
+    newVideoUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -71085,6 +71139,8 @@ export namespace Prisma {
     totalVideos?: SortOrder
     syncedVideos?: SortOrder
     error?: SortOrder
+    entityId?: SortOrder
+    newVideoUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

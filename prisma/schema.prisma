@@ -852,6 +852,8 @@ model YoutubeUploadTask {
   totalVideos      Int      @default(0)
   syncedVideos     Int      @default(0)
   error            String?
+  entityId         String?  // References LectureVideo.id
+  newVideoUrl      String?  // The URL of the video after upload
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
