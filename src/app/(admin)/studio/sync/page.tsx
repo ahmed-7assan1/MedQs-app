@@ -12,7 +12,8 @@ import {
   Loader2,
   Plus,
   ExternalLink,
-  Trash2
+  Trash2,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
