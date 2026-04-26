@@ -61,7 +61,7 @@ export function TaskatClient({ userId, initialCurriculum, initialSubjects }: Tas
             <span className="text-base font-black text-foreground">{Math.round(dayProgress)}%</span>
           </div>
           <div className="space-y-0.5 pr-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Today's Progress</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Today&apos;s Progress</p>
             <p className="text-lg font-black text-primary">
               {dayProgress === 100 ? "Victory!" : dayProgress > 50 ? "Almost there" : "Keep going"}
             </p>
