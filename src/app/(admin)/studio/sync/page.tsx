@@ -78,17 +78,17 @@ export default function YouTubeSyncPage() {
     }
   };
 
-  const handleAutoQueue = async () => {
+  const handleAutoQueue = async (type: "youtube" | "spotify") => {
     setAutoQueueLoading(true);
     try {
-      const res = await fetch("/api/admin/youtube-sync/auto-queue", { method: "POST" });
+      const res = await fetch(`/api/admin/youtube-sync/auto-queue?type=${type}`, { method: "POST" });
       if (res.ok) {
         const data = await res.json();
-        alert(`Queued ${data.queuedCount} external videos out of ${data.totalExternal} total.`);
+        alert(`Queued ${data.queuedCount} external ${type} items out of ${data.totalExternal} total.`);
         fetchTasks();
       }
     } catch (error) {
-      console.error("Failed to auto-queue", error);
+      console.error(`Failed to auto-queue ${type}`, error);
     } finally {
       setAutoQueueLoading(false);
     }
@@ -98,14 +98,12 @@ export default function YouTubeSyncPage() {
     <div className="p-6 max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-display font-bold tracking-tight text-white flex items-center gap-3">
-          <div className="p-2 bg-red-500/10 rounded-xl">
-            <Youtube className="w-8 h-8 text-red-500" />
-          </div>
-          YouTube Sync Studio
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Automate video transfers between playlists directly to MedOnex Channel.
+        <div className="flex items-center gap-3 text-primary mb-1">
+          <Youtube className="w-8 h-8" />
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Media Sync Studio</h1>
+        </div>
+        <p className="text-muted-foreground font-medium">
+          Automate video and audio transfers directly to MedOnex Channel.
         </p>
       </div>
 
@@ -165,12 +163,22 @@ export default function YouTubeSyncPage() {
 
               <button
                 type="button"
-                onClick={handleAutoQueue}
+                onClick={() => handleAutoQueue("youtube")}
                 disabled={autoQueueLoading}
                 className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
               >
                 {autoQueueLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
                 Auto-Migrate External Videos (AI Mode)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleAutoQueue("spotify")}
+                disabled={autoQueueLoading}
+                className="w-full bg-[#1DB954] hover:bg-[#1ed760] text-black font-extrabold py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+              >
+                {autoQueueLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5 text-black" />}
+                Auto-Migrate Spotify Records (AI Mode)
               </button>
             </form>
           </div>

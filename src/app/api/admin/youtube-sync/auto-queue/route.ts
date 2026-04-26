@@ -10,31 +10,50 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find all external YouTube videos
-    const externalVideos = await prisma.lectureVideo.findMany({
-      where: {
-        sourceType: "external",
-        url: {
-          contains: "youtu",
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type"); // "youtube" or "spotify"
+
+    let targetEntities: Array<{ id: string, url: string }> = [];
+
+    if (type === "spotify") {
+      // Find all Spotify audio records
+      const spotifyRecords = await prisma.lectureRecord.findMany({
+        where: {
+          sourceType: "spotify",
+          url: {
+            contains: "spotify",
+          },
         },
-      },
-    });
+      });
+      targetEntities = spotifyRecords.map(r => ({ id: r.id, url: r.url }));
+    } else {
+      // Find all external YouTube videos (Default)
+      const externalVideos = await prisma.lectureVideo.findMany({
+        where: {
+          sourceType: "external",
+          url: {
+            contains: "youtu",
+          },
+        },
+      });
+      targetEntities = externalVideos.map(v => ({ id: v.id, url: v.url }));
+    }
 
     let queuedCount = 0;
 
-    for (const video of externalVideos) {
+    for (const entity of targetEntities) {
       // Check if task already exists for this entity
       const existingTask = await prisma.youtubeUploadTask.findFirst({
-        where: { entityId: video.id },
+        where: { entityId: entity.id },
       });
 
       if (!existingTask) {
         await prisma.youtubeUploadTask.create({
           data: {
-            sourceUrl: video.url,
+            sourceUrl: entity.url,
             status: "PENDING",
-            totalVideos: 1, // Single video
-            entityId: video.id,
+            totalVideos: 1, // Single item
+            entityId: entity.id,
           },
         });
         queuedCount++;
@@ -44,7 +63,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       queuedCount, 
-      totalExternal: externalVideos.length 
+      totalExternal: targetEntities.length 
     });
 
   } catch (error) {

@@ -33,16 +33,41 @@ export async function PATCH(
 
       if (finalUrl && targetEntityId) {
         try {
-          await prisma.lectureVideo.update({
-            where: { id: targetEntityId },
-            data: {
-              url: finalUrl,
-              sourceType: "internal_youtube", // Mark it as migrated
-            },
-          });
-          console.log(`[Auto-Migrate] Swapped URL for LectureVideo ${targetEntityId} to ${finalUrl}`);
+          // Try to update LectureVideo first
+          let updatedVideo = false;
+          try {
+            const videoUpdate = await prisma.lectureVideo.updateMany({
+              where: { id: targetEntityId },
+              data: {
+                url: finalUrl,
+                sourceType: "internal_youtube", // Mark it as migrated
+              },
+            });
+            if (videoUpdate.count > 0) {
+              updatedVideo = true;
+              console.log(`[Auto-Migrate] Swapped URL for LectureVideo ${targetEntityId} to ${finalUrl}`);
+            }
+          } catch (e) {
+            // Ignore error, we will try LectureRecord
+          }
+
+          // If not a LectureVideo, try LectureRecord
+          if (!updatedVideo) {
+            const recordUpdate = await prisma.lectureRecord.updateMany({
+              where: { id: targetEntityId },
+              data: {
+                url: finalUrl,
+                sourceType: "internal_youtube_music", // Mark as migrated Spotify record
+              },
+            });
+            if (recordUpdate.count > 0) {
+              console.log(`[Auto-Migrate] Swapped URL for LectureRecord ${targetEntityId} to ${finalUrl}`);
+            } else {
+              console.warn(`[Auto-Migrate] Target entity ${targetEntityId} not found in LectureVideo or LectureRecord.`);
+            }
+          }
         } catch (err) {
-          console.error(`[Auto-Migrate] Failed to update LectureVideo ${targetEntityId}:`, err);
+          console.error(`[Auto-Migrate] Failed to update entity ${targetEntityId}:`, err);
         }
       }
     }
