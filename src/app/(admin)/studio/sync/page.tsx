@@ -32,6 +32,7 @@ export default function YouTubeSyncPage() {
   const [targetId, setTargetId] = useState("");
   const [tasks, setTasks] = useState<SyncTask[]>([]);
   const [loading, setLoading] = useState(false);
+  const [autoQueueLoading, setAutoQueueLoading] = useState(false);
 
   // Fetch tasks
   const fetchTasks = async () => {
@@ -73,6 +74,22 @@ export default function YouTubeSyncPage() {
       console.error("Failed to create task", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAutoQueue = async () => {
+    setAutoQueueLoading(true);
+    try {
+      const res = await fetch("/api/admin/youtube-sync/auto-queue", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Queued ${data.queuedCount} external videos out of ${data.totalExternal} total.`);
+        fetchTasks();
+      }
+    } catch (error) {
+      console.error("Failed to auto-queue", error);
+    } finally {
+      setAutoQueueLoading(false);
     }
   };
 
@@ -143,6 +160,16 @@ export default function YouTubeSyncPage() {
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <PlayCircle className="w-5 h-5" />}
                 Start Automation Sync
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAutoQueue}
+                disabled={autoQueueLoading}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+              >
+                {autoQueueLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                Auto-Migrate External Videos (AI Mode)
               </button>
             </form>
           </div>
