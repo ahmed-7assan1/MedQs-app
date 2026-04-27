@@ -135,7 +135,7 @@ export default function ColabTransferPage() {
   const [submitting, setSubmitting] = useState(false);
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const pollRef = useRef<number | null>(null);
   const COLAB_SECRET = process.env.NEXT_PUBLIC_COLAB_SECRET ?? "medqs-colab-secret-2026-change-this";
 
   const COLAB_NOTEBOOK_URL = "https://colab.research.google.com/drive/1_vSgEitp7pU_1X7z-nB-Yy7qG8H6QZ9A";
@@ -191,48 +191,59 @@ export default function ColabTransferPage() {
     fetchJobs();
   }
 
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+
   const pending = jobs.filter((j) => j.status === "PENDING").length;
   const processing = jobs.filter((j) => j.status === "PROCESSING").length;
   const completed = jobs.filter((j) => j.status === "COMPLETED").length;
   const failed = jobs.filter((j) => j.status === "FAILED").length;
+
+  const filteredJobs = jobs.filter(j => statusFilter === "ALL" || j.status === statusFilter);
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 shadow-inner">
             <Youtube className="h-6 w-6 text-red-500" />
           </div>
           <div>
-            <h1 className="text-2xl font-black">Colab Transfer</h1>
-            <p className="text-sm text-muted-foreground">YouTube video migration — powered by Google Colab servers</p>
+            <h1 className="text-2xl font-black tracking-tight">Colab Transfer Console</h1>
+            <p className="text-sm text-muted-foreground font-medium">Manage and monitor your YouTube migration pipeline.</p>
           </div>
         </div>
-        <button onClick={fetchJobs} className="rounded-xl border border-border p-2 text-muted-foreground hover:bg-muted">
-          <RefreshCw className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-2">
+           <button 
+             onClick={fetchJobs} 
+             className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:bg-muted transition-all active:scale-95"
+           >
+             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+           </button>
+        </div>
       </div>
 
       {/* Worker Status Banner */}
       <div className={cn(
-        "flex items-center gap-3 rounded-2xl border p-4 transition-all",
+        "flex items-center gap-4 rounded-[1.5rem] border p-5 transition-all shadow-sm",
         workerAlive
-          ? "border-emerald-500/20 bg-emerald-500/5"
-          : "border-amber-500/20 bg-amber-500/5"
+          ? "border-emerald-500/20 bg-emerald-500/5 ring-1 ring-emerald-500/10"
+          : "border-amber-500/20 bg-amber-500/5 ring-1 ring-amber-500/10"
       )}>
-        {workerAlive
-          ? <Wifi className="h-5 w-5 text-emerald-500 shrink-0" />
-          : <WifiOff className="h-5 w-5 text-amber-500 shrink-0" />
-        }
+        <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", workerAlive ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500")}>
+           {workerAlive ? <Wifi className="h-6 w-6" /> : <WifiOff className="h-6 w-6" />}
+        </div>
         <div className="flex-1">
-          <p className={cn("font-bold text-sm", workerAlive ? "text-emerald-500" : "text-amber-500")}>
-            {workerAlive ? "🟢 Colab Worker is Running" : "🟡 Colab Worker is Offline"}
-          </p>
-          <p className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+             <p className={cn("font-black text-sm", workerAlive ? "text-emerald-500" : "text-amber-500")}>
+               {workerAlive ? "PIPELINE ACTIVE" : "PIPELINE OFFLINE"}
+             </p>
+             {workerAlive && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+          </div>
+          <p className="text-xs text-muted-foreground font-medium mt-0.5 leading-relaxed">
             {workerAlive
-              ? "Jobs will be processed automatically. The worker polls every 15 seconds."
-              : "Start the Colab notebook to begin processing queued jobs."}
+              ? "The Colab worker is polling for tasks. Remember: Every 5 successful uploads, you must change your Project in Colab to reset the quota."
+              : "Launch the Colab notebook to start processing the queue. Ensure you have your youtube_cookies.txt in Drive."}
           </p>
         </div>
         {!workerAlive && (
@@ -240,109 +251,119 @@ export default function ColabTransferPage() {
             href={COLAB_NOTEBOOK_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-xs font-black text-white hover:bg-amber-600 transition-colors shrink-0"
+            className="flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black text-white hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20 shrink-0"
           >
             <Play className="h-3.5 w-3.5" />
-            Launch Colab
+            Launch Worker
           </a>
         )}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
-        {[
-          { label: "Pending", value: pending, color: "text-amber-500" },
-          { label: "Processing", value: processing, color: "text-blue-500" },
-          { label: "Completed", value: completed, color: "text-emerald-500" },
-          { label: "Failed", value: failed, color: "text-red-500" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border bg-card p-4 text-center">
-            <p className={cn("text-3xl font-black", s.color)}>{s.value}</p>
-            <p className="text-xs text-muted-foreground font-medium mt-0.5">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Config Box (for Colab setup) */}
-      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-2">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <p className="text-sm font-black text-primary">Colab Setup Config</p>
-          <p className="text-xs text-muted-foreground">— Copy these into your Colab notebook</p>
+      {/* Stats & Filter */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { id: "PENDING", label: "Pending", value: pending, color: "text-amber-500", bg: "bg-amber-500/5" },
+            { id: "PROCESSING", label: "Running", value: processing, color: "text-blue-500", bg: "bg-blue-500/5" },
+            { id: "COMPLETED", label: "Finished", value: completed, color: "text-emerald-500", bg: "bg-emerald-500/5" },
+            { id: "FAILED", label: "Failed", value: failed, color: "text-red-500", bg: "bg-red-500/5" },
+          ].map((s) => (
+            <button 
+              key={s.id} 
+              onClick={() => setStatusFilter(statusFilter === s.id ? "ALL" : s.id)}
+              className={cn(
+                "group relative rounded-2xl border p-4 text-center transition-all hover:scale-[1.02] active:scale-95",
+                statusFilter === s.id ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border bg-card",
+                s.bg
+              )}
+            >
+              <p className={cn("text-3xl font-black tracking-tight", s.color)}>{s.value}</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">{s.label}</p>
+              {statusFilter === s.id && <div className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-primary text-white flex items-center justify-center border-2 border-background"><CheckCircle2 className="h-2.5 w-2.5" /></div>}
+            </button>
+          ))}
         </div>
-        <div className="font-mono text-xs bg-black/80 text-green-400 rounded-xl p-3 space-y-1">
-          <p><span className="text-blue-400">SITE_URL</span> = <span className="text-yellow-300">&quot;{SITE_URL}&quot;</span></p>
-          <p><span className="text-blue-400">COLAB_SECRET</span> = <span className="text-yellow-300">&quot;medqs-colab-secret-2026-change-this&quot;</span></p>
-          <p className="text-white/30"># Change COLAB_SECRET to match your .env file</p>
-        </div>
+        {statusFilter !== "ALL" && (
+           <div className="flex justify-center">
+              <button onClick={() => setStatusFilter("ALL")} className="text-[10px] font-black uppercase text-primary hover:underline flex items-center gap-1">
+                 <RefreshCw className="h-3 w-3" /> Clear Filter
+              </button>
+           </div>
+        )}
       </div>
 
       {/* New Job Form */}
-      <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-        <h2 className="font-black text-lg flex items-center gap-2">
-          <Plus className="h-5 w-5 text-primary" />
-          Queue New Transfer
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <div className="rounded-[2rem] border border-white/[0.03] bg-card p-8 space-y-6 shadow-sm">
+        <div className="flex items-center gap-3 border-b border-white/[0.03] pb-4">
+           <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Plus className="h-4 w-4 text-primary" />
+           </div>
+           <h2 className="font-black text-lg">Manual Queue</h2>
+        </div>
+        
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">YouTube URL *</label>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Source URL (Telegram/YouTube)</label>
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://youtube.com/watch?v=... or playlist"
-              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              placeholder="Paste link here..."
+              className="mt-1 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Label (optional)</label>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Target Title (Optional)</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Cardiology Lecture 3"
-              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              placeholder="Leave empty to use original"
+              className="mt-1 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
-          <div className="flex items-end">
+          <div className="flex items-end pb-0.5">
             <button
               onClick={createJob}
               disabled={submitting || !url.trim()}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-black text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
+              className="w-full h-[46px] flex items-center justify-center gap-2 rounded-xl bg-primary px-6 font-black text-sm text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-primary/20"
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Youtube className="h-4 w-4" />}
-              Queue Transfer
+              Dispatch Job
             </button>
           </div>
         </div>
       </div>
 
       {/* Job List */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-black text-lg">Transfer Queue</h2>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <h2 className="font-black text-xl tracking-tight">Active Pipeline</h2>
           {completed + failed > 0 && (
             <button
               onClick={clearDone}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-red-500 transition-colors"
+              className="flex items-center gap-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-red-500 transition-colors"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Clear completed/failed
+              Purge History
             </button>
           )}
         </div>
+        
         {loading ? (
-          <div className="flex items-center justify-center py-12 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            Loading...
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card rounded-3xl border border-dashed">
+            <Loader2 className="h-8 w-8 animate-spin mb-4 text-primary/40" />
+            <p className="font-bold text-sm tracking-widest uppercase">Synchronizing Jobs...</p>
           </div>
-        ) : jobs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-muted-foreground">
-            <Youtube className="h-8 w-8 mb-3 opacity-30" />
-            <p className="font-bold text-sm">No transfer jobs yet</p>
-            <p className="text-xs mt-1">Queue a YouTube video above to get started</p>
+        ) : filteredJobs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-dashed border-border py-20 text-muted-foreground bg-card/50">
+            <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+               <Youtube className="h-8 w-8 opacity-20" />
+            </div>
+            <p className="font-black text-sm uppercase tracking-widest">No matching jobs</p>
+            <p className="text-xs mt-1 font-medium opacity-60">The pipeline is clear for dispatch.</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {jobs.map((job) => (
+          <div className="space-y-3">
+            {filteredJobs.map((job) => (
               <JobCard key={job.id} job={job} onRefresh={fetchJobs} />
             ))}
           </div>

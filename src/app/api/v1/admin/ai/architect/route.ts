@@ -360,12 +360,22 @@ ${cap}`;
                   for (const v of videosToCreate) {
                      const exists = await tx.lectureVideo.findFirst({ where: { lectureId: lecture.id, url: v.url } });
                      if (!exists) {
-                       await tx.lectureVideo.create({
+                       const newVideo = await tx.lectureVideo.create({
                           data: {
                              lectureId: lecture.id,
                              title: v.title,
                              url: v.url,
                              sourceType: "external"
+                          }
+                       });
+
+                       // 🟢 NEW: Create a Colab Job for this video automatically
+                       await tx.youtubeUploadTask.create({
+                          data: {
+                             sourceUrl: v.url,
+                             title: lecture.title, // Use lecture name as requested
+                             lectureVideoId: newVideo.id,
+                             status: "PENDING"
                           }
                        });
                      }
