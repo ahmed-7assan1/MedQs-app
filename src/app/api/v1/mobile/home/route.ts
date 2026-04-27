@@ -41,19 +41,13 @@ export async function GET(req: Request) {
     }
 
     // 3. Get recent or upcoming lectures for "Next Session"
-    // For simplicity, we just fetch the latest 3 lectures in the user's semester
     const upcomingLectures = await prisma.lecture.findMany({
       where: user.semesterId ? {
         subject: {
-          moduleId: {
-            in: (await prisma.module.findMany({
-              where: { semesterId: user.semesterId },
-              select: { id: true }
-            })).map(m => m.id)
-          }
+          semesterId: user.semesterId
         }
       } : {},
-      orderBy: { createdAt: 'desc' },
+      orderBy: { order: 'desc' },
       take: 1,
       include: {
         subject: {
@@ -66,7 +60,7 @@ export async function GET(req: Request) {
     const recommendedSubjects = await prisma.subject.findMany({
       take: 4,
       orderBy: { lectures: { _count: 'desc' } },
-      select: { id: true, title: true, icon: true, color: true }
+      select: { id: true, name: true }
     });
 
     // 5. Structure the response for the mobile app
@@ -82,9 +76,9 @@ export async function GET(req: Request) {
       nextSession: upcomingLectures.length > 0 ? {
         id: upcomingLectures[0].id,
         title: upcomingLectures[0].title,
-        subject: upcomingLectures[0].subject.title,
-        module: upcomingLectures[0].subject.module.title,
-        date: upcomingLectures[0].createdAt,
+        subject: upcomingLectures[0].subject.name,
+        module: upcomingLectures[0].subject.module?.name || null,
+        date: new Date(), // Lecture doesn't have createdAt
       } : null,
       recommended: recommendedSubjects,
     };

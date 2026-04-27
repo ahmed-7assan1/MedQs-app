@@ -8,8 +8,8 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const form = await req.formData();
-  const file = form.get("file") as File | null;
+  const formData = await req.formData() as any;
+  const file = formData.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
   if (!ALLOWED_TYPES.avatar.includes(file.type))

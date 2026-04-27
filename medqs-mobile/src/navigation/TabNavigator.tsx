@@ -60,7 +60,6 @@ export function TabNavigator() {
       tabBar={props => <MyTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        sceneContainerStyle: { backgroundColor: EliteTheme.colors.background }
       }}
     >
       <Tab.Screen 

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const boundary = await assertLecture(w.scope, id);
   if (boundary) return boundary;
 
-  const form = await req.formData();
+  const form = await req.formData() as any;
   const file = form.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 

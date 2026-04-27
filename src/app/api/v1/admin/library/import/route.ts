@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
           title: sourceLec.title,
           videoUrl: sourceLec.videoUrl,
           notesMarkdown: sourceLec.notesMarkdown,
-          subjectId: targetSubjectId,
+          subject: { connect: { id: targetSubjectId } },
           order: 0, // append at start
           flashcards: {
             create: sourceLec.flashcards.map(f => ({
@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
           isInteractive: sourcePaper.isInteractive,
           isPrivate: false,
           kind: sourcePaper.kind,
-          semesterId: targetSemesterId,
-          moduleId: targetModuleId || sourcePaper.moduleId, // use target module if provided
+          semester: { connect: { id: targetSemesterId } },
+          module: { connect: { id: targetModuleId || sourcePaper.moduleId } },
           quizLecture: sourcePaper.quizLecture ? {
             create: {
               title: sourcePaper.quizLecture.title,

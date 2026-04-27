@@ -91,11 +91,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Admin only" }, { status: 403 });
     }
 
-    const form = await req.formData();
-    const mode = String((form as any).get("mode") || "analyze"); // analyze | commit
-    const scope = String((form as any).get("scope") || "semester"); // semester | module
-    const semesterId = String((form as any).get("semesterId") || "");
-    const wipesExisting = String((form as any).get("wipe") || "0") === "1";
+    const form = await req.formData() as any;
+    const mode = String(form.get("mode") || "analyze"); // analyze | commit
+    const scope = String(form.get("scope") || "semester"); // semester | module
+    const semesterId = String(form.get("semesterId") || "");
+    const wipesExisting = String(form.get("wipe") || "0") === "1";
 
     if (!semesterId) return NextResponse.json({ error: "semesterId required" }, { status: 400 });
 
@@ -107,8 +107,8 @@ export async function POST(req: NextRequest) {
 
     // --- MODE 1: ANALYZE ---
     if (mode === "analyze") {
-      const file = (form as any).get("file") as File | null;
-      const rawText = String((form as any).get("text") || "").trim();
+      const file = form.get("file") as File | null;
+      const rawText = String(form.get("text") || "").trim();
       let text = rawText;
 
       if (file) {
@@ -180,7 +180,7 @@ ${cap}`;
 
     // --- MODE 2: COMMIT ---
     if (mode === "commit") {
-      const rawStructure = String((form as any).get("structure") || "");
+      const rawStructure = String(form.get("structure") || "");
       if (!rawStructure) return NextResponse.json({ error: "Structure JSON required" }, { status: 400 });
       
       const structure = JSON.parse(rawStructure);

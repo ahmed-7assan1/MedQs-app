@@ -89,11 +89,11 @@ export async function POST(req: NextRequest) {
       return tx.pastPaper.create({
         data: {
           title: String(body.title ?? "").trim(),
-          semesterId: lecture.subject.module?.semesterId ?? "",
-          moduleId: lecture.subject.moduleId ?? "",
+          semester: { connect: { id: lecture.subject.module?.semesterId ?? "" } },
+          module: { connect: { id: lecture.subject.moduleId ?? "" } },
           isInteractive: true,
           kind: "ADMIN_AUTHORED_QUIZ",
-          quizLectureId: lecture.id,
+          quizLecture: { connect: { id: lecture.id } },
           timeLimitMin:
             body.timeLimitMin != null && body.timeLimitMin !== ""
               ? Math.max(1, parseInt(String(body.timeLimitMin), 10))
@@ -106,8 +106,8 @@ export async function POST(req: NextRequest) {
     const created = await tx.pastPaper.create({
       data: {
         title: String(body.title ?? "").trim(),
-        semesterId,
-        moduleId,
+        semester: { connect: { id: semesterId } },
+        module: { connect: { id: moduleId } },
         // Admin-authored quizzes are interactive by default.
         isInteractive: isAdminQuiz ? true : Boolean(body.isInteractive),
         kind: isAdminQuiz ? "ADMIN_AUTHORED_QUIZ" : "MODULE_QUESTION_BANK",

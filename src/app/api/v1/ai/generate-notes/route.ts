@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const formData = await req.formData();
+  const formData = await req.formData() as any;
+  const lectureId = formData.get("lectureId") as string;
   const file = formData.get("file") as File | null;
   const instructions = String(formData.get("instructions") ?? "").trim();
   const preferredProvider = String(formData.get("preferredProvider") ?? "").trim() || undefined;

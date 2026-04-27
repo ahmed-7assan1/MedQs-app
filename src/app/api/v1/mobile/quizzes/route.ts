@@ -44,7 +44,7 @@ export async function GET(req: Request) {
       orderBy: { createdAt: "desc" },
       include: {
         module: { select: { name: true } },
-        _count: { select: { attempts: true, questions: true } },
+        _count: { select: { attempts: true } },
       },
     });
 

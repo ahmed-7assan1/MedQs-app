@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN")) {
+    const session = await auth();
+    if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "SUPER_ADMIN")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -25,7 +24,7 @@ export async function POST(request: Request) {
           },
         },
       });
-      targetEntities = spotifyRecords.map(r => ({ id: r.id, url: r.url }));
+      targetEntities = spotifyRecords.map((r: any) => ({ id: r.id, url: r.url }));
     } else {
       // Find all external YouTube videos (Default)
       const externalVideos = await prisma.lectureVideo.findMany({
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
           },
         },
       });
-      targetEntities = externalVideos.map(v => ({ id: v.id, url: v.url }));
+      targetEntities = externalVideos.map((v: any) => ({ id: v.id, url: v.url }));
     }
 
     let queuedCount = 0;

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 // GET: fetch current personal key (masked)
 export async function GET() {
   const session = await auth();
-  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as any)) {
+  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -26,7 +26,7 @@ export async function GET() {
 // POST: save or clear personal key
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as any)) {
+  if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

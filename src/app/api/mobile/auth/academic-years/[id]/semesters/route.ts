@@ -7,11 +7,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   try {
     const semesters = await prisma.semester.findMany({
       where: { academicYearId: params.id },
-      orderBy: { order: 'asc' },
+      orderBy: { name: 'asc' },
       select: {
         id: true,
-        title: true,
-        order: true,
+        name: true,
       }
     });
     

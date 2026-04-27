@@ -43,19 +43,15 @@ export async function GET(req: Request) {
       orderBy: { name: 'asc' },
       include: {
         subjects: {
-          orderBy: { title: 'asc' },
+          orderBy: { name: 'asc' },
           include: {
             lectures: {
-              orderBy: { createdAt: 'asc' },
+              orderBy: { order: 'asc' },
               select: {
                 id: true,
                 title: true,
-                description: true,
-                type: true,
-                duration: true,
-                youtubeUrl: true,
-                driveUrl: true,
-                quizId: true,
+                videoUrl: true,
+                order: true,
               }
             }
           }

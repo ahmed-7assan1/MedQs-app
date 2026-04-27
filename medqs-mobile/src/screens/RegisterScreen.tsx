@@ -163,20 +163,16 @@ export function RegisterScreen({ navigation }: any) {
       if (!result?.user) throw new Error('Registration failed');
 
       // Auto login after register
-      const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000';
-      const res = await fetch(`${API_BASE}/api/auth/callback/credentials`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ email: email.trim().toLowerCase(), password, redirect: 'false', callbackUrl: '/' }),
-        credentials: 'include',
+      const loginRes = await mobileApi.login({ 
+        email: email.trim().toLowerCase(), 
+        password 
       });
-      const cookieHeader = res.headers.get('set-cookie');
-      if (cookieHeader) {
-        const match = cookieHeader.match(/authjs\.session-token=([^;]+)/);
-        if (match) await storage.setItem('sessionToken', match[1]);
+
+      if (loginRes.token) {
+        await storage.setItem('sessionToken', loginRes.token);
       }
 
-      await login(result.user);
+      await login(loginRes.user || result.user);
       await loadConfig(result.user.universityId);
     } catch (err: any) {
       setError(err?.message || 'An error occurred. Please try again.');

@@ -98,7 +98,7 @@ export async function POST(req: Request) {
 
             if (lData.files && lData.files.length > 0) {
               await tx.lectureFile.createMany({
-                data: lData.files.map(f => ({
+                data: lData.files.map((f: any) => ({
                   name: f.name,
                   url: f.url,
                   mimeType: f.mimeType || "application/pdf",

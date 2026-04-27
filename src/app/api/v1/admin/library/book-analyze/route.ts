@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   if (!w.ok) return w.response;
 
   try {
-    const formData = await req.formData();
+    const formData = await req.formData() as any;
     const file = formData.get("file") as File;
     const { searchParams } = new URL(req.url);
     const facultyId = formData.get("facultyId") as string;

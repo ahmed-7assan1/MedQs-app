@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const formData = await req.formData();
+  const formData = await req.formData() as any;
   const startedAt = Date.now();
   const file = formData.get("file") as File | null;
   const questionModeRaw = String(formData.get("questionMode") ?? "mcq").trim().toLowerCase();

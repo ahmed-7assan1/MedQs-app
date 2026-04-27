@@ -91,8 +91,8 @@ export async function GET(req: NextRequest) {
           const yt = ytDataMap.get(c.youtubeId);
           return {
             ...c,
-            thumbnail: yt?.thumbnail || c.thumbnail,
-            subscribers: yt?.subs || c.subscribers
+            thumbnail: (yt as any)?.thumbnail || c.thumbnail,
+            subscribers: (yt as any)?.subs || c.subscribers
           };
        });
     }

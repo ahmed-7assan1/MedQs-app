@@ -15,7 +15,7 @@ export async function PUT(req: NextRequest) {
     const { name, bio, image } = body;
 
     const user = await prisma.user.update({
-      where: { id: token.id },
+      where: { id: token.id as string },
       data: {
         ...(name && { name }),
         ...(bio && { bio }),

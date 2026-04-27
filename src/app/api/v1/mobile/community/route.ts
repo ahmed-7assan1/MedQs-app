@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch the latest forum posts for the community feed
-    const posts = await prisma.forumPost.findMany({
+    const posts = await prisma.post.findMany({
       take: 20,
       orderBy: { createdAt: 'desc' },
       include: {
@@ -25,30 +25,29 @@ export async function GET(req: NextRequest) {
         },
         _count: {
           select: {
-            replies: true,
-            votes: true
+            comments: true,
+            likes: true
           }
         }
       }
     });
 
-    const formattedPosts = posts.map(post => ({
+    const formattedPosts = posts.map((post: any) => ({
       id: post.id,
-      title: post.title,
+      title: post.content.substring(0, 40) + "...",
       content: post.content,
-      category: post.category,
       createdAt: post.createdAt,
       authorName: post.author.name || 'Anonymous User',
       authorImage: post.author.image,
       authorRole: post.author.role,
-      likes: post._count.votes,
-      comments: post._count.replies,
+      likes: post._count.likes,
+      comments: post._count.comments,
       isPinned: post.isPinned,
     }));
 
     // Fetch basic stats for the community header
     const totalUsers = await prisma.user.count();
-    const activeDiscussions = await prisma.forumPost.count({
+    const activeDiscussions = await prisma.post.count({
       where: {
         createdAt: {
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // last 7 days
@@ -59,7 +58,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       posts: formattedPosts,
       stats: {
-        onlineMembers: Math.floor(totalUsers * 0.1) || 15, // Mocked online for now, web does similar
+        onlineMembers: Math.floor(totalUsers * 0.1) || 15,
         totalDiscussions: activeDiscussions
       }
     });

@@ -31,28 +31,20 @@ export function LoginScreen({ navigation }: any) {
     setLoading(true);
 
     try {
-      // Use NextAuth credentials endpoint
-      const res = await fetch(`${API_BASE}/api/auth/callback/credentials`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ email: email.trim().toLowerCase(), password, redirect: 'false', callbackUrl: '/' }),
-        credentials: 'include',
+      const res = await mobileApi.login({ 
+        email: email.trim().toLowerCase(), 
+        password 
       });
 
-      // After credentials login, fetch user data from our mobile API
-      const statsRes = await mobileApi.getUserStats();
-      if (!statsRes?.user) throw new Error('Login failed');
-
-      // Save session cookie for subsequent requests
-      const cookieHeader = res.headers.get('set-cookie');
-      if (cookieHeader) {
-        const match = cookieHeader.match(/authjs\.session-token=([^;]+)/);
-        if (match) await storage.setItem('sessionToken', match[1]);
+      if (res.token) {
+        await storage.setItem('sessionToken', res.token);
       }
 
-      await login(statsRes.user);
+      await login(res.user);
       // Load site config with user's university
-      await loadConfig(statsRes.user.universityId);
+      if (res.user.universityId) {
+        await loadConfig(res.user.universityId);
+      }
 
     } catch (err: any) {
       setError(err?.message || 'Invalid email or password. Please try again.');
@@ -135,11 +127,29 @@ export function LoginScreen({ navigation }: any) {
           </TouchableOpacity>
 
           {/* Register */}
-          <TouchableOpacity onPress={() => navigation.navigate('Register')} style={tw`items-center`} accessibilityLabel="Create new account">
+          <TouchableOpacity onPress={() => navigation.navigate('Register')} style={tw`items-center mb-6`} accessibilityLabel="Create new account">
             <Text style={tw`text-slate-400`}>
               Don't have an account?{' '}
               <Text style={[tw`font-black`, { color: primaryColor }]}>Register now</Text>
             </Text>
+          </TouchableOpacity>
+
+          {/* Skip Login (Temporary) */}
+          <TouchableOpacity 
+            onPress={async () => {
+              const demoUser = {
+                id: 'demo-id',
+                name: 'Demo Doctor',
+                email: 'demo@medonex.com',
+                role: 'STUDENT',
+                points: 1250,
+                theme: 'DARK',
+              };
+              await login(demoUser as any);
+            }} 
+            style={tw`items-center border border-[#1E2D4D] py-3 rounded-2xl`}
+          >
+            <Text style={tw`text-slate-500 font-bold`}>Skip Login (Demo Mode) ⚡</Text>
           </TouchableOpacity>
 
         </ScrollView>

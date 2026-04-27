@@ -31,17 +31,13 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       include: {
         module: { select: { id: true, name: true } },
         lectures: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: { order: 'asc' },
           select: {
             id: true,
             title: true,
-            description: true,
-            type: true,
-            duration: true,
-            youtubeUrl: true,
-            driveUrl: true,
-            quizId: true,
-            createdAt: true,
+            videoUrl: true,
+            order: true,
+            notesMarkdown: true,
           }
         }
       }

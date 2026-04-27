@@ -19,10 +19,9 @@ class ApiClient {
     });
 
     try {
-      // Send session token stored by NextAuth (set during login)
       const sessionToken = await SecureStore.getItemAsync('sessionToken');
       if (sessionToken) {
-        headers.set('Cookie', `authjs.session-token=${sessionToken}`);
+        headers.set('Authorization', `Bearer ${sessionToken}`);
       }
     } catch {
       // SecureStore may not be available in web preview
@@ -84,6 +83,8 @@ export const mobileApi = {
   getSemesters: (yearId: string) => api.get<any[]>(`/auth/academic-years/${yearId}/semesters`),
   register: (data: { name: string; email: string; password: string; universityId?: string; facultyId?: string; semesterId?: string }) =>
     api.post<{ user: any }>('/auth/register', data),
+  login: (data: { email?: string; studentId?: string; password: string }) =>
+    api.post<{ token: string; user: any }>('/login', data),
 
   // Site Config (called once at startup)
   getSiteConfig: (universityId?: string) =>

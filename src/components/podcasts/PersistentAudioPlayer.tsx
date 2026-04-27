@@ -220,30 +220,35 @@ export function PersistentAudioPlayer() {
               overflow: 'hidden' 
             }}
           >
-            <ReactPlayer
-              key={currentTrack.url}
-              ref={ytPlayerRef}
-              url={currentTrack.url}
-              playing={isPlaying}
-              onProgress={({ playedSeconds }: any) => setLocalCurrentTime(playedSeconds)}
-              onDuration={(d: number) => setLocalDuration(d)}
-              onEnded={() => setIsPlaying(false)}
-              onError={(e: any) => console.error("YouTube Player Error:", e)}
-              width="100%"
-              height="100%"
-              config={{
-                youtube: {
-                  playerVars: { 
-                    autoplay: 1,
-                    controls: 0,
-                    showinfo: 0,
-                    modestbranding: 1,
-                    origin: typeof window !== "undefined" ? window.location.origin : undefined,
-                    playsinline: 1
-                  }
-                }
-              }}
-            />
+            {(() => {
+              const Player = ReactPlayer as any;
+              return (
+                <Player
+                  key={currentTrack.url}
+                  ref={ytPlayerRef}
+                  url={currentTrack.url}
+                  playing={isPlaying}
+                  onProgress={({ playedSeconds }: any) => setLocalCurrentTime(playedSeconds)}
+                  onDuration={(d: number) => setLocalDuration(d)}
+                  onEnded={() => setIsPlaying(false)}
+                  onError={(e: any) => console.error("YouTube Player Error:", e)}
+                  width="100%"
+                  height="100%"
+                  config={{
+                    youtube: {
+                      playerVars: { 
+                        autoplay: 1,
+                        controls: 0,
+                        showinfo: 0,
+                        modestbranding: 1,
+                        origin: typeof window !== "undefined" ? window.location.origin : undefined,
+                        playsinline: 1
+                      }
+                    }
+                  }}
+                />
+              );
+            })()}
           </div>
         )}
       </motion.div>

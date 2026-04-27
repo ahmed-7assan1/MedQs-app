@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         moduleId: targetModuleId,
       },
     });
-    return ok({ result: updated, message: "Quiz moved successfully" });
+    return ok({ result: { updated, message: "Quiz moved successfully" } });
   }
 
   // mode === "copy" — deep copy
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
     await prisma.question.createMany({
       data: sourceQuestions.map((q) => ({
         body: q.body,
-        choices: q.choices,
+        choices: q.choices as any,
         answer: q.answer,
         explanation: q.explanation,
         aiExplanation: q.aiExplanation,
@@ -134,8 +134,10 @@ export async function POST(req: NextRequest) {
   }
 
   return ok({
-    result: copiedPaper,
-    message: `Quiz copied successfully with ${sourceQuestions.length} questions`,
+    result: {
+      paper: copiedPaper,
+      message: `Quiz copied successfully with ${sourceQuestions.length} questions`
+    }
   });
 }
 
@@ -173,7 +175,9 @@ export async function PUT(req: NextRequest) {
   });
 
   return ok({
-    result: { migratedCount: result.count },
-    message: `Migrated ${result.count} quizzes to target semester`,
+    result: { 
+      migratedCount: result.count,
+      message: `Migrated ${result.count} quizzes to target semester`
+    }
   });
 }

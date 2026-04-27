@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       recentUsers
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.quiz.count(),
+      prisma.pastPaper.count(),
       prisma.module.count(),
       prisma.user.findMany({
         take: 5,
