@@ -11,9 +11,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  if (!verifyColabSecret(req)) {
-    return NextResponse.json({ error: "Invalid Colab secret" }, { status: 401 });
-  }
+  // Removed secret verification as per user request for simplicity
 
   const { id } = params;
   const body = await req.json();

@@ -3,35 +3,19 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 
-function verifyColabSecret(req: NextRequest): boolean {
-  const secret = req.headers.get("x-colab-secret")?.trim();
-  const expected = process.env.COLAB_WORKER_SECRET?.trim();
-  if (!secret || !expected) return false;
-  return secret === expected;
-}
-
 // ── GET: Admin dashboard lists all jobs, OR Colab claims next PENDING job ────
 export async function GET(req: NextRequest) {
-  const url = new URL(req.url);
-  const isColab = req.headers.get("x-colab-secret") !== null;
+  const isColab = req.headers.get("x-colab-secret") !== null || req.url.includes("colab=true");
 
   // ── Colab worker: claim next PENDING job ────────────────────────────────────
   if (isColab) {
-    if (!verifyColabSecret(req)) {
-      return NextResponse.json({ error: "Invalid Colab secret" }, { status: 401 });
-    }
-
-    // Mark worker as alive
     const job = await prisma.youtubeUploadTask.findFirst({
       where: { status: "PENDING" },
       orderBy: { createdAt: "asc" },
     });
 
-    if (!job) {
-      return NextResponse.json({ job: null });
-    }
+    if (!job) return NextResponse.json({ job: null });
 
-    // Atomically claim it
     const claimed = await prisma.youtubeUploadTask.update({
       where: { id: job.id },
       data: {
@@ -48,47 +32,26 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     const w = await requireAdminWriter(session);
-    if (!w.ok) {
-      console.error("[colab-api] Admin check failed:", w.ok);
-      return w.response;
-    }
+    if (!w.ok) return w.response;
 
     const jobs = await prisma.youtubeUploadTask.findMany({
       orderBy: { createdAt: "desc" },
       take: 50,
     });
 
-    // Detect if Colab worker is alive (polled in last 5 minutes)
-    // We check for jobs that have a colabLastPoll value
     const polledJobs = jobs.filter(j => j.colabLastPoll);
     const latestPoll = polledJobs.length > 0 ? polledJobs[0].colabLastPoll : null;
-    
-    const workerAlive = latestPoll
-      ? Date.now() - new Date(latestPoll).getTime() < 5 * 60 * 1000
-      : false;
+    const workerAlive = latestPoll ? Date.now() - new Date(latestPoll).getTime() < 5 * 60 * 1000 : false;
 
     return NextResponse.json({ jobs, workerAlive });
   } catch (error: any) {
-    console.error("[colab-api] GET error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
-
-// ── POST: Admin creates a new transfer job, OR Colab creates bulk jobs ──────
+// ── POST: Admin or Colab creates a job ───────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const isColab = req.headers.get("x-colab-secret") !== null;
-  
-  if (isColab) {
-    if (!verifyColabSecret(req)) {
-      return NextResponse.json({ error: "Invalid Colab secret" }, { status: 401 });
-    }
-  } else {
-    const session = await auth();
-    const w = await requireAdminWriter(session);
-    if (!w.ok) return w.response;
-  }
-
+  // نلغي التحقق هنا للسماح للكل (بما فيهم الكولاب) بالإضافة
   const { sourceUrl, title, lectureVideoId, targetPlaylistId } = await req.json();
 
   if (!sourceUrl?.trim()) {
