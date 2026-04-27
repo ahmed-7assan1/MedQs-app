@@ -656,8 +656,10 @@ exports.Prisma.ChannelFollowScalarFieldEnum = {
 
 exports.Prisma.YoutubeUploadTaskScalarFieldEnum = {
   id: 'id',
+  title: 'title',
   sourceUrl: 'sourceUrl',
   targetPlaylistId: 'targetPlaylistId',
+  lectureVideoId: 'lectureVideoId',
   status: 'status',
   progress: 'progress',
   totalVideos: 'totalVideos',
@@ -665,6 +667,8 @@ exports.Prisma.YoutubeUploadTaskScalarFieldEnum = {
   error: 'error',
   entityId: 'entityId',
   newVideoUrl: 'newVideoUrl',
+  logs: 'logs',
+  colabLastPoll: 'colabLastPoll',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

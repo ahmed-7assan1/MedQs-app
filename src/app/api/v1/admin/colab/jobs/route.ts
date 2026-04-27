@@ -43,23 +43,35 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Admin dashboard: list all jobs ─────────────────────────────────────────
-  const session = await auth();
-  const w = await requireAdminWriter(session);
-  if (!w.ok) return w.response;
+  try {
+    const session = await auth();
+    const w = await requireAdminWriter(session);
+    if (!w.ok) {
+      console.error("[colab-api] Admin check failed:", w.ok);
+      return w.response;
+    }
 
-  const jobs = await prisma.youtubeUploadTask.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+    const jobs = await prisma.youtubeUploadTask.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
 
-  // Detect if Colab worker is alive (polled in last 3 minutes)
-  const latestPoll = jobs.find((j) => j.colabLastPoll);
-  const workerAlive = latestPoll?.colabLastPoll
-    ? Date.now() - new Date(latestPoll.colabLastPoll).getTime() < 3 * 60 * 1000
-    : false;
+    // Detect if Colab worker is alive (polled in last 5 minutes)
+    // We check for jobs that have a colabLastPoll value
+    const polledJobs = jobs.filter(j => j.colabLastPoll);
+    const latestPoll = polledJobs.length > 0 ? polledJobs[0].colabLastPoll : null;
+    
+    const workerAlive = latestPoll
+      ? Date.now() - new Date(latestPoll).getTime() < 5 * 60 * 1000
+      : false;
 
-  return NextResponse.json({ jobs, workerAlive });
+    return NextResponse.json({ jobs, workerAlive });
+  } catch (error: any) {
+    console.error("[colab-api] GET error:", error);
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  }
 }
+
 
 // ── POST: Admin creates a new transfer job ───────────────────────────────────
 export async function POST(req: NextRequest) {

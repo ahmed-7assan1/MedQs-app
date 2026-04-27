@@ -58363,8 +58363,10 @@ export namespace Prisma {
 
   export type YoutubeUploadTaskMinAggregateOutputType = {
     id: string | null
+    title: string | null
     sourceUrl: string | null
     targetPlaylistId: string | null
+    lectureVideoId: string | null
     status: string | null
     progress: number | null
     totalVideos: number | null
@@ -58372,14 +58374,18 @@ export namespace Prisma {
     error: string | null
     entityId: string | null
     newVideoUrl: string | null
+    logs: string | null
+    colabLastPoll: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type YoutubeUploadTaskMaxAggregateOutputType = {
     id: string | null
+    title: string | null
     sourceUrl: string | null
     targetPlaylistId: string | null
+    lectureVideoId: string | null
     status: string | null
     progress: number | null
     totalVideos: number | null
@@ -58387,14 +58393,18 @@ export namespace Prisma {
     error: string | null
     entityId: string | null
     newVideoUrl: string | null
+    logs: string | null
+    colabLastPoll: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type YoutubeUploadTaskCountAggregateOutputType = {
     id: number
+    title: number
     sourceUrl: number
     targetPlaylistId: number
+    lectureVideoId: number
     status: number
     progress: number
     totalVideos: number
@@ -58402,6 +58412,8 @@ export namespace Prisma {
     error: number
     entityId: number
     newVideoUrl: number
+    logs: number
+    colabLastPoll: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -58422,8 +58434,10 @@ export namespace Prisma {
 
   export type YoutubeUploadTaskMinAggregateInputType = {
     id?: true
+    title?: true
     sourceUrl?: true
     targetPlaylistId?: true
+    lectureVideoId?: true
     status?: true
     progress?: true
     totalVideos?: true
@@ -58431,14 +58445,18 @@ export namespace Prisma {
     error?: true
     entityId?: true
     newVideoUrl?: true
+    logs?: true
+    colabLastPoll?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type YoutubeUploadTaskMaxAggregateInputType = {
     id?: true
+    title?: true
     sourceUrl?: true
     targetPlaylistId?: true
+    lectureVideoId?: true
     status?: true
     progress?: true
     totalVideos?: true
@@ -58446,14 +58464,18 @@ export namespace Prisma {
     error?: true
     entityId?: true
     newVideoUrl?: true
+    logs?: true
+    colabLastPoll?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type YoutubeUploadTaskCountAggregateInputType = {
     id?: true
+    title?: true
     sourceUrl?: true
     targetPlaylistId?: true
+    lectureVideoId?: true
     status?: true
     progress?: true
     totalVideos?: true
@@ -58461,6 +58483,8 @@ export namespace Prisma {
     error?: true
     entityId?: true
     newVideoUrl?: true
+    logs?: true
+    colabLastPoll?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -58554,8 +58578,10 @@ export namespace Prisma {
 
   export type YoutubeUploadTaskGroupByOutputType = {
     id: string
+    title: string | null
     sourceUrl: string
     targetPlaylistId: string | null
+    lectureVideoId: string | null
     status: string
     progress: number
     totalVideos: number
@@ -58563,6 +58589,8 @@ export namespace Prisma {
     error: string | null
     entityId: string | null
     newVideoUrl: string | null
+    logs: string | null
+    colabLastPoll: Date | null
     createdAt: Date
     updatedAt: Date
     _count: YoutubeUploadTaskCountAggregateOutputType | null
@@ -58588,8 +58616,10 @@ export namespace Prisma {
 
   export type YoutubeUploadTaskSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    title?: boolean
     sourceUrl?: boolean
     targetPlaylistId?: boolean
+    lectureVideoId?: boolean
     status?: boolean
     progress?: boolean
     totalVideos?: boolean
@@ -58597,14 +58627,18 @@ export namespace Prisma {
     error?: boolean
     entityId?: boolean
     newVideoUrl?: boolean
+    logs?: boolean
+    colabLastPoll?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["youtubeUploadTask"]>
 
   export type YoutubeUploadTaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    title?: boolean
     sourceUrl?: boolean
     targetPlaylistId?: boolean
+    lectureVideoId?: boolean
     status?: boolean
     progress?: boolean
     totalVideos?: boolean
@@ -58612,14 +58646,18 @@ export namespace Prisma {
     error?: boolean
     entityId?: boolean
     newVideoUrl?: boolean
+    logs?: boolean
+    colabLastPoll?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["youtubeUploadTask"]>
 
   export type YoutubeUploadTaskSelectScalar = {
     id?: boolean
+    title?: boolean
     sourceUrl?: boolean
     targetPlaylistId?: boolean
+    lectureVideoId?: boolean
     status?: boolean
     progress?: boolean
     totalVideos?: boolean
@@ -58627,6 +58665,8 @@ export namespace Prisma {
     error?: boolean
     entityId?: boolean
     newVideoUrl?: boolean
+    logs?: boolean
+    colabLastPoll?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -58637,8 +58677,10 @@ export namespace Prisma {
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      title: string | null
       sourceUrl: string
       targetPlaylistId: string | null
+      lectureVideoId: string | null
       status: string
       progress: number
       totalVideos: number
@@ -58646,6 +58688,8 @@ export namespace Prisma {
       error: string | null
       entityId: string | null
       newVideoUrl: string | null
+      logs: string | null
+      colabLastPoll: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["youtubeUploadTask"]>
@@ -59042,8 +59086,10 @@ export namespace Prisma {
    */ 
   interface YoutubeUploadTaskFieldRefs {
     readonly id: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly title: FieldRef<"YoutubeUploadTask", 'String'>
     readonly sourceUrl: FieldRef<"YoutubeUploadTask", 'String'>
     readonly targetPlaylistId: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly lectureVideoId: FieldRef<"YoutubeUploadTask", 'String'>
     readonly status: FieldRef<"YoutubeUploadTask", 'String'>
     readonly progress: FieldRef<"YoutubeUploadTask", 'Int'>
     readonly totalVideos: FieldRef<"YoutubeUploadTask", 'Int'>
@@ -59051,6 +59097,8 @@ export namespace Prisma {
     readonly error: FieldRef<"YoutubeUploadTask", 'String'>
     readonly entityId: FieldRef<"YoutubeUploadTask", 'String'>
     readonly newVideoUrl: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly logs: FieldRef<"YoutubeUploadTask", 'String'>
+    readonly colabLastPoll: FieldRef<"YoutubeUploadTask", 'DateTime'>
     readonly createdAt: FieldRef<"YoutubeUploadTask", 'DateTime'>
     readonly updatedAt: FieldRef<"YoutubeUploadTask", 'DateTime'>
   }
@@ -60042,8 +60090,10 @@ export namespace Prisma {
 
   export const YoutubeUploadTaskScalarFieldEnum: {
     id: 'id',
+    title: 'title',
     sourceUrl: 'sourceUrl',
     targetPlaylistId: 'targetPlaylistId',
+    lectureVideoId: 'lectureVideoId',
     status: 'status',
     progress: 'progress',
     totalVideos: 'totalVideos',
@@ -60051,6 +60101,8 @@ export namespace Prisma {
     error: 'error',
     entityId: 'entityId',
     newVideoUrl: 'newVideoUrl',
+    logs: 'logs',
+    colabLastPoll: 'colabLastPoll',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -64122,8 +64174,10 @@ export namespace Prisma {
     OR?: YoutubeUploadTaskWhereInput[]
     NOT?: YoutubeUploadTaskWhereInput | YoutubeUploadTaskWhereInput[]
     id?: StringFilter<"YoutubeUploadTask"> | string
+    title?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     sourceUrl?: StringFilter<"YoutubeUploadTask"> | string
     targetPlaylistId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    lectureVideoId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     status?: StringFilter<"YoutubeUploadTask"> | string
     progress?: IntFilter<"YoutubeUploadTask"> | number
     totalVideos?: IntFilter<"YoutubeUploadTask"> | number
@@ -64131,14 +64185,18 @@ export namespace Prisma {
     error?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     entityId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     newVideoUrl?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    logs?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    colabLastPoll?: DateTimeNullableFilter<"YoutubeUploadTask"> | Date | string | null
     createdAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
     updatedAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
   }
 
   export type YoutubeUploadTaskOrderByWithRelationInput = {
     id?: SortOrder
+    title?: SortOrderInput | SortOrder
     sourceUrl?: SortOrder
     targetPlaylistId?: SortOrderInput | SortOrder
+    lectureVideoId?: SortOrderInput | SortOrder
     status?: SortOrder
     progress?: SortOrder
     totalVideos?: SortOrder
@@ -64146,6 +64204,8 @@ export namespace Prisma {
     error?: SortOrderInput | SortOrder
     entityId?: SortOrderInput | SortOrder
     newVideoUrl?: SortOrderInput | SortOrder
+    logs?: SortOrderInput | SortOrder
+    colabLastPoll?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -64155,8 +64215,10 @@ export namespace Prisma {
     AND?: YoutubeUploadTaskWhereInput | YoutubeUploadTaskWhereInput[]
     OR?: YoutubeUploadTaskWhereInput[]
     NOT?: YoutubeUploadTaskWhereInput | YoutubeUploadTaskWhereInput[]
+    title?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     sourceUrl?: StringFilter<"YoutubeUploadTask"> | string
     targetPlaylistId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    lectureVideoId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     status?: StringFilter<"YoutubeUploadTask"> | string
     progress?: IntFilter<"YoutubeUploadTask"> | number
     totalVideos?: IntFilter<"YoutubeUploadTask"> | number
@@ -64164,14 +64226,18 @@ export namespace Prisma {
     error?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     entityId?: StringNullableFilter<"YoutubeUploadTask"> | string | null
     newVideoUrl?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    logs?: StringNullableFilter<"YoutubeUploadTask"> | string | null
+    colabLastPoll?: DateTimeNullableFilter<"YoutubeUploadTask"> | Date | string | null
     createdAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
     updatedAt?: DateTimeFilter<"YoutubeUploadTask"> | Date | string
   }, "id">
 
   export type YoutubeUploadTaskOrderByWithAggregationInput = {
     id?: SortOrder
+    title?: SortOrderInput | SortOrder
     sourceUrl?: SortOrder
     targetPlaylistId?: SortOrderInput | SortOrder
+    lectureVideoId?: SortOrderInput | SortOrder
     status?: SortOrder
     progress?: SortOrder
     totalVideos?: SortOrder
@@ -64179,6 +64245,8 @@ export namespace Prisma {
     error?: SortOrderInput | SortOrder
     entityId?: SortOrderInput | SortOrder
     newVideoUrl?: SortOrderInput | SortOrder
+    logs?: SortOrderInput | SortOrder
+    colabLastPoll?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: YoutubeUploadTaskCountOrderByAggregateInput
@@ -64193,8 +64261,10 @@ export namespace Prisma {
     OR?: YoutubeUploadTaskScalarWhereWithAggregatesInput[]
     NOT?: YoutubeUploadTaskScalarWhereWithAggregatesInput | YoutubeUploadTaskScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"YoutubeUploadTask"> | string
+    title?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
     sourceUrl?: StringWithAggregatesFilter<"YoutubeUploadTask"> | string
     targetPlaylistId?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
+    lectureVideoId?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
     status?: StringWithAggregatesFilter<"YoutubeUploadTask"> | string
     progress?: IntWithAggregatesFilter<"YoutubeUploadTask"> | number
     totalVideos?: IntWithAggregatesFilter<"YoutubeUploadTask"> | number
@@ -64202,6 +64272,8 @@ export namespace Prisma {
     error?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
     entityId?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
     newVideoUrl?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
+    logs?: StringNullableWithAggregatesFilter<"YoutubeUploadTask"> | string | null
+    colabLastPoll?: DateTimeNullableWithAggregatesFilter<"YoutubeUploadTask"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"YoutubeUploadTask"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"YoutubeUploadTask"> | Date | string
   }
@@ -68172,8 +68244,10 @@ export namespace Prisma {
 
   export type YoutubeUploadTaskCreateInput = {
     id?: string
+    title?: string | null
     sourceUrl: string
     targetPlaylistId?: string | null
+    lectureVideoId?: string | null
     status?: string
     progress?: number
     totalVideos?: number
@@ -68181,14 +68255,18 @@ export namespace Prisma {
     error?: string | null
     entityId?: string | null
     newVideoUrl?: string | null
+    logs?: string | null
+    colabLastPoll?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type YoutubeUploadTaskUncheckedCreateInput = {
     id?: string
+    title?: string | null
     sourceUrl: string
     targetPlaylistId?: string | null
+    lectureVideoId?: string | null
     status?: string
     progress?: number
     totalVideos?: number
@@ -68196,14 +68274,18 @@ export namespace Prisma {
     error?: string | null
     entityId?: string | null
     newVideoUrl?: string | null
+    logs?: string | null
+    colabLastPoll?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type YoutubeUploadTaskUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     sourceUrl?: StringFieldUpdateOperationsInput | string
     targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    lectureVideoId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     progress?: IntFieldUpdateOperationsInput | number
     totalVideos?: IntFieldUpdateOperationsInput | number
@@ -68211,14 +68293,18 @@ export namespace Prisma {
     error?: NullableStringFieldUpdateOperationsInput | string | null
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    colabLastPoll?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type YoutubeUploadTaskUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     sourceUrl?: StringFieldUpdateOperationsInput | string
     targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    lectureVideoId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     progress?: IntFieldUpdateOperationsInput | number
     totalVideos?: IntFieldUpdateOperationsInput | number
@@ -68226,14 +68312,18 @@ export namespace Prisma {
     error?: NullableStringFieldUpdateOperationsInput | string | null
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    colabLastPoll?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type YoutubeUploadTaskCreateManyInput = {
     id?: string
+    title?: string | null
     sourceUrl: string
     targetPlaylistId?: string | null
+    lectureVideoId?: string | null
     status?: string
     progress?: number
     totalVideos?: number
@@ -68241,14 +68331,18 @@ export namespace Prisma {
     error?: string | null
     entityId?: string | null
     newVideoUrl?: string | null
+    logs?: string | null
+    colabLastPoll?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type YoutubeUploadTaskUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     sourceUrl?: StringFieldUpdateOperationsInput | string
     targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    lectureVideoId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     progress?: IntFieldUpdateOperationsInput | number
     totalVideos?: IntFieldUpdateOperationsInput | number
@@ -68256,14 +68350,18 @@ export namespace Prisma {
     error?: NullableStringFieldUpdateOperationsInput | string | null
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    colabLastPoll?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type YoutubeUploadTaskUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
     sourceUrl?: StringFieldUpdateOperationsInput | string
     targetPlaylistId?: NullableStringFieldUpdateOperationsInput | string | null
+    lectureVideoId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     progress?: IntFieldUpdateOperationsInput | number
     totalVideos?: IntFieldUpdateOperationsInput | number
@@ -68271,6 +68369,8 @@ export namespace Prisma {
     error?: NullableStringFieldUpdateOperationsInput | string | null
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     newVideoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    colabLastPoll?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -71096,8 +71196,10 @@ export namespace Prisma {
 
   export type YoutubeUploadTaskCountOrderByAggregateInput = {
     id?: SortOrder
+    title?: SortOrder
     sourceUrl?: SortOrder
     targetPlaylistId?: SortOrder
+    lectureVideoId?: SortOrder
     status?: SortOrder
     progress?: SortOrder
     totalVideos?: SortOrder
@@ -71105,6 +71207,8 @@ export namespace Prisma {
     error?: SortOrder
     entityId?: SortOrder
     newVideoUrl?: SortOrder
+    logs?: SortOrder
+    colabLastPoll?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -71117,8 +71221,10 @@ export namespace Prisma {
 
   export type YoutubeUploadTaskMaxOrderByAggregateInput = {
     id?: SortOrder
+    title?: SortOrder
     sourceUrl?: SortOrder
     targetPlaylistId?: SortOrder
+    lectureVideoId?: SortOrder
     status?: SortOrder
     progress?: SortOrder
     totalVideos?: SortOrder
@@ -71126,14 +71232,18 @@ export namespace Prisma {
     error?: SortOrder
     entityId?: SortOrder
     newVideoUrl?: SortOrder
+    logs?: SortOrder
+    colabLastPoll?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type YoutubeUploadTaskMinOrderByAggregateInput = {
     id?: SortOrder
+    title?: SortOrder
     sourceUrl?: SortOrder
     targetPlaylistId?: SortOrder
+    lectureVideoId?: SortOrder
     status?: SortOrder
     progress?: SortOrder
     totalVideos?: SortOrder
@@ -71141,6 +71251,8 @@ export namespace Prisma {
     error?: SortOrder
     entityId?: SortOrder
     newVideoUrl?: SortOrder
+    logs?: SortOrder
+    colabLastPoll?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
