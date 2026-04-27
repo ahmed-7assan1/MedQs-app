@@ -19,12 +19,17 @@ import {
   PlayCircle,
   FileCode,
   GraduationCap,
+  X,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
 import ReactMarkdown from "react-markdown";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
+import { AIAssistantPanel } from "@/components/ai/AIAssistant";
+import toast from "react-hot-toast";
+
 
 type TabId =
   | "overview"
@@ -437,6 +442,33 @@ export function LectureExperienceClient({
 
   const tabs = useMemo(() => getTabs(lecture), [lecture]);
   const [active, setActive] = useState<TabId>((tabs[0]?.id as TabId) ?? "overview");
+  const [showAiChat, setShowAiChat] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAnalyze = async () => {
+    if (isAnalyzing) return;
+    setIsAnalyzing(true);
+    const tid = toast.loading("Dr. Q is analyzing the lecture... This may take a minute.");
+    try {
+      const res = await fetch("/api/v1/ai/analyze-lecture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lectureId: lecture.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Analysis failed");
+      const { generated, sources } = data;
+      const summary = `✅ Generated: ${generated?.questions ?? 0} MCQs · ${generated?.flashcards ?? 0} flashcards · ${generated?.mnemonics ?? 0} mnemonics`;
+      toast.success(summary, { id: tid, duration: 5000 });
+      window.location.reload();
+
+    } catch (err: any) {
+      toast.error(err.message, { id: tid });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
 
   useEffect(() => {
     if (!tabs.find((t) => t.id === active)) setActive((tabs[0]?.id as TabId) ?? "overview");
@@ -563,13 +595,50 @@ export function LectureExperienceClient({
                     <HelpCircle className="h-3.5 w-3.5 text-blue-400" />
                     <span>{(lecture?.questions?.length ?? 0)} Quiz</span>
                  </div>
-                 <Link href="/ai-chat" className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-wider text-white shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95 ml-auto">
-                    <Sparkles className="h-4 w-4" />
-                    Ask Dr. Q
-                 </Link>
+                 <div className="flex items-center gap-2 ml-auto">
+                    <button
+                       onClick={handleAnalyze}
+                       disabled={isAnalyzing}
+                       className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-primary hover:bg-primary/10 transition-colors disabled:opacity-50"
+                    >
+                       {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                       Analyze Lecture
+                    </button>
+                    <button
+                       onClick={() => setShowAiChat(true)}
+                       className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-wider text-white shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95"
+                    >
+                       <Sparkles className="h-4 w-4" />
+                       Chat with Lecture
+                    </button>
+                 </div>
               </div>
            </div>
         </div>
+
+        {/* --- CHAT WITH LECTURE MODAL --- */}
+        {showAiChat && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) setShowAiChat(false); }}
+          >
+            <div className="relative w-full max-w-2xl" style={{ height: '80vh' }}>
+               <button
+                  onClick={() => setShowAiChat(false)}
+                  className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white transition-colors"
+                  aria-label="Close AI chat"
+               >
+                  <X className="h-6 w-6" />
+               </button>
+               <AIAssistantPanel
+                  embedded={true}
+                  fullPage={true}
+                  lectureId={lecture.id}
+                  lectureTitle={lecture.title}
+               />
+            </div>
+          </div>
+        )}
 
         {/* --- DYNAMIC DASHBOARD GRID --- */}
         {active === "overview" && (

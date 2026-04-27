@@ -233,7 +233,7 @@ async function callOpenAI(message: string, systemPrompt: string): Promise<Provid
     },
     signal: AbortSignal.timeout(FETCH_MS),
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: message },

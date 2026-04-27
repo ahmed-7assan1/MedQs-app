@@ -14,6 +14,35 @@ Rules:
 
 `;
 
-export function buildMedicalSystemPrompt(extra?: string): string {
-  return `${MEDICAL_TUTOR_SYSTEM_PREFIX}${extra?.trim() ? `\n${extra.trim()}\n` : ""}`;
+/**
+ * Specialized prompts for medical expert modes.
+ * These are appended to the system prompt when a specific model is selected.
+ */
+export const SPECIALIZED_PROMPTS: Record<string, string> = {
+  internal_medicine: `Expert Mode: Internal Medicine Specialist.
+Reference Knowledge: Davidson's Principles and Practice of Medicine (24th), Harrison's Principles of Internal Medicine (21st), Oxford Handbook of Clinical Medicine (11th), Macleod's Clinical Examination, and Manual of Cardiovascular Medicine.
+Focus: Deep clinical reasoning, complex pathophysiology, differential diagnosis, and evidence-based investigation protocols.`,
+  
+  surgery: `Expert Mode: General Surgery Specialist.
+Reference Knowledge: Bailey & Love's Short Practice of Surgery, Sabiston Textbook of Surgery, and Schwartz's Principles of Surgery.
+Focus: Surgical anatomy, operative indications, perioperative care, and trauma management.`,
+  
+  pediatrics: `Expert Mode: Pediatrics Specialist.
+Reference Knowledge: Nelson Textbook of Pediatrics, Ghai Essential Pediatrics, and Oxford Handbook of Paediatrics.
+Focus: Developmental milestones, pediatric-specific dosages, congenital anomalies, and child-friendly clinical approaches.`,
+  
+  usmle: `Expert Mode: USMLE & Board Exam Prep.
+Reference Knowledge: First Aid for the USMLE Step 1 and Step 2 CK, UWorld patterns, and Pathoma.
+Focus: High-yield exam facts, classic presentations (buzzwords), mnemonics, and "next best step" reasoning.`,
+};
+
+export function buildMedicalSystemPrompt(extra?: string, specializedModel?: string): string {
+  let base = MEDICAL_TUTOR_SYSTEM_PREFIX;
+  
+  if (specializedModel && SPECIALIZED_PROMPTS[specializedModel]) {
+    base += `\n${SPECIALIZED_PROMPTS[specializedModel]}\n`;
+  }
+  
+  return `${base}${extra?.trim() ? `\n${extra.trim()}\n` : ""}`;
 }
+

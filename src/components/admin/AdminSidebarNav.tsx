@@ -23,6 +23,7 @@ const NAV_GROUPS: {
       { href: "/admin/channels",   label: "Channels",     icon: Youtube },
       { href: "/admin/past-papers",label: "Past Papers",  icon: FileText },
       { href: "/admin/medical-library", label: "Medical Library", icon: Library },
+      { href: "/admin/colab-transfer", label: "Colab Transfer", icon: Sparkles, badge: "NEW" },
     ],
   },
   {

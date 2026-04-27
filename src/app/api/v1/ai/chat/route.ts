@@ -230,11 +230,14 @@ export async function POST(req: NextRequest) {
   const {
     message: rawMessage,
     context,
+    lectureId,
+    specializedModel,
     images: rawImages,
     pdfs: rawPdfs,
     conversationHistory,
     preferredProvider,
   } = body;
+
   const effectiveProvider = normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
   const images = sanitizeImages(rawImages);
   const pdfs = sanitizePdfs(rawPdfs);
@@ -282,8 +285,27 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  let lectureContext = "";
+  if (lectureId) {
+    const lecture = await prisma.lecture.findUnique({
+      where: { id: lectureId },
+      select: { title: true, notesMarkdown: true, extras: true },
+    });
+    if (lecture) {
+      const extras = (lecture.extras ?? {}) as any;
+      const takeaways = Array.isArray(extras.overviewCards) 
+        ? extras.overviewCards.map((c: any) => `- ${c.title}: ${c.body}`).join("\n")
+        : "";
+      lectureContext = `### Current Lecture Context:
+Title: ${lecture.title}
+${lecture.notesMarkdown ? `Notes: ${clip(lecture.notesMarkdown, 2000)}` : ""}
+${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
+    }
+  }
+
   const systemPrompt = buildMedicalSystemPrompt(
-    context ? `Current context: the student is studying ${context}` : undefined
+    context ? `Current context: the student is studying ${context}` : undefined,
+    specializedModel
   );
   let personalContext = await buildStudentStudyContext(session.user.id).catch(() => "");
   
@@ -294,9 +316,13 @@ export async function POST(req: NextRequest) {
   if (profileLines.length > 0) {
     personalContext = `### Student Profile Information:\n${profileLines.join("\n")}\n(Do NOT ask the user for this information since it is already provided above)\n\n### Study Context:\n${personalContext}`;
   }
-  const enhancedPrompt = personalContext
-    ? `${systemPrompt}\n\nPersonal learning context (use this to personalize explanation and revision focus):\n${personalContext}`
-    : systemPrompt;
+  
+  const enhancedPrompt = [
+    systemPrompt,
+    lectureContext,
+    personalContext ? `Personal learning context:\n${personalContext}` : "",
+  ].filter(Boolean).join("\n\n---\n\n");
+
 
   let aiResult: { provider: string; text: string; fallbackFrom?: string };
   try {

@@ -200,9 +200,13 @@ const SUGGESTIONS = [
 export function AIAssistantPanel({
   embedded = false,
   fullPage = false,
+  lectureId,
+  lectureTitle,
 }: {
   embedded?: boolean;
   fullPage?: boolean;
+  lectureId?: string;
+  lectureTitle?: string;
 }) {
   const [open, setOpen] = useState(embedded);
   const [threads, setThreads] = useState<DrQThread[]>([]);
@@ -212,6 +216,7 @@ export function AIAssistantPanel({
   const [loading, setLoading] = useState(false);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [specializedModel, setSpecializedModel] = useState<string>("general");
   const [lastFailedPayload, setLastFailedPayload] = useState<{
     message: string;
     images: { mimeType: string; data: string }[];
@@ -239,7 +244,16 @@ export function AIAssistantPanel({
       medicalTutor: "Medical-only tutor. Attach images, a PDF (slides), or text notes. Your conversation topics are saved in this browser — not on our servers.",
       showTopics: "Show topics",
       hideTopics: "Hide topics",
-      close: "Close assistant"
+      close: "Close assistant",
+      context: "Lecture Context",
+      model: "Expertise",
+      models: {
+        general: "General Dr. Q",
+        internal_medicine: "Internal Medicine",
+        surgery: "Surgery",
+        pediatrics: "Pediatrics",
+        usmle: "USMLE / Boards"
+      }
     },
     ar: {
       drq: "د. كيو",
@@ -262,9 +276,19 @@ export function AIAssistantPanel({
       medicalTutor: "مساعد طبي ذكي. يمكنك إرفاق صور، ملفات PDF، أو ملاحظات نصية. محادثاتك تُحفظ على متصفحك فقط وليس على خوادمنا.",
       showTopics: "عرض المواضيع",
       hideTopics: "إخفاء المواضيع",
-      close: "إغلاق المساعد"
+      close: "إغلاق المساعد",
+      context: "سياق المحاضرة",
+      model: "التخصص",
+      models: {
+        general: "د. كيو العام",
+        internal_medicine: "باطنة (Internal)",
+        surgery: "جراحة (Surgery)",
+        pediatrics: "أطفال (Pediatrics)",
+        usmle: "معادلة (USMLE)"
+      }
     }
   };
+
   const t = labels[lang];
 
   useLayoutEffect(() => {
@@ -346,7 +370,9 @@ export function AIAssistantPanel({
       text: string,
       images: { mimeType: string; data: string }[],
       pdfs: { mimeType: "application/pdf"; data: string }[],
-      history: { role: string; content: string }[]
+      history: { role: string; content: string }[],
+      currentLectureId?: string,
+      currentModel?: string
     ) => {
       const res = await fetch("/api/v1/ai/chat", {
         method: "POST",
@@ -356,6 +382,8 @@ export function AIAssistantPanel({
           images: images.length ? images : undefined,
           pdfs: pdfs.length ? pdfs : undefined,
           conversationHistory: history.length ? history : undefined,
+          lectureId: currentLectureId,
+          specializedModel: currentModel !== "general" ? currentModel : undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -445,7 +473,7 @@ export function AIAssistantPanel({
     setLoading(true);
     setLastFailedPayload(null);
     try {
-      await postChat(combined || "(See attached materials.)", imgs, pdfs, history);
+      await postChat(combined || "(See attached materials.)", imgs, pdfs, history, lectureId, specializedModel);
     } catch (err) {
       setLastFailedPayload({
         message: combined || "(See attached materials.)",
@@ -558,64 +586,91 @@ export function AIAssistantPanel({
   );
 
   const header = (
-    <div className="flex items-center gap-2.5 border-b border-primary/10 px-4 py-3 bg-primary/5">
-      {fullPage && embedded ? (
-        <button
-          type="button"
-          onClick={() => setSidebarOpen((s) => !s)}
-          className="rounded-lg border border-primary/10 p-2 text-primary hover:bg-primary/10"
-          aria-label={sidebarOpen ? t.hideTopics : t.showTopics}
-        >
-          {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
-        </button>
-      ) : null}
-      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-        <div className="ai-glow-orb absolute" />
-        <Sparkles className="h-5 w-5 text-primary" aria-hidden />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold tracking-tight">{t.drq}</p>
-        <div className="flex items-center gap-2">
-          {usage && (
-            <p className="text-[10px] text-muted-foreground">
-              {usage.limit === -1
-                ? `${usage.rankLabel} · ${t.unlimited}`
-                : `${usage.used}/${usage.limit} ${t.rankPrefix} · ${usage.rankLabel}`}
-            </p>
-          )}
+    <div className="flex flex-col border-b border-primary/10 bg-primary/5">
+      <div className="flex items-center gap-2.5 px-4 py-3">
+        {fullPage && embedded ? (
           <button
-            onClick={() => setLang(l => l === "en" ? "ar" : "en")}
-            className="text-[9px] font-bold text-primary hover:underline uppercase"
+            type="button"
+            onClick={() => setSidebarOpen((s) => !s)}
+            className="rounded-lg border border-primary/10 p-2 text-primary hover:bg-primary/10"
+            aria-label={sidebarOpen ? t.hideTopics : t.showTopics}
           >
-            {lang === "en" ? "العربية" : "English"}
+            {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
           </button>
+        ) : null}
+        <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+          <div className="ai-glow-orb absolute" />
+          <Sparkles className="h-5 w-5 text-primary" aria-hidden />
         </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold tracking-tight">{t.drq}</p>
+          <div className="flex items-center gap-2">
+            {usage && (
+              <p className="text-[10px] text-muted-foreground">
+                {usage.limit === -1
+                  ? `${usage.rankLabel} · ${t.unlimited}`
+                  : `${usage.used}/${usage.limit} ${t.rankPrefix} · ${usage.rankLabel}`}
+              </p>
+            )}
+            <button
+              onClick={() => setLang(l => l === "en" ? "ar" : "en")}
+              className="text-[9px] font-bold text-primary hover:underline uppercase"
+            >
+              {lang === "en" ? "العربية" : "English"}
+            </button>
+          </div>
+        </div>
+        {fullPage && embedded ? (
+          <button
+            type="button"
+            onClick={newThread}
+            className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {t.newTopic}
+          </button>
+        ) : null}
+        {!embedded && (
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-primary/10"
+            aria-label={t.close}
+          >
+            <ChevronDown className="h-4 w-4" aria-hidden />
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between px-4 pb-3 gap-2">
+        <div className="flex flex-1 items-center gap-2 min-w-0">
+          <label className="text-[10px] font-bold text-muted-foreground/60 uppercase shrink-0">{t.model}:</label>
+          <select
+            value={specializedModel}
+            onChange={(e) => setSpecializedModel(e.target.value)}
+            className="flex-1 bg-white/50 dark:bg-black/20 border border-primary/10 rounded-lg px-2 py-1 text-[11px] font-bold text-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
+          >
+            {Object.keys(t.models).map((m) => (
+              <option key={m} value={m}>{(t.models as any)[m]}</option>
+            ))}
+          </select>
+        </div>
+        {lectureId && (
+          <div className="flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-[10px] font-bold text-primary animate-in fade-in slide-in-from-top-1">
+             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+             <span className="truncate max-w-[120px]">{lectureTitle || t.context}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="px-4 pb-2">
         <p className="line-clamp-2 text-[9px] leading-snug font-medium text-amber-600 dark:text-amber-400">
           {t.disclaimer}
         </p>
       </div>
-      {fullPage && embedded ? (
-        <button
-          type="button"
-          onClick={newThread}
-          className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          {t.newTopic}
-        </button>
-      ) : null}
-      {!embedded && (
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-primary/10"
-          aria-label={t.close}
-        >
-          <ChevronDown className="h-4 w-4" aria-hidden />
-        </button>
-      )}
     </div>
   );
+
 
   const messagesArea = (
     <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
