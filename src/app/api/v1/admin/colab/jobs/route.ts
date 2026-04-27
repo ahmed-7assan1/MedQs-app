@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 
 function verifyColabSecret(req: NextRequest): boolean {
-  const secret = req.headers.get("x-colab-secret");
-  return secret === process.env.COLAB_WORKER_SECRET;
+  const secret = req.headers.get("x-colab-secret")?.trim();
+  const expected = process.env.COLAB_WORKER_SECRET?.trim();
+  if (!secret || !expected) return false;
+  return secret === expected;
 }
 
 // ── GET: Admin dashboard lists all jobs, OR Colab claims next PENDING job ────
@@ -73,11 +75,19 @@ export async function GET(req: NextRequest) {
 }
 
 
-// ── POST: Admin creates a new transfer job ───────────────────────────────────
+// ── POST: Admin creates a new transfer job, OR Colab creates bulk jobs ──────
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  const w = await requireAdminWriter(session);
-  if (!w.ok) return w.response;
+  const isColab = req.headers.get("x-colab-secret") !== null;
+  
+  if (isColab) {
+    if (!verifyColabSecret(req)) {
+      return NextResponse.json({ error: "Invalid Colab secret" }, { status: 401 });
+    }
+  } else {
+    const session = await auth();
+    const w = await requireAdminWriter(session);
+    if (!w.ok) return w.response;
+  }
 
   const { sourceUrl, title, lectureVideoId, targetPlaylistId } = await req.json();
 

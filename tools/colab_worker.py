@@ -1,285 +1,223 @@
-# ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║          MedOneX — Colab YouTube Transfer Worker                            ║
-# ║  يعمل على سيرفرات Google Colab — لا تحميل على سيرفر موقعك                  ║
-# ╚══════════════════════════════════════════════════════════════════════════════╝
-#
-# 📌 طريقة الاستخدام:
-# 1. افتح هذا الملف في Google Colab
-# 2. عدّل SITE_URL و COLAB_SECRET في Cell 2
-# 3. اضغط Runtime → Run all
-# 4. الـ worker هيشتغل ويراقب الـ queue أوتوماتيك
+import os
+# السماح بالروابط غير المشفرة
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CELL 1: Install dependencies
-# ─────────────────────────────────────────────────────────────────────────────
-# !pip install -q yt-dlp google-auth google-auth-oauthlib google-api-python-client
+# 1. ربط جوجل درايف لحفظ تسجيل الدخول للأبد
+try:
+    from google.colab import drive
+    print("🔗 Mounting Google Drive...")
+    drive.mount('/content/drive')
+    SAVE_PATH = "/content/drive/MyDrive/MedOneX_Worker/"
+    if not os.path.exists(SAVE_PATH): os.makedirs(SAVE_PATH)
+except:
+    print("⚠️ Google Drive not found, using local storage.")
+    SAVE_PATH = "./"
 
 import subprocess
-subprocess.run(["pip", "install", "-q", "yt-dlp", "google-auth", "google-auth-oauthlib", "google-api-python-client"], check=True)
-
-import os
 import time
-import json
 import requests
-import yt_dlp
+import json
 from datetime import datetime
-from pathlib import Path
-
-print("✅ Dependencies installed")
+import sys
+import re
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 2: ⚙️ CONFIG — Edit these values
+# 2. ⚙️ الإعدادات (⚠️ بياناتك هنا)
 # ─────────────────────────────────────────────────────────────────────────────
 
-SITE_URL = "https://medonex.vercel.app"   # تم التحديث لرابط موقعك الأونلاين
-COLAB_SECRET = "medqs-colab-secret-2026-change-this"  # تأكد أن هذا يطابق الموجود في Vercel Env
+TG_API_ID = 'YOUR_TG_API_ID' 
+TG_API_HASH = 'YOUR_TG_API_HASH'
 
-# YouTube Upload Config (اختياري — لو مش عايز ترفع على يوتيوب، اتركه فاضي)
-# لو فاضي، الـ worker هيعمل download بس ويبعت رابط R2/Storage أو يسكيب الـ upload
-YOUTUBE_CLIENT_SECRETS = ""  # path to client_secrets.json (اتركه فاضي مبدئياً)
+SITE_URL = "https://medonex.vercel.app" 
+COLAB_SECRET = "YOUR_COLAB_SECRET" 
 
-POLL_INTERVAL = 15  # seconds between polls
-DOWNLOAD_DIR = "/tmp/colab_downloads"
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+YT_TOKEN_FILE = SAVE_PATH + "youtube_token.json" 
+TG_SESSION_FILE = SAVE_PATH + "medonex_session"
 
-HEADERS = {
-    "x-colab-secret": COLAB_SECRET,
-    "Content-Type": "application/json",
+YOUTUBE_CLIENT_CONFIG = {
+    "installed": {
+        "client_id": "YOUR_CLIENT_ID",
+        "project_id": "YOUR_PROJECT_ID",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "YOUR_CLIENT_SECRET",
+        "redirect_uris": ["http://localhost"]
+    }
 }
 
-print(f"⚙️  Site: {SITE_URL}")
-print(f"🔑 Secret: {'*' * len(COLAB_SECRET)}")
-print(f"⏱️  Poll interval: {POLL_INTERVAL}s")
-
+HEADERS = { "x-colab-secret": COLAB_SECRET, "Content-Type": "application/json" }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 3: Helper functions
+# 3. الدوال المساعدة
 # ─────────────────────────────────────────────────────────────────────────────
 
-def log(job_id: str, message: str) -> None:
-    ts = datetime.utcnow().strftime("%H:%M:%S")
-    line = f"[{ts}] {message}"
-    print(line)
+def log_to_site(job_id, message):
+    ts = datetime.now().strftime("%H:%M:%S")
+    full_msg = f"[{ts}] {message}"
+    print(full_msg)
+    try: requests.patch(f"{SITE_URL}/api/v1/admin/colab/jobs/{job_id}", headers=HEADERS, json={"logs": [full_msg]}, timeout=5)
+    except: pass
+
+def update_job(job_id, **kwargs):
+    try: requests.patch(f"{SITE_URL}/api/v1/admin/colab/jobs/{job_id}", headers=HEADERS, json=kwargs, timeout=5)
+    except: pass
+
+def get_youtube_service():
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    from googleapiclient.discovery import build
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+    creds = None
+    if os.path.exists(YT_TOKEN_FILE):
+        creds = Credentials.from_authorized_user_file(YT_TOKEN_FILE, ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.force-ssl"])
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_config(YOUTUBE_CLIENT_CONFIG, scopes=["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.force-ssl"])
+            flow.redirect_uri = 'http://localhost'
+            auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
+            print(f"\n🔐 سجل دخول يوتيوب:\n{auth_url}")
+            res_url = input("\n🔗 انسخ الرابط النهائي هنا: ").strip()
+            flow.fetch_token(authorization_response=res_url)
+            creds = flow.credentials
+            with open(YT_TOKEN_FILE, 'w') as token: token.write(creds.to_json())
+    return build("youtube", "v3", credentials=creds)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. محرك تحليل رسائل تيليجرام (Bulk Parser)
+# ─────────────────────────────────────────────────────────────────────────────
+
+async def parse_bulk_telegram(url, job_id):
+    from telethon import TelegramClient
+    from telethon.tl.types import MessageEntityTextUrl, MessageEntityUrl, MessageMediaDocument
+    client = TelegramClient(TG_SESSION_FILE, TG_API_ID, TG_API_HASH)
+    await client.start()
     try:
-        requests.patch(
-            f"{SITE_URL}/api/v1/admin/colab/jobs/{job_id}",
-            headers=HEADERS,
-            json={"logs": [line]},
-            timeout=10,
-        )
-    except Exception as e:
-        print(f"⚠️  Failed to send log: {e}")
+        log_to_site(job_id, "📡 Analyzing message for links and files...")
+        parts = url.strip('/').split('/')
+        msg_id = int(parts[-1]); peer = parts[-2]
+        entity = await client.get_entity(peer)
+        message = await client.get_messages(entity, ids=msg_id)
+        if not message: return False, "Message not found"
 
+        detected = []
+        # 1. سحب اللينكات
+        entities = message.entities or []
+        for ent in entities:
+            link = None
+            link_text = ""
+            if isinstance(ent, MessageEntityTextUrl):
+                link = ent.url
+                link_text = message.text[ent.offset : ent.offset + ent.length]
+            elif isinstance(ent, MessageEntityUrl):
+                link = message.text[ent.offset : ent.offset + ent.length]
+                link_text = "Video"
 
-def update_job(job_id: str, **kwargs) -> None:
-    try:
-        requests.patch(
-            f"{SITE_URL}/api/v1/admin/colab/jobs/{job_id}",
-            headers=HEADERS,
-            json=kwargs,
-            timeout=10,
-        )
-    except Exception as e:
-        print(f"⚠️  Failed to update job {job_id}: {e}")
-
-
-def claim_job() -> dict | None:
-    """Poll the server for the next PENDING job."""
-    try:
-        res = requests.get(
-            f"{SITE_URL}/api/v1/admin/colab/jobs",
-            headers=HEADERS,
-            timeout=10,
-        )
-        if res.status_code == 200:
-            return res.json().get("job")
-    except Exception as e:
-        print(f"⚠️  Poll failed: {e}")
-    return None
-
-
-def download_video(job_id: str, url: str) -> str | None:
-    """Download video using yt-dlp. Returns the local file path."""
-    out_path = os.path.join(DOWNLOAD_DIR, f"{job_id}.%(ext)s")
-
-    class ProgressLogger:
-        def debug(self, msg): pass
-        def info(self, msg): pass
-        def warning(self, msg): print(msg)
-        def error(self, msg): print(msg)
-
-    def progress_hook(d):
-        if d["status"] == "downloading":
-            pct_str = d.get("_percent_str", "0%").strip().replace("%", "")
-            try:
-                pct = int(float(pct_str) * 0.7)  # download = 0→70%
-                update_job(job_id, progress=pct)
-            except:
-                pass
-        elif d["status"] == "finished":
-            log(job_id, f"✅ Download complete: {d['filename']}")
-
-    ydl_opts = {
-        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-        "outtmpl": out_path,
-        "merge_output_format": "mp4",
-        "logger": ProgressLogger(),
-        "progress_hooks": [progress_hook],
-        "quiet": True,
-    }
-
-    try:
-        if job:
-            job_id, source_url = job['id'], job['sourceUrl']
-            
-            # تحسين روابط تيليجرام للسحب
-            if "t.me/" in source_url and "/s/" not in source_url:
-                source_url = source_url.replace("t.me/", "t.me/s/")
+            if link and ("t.me/" in link or "youtu" in link):
+                subject, lecture, doctor = "General", "Lecture", ""
+                lines_before = message.text[:ent.offset].split('\n')
+                for line in reversed(lines_before):
+                    line = line.strip()
+                    if '📍' in line: subject = line.replace('📍', '').strip()
+                    if '⭐' in line or '💠' in line: lecture = line.strip()
+                    if 'Dr' in line and not doctor: doctor = line.split('(')[0].strip()
+                    if subject != "General" and lecture != "Lecture" and doctor: break
                 
-            log_to_site(job_id, f"🎬 New Task: {source_url}")
-            
-            # استخراج معلومات الفيديو
-            title = "MedOneX Video"
-            thumb_url = None
+                full_title = f"{subject} | {lecture} - {doctor} ({link_text})"
+                detected.append({"url": link, "title": full_title})
+
+        # 2. سحب الملفات المرفقة
+        if message.media and isinstance(message.media, MessageMediaDocument):
+             detected.append({"url": url, "title": f"Attached: {(message.text or 'Document')[:50]}"})
+
+        log_to_site(job_id, f"🔍 Found {len(detected)} items. Sending to site...")
+        added = 0
+        for d in detected:
             try:
-                with yt_dlp.YoutubeDL({'quiet': True, 'no_warnings': True}) as ydl:
-                    info = ydl.extract_info(source_url, download=False)
-                    if info:
-                        title = info.get('title') or info.get('description', 'Telegram Video')[:50]
-                        thumb_url = info.get('thumbnail')
-            except Exception as e:
-                print(f"⚠️ Metadata extraction failed (Normal for some Telegram links): {e}")
+                res = requests.post(f"{SITE_URL}/api/v1/admin/colab/jobs", headers=HEADERS, json={"sourceUrl": d['url'], "title": d['title']}, timeout=10)
+                if res.status_code in [200, 201]: added += 1
+                else: print(f"❌ Site rejected: {d['title']} ({res.status_code})")
+            except: pass
+        return True, f"Successfully extracted {added} items."
+    finally: await client.disconnect()
 
-            update_job(job_id, status="PROCESSING", progress=10, title=title)
-    except Exception as e:
-        log(job_id, f"❌ Download failed: {e}")
-        return None
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. محرك المعالجة
+# ─────────────────────────────────────────────────────────────────────────────
 
-
-def upload_to_youtube(job_id: str, file_path: str, title: str) -> str | None:
-    """
-    Upload a video to YouTube using the YouTube Data API v3.
-    Requires YouTube credentials to be configured.
-    
-    Returns the YouTube video URL if successful, None otherwise.
-    """
-    if not YOUTUBE_CLIENT_SECRETS or not os.path.exists(YOUTUBE_CLIENT_SECRETS):
-        log(job_id, "⚠️  YouTube credentials not configured. Skipping upload.")
-        log(job_id, "💡 Set YOUTUBE_CLIENT_SECRETS to your client_secrets.json path to enable upload.")
-        return None
-
-    try:
-        from googleapiclient.discovery import build
-        from googleapiclient.http import MediaFileUpload
-        from google_auth_oauthlib.flow import InstalledAppFlow
-        import google.oauth2.credentials
-
-        SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
-        flow = InstalledAppFlow.from_client_secrets_file(YOUTUBE_CLIENT_SECRETS, SCOPES)
-        credentials = flow.run_local_server(port=0)
-        youtube = build("youtube", "v3", credentials=credentials)
-
-        log(job_id, f"📤 Uploading to YouTube: {title}")
-        update_job(job_id, progress=75)
-
-        media = MediaFileUpload(file_path, chunksize=-1, resumable=True)
-        request = youtube.videos().insert(
-            part="snippet,status",
-            body={
-                "snippet": {"title": title, "description": "Uploaded by MedOneX Colab Worker"},
-                "status": {"privacyStatus": "unlisted"},
-            },
-            media_body=media,
-        )
-
-        response = None
-        while response is None:
-            status, response = request.next_chunk()
-            if status:
-                pct = 75 + int(status.progress() * 25)
-                update_job(job_id, progress=pct)
-
-        video_id = response.get("id")
-        if video_id:
-            url = f"https://www.youtube.com/watch?v={video_id}"
-            log(job_id, f"✅ Uploaded! {url}")
-            return url
-
-    except Exception as e:
-        log(job_id, f"❌ YouTube upload failed: {e}")
-    return None
-
-
-def process_job(job: dict) -> None:
-    job_id = job["id"]
-    source_url = job["sourceUrl"]
-    title = job.get("title") or "MedOneX Video"
-
-    log(job_id, f"🎬 Starting job: {title}")
-    log(job_id, f"📡 Source: {source_url}")
-
-    # Step 1: Download
-    log(job_id, "⬇️  Downloading video...")
-    update_job(job_id, progress=5)
-    file_path = download_video(job_id, source_url)
-
-    if not file_path or not os.path.exists(file_path):
-        update_job(job_id, status="FAILED", error="Download failed — yt-dlp could not fetch the video.", progress=0)
+async def process_job(job):
+    job_id, source_url = job['id'], job['sourceUrl']
+    title = job.get('title', "")
+    if "bulk" in title.lower() and "t.me/" in source_url:
+        update_job(job_id, status="PROCESSING")
+        success, msg = await parse_bulk_telegram(source_url, job_id)
+        update_job(job_id, status="COMPLETED" if success else "FAILED", logs=[msg])
         return
 
-    file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
-    log(job_id, f"📦 File size: {file_size_mb:.1f} MB")
-    update_job(job_id, progress=70)
-
-    # Step 2: Upload to YouTube (if credentials configured)
-    new_url = upload_to_youtube(job_id, file_path, title)
-
-    # If no YouTube upload, use the source URL as-is (or you could upload to R2)
-    if not new_url:
-        log(job_id, "ℹ️  No YouTube upload — job marked complete with original URL.")
-        new_url = source_url
-
-    # Step 3: Report completion
-    update_job(job_id, status="COMPLETED", progress=100, newVideoUrl=new_url)
-    log(job_id, f"🎉 Job COMPLETED! URL: {new_url}")
-
-    # Cleanup downloaded file
+    local_file, local_thumb = f"/tmp/{job_id}.mp4", f"/tmp/{job_id}.jpg"
+    success, thumb_url = False, None
     try:
-        os.remove(file_path)
-        log(job_id, "🧹 Temp file cleaned up")
-    except:
-        pass
+        if "t.me/" in source_url:
+            from telethon import TelegramClient
+            client = TelegramClient(TG_SESSION_FILE, TG_API_ID, TG_API_HASH)
+            await client.start()
+            parts = source_url.strip('/').split('/')
+            msg = await client.get_messages(parts[-2], ids=int(parts[-1]))
+            if msg and msg.media:
+                await client.download_media(msg, file=local_file, progress_callback=lambda c,t: sys.stdout.write(f"\r⬇️ TG: {int(100*c/t)}%"))
+                if not job.get('title'): title = (msg.text or "Video")[:80]
+                success = True
+            await client.disconnect()
+        else:
+            import yt_dlp
+            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+                info = ydl.extract_info(source_url, download=False)
+                title, thumb_url = job.get('title') or info.get('title', "Video"), info.get('thumbnail')
+                if thumb_url:
+                    with open(local_thumb, 'wb') as f: f.write(requests.get(thumb_url).content)
+                ydl.download([source_url]); success = os.path.exists(local_file)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CELL 4: 🚀 Main polling loop — Run this to start the worker
-# ─────────────────────────────────────────────────────────────────────────────
-
-print("=" * 60)
-print("🚀 MedOneX Colab Worker Started")
-print(f"   Watching: {SITE_URL}")
-print(f"   Polling every {POLL_INTERVAL}s")
-print("   Press Runtime > Interrupt to stop")
-print("=" * 60)
-
-while True:
-    try:
-        job = claim_job()
-
-        if job is None:
-            print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] 💤 No pending jobs. Sleeping {POLL_INTERVAL}s...")
-            time.sleep(POLL_INTERVAL)
-            continue
-
-        print(f"\n{'='*50}")
-        print(f"📋 Job claimed: {job.get('title') or job['id']}")
-        print(f"{'='*50}")
-
-        process_job(job)
-
-    except KeyboardInterrupt:
-        print("\n⛔ Worker stopped by user.")
-        break
+        if success:
+            from googleapiclient.http import MediaFileUpload
+            youtube = get_youtube_service()
+            media = MediaFileUpload(local_file, chunksize=1024*1024, resumable=True)
+            request = youtube.videos().insert(
+                part="snippet,status",
+                body={"snippet": {"title": title}},
+                media_body=media
+            )
+            response = None
+            while response is None:
+                status, response = request.next_chunk()
+                if status: sys.stdout.write(f"\r📤 YT: {int(status.progress() * 100)}%")
+            update_job(job_id, status="COMPLETED", progress=100, newVideoUrl=f"https://youtu.be/{response['id']}")
+            log_to_site(job_id, f"🎉 Success!")
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
-        time.sleep(POLL_INTERVAL)
+        update_job(job_id, status="FAILED", error=str(e))
+    finally:
+        if os.path.exists(local_file): os.remove(local_file)
+        if os.path.exists(local_thumb): os.remove(local_thumb)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. التشغيل
+# ─────────────────────────────────────────────────────────────────────────────
+print("⏳ Setting up Environment...")
+subprocess.run(["pip", "install", "-U", "-q", "yt-dlp", "telethon", "google-auth-oauthlib", "google-api-python-client"], check=True)
+
+import asyncio
+import yt_dlp
+
+async def main():
+    print(f"🚀 MedOneX AI-Worker is ONLINE.")
+    while True:
+        try:
+            res = requests.get(f"{SITE_URL}/api/v1/admin/colab/jobs", headers=HEADERS, timeout=10)
+            job = res.json().get("job") if res.status_code == 200 else None
+            if job: await process_job(job)
+            else: sys.stdout.write("."); sys.stdout.flush()
+            await asyncio.sleep(10)
+        except Exception as e: print(f"⚠️ Error: {e}"); await asyncio.sleep(10)
+
+await main()
