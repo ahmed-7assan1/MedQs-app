@@ -359,11 +359,12 @@ MY_COOKIES = [
 ]
 
 def setup_selenium():
-    print("🔧 Setting up Selenium...")
+    print("🔧 Setting up Selenium (Colab Optimized)...")
     # Install dependencies if in Colab
-    os.system("apt-get update")
-    os.system("apt install -y google-chrome-stable")
-    os.system("pip install -q selenium")
+    if os.path.exists('/content'):
+        print("📦 Installing Chrome and Driver in Colab...")
+        os.system("apt-get update -qq")
+        os.system("apt-get install -y -qq google-chrome-stable")
     
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
@@ -373,24 +374,34 @@ def setup_selenium():
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--remote-debugging-port=9222')
     chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
     
-    driver = webdriver.Chrome(options=chrome_options)
+    try:
+        driver = webdriver.Chrome(options=chrome_options)
+    except Exception as e:
+        print(f"⚠️ Primary WebDriver failed: {e}")
+        print("🔄 Attempting fallback to chromium-browser...")
+        os.system("apt-get install -y -qq chromium-browser chromium-chromedriver")
+        chrome_options.binary_location = "/usr/bin/chromium-browser"
+        driver = webdriver.Chrome(options=chrome_options)
     
     # Load cookies
+    print("🍪 Injecting Cookies...")
     driver.get("https://www.youtube.com")
-    time.sleep(2)
+    time.sleep(3)
     for cookie in MY_COOKIES:
         try:
             # Fix partitionKey if present
             if 'partitionKey' in cookie: del cookie['partitionKey']
             driver.add_cookie(cookie)
         except Exception as e:
-            # print(f"Skipping cookie {cookie.get('name')}: {e}")
             pass
             
     print("✅ Selenium is Ready.")
     return driver
+
 
 def upload_to_youtube_selenium(driver, file_path, title, job_id):
     from selenium.webdriver.common.by import By
