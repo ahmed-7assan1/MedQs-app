@@ -129,15 +129,28 @@ def download_video(job_id: str, url: str) -> str | None:
     }
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info).replace(".webm", ".mp4").replace(".mkv", ".mp4")
-            # Find the actual file
-            for ext in ["mp4", "mkv", "webm"]:
-                f = os.path.join(DOWNLOAD_DIR, f"{job_id}.{ext}")
-                if os.path.exists(f):
-                    return f
-            return filename
+        if job:
+            job_id, source_url = job['id'], job['sourceUrl']
+            
+            # تحسين روابط تيليجرام للسحب
+            if "t.me/" in source_url and "/s/" not in source_url:
+                source_url = source_url.replace("t.me/", "t.me/s/")
+                
+            log_to_site(job_id, f"🎬 New Task: {source_url}")
+            
+            # استخراج معلومات الفيديو
+            title = "MedOneX Video"
+            thumb_url = None
+            try:
+                with yt_dlp.YoutubeDL({'quiet': True, 'no_warnings': True}) as ydl:
+                    info = ydl.extract_info(source_url, download=False)
+                    if info:
+                        title = info.get('title') or info.get('description', 'Telegram Video')[:50]
+                        thumb_url = info.get('thumbnail')
+            except Exception as e:
+                print(f"⚠️ Metadata extraction failed (Normal for some Telegram links): {e}")
+
+            update_job(job_id, status="PROCESSING", progress=10, title=title)
     except Exception as e:
         log(job_id, f"❌ Download failed: {e}")
         return None
