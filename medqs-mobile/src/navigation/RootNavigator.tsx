@@ -10,6 +10,9 @@ import { LectureDetailScreen } from '../screens/LectureDetailScreen';
 import { PodcastPlayerScreen } from '../screens/PodcastPlayerScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
+import { AdminUserManagerScreen } from '../screens/AdminUserManagerScreen';
+import { AdminQuizManagerScreen } from '../screens/AdminQuizManagerScreen';
+import { StudyAssistantScreen } from '../screens/StudyAssistantScreen';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { View, ActivityIndicator, StatusBar } from 'react-native';
@@ -54,6 +57,9 @@ export function RootNavigator() {
             <Stack.Screen name="PodcastPlayer" component={PodcastPlayerScreen} />
             <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
             <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+            <Stack.Screen name="AdminUserManager" component={AdminUserManagerScreen} />
+            <Stack.Screen name="AdminQuizManager" component={AdminQuizManagerScreen} />
+            <Stack.Screen name="StudyAssistant" component={StudyAssistantScreen} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />

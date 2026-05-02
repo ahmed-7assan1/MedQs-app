@@ -5,12 +5,12 @@
  * Avoid experimental `-exp` IDs in .env — Google removes them from v1beta without notice (404).
  */
 const DEPRECATED_MODEL_MAP: Record<string, string> = {
-  "gemini-1.5-flash-exp": "gemini-2.5-flash",
-  "gemini-1.5-pro-exp": "gemini-2.5-flash",
-  /** Bare 1.5 IDs often 404 on current v1beta for AI Studio keys — use 2.5/2.0 flash */
-  "gemini-1.5-pro": "gemini-2.5-flash",
-  "gemini-1.5-pro-latest": "gemini-2.5-flash",
-  "gemini-pro": "gemini-2.5-flash",
+  "gemini-1.5-flash-exp": "gemini-2.0-flash",
+  "gemini-1.5-pro-exp": "gemini-2.0-flash",
+  /** Bare 1.5 IDs often 404 on current v1beta for AI Studio keys — use 2.0 flash */
+  "gemini-1.5-pro": "gemini-2.0-flash",
+  "gemini-1.5-pro-latest": "gemini-2.0-flash",
+  "gemini-pro": "gemini-2.0-flash",
   "gemini-2.0-flash-exp": "gemini-2.0-flash",
   "gemini-exp-1206": "gemini-2.0-flash",
 };
@@ -28,12 +28,12 @@ export function geminiModelChain(): string[] {
    * Order: try widely-available flash first, then lite / older flash, then Pro.
    */
   const fallbacks = [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
     "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
     "gemini-1.5-flash",
     "gemini-1.5-flash-8b",
-    "gemini-2.5-pro",
+    "gemini-2.0-pro-exp",
+    "gemini-1.5-pro",
   ];
   const raw = env ? [env, ...fallbacks.filter((m) => m !== env)] : fallbacks;
   return [...new Set(raw)];

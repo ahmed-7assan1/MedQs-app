@@ -152,94 +152,36 @@ export default function RegisterPage() {
   const totalSteps  = hasFaculties === false ? 4 : 5;
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-white dark:bg-[#080c14]">
-
-      {/* ── LEFT BRANDING PANEL ── */}
-      <div className="relative hidden flex-col justify-between overflow-hidden lg:flex lg:w-[380px] xl:w-[420px]"
-        style={{ background: "linear-gradient(145deg, #0f1729 0%, #111827 60%, #0c1320 100%)" }}>
-        <div className="absolute inset-0 opacity-[0.06]"
-          style={{ backgroundImage: "linear-gradient(rgba(100,150,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(100,150,255,1) 1px, transparent 1px)", backgroundSize: "50px 50px" }} />
-        <div className="absolute -top-1/4 -left-1/4 h-3/4 w-3/4 rounded-full blur-[140px]"
-          style={{ background: "radial-gradient(circle, rgba(26,107,204,0.2) 0%, transparent 60%)" }} />
-        <div className="absolute -bottom-1/4 -right-1/4 h-2/3 w-2/3 rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(107,72,204,0.12) 0%, transparent 60%)" }} />
-
-        <div className="relative z-10 p-10">
-          <div className="flex items-center gap-3">
-            <span style={{ filter: "brightness(0) invert(1)" }}>
-              <MedQsLogoMark className="h-9 w-9" title="MedQs" />
-            </span>
-            <span className="text-lg font-bold text-white">MedQs</span>
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#09080F]">
+      <div className="relative z-10 flex w-full max-w-[400px] flex-col items-center px-6 py-12">
+        {/* Logo & Step indicator */}
+        <div className="mb-12 flex flex-col items-center gap-6">
+          <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-[#131220] border border-white/[0.07] shadow-2xl transition-all hover:scale-105 hover:shadow-primary/20">
+             <MedQsLogoMark className="h-12 w-12 text-primary" title="MedOneX" interactiveColor={true} />
+          </div>
+          <div className="flex gap-2">
+            {Array.from({ length: totalSteps }, (_, i) => (
+              <div key={i} className={cn("h-1.5 w-10 rounded-full transition-all duration-500",
+                displayStep > i + 1 ? "bg-primary" :
+                displayStep === i + 1 ? "bg-primary/40 shadow-[0_0_8px_rgba(var(--primary-rgb),0.3)]" :
+                "bg-white/5")} />
+            ))}
           </div>
         </div>
 
-        <div className="relative z-10 px-10 pb-10">
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-400">Onboarding</p>
-          <h2 className="mb-4 font-display text-2xl font-extrabold leading-tight text-white">
-            Set up your<br />
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              academic profile
-            </span>
-          </h2>
-          <p className="mb-8 text-sm leading-relaxed text-white/50">
-            Your dashboard will show content that matches your university, faculty, year, and semester.
-          </p>
-
-          {/* Step progress sidebar */}
-          <div className="space-y-3">
-            {visibleSteps.map(({ n, label }) => {
-              const isActive = step === n;
-              const isDone   = step > n;
-              return (
-                <div key={n} className="flex items-center gap-3">
-                  <div className={cn(
-                    "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all",
-                    isDone   ? "bg-green-500 text-white" :
-                    isActive ? "bg-blue-500 text-white ring-4 ring-blue-500/20" :
-                    "bg-white/10 text-white/40"
-                  )}>
-                    {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : n}
-                  </div>
-                  <span className={cn("text-sm transition-colors",
-                    isActive ? "font-semibold text-white" :
-                    isDone   ? "text-green-400" :
-                    "text-white/40"
-                  )}>{label}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* ── FORM PANEL ── */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
-        {/* Mobile progress pills */}
-        <div className="mb-8 flex items-center gap-1.5 lg:hidden">
-          {Array.from({ length: totalSteps }, (_, i) => (
-            <div key={i} className={cn("h-1.5 w-8 rounded-full transition-all",
-              displayStep > i + 1 ? "bg-green-500" :
-              displayStep === i + 1 ? "bg-blue-500" :
-              "bg-muted")} />
-          ))}
-        </div>
-
-        <div className="w-full max-w-[400px]">
-
+        <div className="w-full">
           {/* ── STEP 1: University ── */}
           {step === 1 && (
-            <div className="animate-fade-in">
-              <p className="mb-1 text-xs font-bold uppercase tracking-widest text-blue-500">Step 1</p>
-              <h1 className="mb-1 font-display text-2xl font-extrabold text-foreground">Choose your university</h1>
-              <p className="mb-6 text-sm text-muted-foreground">Your content will be personalized based on your institution.</p>
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Select University</h1>
+              <p className="mb-8 text-[13px] text-white/35 font-medium">Personalize your academic workspace.</p>
 
               {loading ? (
-                <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
+                <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
               ) : universities.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-border py-12 text-center">
-                  <Building2 className="mx-auto mb-3 h-8 w-8 text-muted-foreground opacity-40" />
-                  <p className="font-medium">No universities set up yet</p>
-                  <p className="text-sm text-muted-foreground">Please ask your administrator.</p>
+                  <Building2 className="mx-auto mb-3 h-8 w-8 text-muted-foreground opacity-20" />
+                  <p className="text-sm font-medium">No universities available</p>
                 </div>
               ) : (
                 <div className="space-y-2.5">
@@ -247,20 +189,17 @@ export default function RegisterPage() {
                     <button key={uni.id}
                       onClick={() => { setSelectedUni(uni); setSelectedFaculty(null); setSelectedYear(null); setSelectedSem(null); setStep(2); }}
                       className={cn(
-                        "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
-                        selectedUni?.id === uni.id
-                          ? "border-blue-500/50 bg-blue-500/8"
-                          : "border-white/[0.02] bg-card hover:border-blue-500/30 dark:bg-white/3"
+                        "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all hover:border-primary/20 hover:bg-white/5 active:scale-[0.98]",
+                        selectedUni?.id === uni.id ? "border-primary bg-primary/5" : "border-white/[0.07] bg-[#131220]"
                       )}>
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl"
-                        style={{ background: "rgba(26,107,204,0.1)", borderLeft: "3px solid #1A6BCC" }}>
+                      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10">
                         {uni.logoUrl
-                          ? <img src={uni.logoUrl} alt={uni.name} className="h-9 w-9 rounded-lg object-contain" />
-                          : <Building2 className="h-5 w-5 text-blue-500" />
+                          ? <img src={uni.logoUrl} alt={uni.name} className="h-7 w-7 rounded object-contain" />
+                          : <Building2 className="h-5 w-5 text-white/40" />
                         }
                       </div>
-                      <span className="flex-1 font-semibold">{uni.name}</span>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-[14px] font-bold text-white/90">{uni.name}</span>
+                      <ChevronRight className="h-4 w-4 text-white/10" />
                     </button>
                   ))}
                 </div>
@@ -268,38 +207,34 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* ── STEP 2: Faculty (only shown if faculties exist) ── */}
+          {/* ── STEP 2: Faculty ── */}
           {step === 2 && (
-            <div className="animate-fade-in">
-              <button onClick={() => setStep(1)} className="mb-5 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground">
-                <ArrowLeft className="h-3.5 w-3.5" /> Back
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <button onClick={() => setStep(1)} className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
+                <ArrowLeft className="h-3 w-3" /> Back
               </button>
-              <p className="mb-1 text-xs font-bold uppercase tracking-widest text-purple-500">Step 2</p>
-              <h1 className="mb-1 font-display text-2xl font-extrabold text-foreground">Choose your faculty</h1>
-              <p className="mb-6 text-sm text-muted-foreground">{selectedUni?.name}</p>
+              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Select Faculty</h1>
+              <p className="mb-8 text-[13px] text-white/35 font-medium">{selectedUni?.name}</p>
 
               {hasFaculties === null ? (
-                <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-purple-500" /></div>
+                <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
               ) : (
                 <div className="space-y-2.5">
                   {faculties.map(fac => (
                     <button key={fac.id}
                       onClick={() => { setSelectedFaculty(fac); setSelectedYear(null); setSelectedSem(null); setStep(3); }}
                       className={cn(
-                        "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
-                        selectedFaculty?.id === fac.id
-                          ? "border-purple-500/50 bg-purple-500/8"
-                          : "border-white/[0.02] bg-card hover:border-purple-500/30 dark:bg-white/3"
+                        "flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all hover:border-primary/20 hover:bg-muted/50 active:scale-[0.98]",
+                        selectedFaculty?.id === fac.id ? "border-primary bg-primary/5" : "border-border bg-card"
                       )}>
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl"
-                        style={{ background: "rgba(139,92,246,0.1)", borderLeft: "3px solid #8b5cf6" }}>
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         {fac.logoUrl
-                          ? <img src={fac.logoUrl} alt={fac.name} className="h-9 w-9 rounded-lg object-contain" />
-                          : <GraduationCap className="h-5 w-5 text-purple-500" />
+                          ? <img src={fac.logoUrl} alt={fac.name} className="h-7 w-7 rounded object-contain" />
+                          : <GraduationCap className="h-4 w-4 text-primary" />
                         }
                       </div>
-                      <span className="flex-1 font-semibold">{fac.name}</span>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-[14px] font-bold">{fac.name}</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
                     </button>
                   ))}
                 </div>
@@ -309,151 +244,122 @@ export default function RegisterPage() {
 
           {/* ── STEP 3: Year + Semester ── */}
           {step === 3 && (
-            <div className="animate-fade-in">
-              <button onClick={() => setStep(hasFaculties ? 2 : 1)} className="mb-5 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground">
-                <ArrowLeft className="h-3.5 w-3.5" /> Back
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <button onClick={() => setStep(hasFaculties ? 2 : 1)} className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
+                <ArrowLeft className="h-3 w-3" /> Back
               </button>
-              <p className="mb-1 text-xs font-bold uppercase tracking-widest text-blue-500">Step {hasFaculties ? "3" : "2"}</p>
-              <h1 className="mb-1 font-display text-2xl font-extrabold text-foreground">Academic year</h1>
-              <p className="mb-6 text-sm text-muted-foreground">
-                {selectedFaculty ? `${selectedFaculty.name} — ` : ""}{selectedUni?.name}
-              </p>
+              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Academic Year</h1>
+              <p className="mb-8 text-[13px] text-white/35 font-medium">Select your current stage of study.</p>
 
-              {/* Years grid */}
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Select Year</p>
-              {filteredYears.length === 0 ? (
-                <div className="mb-4 rounded-xl border border-dashed border-border py-6 text-center text-sm text-muted-foreground">
-                  No academic years configured yet. Ask your admin.
-                </div>
-              ) : (
-                <div className="mb-5 grid grid-cols-3 gap-2">
-                  {filteredYears.map(year => (
-                    <button key={year.id}
-                      onClick={() => { setSelectedYear(year); setSelectedSem(null); }}
-                      className={cn(
-                        "flex flex-col items-center rounded-xl border p-3 text-center transition-all hover:-translate-y-0.5 active:scale-[0.98]",
-                        selectedYear?.id === year.id
-                          ? "border-amber-500/50 bg-amber-500/8"
-                          : "border-white/[0.02] bg-card hover:border-amber-500/30 dark:bg-white/3"
-                      )}>
-                      <Calendar className={cn("mb-1 h-5 w-5", selectedYear?.id === year.id ? "text-amber-500" : "text-muted-foreground")} />
-                      <span className="text-xs font-bold">Year {year.yearNumber}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                {filteredYears.map(year => (
+                  <button key={year.id}
+                    onClick={() => { setSelectedYear(year); setSelectedSem(null); }}
+                    className={cn(
+                      "flex flex-col items-center justify-center rounded-2xl border p-4 text-center transition-all hover:border-primary/20 active:scale-[0.98]",
+                      selectedYear?.id === year.id ? "border-primary bg-primary/5 shadow-inner shadow-primary/10" : "border-white/[0.07] bg-[#131220]"
+                    )}>
+                    <Calendar className={cn("mb-2 h-4 w-4", selectedYear?.id === year.id ? "text-primary" : "text-white/10")} />
+                    <span className={cn("text-[12px] font-bold", selectedYear?.id === year.id ? "text-white" : "text-white/40")}>Year {year.yearNumber}</span>
+                  </button>
+                ))}
+              </div>
 
-              {/* Semesters */}
               {selectedYear && (
-                <>
-                  <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Select Semester</p>
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Select Semester</p>
                   <div className="space-y-2.5">
-                    {filteredSems.length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-border py-6 text-center text-sm text-muted-foreground">
-                        No semesters for this year.
-                      </div>
-                    ) : filteredSems.map(sem => (
+                    {filteredSems.map(sem => (
                       <button key={sem.id}
                         onClick={() => setSelectedSem(sem)}
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-xl border p-3.5 text-left transition-all hover:-translate-y-0.5 active:scale-[0.98]",
-                          selectedSem?.id === sem.id
-                            ? "border-violet-500/50 bg-violet-500/8"
-                            : "border-white/[0.02] bg-card hover:border-violet-500/30 dark:bg-white/3"
+                          "flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all hover:border-primary/20 active:scale-[0.98]",
+                          selectedSem?.id === sem.id ? "border-primary bg-primary/5" : "border-white/[0.07] bg-[#131220]"
                         )}>
-                        <BookOpen className={cn("h-4 w-4 flex-shrink-0", selectedSem?.id === sem.id ? "text-violet-500" : "text-muted-foreground")} />
-                        <span className="flex-1 font-medium">{sem.name}</span>
-                        {selectedSem?.id === sem.id && <CheckCircle2 className="h-4 w-4 text-violet-500" />}
+                        <div className="flex items-center gap-4">
+                          <BookOpen className={cn("h-5 w-5", selectedSem?.id === sem.id ? "text-primary" : "text-white/10")} />
+                          <span className={cn("text-[14px] font-bold", selectedSem?.id === sem.id ? "text-white" : "text-white/40")}>{sem.name}</span>
+                        </div>
+                        {selectedSem?.id === sem.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
                       </button>
                     ))}
                   </div>
 
                   {selectedSem && (
                     <button onClick={() => setStep(4)}
-                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-sm font-semibold text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)] transition-all hover:-translate-y-0.5 active:scale-[0.98]">
+                      className="mt-10 flex w-full items-center justify-center gap-2 rounded-2xl btn-gradient py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98]">
                       Continue <ChevronRight className="h-4 w-4" />
                     </button>
                   )}
-                </>
+                </div>
               )}
             </div>
           )}
 
           {/* ── STEP 4: Profile ── */}
           {step === 4 && (
-            <div className="animate-fade-in">
-              <button onClick={() => setStep(3)} className="mb-5 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground">
-                <ArrowLeft className="h-3.5 w-3.5" /> Back
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <button onClick={() => setStep(3)} className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
+                <ArrowLeft className="h-3 w-3" /> Back
               </button>
-              <p className="mb-1 text-xs font-bold uppercase tracking-widest text-blue-500">Step {hasFaculties ? "4" : "3"}</p>
-              <h1 className="mb-1 font-display text-2xl font-extrabold text-foreground">Your profile</h1>
-              <p className="mb-6 text-sm text-muted-foreground">Required before entering MedQs.</p>
+              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Create Profile</h1>
+              <p className="mb-8 text-[13px] text-white/35 font-medium">Complete your identity on the platform.</p>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                    <User className="h-3.5 w-3.5 text-blue-500" />
-                    Username <span className="text-red-500">*</span>
-                  </label>
-                  <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="e.g. ahmed.m" maxLength={30}
-                    className="w-full rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-white/5" />
-                  <p className="mt-1 text-[11px] text-muted-foreground">Letters, numbers, dot, underscore, dash only</p>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Username *</label>
+                  <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="e.g. ahmed_m" maxLength={30}
+                    className="w-full rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" />
                 </div>
 
-                <div>
-                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                    <FileText className="h-3.5 w-3.5 text-purple-500" />
-                    University / Faculty ID <span className="text-red-500">*</span>
-                  </label>
-                  <input value={studentId} onChange={e => setStudentId(e.target.value)} placeholder="Your official student number" maxLength={24}
-                    className="w-full rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:bg-white/5" />
-                  <p className="mt-1 text-[11px] text-muted-foreground">Min 6 characters</p>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Student ID *</label>
+                  <input value={studentId} onChange={e => setStudentId(e.target.value)} placeholder="Official student number" maxLength={24}
+                    className="w-full rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" />
                 </div>
 
-                <div>
-                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                    Bio <span className="ml-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px]">optional</span>
-                  </label>
-                  <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell classmates a bit about yourself…" maxLength={200} rows={2}
-                    className="w-full resize-none rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 dark:bg-white/5" />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                    <Phone className="h-3.5 w-3.5" />
-                    Phone <span className="ml-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px]">optional · private</span>
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Phone (Optional)</label>
                   <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20 10 XXXX XXXX" maxLength={20} type="tel"
-                    className="w-full rounded-xl border border-white/[0.02] bg-background/80 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 dark:bg-white/5" />
+                    className="w-full rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" />
                 </div>
 
                 <button onClick={handleFinish} disabled={saving}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-sm font-bold text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)] transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:translate-y-0">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {saving ? "Setting up…" : "Complete Setup"}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl btn-gradient py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50">
+                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                  {saving ? "Finalizing..." : "Join MedOneX"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* ── STEP 5: Done ── */}
+          {/* ── STEP 5: Success ── */}
           {step === 5 && (
-            <div className="animate-fade-in flex flex-col items-center py-8 text-center">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-600 shadow-[0_10px_40px_rgba(16,185,129,0.4)]">
-                <Sparkles className="h-10 w-10 text-white" />
+            <div className="animate-in zoom-in-95 duration-700 flex flex-col items-center py-12 text-center">
+              <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/10 text-primary shadow-inner">
+                <CheckCircle2 className="h-12 w-12" />
               </div>
-              <h1 className="mb-2 font-display text-2xl font-extrabold text-foreground">Welcome to MedQs! 🎉</h1>
-              <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
-                Your profile is all set. Taking you to your dashboard…
+              <h1 className="mb-3 font-display text-3xl font-black tracking-tight text-white">You're in! 🎉</h1>
+              <p className="mb-10 text-[15px] leading-relaxed text-white/35 max-w-[280px]">
+                Your medical journey begins now. Redirecting to your dashboard...
               </p>
-              <div className="h-1.5 w-48 overflow-hidden rounded-full bg-muted">
-                <div className="h-full animate-pulse rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"
-                  style={{ width: "100%", transition: "width 2.2s linear" }} />
+              <div className="h-[2px] w-48 overflow-hidden rounded-full bg-muted">
+                <div className="h-full animate-progress rounded-full bg-primary" />
               </div>
             </div>
           )}
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes progress {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        .animate-progress {
+          animation: progress 2.2s linear forwards;
+        }
+      `}</style>
     </div>
   );
 }

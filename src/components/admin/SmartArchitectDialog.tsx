@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { 
   X, Zap, FileText, Loader2, Check, AlertCircle, 
   Trash2, Plus, ChevronRight, Layout, BookOpen, Layers,
-  Save, RefreshCw, Bot
+  Save, RefreshCw, Bot, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -40,6 +40,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
   const [structure, setStructure] = useState<Structure | null>(null);
   const [isCommitting, setIsCommitting] = useState(false);
   const [wipeMode, setWipeMode] = useState(false);
+  const [enableSmartImages, setEnableSmartImages] = useState(false);
   const [scope, setScope] = useState<"semester"|"module">("semester");
   
   // MANUS Agent State
@@ -138,7 +139,11 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
           const res = await fetch("/api/v1/admin/ai/manus-agent", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lectureId: task.lectureId, url: task.url })
+            body: JSON.stringify({ 
+              lectureId: task.lectureId, 
+              url: task.url,
+              enableSmartImages 
+            })
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Agent failed");
@@ -510,23 +515,44 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                </div>
 
                {/* Bulk Options */}
-               <div className="rounded-3xl bg-amber-500/5 border border-amber-500/20 p-6 flex items-center gap-4">
-                  <div className="h-12 w-12 shrink-0 flex items-center justify-center rounded-2xl bg-amber-500/20 text-amber-500">
-                     <AlertCircle className="h-6 w-6" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="rounded-3xl bg-amber-500/5 border border-amber-500/20 p-6 flex items-center gap-4">
+                    <div className="h-12 w-12 shrink-0 flex items-center justify-center rounded-2xl bg-amber-500/20 text-amber-500">
+                       <AlertCircle className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1">
+                       <h4 className="text-sm font-bold text-amber-500">Curriculum Overwrite</h4>
+                       <p className="text-[10px] text-amber-500/70">Wiping existing data will remove all current modules and lectures.</p>
+                    </div>
+                    <button 
+                      onClick={() => setWipeMode(!wipeMode)}
+                      className={cn(
+                        "relative h-6 w-11 shrink-0 rounded-full transition-colors",
+                        wipeMode ? "bg-amber-500" : "bg-slate-700"
+                      )}
+                    >
+                      <div className={cn("absolute top-1 h-4 w-4 rounded-full bg-white transition-all", wipeMode ? "left-6" : "left-1")} />
+                    </button>
                   </div>
-                  <div className="flex-1">
-                     <h4 className="text-sm font-bold text-amber-500">Curriculum Overwrite</h4>
-                     <p className="text-xs text-amber-500/70">Wiping existing data will remove all current modules and lectures in this semester before rebuilding.</p>
+
+                  <div className="rounded-3xl bg-blue-500/5 border border-blue-500/20 p-6 flex items-center gap-4">
+                    <div className="h-12 w-12 shrink-0 flex items-center justify-center rounded-2xl bg-blue-500/20 text-blue-500">
+                       <Sparkles className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1">
+                       <h4 className="text-sm font-bold text-blue-500">Smart Illustrations</h4>
+                       <p className="text-[10px] text-blue-500/70">Use Open-i AI to find relevant medical images for generated questions.</p>
+                    </div>
+                    <button 
+                      onClick={() => setEnableSmartImages(!enableSmartImages)}
+                      className={cn(
+                        "relative h-6 w-11 shrink-0 rounded-full transition-colors",
+                        enableSmartImages ? "bg-blue-500" : "bg-slate-700"
+                      )}
+                    >
+                      <div className={cn("absolute top-1 h-4 w-4 rounded-full bg-white transition-all", enableSmartImages ? "left-6" : "left-1")} />
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => setWipeMode(!wipeMode)}
-                    className={cn(
-                      "relative h-6 w-11 shrink-0 rounded-full transition-colors",
-                      wipeMode ? "bg-amber-500" : "bg-slate-700"
-                    )}
-                  >
-                    <div className={cn("absolute top-1 h-4 w-4 rounded-full bg-white transition-all", wipeMode ? "left-6" : "left-1")} />
-                  </button>
                </div>
              </div>
           )}

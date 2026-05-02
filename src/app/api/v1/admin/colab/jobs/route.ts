@@ -51,8 +51,7 @@ export async function GET(req: NextRequest) {
 
 // ── POST: Admin or Colab creates a job ───────────────────────────────────────
 export async function POST(req: NextRequest) {
-  // نلغي التحقق هنا للسماح للكل (بما فيهم الكولاب) بالإضافة
-  const { sourceUrl, title, lectureVideoId, targetPlaylistId } = await req.json();
+  const { sourceUrl, title, lectureVideoId, targetPlaylistId, metadata } = await req.json();
 
   if (!sourceUrl?.trim()) {
     return NextResponse.json({ error: "sourceUrl is required" }, { status: 400 });
@@ -64,6 +63,7 @@ export async function POST(req: NextRequest) {
       title: title?.trim() || sourceUrl.trim(),
       lectureVideoId: lectureVideoId || null,
       targetPlaylistId: targetPlaylistId || null,
+      entityId: metadata ? JSON.stringify(metadata) : null,
       status: "PENDING",
     },
   });

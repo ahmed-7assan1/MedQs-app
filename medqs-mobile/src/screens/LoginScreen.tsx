@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  SafeAreaView, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
+  View, Text, SafeAreaView, ScrollView,
+  KeyboardAvoidingView, Platform, StatusBar, Image
 } from 'react-native';
 import tw from 'twrnc';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { mobileApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react-native';
-
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000';
+import * as Haptics from 'expo-haptics';
+import { EliteButton } from '../components/ui/EliteButton';
+import { EliteInput } from '../components/ui/EliteInput';
 
 export function LoginScreen({ navigation }: any) {
   const { login } = useAuthStore();
-  const { primaryColor, loadConfig } = useThemeStore();
+  const { getTheme, primaryColor, isDarkMode, loadConfig } = useThemeStore();
+  const theme = getTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,9 +27,12 @@ export function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password');
+      setError('يرجى إدخال البيانات المطلوبة');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
+    
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setError(null);
     setLoading(true);
 
@@ -41,119 +47,114 @@ export function LoginScreen({ navigation }: any) {
       }
 
       await login(res.user);
-      // Load site config with user's university
       if (res.user.universityId) {
         await loadConfig(res.user.universityId);
       }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     } catch (err: any) {
-      setError(err?.message || 'Invalid email or password. Please try again.');
+      setError(err?.message || 'خطأ في الدخول. يرجى التأكد من البيانات.');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-[#07090F]`}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={tw`flex-1`}>
-        <ScrollView contentContainerStyle={tw`flex-grow justify-center px-6 py-10`} keyboardShouldPersistTaps="handled">
+    <View style={[tw`flex-1`, { backgroundColor: theme.colors.background }]}>
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
+      
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={tw`flex-1`}
+      >
+        <SafeAreaView style={tw`flex-1`}>
+          <ScrollView 
+            contentContainerStyle={tw`flex-grow px-8 py-12 justify-center`} 
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
 
-          {/* Header */}
-          <View style={tw`items-center mb-12`}>
-            <View style={[tw`w-20 h-20 rounded-[32px] items-center justify-center mb-5`, { backgroundColor: primaryColor + '20', borderWidth: 1, borderColor: primaryColor + '40' }]}>
-              <Lock color={primaryColor} size={36} />
-            </View>
-            <Text style={tw`text-white text-3xl font-black`}>Welcome Back 👋</Text>
-            <Text style={tw`text-slate-400 mt-2 text-base`}>Login to continue your journey</Text>
-          </View>
+            {/* Logo Area */}
+            <Animated.View 
+              entering={FadeInUp.delay(200)}
+              style={tw`items-center mb-16`}
+            >
+              <View style={[
+                tw`w-24 h-24 rounded-3xl items-center justify-center mb-6`,
+                { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }
+              ]}>
+                <Lock color={primaryColor} size={42} strokeWidth={2.5} />
+              </View>
+              
+              <Text style={[tw`text-3xl font-black tracking-tight`, { color: theme.colors.text }]}>MedOneX</Text>
+              <Text style={[tw`mt-2 text-center font-medium`, { color: theme.colors.textMuted }]}>
+                مرحباً بك في منصة المستقبل الطبية
+              </Text>
+            </Animated.View>
 
-          {/* Error */}
-          {error && (
-            <View style={tw`flex-row items-center bg-red-500/10 border border-red-500/30 rounded-2xl px-4 py-3 mb-6`}>
-              <AlertCircle color="#f87171" size={18} style={tw`mr-2`} />
-              <Text style={tw`text-red-400 font-bold flex-1`}>{error}</Text>
-            </View>
-          )}
+            {/* Error Message */}
+            {error && (
+              <Animated.View 
+                entering={FadeInDown}
+                style={[tw`flex-row items-center p-4 rounded-2xl mb-6`, { backgroundColor: theme.colors.danger + '10' }]}
+              >
+                <AlertCircle color={theme.colors.danger} size={20} style={tw`mr-3`} />
+                <Text style={[tw`text-sm font-bold flex-1`, { color: theme.colors.danger }]}>{error}</Text>
+              </Animated.View>
+            )}
 
-          {/* Email */}
-          <View style={tw`mb-4`}>
-            <Text style={tw`text-slate-400 text-sm font-bold mb-2 uppercase tracking-widest`}>Email</Text>
-            <View style={tw`flex-row items-center bg-[#0D1117] border border-[#1E2D4D] rounded-2xl px-4`}>
-              <Mail color="#3B4A6B" size={18} style={tw`mr-3`} />
-              <TextInput
+            {/* Input Group */}
+            <Animated.View entering={FadeInDown.delay(400)} style={tw`w-full`}>
+              <EliteInput
+                label="البريد الإلكتروني"
                 value={email}
                 onChangeText={(t) => { setEmail(t); setError(null); }}
-                placeholder="your@email.com"
-                placeholderTextColor="#3B4A6B"
+                placeholder="doctor@example.com"
+                icon={Mail}
                 keyboardType="email-address"
-                autoCapitalize="none"
-                style={tw`flex-1 py-4 text-white text-base`}
-                accessibilityLabel="Email input"
               />
-            </View>
-          </View>
 
-          {/* Password */}
-          <View style={tw`mb-8`}>
-            <Text style={tw`text-slate-400 text-sm font-bold mb-2 uppercase tracking-widest`}>Password</Text>
-            <View style={tw`flex-row items-center bg-[#0D1117] border border-[#1E2D4D] rounded-2xl px-4`}>
-              <Lock color="#3B4A6B" size={18} style={tw`mr-3`} />
-              <TextInput
+              <EliteInput
+                label="كلمة المرور"
                 value={password}
                 onChangeText={(t) => { setPassword(t); setError(null); }}
                 placeholder="••••••••"
-                placeholderTextColor="#3B4A6B"
+                icon={Lock}
                 secureTextEntry={!showPw}
-                style={tw`flex-1 py-4 text-white text-base`}
-                accessibilityLabel="Password input"
+                rightIcon={showPw ? EyeOff : Eye}
+                onRightIconPress={() => setShowPw(!showPw)}
               />
-              <TouchableOpacity onPress={() => setShowPw(!showPw)} accessibilityLabel={showPw ? 'Hide password' : 'Show password'}>
-                {showPw ? <EyeOff color="#3B4A6B" size={18} /> : <Eye color="#3B4A6B" size={18} />}
-              </TouchableOpacity>
-            </View>
-          </View>
 
-          {/* Login Button */}
-          <TouchableOpacity
-            onPress={handleLogin}
-            disabled={loading}
-            style={[tw`py-4 rounded-2xl items-center mb-5`, { backgroundColor: loading ? primaryColor + '80' : primaryColor }]}
-            accessibilityLabel="Login button"
-          >
-            {loading
-              ? <ActivityIndicator color="white" />
-              : <Text style={tw`text-white font-black text-lg`}>Login</Text>
-            }
-          </TouchableOpacity>
+              <EliteButton
+                title="تسجيل الدخول"
+                onPress={handleLogin}
+                loading={loading}
+                style={tw`mt-4`}
+              />
+            </Animated.View>
 
-          {/* Register */}
-          <TouchableOpacity onPress={() => navigation.navigate('Register')} style={tw`items-center mb-6`} accessibilityLabel="Create new account">
-            <Text style={tw`text-slate-400`}>
-              Don't have an account?{' '}
-              <Text style={[tw`font-black`, { color: primaryColor }]}>Register now</Text>
-            </Text>
-          </TouchableOpacity>
+            {/* Bottom Links */}
+            <Animated.View 
+              entering={FadeInDown.delay(600)}
+              style={tw`mt-12 items-center flex-row justify-center`}
+            >
+              <Text style={[tw`font-medium`, { color: theme.colors.textMuted }]}>ليس لديك حساب؟ </Text>
+              <Animated.View>
+                <EliteButton
+                  title="إنشاء حساب جديد"
+                  variant="outline"
+                  onPress={() => navigation.navigate('Register')}
+                  style={tw`h-auto py-1 px-2 border-0`}
+                  textStyle={[tw`font-bold`, { color: primaryColor }]}
+                />
+              </Animated.View>
+            </Animated.View>
 
-          {/* Skip Login (Temporary) */}
-          <TouchableOpacity 
-            onPress={async () => {
-              const demoUser = {
-                id: 'demo-id',
-                name: 'Demo Doctor',
-                email: 'demo@medonex.com',
-                role: 'STUDENT',
-                points: 1250,
-                theme: 'DARK',
-              };
-              await login(demoUser as any);
-            }} 
-            style={tw`items-center border border-[#1E2D4D] py-3 rounded-2xl`}
-          >
-            <Text style={tw`text-slate-500 font-bold`}>Skip Login (Demo Mode) ⚡</Text>
-          </TouchableOpacity>
-
-        </ScrollView>
+          </ScrollView>
+        </SafeAreaView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
+

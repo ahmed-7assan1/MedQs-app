@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
+import { decode } from "next-auth/jwt";
 import { prisma } from "@/lib/prisma";
 import {
   AIConfigurationError,
@@ -218,8 +219,22 @@ const RANK_LIMITS: Record<string, number> = {
 };
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Support both cookie session and Bearer token (mobile)
+  let userId: string | null = null;
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.substring(7);
+      const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "";
+      const decoded = await decode({ token, secret, salt: "authjs.session-token" });
+      if (decoded?.id) userId = decoded.id as string;
+    } catch {}
+  }
+  if (!userId) {
+    const session = await auth();
+    userId = session?.user?.id ?? null;
+  }
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const site = await prisma.siteConfig.findFirst({ select: { enableAI: true, aiPreferredProvider: true } }).catch(() => null);
   if (site?.enableAI === false) {
@@ -252,7 +267,7 @@ export async function POST(req: NextRequest) {
 
   // Get user with rank
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     include: { rank: true, university: true, semester: true },
   });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -307,7 +322,7 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
     context ? `Current context: the student is studying ${context}` : undefined,
     specializedModel
   );
-  let personalContext = await buildStudentStudyContext(session.user.id).catch(() => "");
+  let personalContext = await buildStudentStudyContext(userId).catch(() => "");
   
   const profileLines: string[] = [];
   if (user.name) profileLines.push(`Name: ${user.name}`);
@@ -368,11 +383,25 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Support both cookie session and Bearer token (mobile)
+  let userId: string | null = null;
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.substring(7);
+      const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "";
+      const decoded = await decode({ token, secret, salt: "authjs.session-token" });
+      if (decoded?.id) userId = decoded.id as string;
+    } catch {}
+  }
+  if (!userId) {
+    const session = await auth();
+    userId = session?.user?.id ?? null;
+  }
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     include: { rank: true },
   });
 
@@ -381,7 +410,7 @@ export async function GET(req: NextRequest) {
   const today = new Date().toISOString().slice(0, 10);
 
   const usage = await prisma.aIUsageLog.findUnique({
-    where: { userId_type_date: { userId: session.user.id, type: "chat", date: today } },
+    where: { userId_type_date: { userId, type: "chat", date: today } },
   });
 
   return NextResponse.json({

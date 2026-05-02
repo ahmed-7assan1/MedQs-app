@@ -25,113 +25,48 @@
 /* Fonts are injected via next/font in layout; avoid runtime @import external fonts. */
 
 :root {
-  /* Plus Jakarta Sans + Tajawal — loaded via next/font on <html> */
   --font-ui: var(--font-jakarta), var(--font-tajawal), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-ui);
   --font-arabic: var(--font-tajawal), var(--font-jakarta), ui-sans-serif, sans-serif;
   --font-display: var(--font-jakarta), var(--font-tajawal), ui-sans-serif, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* Brand — clinical blue (overridden by admin primary in layout <style>) */
-  --primary: 221 83% 53%;
+  /* Global Colors */
+  --primary: 245 82% 66%; /* #6C5FF0 */
   --primary-foreground: 0 0% 100%;
-  --ring: 221 83% 53%;
-
-  /* Surfaces — cool porcelain + subtle sage undertone */
-  --background: 165 18% 97%;
-  --foreground: 200 24% 12%;
+  
+  /* Light Mode Tokens (Clean & Balanced) */
+  --background: 240 10% 98%; /* #FBFBFC */
+  --foreground: 240 10% 10%; /* #1D1D1F */
   --card: 0 0% 100%;
-  --card-foreground: 200 24% 12%;
-  --muted: 160 14% 94%;
-  --muted-foreground: 200 12% 42%;
-  --secondary: 158 12% 95%;
-  --secondary-foreground: 200 24% 14%;
-  --accent: 214 32% 91%;
-  --accent-foreground: 221 83% 53%;
-  --border: 160 14% 88%;
-  --input: 160 14% 88%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 100%;
-  --success: 158 64% 32%;
-  --radius: 0.875rem;
-
-  /* Desktop sidebar rail (dark) */
-  --sidebar-bg: 196 32% 7%;
-  --sidebar-fg: 165 14% 78%;
-  --sidebar-accent: 221 83% 53%;
-  --sidebar-border: 196 22% 12%;
-  --sidebar-hover: 196 20% 11%;
-  --sidebar-active-bg: 221 83% 40%;
-}
-
-/* ── MedQs vector logo (SVG) — light UI ── */
-.medqs-logo {
-  --ml-cyan: #60a5fa;
-  --ml-sky: #3b82f6;
-  --ml-mid: #2563eb;
-  --ml-navy: #1e3a8a;
-  --ml-deep: #1d4ed8;
-  --ml-cross: #ffffff;
-  --ml-heart: #2563eb;
-  --ml-ring-hi: #93c5fd;
-  --ml-ring-lo: #1e40af;
-  --ml-glass-fill: #dbeafe;
-  --ml-text-med: #1e3a8a;
-  --ml-text-qs: #2563eb;
-  --ml-tagline: #1d4ed8;
-}
-
-/* Theme dark (class + data-theme for html) */
-.dark .medqs-logo,
-html[data-theme="dark"] .medqs-logo {
-  --ml-cyan: #93c5fd;
-  --ml-sky: #60a5fa;
-  --ml-mid: #3b82f6;
-  --ml-navy: #1e3a8a;
-  --ml-deep: #1d4ed8;
-  --ml-cross: #f8fafc;
-  --ml-heart: #3b82f6;
-  --ml-ring-hi: #bfdbfe;
-  --ml-ring-lo: #1e40af;
-  --ml-glass-fill: #1e3a8a;
-  --ml-text-med: #bfdbfe;
-  --ml-text-qs: #60a5fa;
-  --ml-tagline: #93c5fd;
-}
-
-/* Force palette on always-dark surfaces (e.g. marketing hero) */
-.medqs-logo--on-dark {
-  --ml-cyan: #93c5fd;
-  --ml-sky: #60a5fa;
-  --ml-mid: #3b82f6;
-  --ml-navy: #1e3a8a;
-  --ml-deep: #2563eb;
-  --ml-cross: #ffffff;
-  --ml-heart: #3b82f6;
-  --ml-ring-hi: #bfdbfe;
-  --ml-ring-lo: #1e40af;
-  --ml-glass-fill: #1e3a8a;
-  --ml-text-med: #f8fafc;
-  --ml-text-qs: #60a5fa;
-  --ml-tagline: #94a3b8;
+  --card-foreground: 240 10% 10%;
+  --muted: 240 10% 95%; /* #F5F5F7 */
+  --muted-foreground: 240 4% 46%; 
+  --secondary: 0 0% 100% / 0.04;
+  --secondary-foreground: 240 10% 10%;
+  --accent: 245 82% 66% / 0.1;
+  --accent-foreground: 245 82% 66%;
+  --border: 0 0% 0% / 0.05;
+  --input: 0 0% 0% / 0.05;
+  --ring: 245 82% 66%;
+  --radius: 12px;
 }
 
 .dark {
-  --background: 247 22% 7%; /* #0F0E16 approx */
-  --foreground: 210 20% 98%;
-  --card: 0 0% 100% / 0.04;
-  --card-foreground: 210 20% 98%;
-  --primary: 245 42% 51%; /* #534AB7 */
-  --primary-foreground: 0 0% 100%;
-  --muted: 0 0% 100% / 0.04;
-  --muted-foreground: 245 48% 80%; /* #AFA9EC */
+  /* Dark Mode Tokens (Based on Quiz Page Design) */
+  --background: 248 31% 5%; /* #09080F */
+  --foreground: 0 0% 100%;
+  --card: 244 28% 10%; /* #131220 */
+  --card-foreground: 0 0% 100%;
+  --muted: 244 28% 15% / 0.4;
+  --muted-foreground: 240 5% 65%;
   --secondary: 0 0% 100% / 0.02;
-  --secondary-foreground: 210 20% 98%;
-  --accent: 250 100% 95% / 0.04;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 245 82% 66% / 0.15;
   --accent-foreground: 0 0% 100%;
-  --border: 247 22% 15%;
-  --input: 247 22% 15%;
-  --ring: 245 42% 51%;
+  --border: 0 0% 100% / 0.07;
+  --input: 0 0% 100% / 0.07;
+  --ring: 245 82% 66%;
 }
 
 /* ── Dr. Q Redesign Design System (AI Chat Page) ── */
@@ -217,8 +152,82 @@ html[data-theme="dark"] .medqs-logo {
 
 html[data-theme="dark"] body,
 .dark body {
-  background: radial-gradient(circle at 10% 20%, hsl(232, 45%, 11%), hsl(235, 55%, 6%), hsl(240, 60%, 3%));
+  background: #09080F;
   background-attachment: fixed;
+}
+
+/* ── MedOneX Modern Design System (Quiz-Inspired) ── */
+.btn-gradient {
+  background: linear-gradient(135deg, #534AB7 0%, #7C6FF5 100%);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+.btn-gradient:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.btn-gradient:active {
+  transform: translateY(0);
+}
+
+.stat-card-new {
+  @apply rounded-xl border border-transparent bg-[#131220] p-[18px_20px] transition-all shadow-md;
+}
+
+.row-card-new {
+  @apply relative flex items-center gap-4 rounded-xl border border-transparent bg-[#131220] p-[18px_20px] transition-all overflow-hidden shadow-sm;
+  border-left-width: 3px;
+  border-left-color: rgba(108, 95, 240, 0.4);
+}
+.row-card-new:hover {
+  @apply bg-[#1C1A2E] shadow-xl;
+}
+
+.module-card-new {
+  @apply relative rounded-xl border border-transparent bg-[#131220] p-5 transition-all shadow-md;
+  border-top-width: 3px;
+  border-top-color: rgba(108, 95, 240, 0.4);
+}
+
+.tag-new {
+  @apply rounded-full border px-2 py-0.5 text-[10px] font-medium;
+  border-color: rgba(108, 95, 240, 0.4);
+  color: #AFA9EC;
+  background: rgba(108, 95, 240, 0.08);
+}
+.tag-teal {
+  border-color: rgba(29, 158, 117, 0.4);
+  color: #5DCAA5;
+  background: rgba(29, 158, 117, 0.08);
+}
+
+.tab-bar {
+  @apply flex gap-1 rounded-xl border border-white/[0.07] bg-[#131220] p-1;
+}
+.tab-item {
+  @apply flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium text-white/40 transition-all cursor-pointer;
+}
+.tab-item:hover {
+  @apply bg-white/5 text-white/60;
+}
+.tab-item.active {
+  @apply bg-gradient-to-br from-[#534AB7] to-[#7C6FF5] text-white shadow-lg;
+}
+
+.date-pill {
+  @apply flex flex-col items-center justify-center gap-0.5 rounded-xl border border-white/[0.07] bg-[#131220] transition-all;
+  width: 48px;
+  height: 60px;
+}
+.date-pill.active {
+  @apply border-transparent bg-gradient-to-br from-[#534AB7] to-[#7C6FF5] shadow-lg;
+}
+
+.prog-track {
+  @apply h-1 w-full rounded-full bg-white/5 overflow-hidden;
+}
+.prog-fill {
+  @apply h-full rounded-full transition-all duration-500;
 }
 
 /* ── Base ── */

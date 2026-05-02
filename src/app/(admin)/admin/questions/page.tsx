@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import {
-  HelpCircle, Plus, Trash2, Loader2,
+  HelpCircle, Plus, Trash2, Loader2, Sparkles,
   CheckCircle2, ChevronDown, ChevronUp, Search, ImagePlus, X, BookOpen, Pencil, FileText, Download, Settings, Save, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { saveAs } from "file-saver";
@@ -379,6 +379,32 @@ export default function AdminQuestionsPage() {
                     placeholder="External Image URL (or upload)"
                     className="flex-1 rounded-xl border border-white/[0.02] bg-background/50 px-4 py-2.5 text-sm focus:ring-blue-500/40 focus:outline-none"
                    />
+                   <button
+                    type="button"
+                    onClick={async () => {
+                      if (!body.trim()) return toast.error("Type a question first so I can find a relevant image");
+                      const tid = toast.loading("Analyzing question & searching Open-i...");
+                      try {
+                        const res = await fetch("/api/v1/admin/tools/openi-search", {
+                          method: "POST",
+                          body: JSON.stringify({ query: body })
+                        });
+                        const data = await res.json();
+                        if (data.imageUrl) {
+                          setImageUrl(data.imageUrl);
+                          toast.success("Found a relevant clinical image!", { id: tid });
+                        } else {
+                          toast.error("No relevant clinical image found in Open-i", { id: tid });
+                        }
+                      } catch (e) {
+                        toast.error("Open-i search failed", { id: tid });
+                      }
+                    }}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.02] bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
+                    title="Smart Search (Open-i)"
+                   >
+                    <Sparkles className="h-4 w-4" />
+                   </button>
                    <button
                     type="button"
                     onClick={() => setDrawOpen(true)}

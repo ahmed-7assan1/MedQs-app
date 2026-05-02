@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { generateJsonWithFallback } from "@/lib/ai-router";
 import { scrapeUrlContent } from "@/lib/manus-fetcher";
+import { searchOpenIMedicalImage } from "@/lib/open-i";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -131,19 +132,28 @@ Rules:
         });
       }
 
-      // 3. Add Questions
-      if (questionsClean.length > 0) {
-        await tx.question.createMany({
-          data: questionsClean.map((q: any) => ({
-            lectureId,
-            body: q.body,
-            choices: q.choices,
-            answer: q.answer,
-            explanation: q.explanation,
-            difficulty: q.difficulty,
-          }))
-        });
-      }
+    // 3. Add Questions
+    if (questionsClean.length > 0) {
+      const questionsWithImages = await Promise.all(questionsClean.map(async (q: any) => {
+        let imageUrl = null;
+        if (body.enableSmartImages) {
+          imageUrl = await searchOpenIMedicalImage(q.body);
+        }
+        return {
+          lectureId,
+          body: q.body,
+          choices: q.choices,
+          answer: q.answer,
+          explanation: q.explanation,
+          difficulty: q.difficulty,
+          imageUrl: imageUrl || null
+        };
+      }));
+
+      await tx.question.createMany({
+        data: questionsWithImages
+      });
+    }
     });
 
     return NextResponse.json({

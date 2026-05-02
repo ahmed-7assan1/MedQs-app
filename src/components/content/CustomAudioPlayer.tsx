@@ -95,7 +95,8 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
     isPlaying: globalPlaying, 
     setIsPlaying: setGlobalPlaying,
     currentTime: storeCurrentTime,
-    duration: storeDuration
+    duration: storeDuration,
+    setSeek
   } = useAudioStore();
 
   const isCurrent = currentTrack?.url === url;
@@ -118,6 +119,9 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
     // If it's a new track or the global player is stopped
     if (!isCurrent) {
       setTrack(trackData);
+      if (isSpotify && !metadata?.preview_url) {
+        setShowEmbed(true);
+      }
       return;
     }
 
@@ -128,19 +132,21 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
     }
     
     setGlobalPlaying(!globalPlaying);
-  }, [isSpotify, isYoutube, metadata, url, isCurrent, globalPlaying, setGlobalPlaying, setTrack, initialTitle]);
+  }, [isSpotify, isDrive, isYoutube, metadata, url, isCurrent, globalPlaying, setGlobalPlaying, setTrack, initialTitle]);
 
   // Sync local playing state with global
   const playing = isCurrent && globalPlaying;
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // We would need a setSeek in store to actually seek global player
-    // For now we just allow the local UI to move but it won't actually seek the audio
-    // unless we implement global seek
+    if (!isCurrent) return;
+    const time = Number(e.target.value);
+    setSeek(time);
   };
 
   const handleSkip = (amount: number) => {
-    // same as seek
+    if (!isCurrent) return;
+    const newTime = Math.max(0, Math.min(duration, currentTime + amount));
+    setSeek(newTime);
   };
 
   const formatTime = (seconds: number) => {

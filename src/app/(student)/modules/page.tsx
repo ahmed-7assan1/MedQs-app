@@ -28,10 +28,10 @@ function getModuleAccent(name: string): { bg: string; icon: any; border: string;
   if (n.includes("CNS") || n.includes("NEURO"))
     return { bg: "bg-violet-500/10", icon: Brain, border: "border-l-violet-500", progress: "from-violet-500 to-purple-400", shadow: "shadow-violet-500/10" };
   if (n.includes("ECE") || n.includes("CARDIO") || n.includes("ENDO"))
-    return { bg: "bg-teal-500/10", icon: Heart, border: "border-l-teal-500", progress: "from-teal-500 to-cyan-400", shadow: "shadow-teal-500/10" };
-  if (n.includes("ENR") || n.includes("RENAL") || n.includes("RESP"))
-    return { bg: "bg-sky-500/10", icon: Dna, border: "border-l-sky-500", progress: "from-sky-500 to-blue-400", shadow: "shadow-sky-500/10" };
-  if (n.includes("RESEARCH") || n.includes("STATS"))
+    return { bg: "bg-rose-500/10", icon: Heart, border: "border-l-rose-500", progress: "from-rose-500 to-pink-400", shadow: "shadow-rose-500/10" };
+  if (n.includes("GENETIC") || n.includes("CELL") || n.includes("GENE"))
+    return { bg: "bg-blue-500/10", icon: Dna, border: "border-l-blue-500", progress: "from-blue-500 to-cyan-400", shadow: "shadow-blue-500/10" };
+  if (n.includes("BIOCHEM") || n.includes("PHARMA"))
     return { bg: "bg-amber-500/10", icon: FlaskConical, border: "border-l-amber-500", progress: "from-amber-500 to-orange-400", shadow: "shadow-amber-500/10" };
   if (n.includes("GIT") || n.includes("GI"))
     return { bg: "bg-emerald-500/10", icon: Layers, border: "border-l-emerald-500", progress: "from-emerald-500 to-green-400", shadow: "shadow-emerald-500/10" };
@@ -58,8 +58,8 @@ export default async function ModulesPage() {
         subjects: {
           include: {
             lectures: {
-              include: {
-                _count: { select: { questions: true, flashcards: true } },
+              select: {
+                _count: { select: { questions: true } },
                 questions: { select: { difficulty: true } },
               },
             },
@@ -87,18 +87,18 @@ export default async function ModulesPage() {
   }
 
   return (
-    <StudentPageShell maxWidthClass="max-w-5xl" noTopPaddingMobile>
+    <StudentPageShell maxWidthClass="max-w-[1200px]" noTopPaddingMobile>
       {/* ── Page Header ── */}
-      <div className="mb-8">
-        <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Curriculum</p>
+      <div className="mb-10 px-4 md:px-0">
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Course Curriculum</p>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">Your Modules</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="font-display text-2xl font-bold tracking-tight">Your Modules</h1>
+            <p className="mt-1 text-[13px] text-muted-foreground max-w-lg">
               {isGuest
                 ? "Sign in to track progress and open lectures."
                 : user?.semesterId
-                  ? "Track your progress across all subjects."
+                  ? "Track your academic journey and master each clinical module."
                   : "Select a semester in your profile to see modules."}
             </p>
           </div>
@@ -106,9 +106,9 @@ export default async function ModulesPage() {
       </div>
 
       {isGuest && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/20">
+        <div className="mx-4 mb-6 md:mx-0 flex items-center gap-3 rounded-xl border border-amber-200/50 bg-amber-50 px-4 py-3 dark:border-amber-900/30 dark:bg-amber-900/10">
           <Lock className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
-          <p className="text-sm text-amber-800 dark:text-amber-200">
+          <p className="text-[12px] text-amber-800 dark:text-amber-200">
             Browsing as guest.{" "}
             <Link href="/login" className="font-semibold underline">Sign in</Link>{" "}
             to continue.
@@ -116,17 +116,10 @@ export default async function ModulesPage() {
         </div>
       )}
 
-      {!isGuest && isAdmin && user?.semesterId ? (
-        <ModuleInlineManager
-          semesterId={user.semesterId}
-          initialModules={modules.map((m: any) => ({ id: m.id, name: m.name }))}
-        />
-      ) : null}
-
       {modules.length === 0 && !isGuest ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
-            <BookOpen className="h-8 w-8 text-muted-foreground opacity-40" aria-hidden />
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+            <BookOpen className="h-6 w-6 text-muted-foreground opacity-40" aria-hidden />
           </div>
           <p className="font-display text-lg font-semibold">No modules yet</p>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -140,113 +133,37 @@ export default async function ModulesPage() {
           )}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {modules.map((mod: any, i: number) => {
+        <div className="grid gap-4 px-4 md:px-0 sm:grid-cols-2 lg:grid-cols-3">
+          {modules.map((mod: any) => {
             const lecturesFlat = mod.subjects.flatMap((s: any) => s.lectures);
-            const allQ = lecturesFlat.flatMap((l: any) => l.questions);
             const allQCount = lecturesFlat.reduce((a: number, l: any) => a + l._count.questions, 0);
             const corrQ = correctByModule[mod.id]?.size ?? 0;
             const modPct = allQCount > 0 ? Math.round((corrQ / allQCount) * 100) : 0;
-            const totalLectures = lecturesFlat.length;
-            const diff = moduleDifficultyLabel(allQ);
-            const estMin = allQCount > 0 ? Math.max(5, Math.ceil(allQCount * 1.2)) : null;
             const accent = getModuleAccent(mod.name);
             const IconComp = accent.icon;
-            const isCompleted = allQCount > 0 && modPct === 100;
-            const isInProgress = modPct > 0 && modPct < 100;
 
             return (
               <Link
                 key={mod.id}
                 href={isGuest ? "/login" : `/modules/${mod.id}`}
-                className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
-                style={{ animationDelay: `${i * 60}ms` }}
+                className="group block"
               >
-                <div className={cn(
-                  "relative h-full overflow-hidden rounded-2xl border border-white/[0.05] bg-card p-5 transition-all duration-200",
-                  "border-l-[3px] hover:-translate-y-[2px] hover:shadow-lg",
-                  accent.border,
-                  accent.shadow,
-                  "hover:border-opacity-80"
-                )}>
-                  {/* Completed badge */}
-                  {isCompleted && (
-                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5">
-                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">✓ Done</span>
-                    </div>
-                  )}
-
+                <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5">
                   <div className="flex items-start gap-4">
-                    {/* Colored icon */}
                     <div className={cn(
-                      "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105",
+                      "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10",
                       accent.bg
                     )}>
-                      <IconComp className="h-6 w-6 text-foreground/70" aria-hidden />
+                      <IconComp className="h-4 w-4 text-primary" aria-hidden />
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <h2 className="font-display text-[17px] font-semibold leading-snug">{mod.name}</h2>
-
-                      {/* Stats chips */}
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                        <span className="text-xs text-muted-foreground">
-                          {mod.subjects.length} subject{mod.subjects.length !== 1 ? "s" : ""}
-                        </span>
-                        <span className="text-muted-foreground/30">·</span>
-                        <span className="text-xs text-muted-foreground">
-                          {totalLectures} lecture{totalLectures !== 1 ? "s" : ""}
-                        </span>
-                        <span className="text-muted-foreground/30">·</span>
-                        <span className="text-xs text-muted-foreground">{allQCount} questions</span>
-                      </div>
-
-                      {/* Badges */}
-                      <div className="mt-2.5 flex flex-wrap gap-1.5">
-                        {diff && (
-                          <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold", diff.bg, diff.tone)}>
-                            <Signal className="h-2.5 w-2.5" aria-hidden />
-                            {diff.label}
-                          </span>
-                        )}
-                        {estMin != null && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                            <Clock className="h-2.5 w-2.5" aria-hidden />
-                            ~{estMin} min
-                          </span>
-                        )}
+                      <h2 className="font-display text-[14px] font-bold leading-snug group-hover:text-primary transition-colors">{mod.name}</h2>
+                      
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{modPct}% Mastered</span>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Progress section */}
-                  {!isGuest && allQCount > 0 && (
-                    <div className="mt-4">
-                      <div className="mb-1.5 flex items-center justify-between">
-                        <span className="text-[11px] font-medium text-muted-foreground">
-                          {corrQ > 0 ? `${corrQ}/${allQCount} correct` : "Start your first question!"}
-                        </span>
-                        <span className={cn(
-                          "rounded-full px-2 py-0.5 text-[11px] font-bold",
-                          modPct === 0 ? "bg-muted text-muted-foreground"
-                            : modPct >= 70 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                              : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
-                        )}>
-                          {modPct}%
-                        </span>
-                      </div>
-                      <div className="h-[5px] w-full overflow-hidden rounded-full bg-muted">
-                        <div
-                          className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-700 ease-out", accent.progress)}
-                          style={{ width: `${Math.max(modPct, modPct > 0 ? 2 : 0)}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* "Continue → " hover hint */}
-                  <div className="absolute bottom-4 right-4 flex items-center gap-1 text-[11px] font-semibold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5">
-                    Continue <ChevronRight className="h-3 w-3" />
                   </div>
                 </div>
               </Link>

@@ -1,9 +1,10 @@
 import * as SecureStore from 'expo-secure-store';
 
 // ─── Base URL ────────────────────────────────────────────────────────────────
-// Local: Use your Wi-Fi IPv4. Production: set EXPO_PUBLIC_API_URL env var.
-const BASE = process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000';
+// Local: Use localhost for web preview or your Wi-Fi IPv4 for mobile.
+const BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 export const API_URL = `${BASE}/api/mobile`;
+export const API_V1_URL = `${BASE}/api/v1/mobile`;
 
 interface FetchOptions extends RequestInit {
   data?: any;
@@ -71,6 +72,7 @@ class ApiClient {
 }
 
 export const api = new ApiClient();
+export const v1Api = new ApiClient();
 
 // ─── Typed Endpoint Helpers ───────────────────────────────────────────────────
 
@@ -98,6 +100,14 @@ export const mobileApi = {
   updateProfile: (data: Partial<{ name: string; nickname: string; bio: string; image: string; theme: string; handle: string }>) =>
     api.put<any>('/users/stats', data),
 
+  // Admin
+  getAdminStats: () => api.get<any>('/admin/stats'),
+  getAdminUsers: () => api.get<any[]>('/admin/users'),
+  updateUserStatus: (userId: string, isActive: boolean) =>
+    api.patch<any>('/admin/users/status', { userId, isActive }),
+  updateUserRole: (userId: string, role: string) =>
+    api.patch<any>('/admin/users/role', { userId, role }),
+
   // Quizzes
   getPastPapers: (params: { semesterId: string; moduleId?: string; kind?: string; limit?: number; sort?: string }) => {
     const q = new URLSearchParams(params as any).toString();
@@ -107,6 +117,8 @@ export const mobileApi = {
   submitQuiz: (data: { pastPaperId: string; answers: any[]; timeTaken: number; focusLossCount: number; guestQuizUserId?: string }) =>
     api.post<any>('/quiz-attempts', data),
   getQuizHistory: (limit = 20) => api.get<any[]>(`/quiz-attempts?limit=${limit}`),
+  transferQuiz: (data: { paperId: string; targetSemesterId: string; targetModuleId?: string; mode: 'move' | 'copy' }) =>
+    api.post<any>('/admin/quiz-transfer', data),
 
   // Saved Questions
   getSavedQuestions: () => api.get<any[]>('/saved-questions'),
@@ -160,5 +172,92 @@ export const mobileApi = {
   getLeaderboard: (params: { universityId?: string; semesterId?: string; facultyId?: string; limit?: number }) => {
     const q = new URLSearchParams(params as any).toString();
     return api.get<{ leaderboard: any[]; currentUser: any }>(`/leaderboard?${q}`);
+  },
+
+  // ─── V1 Mobile API ────────────────────────────────────────────────────────
+  // Curriculum: Modules → Subjects → Lectures
+  getModules: () => {
+    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
+    return fetch(`${base}/api/v1/mobile/modules`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }).then(async r => {
+      if (!r.ok) throw { status: r.status };
+      return r.json() as Promise<any[]>;
+    });
+  },
+  getModulesAuth: async () => {
+    const { getItemAsync } = await import('expo-secure-store');
+    const token = await getItemAsync('sessionToken').catch(() => null);
+    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
+    return fetch(`${base}/api/v1/mobile/modules`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }).then(async r => {
+      if (!r.ok) throw { status: r.status };
+      return r.json() as Promise<any[]>;
+    });
+  },
+
+  // Community feed
+  getCommunity: async () => {
+    const { getItemAsync } = await import('expo-secure-store');
+    const token = await getItemAsync('sessionToken').catch(() => null);
+    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
+    return fetch(`${base}/api/v1/mobile/community`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }).then(async r => {
+      if (!r.ok) throw { status: r.status };
+      return r.json() as Promise<{ posts: any[]; stats: { onlineMembers: number; totalDiscussions: number } }>;
+    });
+  },
+
+  // Subject detail
+  getSubject: async (id: string) => {
+    const { getItemAsync } = await import('expo-secure-store');
+    const token = await getItemAsync('sessionToken').catch(() => null);
+    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
+    return fetch(`${base}/api/v1/mobile/subjects/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }).then(async r => {
+      if (!r.ok) throw { status: r.status };
+      return r.json() as Promise<any>;
+    });
+  },
+
+  // AI Study Assistant Chat (uses v1/mobile base path with Bearer token)
+  sendAiMessage: async (messages: { role: string; content: string }[]) => {
+    const { getItemAsync } = await import('expo-secure-store');
+    const token = await getItemAsync('sessionToken').catch(() => null);
+    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
+    // Build request: last message is the user message, prior are history
+    const history = messages.slice(0, -1);
+    const last = messages[messages.length - 1];
+    return fetch(`${base}/api/v1/ai/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        message: last?.content || '',
+        conversationHistory: history,
+      }),
+    }).then(async r => {
+      const data = await r.json();
+      if (!r.ok) throw { status: r.status, message: data?.error || 'AI error' };
+      return data as { reply: string; used?: number; limit?: number; rankLabel?: string };
+    });
   },
 };

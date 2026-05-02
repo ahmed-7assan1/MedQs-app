@@ -1,15 +1,14 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Loader2, User, Phone, BookOpen, Palette, Camera } from "lucide-react";
+import { Save, Loader2, User, Phone, BookOpen, Palette } from "lucide-react";
 import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
-import { useUploadThing } from "@/lib/uploadthing-client";
-import { ImageCropModal } from "@/components/ui/ImageCropModal";
+import { ImageUploadWithCrop } from "@/components/ui/ImageUploadWithCrop";
 
 interface University  { id: string; name: string }
 interface Faculty    { id: string; name: string; universityId: string }
@@ -19,7 +18,6 @@ interface Semester   { id: string; name: string; academicYearId: string }
 export default function EditProfilePage() {
   const router = useRouter();
   const { theme, setTheme } = useThemeStore();
-  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -35,29 +33,6 @@ export default function EditProfilePage() {
     facebookUrl: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const [cropFileName, setCropFileName] = useState("avatar.jpg");
-
-  const { startUpload } = useUploadThing("avatar", {
-    onClientUploadComplete: async (files) => {
-      const url = files[0]?.url;
-      if (!url) return;
-      // Persist the new URL in the database
-      await fetch("/api/v1/auth/avatar-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      setAvatarUrl(url);
-      toast.success("Photo updated!");
-      setUploadingAvatar(false);
-    },
-    onUploadError: (err) => {
-      toast.error("Upload failed: " + (err.message || "Unknown error"));
-      setUploadingAvatar(false);
-    },
-  });
   const [selectedUni,    setSelectedUni]    = useState("");
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [selectedYear,   setSelectedYear]   = useState("");
@@ -135,28 +110,13 @@ export default function EditProfilePage() {
   );
   const filteredSems  = semesters.filter((s) => s.academicYearId === selectedYear);
 
-  // ── When user selects a file, open crop modal instead of uploading directly ──
-  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) return toast.error("Max 10MB for profile photo");
-    setCropFileName(file.name);
-    const objectUrl = URL.createObjectURL(file);
-    setCropSrc(objectUrl);
-    e.target.value = ""; // reset so same file can be re-selected
-  }
-
-  // ── After crop confirmed → upload the blob ────────────────────────────────
-  async function handleCropConfirm(blob: Blob, fileName: string) {
-    setCropSrc(null);
-    setUploadingAvatar(true);
-    const file = new File([blob], fileName.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
-    await startUpload([file]);
-  }
-
-  function handleCropCancel() {
-    if (cropSrc) URL.revokeObjectURL(cropSrc);
-    setCropSrc(null);
+  async function handleAvatarUpdate(url: string) {
+    setAvatarUrl(url);
+    await fetch("/api/v1/auth/avatar-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
   }
 
   async function handleSave() {
@@ -209,37 +169,17 @@ export default function EditProfilePage() {
       title="Edit profile"
       subtitle="Keep your identity, university, and preferences aligned with your cohort — clinical trainees expect accuracy and trust."
     >
-      {/* Crop Modal */}
-      {cropSrc && (
-        <ImageCropModal
-          imageSrc={cropSrc}
-          cropShape="round"
-          aspect={1}
-          onConfirm={handleCropConfirm}
-          onCancel={handleCropCancel}
-          fileName={cropFileName}
-        />
-      )}
-
       <div className="space-y-5">
         {/* Avatar */}
         <div className="flex items-center gap-5 rounded-xl border border-border bg-card p-5">
-          <div className="relative flex-shrink-0">
-            {avatarUrl
-              ? <img src={avatarUrl} alt="Avatar" className="h-20 w-20 rounded-2xl object-cover ring-2 ring-border" />
-              : <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 text-2xl font-bold text-primary">{form.name?.[0]?.toUpperCase() ?? "U"}</div>
-            }
-            <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar}
-              className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white shadow-md hover:bg-primary/90 transition-colors disabled:opacity-60">
-              {uploadingAvatar ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
-            </button>
-            <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
-          </div>
-          <div>
-            <p className="font-semibold">{form.name || "Your name"}</p>
-            <p className="text-sm text-muted-foreground">Click the camera to change your photo</p>
-            <p className="text-xs text-muted-foreground mt-0.5">JPEG, PNG, WebP · Max 5MB</p>
-          </div>
+          <ImageUploadWithCrop
+            label="Profile Photo"
+            value={avatarUrl || ""}
+            onChange={handleAvatarUpdate}
+            cropShape="round"
+            aspect={1}
+            className="w-full"
+          />
         </div>
 
         {/* Personal info */}

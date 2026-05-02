@@ -52,10 +52,8 @@ export function BottomNav() {
       <nav
         className={cn(
           "pointer-events-auto mx-4 mb-1 w-full max-w-[440px]",
-          "rounded-[22px] border border-white/[0.05] dark:border-white/[0.02]",
-          "bg-background/85 dark:bg-[#141418]/92",
-          "shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_48px_rgba(0,0,0,0.55)]",
-          "backdrop-blur-2xl px-2 py-2"
+          "rounded-[24px] border border-white/[0.07]",
+          "bg-[#131220]/95 backdrop-blur-2xl px-2 py-2 shadow-2xl"
         )}
         aria-label="Primary navigation"
       >

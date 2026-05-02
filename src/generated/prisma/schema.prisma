@@ -10,7 +10,7 @@ datasource db {
 
 model SiteConfig {
   id                   String   @id @default(uuid())
-  siteName             String   @default("MedQs")
+  siteName             String   @default("MedOneX")
   logoUrl              String?
   faviconUrl           String?
   primaryColor         String   @default("#0d9488")
@@ -840,4 +840,23 @@ enum FacultyCategory {
   PHARMACY
   PHYSICAL_THERAPY
   OTHER
+}
+
+model YoutubeUploadTask {
+  id               String    @id @default(uuid())
+  title            String? // Human-readable label for the job
+  sourceUrl        String
+  targetPlaylistId String?
+  lectureVideoId   String? // Optional: replace this LectureVideo.url after upload
+  status           String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  progress         Int       @default(0) // 0–100
+  totalVideos      Int       @default(0)
+  syncedVideos     Int       @default(0)
+  error            String?
+  entityId         String? // References LectureVideo.id (legacy)
+  newVideoUrl      String? // The URL of the video after upload
+  logs             String? // JSON array of log lines from Colab
+  colabLastPoll    DateTime? // Last time Colab checked in (to detect if worker is alive)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }

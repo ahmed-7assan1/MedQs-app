@@ -421,40 +421,9 @@ export function ForumClient({
       {/* Header & Navigation */}
       <div className={cn("px-4", isChatTab ? "mb-4 shrink-0" : "mb-8")}>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <h1 className={cn("font-display font-bold text-white tracking-tight", isChatTab ? "text-2xl" : "text-4xl")}>
+          <h1 className={cn("font-display font-bold dark:text-white text-black tracking-tight", isChatTab ? "text-2xl" : "text-4xl")}>
             Community
           </h1>
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              aria-label="Forum options"
-              onClick={(e) => {
-                e.stopPropagation();
-                setPrivateForumMenuOpen((o) => !o);
-              }}
-              className="rounded-xl border border-white/[0.03] bg-white/5 p-2.5 text-white/60 hover:bg-white/10 hover:text-white transition-all shadow-lg backdrop-blur-md"
-            >
-              <MoreVertical className="h-5 w-5" />
-            </button>
-            {privateForumMenuOpen && (
-              <div
-                className="absolute right-0 z-50 mt-2 min-w-[220px] rounded-2xl border border-white/[0.03] bg-[#12111A]/95 p-1.5 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in duration-200"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-                  onClick={() => {
-                    setPrivateFormOpen(true);
-                    setPrivateForumMenuOpen(false);
-                  }}
-                >
-                  <Users className="h-4 w-4 opacity-50" />
-                  <span className="font-medium">Create private forum</span>
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -576,74 +545,7 @@ export function ForumClient({
           </div>
         )}
 
-        {privateFormOpen && (
-          <div className="mb-10 rounded-3xl border border-white/[0.03] bg-[#0F0E16] p-6 sm:p-8 shadow-2xl animate-in slide-in-from-top-4 duration-500">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-xl font-bold text-white">Create Study Cluster</h3>
-                <p className="text-sm text-white/40">Build a private space for your team</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPrivateFormOpen(false)}
-                className="rounded-xl bg-white/5 p-2 text-white/30 hover:bg-white/10 hover:text-white transition-all"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <div className="grid gap-6 md:grid-cols-[1.5fr_1fr_auto] items-end">
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-1">Cluster Name</label>
-                <input
-                  value={newForumName}
-                  onChange={(e) => setNewForumName(e.target.value)}
-                  placeholder="e.g. Surgery Prep Group"
-                  className="w-full h-12 rounded-2xl border border-white/[0.03] bg-white/5 px-4 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#534AB7]/50 focus:bg-white/[0.08] transition-all"
-                />
-              </div>
-              <div className="relative space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-1">Add Members</label>
-                <input
-                  value={inviteQuery}
-                  onChange={(e) => setInviteQuery(e.target.value)}
-                  placeholder="Search student username..."
-                  className="w-full h-12 rounded-2xl border border-white/[0.03] bg-white/5 px-4 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#534AB7]/50 transition-all"
-                />
-                {inviteResults.length > 0 && (
-                  <div className="absolute top-[calc(100%+8px)] z-[60] w-full max-h-60 overflow-y-auto rounded-2xl border border-white/[0.03] bg-[#12111A] p-1 shadow-2xl backdrop-blur-xl">
-                    {inviteResults.map((u) => (
-                      <button
-                        key={u.id}
-                        onClick={() => addInviteToken(u.studentId || u.nickname || u.name)}
-                        className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all group"
-                      >
-                        <span className="font-bold">{u.name}</span>
-                        <span className="text-xs text-white/20 font-medium group-hover:text-white/40">@{u.nickname || u.studentId}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={handleCreateForum}
-                disabled={creatingForum || !newForumName.trim()}
-                className="h-12 w-full md:w-auto px-8 rounded-2xl bg-[#534AB7] text-sm font-black text-white shadow-xl shadow-[#534AB7]/30 hover:bg-[#6056CD] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:scale-100 transition-all"
-              >
-                {creatingForum ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Create"}
-              </button>
-            </div>
-            {inviteTokens && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {inviteTokens.split(",").map((t, i) => t.trim() && (
-                  <div key={i} className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-1.5 border border-white/[0.02]">
-                    <span className="text-xs font-bold text-white/60">{t.trim()}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Main Content Area */}

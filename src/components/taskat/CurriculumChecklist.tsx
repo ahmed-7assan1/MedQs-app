@@ -79,25 +79,25 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
         {modules.map((module) => (
           <div 
             key={module.id} 
-            className="overflow-hidden rounded-[2.5rem] border border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-slate-900/40 shadow-xl backdrop-blur-3xl transition-all duration-300 hover:border-sky-500/20"
+            className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:border-primary/20"
           >
             <button
               onClick={() => toggleModule(module.id)}
-              className="group flex w-full items-center justify-between p-8 text-left transition-colors hover:bg-slate-50/50 dark:hover:bg-white/5"
+              className="group flex w-full items-center justify-between p-6 text-left transition-colors hover:bg-muted/50"
             >
-              <div className="flex items-center gap-6">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 shadow-inner">
-                  <FolderOpen className="h-8 w-8 transition-transform group-hover:scale-110" />
+              <div className="flex items-center gap-5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-inner">
+                  <FolderOpen className="h-6 w-6 transition-transform group-hover:scale-110" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black font-display dark:text-white text-slate-900">{module.name}</h3>
-                  <p className="text-sm dark:text-white/40 text-slate-400 font-bold uppercase tracking-widest mt-1">{module.subjects?.length ?? 0} Major Subjects</p>
+                  <h3 className="text-lg font-bold text-foreground">{module.name}</h3>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">{module.subjects?.length ?? 0} Major Subjects</p>
                 </div>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 transition-all group-hover:bg-sky-500 group-hover:text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted transition-all group-hover:bg-primary group-hover:text-primary-foreground">
                 <ChevronDown 
                   className={cn(
-                    "h-5 w-5 transition-transform duration-500",
+                    "h-4 w-4 transition-transform duration-500",
                     expandedModules[module.id] && "rotate-180"
                   )} 
                 />
@@ -111,9 +111,9 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden border-t border-slate-100 dark:border-white/[0.02]"
+                  className="overflow-hidden border-t border-border"
                 >
-                  <div className="space-y-4 p-6 bg-slate-50/30 dark:bg-black/20">
+                  <div className="space-y-4 p-4 bg-muted/20">
                     {module.subjects.map((subject: any) => (
                       <SubjectItem 
                         key={subject.id} 
@@ -133,16 +133,16 @@ export function CurriculumChecklist({ modules, subjects }: CurriculumChecklistPr
       </div>
 
       {subjects.length > 0 && (
-        <div className="mt-12 space-y-6">
-          <div className="flex items-center gap-4 px-4">
-            <GraduationCap className="h-6 w-6 text-sky-500" />
-            <h2 className="font-display text-2xl font-black dark:text-white/80 text-slate-800">Individual Courses</h2>
+        <div className="mt-10 space-y-6">
+          <div className="flex items-center gap-3 px-4">
+            <GraduationCap className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Individual Courses</h2>
           </div>
-          <div className="grid gap-6">
+          <div className="grid gap-4">
             {subjects.map((subject) => (
               <div 
                  key={subject.id} 
-                 className="overflow-hidden rounded-[2.5rem] border border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-slate-900/40 shadow-xl"
+                 className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
               >
                 <SubjectItem 
                   subject={subject} 
@@ -175,18 +175,18 @@ const LectureItem = memo(({ lecture, isCompleted, onToggle }: any) => {
   return (
     <button
       onClick={() => onToggle(lecture.id)}
-      className="group flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all hover:bg-white dark:hover:bg-white/5 hover:shadow-lg hover:shadow-slate-200/5 dark:hover:shadow-none"
+      className="group flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all hover:bg-muted/50"
     >
-      <div className="relative flex h-6 w-6 shrink-0 items-center justify-center">
+      <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
         {isCompleted ? (
-          <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
         ) : (
-          <Circle className="h-6 w-6 text-slate-300 dark:text-white/20 group-hover:text-sky-500" />
+          <Circle className="h-5 w-5 text-muted-foreground/30 group-hover:text-primary" />
         )}
       </div>
       <span className={cn(
-        "font-bold transition-all",
-        isCompleted ? "dark:text-white/20 text-slate-300 line-through" : "dark:text-white/80 text-slate-600"
+        "text-[13px] font-medium transition-all",
+        isCompleted ? "text-muted-foreground/40 line-through" : "text-foreground/80"
       )}>
         {lecture.title}
       </span>
@@ -206,45 +206,45 @@ const SubjectItem = memo(({ subject, isExpanded, toggle, completionStates, onTog
 
   return (
     <div className={cn(
-        "rounded-[1.5rem] transition-all duration-300", 
-        !standalone && "border border-slate-200/50 dark:border-white/[0.02] bg-white/50 dark:bg-white/[0.03] hover:border-sky-500/30"
+        "rounded-xl transition-all duration-300", 
+        !standalone && "border border-border/50 bg-card/50 hover:border-primary/20"
     )}>
       <button
         onClick={toggle}
-        className="flex w-full items-center justify-between p-6"
+        className="flex w-full items-center justify-between p-5"
       >
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           <div className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-2xl transition-colors",
-              progress === 100 ? "bg-emerald-500 text-white" : "bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+              "flex h-10 w-10 items-center justify-center rounded-xl transition-colors",
+              progress === 100 ? "bg-emerald-500 text-white" : "bg-primary/10 text-primary"
           )}>
-            <BookOpen className="h-6 w-6" />
+            <BookOpen className="h-5 w-5" />
           </div>
           <div className="text-left">
-            <h4 className="text-lg font-black dark:text-white/90 text-slate-800">{subject.name}</h4>
-            <div className="flex items-center gap-3 mt-1">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{completedCount} / {totalCount} Topics</p>
+            <h4 className="text-[14px] font-bold text-foreground">{subject.name}</h4>
+            <div className="flex items-center gap-2 mt-1">
+                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{completedCount} / {totalCount} Topics</p>
                  {progress > 0 && (
-                    <span className="text-[10px] font-black dark:text-indigo-400 text-indigo-600">{Math.round(progress)}%</span>
+                    <span className="text-[10px] font-bold text-primary">{Math.round(progress)}%</span>
                  )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {totalCount > 0 && (
-            <div className="hidden sm:block h-2 w-24 overflow-hidden rounded-full bg-slate-200 dark:bg-white/5 shadow-inner">
+            <div className="hidden sm:block h-1 w-16 overflow-hidden rounded-full bg-muted">
               <motion.div 
-                className="h-full bg-indigo-500 shadow-lg shadow-indigo-500/50" 
+                className="h-full bg-primary" 
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.8, ease: "circOut" }}
               />
             </div>
           )}
-          <div className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-400">
+          <div className="p-1.5 rounded-lg bg-muted text-muted-foreground">
             <ChevronRight 
                 className={cn(
-                "h-4 w-4 transition-transform duration-300",
+                "h-3.5 w-3.5 transition-transform duration-300",
                 isExpanded && "rotate-90"
                 )} 
             />

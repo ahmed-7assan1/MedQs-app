@@ -33,9 +33,9 @@ export function SiteFooter() {
         <div className="flex items-center gap-3 order-3 md:order-2">
            <span className="text-muted-foreground/40 text-[9px] font-black">Powered by</span>
            <div className="flex items-center gap-2 px-3 py-1 bg-muted/40 rounded-lg border border-white/[0.05] hover:border-primary/20 transition-all cursor-default group">
-              <span className="group-hover:text-primary transition-colors italic">DR.HULK</span>
+              <span className="group-hover:text-primary transition-colors font-bold">MedOneX Team</span>
               {hulkLogoUrl && (
-                <img src={hulkLogoUrl} alt="Dr. Hulk" className="w-4 h-4 object-contain brightness-90 grayscale group-hover:grayscale-0 group-hover:brightness-100 transition-all" />
+                <img src={hulkLogoUrl} alt="MedOneX Team" className="w-4 h-4 object-contain brightness-90 grayscale group-hover:grayscale-0 group-hover:brightness-100 transition-all" />
               )}
            </div>
         </div>

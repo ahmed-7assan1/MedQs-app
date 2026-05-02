@@ -1,153 +1,162 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, SafeAreaView, Switch } from 'react-native';
+import { 
+  View, Text, TouchableOpacity, ScrollView, Image, 
+  SafeAreaView, Switch, StatusBar, Dimensions, ImageBackground
+} from 'react-native';
 import tw from 'twrnc';
-import { useAuthStore } from '../store/useAuthStore';
-import { EliteTheme } from '../constants/Theme';
-import { EliteCard } from '../components/ui/EliteCard';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { 
   Settings, LogOut, Shield, Bell, 
   HelpCircle, ChevronRight, BookOpen, 
   Award, Clock, User as UserIcon, Download,
-  Activity
+  Activity, Zap, Moon, CreditCard, Share2
 } from 'lucide-react-native';
+import { useAuthStore } from '../store/useAuthStore';
+import { useThemeStore } from '../store/useThemeStore';
+import * as Haptics from 'expo-haptics';
+
+const { width } = Dimensions.get('window');
 
 export function ProfileScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
+  const { primaryColor, primaryLight } = useThemeStore();
   const [pushEnabled, setPushEnabled] = useState(true);
-
-  const stats = [
-    { label: 'Courses', value: '12', icon: BookOpen, color: '#3b82f6' },
-    { label: 'Rank', value: '#4', icon: Award, color: '#f59e0b' },
-    { label: 'Hours', value: '42', icon: Clock, color: '#10b981' },
-  ];
+  const [darkMode, setDarkMode] = useState(true);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
+  const handleLogout = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    logout();
+  };
+
+  const MenuOption = ({ icon: Icon, label, value, onPress, color = "white", isLast = false, toggleValue, onToggle }: any) => (
+    <TouchableOpacity 
+      activeOpacity={0.7}
+      onPress={onPress}
+      disabled={onToggle !== undefined}
+      style={[
+        tw`flex-row items-center p-4`,
+        !isLast && tw`border-b border-white/5`
+      ]}
+    >
+       <View style={[tw`w-10 h-10 rounded-xl items-center justify-center mr-4`, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+          <Icon color={color} size={20} />
+       </View>
+       <Text style={tw`flex-1 text-white font-bold`}>{label}</Text>
+       {onToggle ? (
+         <Switch 
+           value={toggleValue} 
+           onValueChange={onToggle}
+           trackColor={{ false: '#1E2D4D', true: primaryColor }}
+           thumbColor={'#fff'}
+         />
+       ) : (
+         <View style={tw`flex-row items-center`}>
+            {value && <Text style={tw`text-slate-500 mr-2 font-bold`}>{value}</Text>}
+            <ChevronRight color="#3B4A6B" size={18} />
+         </View>
+       )}
+    </TouchableOpacity>
+  );
+
   return (
-    <SafeAreaView style={tw`flex-1 bg-[${EliteTheme.colors.background}]`}>
-      <ScrollView contentContainerStyle={tw`pb-32 px-6 pt-10`}>
-        {/* Header */}
-        <View style={tw`flex-row justify-between items-center mb-8`}>
-          <Text style={tw`text-2xl font-bold text-white`}>My Profile</Text>
-          <TouchableOpacity style={tw`p-2 bg-white/5 rounded-full border border-white/10`}>
-             <Settings color="white" size={22} />
-          </TouchableOpacity>
-        </View>
+    <View style={tw`flex-1 bg-black`}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView contentContainerStyle={tw`pb-32`}>
+        
+        {/* Header / Profile Card */}
+        <ImageBackground 
+          source={require('../../assets/medical_login_bg.png')} 
+          style={tw`pt-16 pb-12 px-6 items-center`}
+          imageStyle={{ opacity: 0.1, borderBottomLeftRadius: 40, borderBottomRightRadius: 40 }}
+        >
+           <Animated.View entering={FadeInDown} style={tw`relative mb-6`}>
+              <View style={tw`w-32 h-32 rounded-[48px] bg-[#0D1117] border-4 border-[#1E2D4D] overflow-hidden shadow-2xl`}>
+                 <Image 
+                   source={{ uri: user?.image || `https://ui-avatars.com/api/?name=${user?.name || 'Doctor'}&background=0D1117&color=fff&size=256` }} 
+                   style={tw`w-full h-full`}
+                 />
+              </View>
+              <View style={[tw`absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl items-center justify-center border-4 border-black`, { backgroundColor: primaryColor }]}>
+                 <Zap color="white" size={16} fill="white" />
+              </View>
+           </Animated.View>
 
-        {/* Profile Info */}
-        <View style={tw`items-center mb-10`}>
-           <View style={tw`relative`}>
-             <View style={tw`w-28 h-28 rounded-[40px] bg-slate-800 border-4 border-slate-700 overflow-hidden shadow-xl`}>
-                <Image 
-                  source={{ uri: user?.image || 'https://ui-avatars.com/api/?name=' + (user?.name || 'Doctor') + '&size=200&background=0D8ABC&color=fff' }} 
-                  style={tw`w-full h-full`}
-                />
-             </View>
-             <View style={tw`absolute bottom-0 right-0 w-8 h-8 bg-[${EliteTheme.colors.primary}] rounded-full border-4 border-slate-800 items-center justify-center`}>
-                <Award color="white" size={12} />
-             </View>
-           </View>
-           
-           <Text style={tw`text-2xl font-bold text-white mt-6`}>{user?.name}</Text>
-           <Text style={tw`text-slate-400 font-medium`}>{user?.email}</Text>
-           
-           <View style={tw`mt-2 px-4 py-1.5 bg-[${EliteTheme.colors.primary}]/20 rounded-full border border-[${EliteTheme.colors.primary}]/30`}>
-              <Text style={tw`text-[${EliteTheme.colors.primaryLight}] text-xs font-bold`}>{user?.role || 'Medical Student'}</Text>
-           </View>
-        </View>
+           <Animated.Text entering={FadeInDown.delay(100)} style={tw`text-3xl font-black text-white text-center`}>
+              {user?.name || 'Medical Student'}
+           </Animated.Text>
+           <Animated.Text entering={FadeInDown.delay(200)} style={tw`text-slate-500 font-bold text-center mt-1`}>
+              {user?.email}
+           </Animated.Text>
 
-        {/* Stats Grid */}
-        <View style={tw`flex-row justify-between mb-10`}>
-          {stats.map((stat, idx) => (
-            <View key={idx} style={tw`items-center flex-1`}>
-               <View style={[tw`w-12 h-12 rounded-2xl items-center justify-center mb-2`, { backgroundColor: stat.color + '20' }]}>
-                  <stat.icon color={stat.color} size={22} />
-               </View>
-               <Text style={tw`text-white font-bold text-lg`}>{stat.value}</Text>
-               <Text style={tw`text-slate-400 text-xs font-medium`}>{stat.label}</Text>
-            </View>
-          ))}
-        </View>
+           <Animated.View entering={FadeInDown.delay(300)} style={tw`flex-row mt-6 space-x-3`}>
+              <TouchableOpacity style={tw`px-6 py-2.5 bg-white/5 border border-white/10 rounded-2xl flex-row items-center`}>
+                 <CreditCard color={primaryLight} size={16} style={tw`mr-2`} />
+                 <Text style={tw`text-white font-black text-xs`}>Medical ID</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={tw`p-2.5 bg-white/5 border border-white/10 rounded-2xl`}>
+                 <Share2 color="white" size={16} />
+              </TouchableOpacity>
+           </Animated.View>
+        </ImageBackground>
 
-        {/* Admin Section */}
-        {isAdmin && (
-          <>
-            <Text style={tw`text-xs font-bold text-[${EliteTheme.colors.primaryLight}] uppercase tracking-widest mb-4`}>Administration</Text>
-            <EliteCard variant="glass" style={tw`p-0 overflow-hidden mb-8 border border-[${EliteTheme.colors.primary}]/30`}>
-               <TouchableOpacity onPress={() => navigation.navigate('AdminDashboard')} style={tw`flex-row items-center p-4 bg-[${EliteTheme.colors.primaryDark}]/20`}>
-                  <View style={tw`w-10 h-10 bg-[${EliteTheme.colors.primary}]/20 rounded-xl items-center justify-center mr-4 border border-[${EliteTheme.colors.primary}]/40`}>
-                     <Activity color={EliteTheme.colors.primaryLight} size={20} />
+        <View style={tw`px-6 -mt-8`}>
+           {/* Stats Summary */}
+           <Animated.View entering={FadeInUp.delay(400)} style={tw`flex-row bg-[#0D1117] border border-[#1E2D4D] rounded-[32px] p-6 shadow-xl`}>
+              <View style={tw`flex-1 items-center border-r border-white/5`}>
+                 <Text style={tw`text-white font-black text-xl mb-1`}>1,250</Text>
+                 <Text style={tw`text-slate-500 text-[10px] font-black uppercase tracking-widest`}>Points</Text>
+              </View>
+              <View style={tw`flex-1 items-center border-r border-white/5`}>
+                 <Text style={tw`text-white font-black text-xl mb-1`}>#12</Text>
+                 <Text style={tw`text-slate-500 text-[10px] font-black uppercase tracking-widest`}>Rank</Text>
+              </View>
+              <View style={tw`flex-1 items-center`}>
+                 <Text style={tw`text-white font-black text-xl mb-1`}>Level 4</Text>
+                 <Text style={tw`text-slate-500 text-[10px] font-black uppercase tracking-widest`}>Badge</Text>
+              </View>
+           </Animated.View>
+
+           {/* Menu Groups */}
+           <View style={tw`mt-10`}>
+              <Text style={tw`text-slate-500 font-black text-xs uppercase tracking-widest mb-4 ml-2`}>Learning Experience</Text>
+              <View style={tw`bg-[#0D1117] border border-[#1E2D4D] rounded-[32px] overflow-hidden mb-8`}>
+                 <MenuOption icon={BookOpen} label="My Courses" value="12 Active" />
+                 <MenuOption icon={Award} label="Achievements" value="8 Earned" />
+                 <MenuOption icon={Download} label="Offline Content" isLast />
+              </View>
+
+              <Text style={tw`text-slate-500 font-black text-xs uppercase tracking-widest mb-4 ml-2`}>Settings</Text>
+              <View style={tw`bg-[#0D1117] border border-[#1E2D4D] rounded-[32px] overflow-hidden mb-8`}>
+                 <MenuOption icon={Bell} label="Push Notifications" onToggle={setPushEnabled} toggleValue={pushEnabled} />
+                 <MenuOption icon={Moon} label="Dark Mode" onToggle={setDarkMode} toggleValue={darkMode} />
+                 <MenuOption icon={Shield} label="Privacy & Security" isLast />
+              </View>
+
+              {isAdmin && (
+                <>
+                  <Text style={[tw`font-black text-xs uppercase tracking-widest mb-4 ml-2`, { color: primaryColor }]}>Administration</Text>
+                  <View style={[tw`bg-[#0D1117] border rounded-[32px] overflow-hidden mb-8`, { borderColor: primaryColor + '40' }]}>
+                     <MenuOption icon={Activity} label="Admin Dashboard" color={primaryColor} onPress={() => navigation.navigate('AdminDashboard')} isLast />
                   </View>
-                  <Text style={tw`flex-1 text-white font-bold`}>Admin Dashboard</Text>
-                  <ChevronRight color={EliteTheme.colors.primaryLight} size={20} />
-               </TouchableOpacity>
-            </EliteCard>
-          </>
-        )}
+                </>
+              )}
 
-        {/* Menu Sections */}
-        <Text style={tw`text-xs font-bold text-slate-500 uppercase tracking-widest mb-4`}>Account Settings</Text>
-        
-        <EliteCard variant="glass" style={tw`p-0 overflow-hidden mb-8`}>
-           <TouchableOpacity style={tw`flex-row items-center p-4 border-b border-white/5`}>
-              <View style={tw`w-10 h-10 bg-white/5 rounded-xl items-center justify-center mr-4 border border-white/10`}>
-                 <UserIcon color="white" size={20} />
-              </View>
-              <Text style={tw`flex-1 text-white font-bold`}>Personal Information</Text>
-              <ChevronRight color="#475569" size={20} />
-           </TouchableOpacity>
-
-           <TouchableOpacity style={tw`flex-row items-center p-4 border-b border-white/5`}>
-              <View style={tw`w-10 h-10 bg-white/5 rounded-xl items-center justify-center mr-4 border border-white/10`}>
-                 <Download color="white" size={20} />
-              </View>
-              <Text style={tw`flex-1 text-white font-bold`}>My Downloads (Offline)</Text>
-              <ChevronRight color="#475569" size={20} />
-           </TouchableOpacity>
-
-           <View style={tw`flex-row items-center p-4 border-b border-white/5`}>
-              <View style={tw`w-10 h-10 bg-white/5 rounded-xl items-center justify-center mr-4 border border-white/10`}>
-                 <Bell color="white" size={20} />
-              </View>
-              <Text style={tw`flex-1 text-white font-bold`}>Push Notifications</Text>
-              <Switch 
-                value={pushEnabled} 
-                onValueChange={setPushEnabled}
-                trackColor={{ false: '#334155', true: EliteTheme.colors.primary }}
-                thumbColor={'#fff'}
-              />
+              <TouchableOpacity 
+                onPress={handleLogout}
+                style={tw`flex-row items-center p-6 bg-red-500/10 border border-red-500/20 rounded-[32px] mb-10`}
+              >
+                 <View style={tw`w-10 h-10 bg-red-500/20 rounded-xl items-center justify-center mr-4 border border-red-500/30`}>
+                    <LogOut color="#ef4444" size={20} />
+                 </View>
+                 <Text style={tw`flex-1 text-red-500 font-black text-lg`}>Sign Out</Text>
+                 <ChevronRight color="#ef4444" size={20} opacity={0.5} />
+              </TouchableOpacity>
            </View>
-
-           <TouchableOpacity style={tw`flex-row items-center p-4`}>
-              <View style={tw`w-10 h-10 bg-white/5 rounded-xl items-center justify-center mr-4 border border-white/10`}>
-                 <Shield color="white" size={20} />
-              </View>
-              <Text style={tw`flex-1 text-white font-bold`}>Privacy & Security</Text>
-              <ChevronRight color="#475569" size={20} />
-           </TouchableOpacity>
-        </EliteCard>
-
-        <Text style={tw`text-xs font-bold text-slate-500 uppercase tracking-widest mb-4`}>Support</Text>
-        
-        <EliteCard variant="glass" style={tw`p-0 overflow-hidden mb-10`}>
-           <TouchableOpacity style={tw`flex-row items-center p-4 border-b border-white/5`}>
-              <View style={tw`w-10 h-10 bg-white/5 rounded-xl items-center justify-center mr-4 border border-white/10`}>
-                 <HelpCircle color="white" size={20} />
-              </View>
-              <Text style={tw`flex-1 text-white font-bold`}>Help Center</Text>
-              <ChevronRight color="#475569" size={20} />
-           </TouchableOpacity>
-
-           <TouchableOpacity onPress={logout} style={tw`flex-row items-center p-4`}>
-              <View style={tw`w-10 h-10 bg-red-500/20 rounded-xl items-center justify-center mr-4 border border-red-500/30`}>
-                 <LogOut color="#f87171" size={20} />
-              </View>
-              <Text style={tw`flex-1 text-red-400 font-bold`}>Sign Out</Text>
-              <ChevronRight color="#7f1d1d" size={20} />
-           </TouchableOpacity>
-        </EliteCard>
+        </View>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

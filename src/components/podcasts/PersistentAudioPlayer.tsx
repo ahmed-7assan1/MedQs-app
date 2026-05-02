@@ -13,7 +13,11 @@ import dynamic from "next/dynamic";
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 export function PersistentAudioPlayer() {
-  const { currentTrack, isPlaying, isMinimized, setIsPlaying, setMinimized, setProgress, stop } = useAudioStore();
+  const { 
+    currentTrack, isPlaying, isMinimized, 
+    setIsPlaying, setMinimized, setProgress, 
+    stop, seekTo, clearSeek 
+  } = useAudioStore();
   const [mounted, setMounted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
@@ -38,6 +42,21 @@ export function PersistentAudioPlayer() {
   // Local state for immediate responsiveness
   const [localCurrentTime, setLocalCurrentTime] = useState(0);
   const [localDuration, setLocalDuration] = useState(0);
+
+  // Handle Seeking from Global Store
+  useEffect(() => {
+    if (seekTo === null) return;
+    
+    if (isYouTube && ytPlayerRef.current) {
+      ytPlayerRef.current.seekTo(seekTo, "seconds");
+      setLocalCurrentTime(seekTo);
+    } else if (audioRef.current && !currentTrack?.isSpotify) {
+      audioRef.current.currentTime = seekTo;
+      setLocalCurrentTime(seekTo);
+    }
+    
+    clearSeek();
+  }, [seekTo, isYouTube, clearSeek, currentTrack?.isSpotify]);
 
   useEffect(() => {
     setProgress(localCurrentTime, localDuration);

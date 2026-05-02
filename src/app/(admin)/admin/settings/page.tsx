@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload, Settings, Globe, Layers, Plus } from "lucide-react";
 import { ExportPanel } from "@/components/admin/ExportPanel";
 import { PersonalAIKeyCard } from "@/components/admin/PersonalAIKeyCard";
+import { ExternalAPIKeysCard } from "@/components/admin/ExternalAPIKeysCard";
 import { uploadFiles } from "@/lib/uploadthing-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
@@ -550,6 +551,10 @@ export default function AdminSettingsPage() {
                        );
                     })}
                  </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm">
+                 <ExternalAPIKeysCard />
               </div>
 
               <div className="rounded-2xl border border-white/[0.02] bg-card p-6 space-y-4 shadow-sm border-l-4 border-l-blue-500">

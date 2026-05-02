@@ -41,9 +41,11 @@ const NAV_GROUPS: {
   {
     label: "Community",
     items: [
-      { href: "/admin/forum",  label: "Community", icon: MessageSquare },
-      { href: "/admin/users",  label: "Users",     icon: Users },
-      { href: "/admin/ads",    label: "Ads",       icon: Megaphone },
+      { href: "/admin/forum",    label: "Community",  icon: MessageSquare },
+      { href: "/admin/teams",    label: "Teams",      icon: Users, badge: "NEW" },
+      { href: "/admin/founders", label: "Founders",   icon: GraduationCap, badge: "NEW" },
+      { href: "/admin/users",    label: "Users",      icon: Users },
+      { href: "/admin/ads",      label: "Ads",        icon: Megaphone },
     ],
   },
   {

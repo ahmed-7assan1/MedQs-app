@@ -9,6 +9,8 @@ import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
+import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
+import { AdminFAB } from "@/components/admin/AdminFAB";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -69,29 +71,34 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <div className={cn("app-shell flex flex-col min-h-screen")}>
+        <div className={cn("app-shell flex flex-col min-h-screen dark:bg-[#09080F] bg-slate-50")}>
+          <FloatingIslandNavbar 
+             userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+             userName={isGuest ? undefined : displayName}
+             userId={isGuest ? "" : sessionUserId}
+          />
           <Sidebar
             userName={isGuest ? "Guest" : displayName}
             userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
             userId={isGuest ? "" : sessionUserId}
             isAdmin={isAdmin}
-            siteName={siteConfig?.siteName ?? "MedQs"}
+            siteName={siteConfig?.siteName ?? "MedOneX"}
             logoUrl={siteConfig?.logoUrl ?? undefined}
             isGuest={isGuest}
             unreadCount={unreadCount}
           />
-          <div className="main-content flex-1 flex flex-col pt-0 lg:pt-14 min-w-0 transition-all duration-300">
+          <div className="main-content flex-1 flex flex-col pt-24 lg:pt-32 min-w-0 transition-all duration-300">
             {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
             {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
             <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-24 md:pb-8 outline-none w-full">
               {children}
             </main>
             <SiteFooter />
-            {isAdmin && !isGuest ? <AdminStudentBar /> : null}
             {!isGuest && <OnboardingTutorial />}
             <CookieConsentBanner />
             <BottomNav />
             <PersistentAudioPlayer />
+            {isAdmin && <AdminFAB />}
           </div>
         </div>
       </>

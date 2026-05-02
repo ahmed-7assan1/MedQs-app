@@ -12,7 +12,7 @@ import { Skeleton } from '../components/ui/Skeleton';
 import {
   Bell, ChevronRight, Trophy, BookOpen,
   PlayCircle, CheckCircle2, Circle, Clock,
-  ArrowUpRight, AlertCircle, LayoutDashboard, Brain
+  ArrowUpRight, AlertCircle, Brain, Sparkles
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -206,6 +206,29 @@ export function HomeScreen({ navigation }: any) {
               <StatItem label="Avg. Score" value={`${homeData?.stats?.avgScore || 0}%`} icon={CheckCircle2} color="#10b981" />
             </>
           )}
+        </View>
+
+        {/* ── Study Assistant Quick Action ── */}
+        <View style={tw`px-6 mb-8`}>
+          <TouchableOpacity 
+            onPress={() => handlePress('StudyAssistant')}
+            activeOpacity={0.9}
+            style={[tw`p-6 rounded-[32px] flex-row items-center overflow-hidden`, { backgroundColor: primaryColor }]}
+          >
+            <View style={tw`absolute -right-4 -bottom-4 opacity-10`}>
+               <Brain color="white" size={140} />
+            </View>
+            <View style={tw`w-14 h-14 bg-white/20 rounded-2xl items-center justify-center mr-4`}>
+               <Sparkles color="white" size={28} />
+            </View>
+            <View style={tw`flex-1`}>
+               <Text style={tw`text-white font-black text-xl`}>AI Study Assistant</Text>
+               <Text style={tw`text-white/80 text-xs font-bold`}>Generate your plan or ask anything</Text>
+            </View>
+            <View style={tw`bg-white/20 p-2 rounded-xl`}>
+               <ChevronRight color="white" size={20} strokeWidth={3} />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* ── Continue Learning ── */}

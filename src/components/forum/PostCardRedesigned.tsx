@@ -9,6 +9,9 @@ import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { CommentThread } from "./CommentThread";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+
+type ReactType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry' | null;
 
 interface Props {
   post: any; // We'll use the type from ForumPostJson
@@ -17,26 +20,54 @@ interface Props {
 }
 
 export function PostCardRedesigned({ post, currentUserId }: Props) {
-  const [liked, setLiked] = useState(post.likedByMe ?? false);
   const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
   const [liking, setLiking] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  
+  const [activeReaction, setActiveReaction] = useState<ReactType>(post.likedByMe ? 'like' : null);
+  const [showReacts, setShowReacts] = useState(false);
+  const reactTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const initials = post.author.name
     ? post.author.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
     : "??";
 
-  const handleLike = async () => {
+  const getReactionIcon = (r: ReactType) => {
+    switch (r) {
+      case 'love': return '❤️';
+      case 'haha': return '😂';
+      case 'wow': return '😯';
+      case 'sad': return '😢';
+      case 'angry': return '😡';
+      default: return '👍';
+    }
+  };
+
+  const handleReact = async (type: ReactType) => {
     if (!currentUserId) return toast.error("Sign in to like");
+    if (reactTimeoutRef.current) clearTimeout(reactTimeoutRef.current);
+    setShowReacts(false);
+
+    if (activeReaction === type) type = null;
+
     setLiking(true);
-    const next = !liked;
-    setLiked(next);
-    setLikeCount((c: number) => c + (next ? 1 : -1));
+    const wasLiked = activeReaction !== null;
+    const isLiked = type !== null;
+
+    const prevReaction = activeReaction;
+    setActiveReaction(type);
+    
+    if (wasLiked !== isLiked) {
+       setLikeCount((c: number) => c + (isLiked ? 1 : -1));
+    }
+
     try {
       await fetch(`/api/v1/posts/${post.id}/like`, { method: "POST" });
     } catch {
-      setLiked(!next);
-      setLikeCount((c: number) => c + (next ? -1 : 1));
+      setActiveReaction(prevReaction);
+      if (wasLiked !== isLiked) {
+         setLikeCount((c: number) => c + (isLiked ? -1 : 1));
+      }
     } finally {
       setLiking(false);
     }
@@ -54,25 +85,29 @@ export function PostCardRedesigned({ post, currentUserId }: Props) {
   const badge = getExpiryBadge(post.expiresAt, post.isPinned);
 
   return (
-    <article className="group mb-4 bg-white/[0.04] border-b border-white/[0.02] last:border-0 overflow-hidden">
+    <article className="group mb-4 rounded-[24px] dark:bg-[#131220] bg-white border dark:border-white/[0.05] border-black/5 overflow-hidden shadow-sm hover:shadow-md transition-all">
       {/* Header */}
-      <div className="flex items-start justify-between px-4 pt-4 pb-2">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between px-5 pt-5 pb-3">
+        <div className="flex items-center gap-4">
           <Link href={`/profile/u/${post.author.id}`} className="shrink-0">
-            <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#534AB7]/20 border border-[#534AB7]/30 text-[#AFA9EC] font-medium text-sm">
-              {initials}
+            <div className="h-12 w-12 flex items-center justify-center rounded-full dark:bg-white/5 bg-slate-100 overflow-hidden border dark:border-white/10 border-slate-200">
+               <img 
+                 src={post.author.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author.name || "User")}&backgroundColor=c0aede,d1d4f9,b6e3f4`}
+                 alt={post.author.name}
+                 className="h-full w-full object-cover"
+               />
             </div>
           </Link>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <Link href={`/profile/u/${post.author.id}`} className="font-medium text-[15px] hover:text-[#AFA9EC] transition-colors truncate">
+              <Link href={`/profile/u/${post.author.id}`} className="font-bold text-[15px] dark:text-white text-slate-900 hover:text-primary transition-colors truncate">
                 {post.author.name}
               </Link>
-              {post.author.handle && (
-                <span className="text-white/40 text-[13px]">@{post.author.handle}</span>
+              {(post.author.handle || post.author.nickname) && (
+                <span className="dark:text-white/40 text-slate-500 text-[13px] font-medium">@{post.author.handle || post.author.nickname}</span>
               )}
             </div>
-            <p className="text-[12px] text-white/30 uppercase tracking-tight">
+            <p className="text-[12px] dark:text-white/30 text-slate-400 font-bold uppercase tracking-wider mt-0.5">
               {formatDistanceToNow(new Date(post.createdAt))}
             </p>
           </div>
@@ -80,25 +115,25 @@ export function PostCardRedesigned({ post, currentUserId }: Props) {
 
         {badge && (
           <div className={cn(
-            "flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium uppercase tracking-wider",
+            "flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest",
             badge.color
           )}>
-            {badge.icon && <Pin className="h-2.5 w-2.5 fill-current" />}
+            {badge.icon && <Pin className="h-3 w-3 fill-current" />}
             {badge.label}
           </div>
         )}
       </div>
 
       {/* Body */}
-      <div className="px-4 py-2">
-        <div className="prose prose-invert prose-sm max-w-none text-white/90 leading-relaxed font-normal">
+      <div className="px-5 py-2">
+        <div className="prose dark:prose-invert prose-sm max-w-none dark:text-white/80 text-slate-700 leading-relaxed font-medium">
           <ReactMarkdown components={markdownComponentsWithImages}>
             {enhancePlainImageUrls(post.content)}
           </ReactMarkdown>
         </div>
         
         {post.imageUrl && (
-          <div className="mt-3 relative aspect-[16/9] rounded-xl border border-white/[0.02] overflow-hidden bg-white/[0.02]">
+          <div className="mt-4 relative aspect-[16/9] rounded-[20px] border dark:border-white/10 border-black/5 overflow-hidden dark:bg-black/20 bg-slate-50 shadow-inner">
             <img 
               src={normalizeImageUrl(post.imageUrl)} 
               className="w-full h-full object-cover" 
@@ -111,49 +146,91 @@ export function PostCardRedesigned({ post, currentUserId }: Props) {
       </div>
 
       {/* Actions */}
-      <div className="px-4 py-3 flex items-center gap-4 text-[13px] text-white/40 font-medium select-none">
-        <button 
-          onClick={handleLike}
-          disabled={liking}
-          className={cn(
-            "flex items-center gap-1.5 transition-colors hover:text-white",
-            liked && "text-[#534AB7]"
-          )}
-        >
-          <Heart className={cn("h-4 w-4", liked && "fill-current")} />
-          <span>{likeCount}</span>
-        </button>
+      <div className="px-3 py-3 mt-2 flex items-center justify-between border-t dark:border-white/[0.05] border-black/5 dark:bg-black/20 bg-slate-50/50">
+         <div className="flex items-center gap-2 w-full relative">
+            
+            {/* Reaction Popover */}
+            <AnimatePresence>
+               {showReacts && (
+                  <motion.div 
+                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                     animate={{ opacity: 1, y: 0, scale: 1 }}
+                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                     className="absolute bottom-full left-0 mb-3 bg-white dark:bg-[#1f1d36] rounded-full shadow-2xl border dark:border-white/10 border-black/5 px-2 py-1.5 flex items-center gap-1 z-50"
+                     onMouseEnter={() => {
+                        if (reactTimeoutRef.current) clearTimeout(reactTimeoutRef.current);
+                        setShowReacts(true);
+                     }}
+                     onMouseLeave={() => setShowReacts(false)}
+                  >
+                     {[
+                        { type: 'like', icon: '👍', color: 'text-blue-500' },
+                        { type: 'love', icon: '❤️', color: 'text-red-500' },
+                        { type: 'haha', icon: '😂', color: 'text-yellow-500' },
+                        { type: 'wow', icon: '😯', color: 'text-yellow-500' },
+                        { type: 'sad', icon: '😢', color: 'text-yellow-500' },
+                        { type: 'angry', icon: '😡', color: 'text-orange-500' }
+                     ].map(react => (
+                        <button
+                           key={react.type}
+                           onClick={(e) => {
+                              e.stopPropagation();
+                              handleReact(react.type as ReactType);
+                           }}
+                           className="hover:-translate-y-2 hover:scale-125 transition-transform duration-200 p-1.5 text-2xl"
+                        >
+                           {react.icon}
+                        </button>
+                     ))}
+                  </motion.div>
+               )}
+            </AnimatePresence>
 
-        <span className="opacity-20 cursor-default">·</span>
+            <button 
+               onClick={() => handleReact(activeReaction ? null : 'like')}
+               onMouseEnter={() => {
+                  if (reactTimeoutRef.current) clearTimeout(reactTimeoutRef.current);
+                  setShowReacts(true);
+               }}
+               onMouseLeave={() => {
+                  reactTimeoutRef.current = setTimeout(() => setShowReacts(false), 300);
+               }}
+               disabled={liking}
+               className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-[13px] transition-all",
+                  activeReaction === 'love' ? "text-red-500 dark:bg-red-500/10 bg-red-50" : 
+                  activeReaction ? "text-blue-500 dark:bg-blue-500/10 bg-blue-50" : 
+                  "dark:text-white/50 text-slate-500 hover:bg-black/5 dark:hover:bg-white/5"
+               )}
+            >
+               {activeReaction === 'love' ? <Heart className="h-4 w-4 fill-current" /> :
+                activeReaction === 'like' ? <Heart className="h-4 w-4 fill-current" /> :
+                activeReaction ? <span className="text-base leading-none">{getReactionIcon(activeReaction)}</span> :
+                <Heart className="h-4 w-4" />}
+               <span>{activeReaction ? activeReaction.charAt(0).toUpperCase() + activeReaction.slice(1) : "Like"} {likeCount > 0 ? `(${likeCount})` : ''}</span>
+            </button>
 
-        <button 
-          onClick={() => setShowComments(!showComments)}
-          className="flex items-center gap-1.5 transition-colors hover:text-white"
-        >
-          <MessageSquare className="h-4 w-4" />
-          <span>{post._count?.comments || 0}</span>
-        </button>
+            <button 
+               onClick={() => setShowComments(!showComments)}
+               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-[13px] dark:text-white/50 text-slate-500 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+            >
+               <MessageSquare className="h-4 w-4" />
+               <span>{post._count?.comments || 0}</span>
+            </button>
 
-        <span className="opacity-20 cursor-default">·</span>
-
-        <button 
-          onClick={handleShare}
-          className="flex items-center gap-1.5 transition-colors hover:text-white"
-        >
-          <Share2 className="h-4 w-4" />
-          <span>Share</span>
-        </button>
-
-        <div className="ml-auto">
-          <button className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors">
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </div>
+            <button 
+               onClick={handleShare}
+               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-[13px] dark:text-white/50 text-slate-500 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+            >
+               <Share2 className="h-4 w-4" />
+               <span className="hidden sm:inline">Share</span>
+            </button>
+         </div>
       </div>
 
       {/* Comments section */}
       {showComments && (
-        <div className="px-4 pb-4 border-t border-white/[0.02]">
+        <div className="px-5 pb-5 border-t dark:border-white/[0.05] border-black/5">
           <CommentThread 
             postId={post.id} 
             currentUserId={currentUserId}

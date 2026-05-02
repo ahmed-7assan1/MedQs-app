@@ -117,10 +117,13 @@ interface AudioStore {
   isMinimized: boolean;
   currentTime: number;
   duration: number;
+  seekTo: number | null; // null means no pending seek
   setTrack: (track: AudioTrack) => void;
   setIsPlaying: (playing: boolean) => void;
   setMinimized: (min: boolean) => void;
   setProgress: (current: number, total: number) => void;
+  setSeek: (time: number) => void;
+  clearSeek: () => void;
   stop: () => void;
 }
 
@@ -130,9 +133,12 @@ export const useAudioStore = create<AudioStore>((set) => ({
   isMinimized: false,
   currentTime: 0,
   duration: 0,
-  setTrack: (track) => set({ currentTrack: track, isPlaying: true, isMinimized: false, currentTime: 0, duration: 0 }),
+  seekTo: null,
+  setTrack: (track) => set({ currentTrack: track, isPlaying: true, isMinimized: false, currentTime: 0, duration: 0, seekTo: null }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),
   setMinimized: (isMinimized) => set({ isMinimized }),
   setProgress: (currentTime, duration) => set({ currentTime, duration }),
-  stop: () => set({ currentTrack: null, isPlaying: false, currentTime: 0, duration: 0 }),
+  setSeek: (time) => set({ seekTo: time }),
+  clearSeek: () => set({ seekTo: null }),
+  stop: () => set({ currentTrack: null, isPlaying: false, currentTime: 0, duration: 0, seekTo: null }),
 }));

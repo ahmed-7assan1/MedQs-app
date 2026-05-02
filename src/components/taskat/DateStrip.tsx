@@ -67,21 +67,18 @@ export function DateStrip({ selectedDate, onDateChange }: DateStripProps) {
               data-selected={active}
               onClick={() => onDateChange(date)}
               className={cn(
-                "relative flex min-w-[70px] flex-col items-center justify-center rounded-3xl py-4 transition-all duration-300",
-                "scroll-snap-align-center",
-                active 
-                  ? "bg-sky-500 text-white shadow-xl shadow-sky-500/30 scale-105" 
-                  : "bg-white/40 dark:bg-white/5 dark:text-white/40 text-slate-400 hover:bg-white/60 dark:hover:bg-white/10"
+                "date-pill flex-shrink-0",
+                active && "active"
               )}
             >
-              <span className={cn("text-[10px] font-black uppercase tracking-widest", active ? "text-white/70" : "text-slate-400 dark:text-white/20")}>
+              <span className={cn("text-[9px] font-bold uppercase tracking-widest", active ? "text-white/70" : "text-white/30")}>
                 {dayName}
               </span>
-              <span className="mt-1 text-2xl font-black font-display">
+              <span className={cn("text-lg font-bold", active ? "text-white" : "text-white/50")}>
                 {dayNum}
               </span>
               {isToday && !active && (
-                <div className="absolute bottom-2 h-1 w-1 rounded-full bg-sky-500" />
+                <div className="absolute bottom-2 h-1 w-1 rounded-full bg-primary" />
               )}
             </button>
           );

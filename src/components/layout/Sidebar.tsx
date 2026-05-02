@@ -34,10 +34,17 @@ export const NAV = [
   { href: "/taskat", label: "Taskat", icon: Clock },
 ];
 
+
 export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedOneX", logoUrl, isGuest, unreadCount = 0 }: SidebarProps) {
+  function Logo() {
+    if (logoUrl?.trim()) {
+      return <MedQsLogoMark title={siteName} className="h-8 w-8 text-primary" interactiveColor={true} />;
+    }
+    return <MedQsLogoMark title={siteName} className="h-8 w-8 text-primary" interactiveColor={true} />;
+  }
   const pathname = usePathname();
   const { unread } = useNotificationStore();
-  const { theme, setTheme } = useThemeStore();
+  const { setTheme } = useThemeStore();
   const totalUnread = unread || unreadCount;
 
   const [mounted, setMounted] = useState(false);
@@ -46,8 +53,6 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
   const [notifLoading, setNotifLoading] = useState(false);
   const { isOpen: mobileOpen, close: setMobileClose, toggle: toggleMobile } = useSidebarStore();
   const [userOpen, setUserOpen] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
 
   const userRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -55,7 +60,6 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => { setMobileClose(); setUserOpen(false); setNotifOpen(false); }, [pathname, setMobileClose]);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (userRef.current && !userRef.current.contains(e.target as Node)) setUserOpen(false);
@@ -64,53 +68,6 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-
-  useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", handler);
-    return () => document.removeEventListener("fullscreenchange", handler);
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
-    }
-  };
-
-
-  // Close mobile on escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setMobileClose(); };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [setMobileClose]);
-
-  // Prevent body scroll when mobile open
-  useEffect(() => {
-    if (mobileOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileOpen]);
-
-  // Swipe-to-close
-  useEffect(() => {
-    if (!mobileOpen) return;
-    let startX = 0;
-    const onTouchStart = (e: TouchEvent) => { startX = e.touches[0].clientX; };
-    const onTouchEnd = (e: TouchEvent) => {
-      if (e.changedTouches[0].clientX - startX > 60) setMobileClose();
-    };
-    document.addEventListener("touchstart", onTouchStart);
-    document.addEventListener("touchend", onTouchEnd);
-    return () => { document.removeEventListener("touchstart", onTouchStart); document.removeEventListener("touchend", onTouchEnd); };
-  }, [mobileOpen]);
-
-  function isDark() {
-    return typeof document !== "undefined" && document.documentElement.classList.contains("dark");
-  }
-  function toggleAppearance() { setTheme(isDark() ? "light" : "dark"); }
 
   async function loadNotifs() {
     if (notifLoading || isGuest) return;
@@ -127,125 +84,101 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
     setNotifications(n => n.map(x => ({ ...x, read: true })));
   }
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
   const isActive = (href: string) =>
     href === "/dashboard-app" ? pathname === href || pathname === "/dashboard" : pathname?.startsWith(href);
 
   const initial = userName?.[0]?.toUpperCase() ?? "U";
 
-  function Logo() {
-    if (logoUrl?.trim()) {
-      return <img src={logoUrl} alt={siteName} className="h-8 w-8 rounded-lg object-contain dark:brightness-0 dark:invert transition-all" />;
-    }
-    return <MedQsLogoMark title={siteName} className="h-8 w-8 dark:text-white" />;
-  }
-
   return (
     <>
-      {/* ══════════════════════════════════════════════
-          TOP BAR
-      ══════════════════════════════════════════════ */}
+      {/* ── Desktop Top Nav (Disabled in favor of FloatingIslandNavbar) ── */}
+      {/* 
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-40 hidden h-14 items-center border-b border-transparent bg-background/85 backdrop-blur-[14px] lg:flex"
+          "fixed top-0 left-0 right-0 z-40 hidden h-[52px] items-center border-b border-white/[0.07] bg-[#131220] px-6 lg:flex"
         )}
-        style={{ boxShadow: "0 1px 12px rgba(0,0,0,0.18)" }}
       >
-        <div className="flex h-full w-full items-center gap-0 px-6 lg:px-10">
-
-          {/* ── Logo ── */}
-          <Link href="/dashboard-app" className="group flex items-center gap-2.5 flex-shrink-0 mr-4">
-            <div className="relative transition-transform group-hover:scale-105">
-              <Logo />
-            </div>
-            <span className="hidden font-display text-[15px] font-extrabold tracking-tight text-foreground sm:block select-none">
-              {siteName}
-            </span>
+        <div className="flex-1 flex items-center">
+          <Link href="/dashboard-app" className="flex items-center text-[16px] font-bold tracking-tight">
+            <span className="text-white">Med</span>
+            <span className="text-white/60 font-medium">One</span>
+            <span className="text-primary text-[110%] ml-0.5 font-black">X</span>
           </Link>
+        </div>
 
-          {/* Vertical divider */}
-          <div className="mr-4 h-5 w-px bg-white/[0.02] flex-shrink-0 hidden lg:block" />
+        <nav className="flex items-center gap-1">
+          {NAV.map(({ href, label }) => {
+            const active = isActive(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "px-4 py-1.5 rounded-lg text-[12px] font-bold transition-all uppercase tracking-wider",
+                  active ? "text-primary bg-primary/10" : "text-white/35 hover:text-white/60 hover:bg-white/5"
+                )}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
 
-          {/* ── Desktop Nav ── */}
-          <nav className="hidden lg:flex items-center gap-0.5 flex-1">
-            {NAV.map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "relative flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all duration-150 select-none",
-                    active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                  )}
-                >
-                  <Icon
-                    className={cn(
-                      "h-3.5 w-3.5 flex-shrink-0 transition-colors",
-                      active ? "text-primary" : ""
-                    )}
-                  />
-                  {label}
-                  {/* Animated underline */}
-                  {active && (
-                    <span
-                      className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-primary"
-                      style={{ animation: "slideInX 200ms ease-out" }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+        <div className="flex-1 flex items-center justify-end gap-3">
+          <div className="flex items-center gap-1">
+            <GlobalSearch isGuest={isGuest} />
+            
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 text-white/35 hover:text-white transition-colors"
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            </button>
 
-          <div className="flex-1 lg:flex-none" />
+            {!isGuest && (
+              <Link href="/ai-chat" className="hidden xl:flex items-center gap-1.5 rounded-full btn-gradient px-4 py-1.5 text-[11px] font-black uppercase tracking-wider shadow-lg shadow-primary/20">
+                <Sparkles className="h-3 w-3" />
+                Ask Dr. Q
+              </Link>
+            )}
 
-          {/* ── Right actions ── */}
-          <div className="flex items-center gap-0.5">
-            {/* Desktop Search */}
-            <div className="hidden sm:block mr-1">
-              <GlobalSearch isGuest={isGuest} />
-            </div>
-
-            {/* Notifications */}
             {!isGuest && (
               <div ref={notifRef} className="relative">
                 <button
                   onClick={() => { if (!notifOpen) void loadNotifs(); setNotifOpen(o => !o); setUserOpen(false); }}
                   className={cn(
-                    "relative flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
-                    notifOpen && "bg-muted text-foreground"
+                    "p-2 text-white/35 hover:text-white transition-colors relative",
+                    notifOpen && "text-white"
                   )}
                 >
-                  <Bell className="h-[17px] w-[17px]" />
-
-                  {totalUnread > 0 && (
-                    <span className="absolute right-[9px] top-[9px] flex h-2 w-2 rounded-full bg-red-500 ring-2 ring-background"
-                      style={{ boxShadow: "0 0 6px rgba(239,68,68,0.8)" }} />
-                  )}
+                  <Bell className="h-4 w-4" />
+                  {totalUnread > 0 && <span className="absolute top-2 right-2 h-1.5 w-1.5 bg-primary rounded-full" />}
                 </button>
-
                 {notifOpen && (
-                  <div className="absolute right-0 top-11 z-50 w-80 rounded-2xl border border-white/[0.03] bg-card/95 shadow-2xl backdrop-blur-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
-                    <div className="flex items-center justify-between border-b border-white/[0.02] px-4 py-3 bg-muted/20">
-                      <span className="text-sm font-semibold">Notifications</span>
-                      {totalUnread > 0 && (
-                        <button onClick={markAllRead} className="text-[11px] font-semibold text-primary hover:underline" >Mark all read</button>
-                      )}
-                    </div>
-                    <div className="max-h-72 overflow-y-auto custom-scrollbar">
-                      {notifLoading ? (
-                        <div className="p-6 text-center text-sm text-muted-foreground">Loading...</div>
-                      ) : notifications.length === 0 ? (
-                        <div className="flex flex-col items-center gap-2 p-8 text-muted-foreground">
-                          <Bell className="h-8 w-8 opacity-20" />
-                          <p className="text-sm">No notifications</p>
-                        </div>
-                      ) : notifications.map(n => (
-                        <div key={n.id} className={cn("border-b border-white/[0.03] px-4 py-3 text-sm hover:bg-muted/40 transition-colors", !n.read && "bg-primary/5")}>
-                          <p className="font-medium leading-tight">{n.title}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{n.body}</p>
+                  <div className="absolute right-0 top-12 w-80 rounded-2xl border border-white/[0.07] bg-[#131220] shadow-2xl overflow-hidden py-2 animate-in fade-in slide-in-from-top-2">
+                    <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white/20">Notifications</p>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.map(n => (
+                        <div key={n.id} className="px-4 py-3 hover:bg-white/5 border-b border-white/[0.03]">
+                          <p className="text-[12px] font-bold text-white/90">{n.title}</p>
+                          <p className="text-[11px] text-white/40 mt-0.5">{n.body}</p>
                         </div>
                       ))}
                     </div>
@@ -254,93 +187,34 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
               </div>
             )}
 
-            {/* Fullscreen Toggle */}
-            <button
-              onClick={toggleFullscreen}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
-              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-            >
-              {isFullscreen ? <Minimize className="h-[17px] w-[17px]" /> : <Maximize className="h-[17px] w-[17px]" />}
+            <Link href="/settings" className="p-2 text-white/35 hover:text-white transition-colors">
+              <Settings className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div ref={userRef} className="relative">
+            <button onClick={() => setUserOpen(!userOpen)} className="h-8 w-8 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+              {userImage ? (
+                <img src={userImage} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <img 
+                  src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${userName || 'User'}`} 
+                  alt="" 
+                  className="h-full w-full object-cover" 
+                />
+              )}
             </button>
-
-
-            {/* User avatar */}
-            {!isGuest ? (
-              <div ref={userRef} className="relative ml-0.5">
-                <button
-                  onClick={() => { setUserOpen(o => !o); setNotifOpen(false); }}
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl ring-2 transition-all duration-200",
-                    userOpen ? "ring-primary" : "ring-border hover:ring-primary/50"
-                  )}
-                  style={{ boxShadow: userOpen ? "0 0 0 4px rgba(99,102,241,0.15)" : undefined }}
-                >
-                  {userImage
-                    ? <img src={userImage} alt="" className="h-full w-full object-cover" />
-                    : <span className="flex h-full w-full items-center justify-center bg-primary/10 text-[12px] font-extrabold text-primary">{initial}</span>}
-                </button>
-
-                {userOpen && (
-                  <div className="absolute right-0 top-11 z-[60] w-56 rounded-2xl border border-white/[0.03] bg-card/95 shadow-2xl backdrop-blur-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
-                    <div className="border-b border-white/[0.02] px-4 py-3 bg-muted/20">
-                      <p className="text-sm font-bold truncate text-foreground">{userName}</p>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{isAdmin ? "Admin Account" : "Student account"}</p>
-                    </div>
-                    <div className="py-1.5">
-                      <Link href="/profile/me" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
-                        <User className="h-4 w-4 text-muted-foreground" /> Profile
-                      </Link>
-                      <Link href="/profile/saved-questions" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
-                        <Bookmark className="h-4 w-4 text-muted-foreground" /> Saved Questions
-                      </Link>
-                      <Link href="/settings" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
-                        <Settings className="h-4 w-4 text-muted-foreground" /> Settings
-                      </Link>
-                      {isAdmin && (
-                        <Link href="/admin/dashboard" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
-                          <ShieldCheck className="h-4 w-4 text-blue-500" /> {PLATFORM_COPY.doctorPanel}
-                        </Link>
-                      )}
-                      {isAdmin && (
-                        <Link href="/studio/sync" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
-                          <Youtube className="h-4 w-4 text-red-500" /> YouTube Sync Studio
-                        </Link>
-                      )}
-                      {!isGuest && (
-                        <Link href="/ai-chat" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-muted/60 transition-colors">
-                          <Sparkles className="h-4 w-4 text-amber-400" /> Study with Dr. Q
-                        </Link>
-                      )}
-                    </div>
-                    <div className="border-t border-white/[0.02] py-1.5">
-                      <button onClick={() => signOut({ callbackUrl: "/login" })} className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] font-medium text-red-500 hover:bg-red-500/10 transition-colors">
-                        <LogOut className="h-4 w-4" /> Sign out
-                      </button>
-                    </div>
-                  </div>
-                )}
+            {userOpen && (
+              <div className="absolute right-0 top-12 w-48 rounded-2xl border border-white/[0.07] bg-[#131220] shadow-2xl py-2 animate-in fade-in slide-in-from-top-2">
+                <Link href="/profile/me" className="block px-4 py-2 text-[12px] font-bold text-white/40 hover:text-white hover:bg-white/5 transition-colors">Profile</Link>
+                <div className="h-px bg-white/[0.03] my-1" />
+                <button onClick={() => signOut({ callbackUrl: "/login" })} className="w-full text-left px-4 py-2 text-[12px] font-bold text-red-500 hover:bg-red-500/10 transition-colors">Sign Out</button>
               </div>
-            ) : (
-              <Link href="/login" className="ml-1.5 flex h-9 items-center rounded-xl bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors">
-                Sign In
-              </Link>
             )}
-
-            {/* Mobile hamburger - Handle by BottomNav but kept here for fallback visibility */}
-            <button
-              onClick={toggleMobile}
-              className="flex lg:hidden items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
-              aria-label="Open menu"
-            >
-              <div className="flex flex-col gap-[5px] w-[17px]">
-                <span className="h-[1.5px] w-full rounded-full bg-current transition-all" />
-                <span className="h-[1.5px] w-[75%] rounded-full bg-current transition-all" />
-                <span className="h-[1.5px] w-full rounded-full bg-current transition-all" />
-              </div>
-            </button>
           </div>
         </div>
       </header>
+      */}
 
       {/* ══════════════════════════════════════════════
           MOBILE FULL-SCREEN SIDE PANEL (slides from right)
@@ -363,8 +237,8 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
             <div className="flex h-14 items-center justify-between px-5">
               <div className="flex items-center gap-2">
                 {logoUrl?.trim()
-                  ? <img src={logoUrl} alt={siteName} className="h-7 w-7 rounded-md object-contain dark:brightness-0 dark:invert" />
-                  : <MedQsLogoMark className="h-7 w-7 dark:text-white" />}
+                  ? <MedQsLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />
+                  : <MedQsLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />}
                 <span className="font-display text-[15px] font-extrabold">{siteName}</span>
               </div>
               <button

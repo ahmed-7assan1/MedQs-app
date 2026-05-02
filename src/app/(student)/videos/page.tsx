@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-
 import { 
-  Search, Play, Loader2, X, PlusCircle, CheckCircle2, Clapperboard,
-  Video, LayoutGrid, List as ListIcon, Sparkles, Clock, Calendar,
-  ChevronRight, ArrowRight, Star, Home
+  Search, Play, Loader2, X, Clapperboard,
+  Video, Clock, ArrowRight, Star, Home, ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -33,7 +31,6 @@ interface VideoResult {
 }
 
 export default function VideosHubPage() {
-  const [searchOpen, setSearchOpen] = useState(false);
   const [globalQuery, setGlobalQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<VideoResult[]>([]);
@@ -45,17 +42,15 @@ export default function VideosHubPage() {
   const [modules, setModules] = useState<string[]>([]);
 
   useEffect(() => {
-    // Parallel fetch initial data
     Promise.all([
       fetch("/api/v1/videos/instructors").then(r => r.json()),
       fetch("/api/v1/videos/curriculum").then(r => r.json()),
-      fetch("/api/v1/feed?limit=10").then(r => r.json()), // Fetch community posts
-      fetch("/api/v1/modules-all").then(r => r.json()), // Fetch modules for filters
+      fetch("/api/v1/feed?limit=10").then(r => r.json()),
+      fetch("/api/v1/modules-all").then(r => r.json()),
     ]).then(([instData, currData, postData, modData]) => {
       setInstructors(Array.isArray(instData) ? instData : []);
       setCurriculumVideos(Array.isArray(currData) ? currData : []);
       setPosts(Array.isArray(postData) ? postData : []);
-      
       if (Array.isArray(modData)) {
         const uniqueNames = Array.from(new Set(modData.map((m: any) => m.name)));
         setModules(["All", ...uniqueNames.slice(0, 8)]);
@@ -63,6 +58,17 @@ export default function VideosHubPage() {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
+
+  // ── Instant search (no debounce — filters locally + fires API simultaneously)
+  const localFiltered = useMemo(() => {
+    if (!globalQuery.trim()) return curriculumVideos;
+    const q = globalQuery.toLowerCase();
+    return curriculumVideos.filter(v =>
+      v.title.toLowerCase().includes(q) ||
+      v.channelTitle.toLowerCase().includes(q) ||
+      (v.moduleName || "").toLowerCase().includes(q)
+    );
+  }, [globalQuery, curriculumVideos]);
 
   useEffect(() => {
     if (!globalQuery.trim()) { setSearchResults([]); return; }
@@ -73,17 +79,15 @@ export default function VideosHubPage() {
         const data = await res.json();
         setSearchResults(Array.isArray(data) ? data : []);
       } catch { } finally { setIsSearching(false); }
-    }, 400);
+    }, 500);
     return () => clearTimeout(t);
   }, [globalQuery]);
 
   const displayVideos = useMemo(() => {
-    let source = searchResults.length > 0 ? searchResults : curriculumVideos;
-    if (activeSubject !== "All") {
-      source = source.filter(v => v.moduleName === activeSubject);
-    }
+    let source = searchResults.length > 0 ? searchResults : localFiltered;
+    if (activeSubject !== "All") source = source.filter(v => v.moduleName === activeSubject);
     return source;
-  }, [searchResults, curriculumVideos, activeSubject]);
+  }, [searchResults, localFiltered, activeSubject]);
 
   const feedItems = useMemo(() => {
     const items: { type: "video" | "post"; data: any }[] = [];
@@ -97,58 +101,71 @@ export default function VideosHubPage() {
   }, [displayVideos, posts]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white pb-32">
-      {/* Premium Hero Section */}
-      <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-red-600/20 via-[#1a0505] to-[#0a0a0a] z-10" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492619334760-22c69e46a788?q=80&w=2000')] bg-cover bg-center opacity-30 mix-blend-overlay" />
+    <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pb-32">
+      {/* Hero */}
+      <div className="relative h-[280px] md:h-[360px] w-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-red-600/30 via-red-950/60 to-transparent dark:to-[#0a0a0a] to-slate-50 z-10" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492619334760-22c69e46a788?q=80&w=2000')] bg-cover bg-center opacity-40" />
         
-        <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-8 md:pb-12">
+        <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-8 md:pb-10">
           <Link 
             href="/dashboard-app" 
-            className="absolute top-8 left-6 md:left-8 flex items-center justify-center h-10 w-10 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:scale-105 transition-all shadow-lg backdrop-blur-md"
-            aria-label="Back to Home"
+            className="absolute top-6 left-6 flex items-center justify-center h-10 w-10 rounded-full bg-black/30 border border-white/20 text-white hover:bg-black/50 transition-all shadow-lg backdrop-blur-md"
           >
             <Home className="h-5 w-5" />
           </Link>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-400/10 backdrop-blur-md border border-red-400/20 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 mb-4 md:mb-6 animate-in fade-in slide-in-from-bottom-4 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 backdrop-blur-md border border-red-400/30 text-[10px] font-black uppercase tracking-[0.2em] text-red-300 mb-4 w-max">
             <Video className="h-3.5 w-3.5" />
             Visual Learning Engine
           </div>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-2">
             Videos.
           </h1>
-          <p className="text-lg md:text-xl text-white/60 max-w-2xl font-medium animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            Immersive medical lectures from top educators. Master your curriculum with crystal clear visual explanations.
+          <p className="text-base text-white/70 max-w-xl font-medium">
+            Immersive medical lectures from top educators.
           </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 -mt-8 relative z-30">
+      <div className="container mx-auto px-6 -mt-6 relative z-30 space-y-10">
         {/* Search & Filters */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-12">
-          <div className="relative w-full lg:w-[500px]">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500/50" />
+        <div className="flex flex-col lg:flex-row items-center gap-4">
+          {/* Instant Search Bar */}
+          <div className="relative w-full lg:w-[480px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500/60" />
             <input 
               value={globalQuery}
               onChange={(e) => setGlobalQuery(e.target.value)}
               placeholder="Search lectures, topics, educators..." 
-              className="w-full h-16 bg-[#1a1a1a] border border-white/5 rounded-2xl pl-14 pr-6 text-base font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all placeholder:text-white/20"
+              className="w-full h-14 dark:bg-[#1a1a1a] bg-white border dark:border-white/5 border-slate-200 rounded-2xl pl-12 pr-12 text-base font-medium focus:outline-none focus:ring-2 focus:ring-red-500/40 transition-all dark:placeholder:text-white/20 placeholder:text-slate-400 shadow-sm dark:shadow-none dark:text-white text-slate-800"
             />
-            {isSearching && <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-rose-500" />}
+            <AnimatePresence>
+              {globalQuery && (
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2"
+                >
+                  {isSearching && <Loader2 className="h-4 w-4 animate-spin text-red-500" />}
+                  <button onClick={() => { setGlobalQuery(""); setSearchResults([]); }}>
+                    <X className="h-4 w-4 dark:text-white/30 text-slate-400 hover:text-red-500 transition-colors" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
-             {modules.map(mod => (
+          {/* Module Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full lg:flex-1 pb-1">
+            {modules.map(mod => (
               <button
                 key={mod}
                 onClick={() => setActiveSubject(mod)}
                 className={cn(
-                  "px-6 py-2.5 rounded-2xl text-[13px] font-bold transition-all shrink-0 border whitespace-nowrap",
+                  "px-5 py-2 rounded-xl text-[12px] font-bold transition-all shrink-0 border",
                   activeSubject === mod 
-                    ? "bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
-                    : "bg-[#1a1a1a] border-white/5 text-white/40 hover:text-white hover:bg-[#252525] hover:border-red-500/30"
+                    ? "bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20" 
+                    : "dark:bg-[#1a1a1a] bg-white dark:border-white/5 border-slate-200 dark:text-white/50 text-slate-500 hover:border-red-400/50 hover:text-red-500"
                 )}
               >
                 {mod}
@@ -157,165 +174,158 @@ export default function VideosHubPage() {
           </div>
         </div>
 
-        {/* Instructors Circle Row */}
+        {/* Top Educators */}
         {instructors.length > 0 && (
-          <div className="mb-16">
-            <div className="flex items-center gap-3 mb-6">
-              <Star className="h-5 w-5 text-red-500" />
-              <h2 className="text-xl font-black tracking-tight">Top Educators</h2>
+          <div>
+            <div className="flex items-center gap-2 mb-5">
+              <Star className="h-4 w-4 text-red-500" />
+              <h2 className="text-lg font-black tracking-tight dark:text-white text-slate-800">Top Educators</h2>
             </div>
-            <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-4">
+            <div className="flex items-center gap-5 overflow-x-auto no-scrollbar pb-2">
               {instructors.map((inst) => (
-                <div key={inst.id} className="flex flex-col items-center gap-3 shrink-0 group cursor-pointer">
-                   <div className="h-20 w-20 rounded-full border-2 border-white/5 p-1 group-hover:border-red-500 transition-all duration-500 overflow-hidden shadow-lg group-hover:shadow-[0_0_20px_rgba(239,68,68,0.4)]">
-                     <div className="h-full w-full rounded-full overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500 bg-[#1a1a1a]">
-                       <img 
-                         src={inst.thumbnail || `https://ui-avatars.com/api/?name=${inst.name}&background=534AB7&color=fff`} 
-                         alt={inst.name}
-                         className="h-full w-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
-                       />
-                     </div>
-                   </div>
-                   <span className="text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
-                     {inst.name.split(' ')[0]}
-                   </span>
+                <div key={inst.id} className="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
+                  <div className="h-16 w-16 rounded-full border-2 dark:border-white/10 border-slate-200 p-0.5 group-hover:border-red-500 transition-all duration-300 overflow-hidden shadow-md">
+                    <div className="h-full w-full rounded-full overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500 dark:bg-[#1a1a1a] bg-slate-100">
+                      <img 
+                        src={inst.thumbnail || `https://ui-avatars.com/api/?name=${inst.name}&background=534AB7&color=fff`} 
+                        alt={inst.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-500 group-hover:text-red-500 transition-colors">
+                    {inst.name.split(' ')[0]}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Content Section */}
-        <div className="space-y-16">
-          <section>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-black tracking-tighter">
-                {globalQuery ? `Found ${displayVideos.length} Videos` : (activeSubject === "All" ? "Featured Lectures" : `${activeSubject} Lectures`)}
-              </h2>
+        {/* Content Grid */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black tracking-tighter dark:text-white text-slate-800">
+              {globalQuery 
+                ? <span>Results for <span className="text-red-500">"{globalQuery}"</span> — {displayVideos.length} found</span>
+                : activeSubject === "All" ? "Featured Lectures" : `${activeSubject} Lectures`
+              }
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="aspect-video rounded-[28px] dark:bg-white/5 bg-slate-200 animate-pulse" />
+              ))}
             </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="aspect-video rounded-[32px] bg-white/5 animate-pulse" />
-                ))}
-              </div>
-            ) : feedItems.length === 0 ? (
-               <div className="py-32 flex flex-col items-center justify-center text-white/10">
-                <Clapperboard className="h-24 w-24 mb-6 opacity-20" />
-                <p className="text-xl font-bold tracking-tight">No videos found matching your criteria</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {feedItems.map((item, idx) => {
-                   if (item.type === "post") {
-                    return (
-                      <motion.div 
-                        key={`post-${item.data.id}`} 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        className="rounded-[32px] overflow-hidden bg-white/[0.02] border border-white/5 p-2 flex flex-col"
-                      >
-                        <div className="px-6 pt-4 pb-2 text-[10px] font-black text-red-400 uppercase tracking-[0.2em]">
-                          From the community
-                        </div>
-                        <PostCardRedesigned post={item.data} />
-                      </motion.div>
-                    );
-                  }
-
-                  const video = item.data;
-                  const href = (video.lectureId && video.moduleId)
-                    ? `/modules/${video.moduleId}/lectures/${video.lectureId}/video`
-                    : `https://youtube.com/watch?v=${video.videoId}`;
-
+          ) : feedItems.length === 0 ? (
+            <div className="py-24 flex flex-col items-center justify-center dark:text-white/20 text-slate-300">
+              <Clapperboard className="h-20 w-20 mb-4" />
+              <p className="text-lg font-bold">No videos found matching your criteria</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {feedItems.map((item, idx) => {
+                if (item.type === "post") {
                   return (
-                    <VideoCard 
-                      key={video.id} 
-                      video={video} 
-                      href={href} 
-                    />
+                    <motion.div 
+                      key={`post-${item.data.id}`} 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      className="rounded-[28px] overflow-hidden dark:bg-white/[0.02] bg-white dark:border-white/5 border-slate-200 border p-2 flex flex-col shadow-sm"
+                    >
+                      <div className="px-4 pt-3 pb-1 text-[10px] font-black text-red-500 uppercase tracking-[0.2em]">
+                        From the community
+                      </div>
+                      <PostCardRedesigned post={item.data} />
+                    </motion.div>
                   );
-                })}
-              </div>
-            )}
-          </section>
-        </div>
+                }
+
+                const video = item.data;
+                const href = (video.lectureId && video.moduleId)
+                  ? `/modules/${video.moduleId}/lectures/${video.lectureId}/video`
+                  : `https://youtube.com/watch?v=${video.videoId}`;
+
+                return <VideoCard key={video.id} video={video} href={href} />;
+              })}
+            </div>
+          )}
+        </section>
       </div>
+
     </div>
   );
 }
 
 function VideoCard({ video, href }: { video: VideoResult, href: string }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isUnmuted, setIsUnmuted] = useState(false);
 
   return (
     <motion.div 
       onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => { setIsHovered(false); setIsUnmuted(false); }}
-      whileHover={{ y: -8 }}
-      className="group relative flex flex-col p-4 rounded-[40px] bg-[#1a1a1a] hover:bg-[#222] border border-white/5 hover:border-red-400/20 transition-all shadow-2xl overflow-hidden"
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ y: -6 }}
+      className="group relative flex flex-col p-3 rounded-[28px] dark:bg-[#1a1a1a] bg-white dark:hover:bg-[#222] hover:bg-slate-50 dark:border-white/5 border-slate-200 border transition-all shadow-md dark:shadow-none overflow-hidden"
     >
-      <Link href={href} className="relative aspect-video rounded-[32px] overflow-hidden mb-5 border border-white/5 bg-black block">
-        {/* Thumbnail Layer */}
+      <Link href={href} className="relative aspect-video rounded-[20px] overflow-hidden mb-4 border dark:border-white/5 border-slate-200 dark:bg-black bg-slate-100 block">
         <div className={cn("absolute inset-0 transition-opacity duration-700", isHovered ? "opacity-0" : "opacity-100")}>
           <img 
             src={video.thumbnail || `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`} 
-            className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700" 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
             alt={video.title} 
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-red-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-            <div className="h-16 w-16 rounded-full bg-white text-red-500 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] transform translate-y-8 group-hover:translate-y-0 transition-all duration-500">
-              <Play className="h-7 w-7 fill-current ml-1.5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="h-14 w-14 rounded-full bg-white text-red-500 flex items-center justify-center shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-400">
+              <Play className="h-6 w-6 fill-current ml-1" />
             </div>
           </div>
         </div>
 
-        {/* Hover Autoplay Iframe Layer */}
         {isHovered && video.videoId && (
-          <div className="absolute inset-0 z-0 bg-black animate-in fade-in duration-1000 delay-300">
+          <div className="absolute inset-0 z-0 bg-black animate-in fade-in duration-700">
             <iframe 
-              src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=${isUnmuted ? 0 : 1}&controls=0&modestbranding=1&playsinline=1`}
-              className="w-full h-full object-cover pointer-events-none scale-150"
+              src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&playsinline=1`}
+              className="w-full h-full scale-150 pointer-events-none"
               allow="autoplay; encrypted-media"
             />
           </div>
         )}
 
-
         {video.source === "medqs" && (
-          <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 text-[10px] font-black text-white uppercase tracking-widest z-20">
+          <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-xl rounded-xl border border-white/10 text-[9px] font-black text-white uppercase tracking-widest z-20">
             Official
           </div>
         )}
       </Link>
       
-      <div className="px-2 space-y-2">
-        <div className="flex items-start gap-3">
+      <div className="px-1 space-y-1.5">
+        <div className="flex items-start gap-2.5">
           <img 
             src={video.channelThumbnail || `https://ui-avatars.com/api/?name=${video.channelTitle}&background=534AB7&color=fff`} 
-            className="h-9 w-9 rounded-full border border-white/10 object-cover" 
+            className="h-8 w-8 rounded-full dark:border-white/10 border-slate-200 border object-cover shrink-0" 
             alt="" 
           />
           <div className="flex-1 min-w-0">
-            <Link href={href} className="font-bold text-[17px] leading-tight line-clamp-2 group-hover:text-red-400 transition-colors">
+            <Link href={href} className="font-bold text-[15px] leading-snug line-clamp-2 dark:text-white text-slate-800 group-hover:text-red-500 transition-colors">
               {video.title}
             </Link>
+            <p className="text-xs dark:text-white/40 text-slate-500 mt-0.5 truncate">{video.channelTitle}</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 mt-2 px-12">
-          <span className="text-xs font-medium text-white/40 truncate">{video.channelTitle}</span>
-          <span className="h-1 w-1 rounded-full bg-white/10" />
-          <span className="text-xs font-bold text-red-500/60 truncate uppercase tracking-tighter">{video.moduleName || "Medical"}</span>
-        </div>
+        {video.moduleName && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-red-500/70 dark:bg-red-500/10 bg-red-50 px-2 py-0.5 rounded-full border border-red-500/10">
+            {video.moduleName}
+          </span>
+        )}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-white/[0.03] flex items-center justify-between px-2">
-        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/20">
-          <Clock className="h-3.5 w-3.5" /> 45:00
+      <div className="mt-4 pt-3 border-t dark:border-white/[0.04] border-slate-100 flex items-center justify-between px-1">
+        <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest dark:text-white/20 text-slate-400">
+          <Clock className="h-3 w-3" /> Lecture
         </div>
         <ArrowRight className="h-4 w-4 text-red-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
       </div>

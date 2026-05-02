@@ -118,9 +118,11 @@ export function HomeTopBar({ userName, userImage, location = "Medical Platform",
                     }} 
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-primary font-bold text-[11px]">
-                    {firstName[0]}
-                  </div>
+                  <img 
+                    src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${userName || 'User'}`} 
+                    alt="" 
+                    className="h-full w-full object-cover" 
+                  />
                 )}
               </button>
 

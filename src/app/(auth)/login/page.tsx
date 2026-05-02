@@ -11,143 +11,66 @@ export default async function LoginPage() {
   if (session?.user) redirect("/dashboard");
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-white dark:bg-[#080c14]">
-
-      {/* ── LEFT PANEL (branding) — hidden on mobile ── */}
-      <div className="relative hidden flex-1 flex-col justify-between overflow-hidden lg:flex"
-        style={{ background: "linear-gradient(145deg, #0f1729 0%, #111827 60%, #0c1320 100%)" }}>
-
-        {/* Grid overlay */}
-        <div className="absolute inset-0 opacity-[0.06]"
-          style={{ backgroundImage: "linear-gradient(rgba(100,150,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(100,150,255,1) 1px, transparent 1px)", backgroundSize: "50px 50px" }} />
-
-        {/* Glow orb */}
-        <div className="absolute -top-1/4 -left-1/4 h-3/4 w-3/4 rounded-full blur-[140px]"
-          style={{ background: "radial-gradient(circle, rgba(26,107,204,0.25) 0%, transparent 60%)" }} />
-        <div className="absolute -bottom-1/4 -right-1/4 h-2/3 w-2/3 rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(107,72,204,0.15) 0%, transparent 60%)" }} />
-
-        <div className="relative z-10 p-10">
-          <div className="flex items-center gap-3">
-            <span style={{ filter: "brightness(0) invert(1)" }}>
-              <MedQsLogoMark className="h-10 w-10" title="MedQs" />
-            </span>
-            <span className="text-xl font-bold text-white tracking-tight">MedQs</span>
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#09080F]">
+      <div className="relative z-10 flex w-full max-w-[400px] flex-col items-center px-6">
+        {/* Logo */}
+        <div className="mb-12 flex flex-col items-center gap-6">
+          <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-[#131220] border border-white/[0.07] shadow-2xl transition-all hover:scale-105 hover:shadow-primary/20">
+             <MedQsLogoMark className="h-12 w-12 text-primary" title="MedOneX" interactiveColor={true} />
+          </div>
+          <div className="text-center">
+            <h1 className="text-3xl font-black tracking-tighter text-white">MedOne<span className="text-primary">X</span></h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/20 mt-1">Medical Excellence</p>
           </div>
         </div>
 
-        <div className="relative z-10 px-10 pb-8">
-          <h2 className="mb-3 font-display text-3xl font-extrabold leading-tight text-white">
-            Your path to<br />
-            <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              medical excellence.
-            </span>
-          </h2>
-          <p className="mb-8 text-sm leading-relaxed text-white/60">
-            Structured curriculums, exam simulators, AI study notes, and a thriving community — all in one place.
-          </p>
-
-          <div className="space-y-3">
-            {[
-              { icon: BookOpen, text: "Structured curriculum matched to your university", color: "#1A6BCC" },
-              { icon: ShieldCheck, text: "AI-powered study tools & smart flashcards", color: "#6B48CC" },
-              { icon: Users, text: "Join 1,000+ students mastering medicine", color: "#059669" },
-            ].map(({ icon: Icon, text, color }) => (
-              <div key={text} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl"
-                  style={{ background: `${color}22` }}>
-                  <Icon className="h-4 w-4" style={{ color }} />
-                </div>
-                <p className="text-sm text-white/70">{text}</p>
-              </div>
-            ))}
+        <div className="w-full space-y-8">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-white mb-2">Welcome back</h2>
+            <p className="text-[13px] text-white/35 font-medium">Sign in to your medical workspace</p>
           </div>
-        </div>
-      </div>
 
-      {/* ── RIGHT PANEL (form) ── */}
-      <div className="flex flex-1 flex-col items-center justify-center px-5 py-10 lg:max-w-[480px]">
-        {/* Mobile logo */}
-        <div className="mb-6 flex items-center gap-2.5 lg:hidden">
-          <MedQsLogoMark className="h-8 w-8" title="MedQs" />
-          <span className="text-base font-bold tracking-tight text-foreground">MedQs</span>
-        </div>
-
-        <div className="w-full max-w-[340px] sm:max-w-[360px]">
-          <h1 className="mb-1 font-display text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
-            Welcome back
-          </h1>
-          <p className="mb-6 sm:mb-8 text-sm text-muted-foreground">
-            Sign in to continue your medical studies.
-          </p>
-
-          {/* ── OAUTH BUTTONS ── */}
+          {/* Social Auth */}
           <div className="space-y-3">
-
-            {/* Google */}
-            <form action={async () => {
-              "use server";
-              await signIn("google", { redirectTo: "/dashboard" });
-            }}>
+            <form action={async () => { "use server"; await signIn("google", { redirectTo: "/dashboard" }); }}>
               <button type="submit"
-                className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.02] bg-background/80 px-5 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-blue-500/40 hover:bg-muted/40 hover:shadow-md active:scale-[0.98] dark:bg-white/5 dark:hover:bg-white/8">
-                {/* Custom G icon (not Google branded) */}
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
-                  <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24" aria-hidden>
-                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+                className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#1a1928] hover:border-primary/20 active:scale-[0.98]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.83c.87-2.6 3.3-4.52 6.16-4.52z"/>
                   </svg>
                 </div>
-                <span className="flex-1 text-left">Continue with Google</span>
-                <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                <span className="flex-1">Continue with Google</span>
+                <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-40 group-hover:translate-x-0" />
               </button>
             </form>
 
-            {/* Facebook */}
-            <form action={async () => {
-              "use server";
-              await signIn("facebook", { redirectTo: "/dashboard" });
-            }}>
+            <form action={async () => { "use server"; await signIn("facebook", { redirectTo: "/dashboard" }); }}>
               <button type="submit"
-                className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.02] bg-background/80 px-5 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-blue-600/40 hover:bg-muted/40 hover:shadow-md active:scale-[0.98] dark:bg-white/5 dark:hover:bg-white/8">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1877F2] to-[#0d65d9] shadow-sm">
-                  <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24" aria-hidden>
+                className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#1a1928] hover:border-primary/20 active:scale-[0.98]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1877F2] shadow-sm">
+                  <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </div>
-                <span className="flex-1 text-left">Continue with Facebook</span>
-                <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                <span className="flex-1">Continue with Facebook</span>
+                <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-40 group-hover:translate-x-0" />
               </button>
             </form>
           </div>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 border-t border-white/[0.02]" />
-            <span className="text-xs text-muted-foreground">or</span>
-            <div className="flex-1 border-t border-white/[0.02]" />
+          <div className="flex flex-col gap-4 pt-6">
+            <Link href="/guest/past-papers" className="text-center text-[11px] font-bold text-white/20 hover:text-primary transition-colors uppercase tracking-[0.2em]">
+               Browse as Guest
+            </Link>
+            <div className="h-px bg-white/[0.03]" />
+            <p className="text-center text-[10px] leading-relaxed text-white/10 px-8">
+               By continuing, you agree to our <a href="/terms" className="text-white/20 hover:underline">Terms</a> & <a href="/privacy" className="text-white/20 hover:underline">Privacy</a>.
+            </p>
           </div>
-
-          {/* Guest access */}
-          <Link href="/guest/past-papers"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/[0.02] bg-background/40 px-5 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-muted/30 hover:text-foreground dark:bg-white/3 dark:hover:bg-white/6">
-            Browse as Guest (no account)
-          </Link>
-
-          {/* Legal */}
-          <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <a href="/terms" className="text-blue-500 hover:underline">Terms</a>
-            {" "}and{" "}
-            <a href="/privacy" className="text-blue-500 hover:underline">Privacy Policy</a>.
-          </p>
-
-          {/* Doctor hint */}
-          <p className="mt-3 rounded-xl border border-white/[0.05] bg-muted/30 px-3 py-2.5 text-center text-[11px] leading-relaxed text-muted-foreground dark:bg-white/3">
-            {PLATFORM_COPY.loginDoctorHint}{" "}
-            <Link href="/doctor" className="font-semibold text-blue-500 hover:underline">
-              {PLATFORM_COPY.landingForDoctorsCta}
-            </Link>.
-          </p>
         </div>
       </div>
     </div>

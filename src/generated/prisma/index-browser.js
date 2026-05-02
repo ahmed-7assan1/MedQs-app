@@ -146,7 +146,10 @@ exports.Prisma.SiteConfigScalarFieldEnum = {
   twitterUrl: 'twitterUrl',
   whatsappUrl: 'whatsappUrl',
   youtubeUrl: 'youtubeUrl',
-  enableCreativeStudio: 'enableCreativeStudio'
+  enableCreativeStudio: 'enableCreativeStudio',
+  stabilityAIKey: 'stabilityAIKey',
+  assemblyAIKey: 'assemblyAIKey',
+  uploadcarePublicKey: 'uploadcarePublicKey'
 };
 
 exports.Prisma.FeatureFlagScalarFieldEnum = {
@@ -230,7 +233,8 @@ exports.Prisma.LectureScalarFieldEnum = {
   subjectId: 'subjectId',
   notesMarkdown: 'notesMarkdown',
   extras: 'extras',
-  uiConfig: 'uiConfig'
+  uiConfig: 'uiConfig',
+  teamId: 'teamId'
 };
 
 exports.Prisma.FlashcardScalarFieldEnum = {
@@ -416,6 +420,15 @@ exports.Prisma.UserScalarFieldEnum = {
   handle: 'handle'
 };
 
+exports.Prisma.NoteScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  lectureId: 'lectureId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.UserLectureActivityScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -474,7 +487,8 @@ exports.Prisma.PostScalarFieldEnum = {
   expiresAt: 'expiresAt',
   isPinned: 'isPinned',
   isChatMessage: 'isChatMessage',
-  isForumPost: 'isForumPost'
+  isForumPost: 'isForumPost',
+  teamId: 'teamId'
 };
 
 exports.Prisma.CommentScalarFieldEnum = {
@@ -673,6 +687,44 @@ exports.Prisma.YoutubeUploadTaskScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.MedicalTeamScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  imageUrl: 'imageUrl',
+  facultyId: 'facultyId',
+  universityId: 'universityId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  followersCount: 'followersCount'
+};
+
+exports.Prisma.TeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.TeamFollowerScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PlatformMemberScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  role: 'role',
+  description: 'description',
+  imageUrl: 'imageUrl',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -761,6 +813,12 @@ exports.NotifChannel = exports.$Enums.NotifChannel = {
   BROADCAST: 'BROADCAST'
 };
 
+exports.TeamRole = exports.$Enums.TeamRole = {
+  LEADER: 'LEADER',
+  ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER'
+};
+
 exports.Prisma.ModelName = {
   SiteConfig: 'SiteConfig',
   FeatureFlag: 'FeatureFlag',
@@ -788,6 +846,7 @@ exports.Prisma.ModelName = {
   StudyAssistantProfile: 'StudyAssistantProfile',
   QuizAttemptItem: 'QuizAttemptItem',
   User: 'User',
+  Note: 'Note',
   UserLectureActivity: 'UserLectureActivity',
   DirectMessage: 'DirectMessage',
   Forum: 'Forum',
@@ -813,7 +872,11 @@ exports.Prisma.ModelName = {
   LibraryResource: 'LibraryResource',
   AllowedChannel: 'AllowedChannel',
   ChannelFollow: 'ChannelFollow',
-  YoutubeUploadTask: 'YoutubeUploadTask'
+  YoutubeUploadTask: 'YoutubeUploadTask',
+  MedicalTeam: 'MedicalTeam',
+  TeamMember: 'TeamMember',
+  TeamFollower: 'TeamFollower',
+  PlatformMember: 'PlatformMember'
 };
 
 /**

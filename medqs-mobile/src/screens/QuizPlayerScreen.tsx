@@ -8,11 +8,13 @@ import tw from 'twrnc';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
+import Animated, { FadeIn, FadeInDown, SlideInRight, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import {
   ChevronLeft, Timer, CheckCircle2,
   XCircle, ArrowRight, HelpCircle,
   Award, RefreshCcw, Flag, Volume2,
-  X, ChevronRight, AlertCircle, Info
+  X, ChevronRight, AlertCircle, Info,
+  Sparkles, Brain, Trophy, Share2
 } from 'lucide-react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
@@ -24,8 +26,8 @@ const { width, height } = Dimensions.get('window');
 // ─── Result Circle ──────────────────────────────────────────────────────────
 
 const ResultCircle = ({ percentage, color }: { percentage: number; color: string }) => {
-  const size = 180;
-  const strokeWidth = 15;
+  const size = 200;
+  const strokeWidth = 12;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -35,7 +37,7 @@ const ResultCircle = ({ percentage, color }: { percentage: number; color: string
       <Svg width={size} height={size}>
         <SvgCircle
           cx={size / 2} cy={size / 2} r={radius}
-          stroke="#1E2D4D" strokeWidth={strokeWidth} fill="transparent"
+          stroke="rgba(255,255,255,0.05)" strokeWidth={strokeWidth} fill="transparent"
         />
         <SvgCircle
           cx={size / 2} cy={size / 2} r={radius}
@@ -46,7 +48,7 @@ const ResultCircle = ({ percentage, color }: { percentage: number; color: string
       </Svg>
       <View style={tw`absolute items-center justify-center`}>
         <Text style={tw`text-5xl font-black text-white`}>{Math.round(percentage)}%</Text>
-        <Text style={tw`text-slate-500 font-bold uppercase text-[10px] tracking-widest`}>Score</Text>
+        <Text style={tw`text-slate-500 font-black uppercase text-[10px] tracking-widest mt-1`}>Exam Score</Text>
       </View>
     </View>
   );
@@ -55,7 +57,7 @@ const ResultCircle = ({ percentage, color }: { percentage: number; color: string
 // ─── Main QuizPlayerScreen ───────────────────────────────────────────────────
 
 export function QuizPlayerScreen({ route, navigation }: any) {
-  const { pastPaperId } = route.params;
+  const { pastPaperId } = route.params || {};
   const { user } = useAuthStore();
   const { primaryColor, primaryLight } = useThemeStore();
   const quiz = useQuizStore();
@@ -95,6 +97,7 @@ export function QuizPlayerScreen({ route, navigation }: any) {
   // Initial Load
   useEffect(() => {
     const loadQuiz = async () => {
+      if (!pastPaperId) return;
       try {
         quiz.reset();
         const data = await mobileApi.getPastPaperQuestions(pastPaperId);
@@ -124,7 +127,7 @@ export function QuizPlayerScreen({ route, navigation }: any) {
       const res = await mobileApi.submitQuiz({
         pastPaperId,
         answers: answersArray,
-        timeTaken: (quiz.questions.length * 60) - quiz.timeRemaining, // Simplified
+        timeTaken: (quiz.questions.length * 60) - quiz.timeRemaining,
         focusLossCount: quiz.focusLossCount
       });
 
@@ -139,6 +142,7 @@ export function QuizPlayerScreen({ route, navigation }: any) {
 
   const handleSpeak = (text: string) => {
     Speech.speak(text, { language: 'en', pitch: 1.0, rate: 0.9 });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const formatTime = (sec: number) => {
@@ -149,20 +153,20 @@ export function QuizPlayerScreen({ route, navigation }: any) {
 
   if (loading) {
     return (
-      <View style={tw`flex-1 bg-[#07090F] justify-center items-center`}>
+      <View style={tw`flex-1 bg-black justify-center items-center`}>
         <ActivityIndicator size="large" color={primaryColor} />
-        <Text style={tw`text-slate-400 mt-4 font-bold`}>Loading Questions...</Text>
+        <Text style={tw`text-slate-500 mt-4 font-black uppercase tracking-widest`}>Syncing with Database...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={tw`flex-1 bg-[#07090F] justify-center items-center px-10`}>
+      <View style={tw`flex-1 bg-black justify-center items-center px-10`}>
         <AlertCircle color="#ef4444" size={48} style={tw`mb-4`} />
-        <Text style={tw`text-white text-xl font-bold text-center`}>{error}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mt-8 p-4 bg-white/5 rounded-2xl`}>
-          <Text style={tw`text-white font-bold`}>Go Back</Text>
+        <Text style={tw`text-white text-xl font-black text-center`}>{error}</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mt-8 px-8 py-4 bg-white/5 rounded-[24px] border border-white/10`}>
+          <Text style={tw`text-white font-black`}>Return to Library</Text>
         </TouchableOpacity>
       </View>
     );
@@ -175,47 +179,62 @@ export function QuizPlayerScreen({ route, navigation }: any) {
     const percent = (score / total) * 100;
 
     return (
-      <SafeAreaView style={tw`flex-1 bg-[#07090F]`}>
+      <SafeAreaView style={tw`flex-1 bg-black`}>
+        <StatusBar barStyle="light-content" />
         <ScrollView contentContainerStyle={tw`px-6 py-10 items-center`}>
-          <Text style={tw`text-white text-2xl font-black mb-10`}>Quiz Results</Text>
+          <Animated.View entering={FadeInDown} style={tw`items-center`}>
+             <Trophy color="#fbbf24" size={48} style={tw`mb-4`} />
+             <Text style={tw`text-white text-3xl font-black mb-2`}>Exam Finished!</Text>
+             <Text style={tw`text-slate-500 font-bold mb-10`}>You've completed the challenge.</Text>
+          </Animated.View>
           
-          <ResultCircle percentage={percent} color={primaryColor} />
+          <Animated.View entering={FadeIn.delay(300)}>
+             <ResultCircle percentage={percent} color={primaryColor} />
+          </Animated.View>
 
-          <View style={tw`flex-row justify-between w-full mt-10 gap-4`}>
-            <View style={tw`flex-1 bg-[#0D1117] p-5 rounded-3xl border border-[#1E2D4D]`}>
-              <Text style={tw`text-green-400 text-2xl font-black`}>{score}</Text>
-              <Text style={tw`text-slate-500 text-[10px] font-bold uppercase`}>Correct</Text>
-            </View>
-            <View style={tw`flex-1 bg-[#0D1117] p-5 rounded-3xl border border-[#1E2D4D]`}>
-              <Text style={tw`text-red-400 text-2xl font-black`}>{total - score}</Text>
-              <Text style={tw`text-slate-500 text-[10px] font-bold uppercase`}>Incorrect</Text>
-            </View>
-          </View>
-
-          {/* Explanation Section */}
-          <View style={tw`w-full mt-8`}>
-            <Text style={tw`text-white text-lg font-black mb-4`}>Quick Breakdown</Text>
-            {quiz.questions.slice(0, 5).map((q, idx) => {
-              const userAnswer = quiz.answers[q.id];
-              const isCorrect = userAnswer === q.correctAnswer;
-              return (
-                <View key={q.id} style={tw`bg-[#0D1117] p-4 rounded-2xl mb-3 border border-[#1E2D4D]`}>
-                  <View style={tw`flex-row justify-between mb-2`}>
-                    <Text style={tw`text-slate-400 font-bold text-xs`}>Q{idx + 1}</Text>
-                    {isCorrect ? <CheckCircle2 color="#10b981" size={14} /> : <XCircle color="#ef4444" size={14} />}
-                  </View>
-                  <Text style={tw`text-white text-sm font-medium`} numberOfLines={1}>{q.questionText}</Text>
-                </View>
-              );
-            })}
+          <View style={tw`flex-row justify-between w-full mt-12 gap-4`}>
+            <Animated.View entering={FadeInUp.delay(500)} style={tw`flex-1 bg-[#0D1117] p-5 rounded-[32px] border border-[#1E2D4D]`}>
+              <View style={tw`flex-row items-center mb-1`}>
+                 <View style={tw`w-2 h-2 rounded-full bg-green-500 mr-2`} />
+                 <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>Correct</Text>
+              </View>
+              <Text style={tw`text-white text-3xl font-black`}>{score}</Text>
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(600)} style={tw`flex-1 bg-[#0D1117] p-5 rounded-[32px] border border-[#1E2D4D]`}>
+               <View style={tw`flex-row items-center mb-1`}>
+                 <View style={tw`w-2 h-2 rounded-full bg-red-500 mr-2`} />
+                 <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>Mistakes</Text>
+              </View>
+              <Text style={tw`text-white text-3xl font-black`}>{total - score}</Text>
+            </Animated.View>
           </View>
 
           <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={[tw`w-full py-4 rounded-2xl items-center mt-10`, { backgroundColor: primaryColor }]}
+            style={tw`w-full bg-[#0D1117] p-6 rounded-[32px] mt-8 border border-[#1E2D4D] flex-row items-center justify-between`}
           >
-            <Text style={tw`text-white font-black text-lg`}>Back to Quizzes</Text>
+             <View style={tw`flex-row items-center`}>
+                <View style={tw`w-12 h-12 bg-indigo-500/10 rounded-2xl items-center justify-center mr-4`}>
+                   <Brain color="#818cf8" size={24} />
+                </View>
+                <View>
+                   <Text style={tw`text-white font-black text-lg`}>AI Explanation</Text>
+                   <Text style={tw`text-slate-500 text-xs font-bold`}>Analyze your mistakes</Text>
+                </View>
+             </View>
+             <ChevronRight color="#4B5563" size={20} />
           </TouchableOpacity>
+
+          <View style={tw`flex-row gap-4 mt-8`}>
+             <TouchableOpacity
+               onPress={() => navigation.goBack()}
+               style={[tw`flex-1 py-5 rounded-[32px] items-center`, { backgroundColor: primaryColor }]}
+             >
+               <Text style={tw`text-white font-black text-lg`}>Continue</Text>
+             </TouchableOpacity>
+             <TouchableOpacity style={tw`w-20 bg-white/5 border border-white/10 rounded-[32px] items-center justify-center`}>
+                <Share2 color="white" size={24} />
+             </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     );
@@ -226,48 +245,58 @@ export function QuizPlayerScreen({ route, navigation }: any) {
   const timerColor = quiz.timeRemaining < 60 ? '#ef4444' : primaryLight;
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-[#07090F]`}>
+    <SafeAreaView style={tw`flex-1 bg-black`}>
       <StatusBar barStyle="light-content" />
       
       {/* Top Header */}
-      <View style={tw`flex-row justify-between items-center px-6 py-4 border-b border-[#1E2D4D]`}>
-        <TouchableOpacity onPress={() => Alert.alert('Exit Quiz', 'Are you sure?', [{text: 'Stay'}, {text: 'Exit', onPress: () => navigation.goBack()}])}>
-          <X color="white" size={24} />
+      <View style={tw`flex-row justify-between items-center px-6 py-4`}>
+        <TouchableOpacity 
+           onPress={() => Alert.alert('Exit Quiz', 'Your progress will be lost. Exit anyway?', [{text: 'Stay'}, {text: 'Exit', onPress: () => navigation.goBack()}])}
+           style={tw`p-2 bg-white/5 rounded-xl border border-white/10`}
+        >
+          <X color="white" size={20} />
         </TouchableOpacity>
         
-        <View style={[tw`flex-row items-center px-4 py-2 rounded-full border`, { borderColor: timerColor + '30', backgroundColor: timerColor + '10' }]}>
+        <View style={[tw`flex-row items-center px-5 py-2 rounded-2xl border`, { borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.02)' }]}>
           <Timer color={timerColor} size={18} style={tw`mr-2`} />
-          <Text style={[tw`font-black text-sm`, { color: timerColor }]}>{formatTime(quiz.timeRemaining)}</Text>
+          <Text style={[tw`font-black text-sm tracking-tighter`, { color: timerColor }]}>{formatTime(quiz.timeRemaining)}</Text>
         </View>
 
-        <TouchableOpacity onPress={() => quiz.toggleFlag(currentQ.id)}>
-          <Flag color={quiz.flagged.includes(currentQ.id) ? '#fbbf24' : '#3B4A6B'} fill={quiz.flagged.includes(currentQ.id) ? '#fbbf24' : 'transparent'} size={24} />
+        <TouchableOpacity 
+           onPress={() => { quiz.toggleFlag(currentQ.id); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }}
+           style={tw`p-2 bg-white/5 rounded-xl border border-white/10`}
+        >
+          <Flag color={quiz.flagged.includes(currentQ.id) ? '#fbbf24' : 'white'} fill={quiz.flagged.includes(currentQ.id) ? '#fbbf24' : 'transparent'} size={20} />
         </TouchableOpacity>
       </View>
 
-      {/* Progress Bar */}
-      <View style={tw`h-1 w-full bg-[#1E2D4D]`}>
-        <View style={[tw`h-full`, { backgroundColor: primaryColor, width: `${((quiz.currentIndex + 1) / quiz.questions.length) * 100}%` }]} />
+      {/* Progress Bar Container */}
+      <View style={tw`px-6 py-2`}>
+         <View style={tw`h-1.5 w-full bg-white/5 rounded-full overflow-hidden`}>
+           <View style={[tw`h-full rounded-full`, { backgroundColor: primaryColor, width: `${((quiz.currentIndex + 1) / quiz.questions.length) * 100}%` }]} />
+         </View>
       </View>
 
-      <ScrollView contentContainerStyle={tw`p-6 pb-40`}>
-        <View style={tw`flex-row justify-between items-center mb-6`}>
-          <Text style={tw`text-slate-500 font-black text-sm`}>QUESTION {quiz.currentIndex + 1} OF {quiz.questions.length}</Text>
-          <TouchableOpacity onPress={() => handleSpeak(currentQ.questionText)}>
-            <Volume2 color={primaryLight} size={20} />
-          </TouchableOpacity>
+      <ScrollView contentContainerStyle={tw`p-6 pb-40`} showsVerticalScrollIndicator={false}>
+        <View style={tw`flex-row justify-between items-center mb-8`}>
+           <View style={tw`bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20`}>
+             <Text style={tw`text-teal-400 font-black text-[10px] uppercase tracking-widest`}>Question {quiz.currentIndex + 1} of {quiz.questions.length}</Text>
+           </View>
+           <TouchableOpacity onPress={() => handleSpeak(currentQ.questionText)} style={tw`p-2 bg-white/5 rounded-xl`}>
+             <Volume2 color={primaryLight} size={20} />
+           </TouchableOpacity>
         </View>
 
-        <Text style={tw`text-white text-xl font-black leading-8 mb-10`}>
+        <Text style={tw`text-white text-2xl font-black leading-9 mb-10`}>
           {currentQ.questionText}
         </Text>
 
         {currentQ.image && (
-          <Image source={{ uri: currentQ.image }} style={tw`w-full h-48 rounded-3xl mb-8 bg-[#0D1117]`} resizeMode="contain" />
+          <Image source={{ uri: currentQ.image }} style={tw`w-full h-56 rounded-[32px] mb-10 bg-[#0D1117] border border-[#1E2D4D]`} resizeMode="contain" />
         )}
 
         {/* Options */}
-        <View style={tw`gap-3`}>
+        <View style={tw`space-y-4`}>
           {currentQ.options.map((opt, idx) => {
             const isSelected = quiz.answers[currentQ.id] === idx;
             return (
@@ -275,27 +304,28 @@ export function QuizPlayerScreen({ route, navigation }: any) {
                 key={idx}
                 onPress={() => {
                   quiz.setAnswer(currentQ.id, idx);
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }}
+                activeOpacity={0.8}
                 style={[
-                  tw`flex-row items-center p-5 rounded-3xl border-2`,
+                  tw`flex-row items-center p-6 rounded-[32px] border-2 mb-4`,
                   isSelected
                     ? { borderColor: primaryColor, backgroundColor: primaryColor + '10' }
                     : { borderColor: '#1E2D4D', backgroundColor: '#0D1117' }
                 ]}
               >
                 <View style={[
-                  tw`w-8 h-8 rounded-full items-center justify-center mr-4 border`,
+                  tw`w-10 h-10 rounded-2xl items-center justify-center mr-4 border`,
                   isSelected
                     ? { backgroundColor: primaryColor, borderColor: primaryColor }
                     : { backgroundColor: 'transparent', borderColor: '#3B4A6B' }
                 ]}>
-                  <Text style={[tw`font-bold`, { color: isSelected ? 'white' : '#3B4A6B' }]}>
+                  <Text style={[tw`font-black`, { color: isSelected ? 'white' : '#3B4A6B' }]}>
                     {String.fromCharCode(65 + idx)}
                   </Text>
                 </View>
-                <Text style={[tw`flex-1 font-bold text-base`, { color: isSelected ? 'white' : '#8899BB' }]}>{opt}</Text>
-                {isSelected && <CheckCircle2 color={primaryColor} size={20} />}
+                <Text style={[tw`flex-1 font-bold text-[15px]`, { color: isSelected ? 'white' : '#8899BB' }]}>{opt}</Text>
+                {isSelected && <CheckCircle2 color={primaryColor} size={22} />}
               </TouchableOpacity>
             );
           })}
@@ -303,35 +333,35 @@ export function QuizPlayerScreen({ route, navigation }: any) {
       </ScrollView>
 
       {/* Bottom Nav */}
-      <View style={tw`absolute bottom-0 left-0 right-0 p-6 bg-[#07090F] border-t border-[#1E2D4D] flex-row gap-4`}>
+      <View style={tw`absolute bottom-0 left-0 right-0 p-6 bg-black border-t border-white/5 flex-row gap-4`}>
         <TouchableOpacity
-          onPress={() => quiz.setCurrentIndex(Math.max(0, quiz.currentIndex - 1))}
+          onPress={() => { quiz.setCurrentIndex(Math.max(0, quiz.currentIndex - 1)); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
           disabled={quiz.currentIndex === 0}
-          style={[tw`p-4 rounded-2xl bg-[#0D1117] border border-[#1E2D4D]`, quiz.currentIndex === 0 && { opacity: 0.3 }]}
+          style={[tw`w-16 h-16 rounded-[24px] bg-[#0D1117] border border-[#1E2D4D] items-center justify-center`, quiz.currentIndex === 0 && { opacity: 0.3 }]}
         >
-          <ChevronLeft color="white" size={24} />
+          <ChevronLeft color="white" size={28} />
         </TouchableOpacity>
 
         {quiz.currentIndex === quiz.questions.length - 1 ? (
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={submitting}
-            style={[tw`flex-1 py-4 rounded-2xl items-center flex-row justify-center shadow-2xl`, { backgroundColor: primaryColor }]}
+            style={[tw`flex-1 h-16 rounded-[24px] items-center flex-row justify-center shadow-2xl`, { backgroundColor: primaryColor }]}
           >
             {submitting ? <ActivityIndicator color="white" /> : (
               <>
-                <Text style={tw`text-white font-black text-lg mr-2`}>Submit Quiz</Text>
-                <Award color="white" size={20} />
+                <Text style={tw`text-white font-black text-lg mr-2`}>Finish Exam</Text>
+                <Sparkles color="white" size={20} fill="white" />
               </>
             )}
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            onPress={() => quiz.setCurrentIndex(quiz.currentIndex + 1)}
-            style={[tw`flex-1 py-4 rounded-2xl items-center flex-row justify-center`, { backgroundColor: '#1E2D4D' }]}
+            onPress={() => { quiz.setCurrentIndex(quiz.currentIndex + 1); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }}
+            style={[tw`flex-1 h-16 rounded-[24px] bg-[#1E2D4D] items-center flex-row justify-center border border-white/10`]}
           >
             <Text style={tw`text-white font-black text-lg mr-2`}>Next Question</Text>
-            <ChevronRight color="white" size={20} />
+            <ChevronRight color="white" size={20} strokeWidth={3} />
           </TouchableOpacity>
         )}
       </View>

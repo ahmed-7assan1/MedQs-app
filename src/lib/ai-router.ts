@@ -4,7 +4,7 @@ type ProviderResult = {
   provider: string;
   text: string;
 };
-export type AIProviderId = "gemini" | "openai" | "anthropic" | "deepseek";
+export type AIProviderId = "manus" | "gemini" | "openai" | "anthropic" | "deepseek";
 
 export type AIFallbackMeta = {
   provider: string;
@@ -95,6 +95,7 @@ function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
 }
 
 function hasProviderKey(provider: AIProviderId): boolean {
+  if (provider === "manus") return !!process.env.MANUS_API_KEY?.trim();
   if (provider === "gemini") return !!process.env.GEMINI_API_KEY?.trim();
   if (provider === "openai") return !!process.env.OPENAI_API_KEY?.trim();
   if (provider === "anthropic") return !!process.env.ANTHROPIC_API_KEY?.trim();
@@ -109,10 +110,12 @@ function providerDisplayName(provider: AIProviderId): string {
 }
 
 function buildProviderOrder(preferred?: AIProviderId): AIProviderId[] {
-  const base: AIProviderId[] = ["gemini", "openai", "anthropic", "deepseek"];
+  const base: AIProviderId[] = ["manus", "gemini", "openai", "anthropic", "deepseek"];
   const withKeys = base.filter((p) => hasProviderKey(p));
-  if (!preferred) return withKeys;
-  if (!withKeys.includes(preferred)) return withKeys;
+  
+  if (!preferred || !withKeys.includes(preferred)) {
+    return withKeys;
+  }
   return [preferred, ...withKeys.filter((p) => p !== preferred)];
 }
 
@@ -328,18 +331,16 @@ export async function generateAIReplyWithFallback(
   const runners: Array<{ id: string; run: () => Promise<ProviderResult> }> = order.map((id) => ({
     id,
     run:
-      id === "gemini"
-        ? () => callGemini(message, systemPrompt, [], [], personalGeminiKey)
-        : id === "openai"
-          ? () => callOpenAI(message, systemPrompt)
-          : id === "anthropic"
-            ? () => callAnthropic(message, systemPrompt)
-            : () => callDeepSeek(message, systemPrompt),
+      id === "manus"
+        ? () => callManus(message, systemPrompt)
+        : id === "gemini"
+          ? () => callGemini(message, systemPrompt, [], [], personalGeminiKey)
+          : id === "openai"
+            ? () => callOpenAI(message, systemPrompt)
+            : id === "anthropic"
+              ? () => callAnthropic(message, systemPrompt)
+              : () => callDeepSeek(message, systemPrompt),
   }));
-  // Always add MANUS as the last resort fallback if key exists
-  if (process.env.MANUS_API_KEY?.trim()) {
-    runners.push({ id: "manus", run: () => callManus(message, systemPrompt) });
-  }
 
   if (runners.length === 0) {
     throw new AIConfigurationError(

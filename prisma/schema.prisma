@@ -34,6 +34,9 @@ model SiteConfig {
   whatsappUrl          String?
   youtubeUrl           String?
   enableCreativeStudio Boolean  @default(false)
+  stabilityAIKey       String?
+  assemblyAIKey        String?
+  uploadcarePublicKey  String?
 }
 
 model FeatureFlag {
@@ -66,6 +69,7 @@ model University {
   posts          Post[]
   yearIdFormats  UniversityYearIdFormat[]
   users          User[]
+  medicalTeams   MedicalTeam[]
 }
 
 /// Faculty (كليه) — optional sub-division of a University.
@@ -83,6 +87,7 @@ model Faculty {
   guestQuizUsers GuestQuizUser[]
   sourceBooks    SourceBook[]
   users          User[]
+  medicalTeams   MedicalTeam[]
 
   @@index([universityId])
   @@index([category])
@@ -179,6 +184,9 @@ model Lecture {
   PastPaper     PastPaper?
   questions     Question[]
   activities    UserLectureActivity[]
+  notes         Note[]
+  teamId        String?
+  team          MedicalTeam? @relation(fields: [teamId], references: [id])
 }
 
 model Flashcard {
@@ -453,6 +461,22 @@ model User {
   followers             UserFollow[]           @relation("UserFollowers")
   lectureActivities     UserLectureActivity[]
   tasks                 UserTask[]
+  notes                 Note[]
+  teamMemberships       TeamMember[]
+  followedTeams         TeamFollower[]
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  lectureId String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lecture   Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lectureId])
 }
 
 model UserLectureActivity {
@@ -546,6 +570,8 @@ model Post {
   author               User         @relation(fields: [authorId], references: [id])
   forum                Forum        @relation(fields: [forumId], references: [id])
   university           University   @relation(fields: [universityId], references: [id])
+  teamId               String?
+  team                 MedicalTeam? @relation(fields: [teamId], references: [id])
 
   @@index([universityId, createdAt])
   @@index([forumId, createdAt])
@@ -862,3 +888,67 @@ model YoutubeUploadTask {
   updatedAt        DateTime @updatedAt
 }
 
+
+
+enum TeamRole {
+  LEADER
+  ADMIN
+  MEMBER
+}
+
+model MedicalTeam {
+  id             String          @id @default(uuid())
+  name           String
+  description    String?         @db.Text
+  imageUrl       String?
+  facultyId      String
+  universityId   String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  followersCount Int             @default(0)
+  faculty        Faculty         @relation(fields: [facultyId], references: [id])
+  university     University      @relation(fields: [universityId], references: [id])
+  members        TeamMember[]
+  followers      TeamFollower[]
+  lectures       Lecture[]
+  posts          Post[]
+
+  @@index([facultyId])
+  @@index([universityId])
+}
+
+model TeamMember {
+  id        String      @id @default(uuid())
+  teamId    String
+  userId    String
+  role      TeamRole    @default(MEMBER)
+  createdAt DateTime    @default(now())
+  team      MedicalTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model TeamFollower {
+  id        String      @id @default(uuid())
+  teamId    String
+  userId    String
+  createdAt DateTime    @default(now())
+  team      MedicalTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model PlatformMember {
+  id          String   @id @default(uuid())
+  name        String
+  role        String
+  description String?  @db.Text
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -146,6 +146,11 @@ export type QuizAttemptItem = $Result.DefaultSelection<Prisma.$QuizAttemptItemPa
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model Note
+ * 
+ */
+export type Note = $Result.DefaultSelection<Prisma.$NotePayload>
+/**
  * Model UserLectureActivity
  * 
  */
@@ -275,6 +280,26 @@ export type ChannelFollow = $Result.DefaultSelection<Prisma.$ChannelFollowPayloa
  * 
  */
 export type YoutubeUploadTask = $Result.DefaultSelection<Prisma.$YoutubeUploadTaskPayload>
+/**
+ * Model MedicalTeam
+ * 
+ */
+export type MedicalTeam = $Result.DefaultSelection<Prisma.$MedicalTeamPayload>
+/**
+ * Model TeamMember
+ * 
+ */
+export type TeamMember = $Result.DefaultSelection<Prisma.$TeamMemberPayload>
+/**
+ * Model TeamFollower
+ * 
+ */
+export type TeamFollower = $Result.DefaultSelection<Prisma.$TeamFollowerPayload>
+/**
+ * Model PlatformMember
+ * 
+ */
+export type PlatformMember = $Result.DefaultSelection<Prisma.$PlatformMemberPayload>
 
 /**
  * Enums
@@ -368,6 +393,15 @@ export const NotifChannel: {
 
 export type NotifChannel = (typeof NotifChannel)[keyof typeof NotifChannel]
 
+
+export const TeamRole: {
+  LEADER: 'LEADER',
+  ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER'
+};
+
+export type TeamRole = (typeof TeamRole)[keyof typeof TeamRole]
+
 }
 
 export type FacultyCategory = $Enums.FacultyCategory
@@ -409,6 +443,10 @@ export const PostAudience: typeof $Enums.PostAudience
 export type NotifChannel = $Enums.NotifChannel
 
 export const NotifChannel: typeof $Enums.NotifChannel
+
+export type TeamRole = $Enums.TeamRole
+
+export const TeamRole: typeof $Enums.TeamRole
 
 /**
  * ##  Prisma Client ʲˢ
@@ -794,6 +832,16 @@ export class PrismaClient<
   get user(): Prisma.UserDelegate<ExtArgs>;
 
   /**
+   * `prisma.note`: Exposes CRUD operations for the **Note** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Notes
+    * const notes = await prisma.note.findMany()
+    * ```
+    */
+  get note(): Prisma.NoteDelegate<ExtArgs>;
+
+  /**
    * `prisma.userLectureActivity`: Exposes CRUD operations for the **UserLectureActivity** model.
     * Example usage:
     * ```ts
@@ -1052,6 +1100,46 @@ export class PrismaClient<
     * ```
     */
   get youtubeUploadTask(): Prisma.YoutubeUploadTaskDelegate<ExtArgs>;
+
+  /**
+   * `prisma.medicalTeam`: Exposes CRUD operations for the **MedicalTeam** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MedicalTeams
+    * const medicalTeams = await prisma.medicalTeam.findMany()
+    * ```
+    */
+  get medicalTeam(): Prisma.MedicalTeamDelegate<ExtArgs>;
+
+  /**
+   * `prisma.teamMember`: Exposes CRUD operations for the **TeamMember** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TeamMembers
+    * const teamMembers = await prisma.teamMember.findMany()
+    * ```
+    */
+  get teamMember(): Prisma.TeamMemberDelegate<ExtArgs>;
+
+  /**
+   * `prisma.teamFollower`: Exposes CRUD operations for the **TeamFollower** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TeamFollowers
+    * const teamFollowers = await prisma.teamFollower.findMany()
+    * ```
+    */
+  get teamFollower(): Prisma.TeamFollowerDelegate<ExtArgs>;
+
+  /**
+   * `prisma.platformMember`: Exposes CRUD operations for the **PlatformMember** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PlatformMembers
+    * const platformMembers = await prisma.platformMember.findMany()
+    * ```
+    */
+  get platformMember(): Prisma.PlatformMemberDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1519,6 +1607,7 @@ export namespace Prisma {
     StudyAssistantProfile: 'StudyAssistantProfile',
     QuizAttemptItem: 'QuizAttemptItem',
     User: 'User',
+    Note: 'Note',
     UserLectureActivity: 'UserLectureActivity',
     DirectMessage: 'DirectMessage',
     Forum: 'Forum',
@@ -1544,7 +1633,11 @@ export namespace Prisma {
     LibraryResource: 'LibraryResource',
     AllowedChannel: 'AllowedChannel',
     ChannelFollow: 'ChannelFollow',
-    YoutubeUploadTask: 'YoutubeUploadTask'
+    YoutubeUploadTask: 'YoutubeUploadTask',
+    MedicalTeam: 'MedicalTeam',
+    TeamMember: 'TeamMember',
+    TeamFollower: 'TeamFollower',
+    PlatformMember: 'PlatformMember'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1560,7 +1653,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow" | "youtubeUploadTask"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "note" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow" | "youtubeUploadTask" | "medicalTeam" | "teamMember" | "teamFollower" | "platformMember"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3384,6 +3477,76 @@ export namespace Prisma {
           }
         }
       }
+      Note: {
+        payload: Prisma.$NotePayload<ExtArgs>
+        fields: Prisma.NoteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NoteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NoteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          findFirst: {
+            args: Prisma.NoteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NoteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          findMany: {
+            args: Prisma.NoteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>[]
+          }
+          create: {
+            args: Prisma.NoteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          createMany: {
+            args: Prisma.NoteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NoteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>[]
+          }
+          delete: {
+            args: Prisma.NoteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          update: {
+            args: Prisma.NoteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          deleteMany: {
+            args: Prisma.NoteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NoteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.NoteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          aggregate: {
+            args: Prisma.NoteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNote>
+          }
+          groupBy: {
+            args: Prisma.NoteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NoteGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NoteCountArgs<ExtArgs>
+            result: $Utils.Optional<NoteCountAggregateOutputType> | number
+          }
+        }
+      }
       UserLectureActivity: {
         payload: Prisma.$UserLectureActivityPayload<ExtArgs>
         fields: Prisma.UserLectureActivityFieldRefs
@@ -5204,6 +5367,286 @@ export namespace Prisma {
           }
         }
       }
+      MedicalTeam: {
+        payload: Prisma.$MedicalTeamPayload<ExtArgs>
+        fields: Prisma.MedicalTeamFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MedicalTeamFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MedicalTeamFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>
+          }
+          findFirst: {
+            args: Prisma.MedicalTeamFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MedicalTeamFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>
+          }
+          findMany: {
+            args: Prisma.MedicalTeamFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>[]
+          }
+          create: {
+            args: Prisma.MedicalTeamCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>
+          }
+          createMany: {
+            args: Prisma.MedicalTeamCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MedicalTeamCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>[]
+          }
+          delete: {
+            args: Prisma.MedicalTeamDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>
+          }
+          update: {
+            args: Prisma.MedicalTeamUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>
+          }
+          deleteMany: {
+            args: Prisma.MedicalTeamDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MedicalTeamUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.MedicalTeamUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MedicalTeamPayload>
+          }
+          aggregate: {
+            args: Prisma.MedicalTeamAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMedicalTeam>
+          }
+          groupBy: {
+            args: Prisma.MedicalTeamGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MedicalTeamGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MedicalTeamCountArgs<ExtArgs>
+            result: $Utils.Optional<MedicalTeamCountAggregateOutputType> | number
+          }
+        }
+      }
+      TeamMember: {
+        payload: Prisma.$TeamMemberPayload<ExtArgs>
+        fields: Prisma.TeamMemberFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TeamMemberFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TeamMemberFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+          }
+          findFirst: {
+            args: Prisma.TeamMemberFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TeamMemberFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+          }
+          findMany: {
+            args: Prisma.TeamMemberFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>[]
+          }
+          create: {
+            args: Prisma.TeamMemberCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+          }
+          createMany: {
+            args: Prisma.TeamMemberCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TeamMemberCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>[]
+          }
+          delete: {
+            args: Prisma.TeamMemberDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+          }
+          update: {
+            args: Prisma.TeamMemberUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+          }
+          deleteMany: {
+            args: Prisma.TeamMemberDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TeamMemberUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.TeamMemberUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+          }
+          aggregate: {
+            args: Prisma.TeamMemberAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTeamMember>
+          }
+          groupBy: {
+            args: Prisma.TeamMemberGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TeamMemberGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TeamMemberCountArgs<ExtArgs>
+            result: $Utils.Optional<TeamMemberCountAggregateOutputType> | number
+          }
+        }
+      }
+      TeamFollower: {
+        payload: Prisma.$TeamFollowerPayload<ExtArgs>
+        fields: Prisma.TeamFollowerFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TeamFollowerFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TeamFollowerFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>
+          }
+          findFirst: {
+            args: Prisma.TeamFollowerFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TeamFollowerFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>
+          }
+          findMany: {
+            args: Prisma.TeamFollowerFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>[]
+          }
+          create: {
+            args: Prisma.TeamFollowerCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>
+          }
+          createMany: {
+            args: Prisma.TeamFollowerCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TeamFollowerCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>[]
+          }
+          delete: {
+            args: Prisma.TeamFollowerDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>
+          }
+          update: {
+            args: Prisma.TeamFollowerUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>
+          }
+          deleteMany: {
+            args: Prisma.TeamFollowerDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TeamFollowerUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.TeamFollowerUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeamFollowerPayload>
+          }
+          aggregate: {
+            args: Prisma.TeamFollowerAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTeamFollower>
+          }
+          groupBy: {
+            args: Prisma.TeamFollowerGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TeamFollowerGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TeamFollowerCountArgs<ExtArgs>
+            result: $Utils.Optional<TeamFollowerCountAggregateOutputType> | number
+          }
+        }
+      }
+      PlatformMember: {
+        payload: Prisma.$PlatformMemberPayload<ExtArgs>
+        fields: Prisma.PlatformMemberFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PlatformMemberFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PlatformMemberFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>
+          }
+          findFirst: {
+            args: Prisma.PlatformMemberFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PlatformMemberFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>
+          }
+          findMany: {
+            args: Prisma.PlatformMemberFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>[]
+          }
+          create: {
+            args: Prisma.PlatformMemberCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>
+          }
+          createMany: {
+            args: Prisma.PlatformMemberCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PlatformMemberCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>[]
+          }
+          delete: {
+            args: Prisma.PlatformMemberDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>
+          }
+          update: {
+            args: Prisma.PlatformMemberUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>
+          }
+          deleteMany: {
+            args: Prisma.PlatformMemberDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PlatformMemberUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PlatformMemberUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformMemberPayload>
+          }
+          aggregate: {
+            args: Prisma.PlatformMemberAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePlatformMember>
+          }
+          groupBy: {
+            args: Prisma.PlatformMemberGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PlatformMemberGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PlatformMemberCountArgs<ExtArgs>
+            result: $Utils.Optional<PlatformMemberCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -5375,6 +5818,7 @@ export namespace Prisma {
     posts: number
     yearIdFormats: number
     users: number
+    medicalTeams: number
   }
 
   export type UniversityCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5388,6 +5832,7 @@ export namespace Prisma {
     posts?: boolean | UniversityCountOutputTypeCountPostsArgs
     yearIdFormats?: boolean | UniversityCountOutputTypeCountYearIdFormatsArgs
     users?: boolean | UniversityCountOutputTypeCountUsersArgs
+    medicalTeams?: boolean | UniversityCountOutputTypeCountMedicalTeamsArgs
   }
 
   // Custom InputTypes
@@ -5471,6 +5916,13 @@ export namespace Prisma {
     where?: UserWhereInput
   }
 
+  /**
+   * UniversityCountOutputType without action
+   */
+  export type UniversityCountOutputTypeCountMedicalTeamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MedicalTeamWhereInput
+  }
+
 
   /**
    * Count Type FacultyCountOutputType
@@ -5481,6 +5933,7 @@ export namespace Prisma {
     guestQuizUsers: number
     sourceBooks: number
     users: number
+    medicalTeams: number
   }
 
   export type FacultyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5488,6 +5941,7 @@ export namespace Prisma {
     guestQuizUsers?: boolean | FacultyCountOutputTypeCountGuestQuizUsersArgs
     sourceBooks?: boolean | FacultyCountOutputTypeCountSourceBooksArgs
     users?: boolean | FacultyCountOutputTypeCountUsersArgs
+    medicalTeams?: boolean | FacultyCountOutputTypeCountMedicalTeamsArgs
   }
 
   // Custom InputTypes
@@ -5527,6 +5981,13 @@ export namespace Prisma {
    */
   export type FacultyCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
+  }
+
+  /**
+   * FacultyCountOutputType without action
+   */
+  export type FacultyCountOutputTypeCountMedicalTeamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MedicalTeamWhereInput
   }
 
 
@@ -5737,6 +6198,7 @@ export namespace Prisma {
     videos: number
     questions: number
     activities: number
+    notes: number
   }
 
   export type LectureCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5746,6 +6208,7 @@ export namespace Prisma {
     videos?: boolean | LectureCountOutputTypeCountVideosArgs
     questions?: boolean | LectureCountOutputTypeCountQuestionsArgs
     activities?: boolean | LectureCountOutputTypeCountActivitiesArgs
+    notes?: boolean | LectureCountOutputTypeCountNotesArgs
   }
 
   // Custom InputTypes
@@ -5799,6 +6262,13 @@ export namespace Prisma {
    */
   export type LectureCountOutputTypeCountActivitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserLectureActivityWhereInput
+  }
+
+  /**
+   * LectureCountOutputType without action
+   */
+  export type LectureCountOutputTypeCountNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NoteWhereInput
   }
 
 
@@ -6054,6 +6524,9 @@ export namespace Prisma {
     followers: number
     lectureActivities: number
     tasks: number
+    notes: number
+    teamMemberships: number
+    followedTeams: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6082,6 +6555,9 @@ export namespace Prisma {
     followers?: boolean | UserCountOutputTypeCountFollowersArgs
     lectureActivities?: boolean | UserCountOutputTypeCountLectureActivitiesArgs
     tasks?: boolean | UserCountOutputTypeCountTasksArgs
+    notes?: boolean | UserCountOutputTypeCountNotesArgs
+    teamMemberships?: boolean | UserCountOutputTypeCountTeamMembershipsArgs
+    followedTeams?: boolean | UserCountOutputTypeCountFollowedTeamsArgs
   }
 
   // Custom InputTypes
@@ -6268,6 +6744,27 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserTaskWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NoteWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountTeamMembershipsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeamMemberWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountFollowedTeamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeamFollowerWhereInput
   }
 
 
@@ -6494,6 +6991,64 @@ export namespace Prisma {
 
 
   /**
+   * Count Type MedicalTeamCountOutputType
+   */
+
+  export type MedicalTeamCountOutputType = {
+    members: number
+    followers: number
+    lectures: number
+    posts: number
+  }
+
+  export type MedicalTeamCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    members?: boolean | MedicalTeamCountOutputTypeCountMembersArgs
+    followers?: boolean | MedicalTeamCountOutputTypeCountFollowersArgs
+    lectures?: boolean | MedicalTeamCountOutputTypeCountLecturesArgs
+    posts?: boolean | MedicalTeamCountOutputTypeCountPostsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * MedicalTeamCountOutputType without action
+   */
+  export type MedicalTeamCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeamCountOutputType
+     */
+    select?: MedicalTeamCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * MedicalTeamCountOutputType without action
+   */
+  export type MedicalTeamCountOutputTypeCountMembersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeamMemberWhereInput
+  }
+
+  /**
+   * MedicalTeamCountOutputType without action
+   */
+  export type MedicalTeamCountOutputTypeCountFollowersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeamFollowerWhereInput
+  }
+
+  /**
+   * MedicalTeamCountOutputType without action
+   */
+  export type MedicalTeamCountOutputTypeCountLecturesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LectureWhereInput
+  }
+
+  /**
+   * MedicalTeamCountOutputType without action
+   */
+  export type MedicalTeamCountOutputTypeCountPostsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PostWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -6532,6 +7087,9 @@ export namespace Prisma {
     whatsappUrl: string | null
     youtubeUrl: string | null
     enableCreativeStudio: boolean | null
+    stabilityAIKey: string | null
+    assemblyAIKey: string | null
+    uploadcarePublicKey: string | null
   }
 
   export type SiteConfigMaxAggregateOutputType = {
@@ -6559,6 +7117,9 @@ export namespace Prisma {
     whatsappUrl: string | null
     youtubeUrl: string | null
     enableCreativeStudio: boolean | null
+    stabilityAIKey: string | null
+    assemblyAIKey: string | null
+    uploadcarePublicKey: string | null
   }
 
   export type SiteConfigCountAggregateOutputType = {
@@ -6586,6 +7147,9 @@ export namespace Prisma {
     whatsappUrl: number
     youtubeUrl: number
     enableCreativeStudio: number
+    stabilityAIKey: number
+    assemblyAIKey: number
+    uploadcarePublicKey: number
     _all: number
   }
 
@@ -6615,6 +7179,9 @@ export namespace Prisma {
     whatsappUrl?: true
     youtubeUrl?: true
     enableCreativeStudio?: true
+    stabilityAIKey?: true
+    assemblyAIKey?: true
+    uploadcarePublicKey?: true
   }
 
   export type SiteConfigMaxAggregateInputType = {
@@ -6642,6 +7209,9 @@ export namespace Prisma {
     whatsappUrl?: true
     youtubeUrl?: true
     enableCreativeStudio?: true
+    stabilityAIKey?: true
+    assemblyAIKey?: true
+    uploadcarePublicKey?: true
   }
 
   export type SiteConfigCountAggregateInputType = {
@@ -6669,6 +7239,9 @@ export namespace Prisma {
     whatsappUrl?: true
     youtubeUrl?: true
     enableCreativeStudio?: true
+    stabilityAIKey?: true
+    assemblyAIKey?: true
+    uploadcarePublicKey?: true
     _all?: true
   }
 
@@ -6769,6 +7342,9 @@ export namespace Prisma {
     whatsappUrl: string | null
     youtubeUrl: string | null
     enableCreativeStudio: boolean
+    stabilityAIKey: string | null
+    assemblyAIKey: string | null
+    uploadcarePublicKey: string | null
     _count: SiteConfigCountAggregateOutputType | null
     _min: SiteConfigMinAggregateOutputType | null
     _max: SiteConfigMaxAggregateOutputType | null
@@ -6813,6 +7389,9 @@ export namespace Prisma {
     whatsappUrl?: boolean
     youtubeUrl?: boolean
     enableCreativeStudio?: boolean
+    stabilityAIKey?: boolean
+    assemblyAIKey?: boolean
+    uploadcarePublicKey?: boolean
   }, ExtArgs["result"]["siteConfig"]>
 
   export type SiteConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6840,6 +7419,9 @@ export namespace Prisma {
     whatsappUrl?: boolean
     youtubeUrl?: boolean
     enableCreativeStudio?: boolean
+    stabilityAIKey?: boolean
+    assemblyAIKey?: boolean
+    uploadcarePublicKey?: boolean
   }, ExtArgs["result"]["siteConfig"]>
 
   export type SiteConfigSelectScalar = {
@@ -6867,6 +7449,9 @@ export namespace Prisma {
     whatsappUrl?: boolean
     youtubeUrl?: boolean
     enableCreativeStudio?: boolean
+    stabilityAIKey?: boolean
+    assemblyAIKey?: boolean
+    uploadcarePublicKey?: boolean
   }
 
 
@@ -6901,6 +7486,9 @@ export namespace Prisma {
       whatsappUrl: string | null
       youtubeUrl: string | null
       enableCreativeStudio: boolean
+      stabilityAIKey: string | null
+      assemblyAIKey: string | null
+      uploadcarePublicKey: string | null
     }, ExtArgs["result"]["siteConfig"]>
     composites: {}
   }
@@ -7318,6 +7906,9 @@ export namespace Prisma {
     readonly whatsappUrl: FieldRef<"SiteConfig", 'String'>
     readonly youtubeUrl: FieldRef<"SiteConfig", 'String'>
     readonly enableCreativeStudio: FieldRef<"SiteConfig", 'Boolean'>
+    readonly stabilityAIKey: FieldRef<"SiteConfig", 'String'>
+    readonly assemblyAIKey: FieldRef<"SiteConfig", 'String'>
+    readonly uploadcarePublicKey: FieldRef<"SiteConfig", 'String'>
   }
     
 
@@ -8782,6 +9373,7 @@ export namespace Prisma {
     posts?: boolean | University$postsArgs<ExtArgs>
     yearIdFormats?: boolean | University$yearIdFormatsArgs<ExtArgs>
     users?: boolean | University$usersArgs<ExtArgs>
+    medicalTeams?: boolean | University$medicalTeamsArgs<ExtArgs>
     _count?: boolean | UniversityCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["university"]>
 
@@ -8814,6 +9406,7 @@ export namespace Prisma {
     posts?: boolean | University$postsArgs<ExtArgs>
     yearIdFormats?: boolean | University$yearIdFormatsArgs<ExtArgs>
     users?: boolean | University$usersArgs<ExtArgs>
+    medicalTeams?: boolean | University$medicalTeamsArgs<ExtArgs>
     _count?: boolean | UniversityCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UniversityIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -8831,6 +9424,7 @@ export namespace Prisma {
       posts: Prisma.$PostPayload<ExtArgs>[]
       yearIdFormats: Prisma.$UniversityYearIdFormatPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
+      medicalTeams: Prisma.$MedicalTeamPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9213,6 +9807,7 @@ export namespace Prisma {
     posts<T extends University$postsArgs<ExtArgs> = {}>(args?: Subset<T, University$postsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany"> | Null>
     yearIdFormats<T extends University$yearIdFormatsArgs<ExtArgs> = {}>(args?: Subset<T, University$yearIdFormatsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UniversityYearIdFormatPayload<ExtArgs>, T, "findMany"> | Null>
     users<T extends University$usersArgs<ExtArgs> = {}>(args?: Subset<T, University$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
+    medicalTeams<T extends University$medicalTeamsArgs<ExtArgs> = {}>(args?: Subset<T, University$medicalTeamsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9762,6 +10357,26 @@ export namespace Prisma {
   }
 
   /**
+   * University.medicalTeams
+   */
+  export type University$medicalTeamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    where?: MedicalTeamWhereInput
+    orderBy?: MedicalTeamOrderByWithRelationInput | MedicalTeamOrderByWithRelationInput[]
+    cursor?: MedicalTeamWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MedicalTeamScalarFieldEnum | MedicalTeamScalarFieldEnum[]
+  }
+
+  /**
    * University without action
    */
   export type UniversityDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9953,6 +10568,7 @@ export namespace Prisma {
     guestQuizUsers?: boolean | Faculty$guestQuizUsersArgs<ExtArgs>
     sourceBooks?: boolean | Faculty$sourceBooksArgs<ExtArgs>
     users?: boolean | Faculty$usersArgs<ExtArgs>
+    medicalTeams?: boolean | Faculty$medicalTeamsArgs<ExtArgs>
     _count?: boolean | FacultyCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["faculty"]>
 
@@ -9981,6 +10597,7 @@ export namespace Prisma {
     guestQuizUsers?: boolean | Faculty$guestQuizUsersArgs<ExtArgs>
     sourceBooks?: boolean | Faculty$sourceBooksArgs<ExtArgs>
     users?: boolean | Faculty$usersArgs<ExtArgs>
+    medicalTeams?: boolean | Faculty$medicalTeamsArgs<ExtArgs>
     _count?: boolean | FacultyCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type FacultyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9995,6 +10612,7 @@ export namespace Prisma {
       guestQuizUsers: Prisma.$GuestQuizUserPayload<ExtArgs>[]
       sourceBooks: Prisma.$SourceBookPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
+      medicalTeams: Prisma.$MedicalTeamPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10372,6 +10990,7 @@ export namespace Prisma {
     guestQuizUsers<T extends Faculty$guestQuizUsersArgs<ExtArgs> = {}>(args?: Subset<T, Faculty$guestQuizUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GuestQuizUserPayload<ExtArgs>, T, "findMany"> | Null>
     sourceBooks<T extends Faculty$sourceBooksArgs<ExtArgs> = {}>(args?: Subset<T, Faculty$sourceBooksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SourceBookPayload<ExtArgs>, T, "findMany"> | Null>
     users<T extends Faculty$usersArgs<ExtArgs> = {}>(args?: Subset<T, Faculty$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
+    medicalTeams<T extends Faculty$medicalTeamsArgs<ExtArgs> = {}>(args?: Subset<T, Faculty$medicalTeamsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10802,6 +11421,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * Faculty.medicalTeams
+   */
+  export type Faculty$medicalTeamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    where?: MedicalTeamWhereInput
+    orderBy?: MedicalTeamOrderByWithRelationInput | MedicalTeamOrderByWithRelationInput[]
+    cursor?: MedicalTeamWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MedicalTeamScalarFieldEnum | MedicalTeamScalarFieldEnum[]
   }
 
   /**
@@ -16849,6 +17488,7 @@ export namespace Prisma {
     order: number | null
     subjectId: string | null
     notesMarkdown: string | null
+    teamId: string | null
   }
 
   export type LectureMaxAggregateOutputType = {
@@ -16858,6 +17498,7 @@ export namespace Prisma {
     order: number | null
     subjectId: string | null
     notesMarkdown: string | null
+    teamId: string | null
   }
 
   export type LectureCountAggregateOutputType = {
@@ -16869,6 +17510,7 @@ export namespace Prisma {
     notesMarkdown: number
     extras: number
     uiConfig: number
+    teamId: number
     _all: number
   }
 
@@ -16888,6 +17530,7 @@ export namespace Prisma {
     order?: true
     subjectId?: true
     notesMarkdown?: true
+    teamId?: true
   }
 
   export type LectureMaxAggregateInputType = {
@@ -16897,6 +17540,7 @@ export namespace Prisma {
     order?: true
     subjectId?: true
     notesMarkdown?: true
+    teamId?: true
   }
 
   export type LectureCountAggregateInputType = {
@@ -16908,6 +17552,7 @@ export namespace Prisma {
     notesMarkdown?: true
     extras?: true
     uiConfig?: true
+    teamId?: true
     _all?: true
   }
 
@@ -17006,6 +17651,7 @@ export namespace Prisma {
     notesMarkdown: string | null
     extras: JsonValue | null
     uiConfig: JsonValue | null
+    teamId: string | null
     _count: LectureCountAggregateOutputType | null
     _avg: LectureAvgAggregateOutputType | null
     _sum: LectureSumAggregateOutputType | null
@@ -17036,6 +17682,7 @@ export namespace Prisma {
     notesMarkdown?: boolean
     extras?: boolean
     uiConfig?: boolean
+    teamId?: boolean
     flashcards?: boolean | Lecture$flashcardsArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     files?: boolean | Lecture$filesArgs<ExtArgs>
@@ -17044,6 +17691,8 @@ export namespace Prisma {
     PastPaper?: boolean | Lecture$PastPaperArgs<ExtArgs>
     questions?: boolean | Lecture$questionsArgs<ExtArgs>
     activities?: boolean | Lecture$activitiesArgs<ExtArgs>
+    notes?: boolean | Lecture$notesArgs<ExtArgs>
+    team?: boolean | Lecture$teamArgs<ExtArgs>
     _count?: boolean | LectureCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["lecture"]>
 
@@ -17056,7 +17705,9 @@ export namespace Prisma {
     notesMarkdown?: boolean
     extras?: boolean
     uiConfig?: boolean
+    teamId?: boolean
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
+    team?: boolean | Lecture$teamArgs<ExtArgs>
   }, ExtArgs["result"]["lecture"]>
 
   export type LectureSelectScalar = {
@@ -17068,6 +17719,7 @@ export namespace Prisma {
     notesMarkdown?: boolean
     extras?: boolean
     uiConfig?: boolean
+    teamId?: boolean
   }
 
   export type LectureInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -17079,10 +17731,13 @@ export namespace Prisma {
     PastPaper?: boolean | Lecture$PastPaperArgs<ExtArgs>
     questions?: boolean | Lecture$questionsArgs<ExtArgs>
     activities?: boolean | Lecture$activitiesArgs<ExtArgs>
+    notes?: boolean | Lecture$notesArgs<ExtArgs>
+    team?: boolean | Lecture$teamArgs<ExtArgs>
     _count?: boolean | LectureCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type LectureIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
+    team?: boolean | Lecture$teamArgs<ExtArgs>
   }
 
   export type $LecturePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -17096,6 +17751,8 @@ export namespace Prisma {
       PastPaper: Prisma.$PastPaperPayload<ExtArgs> | null
       questions: Prisma.$QuestionPayload<ExtArgs>[]
       activities: Prisma.$UserLectureActivityPayload<ExtArgs>[]
+      notes: Prisma.$NotePayload<ExtArgs>[]
+      team: Prisma.$MedicalTeamPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -17106,6 +17763,7 @@ export namespace Prisma {
       notesMarkdown: string | null
       extras: Prisma.JsonValue | null
       uiConfig: Prisma.JsonValue | null
+      teamId: string | null
     }, ExtArgs["result"]["lecture"]>
     composites: {}
   }
@@ -17478,6 +18136,8 @@ export namespace Prisma {
     PastPaper<T extends Lecture$PastPaperArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$PastPaperArgs<ExtArgs>>): Prisma__PastPaperClient<$Result.GetResult<Prisma.$PastPaperPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     questions<T extends Lecture$questionsArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$questionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuestionPayload<ExtArgs>, T, "findMany"> | Null>
     activities<T extends Lecture$activitiesArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLectureActivityPayload<ExtArgs>, T, "findMany"> | Null>
+    notes<T extends Lecture$notesArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$notesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findMany"> | Null>
+    team<T extends Lecture$teamArgs<ExtArgs> = {}>(args?: Subset<T, Lecture$teamArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -17515,6 +18175,7 @@ export namespace Prisma {
     readonly notesMarkdown: FieldRef<"Lecture", 'String'>
     readonly extras: FieldRef<"Lecture", 'Json'>
     readonly uiConfig: FieldRef<"Lecture", 'Json'>
+    readonly teamId: FieldRef<"Lecture", 'String'>
   }
     
 
@@ -17965,6 +18626,41 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserLectureActivityScalarFieldEnum | UserLectureActivityScalarFieldEnum[]
+  }
+
+  /**
+   * Lecture.notes
+   */
+  export type Lecture$notesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    where?: NoteWhereInput
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    cursor?: NoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * Lecture.team
+   */
+  export type Lecture$teamArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    where?: MedicalTeamWhereInput
   }
 
   /**
@@ -32538,6 +33234,9 @@ export namespace Prisma {
     followers?: boolean | User$followersArgs<ExtArgs>
     lectureActivities?: boolean | User$lectureActivitiesArgs<ExtArgs>
     tasks?: boolean | User$tasksArgs<ExtArgs>
+    notes?: boolean | User$notesArgs<ExtArgs>
+    teamMemberships?: boolean | User$teamMembershipsArgs<ExtArgs>
+    followedTeams?: boolean | User$followedTeamsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -32637,6 +33336,9 @@ export namespace Prisma {
     followers?: boolean | User$followersArgs<ExtArgs>
     lectureActivities?: boolean | User$lectureActivitiesArgs<ExtArgs>
     tasks?: boolean | User$tasksArgs<ExtArgs>
+    notes?: boolean | User$notesArgs<ExtArgs>
+    teamMemberships?: boolean | User$teamMembershipsArgs<ExtArgs>
+    followedTeams?: boolean | User$followedTeamsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -32680,6 +33382,9 @@ export namespace Prisma {
       followers: Prisma.$UserFollowPayload<ExtArgs>[]
       lectureActivities: Prisma.$UserLectureActivityPayload<ExtArgs>[]
       tasks: Prisma.$UserTaskPayload<ExtArgs>[]
+      notes: Prisma.$NotePayload<ExtArgs>[]
+      teamMemberships: Prisma.$TeamMemberPayload<ExtArgs>[]
+      followedTeams: Prisma.$TeamFollowerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -33104,6 +33809,9 @@ export namespace Prisma {
     followers<T extends User$followersArgs<ExtArgs> = {}>(args?: Subset<T, User$followersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserFollowPayload<ExtArgs>, T, "findMany"> | Null>
     lectureActivities<T extends User$lectureActivitiesArgs<ExtArgs> = {}>(args?: Subset<T, User$lectureActivitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLectureActivityPayload<ExtArgs>, T, "findMany"> | Null>
     tasks<T extends User$tasksArgs<ExtArgs> = {}>(args?: Subset<T, User$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserTaskPayload<ExtArgs>, T, "findMany"> | Null>
+    notes<T extends User$notesArgs<ExtArgs> = {}>(args?: Subset<T, User$notesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findMany"> | Null>
+    teamMemberships<T extends User$teamMembershipsArgs<ExtArgs> = {}>(args?: Subset<T, User$teamMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany"> | Null>
+    followedTeams<T extends User$followedTeamsArgs<ExtArgs> = {}>(args?: Subset<T, User$followedTeamsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -34068,6 +34776,66 @@ export namespace Prisma {
   }
 
   /**
+   * User.notes
+   */
+  export type User$notesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    where?: NoteWhereInput
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    cursor?: NoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * User.teamMemberships
+   */
+  export type User$teamMembershipsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    where?: TeamMemberWhereInput
+    orderBy?: TeamMemberOrderByWithRelationInput | TeamMemberOrderByWithRelationInput[]
+    cursor?: TeamMemberWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TeamMemberScalarFieldEnum | TeamMemberScalarFieldEnum[]
+  }
+
+  /**
+   * User.followedTeams
+   */
+  export type User$followedTeamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    where?: TeamFollowerWhereInput
+    orderBy?: TeamFollowerOrderByWithRelationInput | TeamFollowerOrderByWithRelationInput[]
+    cursor?: TeamFollowerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TeamFollowerScalarFieldEnum | TeamFollowerScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -34079,6 +34847,957 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Note
+   */
+
+  export type AggregateNote = {
+    _count: NoteCountAggregateOutputType | null
+    _min: NoteMinAggregateOutputType | null
+    _max: NoteMaxAggregateOutputType | null
+  }
+
+  export type NoteMinAggregateOutputType = {
+    id: string | null
+    content: string | null
+    lectureId: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NoteMaxAggregateOutputType = {
+    id: string | null
+    content: string | null
+    lectureId: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NoteCountAggregateOutputType = {
+    id: number
+    content: number
+    lectureId: number
+    userId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type NoteMinAggregateInputType = {
+    id?: true
+    content?: true
+    lectureId?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NoteMaxAggregateInputType = {
+    id?: true
+    content?: true
+    lectureId?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NoteCountAggregateInputType = {
+    id?: true
+    content?: true
+    lectureId?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type NoteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Note to aggregate.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Notes
+    **/
+    _count?: true | NoteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NoteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NoteMaxAggregateInputType
+  }
+
+  export type GetNoteAggregateType<T extends NoteAggregateArgs> = {
+        [P in keyof T & keyof AggregateNote]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNote[P]>
+      : GetScalarType<T[P], AggregateNote[P]>
+  }
+
+
+
+
+  export type NoteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NoteWhereInput
+    orderBy?: NoteOrderByWithAggregationInput | NoteOrderByWithAggregationInput[]
+    by: NoteScalarFieldEnum[] | NoteScalarFieldEnum
+    having?: NoteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NoteCountAggregateInputType | true
+    _min?: NoteMinAggregateInputType
+    _max?: NoteMaxAggregateInputType
+  }
+
+  export type NoteGroupByOutputType = {
+    id: string
+    content: string
+    lectureId: string
+    userId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: NoteCountAggregateOutputType | null
+    _min: NoteMinAggregateOutputType | null
+    _max: NoteMaxAggregateOutputType | null
+  }
+
+  type GetNoteGroupByPayload<T extends NoteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NoteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NoteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NoteGroupByOutputType[P]>
+            : GetScalarType<T[P], NoteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NoteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    content?: boolean
+    lectureId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    lecture?: boolean | LectureDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["note"]>
+
+  export type NoteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    content?: boolean
+    lectureId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    lecture?: boolean | LectureDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["note"]>
+
+  export type NoteSelectScalar = {
+    id?: boolean
+    content?: boolean
+    lectureId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type NoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    lecture?: boolean | LectureDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type NoteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    lecture?: boolean | LectureDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $NotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Note"
+    objects: {
+      lecture: Prisma.$LecturePayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      content: string
+      lectureId: string
+      userId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["note"]>
+    composites: {}
+  }
+
+  type NoteGetPayload<S extends boolean | null | undefined | NoteDefaultArgs> = $Result.GetResult<Prisma.$NotePayload, S>
+
+  type NoteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<NoteFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: NoteCountAggregateInputType | true
+    }
+
+  export interface NoteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Note'], meta: { name: 'Note' } }
+    /**
+     * Find zero or one Note that matches the filter.
+     * @param {NoteFindUniqueArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NoteFindUniqueArgs>(args: SelectSubset<T, NoteFindUniqueArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Note that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {NoteFindUniqueOrThrowArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NoteFindUniqueOrThrowArgs>(args: SelectSubset<T, NoteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Note that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteFindFirstArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NoteFindFirstArgs>(args?: SelectSubset<T, NoteFindFirstArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Note that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteFindFirstOrThrowArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NoteFindFirstOrThrowArgs>(args?: SelectSubset<T, NoteFindFirstOrThrowArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Notes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Notes
+     * const notes = await prisma.note.findMany()
+     * 
+     * // Get first 10 Notes
+     * const notes = await prisma.note.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const noteWithIdOnly = await prisma.note.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NoteFindManyArgs>(args?: SelectSubset<T, NoteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Note.
+     * @param {NoteCreateArgs} args - Arguments to create a Note.
+     * @example
+     * // Create one Note
+     * const Note = await prisma.note.create({
+     *   data: {
+     *     // ... data to create a Note
+     *   }
+     * })
+     * 
+     */
+    create<T extends NoteCreateArgs>(args: SelectSubset<T, NoteCreateArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Notes.
+     * @param {NoteCreateManyArgs} args - Arguments to create many Notes.
+     * @example
+     * // Create many Notes
+     * const note = await prisma.note.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NoteCreateManyArgs>(args?: SelectSubset<T, NoteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Notes and returns the data saved in the database.
+     * @param {NoteCreateManyAndReturnArgs} args - Arguments to create many Notes.
+     * @example
+     * // Create many Notes
+     * const note = await prisma.note.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Notes and only return the `id`
+     * const noteWithIdOnly = await prisma.note.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NoteCreateManyAndReturnArgs>(args?: SelectSubset<T, NoteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Note.
+     * @param {NoteDeleteArgs} args - Arguments to delete one Note.
+     * @example
+     * // Delete one Note
+     * const Note = await prisma.note.delete({
+     *   where: {
+     *     // ... filter to delete one Note
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NoteDeleteArgs>(args: SelectSubset<T, NoteDeleteArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Note.
+     * @param {NoteUpdateArgs} args - Arguments to update one Note.
+     * @example
+     * // Update one Note
+     * const note = await prisma.note.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NoteUpdateArgs>(args: SelectSubset<T, NoteUpdateArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Notes.
+     * @param {NoteDeleteManyArgs} args - Arguments to filter Notes to delete.
+     * @example
+     * // Delete a few Notes
+     * const { count } = await prisma.note.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NoteDeleteManyArgs>(args?: SelectSubset<T, NoteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Notes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Notes
+     * const note = await prisma.note.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NoteUpdateManyArgs>(args: SelectSubset<T, NoteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Note.
+     * @param {NoteUpsertArgs} args - Arguments to update or create a Note.
+     * @example
+     * // Update or create a Note
+     * const note = await prisma.note.upsert({
+     *   create: {
+     *     // ... data to create a Note
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Note we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NoteUpsertArgs>(args: SelectSubset<T, NoteUpsertArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Notes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteCountArgs} args - Arguments to filter Notes to count.
+     * @example
+     * // Count the number of Notes
+     * const count = await prisma.note.count({
+     *   where: {
+     *     // ... the filter for the Notes we want to count
+     *   }
+     * })
+    **/
+    count<T extends NoteCountArgs>(
+      args?: Subset<T, NoteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NoteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Note.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NoteAggregateArgs>(args: Subset<T, NoteAggregateArgs>): Prisma.PrismaPromise<GetNoteAggregateType<T>>
+
+    /**
+     * Group by Note.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NoteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NoteGroupByArgs['orderBy'] }
+        : { orderBy?: NoteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NoteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNoteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Note model
+   */
+  readonly fields: NoteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Note.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    lecture<T extends LectureDefaultArgs<ExtArgs> = {}>(args?: Subset<T, LectureDefaultArgs<ExtArgs>>): Prisma__LectureClient<$Result.GetResult<Prisma.$LecturePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Note model
+   */ 
+  interface NoteFieldRefs {
+    readonly id: FieldRef<"Note", 'String'>
+    readonly content: FieldRef<"Note", 'String'>
+    readonly lectureId: FieldRef<"Note", 'String'>
+    readonly userId: FieldRef<"Note", 'String'>
+    readonly createdAt: FieldRef<"Note", 'DateTime'>
+    readonly updatedAt: FieldRef<"Note", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Note findUnique
+   */
+  export type NoteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note findUniqueOrThrow
+   */
+  export type NoteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note findFirst
+   */
+  export type NoteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Notes.
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Notes.
+     */
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * Note findFirstOrThrow
+   */
+  export type NoteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Notes.
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Notes.
+     */
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * Note findMany
+   */
+  export type NoteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Notes to fetch.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Notes.
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * Note create
+   */
+  export type NoteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Note.
+     */
+    data: XOR<NoteCreateInput, NoteUncheckedCreateInput>
+  }
+
+  /**
+   * Note createMany
+   */
+  export type NoteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Notes.
+     */
+    data: NoteCreateManyInput | NoteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Note createManyAndReturn
+   */
+  export type NoteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Notes.
+     */
+    data: NoteCreateManyInput | NoteCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Note update
+   */
+  export type NoteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Note.
+     */
+    data: XOR<NoteUpdateInput, NoteUncheckedUpdateInput>
+    /**
+     * Choose, which Note to update.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note updateMany
+   */
+  export type NoteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Notes.
+     */
+    data: XOR<NoteUpdateManyMutationInput, NoteUncheckedUpdateManyInput>
+    /**
+     * Filter which Notes to update
+     */
+    where?: NoteWhereInput
+  }
+
+  /**
+   * Note upsert
+   */
+  export type NoteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Note to update in case it exists.
+     */
+    where: NoteWhereUniqueInput
+    /**
+     * In case the Note found by the `where` argument doesn't exist, create a new Note with this data.
+     */
+    create: XOR<NoteCreateInput, NoteUncheckedCreateInput>
+    /**
+     * In case the Note was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NoteUpdateInput, NoteUncheckedUpdateInput>
+  }
+
+  /**
+   * Note delete
+   */
+  export type NoteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter which Note to delete.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note deleteMany
+   */
+  export type NoteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Notes to delete
+     */
+    where?: NoteWhereInput
+  }
+
+  /**
+   * Note without action
+   */
+  export type NoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
   }
 
 
@@ -38945,6 +40664,7 @@ export namespace Prisma {
     isPinned: boolean | null
     isChatMessage: boolean | null
     isForumPost: boolean | null
+    teamId: string | null
   }
 
   export type PostMaxAggregateOutputType = {
@@ -38962,6 +40682,7 @@ export namespace Prisma {
     isPinned: boolean | null
     isChatMessage: boolean | null
     isForumPost: boolean | null
+    teamId: string | null
   }
 
   export type PostCountAggregateOutputType = {
@@ -38979,6 +40700,7 @@ export namespace Prisma {
     isPinned: number
     isChatMessage: number
     isForumPost: number
+    teamId: number
     _all: number
   }
 
@@ -38998,6 +40720,7 @@ export namespace Prisma {
     isPinned?: true
     isChatMessage?: true
     isForumPost?: true
+    teamId?: true
   }
 
   export type PostMaxAggregateInputType = {
@@ -39015,6 +40738,7 @@ export namespace Prisma {
     isPinned?: true
     isChatMessage?: true
     isForumPost?: true
+    teamId?: true
   }
 
   export type PostCountAggregateInputType = {
@@ -39032,6 +40756,7 @@ export namespace Prisma {
     isPinned?: true
     isChatMessage?: true
     isForumPost?: true
+    teamId?: true
     _all?: true
   }
 
@@ -39122,6 +40847,7 @@ export namespace Prisma {
     isPinned: boolean
     isChatMessage: boolean
     isForumPost: boolean
+    teamId: string | null
     _count: PostCountAggregateOutputType | null
     _min: PostMinAggregateOutputType | null
     _max: PostMaxAggregateOutputType | null
@@ -39156,11 +40882,13 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: boolean
     comments?: boolean | Post$commentsArgs<ExtArgs>
     likes?: boolean | Post$likesArgs<ExtArgs>
     author?: boolean | UserDefaultArgs<ExtArgs>
     forum?: boolean | ForumDefaultArgs<ExtArgs>
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    team?: boolean | Post$teamArgs<ExtArgs>
     _count?: boolean | PostCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["post"]>
 
@@ -39179,9 +40907,11 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: boolean
     author?: boolean | UserDefaultArgs<ExtArgs>
     forum?: boolean | ForumDefaultArgs<ExtArgs>
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    team?: boolean | Post$teamArgs<ExtArgs>
   }, ExtArgs["result"]["post"]>
 
   export type PostSelectScalar = {
@@ -39199,6 +40929,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: boolean
   }
 
   export type PostInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -39207,12 +40938,14 @@ export namespace Prisma {
     author?: boolean | UserDefaultArgs<ExtArgs>
     forum?: boolean | ForumDefaultArgs<ExtArgs>
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    team?: boolean | Post$teamArgs<ExtArgs>
     _count?: boolean | PostCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PostIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     author?: boolean | UserDefaultArgs<ExtArgs>
     forum?: boolean | ForumDefaultArgs<ExtArgs>
     university?: boolean | UniversityDefaultArgs<ExtArgs>
+    team?: boolean | Post$teamArgs<ExtArgs>
   }
 
   export type $PostPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -39223,6 +40956,7 @@ export namespace Prisma {
       author: Prisma.$UserPayload<ExtArgs>
       forum: Prisma.$ForumPayload<ExtArgs>
       university: Prisma.$UniversityPayload<ExtArgs>
+      team: Prisma.$MedicalTeamPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -39239,6 +40973,7 @@ export namespace Prisma {
       isPinned: boolean
       isChatMessage: boolean
       isForumPost: boolean
+      teamId: string | null
     }, ExtArgs["result"]["post"]>
     composites: {}
   }
@@ -39608,6 +41343,7 @@ export namespace Prisma {
     author<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     forum<T extends ForumDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ForumDefaultArgs<ExtArgs>>): Prisma__ForumClient<$Result.GetResult<Prisma.$ForumPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     university<T extends UniversityDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UniversityDefaultArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    team<T extends Post$teamArgs<ExtArgs> = {}>(args?: Subset<T, Post$teamArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -39651,6 +41387,7 @@ export namespace Prisma {
     readonly isPinned: FieldRef<"Post", 'Boolean'>
     readonly isChatMessage: FieldRef<"Post", 'Boolean'>
     readonly isForumPost: FieldRef<"Post", 'Boolean'>
+    readonly teamId: FieldRef<"Post", 'String'>
   }
     
 
@@ -40006,6 +41743,21 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: LikeScalarFieldEnum | LikeScalarFieldEnum[]
+  }
+
+  /**
+   * Post.team
+   */
+  export type Post$teamArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    where?: MedicalTeamWhereInput
   }
 
   /**
@@ -59390,6 +61142,3939 @@ export namespace Prisma {
 
 
   /**
+   * Model MedicalTeam
+   */
+
+  export type AggregateMedicalTeam = {
+    _count: MedicalTeamCountAggregateOutputType | null
+    _avg: MedicalTeamAvgAggregateOutputType | null
+    _sum: MedicalTeamSumAggregateOutputType | null
+    _min: MedicalTeamMinAggregateOutputType | null
+    _max: MedicalTeamMaxAggregateOutputType | null
+  }
+
+  export type MedicalTeamAvgAggregateOutputType = {
+    followersCount: number | null
+  }
+
+  export type MedicalTeamSumAggregateOutputType = {
+    followersCount: number | null
+  }
+
+  export type MedicalTeamMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    imageUrl: string | null
+    facultyId: string | null
+    universityId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    followersCount: number | null
+  }
+
+  export type MedicalTeamMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    imageUrl: string | null
+    facultyId: string | null
+    universityId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    followersCount: number | null
+  }
+
+  export type MedicalTeamCountAggregateOutputType = {
+    id: number
+    name: number
+    description: number
+    imageUrl: number
+    facultyId: number
+    universityId: number
+    createdAt: number
+    updatedAt: number
+    followersCount: number
+    _all: number
+  }
+
+
+  export type MedicalTeamAvgAggregateInputType = {
+    followersCount?: true
+  }
+
+  export type MedicalTeamSumAggregateInputType = {
+    followersCount?: true
+  }
+
+  export type MedicalTeamMinAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    imageUrl?: true
+    facultyId?: true
+    universityId?: true
+    createdAt?: true
+    updatedAt?: true
+    followersCount?: true
+  }
+
+  export type MedicalTeamMaxAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    imageUrl?: true
+    facultyId?: true
+    universityId?: true
+    createdAt?: true
+    updatedAt?: true
+    followersCount?: true
+  }
+
+  export type MedicalTeamCountAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    imageUrl?: true
+    facultyId?: true
+    universityId?: true
+    createdAt?: true
+    updatedAt?: true
+    followersCount?: true
+    _all?: true
+  }
+
+  export type MedicalTeamAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MedicalTeam to aggregate.
+     */
+    where?: MedicalTeamWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MedicalTeams to fetch.
+     */
+    orderBy?: MedicalTeamOrderByWithRelationInput | MedicalTeamOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MedicalTeamWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MedicalTeams from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MedicalTeams.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MedicalTeams
+    **/
+    _count?: true | MedicalTeamCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MedicalTeamAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MedicalTeamSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MedicalTeamMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MedicalTeamMaxAggregateInputType
+  }
+
+  export type GetMedicalTeamAggregateType<T extends MedicalTeamAggregateArgs> = {
+        [P in keyof T & keyof AggregateMedicalTeam]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMedicalTeam[P]>
+      : GetScalarType<T[P], AggregateMedicalTeam[P]>
+  }
+
+
+
+
+  export type MedicalTeamGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MedicalTeamWhereInput
+    orderBy?: MedicalTeamOrderByWithAggregationInput | MedicalTeamOrderByWithAggregationInput[]
+    by: MedicalTeamScalarFieldEnum[] | MedicalTeamScalarFieldEnum
+    having?: MedicalTeamScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MedicalTeamCountAggregateInputType | true
+    _avg?: MedicalTeamAvgAggregateInputType
+    _sum?: MedicalTeamSumAggregateInputType
+    _min?: MedicalTeamMinAggregateInputType
+    _max?: MedicalTeamMaxAggregateInputType
+  }
+
+  export type MedicalTeamGroupByOutputType = {
+    id: string
+    name: string
+    description: string | null
+    imageUrl: string | null
+    facultyId: string
+    universityId: string
+    createdAt: Date
+    updatedAt: Date
+    followersCount: number
+    _count: MedicalTeamCountAggregateOutputType | null
+    _avg: MedicalTeamAvgAggregateOutputType | null
+    _sum: MedicalTeamSumAggregateOutputType | null
+    _min: MedicalTeamMinAggregateOutputType | null
+    _max: MedicalTeamMaxAggregateOutputType | null
+  }
+
+  type GetMedicalTeamGroupByPayload<T extends MedicalTeamGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MedicalTeamGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MedicalTeamGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MedicalTeamGroupByOutputType[P]>
+            : GetScalarType<T[P], MedicalTeamGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MedicalTeamSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    imageUrl?: boolean
+    facultyId?: boolean
+    universityId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    followersCount?: boolean
+    faculty?: boolean | FacultyDefaultArgs<ExtArgs>
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+    members?: boolean | MedicalTeam$membersArgs<ExtArgs>
+    followers?: boolean | MedicalTeam$followersArgs<ExtArgs>
+    lectures?: boolean | MedicalTeam$lecturesArgs<ExtArgs>
+    posts?: boolean | MedicalTeam$postsArgs<ExtArgs>
+    _count?: boolean | MedicalTeamCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["medicalTeam"]>
+
+  export type MedicalTeamSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    imageUrl?: boolean
+    facultyId?: boolean
+    universityId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    followersCount?: boolean
+    faculty?: boolean | FacultyDefaultArgs<ExtArgs>
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["medicalTeam"]>
+
+  export type MedicalTeamSelectScalar = {
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    imageUrl?: boolean
+    facultyId?: boolean
+    universityId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    followersCount?: boolean
+  }
+
+  export type MedicalTeamInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    faculty?: boolean | FacultyDefaultArgs<ExtArgs>
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+    members?: boolean | MedicalTeam$membersArgs<ExtArgs>
+    followers?: boolean | MedicalTeam$followersArgs<ExtArgs>
+    lectures?: boolean | MedicalTeam$lecturesArgs<ExtArgs>
+    posts?: boolean | MedicalTeam$postsArgs<ExtArgs>
+    _count?: boolean | MedicalTeamCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type MedicalTeamIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    faculty?: boolean | FacultyDefaultArgs<ExtArgs>
+    university?: boolean | UniversityDefaultArgs<ExtArgs>
+  }
+
+  export type $MedicalTeamPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MedicalTeam"
+    objects: {
+      faculty: Prisma.$FacultyPayload<ExtArgs>
+      university: Prisma.$UniversityPayload<ExtArgs>
+      members: Prisma.$TeamMemberPayload<ExtArgs>[]
+      followers: Prisma.$TeamFollowerPayload<ExtArgs>[]
+      lectures: Prisma.$LecturePayload<ExtArgs>[]
+      posts: Prisma.$PostPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      description: string | null
+      imageUrl: string | null
+      facultyId: string
+      universityId: string
+      createdAt: Date
+      updatedAt: Date
+      followersCount: number
+    }, ExtArgs["result"]["medicalTeam"]>
+    composites: {}
+  }
+
+  type MedicalTeamGetPayload<S extends boolean | null | undefined | MedicalTeamDefaultArgs> = $Result.GetResult<Prisma.$MedicalTeamPayload, S>
+
+  type MedicalTeamCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<MedicalTeamFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: MedicalTeamCountAggregateInputType | true
+    }
+
+  export interface MedicalTeamDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MedicalTeam'], meta: { name: 'MedicalTeam' } }
+    /**
+     * Find zero or one MedicalTeam that matches the filter.
+     * @param {MedicalTeamFindUniqueArgs} args - Arguments to find a MedicalTeam
+     * @example
+     * // Get one MedicalTeam
+     * const medicalTeam = await prisma.medicalTeam.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MedicalTeamFindUniqueArgs>(args: SelectSubset<T, MedicalTeamFindUniqueArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one MedicalTeam that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {MedicalTeamFindUniqueOrThrowArgs} args - Arguments to find a MedicalTeam
+     * @example
+     * // Get one MedicalTeam
+     * const medicalTeam = await prisma.medicalTeam.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MedicalTeamFindUniqueOrThrowArgs>(args: SelectSubset<T, MedicalTeamFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first MedicalTeam that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MedicalTeamFindFirstArgs} args - Arguments to find a MedicalTeam
+     * @example
+     * // Get one MedicalTeam
+     * const medicalTeam = await prisma.medicalTeam.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MedicalTeamFindFirstArgs>(args?: SelectSubset<T, MedicalTeamFindFirstArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first MedicalTeam that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MedicalTeamFindFirstOrThrowArgs} args - Arguments to find a MedicalTeam
+     * @example
+     * // Get one MedicalTeam
+     * const medicalTeam = await prisma.medicalTeam.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MedicalTeamFindFirstOrThrowArgs>(args?: SelectSubset<T, MedicalTeamFindFirstOrThrowArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more MedicalTeams that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MedicalTeamFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MedicalTeams
+     * const medicalTeams = await prisma.medicalTeam.findMany()
+     * 
+     * // Get first 10 MedicalTeams
+     * const medicalTeams = await prisma.medicalTeam.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const medicalTeamWithIdOnly = await prisma.medicalTeam.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MedicalTeamFindManyArgs>(args?: SelectSubset<T, MedicalTeamFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a MedicalTeam.
+     * @param {MedicalTeamCreateArgs} args - Arguments to create a MedicalTeam.
+     * @example
+     * // Create one MedicalTeam
+     * const MedicalTeam = await prisma.medicalTeam.create({
+     *   data: {
+     *     // ... data to create a MedicalTeam
+     *   }
+     * })
+     * 
+     */
+    create<T extends MedicalTeamCreateArgs>(args: SelectSubset<T, MedicalTeamCreateArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many MedicalTeams.
+     * @param {MedicalTeamCreateManyArgs} args - Arguments to create many MedicalTeams.
+     * @example
+     * // Create many MedicalTeams
+     * const medicalTeam = await prisma.medicalTeam.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MedicalTeamCreateManyArgs>(args?: SelectSubset<T, MedicalTeamCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MedicalTeams and returns the data saved in the database.
+     * @param {MedicalTeamCreateManyAndReturnArgs} args - Arguments to create many MedicalTeams.
+     * @example
+     * // Create many MedicalTeams
+     * const medicalTeam = await prisma.medicalTeam.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MedicalTeams and only return the `id`
+     * const medicalTeamWithIdOnly = await prisma.medicalTeam.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MedicalTeamCreateManyAndReturnArgs>(args?: SelectSubset<T, MedicalTeamCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a MedicalTeam.
+     * @param {MedicalTeamDeleteArgs} args - Arguments to delete one MedicalTeam.
+     * @example
+     * // Delete one MedicalTeam
+     * const MedicalTeam = await prisma.medicalTeam.delete({
+     *   where: {
+     *     // ... filter to delete one MedicalTeam
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MedicalTeamDeleteArgs>(args: SelectSubset<T, MedicalTeamDeleteArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one MedicalTeam.
+     * @param {MedicalTeamUpdateArgs} args - Arguments to update one MedicalTeam.
+     * @example
+     * // Update one MedicalTeam
+     * const medicalTeam = await prisma.medicalTeam.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MedicalTeamUpdateArgs>(args: SelectSubset<T, MedicalTeamUpdateArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more MedicalTeams.
+     * @param {MedicalTeamDeleteManyArgs} args - Arguments to filter MedicalTeams to delete.
+     * @example
+     * // Delete a few MedicalTeams
+     * const { count } = await prisma.medicalTeam.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MedicalTeamDeleteManyArgs>(args?: SelectSubset<T, MedicalTeamDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MedicalTeams.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MedicalTeamUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MedicalTeams
+     * const medicalTeam = await prisma.medicalTeam.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MedicalTeamUpdateManyArgs>(args: SelectSubset<T, MedicalTeamUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one MedicalTeam.
+     * @param {MedicalTeamUpsertArgs} args - Arguments to update or create a MedicalTeam.
+     * @example
+     * // Update or create a MedicalTeam
+     * const medicalTeam = await prisma.medicalTeam.upsert({
+     *   create: {
+     *     // ... data to create a MedicalTeam
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MedicalTeam we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MedicalTeamUpsertArgs>(args: SelectSubset<T, MedicalTeamUpsertArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of MedicalTeams.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MedicalTeamCountArgs} args - Arguments to filter MedicalTeams to count.
+     * @example
+     * // Count the number of MedicalTeams
+     * const count = await prisma.medicalTeam.count({
+     *   where: {
+     *     // ... the filter for the MedicalTeams we want to count
+     *   }
+     * })
+    **/
+    count<T extends MedicalTeamCountArgs>(
+      args?: Subset<T, MedicalTeamCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MedicalTeamCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MedicalTeam.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MedicalTeamAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MedicalTeamAggregateArgs>(args: Subset<T, MedicalTeamAggregateArgs>): Prisma.PrismaPromise<GetMedicalTeamAggregateType<T>>
+
+    /**
+     * Group by MedicalTeam.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MedicalTeamGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MedicalTeamGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MedicalTeamGroupByArgs['orderBy'] }
+        : { orderBy?: MedicalTeamGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MedicalTeamGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMedicalTeamGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MedicalTeam model
+   */
+  readonly fields: MedicalTeamFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MedicalTeam.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MedicalTeamClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    faculty<T extends FacultyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FacultyDefaultArgs<ExtArgs>>): Prisma__FacultyClient<$Result.GetResult<Prisma.$FacultyPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    university<T extends UniversityDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UniversityDefaultArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    members<T extends MedicalTeam$membersArgs<ExtArgs> = {}>(args?: Subset<T, MedicalTeam$membersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany"> | Null>
+    followers<T extends MedicalTeam$followersArgs<ExtArgs> = {}>(args?: Subset<T, MedicalTeam$followersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "findMany"> | Null>
+    lectures<T extends MedicalTeam$lecturesArgs<ExtArgs> = {}>(args?: Subset<T, MedicalTeam$lecturesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LecturePayload<ExtArgs>, T, "findMany"> | Null>
+    posts<T extends MedicalTeam$postsArgs<ExtArgs> = {}>(args?: Subset<T, MedicalTeam$postsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MedicalTeam model
+   */ 
+  interface MedicalTeamFieldRefs {
+    readonly id: FieldRef<"MedicalTeam", 'String'>
+    readonly name: FieldRef<"MedicalTeam", 'String'>
+    readonly description: FieldRef<"MedicalTeam", 'String'>
+    readonly imageUrl: FieldRef<"MedicalTeam", 'String'>
+    readonly facultyId: FieldRef<"MedicalTeam", 'String'>
+    readonly universityId: FieldRef<"MedicalTeam", 'String'>
+    readonly createdAt: FieldRef<"MedicalTeam", 'DateTime'>
+    readonly updatedAt: FieldRef<"MedicalTeam", 'DateTime'>
+    readonly followersCount: FieldRef<"MedicalTeam", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MedicalTeam findUnique
+   */
+  export type MedicalTeamFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * Filter, which MedicalTeam to fetch.
+     */
+    where: MedicalTeamWhereUniqueInput
+  }
+
+  /**
+   * MedicalTeam findUniqueOrThrow
+   */
+  export type MedicalTeamFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * Filter, which MedicalTeam to fetch.
+     */
+    where: MedicalTeamWhereUniqueInput
+  }
+
+  /**
+   * MedicalTeam findFirst
+   */
+  export type MedicalTeamFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * Filter, which MedicalTeam to fetch.
+     */
+    where?: MedicalTeamWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MedicalTeams to fetch.
+     */
+    orderBy?: MedicalTeamOrderByWithRelationInput | MedicalTeamOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MedicalTeams.
+     */
+    cursor?: MedicalTeamWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MedicalTeams from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MedicalTeams.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MedicalTeams.
+     */
+    distinct?: MedicalTeamScalarFieldEnum | MedicalTeamScalarFieldEnum[]
+  }
+
+  /**
+   * MedicalTeam findFirstOrThrow
+   */
+  export type MedicalTeamFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * Filter, which MedicalTeam to fetch.
+     */
+    where?: MedicalTeamWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MedicalTeams to fetch.
+     */
+    orderBy?: MedicalTeamOrderByWithRelationInput | MedicalTeamOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MedicalTeams.
+     */
+    cursor?: MedicalTeamWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MedicalTeams from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MedicalTeams.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MedicalTeams.
+     */
+    distinct?: MedicalTeamScalarFieldEnum | MedicalTeamScalarFieldEnum[]
+  }
+
+  /**
+   * MedicalTeam findMany
+   */
+  export type MedicalTeamFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * Filter, which MedicalTeams to fetch.
+     */
+    where?: MedicalTeamWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MedicalTeams to fetch.
+     */
+    orderBy?: MedicalTeamOrderByWithRelationInput | MedicalTeamOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MedicalTeams.
+     */
+    cursor?: MedicalTeamWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MedicalTeams from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MedicalTeams.
+     */
+    skip?: number
+    distinct?: MedicalTeamScalarFieldEnum | MedicalTeamScalarFieldEnum[]
+  }
+
+  /**
+   * MedicalTeam create
+   */
+  export type MedicalTeamCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MedicalTeam.
+     */
+    data: XOR<MedicalTeamCreateInput, MedicalTeamUncheckedCreateInput>
+  }
+
+  /**
+   * MedicalTeam createMany
+   */
+  export type MedicalTeamCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MedicalTeams.
+     */
+    data: MedicalTeamCreateManyInput | MedicalTeamCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MedicalTeam createManyAndReturn
+   */
+  export type MedicalTeamCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many MedicalTeams.
+     */
+    data: MedicalTeamCreateManyInput | MedicalTeamCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MedicalTeam update
+   */
+  export type MedicalTeamUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MedicalTeam.
+     */
+    data: XOR<MedicalTeamUpdateInput, MedicalTeamUncheckedUpdateInput>
+    /**
+     * Choose, which MedicalTeam to update.
+     */
+    where: MedicalTeamWhereUniqueInput
+  }
+
+  /**
+   * MedicalTeam updateMany
+   */
+  export type MedicalTeamUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MedicalTeams.
+     */
+    data: XOR<MedicalTeamUpdateManyMutationInput, MedicalTeamUncheckedUpdateManyInput>
+    /**
+     * Filter which MedicalTeams to update
+     */
+    where?: MedicalTeamWhereInput
+  }
+
+  /**
+   * MedicalTeam upsert
+   */
+  export type MedicalTeamUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MedicalTeam to update in case it exists.
+     */
+    where: MedicalTeamWhereUniqueInput
+    /**
+     * In case the MedicalTeam found by the `where` argument doesn't exist, create a new MedicalTeam with this data.
+     */
+    create: XOR<MedicalTeamCreateInput, MedicalTeamUncheckedCreateInput>
+    /**
+     * In case the MedicalTeam was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MedicalTeamUpdateInput, MedicalTeamUncheckedUpdateInput>
+  }
+
+  /**
+   * MedicalTeam delete
+   */
+  export type MedicalTeamDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+    /**
+     * Filter which MedicalTeam to delete.
+     */
+    where: MedicalTeamWhereUniqueInput
+  }
+
+  /**
+   * MedicalTeam deleteMany
+   */
+  export type MedicalTeamDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MedicalTeams to delete
+     */
+    where?: MedicalTeamWhereInput
+  }
+
+  /**
+   * MedicalTeam.members
+   */
+  export type MedicalTeam$membersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    where?: TeamMemberWhereInput
+    orderBy?: TeamMemberOrderByWithRelationInput | TeamMemberOrderByWithRelationInput[]
+    cursor?: TeamMemberWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TeamMemberScalarFieldEnum | TeamMemberScalarFieldEnum[]
+  }
+
+  /**
+   * MedicalTeam.followers
+   */
+  export type MedicalTeam$followersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    where?: TeamFollowerWhereInput
+    orderBy?: TeamFollowerOrderByWithRelationInput | TeamFollowerOrderByWithRelationInput[]
+    cursor?: TeamFollowerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TeamFollowerScalarFieldEnum | TeamFollowerScalarFieldEnum[]
+  }
+
+  /**
+   * MedicalTeam.lectures
+   */
+  export type MedicalTeam$lecturesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Lecture
+     */
+    select?: LectureSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LectureInclude<ExtArgs> | null
+    where?: LectureWhereInput
+    orderBy?: LectureOrderByWithRelationInput | LectureOrderByWithRelationInput[]
+    cursor?: LectureWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LectureScalarFieldEnum | LectureScalarFieldEnum[]
+  }
+
+  /**
+   * MedicalTeam.posts
+   */
+  export type MedicalTeam$postsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Post
+     */
+    select?: PostSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PostInclude<ExtArgs> | null
+    where?: PostWhereInput
+    orderBy?: PostOrderByWithRelationInput | PostOrderByWithRelationInput[]
+    cursor?: PostWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PostScalarFieldEnum | PostScalarFieldEnum[]
+  }
+
+  /**
+   * MedicalTeam without action
+   */
+  export type MedicalTeamDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MedicalTeam
+     */
+    select?: MedicalTeamSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MedicalTeamInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TeamMember
+   */
+
+  export type AggregateTeamMember = {
+    _count: TeamMemberCountAggregateOutputType | null
+    _min: TeamMemberMinAggregateOutputType | null
+    _max: TeamMemberMaxAggregateOutputType | null
+  }
+
+  export type TeamMemberMinAggregateOutputType = {
+    id: string | null
+    teamId: string | null
+    userId: string | null
+    role: $Enums.TeamRole | null
+    createdAt: Date | null
+  }
+
+  export type TeamMemberMaxAggregateOutputType = {
+    id: string | null
+    teamId: string | null
+    userId: string | null
+    role: $Enums.TeamRole | null
+    createdAt: Date | null
+  }
+
+  export type TeamMemberCountAggregateOutputType = {
+    id: number
+    teamId: number
+    userId: number
+    role: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type TeamMemberMinAggregateInputType = {
+    id?: true
+    teamId?: true
+    userId?: true
+    role?: true
+    createdAt?: true
+  }
+
+  export type TeamMemberMaxAggregateInputType = {
+    id?: true
+    teamId?: true
+    userId?: true
+    role?: true
+    createdAt?: true
+  }
+
+  export type TeamMemberCountAggregateInputType = {
+    id?: true
+    teamId?: true
+    userId?: true
+    role?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type TeamMemberAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeamMember to aggregate.
+     */
+    where?: TeamMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamMembers to fetch.
+     */
+    orderBy?: TeamMemberOrderByWithRelationInput | TeamMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TeamMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamMembers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TeamMembers
+    **/
+    _count?: true | TeamMemberCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TeamMemberMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TeamMemberMaxAggregateInputType
+  }
+
+  export type GetTeamMemberAggregateType<T extends TeamMemberAggregateArgs> = {
+        [P in keyof T & keyof AggregateTeamMember]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTeamMember[P]>
+      : GetScalarType<T[P], AggregateTeamMember[P]>
+  }
+
+
+
+
+  export type TeamMemberGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeamMemberWhereInput
+    orderBy?: TeamMemberOrderByWithAggregationInput | TeamMemberOrderByWithAggregationInput[]
+    by: TeamMemberScalarFieldEnum[] | TeamMemberScalarFieldEnum
+    having?: TeamMemberScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TeamMemberCountAggregateInputType | true
+    _min?: TeamMemberMinAggregateInputType
+    _max?: TeamMemberMaxAggregateInputType
+  }
+
+  export type TeamMemberGroupByOutputType = {
+    id: string
+    teamId: string
+    userId: string
+    role: $Enums.TeamRole
+    createdAt: Date
+    _count: TeamMemberCountAggregateOutputType | null
+    _min: TeamMemberMinAggregateOutputType | null
+    _max: TeamMemberMaxAggregateOutputType | null
+  }
+
+  type GetTeamMemberGroupByPayload<T extends TeamMemberGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TeamMemberGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TeamMemberGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TeamMemberGroupByOutputType[P]>
+            : GetScalarType<T[P], TeamMemberGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TeamMemberSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    teamId?: boolean
+    userId?: boolean
+    role?: boolean
+    createdAt?: boolean
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teamMember"]>
+
+  export type TeamMemberSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    teamId?: boolean
+    userId?: boolean
+    role?: boolean
+    createdAt?: boolean
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teamMember"]>
+
+  export type TeamMemberSelectScalar = {
+    id?: boolean
+    teamId?: boolean
+    userId?: boolean
+    role?: boolean
+    createdAt?: boolean
+  }
+
+  export type TeamMemberInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TeamMemberIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $TeamMemberPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TeamMember"
+    objects: {
+      team: Prisma.$MedicalTeamPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      teamId: string
+      userId: string
+      role: $Enums.TeamRole
+      createdAt: Date
+    }, ExtArgs["result"]["teamMember"]>
+    composites: {}
+  }
+
+  type TeamMemberGetPayload<S extends boolean | null | undefined | TeamMemberDefaultArgs> = $Result.GetResult<Prisma.$TeamMemberPayload, S>
+
+  type TeamMemberCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<TeamMemberFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: TeamMemberCountAggregateInputType | true
+    }
+
+  export interface TeamMemberDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TeamMember'], meta: { name: 'TeamMember' } }
+    /**
+     * Find zero or one TeamMember that matches the filter.
+     * @param {TeamMemberFindUniqueArgs} args - Arguments to find a TeamMember
+     * @example
+     * // Get one TeamMember
+     * const teamMember = await prisma.teamMember.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TeamMemberFindUniqueArgs>(args: SelectSubset<T, TeamMemberFindUniqueArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one TeamMember that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {TeamMemberFindUniqueOrThrowArgs} args - Arguments to find a TeamMember
+     * @example
+     * // Get one TeamMember
+     * const teamMember = await prisma.teamMember.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TeamMemberFindUniqueOrThrowArgs>(args: SelectSubset<T, TeamMemberFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first TeamMember that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamMemberFindFirstArgs} args - Arguments to find a TeamMember
+     * @example
+     * // Get one TeamMember
+     * const teamMember = await prisma.teamMember.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TeamMemberFindFirstArgs>(args?: SelectSubset<T, TeamMemberFindFirstArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first TeamMember that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamMemberFindFirstOrThrowArgs} args - Arguments to find a TeamMember
+     * @example
+     * // Get one TeamMember
+     * const teamMember = await prisma.teamMember.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TeamMemberFindFirstOrThrowArgs>(args?: SelectSubset<T, TeamMemberFindFirstOrThrowArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more TeamMembers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamMemberFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TeamMembers
+     * const teamMembers = await prisma.teamMember.findMany()
+     * 
+     * // Get first 10 TeamMembers
+     * const teamMembers = await prisma.teamMember.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const teamMemberWithIdOnly = await prisma.teamMember.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TeamMemberFindManyArgs>(args?: SelectSubset<T, TeamMemberFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a TeamMember.
+     * @param {TeamMemberCreateArgs} args - Arguments to create a TeamMember.
+     * @example
+     * // Create one TeamMember
+     * const TeamMember = await prisma.teamMember.create({
+     *   data: {
+     *     // ... data to create a TeamMember
+     *   }
+     * })
+     * 
+     */
+    create<T extends TeamMemberCreateArgs>(args: SelectSubset<T, TeamMemberCreateArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many TeamMembers.
+     * @param {TeamMemberCreateManyArgs} args - Arguments to create many TeamMembers.
+     * @example
+     * // Create many TeamMembers
+     * const teamMember = await prisma.teamMember.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TeamMemberCreateManyArgs>(args?: SelectSubset<T, TeamMemberCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TeamMembers and returns the data saved in the database.
+     * @param {TeamMemberCreateManyAndReturnArgs} args - Arguments to create many TeamMembers.
+     * @example
+     * // Create many TeamMembers
+     * const teamMember = await prisma.teamMember.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TeamMembers and only return the `id`
+     * const teamMemberWithIdOnly = await prisma.teamMember.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TeamMemberCreateManyAndReturnArgs>(args?: SelectSubset<T, TeamMemberCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a TeamMember.
+     * @param {TeamMemberDeleteArgs} args - Arguments to delete one TeamMember.
+     * @example
+     * // Delete one TeamMember
+     * const TeamMember = await prisma.teamMember.delete({
+     *   where: {
+     *     // ... filter to delete one TeamMember
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TeamMemberDeleteArgs>(args: SelectSubset<T, TeamMemberDeleteArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one TeamMember.
+     * @param {TeamMemberUpdateArgs} args - Arguments to update one TeamMember.
+     * @example
+     * // Update one TeamMember
+     * const teamMember = await prisma.teamMember.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TeamMemberUpdateArgs>(args: SelectSubset<T, TeamMemberUpdateArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more TeamMembers.
+     * @param {TeamMemberDeleteManyArgs} args - Arguments to filter TeamMembers to delete.
+     * @example
+     * // Delete a few TeamMembers
+     * const { count } = await prisma.teamMember.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TeamMemberDeleteManyArgs>(args?: SelectSubset<T, TeamMemberDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TeamMembers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamMemberUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TeamMembers
+     * const teamMember = await prisma.teamMember.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TeamMemberUpdateManyArgs>(args: SelectSubset<T, TeamMemberUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one TeamMember.
+     * @param {TeamMemberUpsertArgs} args - Arguments to update or create a TeamMember.
+     * @example
+     * // Update or create a TeamMember
+     * const teamMember = await prisma.teamMember.upsert({
+     *   create: {
+     *     // ... data to create a TeamMember
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TeamMember we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TeamMemberUpsertArgs>(args: SelectSubset<T, TeamMemberUpsertArgs<ExtArgs>>): Prisma__TeamMemberClient<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of TeamMembers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamMemberCountArgs} args - Arguments to filter TeamMembers to count.
+     * @example
+     * // Count the number of TeamMembers
+     * const count = await prisma.teamMember.count({
+     *   where: {
+     *     // ... the filter for the TeamMembers we want to count
+     *   }
+     * })
+    **/
+    count<T extends TeamMemberCountArgs>(
+      args?: Subset<T, TeamMemberCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TeamMemberCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TeamMember.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamMemberAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TeamMemberAggregateArgs>(args: Subset<T, TeamMemberAggregateArgs>): Prisma.PrismaPromise<GetTeamMemberAggregateType<T>>
+
+    /**
+     * Group by TeamMember.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamMemberGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TeamMemberGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TeamMemberGroupByArgs['orderBy'] }
+        : { orderBy?: TeamMemberGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TeamMemberGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTeamMemberGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TeamMember model
+   */
+  readonly fields: TeamMemberFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TeamMember.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TeamMemberClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    team<T extends MedicalTeamDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MedicalTeamDefaultArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TeamMember model
+   */ 
+  interface TeamMemberFieldRefs {
+    readonly id: FieldRef<"TeamMember", 'String'>
+    readonly teamId: FieldRef<"TeamMember", 'String'>
+    readonly userId: FieldRef<"TeamMember", 'String'>
+    readonly role: FieldRef<"TeamMember", 'TeamRole'>
+    readonly createdAt: FieldRef<"TeamMember", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TeamMember findUnique
+   */
+  export type TeamMemberFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamMember to fetch.
+     */
+    where: TeamMemberWhereUniqueInput
+  }
+
+  /**
+   * TeamMember findUniqueOrThrow
+   */
+  export type TeamMemberFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamMember to fetch.
+     */
+    where: TeamMemberWhereUniqueInput
+  }
+
+  /**
+   * TeamMember findFirst
+   */
+  export type TeamMemberFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamMember to fetch.
+     */
+    where?: TeamMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamMembers to fetch.
+     */
+    orderBy?: TeamMemberOrderByWithRelationInput | TeamMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeamMembers.
+     */
+    cursor?: TeamMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamMembers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeamMembers.
+     */
+    distinct?: TeamMemberScalarFieldEnum | TeamMemberScalarFieldEnum[]
+  }
+
+  /**
+   * TeamMember findFirstOrThrow
+   */
+  export type TeamMemberFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamMember to fetch.
+     */
+    where?: TeamMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamMembers to fetch.
+     */
+    orderBy?: TeamMemberOrderByWithRelationInput | TeamMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeamMembers.
+     */
+    cursor?: TeamMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamMembers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeamMembers.
+     */
+    distinct?: TeamMemberScalarFieldEnum | TeamMemberScalarFieldEnum[]
+  }
+
+  /**
+   * TeamMember findMany
+   */
+  export type TeamMemberFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamMembers to fetch.
+     */
+    where?: TeamMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamMembers to fetch.
+     */
+    orderBy?: TeamMemberOrderByWithRelationInput | TeamMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TeamMembers.
+     */
+    cursor?: TeamMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamMembers.
+     */
+    skip?: number
+    distinct?: TeamMemberScalarFieldEnum | TeamMemberScalarFieldEnum[]
+  }
+
+  /**
+   * TeamMember create
+   */
+  export type TeamMemberCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TeamMember.
+     */
+    data: XOR<TeamMemberCreateInput, TeamMemberUncheckedCreateInput>
+  }
+
+  /**
+   * TeamMember createMany
+   */
+  export type TeamMemberCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TeamMembers.
+     */
+    data: TeamMemberCreateManyInput | TeamMemberCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TeamMember createManyAndReturn
+   */
+  export type TeamMemberCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many TeamMembers.
+     */
+    data: TeamMemberCreateManyInput | TeamMemberCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TeamMember update
+   */
+  export type TeamMemberUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TeamMember.
+     */
+    data: XOR<TeamMemberUpdateInput, TeamMemberUncheckedUpdateInput>
+    /**
+     * Choose, which TeamMember to update.
+     */
+    where: TeamMemberWhereUniqueInput
+  }
+
+  /**
+   * TeamMember updateMany
+   */
+  export type TeamMemberUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TeamMembers.
+     */
+    data: XOR<TeamMemberUpdateManyMutationInput, TeamMemberUncheckedUpdateManyInput>
+    /**
+     * Filter which TeamMembers to update
+     */
+    where?: TeamMemberWhereInput
+  }
+
+  /**
+   * TeamMember upsert
+   */
+  export type TeamMemberUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TeamMember to update in case it exists.
+     */
+    where: TeamMemberWhereUniqueInput
+    /**
+     * In case the TeamMember found by the `where` argument doesn't exist, create a new TeamMember with this data.
+     */
+    create: XOR<TeamMemberCreateInput, TeamMemberUncheckedCreateInput>
+    /**
+     * In case the TeamMember was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TeamMemberUpdateInput, TeamMemberUncheckedUpdateInput>
+  }
+
+  /**
+   * TeamMember delete
+   */
+  export type TeamMemberDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+    /**
+     * Filter which TeamMember to delete.
+     */
+    where: TeamMemberWhereUniqueInput
+  }
+
+  /**
+   * TeamMember deleteMany
+   */
+  export type TeamMemberDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeamMembers to delete
+     */
+    where?: TeamMemberWhereInput
+  }
+
+  /**
+   * TeamMember without action
+   */
+  export type TeamMemberDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamMember
+     */
+    select?: TeamMemberSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamMemberInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TeamFollower
+   */
+
+  export type AggregateTeamFollower = {
+    _count: TeamFollowerCountAggregateOutputType | null
+    _min: TeamFollowerMinAggregateOutputType | null
+    _max: TeamFollowerMaxAggregateOutputType | null
+  }
+
+  export type TeamFollowerMinAggregateOutputType = {
+    id: string | null
+    teamId: string | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type TeamFollowerMaxAggregateOutputType = {
+    id: string | null
+    teamId: string | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type TeamFollowerCountAggregateOutputType = {
+    id: number
+    teamId: number
+    userId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type TeamFollowerMinAggregateInputType = {
+    id?: true
+    teamId?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type TeamFollowerMaxAggregateInputType = {
+    id?: true
+    teamId?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type TeamFollowerCountAggregateInputType = {
+    id?: true
+    teamId?: true
+    userId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type TeamFollowerAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeamFollower to aggregate.
+     */
+    where?: TeamFollowerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamFollowers to fetch.
+     */
+    orderBy?: TeamFollowerOrderByWithRelationInput | TeamFollowerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TeamFollowerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamFollowers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamFollowers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TeamFollowers
+    **/
+    _count?: true | TeamFollowerCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TeamFollowerMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TeamFollowerMaxAggregateInputType
+  }
+
+  export type GetTeamFollowerAggregateType<T extends TeamFollowerAggregateArgs> = {
+        [P in keyof T & keyof AggregateTeamFollower]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTeamFollower[P]>
+      : GetScalarType<T[P], AggregateTeamFollower[P]>
+  }
+
+
+
+
+  export type TeamFollowerGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeamFollowerWhereInput
+    orderBy?: TeamFollowerOrderByWithAggregationInput | TeamFollowerOrderByWithAggregationInput[]
+    by: TeamFollowerScalarFieldEnum[] | TeamFollowerScalarFieldEnum
+    having?: TeamFollowerScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TeamFollowerCountAggregateInputType | true
+    _min?: TeamFollowerMinAggregateInputType
+    _max?: TeamFollowerMaxAggregateInputType
+  }
+
+  export type TeamFollowerGroupByOutputType = {
+    id: string
+    teamId: string
+    userId: string
+    createdAt: Date
+    _count: TeamFollowerCountAggregateOutputType | null
+    _min: TeamFollowerMinAggregateOutputType | null
+    _max: TeamFollowerMaxAggregateOutputType | null
+  }
+
+  type GetTeamFollowerGroupByPayload<T extends TeamFollowerGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TeamFollowerGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TeamFollowerGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TeamFollowerGroupByOutputType[P]>
+            : GetScalarType<T[P], TeamFollowerGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TeamFollowerSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    teamId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teamFollower"]>
+
+  export type TeamFollowerSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    teamId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teamFollower"]>
+
+  export type TeamFollowerSelectScalar = {
+    id?: boolean
+    teamId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+  }
+
+  export type TeamFollowerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TeamFollowerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    team?: boolean | MedicalTeamDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $TeamFollowerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TeamFollower"
+    objects: {
+      team: Prisma.$MedicalTeamPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      teamId: string
+      userId: string
+      createdAt: Date
+    }, ExtArgs["result"]["teamFollower"]>
+    composites: {}
+  }
+
+  type TeamFollowerGetPayload<S extends boolean | null | undefined | TeamFollowerDefaultArgs> = $Result.GetResult<Prisma.$TeamFollowerPayload, S>
+
+  type TeamFollowerCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<TeamFollowerFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: TeamFollowerCountAggregateInputType | true
+    }
+
+  export interface TeamFollowerDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TeamFollower'], meta: { name: 'TeamFollower' } }
+    /**
+     * Find zero or one TeamFollower that matches the filter.
+     * @param {TeamFollowerFindUniqueArgs} args - Arguments to find a TeamFollower
+     * @example
+     * // Get one TeamFollower
+     * const teamFollower = await prisma.teamFollower.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TeamFollowerFindUniqueArgs>(args: SelectSubset<T, TeamFollowerFindUniqueArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one TeamFollower that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {TeamFollowerFindUniqueOrThrowArgs} args - Arguments to find a TeamFollower
+     * @example
+     * // Get one TeamFollower
+     * const teamFollower = await prisma.teamFollower.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TeamFollowerFindUniqueOrThrowArgs>(args: SelectSubset<T, TeamFollowerFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first TeamFollower that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamFollowerFindFirstArgs} args - Arguments to find a TeamFollower
+     * @example
+     * // Get one TeamFollower
+     * const teamFollower = await prisma.teamFollower.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TeamFollowerFindFirstArgs>(args?: SelectSubset<T, TeamFollowerFindFirstArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first TeamFollower that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamFollowerFindFirstOrThrowArgs} args - Arguments to find a TeamFollower
+     * @example
+     * // Get one TeamFollower
+     * const teamFollower = await prisma.teamFollower.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TeamFollowerFindFirstOrThrowArgs>(args?: SelectSubset<T, TeamFollowerFindFirstOrThrowArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more TeamFollowers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamFollowerFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TeamFollowers
+     * const teamFollowers = await prisma.teamFollower.findMany()
+     * 
+     * // Get first 10 TeamFollowers
+     * const teamFollowers = await prisma.teamFollower.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const teamFollowerWithIdOnly = await prisma.teamFollower.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TeamFollowerFindManyArgs>(args?: SelectSubset<T, TeamFollowerFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a TeamFollower.
+     * @param {TeamFollowerCreateArgs} args - Arguments to create a TeamFollower.
+     * @example
+     * // Create one TeamFollower
+     * const TeamFollower = await prisma.teamFollower.create({
+     *   data: {
+     *     // ... data to create a TeamFollower
+     *   }
+     * })
+     * 
+     */
+    create<T extends TeamFollowerCreateArgs>(args: SelectSubset<T, TeamFollowerCreateArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many TeamFollowers.
+     * @param {TeamFollowerCreateManyArgs} args - Arguments to create many TeamFollowers.
+     * @example
+     * // Create many TeamFollowers
+     * const teamFollower = await prisma.teamFollower.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TeamFollowerCreateManyArgs>(args?: SelectSubset<T, TeamFollowerCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TeamFollowers and returns the data saved in the database.
+     * @param {TeamFollowerCreateManyAndReturnArgs} args - Arguments to create many TeamFollowers.
+     * @example
+     * // Create many TeamFollowers
+     * const teamFollower = await prisma.teamFollower.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TeamFollowers and only return the `id`
+     * const teamFollowerWithIdOnly = await prisma.teamFollower.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TeamFollowerCreateManyAndReturnArgs>(args?: SelectSubset<T, TeamFollowerCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a TeamFollower.
+     * @param {TeamFollowerDeleteArgs} args - Arguments to delete one TeamFollower.
+     * @example
+     * // Delete one TeamFollower
+     * const TeamFollower = await prisma.teamFollower.delete({
+     *   where: {
+     *     // ... filter to delete one TeamFollower
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TeamFollowerDeleteArgs>(args: SelectSubset<T, TeamFollowerDeleteArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one TeamFollower.
+     * @param {TeamFollowerUpdateArgs} args - Arguments to update one TeamFollower.
+     * @example
+     * // Update one TeamFollower
+     * const teamFollower = await prisma.teamFollower.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TeamFollowerUpdateArgs>(args: SelectSubset<T, TeamFollowerUpdateArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more TeamFollowers.
+     * @param {TeamFollowerDeleteManyArgs} args - Arguments to filter TeamFollowers to delete.
+     * @example
+     * // Delete a few TeamFollowers
+     * const { count } = await prisma.teamFollower.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TeamFollowerDeleteManyArgs>(args?: SelectSubset<T, TeamFollowerDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TeamFollowers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamFollowerUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TeamFollowers
+     * const teamFollower = await prisma.teamFollower.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TeamFollowerUpdateManyArgs>(args: SelectSubset<T, TeamFollowerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one TeamFollower.
+     * @param {TeamFollowerUpsertArgs} args - Arguments to update or create a TeamFollower.
+     * @example
+     * // Update or create a TeamFollower
+     * const teamFollower = await prisma.teamFollower.upsert({
+     *   create: {
+     *     // ... data to create a TeamFollower
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TeamFollower we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TeamFollowerUpsertArgs>(args: SelectSubset<T, TeamFollowerUpsertArgs<ExtArgs>>): Prisma__TeamFollowerClient<$Result.GetResult<Prisma.$TeamFollowerPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of TeamFollowers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamFollowerCountArgs} args - Arguments to filter TeamFollowers to count.
+     * @example
+     * // Count the number of TeamFollowers
+     * const count = await prisma.teamFollower.count({
+     *   where: {
+     *     // ... the filter for the TeamFollowers we want to count
+     *   }
+     * })
+    **/
+    count<T extends TeamFollowerCountArgs>(
+      args?: Subset<T, TeamFollowerCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TeamFollowerCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TeamFollower.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamFollowerAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TeamFollowerAggregateArgs>(args: Subset<T, TeamFollowerAggregateArgs>): Prisma.PrismaPromise<GetTeamFollowerAggregateType<T>>
+
+    /**
+     * Group by TeamFollower.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeamFollowerGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TeamFollowerGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TeamFollowerGroupByArgs['orderBy'] }
+        : { orderBy?: TeamFollowerGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TeamFollowerGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTeamFollowerGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TeamFollower model
+   */
+  readonly fields: TeamFollowerFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TeamFollower.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TeamFollowerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    team<T extends MedicalTeamDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MedicalTeamDefaultArgs<ExtArgs>>): Prisma__MedicalTeamClient<$Result.GetResult<Prisma.$MedicalTeamPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TeamFollower model
+   */ 
+  interface TeamFollowerFieldRefs {
+    readonly id: FieldRef<"TeamFollower", 'String'>
+    readonly teamId: FieldRef<"TeamFollower", 'String'>
+    readonly userId: FieldRef<"TeamFollower", 'String'>
+    readonly createdAt: FieldRef<"TeamFollower", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TeamFollower findUnique
+   */
+  export type TeamFollowerFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamFollower to fetch.
+     */
+    where: TeamFollowerWhereUniqueInput
+  }
+
+  /**
+   * TeamFollower findUniqueOrThrow
+   */
+  export type TeamFollowerFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamFollower to fetch.
+     */
+    where: TeamFollowerWhereUniqueInput
+  }
+
+  /**
+   * TeamFollower findFirst
+   */
+  export type TeamFollowerFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamFollower to fetch.
+     */
+    where?: TeamFollowerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamFollowers to fetch.
+     */
+    orderBy?: TeamFollowerOrderByWithRelationInput | TeamFollowerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeamFollowers.
+     */
+    cursor?: TeamFollowerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamFollowers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamFollowers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeamFollowers.
+     */
+    distinct?: TeamFollowerScalarFieldEnum | TeamFollowerScalarFieldEnum[]
+  }
+
+  /**
+   * TeamFollower findFirstOrThrow
+   */
+  export type TeamFollowerFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamFollower to fetch.
+     */
+    where?: TeamFollowerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamFollowers to fetch.
+     */
+    orderBy?: TeamFollowerOrderByWithRelationInput | TeamFollowerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeamFollowers.
+     */
+    cursor?: TeamFollowerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamFollowers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamFollowers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeamFollowers.
+     */
+    distinct?: TeamFollowerScalarFieldEnum | TeamFollowerScalarFieldEnum[]
+  }
+
+  /**
+   * TeamFollower findMany
+   */
+  export type TeamFollowerFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * Filter, which TeamFollowers to fetch.
+     */
+    where?: TeamFollowerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeamFollowers to fetch.
+     */
+    orderBy?: TeamFollowerOrderByWithRelationInput | TeamFollowerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TeamFollowers.
+     */
+    cursor?: TeamFollowerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeamFollowers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeamFollowers.
+     */
+    skip?: number
+    distinct?: TeamFollowerScalarFieldEnum | TeamFollowerScalarFieldEnum[]
+  }
+
+  /**
+   * TeamFollower create
+   */
+  export type TeamFollowerCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TeamFollower.
+     */
+    data: XOR<TeamFollowerCreateInput, TeamFollowerUncheckedCreateInput>
+  }
+
+  /**
+   * TeamFollower createMany
+   */
+  export type TeamFollowerCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TeamFollowers.
+     */
+    data: TeamFollowerCreateManyInput | TeamFollowerCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TeamFollower createManyAndReturn
+   */
+  export type TeamFollowerCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many TeamFollowers.
+     */
+    data: TeamFollowerCreateManyInput | TeamFollowerCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TeamFollower update
+   */
+  export type TeamFollowerUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TeamFollower.
+     */
+    data: XOR<TeamFollowerUpdateInput, TeamFollowerUncheckedUpdateInput>
+    /**
+     * Choose, which TeamFollower to update.
+     */
+    where: TeamFollowerWhereUniqueInput
+  }
+
+  /**
+   * TeamFollower updateMany
+   */
+  export type TeamFollowerUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TeamFollowers.
+     */
+    data: XOR<TeamFollowerUpdateManyMutationInput, TeamFollowerUncheckedUpdateManyInput>
+    /**
+     * Filter which TeamFollowers to update
+     */
+    where?: TeamFollowerWhereInput
+  }
+
+  /**
+   * TeamFollower upsert
+   */
+  export type TeamFollowerUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TeamFollower to update in case it exists.
+     */
+    where: TeamFollowerWhereUniqueInput
+    /**
+     * In case the TeamFollower found by the `where` argument doesn't exist, create a new TeamFollower with this data.
+     */
+    create: XOR<TeamFollowerCreateInput, TeamFollowerUncheckedCreateInput>
+    /**
+     * In case the TeamFollower was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TeamFollowerUpdateInput, TeamFollowerUncheckedUpdateInput>
+  }
+
+  /**
+   * TeamFollower delete
+   */
+  export type TeamFollowerDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+    /**
+     * Filter which TeamFollower to delete.
+     */
+    where: TeamFollowerWhereUniqueInput
+  }
+
+  /**
+   * TeamFollower deleteMany
+   */
+  export type TeamFollowerDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeamFollowers to delete
+     */
+    where?: TeamFollowerWhereInput
+  }
+
+  /**
+   * TeamFollower without action
+   */
+  export type TeamFollowerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeamFollower
+     */
+    select?: TeamFollowerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamFollowerInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PlatformMember
+   */
+
+  export type AggregatePlatformMember = {
+    _count: PlatformMemberCountAggregateOutputType | null
+    _avg: PlatformMemberAvgAggregateOutputType | null
+    _sum: PlatformMemberSumAggregateOutputType | null
+    _min: PlatformMemberMinAggregateOutputType | null
+    _max: PlatformMemberMaxAggregateOutputType | null
+  }
+
+  export type PlatformMemberAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type PlatformMemberSumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type PlatformMemberMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    role: string | null
+    description: string | null
+    imageUrl: string | null
+    sortOrder: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PlatformMemberMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    role: string | null
+    description: string | null
+    imageUrl: string | null
+    sortOrder: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PlatformMemberCountAggregateOutputType = {
+    id: number
+    name: number
+    role: number
+    description: number
+    imageUrl: number
+    sortOrder: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PlatformMemberAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type PlatformMemberSumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type PlatformMemberMinAggregateInputType = {
+    id?: true
+    name?: true
+    role?: true
+    description?: true
+    imageUrl?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PlatformMemberMaxAggregateInputType = {
+    id?: true
+    name?: true
+    role?: true
+    description?: true
+    imageUrl?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PlatformMemberCountAggregateInputType = {
+    id?: true
+    name?: true
+    role?: true
+    description?: true
+    imageUrl?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PlatformMemberAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PlatformMember to aggregate.
+     */
+    where?: PlatformMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformMembers to fetch.
+     */
+    orderBy?: PlatformMemberOrderByWithRelationInput | PlatformMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PlatformMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformMembers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PlatformMembers
+    **/
+    _count?: true | PlatformMemberCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PlatformMemberAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PlatformMemberSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PlatformMemberMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PlatformMemberMaxAggregateInputType
+  }
+
+  export type GetPlatformMemberAggregateType<T extends PlatformMemberAggregateArgs> = {
+        [P in keyof T & keyof AggregatePlatformMember]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePlatformMember[P]>
+      : GetScalarType<T[P], AggregatePlatformMember[P]>
+  }
+
+
+
+
+  export type PlatformMemberGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PlatformMemberWhereInput
+    orderBy?: PlatformMemberOrderByWithAggregationInput | PlatformMemberOrderByWithAggregationInput[]
+    by: PlatformMemberScalarFieldEnum[] | PlatformMemberScalarFieldEnum
+    having?: PlatformMemberScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PlatformMemberCountAggregateInputType | true
+    _avg?: PlatformMemberAvgAggregateInputType
+    _sum?: PlatformMemberSumAggregateInputType
+    _min?: PlatformMemberMinAggregateInputType
+    _max?: PlatformMemberMaxAggregateInputType
+  }
+
+  export type PlatformMemberGroupByOutputType = {
+    id: string
+    name: string
+    role: string
+    description: string | null
+    imageUrl: string | null
+    sortOrder: number
+    createdAt: Date
+    updatedAt: Date
+    _count: PlatformMemberCountAggregateOutputType | null
+    _avg: PlatformMemberAvgAggregateOutputType | null
+    _sum: PlatformMemberSumAggregateOutputType | null
+    _min: PlatformMemberMinAggregateOutputType | null
+    _max: PlatformMemberMaxAggregateOutputType | null
+  }
+
+  type GetPlatformMemberGroupByPayload<T extends PlatformMemberGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PlatformMemberGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PlatformMemberGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PlatformMemberGroupByOutputType[P]>
+            : GetScalarType<T[P], PlatformMemberGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PlatformMemberSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    role?: boolean
+    description?: boolean
+    imageUrl?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["platformMember"]>
+
+  export type PlatformMemberSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    role?: boolean
+    description?: boolean
+    imageUrl?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["platformMember"]>
+
+  export type PlatformMemberSelectScalar = {
+    id?: boolean
+    name?: boolean
+    role?: boolean
+    description?: boolean
+    imageUrl?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+
+  export type $PlatformMemberPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PlatformMember"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      role: string
+      description: string | null
+      imageUrl: string | null
+      sortOrder: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["platformMember"]>
+    composites: {}
+  }
+
+  type PlatformMemberGetPayload<S extends boolean | null | undefined | PlatformMemberDefaultArgs> = $Result.GetResult<Prisma.$PlatformMemberPayload, S>
+
+  type PlatformMemberCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PlatformMemberFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PlatformMemberCountAggregateInputType | true
+    }
+
+  export interface PlatformMemberDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PlatformMember'], meta: { name: 'PlatformMember' } }
+    /**
+     * Find zero or one PlatformMember that matches the filter.
+     * @param {PlatformMemberFindUniqueArgs} args - Arguments to find a PlatformMember
+     * @example
+     * // Get one PlatformMember
+     * const platformMember = await prisma.platformMember.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PlatformMemberFindUniqueArgs>(args: SelectSubset<T, PlatformMemberFindUniqueArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PlatformMember that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PlatformMemberFindUniqueOrThrowArgs} args - Arguments to find a PlatformMember
+     * @example
+     * // Get one PlatformMember
+     * const platformMember = await prisma.platformMember.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PlatformMemberFindUniqueOrThrowArgs>(args: SelectSubset<T, PlatformMemberFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PlatformMember that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformMemberFindFirstArgs} args - Arguments to find a PlatformMember
+     * @example
+     * // Get one PlatformMember
+     * const platformMember = await prisma.platformMember.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PlatformMemberFindFirstArgs>(args?: SelectSubset<T, PlatformMemberFindFirstArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PlatformMember that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformMemberFindFirstOrThrowArgs} args - Arguments to find a PlatformMember
+     * @example
+     * // Get one PlatformMember
+     * const platformMember = await prisma.platformMember.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PlatformMemberFindFirstOrThrowArgs>(args?: SelectSubset<T, PlatformMemberFindFirstOrThrowArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PlatformMembers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformMemberFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PlatformMembers
+     * const platformMembers = await prisma.platformMember.findMany()
+     * 
+     * // Get first 10 PlatformMembers
+     * const platformMembers = await prisma.platformMember.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const platformMemberWithIdOnly = await prisma.platformMember.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PlatformMemberFindManyArgs>(args?: SelectSubset<T, PlatformMemberFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PlatformMember.
+     * @param {PlatformMemberCreateArgs} args - Arguments to create a PlatformMember.
+     * @example
+     * // Create one PlatformMember
+     * const PlatformMember = await prisma.platformMember.create({
+     *   data: {
+     *     // ... data to create a PlatformMember
+     *   }
+     * })
+     * 
+     */
+    create<T extends PlatformMemberCreateArgs>(args: SelectSubset<T, PlatformMemberCreateArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PlatformMembers.
+     * @param {PlatformMemberCreateManyArgs} args - Arguments to create many PlatformMembers.
+     * @example
+     * // Create many PlatformMembers
+     * const platformMember = await prisma.platformMember.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PlatformMemberCreateManyArgs>(args?: SelectSubset<T, PlatformMemberCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PlatformMembers and returns the data saved in the database.
+     * @param {PlatformMemberCreateManyAndReturnArgs} args - Arguments to create many PlatformMembers.
+     * @example
+     * // Create many PlatformMembers
+     * const platformMember = await prisma.platformMember.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PlatformMembers and only return the `id`
+     * const platformMemberWithIdOnly = await prisma.platformMember.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PlatformMemberCreateManyAndReturnArgs>(args?: SelectSubset<T, PlatformMemberCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PlatformMember.
+     * @param {PlatformMemberDeleteArgs} args - Arguments to delete one PlatformMember.
+     * @example
+     * // Delete one PlatformMember
+     * const PlatformMember = await prisma.platformMember.delete({
+     *   where: {
+     *     // ... filter to delete one PlatformMember
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PlatformMemberDeleteArgs>(args: SelectSubset<T, PlatformMemberDeleteArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PlatformMember.
+     * @param {PlatformMemberUpdateArgs} args - Arguments to update one PlatformMember.
+     * @example
+     * // Update one PlatformMember
+     * const platformMember = await prisma.platformMember.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PlatformMemberUpdateArgs>(args: SelectSubset<T, PlatformMemberUpdateArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PlatformMembers.
+     * @param {PlatformMemberDeleteManyArgs} args - Arguments to filter PlatformMembers to delete.
+     * @example
+     * // Delete a few PlatformMembers
+     * const { count } = await prisma.platformMember.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PlatformMemberDeleteManyArgs>(args?: SelectSubset<T, PlatformMemberDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PlatformMembers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformMemberUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PlatformMembers
+     * const platformMember = await prisma.platformMember.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PlatformMemberUpdateManyArgs>(args: SelectSubset<T, PlatformMemberUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PlatformMember.
+     * @param {PlatformMemberUpsertArgs} args - Arguments to update or create a PlatformMember.
+     * @example
+     * // Update or create a PlatformMember
+     * const platformMember = await prisma.platformMember.upsert({
+     *   create: {
+     *     // ... data to create a PlatformMember
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PlatformMember we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PlatformMemberUpsertArgs>(args: SelectSubset<T, PlatformMemberUpsertArgs<ExtArgs>>): Prisma__PlatformMemberClient<$Result.GetResult<Prisma.$PlatformMemberPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PlatformMembers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformMemberCountArgs} args - Arguments to filter PlatformMembers to count.
+     * @example
+     * // Count the number of PlatformMembers
+     * const count = await prisma.platformMember.count({
+     *   where: {
+     *     // ... the filter for the PlatformMembers we want to count
+     *   }
+     * })
+    **/
+    count<T extends PlatformMemberCountArgs>(
+      args?: Subset<T, PlatformMemberCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PlatformMemberCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PlatformMember.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformMemberAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PlatformMemberAggregateArgs>(args: Subset<T, PlatformMemberAggregateArgs>): Prisma.PrismaPromise<GetPlatformMemberAggregateType<T>>
+
+    /**
+     * Group by PlatformMember.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformMemberGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PlatformMemberGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PlatformMemberGroupByArgs['orderBy'] }
+        : { orderBy?: PlatformMemberGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PlatformMemberGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPlatformMemberGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PlatformMember model
+   */
+  readonly fields: PlatformMemberFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PlatformMember.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PlatformMemberClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PlatformMember model
+   */ 
+  interface PlatformMemberFieldRefs {
+    readonly id: FieldRef<"PlatformMember", 'String'>
+    readonly name: FieldRef<"PlatformMember", 'String'>
+    readonly role: FieldRef<"PlatformMember", 'String'>
+    readonly description: FieldRef<"PlatformMember", 'String'>
+    readonly imageUrl: FieldRef<"PlatformMember", 'String'>
+    readonly sortOrder: FieldRef<"PlatformMember", 'Int'>
+    readonly createdAt: FieldRef<"PlatformMember", 'DateTime'>
+    readonly updatedAt: FieldRef<"PlatformMember", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PlatformMember findUnique
+   */
+  export type PlatformMemberFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * Filter, which PlatformMember to fetch.
+     */
+    where: PlatformMemberWhereUniqueInput
+  }
+
+  /**
+   * PlatformMember findUniqueOrThrow
+   */
+  export type PlatformMemberFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * Filter, which PlatformMember to fetch.
+     */
+    where: PlatformMemberWhereUniqueInput
+  }
+
+  /**
+   * PlatformMember findFirst
+   */
+  export type PlatformMemberFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * Filter, which PlatformMember to fetch.
+     */
+    where?: PlatformMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformMembers to fetch.
+     */
+    orderBy?: PlatformMemberOrderByWithRelationInput | PlatformMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PlatformMembers.
+     */
+    cursor?: PlatformMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformMembers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PlatformMembers.
+     */
+    distinct?: PlatformMemberScalarFieldEnum | PlatformMemberScalarFieldEnum[]
+  }
+
+  /**
+   * PlatformMember findFirstOrThrow
+   */
+  export type PlatformMemberFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * Filter, which PlatformMember to fetch.
+     */
+    where?: PlatformMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformMembers to fetch.
+     */
+    orderBy?: PlatformMemberOrderByWithRelationInput | PlatformMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PlatformMembers.
+     */
+    cursor?: PlatformMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformMembers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PlatformMembers.
+     */
+    distinct?: PlatformMemberScalarFieldEnum | PlatformMemberScalarFieldEnum[]
+  }
+
+  /**
+   * PlatformMember findMany
+   */
+  export type PlatformMemberFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * Filter, which PlatformMembers to fetch.
+     */
+    where?: PlatformMemberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformMembers to fetch.
+     */
+    orderBy?: PlatformMemberOrderByWithRelationInput | PlatformMemberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PlatformMembers.
+     */
+    cursor?: PlatformMemberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformMembers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformMembers.
+     */
+    skip?: number
+    distinct?: PlatformMemberScalarFieldEnum | PlatformMemberScalarFieldEnum[]
+  }
+
+  /**
+   * PlatformMember create
+   */
+  export type PlatformMemberCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * The data needed to create a PlatformMember.
+     */
+    data: XOR<PlatformMemberCreateInput, PlatformMemberUncheckedCreateInput>
+  }
+
+  /**
+   * PlatformMember createMany
+   */
+  export type PlatformMemberCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PlatformMembers.
+     */
+    data: PlatformMemberCreateManyInput | PlatformMemberCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PlatformMember createManyAndReturn
+   */
+  export type PlatformMemberCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PlatformMembers.
+     */
+    data: PlatformMemberCreateManyInput | PlatformMemberCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PlatformMember update
+   */
+  export type PlatformMemberUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * The data needed to update a PlatformMember.
+     */
+    data: XOR<PlatformMemberUpdateInput, PlatformMemberUncheckedUpdateInput>
+    /**
+     * Choose, which PlatformMember to update.
+     */
+    where: PlatformMemberWhereUniqueInput
+  }
+
+  /**
+   * PlatformMember updateMany
+   */
+  export type PlatformMemberUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PlatformMembers.
+     */
+    data: XOR<PlatformMemberUpdateManyMutationInput, PlatformMemberUncheckedUpdateManyInput>
+    /**
+     * Filter which PlatformMembers to update
+     */
+    where?: PlatformMemberWhereInput
+  }
+
+  /**
+   * PlatformMember upsert
+   */
+  export type PlatformMemberUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * The filter to search for the PlatformMember to update in case it exists.
+     */
+    where: PlatformMemberWhereUniqueInput
+    /**
+     * In case the PlatformMember found by the `where` argument doesn't exist, create a new PlatformMember with this data.
+     */
+    create: XOR<PlatformMemberCreateInput, PlatformMemberUncheckedCreateInput>
+    /**
+     * In case the PlatformMember was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PlatformMemberUpdateInput, PlatformMemberUncheckedUpdateInput>
+  }
+
+  /**
+   * PlatformMember delete
+   */
+  export type PlatformMemberDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+    /**
+     * Filter which PlatformMember to delete.
+     */
+    where: PlatformMemberWhereUniqueInput
+  }
+
+  /**
+   * PlatformMember deleteMany
+   */
+  export type PlatformMemberDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PlatformMembers to delete
+     */
+    where?: PlatformMemberWhereInput
+  }
+
+  /**
+   * PlatformMember without action
+   */
+  export type PlatformMemberDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformMember
+     */
+    select?: PlatformMemberSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -59427,7 +65112,10 @@ export namespace Prisma {
     twitterUrl: 'twitterUrl',
     whatsappUrl: 'whatsappUrl',
     youtubeUrl: 'youtubeUrl',
-    enableCreativeStudio: 'enableCreativeStudio'
+    enableCreativeStudio: 'enableCreativeStudio',
+    stabilityAIKey: 'stabilityAIKey',
+    assemblyAIKey: 'assemblyAIKey',
+    uploadcarePublicKey: 'uploadcarePublicKey'
   };
 
   export type SiteConfigScalarFieldEnum = (typeof SiteConfigScalarFieldEnum)[keyof typeof SiteConfigScalarFieldEnum]
@@ -59541,7 +65229,8 @@ export namespace Prisma {
     subjectId: 'subjectId',
     notesMarkdown: 'notesMarkdown',
     extras: 'extras',
-    uiConfig: 'uiConfig'
+    uiConfig: 'uiConfig',
+    teamId: 'teamId'
   };
 
   export type LectureScalarFieldEnum = (typeof LectureScalarFieldEnum)[keyof typeof LectureScalarFieldEnum]
@@ -59775,6 +65464,18 @@ export namespace Prisma {
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+  export const NoteScalarFieldEnum: {
+    id: 'id',
+    content: 'content',
+    lectureId: 'lectureId',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type NoteScalarFieldEnum = (typeof NoteScalarFieldEnum)[keyof typeof NoteScalarFieldEnum]
+
+
   export const UserLectureActivityScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
@@ -59848,7 +65549,8 @@ export namespace Prisma {
     expiresAt: 'expiresAt',
     isPinned: 'isPinned',
     isChatMessage: 'isChatMessage',
-    isForumPost: 'isForumPost'
+    isForumPost: 'isForumPost',
+    teamId: 'teamId'
   };
 
   export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
@@ -60110,6 +65812,56 @@ export namespace Prisma {
   export type YoutubeUploadTaskScalarFieldEnum = (typeof YoutubeUploadTaskScalarFieldEnum)[keyof typeof YoutubeUploadTaskScalarFieldEnum]
 
 
+  export const MedicalTeamScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    imageUrl: 'imageUrl',
+    facultyId: 'facultyId',
+    universityId: 'universityId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    followersCount: 'followersCount'
+  };
+
+  export type MedicalTeamScalarFieldEnum = (typeof MedicalTeamScalarFieldEnum)[keyof typeof MedicalTeamScalarFieldEnum]
+
+
+  export const TeamMemberScalarFieldEnum: {
+    id: 'id',
+    teamId: 'teamId',
+    userId: 'userId',
+    role: 'role',
+    createdAt: 'createdAt'
+  };
+
+  export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
+
+
+  export const TeamFollowerScalarFieldEnum: {
+    id: 'id',
+    teamId: 'teamId',
+    userId: 'userId',
+    createdAt: 'createdAt'
+  };
+
+  export type TeamFollowerScalarFieldEnum = (typeof TeamFollowerScalarFieldEnum)[keyof typeof TeamFollowerScalarFieldEnum]
+
+
+  export const PlatformMemberScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    role: 'role',
+    description: 'description',
+    imageUrl: 'imageUrl',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PlatformMemberScalarFieldEnum = (typeof PlatformMemberScalarFieldEnum)[keyof typeof PlatformMemberScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -60360,6 +66112,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TeamRole'
+   */
+  export type EnumTeamRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TeamRole'>
+    
+
+
+  /**
+   * Reference to a field of type 'TeamRole[]'
+   */
+  export type ListEnumTeamRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TeamRole[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -60404,6 +66170,9 @@ export namespace Prisma {
     whatsappUrl?: StringNullableFilter<"SiteConfig"> | string | null
     youtubeUrl?: StringNullableFilter<"SiteConfig"> | string | null
     enableCreativeStudio?: BoolFilter<"SiteConfig"> | boolean
+    stabilityAIKey?: StringNullableFilter<"SiteConfig"> | string | null
+    assemblyAIKey?: StringNullableFilter<"SiteConfig"> | string | null
+    uploadcarePublicKey?: StringNullableFilter<"SiteConfig"> | string | null
   }
 
   export type SiteConfigOrderByWithRelationInput = {
@@ -60431,6 +66200,9 @@ export namespace Prisma {
     whatsappUrl?: SortOrderInput | SortOrder
     youtubeUrl?: SortOrderInput | SortOrder
     enableCreativeStudio?: SortOrder
+    stabilityAIKey?: SortOrderInput | SortOrder
+    assemblyAIKey?: SortOrderInput | SortOrder
+    uploadcarePublicKey?: SortOrderInput | SortOrder
   }
 
   export type SiteConfigWhereUniqueInput = Prisma.AtLeast<{
@@ -60461,6 +66233,9 @@ export namespace Prisma {
     whatsappUrl?: StringNullableFilter<"SiteConfig"> | string | null
     youtubeUrl?: StringNullableFilter<"SiteConfig"> | string | null
     enableCreativeStudio?: BoolFilter<"SiteConfig"> | boolean
+    stabilityAIKey?: StringNullableFilter<"SiteConfig"> | string | null
+    assemblyAIKey?: StringNullableFilter<"SiteConfig"> | string | null
+    uploadcarePublicKey?: StringNullableFilter<"SiteConfig"> | string | null
   }, "id">
 
   export type SiteConfigOrderByWithAggregationInput = {
@@ -60488,6 +66263,9 @@ export namespace Prisma {
     whatsappUrl?: SortOrderInput | SortOrder
     youtubeUrl?: SortOrderInput | SortOrder
     enableCreativeStudio?: SortOrder
+    stabilityAIKey?: SortOrderInput | SortOrder
+    assemblyAIKey?: SortOrderInput | SortOrder
+    uploadcarePublicKey?: SortOrderInput | SortOrder
     _count?: SiteConfigCountOrderByAggregateInput
     _max?: SiteConfigMaxOrderByAggregateInput
     _min?: SiteConfigMinOrderByAggregateInput
@@ -60521,6 +66299,9 @@ export namespace Prisma {
     whatsappUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     youtubeUrl?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
     enableCreativeStudio?: BoolWithAggregatesFilter<"SiteConfig"> | boolean
+    stabilityAIKey?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    assemblyAIKey?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
+    uploadcarePublicKey?: StringNullableWithAggregatesFilter<"SiteConfig"> | string | null
   }
 
   export type FeatureFlagWhereInput = {
@@ -60604,6 +66385,7 @@ export namespace Prisma {
     posts?: PostListRelationFilter
     yearIdFormats?: UniversityYearIdFormatListRelationFilter
     users?: UserListRelationFilter
+    medicalTeams?: MedicalTeamListRelationFilter
   }
 
   export type UniversityOrderByWithRelationInput = {
@@ -60623,6 +66405,7 @@ export namespace Prisma {
     posts?: PostOrderByRelationAggregateInput
     yearIdFormats?: UniversityYearIdFormatOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
+    medicalTeams?: MedicalTeamOrderByRelationAggregateInput
   }
 
   export type UniversityWhereUniqueInput = Prisma.AtLeast<{
@@ -60645,6 +66428,7 @@ export namespace Prisma {
     posts?: PostListRelationFilter
     yearIdFormats?: UniversityYearIdFormatListRelationFilter
     users?: UserListRelationFilter
+    medicalTeams?: MedicalTeamListRelationFilter
   }, "id">
 
   export type UniversityOrderByWithAggregationInput = {
@@ -60688,6 +66472,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserListRelationFilter
     sourceBooks?: SourceBookListRelationFilter
     users?: UserListRelationFilter
+    medicalTeams?: MedicalTeamListRelationFilter
   }
 
   export type FacultyOrderByWithRelationInput = {
@@ -60702,6 +66487,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserOrderByRelationAggregateInput
     sourceBooks?: SourceBookOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
+    medicalTeams?: MedicalTeamOrderByRelationAggregateInput
   }
 
   export type FacultyWhereUniqueInput = Prisma.AtLeast<{
@@ -60719,6 +66505,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserListRelationFilter
     sourceBooks?: SourceBookListRelationFilter
     users?: UserListRelationFilter
+    medicalTeams?: MedicalTeamListRelationFilter
   }, "id">
 
   export type FacultyOrderByWithAggregationInput = {
@@ -61125,6 +66912,7 @@ export namespace Prisma {
     notesMarkdown?: StringNullableFilter<"Lecture"> | string | null
     extras?: JsonNullableFilter<"Lecture">
     uiConfig?: JsonNullableFilter<"Lecture">
+    teamId?: StringNullableFilter<"Lecture"> | string | null
     flashcards?: FlashcardListRelationFilter
     subject?: XOR<SubjectRelationFilter, SubjectWhereInput>
     files?: LectureFileListRelationFilter
@@ -61133,6 +66921,8 @@ export namespace Prisma {
     PastPaper?: XOR<PastPaperNullableRelationFilter, PastPaperWhereInput> | null
     questions?: QuestionListRelationFilter
     activities?: UserLectureActivityListRelationFilter
+    notes?: NoteListRelationFilter
+    team?: XOR<MedicalTeamNullableRelationFilter, MedicalTeamWhereInput> | null
   }
 
   export type LectureOrderByWithRelationInput = {
@@ -61144,6 +66934,7 @@ export namespace Prisma {
     notesMarkdown?: SortOrderInput | SortOrder
     extras?: SortOrderInput | SortOrder
     uiConfig?: SortOrderInput | SortOrder
+    teamId?: SortOrderInput | SortOrder
     flashcards?: FlashcardOrderByRelationAggregateInput
     subject?: SubjectOrderByWithRelationInput
     files?: LectureFileOrderByRelationAggregateInput
@@ -61152,6 +66943,8 @@ export namespace Prisma {
     PastPaper?: PastPaperOrderByWithRelationInput
     questions?: QuestionOrderByRelationAggregateInput
     activities?: UserLectureActivityOrderByRelationAggregateInput
+    notes?: NoteOrderByRelationAggregateInput
+    team?: MedicalTeamOrderByWithRelationInput
   }
 
   export type LectureWhereUniqueInput = Prisma.AtLeast<{
@@ -61166,6 +66959,7 @@ export namespace Prisma {
     notesMarkdown?: StringNullableFilter<"Lecture"> | string | null
     extras?: JsonNullableFilter<"Lecture">
     uiConfig?: JsonNullableFilter<"Lecture">
+    teamId?: StringNullableFilter<"Lecture"> | string | null
     flashcards?: FlashcardListRelationFilter
     subject?: XOR<SubjectRelationFilter, SubjectWhereInput>
     files?: LectureFileListRelationFilter
@@ -61174,6 +66968,8 @@ export namespace Prisma {
     PastPaper?: XOR<PastPaperNullableRelationFilter, PastPaperWhereInput> | null
     questions?: QuestionListRelationFilter
     activities?: UserLectureActivityListRelationFilter
+    notes?: NoteListRelationFilter
+    team?: XOR<MedicalTeamNullableRelationFilter, MedicalTeamWhereInput> | null
   }, "id">
 
   export type LectureOrderByWithAggregationInput = {
@@ -61185,6 +66981,7 @@ export namespace Prisma {
     notesMarkdown?: SortOrderInput | SortOrder
     extras?: SortOrderInput | SortOrder
     uiConfig?: SortOrderInput | SortOrder
+    teamId?: SortOrderInput | SortOrder
     _count?: LectureCountOrderByAggregateInput
     _avg?: LectureAvgOrderByAggregateInput
     _max?: LectureMaxOrderByAggregateInput
@@ -61204,6 +67001,7 @@ export namespace Prisma {
     notesMarkdown?: StringNullableWithAggregatesFilter<"Lecture"> | string | null
     extras?: JsonNullableWithAggregatesFilter<"Lecture">
     uiConfig?: JsonNullableWithAggregatesFilter<"Lecture">
+    teamId?: StringNullableWithAggregatesFilter<"Lecture"> | string | null
   }
 
   export type FlashcardWhereInput = {
@@ -62322,6 +68120,9 @@ export namespace Prisma {
     followers?: UserFollowListRelationFilter
     lectureActivities?: UserLectureActivityListRelationFilter
     tasks?: UserTaskListRelationFilter
+    notes?: NoteListRelationFilter
+    teamMemberships?: TeamMemberListRelationFilter
+    followedTeams?: TeamFollowerListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -62383,6 +68184,9 @@ export namespace Prisma {
     followers?: UserFollowOrderByRelationAggregateInput
     lectureActivities?: UserLectureActivityOrderByRelationAggregateInput
     tasks?: UserTaskOrderByRelationAggregateInput
+    notes?: NoteOrderByRelationAggregateInput
+    teamMemberships?: TeamMemberOrderByRelationAggregateInput
+    followedTeams?: TeamFollowerOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -62447,6 +68251,9 @@ export namespace Prisma {
     followers?: UserFollowListRelationFilter
     lectureActivities?: UserLectureActivityListRelationFilter
     tasks?: UserTaskListRelationFilter
+    notes?: NoteListRelationFilter
+    teamMemberships?: TeamMemberListRelationFilter
+    followedTeams?: TeamFollowerListRelationFilter
   }, "id" | "email" | "handle">
 
   export type UserOrderByWithAggregationInput = {
@@ -62515,6 +68322,70 @@ export namespace Prisma {
     facultyId?: StringNullableWithAggregatesFilter<"User"> | string | null
     personalGeminiKey?: StringNullableWithAggregatesFilter<"User"> | string | null
     handle?: StringNullableWithAggregatesFilter<"User"> | string | null
+  }
+
+  export type NoteWhereInput = {
+    AND?: NoteWhereInput | NoteWhereInput[]
+    OR?: NoteWhereInput[]
+    NOT?: NoteWhereInput | NoteWhereInput[]
+    id?: StringFilter<"Note"> | string
+    content?: StringFilter<"Note"> | string
+    lectureId?: StringFilter<"Note"> | string
+    userId?: StringFilter<"Note"> | string
+    createdAt?: DateTimeFilter<"Note"> | Date | string
+    updatedAt?: DateTimeFilter<"Note"> | Date | string
+    lecture?: XOR<LectureRelationFilter, LectureWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type NoteOrderByWithRelationInput = {
+    id?: SortOrder
+    content?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    lecture?: LectureOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type NoteWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_lectureId?: NoteUserIdLectureIdCompoundUniqueInput
+    AND?: NoteWhereInput | NoteWhereInput[]
+    OR?: NoteWhereInput[]
+    NOT?: NoteWhereInput | NoteWhereInput[]
+    content?: StringFilter<"Note"> | string
+    lectureId?: StringFilter<"Note"> | string
+    userId?: StringFilter<"Note"> | string
+    createdAt?: DateTimeFilter<"Note"> | Date | string
+    updatedAt?: DateTimeFilter<"Note"> | Date | string
+    lecture?: XOR<LectureRelationFilter, LectureWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id" | "userId_lectureId">
+
+  export type NoteOrderByWithAggregationInput = {
+    id?: SortOrder
+    content?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: NoteCountOrderByAggregateInput
+    _max?: NoteMaxOrderByAggregateInput
+    _min?: NoteMinOrderByAggregateInput
+  }
+
+  export type NoteScalarWhereWithAggregatesInput = {
+    AND?: NoteScalarWhereWithAggregatesInput | NoteScalarWhereWithAggregatesInput[]
+    OR?: NoteScalarWhereWithAggregatesInput[]
+    NOT?: NoteScalarWhereWithAggregatesInput | NoteScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Note"> | string
+    content?: StringWithAggregatesFilter<"Note"> | string
+    lectureId?: StringWithAggregatesFilter<"Note"> | string
+    userId?: StringWithAggregatesFilter<"Note"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Note"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Note"> | Date | string
   }
 
   export type UserLectureActivityWhereInput = {
@@ -62860,11 +68731,13 @@ export namespace Prisma {
     isPinned?: BoolFilter<"Post"> | boolean
     isChatMessage?: BoolFilter<"Post"> | boolean
     isForumPost?: BoolFilter<"Post"> | boolean
+    teamId?: StringNullableFilter<"Post"> | string | null
     comments?: CommentListRelationFilter
     likes?: LikeListRelationFilter
     author?: XOR<UserRelationFilter, UserWhereInput>
     forum?: XOR<ForumRelationFilter, ForumWhereInput>
     university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    team?: XOR<MedicalTeamNullableRelationFilter, MedicalTeamWhereInput> | null
   }
 
   export type PostOrderByWithRelationInput = {
@@ -62882,11 +68755,13 @@ export namespace Prisma {
     isPinned?: SortOrder
     isChatMessage?: SortOrder
     isForumPost?: SortOrder
+    teamId?: SortOrderInput | SortOrder
     comments?: CommentOrderByRelationAggregateInput
     likes?: LikeOrderByRelationAggregateInput
     author?: UserOrderByWithRelationInput
     forum?: ForumOrderByWithRelationInput
     university?: UniversityOrderByWithRelationInput
+    team?: MedicalTeamOrderByWithRelationInput
   }
 
   export type PostWhereUniqueInput = Prisma.AtLeast<{
@@ -62907,11 +68782,13 @@ export namespace Prisma {
     isPinned?: BoolFilter<"Post"> | boolean
     isChatMessage?: BoolFilter<"Post"> | boolean
     isForumPost?: BoolFilter<"Post"> | boolean
+    teamId?: StringNullableFilter<"Post"> | string | null
     comments?: CommentListRelationFilter
     likes?: LikeListRelationFilter
     author?: XOR<UserRelationFilter, UserWhereInput>
     forum?: XOR<ForumRelationFilter, ForumWhereInput>
     university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    team?: XOR<MedicalTeamNullableRelationFilter, MedicalTeamWhereInput> | null
   }, "id">
 
   export type PostOrderByWithAggregationInput = {
@@ -62929,6 +68806,7 @@ export namespace Prisma {
     isPinned?: SortOrder
     isChatMessage?: SortOrder
     isForumPost?: SortOrder
+    teamId?: SortOrderInput | SortOrder
     _count?: PostCountOrderByAggregateInput
     _max?: PostMaxOrderByAggregateInput
     _min?: PostMinOrderByAggregateInput
@@ -62952,6 +68830,7 @@ export namespace Prisma {
     isPinned?: BoolWithAggregatesFilter<"Post"> | boolean
     isChatMessage?: BoolWithAggregatesFilter<"Post"> | boolean
     isForumPost?: BoolWithAggregatesFilter<"Post"> | boolean
+    teamId?: StringNullableWithAggregatesFilter<"Post"> | string | null
   }
 
   export type CommentWhereInput = {
@@ -64278,6 +70157,280 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"YoutubeUploadTask"> | Date | string
   }
 
+  export type MedicalTeamWhereInput = {
+    AND?: MedicalTeamWhereInput | MedicalTeamWhereInput[]
+    OR?: MedicalTeamWhereInput[]
+    NOT?: MedicalTeamWhereInput | MedicalTeamWhereInput[]
+    id?: StringFilter<"MedicalTeam"> | string
+    name?: StringFilter<"MedicalTeam"> | string
+    description?: StringNullableFilter<"MedicalTeam"> | string | null
+    imageUrl?: StringNullableFilter<"MedicalTeam"> | string | null
+    facultyId?: StringFilter<"MedicalTeam"> | string
+    universityId?: StringFilter<"MedicalTeam"> | string
+    createdAt?: DateTimeFilter<"MedicalTeam"> | Date | string
+    updatedAt?: DateTimeFilter<"MedicalTeam"> | Date | string
+    followersCount?: IntFilter<"MedicalTeam"> | number
+    faculty?: XOR<FacultyRelationFilter, FacultyWhereInput>
+    university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    members?: TeamMemberListRelationFilter
+    followers?: TeamFollowerListRelationFilter
+    lectures?: LectureListRelationFilter
+    posts?: PostListRelationFilter
+  }
+
+  export type MedicalTeamOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    facultyId?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    followersCount?: SortOrder
+    faculty?: FacultyOrderByWithRelationInput
+    university?: UniversityOrderByWithRelationInput
+    members?: TeamMemberOrderByRelationAggregateInput
+    followers?: TeamFollowerOrderByRelationAggregateInput
+    lectures?: LectureOrderByRelationAggregateInput
+    posts?: PostOrderByRelationAggregateInput
+  }
+
+  export type MedicalTeamWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: MedicalTeamWhereInput | MedicalTeamWhereInput[]
+    OR?: MedicalTeamWhereInput[]
+    NOT?: MedicalTeamWhereInput | MedicalTeamWhereInput[]
+    name?: StringFilter<"MedicalTeam"> | string
+    description?: StringNullableFilter<"MedicalTeam"> | string | null
+    imageUrl?: StringNullableFilter<"MedicalTeam"> | string | null
+    facultyId?: StringFilter<"MedicalTeam"> | string
+    universityId?: StringFilter<"MedicalTeam"> | string
+    createdAt?: DateTimeFilter<"MedicalTeam"> | Date | string
+    updatedAt?: DateTimeFilter<"MedicalTeam"> | Date | string
+    followersCount?: IntFilter<"MedicalTeam"> | number
+    faculty?: XOR<FacultyRelationFilter, FacultyWhereInput>
+    university?: XOR<UniversityRelationFilter, UniversityWhereInput>
+    members?: TeamMemberListRelationFilter
+    followers?: TeamFollowerListRelationFilter
+    lectures?: LectureListRelationFilter
+    posts?: PostListRelationFilter
+  }, "id">
+
+  export type MedicalTeamOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    facultyId?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    followersCount?: SortOrder
+    _count?: MedicalTeamCountOrderByAggregateInput
+    _avg?: MedicalTeamAvgOrderByAggregateInput
+    _max?: MedicalTeamMaxOrderByAggregateInput
+    _min?: MedicalTeamMinOrderByAggregateInput
+    _sum?: MedicalTeamSumOrderByAggregateInput
+  }
+
+  export type MedicalTeamScalarWhereWithAggregatesInput = {
+    AND?: MedicalTeamScalarWhereWithAggregatesInput | MedicalTeamScalarWhereWithAggregatesInput[]
+    OR?: MedicalTeamScalarWhereWithAggregatesInput[]
+    NOT?: MedicalTeamScalarWhereWithAggregatesInput | MedicalTeamScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"MedicalTeam"> | string
+    name?: StringWithAggregatesFilter<"MedicalTeam"> | string
+    description?: StringNullableWithAggregatesFilter<"MedicalTeam"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"MedicalTeam"> | string | null
+    facultyId?: StringWithAggregatesFilter<"MedicalTeam"> | string
+    universityId?: StringWithAggregatesFilter<"MedicalTeam"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"MedicalTeam"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MedicalTeam"> | Date | string
+    followersCount?: IntWithAggregatesFilter<"MedicalTeam"> | number
+  }
+
+  export type TeamMemberWhereInput = {
+    AND?: TeamMemberWhereInput | TeamMemberWhereInput[]
+    OR?: TeamMemberWhereInput[]
+    NOT?: TeamMemberWhereInput | TeamMemberWhereInput[]
+    id?: StringFilter<"TeamMember"> | string
+    teamId?: StringFilter<"TeamMember"> | string
+    userId?: StringFilter<"TeamMember"> | string
+    role?: EnumTeamRoleFilter<"TeamMember"> | $Enums.TeamRole
+    createdAt?: DateTimeFilter<"TeamMember"> | Date | string
+    team?: XOR<MedicalTeamRelationFilter, MedicalTeamWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type TeamMemberOrderByWithRelationInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    role?: SortOrder
+    createdAt?: SortOrder
+    team?: MedicalTeamOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type TeamMemberWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    teamId_userId?: TeamMemberTeamIdUserIdCompoundUniqueInput
+    AND?: TeamMemberWhereInput | TeamMemberWhereInput[]
+    OR?: TeamMemberWhereInput[]
+    NOT?: TeamMemberWhereInput | TeamMemberWhereInput[]
+    teamId?: StringFilter<"TeamMember"> | string
+    userId?: StringFilter<"TeamMember"> | string
+    role?: EnumTeamRoleFilter<"TeamMember"> | $Enums.TeamRole
+    createdAt?: DateTimeFilter<"TeamMember"> | Date | string
+    team?: XOR<MedicalTeamRelationFilter, MedicalTeamWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id" | "teamId_userId">
+
+  export type TeamMemberOrderByWithAggregationInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    role?: SortOrder
+    createdAt?: SortOrder
+    _count?: TeamMemberCountOrderByAggregateInput
+    _max?: TeamMemberMaxOrderByAggregateInput
+    _min?: TeamMemberMinOrderByAggregateInput
+  }
+
+  export type TeamMemberScalarWhereWithAggregatesInput = {
+    AND?: TeamMemberScalarWhereWithAggregatesInput | TeamMemberScalarWhereWithAggregatesInput[]
+    OR?: TeamMemberScalarWhereWithAggregatesInput[]
+    NOT?: TeamMemberScalarWhereWithAggregatesInput | TeamMemberScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TeamMember"> | string
+    teamId?: StringWithAggregatesFilter<"TeamMember"> | string
+    userId?: StringWithAggregatesFilter<"TeamMember"> | string
+    role?: EnumTeamRoleWithAggregatesFilter<"TeamMember"> | $Enums.TeamRole
+    createdAt?: DateTimeWithAggregatesFilter<"TeamMember"> | Date | string
+  }
+
+  export type TeamFollowerWhereInput = {
+    AND?: TeamFollowerWhereInput | TeamFollowerWhereInput[]
+    OR?: TeamFollowerWhereInput[]
+    NOT?: TeamFollowerWhereInput | TeamFollowerWhereInput[]
+    id?: StringFilter<"TeamFollower"> | string
+    teamId?: StringFilter<"TeamFollower"> | string
+    userId?: StringFilter<"TeamFollower"> | string
+    createdAt?: DateTimeFilter<"TeamFollower"> | Date | string
+    team?: XOR<MedicalTeamRelationFilter, MedicalTeamWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type TeamFollowerOrderByWithRelationInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    team?: MedicalTeamOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type TeamFollowerWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    teamId_userId?: TeamFollowerTeamIdUserIdCompoundUniqueInput
+    AND?: TeamFollowerWhereInput | TeamFollowerWhereInput[]
+    OR?: TeamFollowerWhereInput[]
+    NOT?: TeamFollowerWhereInput | TeamFollowerWhereInput[]
+    teamId?: StringFilter<"TeamFollower"> | string
+    userId?: StringFilter<"TeamFollower"> | string
+    createdAt?: DateTimeFilter<"TeamFollower"> | Date | string
+    team?: XOR<MedicalTeamRelationFilter, MedicalTeamWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id" | "teamId_userId">
+
+  export type TeamFollowerOrderByWithAggregationInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    _count?: TeamFollowerCountOrderByAggregateInput
+    _max?: TeamFollowerMaxOrderByAggregateInput
+    _min?: TeamFollowerMinOrderByAggregateInput
+  }
+
+  export type TeamFollowerScalarWhereWithAggregatesInput = {
+    AND?: TeamFollowerScalarWhereWithAggregatesInput | TeamFollowerScalarWhereWithAggregatesInput[]
+    OR?: TeamFollowerScalarWhereWithAggregatesInput[]
+    NOT?: TeamFollowerScalarWhereWithAggregatesInput | TeamFollowerScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TeamFollower"> | string
+    teamId?: StringWithAggregatesFilter<"TeamFollower"> | string
+    userId?: StringWithAggregatesFilter<"TeamFollower"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"TeamFollower"> | Date | string
+  }
+
+  export type PlatformMemberWhereInput = {
+    AND?: PlatformMemberWhereInput | PlatformMemberWhereInput[]
+    OR?: PlatformMemberWhereInput[]
+    NOT?: PlatformMemberWhereInput | PlatformMemberWhereInput[]
+    id?: StringFilter<"PlatformMember"> | string
+    name?: StringFilter<"PlatformMember"> | string
+    role?: StringFilter<"PlatformMember"> | string
+    description?: StringNullableFilter<"PlatformMember"> | string | null
+    imageUrl?: StringNullableFilter<"PlatformMember"> | string | null
+    sortOrder?: IntFilter<"PlatformMember"> | number
+    createdAt?: DateTimeFilter<"PlatformMember"> | Date | string
+    updatedAt?: DateTimeFilter<"PlatformMember"> | Date | string
+  }
+
+  export type PlatformMemberOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    description?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PlatformMemberWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PlatformMemberWhereInput | PlatformMemberWhereInput[]
+    OR?: PlatformMemberWhereInput[]
+    NOT?: PlatformMemberWhereInput | PlatformMemberWhereInput[]
+    name?: StringFilter<"PlatformMember"> | string
+    role?: StringFilter<"PlatformMember"> | string
+    description?: StringNullableFilter<"PlatformMember"> | string | null
+    imageUrl?: StringNullableFilter<"PlatformMember"> | string | null
+    sortOrder?: IntFilter<"PlatformMember"> | number
+    createdAt?: DateTimeFilter<"PlatformMember"> | Date | string
+    updatedAt?: DateTimeFilter<"PlatformMember"> | Date | string
+  }, "id">
+
+  export type PlatformMemberOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    description?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PlatformMemberCountOrderByAggregateInput
+    _avg?: PlatformMemberAvgOrderByAggregateInput
+    _max?: PlatformMemberMaxOrderByAggregateInput
+    _min?: PlatformMemberMinOrderByAggregateInput
+    _sum?: PlatformMemberSumOrderByAggregateInput
+  }
+
+  export type PlatformMemberScalarWhereWithAggregatesInput = {
+    AND?: PlatformMemberScalarWhereWithAggregatesInput | PlatformMemberScalarWhereWithAggregatesInput[]
+    OR?: PlatformMemberScalarWhereWithAggregatesInput[]
+    NOT?: PlatformMemberScalarWhereWithAggregatesInput | PlatformMemberScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PlatformMember"> | string
+    name?: StringWithAggregatesFilter<"PlatformMember"> | string
+    role?: StringWithAggregatesFilter<"PlatformMember"> | string
+    description?: StringNullableWithAggregatesFilter<"PlatformMember"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"PlatformMember"> | string | null
+    sortOrder?: IntWithAggregatesFilter<"PlatformMember"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PlatformMember"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PlatformMember"> | Date | string
+  }
+
   export type SiteConfigCreateInput = {
     id?: string
     siteName?: string
@@ -64303,6 +70456,9 @@ export namespace Prisma {
     whatsappUrl?: string | null
     youtubeUrl?: string | null
     enableCreativeStudio?: boolean
+    stabilityAIKey?: string | null
+    assemblyAIKey?: string | null
+    uploadcarePublicKey?: string | null
   }
 
   export type SiteConfigUncheckedCreateInput = {
@@ -64330,6 +70486,9 @@ export namespace Prisma {
     whatsappUrl?: string | null
     youtubeUrl?: string | null
     enableCreativeStudio?: boolean
+    stabilityAIKey?: string | null
+    assemblyAIKey?: string | null
+    uploadcarePublicKey?: string | null
   }
 
   export type SiteConfigUpdateInput = {
@@ -64357,6 +70516,9 @@ export namespace Prisma {
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
     enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
+    stabilityAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    assemblyAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadcarePublicKey?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SiteConfigUncheckedUpdateInput = {
@@ -64384,6 +70546,9 @@ export namespace Prisma {
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
     enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
+    stabilityAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    assemblyAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadcarePublicKey?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SiteConfigCreateManyInput = {
@@ -64411,6 +70576,9 @@ export namespace Prisma {
     whatsappUrl?: string | null
     youtubeUrl?: string | null
     enableCreativeStudio?: boolean
+    stabilityAIKey?: string | null
+    assemblyAIKey?: string | null
+    uploadcarePublicKey?: string | null
   }
 
   export type SiteConfigUpdateManyMutationInput = {
@@ -64438,6 +70606,9 @@ export namespace Prisma {
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
     enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
+    stabilityAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    assemblyAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadcarePublicKey?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SiteConfigUncheckedUpdateManyInput = {
@@ -64465,6 +70636,9 @@ export namespace Prisma {
     whatsappUrl?: NullableStringFieldUpdateOperationsInput | string | null
     youtubeUrl?: NullableStringFieldUpdateOperationsInput | string | null
     enableCreativeStudio?: BoolFieldUpdateOperationsInput | boolean
+    stabilityAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    assemblyAIKey?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadcarePublicKey?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type FeatureFlagCreateInput = {
@@ -64546,6 +70720,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateInput = {
@@ -64565,6 +70740,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUpdateInput = {
@@ -64584,6 +70760,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateInput = {
@@ -64603,6 +70780,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityCreateManyInput = {
@@ -64643,6 +70821,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookCreateNestedManyWithoutFacultyInput
     users?: UserCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyUncheckedCreateInput = {
@@ -64656,6 +70835,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookUncheckedCreateNestedManyWithoutFacultyInput
     users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyUpdateInput = {
@@ -64669,6 +70849,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUpdateManyWithoutFacultyNestedInput
     users?: UserUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyUncheckedUpdateInput = {
@@ -64682,6 +70863,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUncheckedUpdateManyWithoutFacultyNestedInput
     users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyCreateManyInput = {
@@ -65088,6 +71270,8 @@ export namespace Prisma {
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateInput = {
@@ -65099,6 +71283,7 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
@@ -65106,6 +71291,7 @@ export namespace Prisma {
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureUpdateInput = {
@@ -65124,6 +71310,8 @@ export namespace Prisma {
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateInput = {
@@ -65135,6 +71323,7 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
@@ -65142,6 +71331,7 @@ export namespace Prisma {
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type LectureCreateManyInput = {
@@ -65153,6 +71343,7 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
   }
 
   export type LectureUpdateManyMutationInput = {
@@ -65174,6 +71365,7 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type FlashcardCreateInput = {
@@ -66315,6 +72507,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -66372,6 +72567,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -66429,6 +72627,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -66486,6 +72687,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -66572,6 +72776,67 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type NoteCreateInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lecture: LectureCreateNestedOneWithoutNotesInput
+    user: UserCreateNestedOneWithoutNotesInput
+  }
+
+  export type NoteUncheckedCreateInput = {
+    id?: string
+    content: string
+    lectureId: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lecture?: LectureUpdateOneRequiredWithoutNotesNestedInput
+    user?: UserUpdateOneRequiredWithoutNotesNestedInput
+  }
+
+  export type NoteUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    lectureId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteCreateManyInput = {
+    id?: string
+    content: string
+    lectureId: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    lectureId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserLectureActivityCreateInput = {
@@ -66900,6 +73165,7 @@ export namespace Prisma {
     author: UserCreateNestedOneWithoutPostsInput
     forum: ForumCreateNestedOneWithoutPostsInput
     university: UniversityCreateNestedOneWithoutPostsInput
+    team?: MedicalTeamCreateNestedOneWithoutPostsInput
   }
 
   export type PostUncheckedCreateInput = {
@@ -66917,6 +73183,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -66938,6 +73205,7 @@ export namespace Prisma {
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
     university?: UniversityUpdateOneRequiredWithoutPostsNestedInput
+    team?: MedicalTeamUpdateOneWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateInput = {
@@ -66955,6 +73223,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -66974,6 +73243,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
   }
 
   export type PostUpdateManyMutationInput = {
@@ -67005,6 +73275,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CommentCreateInput = {
@@ -68375,6 +74646,282 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type MedicalTeamCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    faculty: FacultyCreateNestedOneWithoutMedicalTeamsInput
+    university: UniversityCreateNestedOneWithoutMedicalTeamsInput
+    members?: TeamMemberCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerCreateNestedManyWithoutTeamInput
+    lectures?: LectureCreateNestedManyWithoutTeamInput
+    posts?: PostCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUncheckedCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerUncheckedCreateNestedManyWithoutTeamInput
+    lectures?: LectureUncheckedCreateNestedManyWithoutTeamInput
+    posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    faculty?: FacultyUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    university?: UniversityUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUpdateManyWithoutTeamNestedInput
+    posts?: PostUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUncheckedUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUncheckedUpdateManyWithoutTeamNestedInput
+    posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamCreateManyInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+  }
+
+  export type MedicalTeamUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type MedicalTeamUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type TeamMemberCreateInput = {
+    id?: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+    team: MedicalTeamCreateNestedOneWithoutMembersInput
+    user: UserCreateNestedOneWithoutTeamMembershipsInput
+  }
+
+  export type TeamMemberUncheckedCreateInput = {
+    id?: string
+    teamId: string
+    userId: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+  }
+
+  export type TeamMemberUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: MedicalTeamUpdateOneRequiredWithoutMembersNestedInput
+    user?: UserUpdateOneRequiredWithoutTeamMembershipsNestedInput
+  }
+
+  export type TeamMemberUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamMemberCreateManyInput = {
+    id?: string
+    teamId: string
+    userId: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+  }
+
+  export type TeamMemberUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamMemberUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamFollowerCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    team: MedicalTeamCreateNestedOneWithoutFollowersInput
+    user: UserCreateNestedOneWithoutFollowedTeamsInput
+  }
+
+  export type TeamFollowerUncheckedCreateInput = {
+    id?: string
+    teamId: string
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type TeamFollowerUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: MedicalTeamUpdateOneRequiredWithoutFollowersNestedInput
+    user?: UserUpdateOneRequiredWithoutFollowedTeamsNestedInput
+  }
+
+  export type TeamFollowerUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamFollowerCreateManyInput = {
+    id?: string
+    teamId: string
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type TeamFollowerUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamFollowerUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlatformMemberCreateInput = {
+    id?: string
+    name: string
+    role: string
+    description?: string | null
+    imageUrl?: string | null
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PlatformMemberUncheckedCreateInput = {
+    id?: string
+    name: string
+    role: string
+    description?: string | null
+    imageUrl?: string | null
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PlatformMemberUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlatformMemberUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlatformMemberCreateManyInput = {
+    id?: string
+    name: string
+    role: string
+    description?: string | null
+    imageUrl?: string | null
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PlatformMemberUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlatformMemberUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -68451,6 +74998,9 @@ export namespace Prisma {
     whatsappUrl?: SortOrder
     youtubeUrl?: SortOrder
     enableCreativeStudio?: SortOrder
+    stabilityAIKey?: SortOrder
+    assemblyAIKey?: SortOrder
+    uploadcarePublicKey?: SortOrder
   }
 
   export type SiteConfigMaxOrderByAggregateInput = {
@@ -68478,6 +75028,9 @@ export namespace Prisma {
     whatsappUrl?: SortOrder
     youtubeUrl?: SortOrder
     enableCreativeStudio?: SortOrder
+    stabilityAIKey?: SortOrder
+    assemblyAIKey?: SortOrder
+    uploadcarePublicKey?: SortOrder
   }
 
   export type SiteConfigMinOrderByAggregateInput = {
@@ -68505,6 +75058,9 @@ export namespace Prisma {
     whatsappUrl?: SortOrder
     youtubeUrl?: SortOrder
     enableCreativeStudio?: SortOrder
+    stabilityAIKey?: SortOrder
+    assemblyAIKey?: SortOrder
+    uploadcarePublicKey?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -68718,6 +75274,12 @@ export namespace Prisma {
     none?: UserWhereInput
   }
 
+  export type MedicalTeamListRelationFilter = {
+    every?: MedicalTeamWhereInput
+    some?: MedicalTeamWhereInput
+    none?: MedicalTeamWhereInput
+  }
+
   export type AcademicYearOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -68755,6 +75317,10 @@ export namespace Prisma {
   }
 
   export type UserOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type MedicalTeamOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -69170,6 +75736,17 @@ export namespace Prisma {
     none?: UserLectureActivityWhereInput
   }
 
+  export type NoteListRelationFilter = {
+    every?: NoteWhereInput
+    some?: NoteWhereInput
+    none?: NoteWhereInput
+  }
+
+  export type MedicalTeamNullableRelationFilter = {
+    is?: MedicalTeamWhereInput | null
+    isNot?: MedicalTeamWhereInput | null
+  }
+
   export type FlashcardOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -69194,6 +75771,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type NoteOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type LectureCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
@@ -69203,6 +75784,7 @@ export namespace Prisma {
     notesMarkdown?: SortOrder
     extras?: SortOrder
     uiConfig?: SortOrder
+    teamId?: SortOrder
   }
 
   export type LectureAvgOrderByAggregateInput = {
@@ -69216,6 +75798,7 @@ export namespace Prisma {
     order?: SortOrder
     subjectId?: SortOrder
     notesMarkdown?: SortOrder
+    teamId?: SortOrder
   }
 
   export type LectureMinOrderByAggregateInput = {
@@ -69225,6 +75808,7 @@ export namespace Prisma {
     order?: SortOrder
     subjectId?: SortOrder
     notesMarkdown?: SortOrder
+    teamId?: SortOrder
   }
 
   export type LectureSumOrderByAggregateInput = {
@@ -70100,6 +76684,18 @@ export namespace Prisma {
     none?: UserTaskWhereInput
   }
 
+  export type TeamMemberListRelationFilter = {
+    every?: TeamMemberWhereInput
+    some?: TeamMemberWhereInput
+    none?: TeamMemberWhereInput
+  }
+
+  export type TeamFollowerListRelationFilter = {
+    every?: TeamFollowerWhereInput
+    some?: TeamFollowerWhereInput
+    none?: TeamFollowerWhereInput
+  }
+
   export type AIUsageLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -70153,6 +76749,14 @@ export namespace Prisma {
   }
 
   export type UserTaskOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TeamMemberOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TeamFollowerOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -70286,6 +76890,38 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
+  }
+
+  export type NoteUserIdLectureIdCompoundUniqueInput = {
+    userId: string
+    lectureId: string
+  }
+
+  export type NoteCountOrderByAggregateInput = {
+    id?: SortOrder
+    content?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type NoteMaxOrderByAggregateInput = {
+    id?: SortOrder
+    content?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type NoteMinOrderByAggregateInput = {
+    id?: SortOrder
+    content?: SortOrder
+    lectureId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type UserLectureActivityUserIdLectureIdCompoundUniqueInput = {
@@ -70496,6 +77132,7 @@ export namespace Prisma {
     isPinned?: SortOrder
     isChatMessage?: SortOrder
     isForumPost?: SortOrder
+    teamId?: SortOrder
   }
 
   export type PostMaxOrderByAggregateInput = {
@@ -70513,6 +77150,7 @@ export namespace Prisma {
     isPinned?: SortOrder
     isChatMessage?: SortOrder
     isForumPost?: SortOrder
+    teamId?: SortOrder
   }
 
   export type PostMinOrderByAggregateInput = {
@@ -70530,6 +77168,7 @@ export namespace Prisma {
     isPinned?: SortOrder
     isChatMessage?: SortOrder
     isForumPost?: SortOrder
+    teamId?: SortOrder
   }
 
   export type EnumPostAudienceWithAggregatesFilter<$PrismaModel = never> = {
@@ -71263,6 +77902,168 @@ export namespace Prisma {
     syncedVideos?: SortOrder
   }
 
+  export type MedicalTeamCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    facultyId?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    followersCount?: SortOrder
+  }
+
+  export type MedicalTeamAvgOrderByAggregateInput = {
+    followersCount?: SortOrder
+  }
+
+  export type MedicalTeamMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    facultyId?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    followersCount?: SortOrder
+  }
+
+  export type MedicalTeamMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    facultyId?: SortOrder
+    universityId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    followersCount?: SortOrder
+  }
+
+  export type MedicalTeamSumOrderByAggregateInput = {
+    followersCount?: SortOrder
+  }
+
+  export type EnumTeamRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.TeamRole | EnumTeamRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTeamRoleFilter<$PrismaModel> | $Enums.TeamRole
+  }
+
+  export type MedicalTeamRelationFilter = {
+    is?: MedicalTeamWhereInput
+    isNot?: MedicalTeamWhereInput
+  }
+
+  export type TeamMemberTeamIdUserIdCompoundUniqueInput = {
+    teamId: string
+    userId: string
+  }
+
+  export type TeamMemberCountOrderByAggregateInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    role?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TeamMemberMaxOrderByAggregateInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    role?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TeamMemberMinOrderByAggregateInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    role?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EnumTeamRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TeamRole | EnumTeamRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTeamRoleWithAggregatesFilter<$PrismaModel> | $Enums.TeamRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTeamRoleFilter<$PrismaModel>
+    _max?: NestedEnumTeamRoleFilter<$PrismaModel>
+  }
+
+  export type TeamFollowerTeamIdUserIdCompoundUniqueInput = {
+    teamId: string
+    userId: string
+  }
+
+  export type TeamFollowerCountOrderByAggregateInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TeamFollowerMaxOrderByAggregateInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TeamFollowerMinOrderByAggregateInput = {
+    id?: SortOrder
+    teamId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PlatformMemberCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PlatformMemberAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type PlatformMemberMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PlatformMemberMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PlatformMemberSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -71365,6 +78166,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type MedicalTeamCreateNestedManyWithoutUniversityInput = {
+    create?: XOR<MedicalTeamCreateWithoutUniversityInput, MedicalTeamUncheckedCreateWithoutUniversityInput> | MedicalTeamCreateWithoutUniversityInput[] | MedicalTeamUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutUniversityInput | MedicalTeamCreateOrConnectWithoutUniversityInput[]
+    createMany?: MedicalTeamCreateManyUniversityInputEnvelope
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+  }
+
   export type AcademicYearUncheckedCreateNestedManyWithoutUniversityInput = {
     create?: XOR<AcademicYearCreateWithoutUniversityInput, AcademicYearUncheckedCreateWithoutUniversityInput> | AcademicYearCreateWithoutUniversityInput[] | AcademicYearUncheckedCreateWithoutUniversityInput[]
     connectOrCreate?: AcademicYearCreateOrConnectWithoutUniversityInput | AcademicYearCreateOrConnectWithoutUniversityInput[]
@@ -71433,6 +78241,13 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutUniversityInput | UserCreateOrConnectWithoutUniversityInput[]
     createMany?: UserCreateManyUniversityInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput = {
+    create?: XOR<MedicalTeamCreateWithoutUniversityInput, MedicalTeamUncheckedCreateWithoutUniversityInput> | MedicalTeamCreateWithoutUniversityInput[] | MedicalTeamUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutUniversityInput | MedicalTeamCreateOrConnectWithoutUniversityInput[]
+    createMany?: MedicalTeamCreateManyUniversityInputEnvelope
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -71583,6 +78398,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type MedicalTeamUpdateManyWithoutUniversityNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutUniversityInput, MedicalTeamUncheckedCreateWithoutUniversityInput> | MedicalTeamCreateWithoutUniversityInput[] | MedicalTeamUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutUniversityInput | MedicalTeamCreateOrConnectWithoutUniversityInput[]
+    upsert?: MedicalTeamUpsertWithWhereUniqueWithoutUniversityInput | MedicalTeamUpsertWithWhereUniqueWithoutUniversityInput[]
+    createMany?: MedicalTeamCreateManyUniversityInputEnvelope
+    set?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    disconnect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    delete?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    update?: MedicalTeamUpdateWithWhereUniqueWithoutUniversityInput | MedicalTeamUpdateWithWhereUniqueWithoutUniversityInput[]
+    updateMany?: MedicalTeamUpdateManyWithWhereWithoutUniversityInput | MedicalTeamUpdateManyWithWhereWithoutUniversityInput[]
+    deleteMany?: MedicalTeamScalarWhereInput | MedicalTeamScalarWhereInput[]
+  }
+
   export type AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput = {
     create?: XOR<AcademicYearCreateWithoutUniversityInput, AcademicYearUncheckedCreateWithoutUniversityInput> | AcademicYearCreateWithoutUniversityInput[] | AcademicYearUncheckedCreateWithoutUniversityInput[]
     connectOrCreate?: AcademicYearCreateOrConnectWithoutUniversityInput | AcademicYearCreateOrConnectWithoutUniversityInput[]
@@ -71723,6 +78552,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutUniversityInput, MedicalTeamUncheckedCreateWithoutUniversityInput> | MedicalTeamCreateWithoutUniversityInput[] | MedicalTeamUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutUniversityInput | MedicalTeamCreateOrConnectWithoutUniversityInput[]
+    upsert?: MedicalTeamUpsertWithWhereUniqueWithoutUniversityInput | MedicalTeamUpsertWithWhereUniqueWithoutUniversityInput[]
+    createMany?: MedicalTeamCreateManyUniversityInputEnvelope
+    set?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    disconnect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    delete?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    update?: MedicalTeamUpdateWithWhereUniqueWithoutUniversityInput | MedicalTeamUpdateWithWhereUniqueWithoutUniversityInput[]
+    updateMany?: MedicalTeamUpdateManyWithWhereWithoutUniversityInput | MedicalTeamUpdateManyWithWhereWithoutUniversityInput[]
+    deleteMany?: MedicalTeamScalarWhereInput | MedicalTeamScalarWhereInput[]
+  }
+
   export type AcademicYearCreateNestedManyWithoutFacultyInput = {
     create?: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput> | AcademicYearCreateWithoutFacultyInput[] | AcademicYearUncheckedCreateWithoutFacultyInput[]
     connectOrCreate?: AcademicYearCreateOrConnectWithoutFacultyInput | AcademicYearCreateOrConnectWithoutFacultyInput[]
@@ -71757,6 +78600,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type MedicalTeamCreateNestedManyWithoutFacultyInput = {
+    create?: XOR<MedicalTeamCreateWithoutFacultyInput, MedicalTeamUncheckedCreateWithoutFacultyInput> | MedicalTeamCreateWithoutFacultyInput[] | MedicalTeamUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutFacultyInput | MedicalTeamCreateOrConnectWithoutFacultyInput[]
+    createMany?: MedicalTeamCreateManyFacultyInputEnvelope
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+  }
+
   export type AcademicYearUncheckedCreateNestedManyWithoutFacultyInput = {
     create?: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput> | AcademicYearCreateWithoutFacultyInput[] | AcademicYearUncheckedCreateWithoutFacultyInput[]
     connectOrCreate?: AcademicYearCreateOrConnectWithoutFacultyInput | AcademicYearCreateOrConnectWithoutFacultyInput[]
@@ -71783,6 +78633,13 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutFacultyInput | UserCreateOrConnectWithoutFacultyInput[]
     createMany?: UserCreateManyFacultyInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type MedicalTeamUncheckedCreateNestedManyWithoutFacultyInput = {
+    create?: XOR<MedicalTeamCreateWithoutFacultyInput, MedicalTeamUncheckedCreateWithoutFacultyInput> | MedicalTeamCreateWithoutFacultyInput[] | MedicalTeamUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutFacultyInput | MedicalTeamCreateOrConnectWithoutFacultyInput[]
+    createMany?: MedicalTeamCreateManyFacultyInputEnvelope
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
   }
 
   export type EnumFacultyCategoryFieldUpdateOperationsInput = {
@@ -71853,6 +78710,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type MedicalTeamUpdateManyWithoutFacultyNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutFacultyInput, MedicalTeamUncheckedCreateWithoutFacultyInput> | MedicalTeamCreateWithoutFacultyInput[] | MedicalTeamUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutFacultyInput | MedicalTeamCreateOrConnectWithoutFacultyInput[]
+    upsert?: MedicalTeamUpsertWithWhereUniqueWithoutFacultyInput | MedicalTeamUpsertWithWhereUniqueWithoutFacultyInput[]
+    createMany?: MedicalTeamCreateManyFacultyInputEnvelope
+    set?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    disconnect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    delete?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    update?: MedicalTeamUpdateWithWhereUniqueWithoutFacultyInput | MedicalTeamUpdateWithWhereUniqueWithoutFacultyInput[]
+    updateMany?: MedicalTeamUpdateManyWithWhereWithoutFacultyInput | MedicalTeamUpdateManyWithWhereWithoutFacultyInput[]
+    deleteMany?: MedicalTeamScalarWhereInput | MedicalTeamScalarWhereInput[]
+  }
+
   export type AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput = {
     create?: XOR<AcademicYearCreateWithoutFacultyInput, AcademicYearUncheckedCreateWithoutFacultyInput> | AcademicYearCreateWithoutFacultyInput[] | AcademicYearUncheckedCreateWithoutFacultyInput[]
     connectOrCreate?: AcademicYearCreateOrConnectWithoutFacultyInput | AcademicYearCreateOrConnectWithoutFacultyInput[]
@@ -71907,6 +78778,20 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutFacultyInput | UserUpdateWithWhereUniqueWithoutFacultyInput[]
     updateMany?: UserUpdateManyWithWhereWithoutFacultyInput | UserUpdateManyWithWhereWithoutFacultyInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type MedicalTeamUncheckedUpdateManyWithoutFacultyNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutFacultyInput, MedicalTeamUncheckedCreateWithoutFacultyInput> | MedicalTeamCreateWithoutFacultyInput[] | MedicalTeamUncheckedCreateWithoutFacultyInput[]
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutFacultyInput | MedicalTeamCreateOrConnectWithoutFacultyInput[]
+    upsert?: MedicalTeamUpsertWithWhereUniqueWithoutFacultyInput | MedicalTeamUpsertWithWhereUniqueWithoutFacultyInput[]
+    createMany?: MedicalTeamCreateManyFacultyInputEnvelope
+    set?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    disconnect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    delete?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    connect?: MedicalTeamWhereUniqueInput | MedicalTeamWhereUniqueInput[]
+    update?: MedicalTeamUpdateWithWhereUniqueWithoutFacultyInput | MedicalTeamUpdateWithWhereUniqueWithoutFacultyInput[]
+    updateMany?: MedicalTeamUpdateManyWithWhereWithoutFacultyInput | MedicalTeamUpdateManyWithWhereWithoutFacultyInput[]
+    deleteMany?: MedicalTeamScalarWhereInput | MedicalTeamScalarWhereInput[]
   }
 
   export type UniversityCreateNestedOneWithoutYearIdFormatsInput = {
@@ -72585,6 +79470,19 @@ export namespace Prisma {
     connect?: UserLectureActivityWhereUniqueInput | UserLectureActivityWhereUniqueInput[]
   }
 
+  export type NoteCreateNestedManyWithoutLectureInput = {
+    create?: XOR<NoteCreateWithoutLectureInput, NoteUncheckedCreateWithoutLectureInput> | NoteCreateWithoutLectureInput[] | NoteUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutLectureInput | NoteCreateOrConnectWithoutLectureInput[]
+    createMany?: NoteCreateManyLectureInputEnvelope
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+  }
+
+  export type MedicalTeamCreateNestedOneWithoutLecturesInput = {
+    create?: XOR<MedicalTeamCreateWithoutLecturesInput, MedicalTeamUncheckedCreateWithoutLecturesInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutLecturesInput
+    connect?: MedicalTeamWhereUniqueInput
+  }
+
   export type FlashcardUncheckedCreateNestedManyWithoutLectureInput = {
     create?: XOR<FlashcardCreateWithoutLectureInput, FlashcardUncheckedCreateWithoutLectureInput> | FlashcardCreateWithoutLectureInput[] | FlashcardUncheckedCreateWithoutLectureInput[]
     connectOrCreate?: FlashcardCreateOrConnectWithoutLectureInput | FlashcardCreateOrConnectWithoutLectureInput[]
@@ -72631,6 +79529,13 @@ export namespace Prisma {
     connectOrCreate?: UserLectureActivityCreateOrConnectWithoutLectureInput | UserLectureActivityCreateOrConnectWithoutLectureInput[]
     createMany?: UserLectureActivityCreateManyLectureInputEnvelope
     connect?: UserLectureActivityWhereUniqueInput | UserLectureActivityWhereUniqueInput[]
+  }
+
+  export type NoteUncheckedCreateNestedManyWithoutLectureInput = {
+    create?: XOR<NoteCreateWithoutLectureInput, NoteUncheckedCreateWithoutLectureInput> | NoteCreateWithoutLectureInput[] | NoteUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutLectureInput | NoteCreateOrConnectWithoutLectureInput[]
+    createMany?: NoteCreateManyLectureInputEnvelope
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
   }
 
   export type FlashcardUpdateManyWithoutLectureNestedInput = {
@@ -72735,6 +79640,30 @@ export namespace Prisma {
     deleteMany?: UserLectureActivityScalarWhereInput | UserLectureActivityScalarWhereInput[]
   }
 
+  export type NoteUpdateManyWithoutLectureNestedInput = {
+    create?: XOR<NoteCreateWithoutLectureInput, NoteUncheckedCreateWithoutLectureInput> | NoteCreateWithoutLectureInput[] | NoteUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutLectureInput | NoteCreateOrConnectWithoutLectureInput[]
+    upsert?: NoteUpsertWithWhereUniqueWithoutLectureInput | NoteUpsertWithWhereUniqueWithoutLectureInput[]
+    createMany?: NoteCreateManyLectureInputEnvelope
+    set?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    disconnect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    delete?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    update?: NoteUpdateWithWhereUniqueWithoutLectureInput | NoteUpdateWithWhereUniqueWithoutLectureInput[]
+    updateMany?: NoteUpdateManyWithWhereWithoutLectureInput | NoteUpdateManyWithWhereWithoutLectureInput[]
+    deleteMany?: NoteScalarWhereInput | NoteScalarWhereInput[]
+  }
+
+  export type MedicalTeamUpdateOneWithoutLecturesNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutLecturesInput, MedicalTeamUncheckedCreateWithoutLecturesInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutLecturesInput
+    upsert?: MedicalTeamUpsertWithoutLecturesInput
+    disconnect?: MedicalTeamWhereInput | boolean
+    delete?: MedicalTeamWhereInput | boolean
+    connect?: MedicalTeamWhereUniqueInput
+    update?: XOR<XOR<MedicalTeamUpdateToOneWithWhereWithoutLecturesInput, MedicalTeamUpdateWithoutLecturesInput>, MedicalTeamUncheckedUpdateWithoutLecturesInput>
+  }
+
   export type FlashcardUncheckedUpdateManyWithoutLectureNestedInput = {
     create?: XOR<FlashcardCreateWithoutLectureInput, FlashcardUncheckedCreateWithoutLectureInput> | FlashcardCreateWithoutLectureInput[] | FlashcardUncheckedCreateWithoutLectureInput[]
     connectOrCreate?: FlashcardCreateOrConnectWithoutLectureInput | FlashcardCreateOrConnectWithoutLectureInput[]
@@ -72827,6 +79756,20 @@ export namespace Prisma {
     update?: UserLectureActivityUpdateWithWhereUniqueWithoutLectureInput | UserLectureActivityUpdateWithWhereUniqueWithoutLectureInput[]
     updateMany?: UserLectureActivityUpdateManyWithWhereWithoutLectureInput | UserLectureActivityUpdateManyWithWhereWithoutLectureInput[]
     deleteMany?: UserLectureActivityScalarWhereInput | UserLectureActivityScalarWhereInput[]
+  }
+
+  export type NoteUncheckedUpdateManyWithoutLectureNestedInput = {
+    create?: XOR<NoteCreateWithoutLectureInput, NoteUncheckedCreateWithoutLectureInput> | NoteCreateWithoutLectureInput[] | NoteUncheckedCreateWithoutLectureInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutLectureInput | NoteCreateOrConnectWithoutLectureInput[]
+    upsert?: NoteUpsertWithWhereUniqueWithoutLectureInput | NoteUpsertWithWhereUniqueWithoutLectureInput[]
+    createMany?: NoteCreateManyLectureInputEnvelope
+    set?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    disconnect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    delete?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    update?: NoteUpdateWithWhereUniqueWithoutLectureInput | NoteUpdateWithWhereUniqueWithoutLectureInput[]
+    updateMany?: NoteUpdateManyWithWhereWithoutLectureInput | NoteUpdateManyWithWhereWithoutLectureInput[]
+    deleteMany?: NoteScalarWhereInput | NoteScalarWhereInput[]
   }
 
   export type LectureCreateNestedOneWithoutFlashcardsInput = {
@@ -73874,6 +80817,27 @@ export namespace Prisma {
     connect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
   }
 
+  export type NoteCreateNestedManyWithoutUserInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+  }
+
+  export type TeamMemberCreateNestedManyWithoutUserInput = {
+    create?: XOR<TeamMemberCreateWithoutUserInput, TeamMemberUncheckedCreateWithoutUserInput> | TeamMemberCreateWithoutUserInput[] | TeamMemberUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutUserInput | TeamMemberCreateOrConnectWithoutUserInput[]
+    createMany?: TeamMemberCreateManyUserInputEnvelope
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+  }
+
+  export type TeamFollowerCreateNestedManyWithoutUserInput = {
+    create?: XOR<TeamFollowerCreateWithoutUserInput, TeamFollowerUncheckedCreateWithoutUserInput> | TeamFollowerCreateWithoutUserInput[] | TeamFollowerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutUserInput | TeamFollowerCreateOrConnectWithoutUserInput[]
+    createMany?: TeamFollowerCreateManyUserInputEnvelope
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+  }
+
   export type AIUsageLogUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<AIUsageLogCreateWithoutUserInput, AIUsageLogUncheckedCreateWithoutUserInput> | AIUsageLogCreateWithoutUserInput[] | AIUsageLogUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AIUsageLogCreateOrConnectWithoutUserInput | AIUsageLogCreateOrConnectWithoutUserInput[]
@@ -74059,6 +81023,27 @@ export namespace Prisma {
     connectOrCreate?: UserTaskCreateOrConnectWithoutUserInput | UserTaskCreateOrConnectWithoutUserInput[]
     createMany?: UserTaskCreateManyUserInputEnvelope
     connect?: UserTaskWhereUniqueInput | UserTaskWhereUniqueInput[]
+  }
+
+  export type NoteUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+  }
+
+  export type TeamMemberUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<TeamMemberCreateWithoutUserInput, TeamMemberUncheckedCreateWithoutUserInput> | TeamMemberCreateWithoutUserInput[] | TeamMemberUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutUserInput | TeamMemberCreateOrConnectWithoutUserInput[]
+    createMany?: TeamMemberCreateManyUserInputEnvelope
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+  }
+
+  export type TeamFollowerUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<TeamFollowerCreateWithoutUserInput, TeamFollowerUncheckedCreateWithoutUserInput> | TeamFollowerCreateWithoutUserInput[] | TeamFollowerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutUserInput | TeamFollowerCreateOrConnectWithoutUserInput[]
+    createMany?: TeamFollowerCreateManyUserInputEnvelope
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -74483,6 +81468,48 @@ export namespace Prisma {
     deleteMany?: UserTaskScalarWhereInput | UserTaskScalarWhereInput[]
   }
 
+  export type NoteUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    upsert?: NoteUpsertWithWhereUniqueWithoutUserInput | NoteUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    set?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    disconnect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    delete?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    update?: NoteUpdateWithWhereUniqueWithoutUserInput | NoteUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NoteUpdateManyWithWhereWithoutUserInput | NoteUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NoteScalarWhereInput | NoteScalarWhereInput[]
+  }
+
+  export type TeamMemberUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TeamMemberCreateWithoutUserInput, TeamMemberUncheckedCreateWithoutUserInput> | TeamMemberCreateWithoutUserInput[] | TeamMemberUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutUserInput | TeamMemberCreateOrConnectWithoutUserInput[]
+    upsert?: TeamMemberUpsertWithWhereUniqueWithoutUserInput | TeamMemberUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TeamMemberCreateManyUserInputEnvelope
+    set?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    disconnect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    delete?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    update?: TeamMemberUpdateWithWhereUniqueWithoutUserInput | TeamMemberUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TeamMemberUpdateManyWithWhereWithoutUserInput | TeamMemberUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TeamMemberScalarWhereInput | TeamMemberScalarWhereInput[]
+  }
+
+  export type TeamFollowerUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TeamFollowerCreateWithoutUserInput, TeamFollowerUncheckedCreateWithoutUserInput> | TeamFollowerCreateWithoutUserInput[] | TeamFollowerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutUserInput | TeamFollowerCreateOrConnectWithoutUserInput[]
+    upsert?: TeamFollowerUpsertWithWhereUniqueWithoutUserInput | TeamFollowerUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TeamFollowerCreateManyUserInputEnvelope
+    set?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    disconnect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    delete?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    update?: TeamFollowerUpdateWithWhereUniqueWithoutUserInput | TeamFollowerUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TeamFollowerUpdateManyWithWhereWithoutUserInput | TeamFollowerUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TeamFollowerScalarWhereInput | TeamFollowerScalarWhereInput[]
+  }
+
   export type AIUsageLogUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<AIUsageLogCreateWithoutUserInput, AIUsageLogUncheckedCreateWithoutUserInput> | AIUsageLogCreateWithoutUserInput[] | AIUsageLogUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AIUsageLogCreateOrConnectWithoutUserInput | AIUsageLogCreateOrConnectWithoutUserInput[]
@@ -74853,6 +81880,76 @@ export namespace Prisma {
     deleteMany?: UserTaskScalarWhereInput | UserTaskScalarWhereInput[]
   }
 
+  export type NoteUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    upsert?: NoteUpsertWithWhereUniqueWithoutUserInput | NoteUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    set?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    disconnect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    delete?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    update?: NoteUpdateWithWhereUniqueWithoutUserInput | NoteUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NoteUpdateManyWithWhereWithoutUserInput | NoteUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NoteScalarWhereInput | NoteScalarWhereInput[]
+  }
+
+  export type TeamMemberUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TeamMemberCreateWithoutUserInput, TeamMemberUncheckedCreateWithoutUserInput> | TeamMemberCreateWithoutUserInput[] | TeamMemberUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutUserInput | TeamMemberCreateOrConnectWithoutUserInput[]
+    upsert?: TeamMemberUpsertWithWhereUniqueWithoutUserInput | TeamMemberUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TeamMemberCreateManyUserInputEnvelope
+    set?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    disconnect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    delete?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    update?: TeamMemberUpdateWithWhereUniqueWithoutUserInput | TeamMemberUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TeamMemberUpdateManyWithWhereWithoutUserInput | TeamMemberUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TeamMemberScalarWhereInput | TeamMemberScalarWhereInput[]
+  }
+
+  export type TeamFollowerUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TeamFollowerCreateWithoutUserInput, TeamFollowerUncheckedCreateWithoutUserInput> | TeamFollowerCreateWithoutUserInput[] | TeamFollowerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutUserInput | TeamFollowerCreateOrConnectWithoutUserInput[]
+    upsert?: TeamFollowerUpsertWithWhereUniqueWithoutUserInput | TeamFollowerUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TeamFollowerCreateManyUserInputEnvelope
+    set?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    disconnect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    delete?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    update?: TeamFollowerUpdateWithWhereUniqueWithoutUserInput | TeamFollowerUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TeamFollowerUpdateManyWithWhereWithoutUserInput | TeamFollowerUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TeamFollowerScalarWhereInput | TeamFollowerScalarWhereInput[]
+  }
+
+  export type LectureCreateNestedOneWithoutNotesInput = {
+    create?: XOR<LectureCreateWithoutNotesInput, LectureUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: LectureCreateOrConnectWithoutNotesInput
+    connect?: LectureWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutNotesInput = {
+    create?: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type LectureUpdateOneRequiredWithoutNotesNestedInput = {
+    create?: XOR<LectureCreateWithoutNotesInput, LectureUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: LectureCreateOrConnectWithoutNotesInput
+    upsert?: LectureUpsertWithoutNotesInput
+    connect?: LectureWhereUniqueInput
+    update?: XOR<XOR<LectureUpdateToOneWithWhereWithoutNotesInput, LectureUpdateWithoutNotesInput>, LectureUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutNotesNestedInput = {
+    create?: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotesInput
+    upsert?: UserUpsertWithoutNotesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotesInput, UserUpdateWithoutNotesInput>, UserUncheckedUpdateWithoutNotesInput>
+  }
+
   export type LectureCreateNestedOneWithoutActivitiesInput = {
     create?: XOR<LectureCreateWithoutActivitiesInput, LectureUncheckedCreateWithoutActivitiesInput>
     connectOrCreate?: LectureCreateOrConnectWithoutActivitiesInput
@@ -75175,6 +82272,12 @@ export namespace Prisma {
     connect?: UniversityWhereUniqueInput
   }
 
+  export type MedicalTeamCreateNestedOneWithoutPostsInput = {
+    create?: XOR<MedicalTeamCreateWithoutPostsInput, MedicalTeamUncheckedCreateWithoutPostsInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutPostsInput
+    connect?: MedicalTeamWhereUniqueInput
+  }
+
   export type CommentUncheckedCreateNestedManyWithoutPostInput = {
     create?: XOR<CommentCreateWithoutPostInput, CommentUncheckedCreateWithoutPostInput> | CommentCreateWithoutPostInput[] | CommentUncheckedCreateWithoutPostInput[]
     connectOrCreate?: CommentCreateOrConnectWithoutPostInput | CommentCreateOrConnectWithoutPostInput[]
@@ -75243,6 +82346,16 @@ export namespace Prisma {
     upsert?: UniversityUpsertWithoutPostsInput
     connect?: UniversityWhereUniqueInput
     update?: XOR<XOR<UniversityUpdateToOneWithWhereWithoutPostsInput, UniversityUpdateWithoutPostsInput>, UniversityUncheckedUpdateWithoutPostsInput>
+  }
+
+  export type MedicalTeamUpdateOneWithoutPostsNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutPostsInput, MedicalTeamUncheckedCreateWithoutPostsInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutPostsInput
+    upsert?: MedicalTeamUpsertWithoutPostsInput
+    disconnect?: MedicalTeamWhereInput | boolean
+    delete?: MedicalTeamWhereInput | boolean
+    connect?: MedicalTeamWhereUniqueInput
+    update?: XOR<XOR<MedicalTeamUpdateToOneWithWhereWithoutPostsInput, MedicalTeamUpdateWithoutPostsInput>, MedicalTeamUncheckedUpdateWithoutPostsInput>
   }
 
   export type CommentUncheckedUpdateManyWithoutPostNestedInput = {
@@ -75831,6 +82944,262 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutChannelFollowsInput, UserUpdateWithoutChannelFollowsInput>, UserUncheckedUpdateWithoutChannelFollowsInput>
   }
 
+  export type FacultyCreateNestedOneWithoutMedicalTeamsInput = {
+    create?: XOR<FacultyCreateWithoutMedicalTeamsInput, FacultyUncheckedCreateWithoutMedicalTeamsInput>
+    connectOrCreate?: FacultyCreateOrConnectWithoutMedicalTeamsInput
+    connect?: FacultyWhereUniqueInput
+  }
+
+  export type UniversityCreateNestedOneWithoutMedicalTeamsInput = {
+    create?: XOR<UniversityCreateWithoutMedicalTeamsInput, UniversityUncheckedCreateWithoutMedicalTeamsInput>
+    connectOrCreate?: UniversityCreateOrConnectWithoutMedicalTeamsInput
+    connect?: UniversityWhereUniqueInput
+  }
+
+  export type TeamMemberCreateNestedManyWithoutTeamInput = {
+    create?: XOR<TeamMemberCreateWithoutTeamInput, TeamMemberUncheckedCreateWithoutTeamInput> | TeamMemberCreateWithoutTeamInput[] | TeamMemberUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutTeamInput | TeamMemberCreateOrConnectWithoutTeamInput[]
+    createMany?: TeamMemberCreateManyTeamInputEnvelope
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+  }
+
+  export type TeamFollowerCreateNestedManyWithoutTeamInput = {
+    create?: XOR<TeamFollowerCreateWithoutTeamInput, TeamFollowerUncheckedCreateWithoutTeamInput> | TeamFollowerCreateWithoutTeamInput[] | TeamFollowerUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutTeamInput | TeamFollowerCreateOrConnectWithoutTeamInput[]
+    createMany?: TeamFollowerCreateManyTeamInputEnvelope
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+  }
+
+  export type LectureCreateNestedManyWithoutTeamInput = {
+    create?: XOR<LectureCreateWithoutTeamInput, LectureUncheckedCreateWithoutTeamInput> | LectureCreateWithoutTeamInput[] | LectureUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: LectureCreateOrConnectWithoutTeamInput | LectureCreateOrConnectWithoutTeamInput[]
+    createMany?: LectureCreateManyTeamInputEnvelope
+    connect?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+  }
+
+  export type PostCreateNestedManyWithoutTeamInput = {
+    create?: XOR<PostCreateWithoutTeamInput, PostUncheckedCreateWithoutTeamInput> | PostCreateWithoutTeamInput[] | PostUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutTeamInput | PostCreateOrConnectWithoutTeamInput[]
+    createMany?: PostCreateManyTeamInputEnvelope
+    connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
+  }
+
+  export type TeamMemberUncheckedCreateNestedManyWithoutTeamInput = {
+    create?: XOR<TeamMemberCreateWithoutTeamInput, TeamMemberUncheckedCreateWithoutTeamInput> | TeamMemberCreateWithoutTeamInput[] | TeamMemberUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutTeamInput | TeamMemberCreateOrConnectWithoutTeamInput[]
+    createMany?: TeamMemberCreateManyTeamInputEnvelope
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+  }
+
+  export type TeamFollowerUncheckedCreateNestedManyWithoutTeamInput = {
+    create?: XOR<TeamFollowerCreateWithoutTeamInput, TeamFollowerUncheckedCreateWithoutTeamInput> | TeamFollowerCreateWithoutTeamInput[] | TeamFollowerUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutTeamInput | TeamFollowerCreateOrConnectWithoutTeamInput[]
+    createMany?: TeamFollowerCreateManyTeamInputEnvelope
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+  }
+
+  export type LectureUncheckedCreateNestedManyWithoutTeamInput = {
+    create?: XOR<LectureCreateWithoutTeamInput, LectureUncheckedCreateWithoutTeamInput> | LectureCreateWithoutTeamInput[] | LectureUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: LectureCreateOrConnectWithoutTeamInput | LectureCreateOrConnectWithoutTeamInput[]
+    createMany?: LectureCreateManyTeamInputEnvelope
+    connect?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+  }
+
+  export type PostUncheckedCreateNestedManyWithoutTeamInput = {
+    create?: XOR<PostCreateWithoutTeamInput, PostUncheckedCreateWithoutTeamInput> | PostCreateWithoutTeamInput[] | PostUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutTeamInput | PostCreateOrConnectWithoutTeamInput[]
+    createMany?: PostCreateManyTeamInputEnvelope
+    connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
+  }
+
+  export type FacultyUpdateOneRequiredWithoutMedicalTeamsNestedInput = {
+    create?: XOR<FacultyCreateWithoutMedicalTeamsInput, FacultyUncheckedCreateWithoutMedicalTeamsInput>
+    connectOrCreate?: FacultyCreateOrConnectWithoutMedicalTeamsInput
+    upsert?: FacultyUpsertWithoutMedicalTeamsInput
+    connect?: FacultyWhereUniqueInput
+    update?: XOR<XOR<FacultyUpdateToOneWithWhereWithoutMedicalTeamsInput, FacultyUpdateWithoutMedicalTeamsInput>, FacultyUncheckedUpdateWithoutMedicalTeamsInput>
+  }
+
+  export type UniversityUpdateOneRequiredWithoutMedicalTeamsNestedInput = {
+    create?: XOR<UniversityCreateWithoutMedicalTeamsInput, UniversityUncheckedCreateWithoutMedicalTeamsInput>
+    connectOrCreate?: UniversityCreateOrConnectWithoutMedicalTeamsInput
+    upsert?: UniversityUpsertWithoutMedicalTeamsInput
+    connect?: UniversityWhereUniqueInput
+    update?: XOR<XOR<UniversityUpdateToOneWithWhereWithoutMedicalTeamsInput, UniversityUpdateWithoutMedicalTeamsInput>, UniversityUncheckedUpdateWithoutMedicalTeamsInput>
+  }
+
+  export type TeamMemberUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<TeamMemberCreateWithoutTeamInput, TeamMemberUncheckedCreateWithoutTeamInput> | TeamMemberCreateWithoutTeamInput[] | TeamMemberUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutTeamInput | TeamMemberCreateOrConnectWithoutTeamInput[]
+    upsert?: TeamMemberUpsertWithWhereUniqueWithoutTeamInput | TeamMemberUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: TeamMemberCreateManyTeamInputEnvelope
+    set?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    disconnect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    delete?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    update?: TeamMemberUpdateWithWhereUniqueWithoutTeamInput | TeamMemberUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: TeamMemberUpdateManyWithWhereWithoutTeamInput | TeamMemberUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: TeamMemberScalarWhereInput | TeamMemberScalarWhereInput[]
+  }
+
+  export type TeamFollowerUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<TeamFollowerCreateWithoutTeamInput, TeamFollowerUncheckedCreateWithoutTeamInput> | TeamFollowerCreateWithoutTeamInput[] | TeamFollowerUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutTeamInput | TeamFollowerCreateOrConnectWithoutTeamInput[]
+    upsert?: TeamFollowerUpsertWithWhereUniqueWithoutTeamInput | TeamFollowerUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: TeamFollowerCreateManyTeamInputEnvelope
+    set?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    disconnect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    delete?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    update?: TeamFollowerUpdateWithWhereUniqueWithoutTeamInput | TeamFollowerUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: TeamFollowerUpdateManyWithWhereWithoutTeamInput | TeamFollowerUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: TeamFollowerScalarWhereInput | TeamFollowerScalarWhereInput[]
+  }
+
+  export type LectureUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<LectureCreateWithoutTeamInput, LectureUncheckedCreateWithoutTeamInput> | LectureCreateWithoutTeamInput[] | LectureUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: LectureCreateOrConnectWithoutTeamInput | LectureCreateOrConnectWithoutTeamInput[]
+    upsert?: LectureUpsertWithWhereUniqueWithoutTeamInput | LectureUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: LectureCreateManyTeamInputEnvelope
+    set?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    disconnect?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    delete?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    connect?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    update?: LectureUpdateWithWhereUniqueWithoutTeamInput | LectureUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: LectureUpdateManyWithWhereWithoutTeamInput | LectureUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: LectureScalarWhereInput | LectureScalarWhereInput[]
+  }
+
+  export type PostUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<PostCreateWithoutTeamInput, PostUncheckedCreateWithoutTeamInput> | PostCreateWithoutTeamInput[] | PostUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutTeamInput | PostCreateOrConnectWithoutTeamInput[]
+    upsert?: PostUpsertWithWhereUniqueWithoutTeamInput | PostUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: PostCreateManyTeamInputEnvelope
+    set?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    disconnect?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    delete?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    update?: PostUpdateWithWhereUniqueWithoutTeamInput | PostUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: PostUpdateManyWithWhereWithoutTeamInput | PostUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: PostScalarWhereInput | PostScalarWhereInput[]
+  }
+
+  export type TeamMemberUncheckedUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<TeamMemberCreateWithoutTeamInput, TeamMemberUncheckedCreateWithoutTeamInput> | TeamMemberCreateWithoutTeamInput[] | TeamMemberUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamMemberCreateOrConnectWithoutTeamInput | TeamMemberCreateOrConnectWithoutTeamInput[]
+    upsert?: TeamMemberUpsertWithWhereUniqueWithoutTeamInput | TeamMemberUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: TeamMemberCreateManyTeamInputEnvelope
+    set?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    disconnect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    delete?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+    update?: TeamMemberUpdateWithWhereUniqueWithoutTeamInput | TeamMemberUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: TeamMemberUpdateManyWithWhereWithoutTeamInput | TeamMemberUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: TeamMemberScalarWhereInput | TeamMemberScalarWhereInput[]
+  }
+
+  export type TeamFollowerUncheckedUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<TeamFollowerCreateWithoutTeamInput, TeamFollowerUncheckedCreateWithoutTeamInput> | TeamFollowerCreateWithoutTeamInput[] | TeamFollowerUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: TeamFollowerCreateOrConnectWithoutTeamInput | TeamFollowerCreateOrConnectWithoutTeamInput[]
+    upsert?: TeamFollowerUpsertWithWhereUniqueWithoutTeamInput | TeamFollowerUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: TeamFollowerCreateManyTeamInputEnvelope
+    set?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    disconnect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    delete?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    connect?: TeamFollowerWhereUniqueInput | TeamFollowerWhereUniqueInput[]
+    update?: TeamFollowerUpdateWithWhereUniqueWithoutTeamInput | TeamFollowerUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: TeamFollowerUpdateManyWithWhereWithoutTeamInput | TeamFollowerUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: TeamFollowerScalarWhereInput | TeamFollowerScalarWhereInput[]
+  }
+
+  export type LectureUncheckedUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<LectureCreateWithoutTeamInput, LectureUncheckedCreateWithoutTeamInput> | LectureCreateWithoutTeamInput[] | LectureUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: LectureCreateOrConnectWithoutTeamInput | LectureCreateOrConnectWithoutTeamInput[]
+    upsert?: LectureUpsertWithWhereUniqueWithoutTeamInput | LectureUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: LectureCreateManyTeamInputEnvelope
+    set?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    disconnect?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    delete?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    connect?: LectureWhereUniqueInput | LectureWhereUniqueInput[]
+    update?: LectureUpdateWithWhereUniqueWithoutTeamInput | LectureUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: LectureUpdateManyWithWhereWithoutTeamInput | LectureUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: LectureScalarWhereInput | LectureScalarWhereInput[]
+  }
+
+  export type PostUncheckedUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<PostCreateWithoutTeamInput, PostUncheckedCreateWithoutTeamInput> | PostCreateWithoutTeamInput[] | PostUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutTeamInput | PostCreateOrConnectWithoutTeamInput[]
+    upsert?: PostUpsertWithWhereUniqueWithoutTeamInput | PostUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: PostCreateManyTeamInputEnvelope
+    set?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    disconnect?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    delete?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
+    update?: PostUpdateWithWhereUniqueWithoutTeamInput | PostUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: PostUpdateManyWithWhereWithoutTeamInput | PostUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: PostScalarWhereInput | PostScalarWhereInput[]
+  }
+
+  export type MedicalTeamCreateNestedOneWithoutMembersInput = {
+    create?: XOR<MedicalTeamCreateWithoutMembersInput, MedicalTeamUncheckedCreateWithoutMembersInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutMembersInput
+    connect?: MedicalTeamWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutTeamMembershipsInput = {
+    create?: XOR<UserCreateWithoutTeamMembershipsInput, UserUncheckedCreateWithoutTeamMembershipsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTeamMembershipsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumTeamRoleFieldUpdateOperationsInput = {
+    set?: $Enums.TeamRole
+  }
+
+  export type MedicalTeamUpdateOneRequiredWithoutMembersNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutMembersInput, MedicalTeamUncheckedCreateWithoutMembersInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutMembersInput
+    upsert?: MedicalTeamUpsertWithoutMembersInput
+    connect?: MedicalTeamWhereUniqueInput
+    update?: XOR<XOR<MedicalTeamUpdateToOneWithWhereWithoutMembersInput, MedicalTeamUpdateWithoutMembersInput>, MedicalTeamUncheckedUpdateWithoutMembersInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutTeamMembershipsNestedInput = {
+    create?: XOR<UserCreateWithoutTeamMembershipsInput, UserUncheckedCreateWithoutTeamMembershipsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTeamMembershipsInput
+    upsert?: UserUpsertWithoutTeamMembershipsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTeamMembershipsInput, UserUpdateWithoutTeamMembershipsInput>, UserUncheckedUpdateWithoutTeamMembershipsInput>
+  }
+
+  export type MedicalTeamCreateNestedOneWithoutFollowersInput = {
+    create?: XOR<MedicalTeamCreateWithoutFollowersInput, MedicalTeamUncheckedCreateWithoutFollowersInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutFollowersInput
+    connect?: MedicalTeamWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutFollowedTeamsInput = {
+    create?: XOR<UserCreateWithoutFollowedTeamsInput, UserUncheckedCreateWithoutFollowedTeamsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFollowedTeamsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type MedicalTeamUpdateOneRequiredWithoutFollowersNestedInput = {
+    create?: XOR<MedicalTeamCreateWithoutFollowersInput, MedicalTeamUncheckedCreateWithoutFollowersInput>
+    connectOrCreate?: MedicalTeamCreateOrConnectWithoutFollowersInput
+    upsert?: MedicalTeamUpsertWithoutFollowersInput
+    connect?: MedicalTeamWhereUniqueInput
+    update?: XOR<XOR<MedicalTeamUpdateToOneWithWhereWithoutFollowersInput, MedicalTeamUpdateWithoutFollowersInput>, MedicalTeamUncheckedUpdateWithoutFollowersInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutFollowedTeamsNestedInput = {
+    create?: XOR<UserCreateWithoutFollowedTeamsInput, UserUncheckedCreateWithoutFollowedTeamsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFollowedTeamsInput
+    upsert?: UserUpsertWithoutFollowedTeamsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFollowedTeamsInput, UserUpdateWithoutFollowedTeamsInput>, UserUncheckedUpdateWithoutFollowedTeamsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -76246,6 +83615,23 @@ export namespace Prisma {
     _max?: NestedEnumNotifChannelFilter<$PrismaModel>
   }
 
+  export type NestedEnumTeamRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.TeamRole | EnumTeamRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTeamRoleFilter<$PrismaModel> | $Enums.TeamRole
+  }
+
+  export type NestedEnumTeamRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TeamRole | EnumTeamRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TeamRole[] | ListEnumTeamRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTeamRoleWithAggregatesFilter<$PrismaModel> | $Enums.TeamRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTeamRoleFilter<$PrismaModel>
+    _max?: NestedEnumTeamRoleFilter<$PrismaModel>
+  }
+
   export type UniversityCreateWithoutFeatureFlagsInput = {
     id?: string
     name: string
@@ -76262,6 +83648,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutFeatureFlagsInput = {
@@ -76280,6 +83667,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutFeatureFlagsInput = {
@@ -76314,6 +83702,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutFeatureFlagsInput = {
@@ -76332,6 +83721,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type AcademicYearCreateWithoutUniversityInput = {
@@ -76428,6 +83818,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookCreateNestedManyWithoutFacultyInput
     users?: UserCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyUncheckedCreateWithoutUniversityInput = {
@@ -76440,6 +83831,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookUncheckedCreateNestedManyWithoutFacultyInput
     users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyCreateOrConnectWithoutUniversityInput = {
@@ -76562,6 +83954,7 @@ export namespace Prisma {
     likes?: LikeCreateNestedManyWithoutPostInput
     author: UserCreateNestedOneWithoutPostsInput
     forum: ForumCreateNestedOneWithoutPostsInput
+    team?: MedicalTeamCreateNestedOneWithoutPostsInput
   }
 
   export type PostUncheckedCreateWithoutUniversityInput = {
@@ -76578,6 +83971,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -76672,6 +84066,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutUniversityInput = {
@@ -76728,6 +84125,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutUniversityInput = {
@@ -76737,6 +84137,46 @@ export namespace Prisma {
 
   export type UserCreateManyUniversityInputEnvelope = {
     data: UserCreateManyUniversityInput | UserCreateManyUniversityInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MedicalTeamCreateWithoutUniversityInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    faculty: FacultyCreateNestedOneWithoutMedicalTeamsInput
+    members?: TeamMemberCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerCreateNestedManyWithoutTeamInput
+    lectures?: LectureCreateNestedManyWithoutTeamInput
+    posts?: PostCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUncheckedCreateWithoutUniversityInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerUncheckedCreateNestedManyWithoutTeamInput
+    lectures?: LectureUncheckedCreateNestedManyWithoutTeamInput
+    posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamCreateOrConnectWithoutUniversityInput = {
+    where: MedicalTeamWhereUniqueInput
+    create: XOR<MedicalTeamCreateWithoutUniversityInput, MedicalTeamUncheckedCreateWithoutUniversityInput>
+  }
+
+  export type MedicalTeamCreateManyUniversityInputEnvelope = {
+    data: MedicalTeamCreateManyUniversityInput | MedicalTeamCreateManyUniversityInput[]
     skipDuplicates?: boolean
   }
 
@@ -76974,6 +84414,7 @@ export namespace Prisma {
     isPinned?: BoolFilter<"Post"> | boolean
     isChatMessage?: BoolFilter<"Post"> | boolean
     isForumPost?: BoolFilter<"Post"> | boolean
+    teamId?: StringNullableFilter<"Post"> | string | null
   }
 
   export type UniversityYearIdFormatUpsertWithWhereUniqueWithoutUniversityInput = {
@@ -77053,6 +84494,37 @@ export namespace Prisma {
     handle?: StringNullableFilter<"User"> | string | null
   }
 
+  export type MedicalTeamUpsertWithWhereUniqueWithoutUniversityInput = {
+    where: MedicalTeamWhereUniqueInput
+    update: XOR<MedicalTeamUpdateWithoutUniversityInput, MedicalTeamUncheckedUpdateWithoutUniversityInput>
+    create: XOR<MedicalTeamCreateWithoutUniversityInput, MedicalTeamUncheckedCreateWithoutUniversityInput>
+  }
+
+  export type MedicalTeamUpdateWithWhereUniqueWithoutUniversityInput = {
+    where: MedicalTeamWhereUniqueInput
+    data: XOR<MedicalTeamUpdateWithoutUniversityInput, MedicalTeamUncheckedUpdateWithoutUniversityInput>
+  }
+
+  export type MedicalTeamUpdateManyWithWhereWithoutUniversityInput = {
+    where: MedicalTeamScalarWhereInput
+    data: XOR<MedicalTeamUpdateManyMutationInput, MedicalTeamUncheckedUpdateManyWithoutUniversityInput>
+  }
+
+  export type MedicalTeamScalarWhereInput = {
+    AND?: MedicalTeamScalarWhereInput | MedicalTeamScalarWhereInput[]
+    OR?: MedicalTeamScalarWhereInput[]
+    NOT?: MedicalTeamScalarWhereInput | MedicalTeamScalarWhereInput[]
+    id?: StringFilter<"MedicalTeam"> | string
+    name?: StringFilter<"MedicalTeam"> | string
+    description?: StringNullableFilter<"MedicalTeam"> | string | null
+    imageUrl?: StringNullableFilter<"MedicalTeam"> | string | null
+    facultyId?: StringFilter<"MedicalTeam"> | string
+    universityId?: StringFilter<"MedicalTeam"> | string
+    createdAt?: DateTimeFilter<"MedicalTeam"> | Date | string
+    updatedAt?: DateTimeFilter<"MedicalTeam"> | Date | string
+    followersCount?: IntFilter<"MedicalTeam"> | number
+  }
+
   export type AcademicYearCreateWithoutFacultyInput = {
     id?: string
     yearNumber: number
@@ -77093,6 +84565,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutFacultiesInput = {
@@ -77111,6 +84584,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutFacultiesInput = {
@@ -77240,6 +84714,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFacultyInput = {
@@ -77296,6 +84773,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFacultyInput = {
@@ -77305,6 +84785,46 @@ export namespace Prisma {
 
   export type UserCreateManyFacultyInputEnvelope = {
     data: UserCreateManyFacultyInput | UserCreateManyFacultyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MedicalTeamCreateWithoutFacultyInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    university: UniversityCreateNestedOneWithoutMedicalTeamsInput
+    members?: TeamMemberCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerCreateNestedManyWithoutTeamInput
+    lectures?: LectureCreateNestedManyWithoutTeamInput
+    posts?: PostCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUncheckedCreateWithoutFacultyInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerUncheckedCreateNestedManyWithoutTeamInput
+    lectures?: LectureUncheckedCreateNestedManyWithoutTeamInput
+    posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamCreateOrConnectWithoutFacultyInput = {
+    where: MedicalTeamWhereUniqueInput
+    create: XOR<MedicalTeamCreateWithoutFacultyInput, MedicalTeamUncheckedCreateWithoutFacultyInput>
+  }
+
+  export type MedicalTeamCreateManyFacultyInputEnvelope = {
+    data: MedicalTeamCreateManyFacultyInput | MedicalTeamCreateManyFacultyInput[]
     skipDuplicates?: boolean
   }
 
@@ -77351,6 +84871,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutFacultiesInput = {
@@ -77369,6 +84890,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type GuestQuizUserUpsertWithWhereUniqueWithoutFacultyInput = {
@@ -77435,6 +84957,22 @@ export namespace Prisma {
     data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutFacultyInput>
   }
 
+  export type MedicalTeamUpsertWithWhereUniqueWithoutFacultyInput = {
+    where: MedicalTeamWhereUniqueInput
+    update: XOR<MedicalTeamUpdateWithoutFacultyInput, MedicalTeamUncheckedUpdateWithoutFacultyInput>
+    create: XOR<MedicalTeamCreateWithoutFacultyInput, MedicalTeamUncheckedCreateWithoutFacultyInput>
+  }
+
+  export type MedicalTeamUpdateWithWhereUniqueWithoutFacultyInput = {
+    where: MedicalTeamWhereUniqueInput
+    data: XOR<MedicalTeamUpdateWithoutFacultyInput, MedicalTeamUncheckedUpdateWithoutFacultyInput>
+  }
+
+  export type MedicalTeamUpdateManyWithWhereWithoutFacultyInput = {
+    where: MedicalTeamScalarWhereInput
+    data: XOR<MedicalTeamUpdateManyMutationInput, MedicalTeamUncheckedUpdateManyWithoutFacultyInput>
+  }
+
   export type UniversityCreateWithoutYearIdFormatsInput = {
     id?: string
     name: string
@@ -77451,6 +84989,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutUniversityInput
     posts?: PostCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutYearIdFormatsInput = {
@@ -77469,6 +85008,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutUniversityInput
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutYearIdFormatsInput = {
@@ -77503,6 +85043,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutUniversityNestedInput
     posts?: PostUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutYearIdFormatsInput = {
@@ -77521,6 +85062,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutUniversityNestedInput
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type FacultyCreateWithoutAcademicYearsInput = {
@@ -77533,6 +85075,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookCreateNestedManyWithoutFacultyInput
     users?: UserCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyUncheckedCreateWithoutAcademicYearsInput = {
@@ -77545,6 +85088,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookUncheckedCreateNestedManyWithoutFacultyInput
     users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyCreateOrConnectWithoutAcademicYearsInput = {
@@ -77568,6 +85112,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutAcademicYearsInput = {
@@ -77586,6 +85131,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutAcademicYearsInput = {
@@ -77650,6 +85196,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUpdateManyWithoutFacultyNestedInput
     users?: UserUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyUncheckedUpdateWithoutAcademicYearsInput = {
@@ -77662,6 +85209,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUncheckedUpdateManyWithoutFacultyNestedInput
     users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type UniversityUpsertWithoutAcademicYearsInput = {
@@ -77691,6 +85239,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutAcademicYearsInput = {
@@ -77709,6 +85258,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type SemesterUpsertWithWhereUniqueWithoutAcademicYearInput = {
@@ -78037,6 +85587,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSemesterInput = {
@@ -78093,6 +85646,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSemesterInput = {
@@ -78578,6 +86134,8 @@ export namespace Prisma {
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutSubjectInput = {
@@ -78588,6 +86146,7 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
@@ -78595,6 +86154,7 @@ export namespace Prisma {
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutSubjectInput = {
@@ -78685,6 +86245,7 @@ export namespace Prisma {
     notesMarkdown?: StringNullableFilter<"Lecture"> | string | null
     extras?: JsonNullableFilter<"Lecture">
     uiConfig?: JsonNullableFilter<"Lecture">
+    teamId?: StringNullableFilter<"Lecture"> | string | null
   }
 
   export type ModuleUpsertWithoutSubjectsInput = {
@@ -79007,6 +86568,67 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type NoteCreateWithoutLectureInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutNotesInput
+  }
+
+  export type NoteUncheckedCreateWithoutLectureInput = {
+    id?: string
+    content: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteCreateOrConnectWithoutLectureInput = {
+    where: NoteWhereUniqueInput
+    create: XOR<NoteCreateWithoutLectureInput, NoteUncheckedCreateWithoutLectureInput>
+  }
+
+  export type NoteCreateManyLectureInputEnvelope = {
+    data: NoteCreateManyLectureInput | NoteCreateManyLectureInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MedicalTeamCreateWithoutLecturesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    faculty: FacultyCreateNestedOneWithoutMedicalTeamsInput
+    university: UniversityCreateNestedOneWithoutMedicalTeamsInput
+    members?: TeamMemberCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerCreateNestedManyWithoutTeamInput
+    posts?: PostCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUncheckedCreateWithoutLecturesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerUncheckedCreateNestedManyWithoutTeamInput
+    posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamCreateOrConnectWithoutLecturesInput = {
+    where: MedicalTeamWhereUniqueInput
+    create: XOR<MedicalTeamCreateWithoutLecturesInput, MedicalTeamUncheckedCreateWithoutLecturesInput>
+  }
+
   export type FlashcardUpsertWithWhereUniqueWithoutLectureInput = {
     where: FlashcardWhereUniqueInput
     update: XOR<FlashcardUpdateWithoutLectureInput, FlashcardUncheckedUpdateWithoutLectureInput>
@@ -79268,6 +86890,75 @@ export namespace Prisma {
     isCompleted?: BoolFilter<"UserLectureActivity"> | boolean
   }
 
+  export type NoteUpsertWithWhereUniqueWithoutLectureInput = {
+    where: NoteWhereUniqueInput
+    update: XOR<NoteUpdateWithoutLectureInput, NoteUncheckedUpdateWithoutLectureInput>
+    create: XOR<NoteCreateWithoutLectureInput, NoteUncheckedCreateWithoutLectureInput>
+  }
+
+  export type NoteUpdateWithWhereUniqueWithoutLectureInput = {
+    where: NoteWhereUniqueInput
+    data: XOR<NoteUpdateWithoutLectureInput, NoteUncheckedUpdateWithoutLectureInput>
+  }
+
+  export type NoteUpdateManyWithWhereWithoutLectureInput = {
+    where: NoteScalarWhereInput
+    data: XOR<NoteUpdateManyMutationInput, NoteUncheckedUpdateManyWithoutLectureInput>
+  }
+
+  export type NoteScalarWhereInput = {
+    AND?: NoteScalarWhereInput | NoteScalarWhereInput[]
+    OR?: NoteScalarWhereInput[]
+    NOT?: NoteScalarWhereInput | NoteScalarWhereInput[]
+    id?: StringFilter<"Note"> | string
+    content?: StringFilter<"Note"> | string
+    lectureId?: StringFilter<"Note"> | string
+    userId?: StringFilter<"Note"> | string
+    createdAt?: DateTimeFilter<"Note"> | Date | string
+    updatedAt?: DateTimeFilter<"Note"> | Date | string
+  }
+
+  export type MedicalTeamUpsertWithoutLecturesInput = {
+    update: XOR<MedicalTeamUpdateWithoutLecturesInput, MedicalTeamUncheckedUpdateWithoutLecturesInput>
+    create: XOR<MedicalTeamCreateWithoutLecturesInput, MedicalTeamUncheckedCreateWithoutLecturesInput>
+    where?: MedicalTeamWhereInput
+  }
+
+  export type MedicalTeamUpdateToOneWithWhereWithoutLecturesInput = {
+    where?: MedicalTeamWhereInput
+    data: XOR<MedicalTeamUpdateWithoutLecturesInput, MedicalTeamUncheckedUpdateWithoutLecturesInput>
+  }
+
+  export type MedicalTeamUpdateWithoutLecturesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    faculty?: FacultyUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    university?: UniversityUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUpdateManyWithoutTeamNestedInput
+    posts?: PostUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateWithoutLecturesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUncheckedUpdateManyWithoutTeamNestedInput
+    posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+  }
+
   export type LectureCreateWithoutFlashcardsInput = {
     id?: string
     title: string
@@ -79283,6 +86974,8 @@ export namespace Prisma {
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutFlashcardsInput = {
@@ -79294,12 +86987,14 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
     videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutFlashcardsInput = {
@@ -79333,6 +87028,8 @@ export namespace Prisma {
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutFlashcardsInput = {
@@ -79344,12 +87041,14 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
     videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type LectureCreateWithoutFilesInput = {
@@ -79367,6 +87066,8 @@ export namespace Prisma {
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutFilesInput = {
@@ -79378,12 +87079,14 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
     videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutFilesInput = {
@@ -79417,6 +87120,8 @@ export namespace Prisma {
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutFilesInput = {
@@ -79428,12 +87133,14 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
     videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type LectureCreateWithoutVideosInput = {
@@ -79451,6 +87158,8 @@ export namespace Prisma {
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutVideosInput = {
@@ -79462,12 +87171,14 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutVideosInput = {
@@ -79549,6 +87260,8 @@ export namespace Prisma {
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutVideosInput = {
@@ -79560,12 +87273,14 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type LectureVideoCommentUpsertWithWhereUniqueWithoutVideoInput = {
@@ -79636,6 +87351,8 @@ export namespace Prisma {
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutRecordsInput = {
@@ -79647,12 +87364,14 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutRecordsInput = {
@@ -79686,6 +87405,8 @@ export namespace Prisma {
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutRecordsInput = {
@@ -79697,12 +87418,14 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type LectureVideoCommentCreateWithoutRepliesInput = {
@@ -79810,6 +87533,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVideoCommentsInput = {
@@ -79866,6 +87592,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVideoCommentsInput = {
@@ -80020,6 +87749,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVideoCommentsInput = {
@@ -80076,6 +87808,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureVideoUpsertWithoutCommentsInput = {
@@ -80175,6 +87910,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVideoLikesInput = {
@@ -80231,6 +87969,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVideoLikesInput = {
@@ -80340,6 +88081,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVideoLikesInput = {
@@ -80396,6 +88140,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LectureVideoUpsertWithoutLikesInput = {
@@ -80456,6 +88203,8 @@ export namespace Prisma {
     videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutQuestionsInput = {
@@ -80467,12 +88216,14 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
     videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutQuestionsInput = {
@@ -80580,6 +88331,8 @@ export namespace Prisma {
     videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutQuestionsInput = {
@@ -80591,12 +88344,14 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
     videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type QuestionReportUpsertWithWhereUniqueWithoutQuestionInput = {
@@ -80715,6 +88470,8 @@ export namespace Prisma {
     videos?: LectureVideoCreateNestedManyWithoutLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutPastPaperInput = {
@@ -80726,12 +88483,14 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
     videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
     activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutPastPaperInput = {
@@ -80879,6 +88638,8 @@ export namespace Prisma {
     videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutPastPaperInput = {
@@ -80890,12 +88651,14 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
     videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type SemesterUpsertWithoutPastPapersInput = {
@@ -81125,6 +88888,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutQuestionReportsInput = {
@@ -81181,6 +88947,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutQuestionReportsInput = {
@@ -81355,6 +89124,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutQuestionReportsInput = {
@@ -81411,6 +89183,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type QuestionCreateWithoutSavedByInput = {
@@ -81508,6 +89283,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSavedQuestionsInput = {
@@ -81564,6 +89342,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSavedQuestionsInput = {
@@ -81683,6 +89464,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSavedQuestionsInput = {
@@ -81739,6 +89523,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type FacultyCreateWithoutGuestQuizUsersInput = {
@@ -81751,6 +89538,7 @@ export namespace Prisma {
     university: UniversityCreateNestedOneWithoutFacultiesInput
     sourceBooks?: SourceBookCreateNestedManyWithoutFacultyInput
     users?: UserCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyUncheckedCreateWithoutGuestQuizUsersInput = {
@@ -81763,6 +89551,7 @@ export namespace Prisma {
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookUncheckedCreateNestedManyWithoutFacultyInput
     users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyCreateOrConnectWithoutGuestQuizUsersInput = {
@@ -81817,6 +89606,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutGuestQuizUsersInput = {
@@ -81835,6 +89625,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutGuestQuizUsersInput = {
@@ -81895,6 +89686,7 @@ export namespace Prisma {
     university?: UniversityUpdateOneRequiredWithoutFacultiesNestedInput
     sourceBooks?: SourceBookUpdateManyWithoutFacultyNestedInput
     users?: UserUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyUncheckedUpdateWithoutGuestQuizUsersInput = {
@@ -81907,6 +89699,7 @@ export namespace Prisma {
     academicYears?: AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUncheckedUpdateManyWithoutFacultyNestedInput
     users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type SemesterUpsertWithoutGuestQuizUsersInput = {
@@ -81973,6 +89766,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutGuestQuizUsersInput = {
@@ -81991,6 +89785,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type QuizAttemptUpsertWithWhereUniqueWithoutGuestQuizUserInput = {
@@ -82139,6 +89934,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutQuizAttemptsInput = {
@@ -82195,6 +89993,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutQuizAttemptsInput = {
@@ -82381,6 +90182,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
@@ -82437,6 +90241,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type QuizAttemptItemUpsertWithWhereUniqueWithoutAttemptInput = {
@@ -82509,6 +90316,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutStudyAssistantProfileInput = {
@@ -82565,6 +90375,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutStudyAssistantProfileInput = {
@@ -82637,6 +90450,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStudyAssistantProfileInput = {
@@ -82693,6 +90509,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type QuizAttemptCreateWithoutItemsInput = {
@@ -83214,6 +91033,7 @@ export namespace Prisma {
     likes?: LikeCreateNestedManyWithoutPostInput
     forum: ForumCreateNestedOneWithoutPostsInput
     university: UniversityCreateNestedOneWithoutPostsInput
+    team?: MedicalTeamCreateNestedOneWithoutPostsInput
   }
 
   export type PostUncheckedCreateWithoutAuthorInput = {
@@ -83230,6 +91050,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -83459,6 +91280,7 @@ export namespace Prisma {
     university: UniversityCreateNestedOneWithoutFacultiesInput
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyUncheckedCreateWithoutUsersInput = {
@@ -83471,6 +91293,7 @@ export namespace Prisma {
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutFacultyInput
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutFacultyInput
     sourceBooks?: SourceBookUncheckedCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyCreateOrConnectWithoutUsersInput = {
@@ -83544,6 +91367,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutUniversityInput
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutUsersInput = {
@@ -83562,6 +91386,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutUniversityInput
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutUsersInput = {
@@ -83670,6 +91495,78 @@ export namespace Prisma {
 
   export type UserTaskCreateManyUserInputEnvelope = {
     data: UserTaskCreateManyUserInput | UserTaskCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type NoteCreateWithoutUserInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lecture: LectureCreateNestedOneWithoutNotesInput
+  }
+
+  export type NoteUncheckedCreateWithoutUserInput = {
+    id?: string
+    content: string
+    lectureId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteCreateOrConnectWithoutUserInput = {
+    where: NoteWhereUniqueInput
+    create: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput>
+  }
+
+  export type NoteCreateManyUserInputEnvelope = {
+    data: NoteCreateManyUserInput | NoteCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TeamMemberCreateWithoutUserInput = {
+    id?: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+    team: MedicalTeamCreateNestedOneWithoutMembersInput
+  }
+
+  export type TeamMemberUncheckedCreateWithoutUserInput = {
+    id?: string
+    teamId: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+  }
+
+  export type TeamMemberCreateOrConnectWithoutUserInput = {
+    where: TeamMemberWhereUniqueInput
+    create: XOR<TeamMemberCreateWithoutUserInput, TeamMemberUncheckedCreateWithoutUserInput>
+  }
+
+  export type TeamMemberCreateManyUserInputEnvelope = {
+    data: TeamMemberCreateManyUserInput | TeamMemberCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TeamFollowerCreateWithoutUserInput = {
+    id?: string
+    createdAt?: Date | string
+    team: MedicalTeamCreateNestedOneWithoutFollowersInput
+  }
+
+  export type TeamFollowerUncheckedCreateWithoutUserInput = {
+    id?: string
+    teamId: string
+    createdAt?: Date | string
+  }
+
+  export type TeamFollowerCreateOrConnectWithoutUserInput = {
+    where: TeamFollowerWhereUniqueInput
+    create: XOR<TeamFollowerCreateWithoutUserInput, TeamFollowerUncheckedCreateWithoutUserInput>
+  }
+
+  export type TeamFollowerCreateManyUserInputEnvelope = {
+    data: TeamFollowerCreateManyUserInput | TeamFollowerCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -84229,6 +92126,7 @@ export namespace Prisma {
     university?: UniversityUpdateOneRequiredWithoutFacultiesNestedInput
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyUncheckedUpdateWithoutUsersInput = {
@@ -84241,6 +92139,7 @@ export namespace Prisma {
     academicYears?: AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUncheckedUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type RankUpsertWithoutUsersInput = {
@@ -84332,6 +92231,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutUniversityNestedInput
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutUsersInput = {
@@ -84350,6 +92250,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutUniversityNestedInput
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type UserFollowUpsertWithWhereUniqueWithoutFollowerInput = {
@@ -84442,6 +92343,419 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"UserTask"> | Date | string
   }
 
+  export type NoteUpsertWithWhereUniqueWithoutUserInput = {
+    where: NoteWhereUniqueInput
+    update: XOR<NoteUpdateWithoutUserInput, NoteUncheckedUpdateWithoutUserInput>
+    create: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput>
+  }
+
+  export type NoteUpdateWithWhereUniqueWithoutUserInput = {
+    where: NoteWhereUniqueInput
+    data: XOR<NoteUpdateWithoutUserInput, NoteUncheckedUpdateWithoutUserInput>
+  }
+
+  export type NoteUpdateManyWithWhereWithoutUserInput = {
+    where: NoteScalarWhereInput
+    data: XOR<NoteUpdateManyMutationInput, NoteUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type TeamMemberUpsertWithWhereUniqueWithoutUserInput = {
+    where: TeamMemberWhereUniqueInput
+    update: XOR<TeamMemberUpdateWithoutUserInput, TeamMemberUncheckedUpdateWithoutUserInput>
+    create: XOR<TeamMemberCreateWithoutUserInput, TeamMemberUncheckedCreateWithoutUserInput>
+  }
+
+  export type TeamMemberUpdateWithWhereUniqueWithoutUserInput = {
+    where: TeamMemberWhereUniqueInput
+    data: XOR<TeamMemberUpdateWithoutUserInput, TeamMemberUncheckedUpdateWithoutUserInput>
+  }
+
+  export type TeamMemberUpdateManyWithWhereWithoutUserInput = {
+    where: TeamMemberScalarWhereInput
+    data: XOR<TeamMemberUpdateManyMutationInput, TeamMemberUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type TeamMemberScalarWhereInput = {
+    AND?: TeamMemberScalarWhereInput | TeamMemberScalarWhereInput[]
+    OR?: TeamMemberScalarWhereInput[]
+    NOT?: TeamMemberScalarWhereInput | TeamMemberScalarWhereInput[]
+    id?: StringFilter<"TeamMember"> | string
+    teamId?: StringFilter<"TeamMember"> | string
+    userId?: StringFilter<"TeamMember"> | string
+    role?: EnumTeamRoleFilter<"TeamMember"> | $Enums.TeamRole
+    createdAt?: DateTimeFilter<"TeamMember"> | Date | string
+  }
+
+  export type TeamFollowerUpsertWithWhereUniqueWithoutUserInput = {
+    where: TeamFollowerWhereUniqueInput
+    update: XOR<TeamFollowerUpdateWithoutUserInput, TeamFollowerUncheckedUpdateWithoutUserInput>
+    create: XOR<TeamFollowerCreateWithoutUserInput, TeamFollowerUncheckedCreateWithoutUserInput>
+  }
+
+  export type TeamFollowerUpdateWithWhereUniqueWithoutUserInput = {
+    where: TeamFollowerWhereUniqueInput
+    data: XOR<TeamFollowerUpdateWithoutUserInput, TeamFollowerUncheckedUpdateWithoutUserInput>
+  }
+
+  export type TeamFollowerUpdateManyWithWhereWithoutUserInput = {
+    where: TeamFollowerScalarWhereInput
+    data: XOR<TeamFollowerUpdateManyMutationInput, TeamFollowerUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type TeamFollowerScalarWhereInput = {
+    AND?: TeamFollowerScalarWhereInput | TeamFollowerScalarWhereInput[]
+    OR?: TeamFollowerScalarWhereInput[]
+    NOT?: TeamFollowerScalarWhereInput | TeamFollowerScalarWhereInput[]
+    id?: StringFilter<"TeamFollower"> | string
+    teamId?: StringFilter<"TeamFollower"> | string
+    userId?: StringFilter<"TeamFollower"> | string
+    createdAt?: DateTimeFilter<"TeamFollower"> | Date | string
+  }
+
+  export type LectureCreateWithoutNotesInput = {
+    id?: string
+    title: string
+    videoUrl?: string | null
+    order?: number
+    notesMarkdown?: string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    flashcards?: FlashcardCreateNestedManyWithoutLectureInput
+    subject: SubjectCreateNestedOneWithoutLecturesInput
+    files?: LectureFileCreateNestedManyWithoutLectureInput
+    records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
+    PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
+    questions?: QuestionCreateNestedManyWithoutLectureInput
+    activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
+  }
+
+  export type LectureUncheckedCreateWithoutNotesInput = {
+    id?: string
+    title: string
+    videoUrl?: string | null
+    order?: number
+    subjectId: string
+    notesMarkdown?: string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
+    flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
+    files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
+    records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
+    PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
+    questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
+    activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+  }
+
+  export type LectureCreateOrConnectWithoutNotesInput = {
+    where: LectureWhereUniqueInput
+    create: XOR<LectureCreateWithoutNotesInput, LectureUncheckedCreateWithoutNotesInput>
+  }
+
+  export type UserCreateWithoutNotesInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    hideRank?: boolean
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facebookUrl?: string | null
+    instagramUrl?: string | null
+    isPrivate?: boolean
+    canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
+    aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
+    comments?: CommentCreateNestedManyWithoutAuthorInput
+    commentLikes?: CommentLikeCreateNestedManyWithoutUserInput
+    dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
+    dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeCreateNestedManyWithoutUserInput
+    likes?: LikeCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteCreateNestedOneWithoutUserInput
+    posts?: PostCreateNestedManyWithoutAuthorInput
+    receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
+    sentInvites?: PrivateForumInviteCreateNestedManyWithoutSenderInput
+    forumMemberships?: PrivateForumMemberCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
+    rank?: RankCreateNestedOneWithoutUsersInput
+    semester?: SemesterCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
+    following?: UserFollowCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutNotesInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    hideRank?: boolean
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facebookUrl?: string | null
+    instagramUrl?: string | null
+    isPrivate?: boolean
+    canManageReports?: boolean
+    facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
+    aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
+    comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
+    commentLikes?: CommentLikeUncheckedCreateNestedManyWithoutUserInput
+    dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
+    dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogUncheckedCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentUncheckedCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeUncheckedCreateNestedManyWithoutUserInput
+    likes?: LikeUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteUncheckedCreateNestedOneWithoutUserInput
+    posts?: PostUncheckedCreateNestedManyWithoutAuthorInput
+    receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
+    sentInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutSenderInput
+    forumMemberships?: PrivateForumMemberUncheckedCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    quizAttempts?: QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedCreateNestedOneWithoutUserInput
+    following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutNotesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+  }
+
+  export type LectureUpsertWithoutNotesInput = {
+    update: XOR<LectureUpdateWithoutNotesInput, LectureUncheckedUpdateWithoutNotesInput>
+    create: XOR<LectureCreateWithoutNotesInput, LectureUncheckedCreateWithoutNotesInput>
+    where?: LectureWhereInput
+  }
+
+  export type LectureUpdateToOneWithWhereWithoutNotesInput = {
+    where?: LectureWhereInput
+    data: XOR<LectureUpdateWithoutNotesInput, LectureUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type LectureUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
+    files?: LectureFileUpdateManyWithoutLectureNestedInput
+    records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
+    PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
+    questions?: QuestionUpdateManyWithoutLectureNestedInput
+    activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
+  }
+
+  export type LectureUncheckedUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    subjectId?: StringFieldUpdateOperationsInput | string
+    notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
+    files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
+    records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
+    PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
+    questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
+    activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+  }
+
+  export type UserUpsertWithoutNotesInput = {
+    update: XOR<UserUpdateWithoutNotesInput, UserUncheckedUpdateWithoutNotesInput>
+    create: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutNotesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutNotesInput, UserUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type UserUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
+    aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
+    comments?: CommentUpdateManyWithoutAuthorNestedInput
+    commentLikes?: CommentLikeUpdateManyWithoutUserNestedInput
+    dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
+    dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUpdateManyWithoutUserNestedInput
+    likes?: LikeUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUpdateOneWithoutUserNestedInput
+    posts?: PostUpdateManyWithoutAuthorNestedInput
+    receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
+    sentInvites?: PrivateForumInviteUpdateManyWithoutSenderNestedInput
+    forumMemberships?: PrivateForumMemberUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
+    rank?: RankUpdateOneWithoutUsersNestedInput
+    semester?: SemesterUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
+    following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
+    aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
+    commentLikes?: CommentLikeUncheckedUpdateManyWithoutUserNestedInput
+    dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUncheckedUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUncheckedUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUncheckedUpdateManyWithoutUserNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUncheckedUpdateOneWithoutUserNestedInput
+    posts?: PostUncheckedUpdateManyWithoutAuthorNestedInput
+    receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
+    forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    quizAttempts?: QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedUpdateOneWithoutUserNestedInput
+    following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type LectureCreateWithoutActivitiesInput = {
     id?: string
     title: string
@@ -84457,6 +92771,8 @@ export namespace Prisma {
     videos?: LectureVideoCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+    team?: MedicalTeamCreateNestedOneWithoutLecturesInput
   }
 
   export type LectureUncheckedCreateWithoutActivitiesInput = {
@@ -84468,12 +92784,14 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
     flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
     files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
     records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
     videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
     PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
     questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
   }
 
   export type LectureCreateOrConnectWithoutActivitiesInput = {
@@ -84535,6 +92853,9 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLectureActivitiesInput = {
@@ -84591,6 +92912,9 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLectureActivitiesInput = {
@@ -84624,6 +92948,8 @@ export namespace Prisma {
     videos?: LectureVideoUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutActivitiesInput = {
@@ -84635,12 +92961,14 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
     videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type UserUpsertWithoutLectureActivitiesInput = {
@@ -84708,6 +93036,9 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLectureActivitiesInput = {
@@ -84764,6 +93095,9 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutDmReceivedInput = {
@@ -84820,6 +93154,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDmReceivedInput = {
@@ -84876,6 +93213,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDmReceivedInput = {
@@ -84937,6 +93277,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDmSentInput = {
@@ -84993,6 +93336,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDmSentInput = {
@@ -85065,6 +93411,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDmReceivedInput = {
@@ -85121,6 +93470,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutDmSentInput = {
@@ -85188,6 +93540,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDmSentInput = {
@@ -85244,6 +93599,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type SemesterCreateWithoutForumsInput = {
@@ -85293,6 +93651,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutForumsInput = {
@@ -85311,6 +93670,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutForumsInput = {
@@ -85334,6 +93694,7 @@ export namespace Prisma {
     likes?: LikeCreateNestedManyWithoutPostInput
     author: UserCreateNestedOneWithoutPostsInput
     university: UniversityCreateNestedOneWithoutPostsInput
+    team?: MedicalTeamCreateNestedOneWithoutPostsInput
   }
 
   export type PostUncheckedCreateWithoutForumInput = {
@@ -85350,6 +93711,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
@@ -85474,6 +93836,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutForumsInput = {
@@ -85492,6 +93855,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type PostUpsertWithWhereUniqueWithoutForumInput = {
@@ -85627,6 +93991,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutForumMembershipsInput = {
@@ -85683,6 +94050,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutForumMembershipsInput = {
@@ -85792,6 +94162,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutForumMembershipsInput = {
@@ -85848,6 +94221,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ForumCreateWithoutInvitesInput = {
@@ -85935,6 +94311,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReceivedInvitesInput = {
@@ -85991,6 +94370,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReceivedInvitesInput = {
@@ -86052,6 +94434,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSentInvitesInput = {
@@ -86108,6 +94493,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSentInvitesInput = {
@@ -86217,6 +94605,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceivedInvitesInput = {
@@ -86273,6 +94664,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutSentInvitesInput = {
@@ -86340,6 +94734,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSentInvitesInput = {
@@ -86396,6 +94793,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CommentCreateWithoutPostInput = {
@@ -86504,6 +94904,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPostsInput = {
@@ -86560,6 +94963,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPostsInput = {
@@ -86614,6 +95020,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutPostsInput = {
@@ -86632,11 +95039,47 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutPostsInput = {
     where: UniversityWhereUniqueInput
     create: XOR<UniversityCreateWithoutPostsInput, UniversityUncheckedCreateWithoutPostsInput>
+  }
+
+  export type MedicalTeamCreateWithoutPostsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    faculty: FacultyCreateNestedOneWithoutMedicalTeamsInput
+    university: UniversityCreateNestedOneWithoutMedicalTeamsInput
+    members?: TeamMemberCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerCreateNestedManyWithoutTeamInput
+    lectures?: LectureCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUncheckedCreateWithoutPostsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    followers?: TeamFollowerUncheckedCreateNestedManyWithoutTeamInput
+    lectures?: LectureUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamCreateOrConnectWithoutPostsInput = {
+    where: MedicalTeamWhereUniqueInput
+    create: XOR<MedicalTeamCreateWithoutPostsInput, MedicalTeamUncheckedCreateWithoutPostsInput>
   }
 
   export type CommentUpsertWithWhereUniqueWithoutPostInput = {
@@ -86736,6 +95179,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPostsInput = {
@@ -86792,6 +95238,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ForumUpsertWithoutPostsInput = {
@@ -86858,6 +95307,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutPostsInput = {
@@ -86876,6 +95326,48 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type MedicalTeamUpsertWithoutPostsInput = {
+    update: XOR<MedicalTeamUpdateWithoutPostsInput, MedicalTeamUncheckedUpdateWithoutPostsInput>
+    create: XOR<MedicalTeamCreateWithoutPostsInput, MedicalTeamUncheckedCreateWithoutPostsInput>
+    where?: MedicalTeamWhereInput
+  }
+
+  export type MedicalTeamUpdateToOneWithWhereWithoutPostsInput = {
+    where?: MedicalTeamWhereInput
+    data: XOR<MedicalTeamUpdateWithoutPostsInput, MedicalTeamUncheckedUpdateWithoutPostsInput>
+  }
+
+  export type MedicalTeamUpdateWithoutPostsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    faculty?: FacultyUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    university?: UniversityUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateWithoutPostsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUncheckedUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUncheckedUpdateManyWithoutTeamNestedInput
   }
 
   export type UserCreateWithoutCommentsInput = {
@@ -86932,6 +95424,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCommentsInput = {
@@ -86988,6 +95483,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCommentsInput = {
@@ -87070,6 +95568,7 @@ export namespace Prisma {
     author: UserCreateNestedOneWithoutPostsInput
     forum: ForumCreateNestedOneWithoutPostsInput
     university: UniversityCreateNestedOneWithoutPostsInput
+    team?: MedicalTeamCreateNestedOneWithoutPostsInput
   }
 
   export type PostUncheckedCreateWithoutCommentsInput = {
@@ -87087,6 +95586,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
     likes?: LikeUncheckedCreateNestedManyWithoutPostInput
   }
 
@@ -87111,6 +95611,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutCommentsInput = {
@@ -87129,6 +95630,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutCommentsInput = {
@@ -87221,6 +95723,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -87277,6 +95782,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CommentUpsertWithoutRepliesInput = {
@@ -87355,6 +95863,7 @@ export namespace Prisma {
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
     university?: UniversityUpdateOneRequiredWithoutPostsNestedInput
+    team?: MedicalTeamUpdateOneWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateWithoutCommentsInput = {
@@ -87372,6 +95881,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
 
@@ -87402,6 +95912,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutCommentsInput = {
@@ -87420,6 +95931,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type CommentLikeUpsertWithWhereUniqueWithoutCommentInput = {
@@ -87492,6 +96004,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFollowingInput = {
@@ -87548,6 +96063,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFollowingInput = {
@@ -87609,6 +96127,9 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFollowersInput = {
@@ -87665,6 +96186,9 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFollowersInput = {
@@ -87737,6 +96261,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -87793,6 +96320,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutFollowersInput = {
@@ -87860,6 +96390,9 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -87916,6 +96449,9 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PostCreateWithoutLikesInput = {
@@ -87934,6 +96470,7 @@ export namespace Prisma {
     author: UserCreateNestedOneWithoutPostsInput
     forum: ForumCreateNestedOneWithoutPostsInput
     university: UniversityCreateNestedOneWithoutPostsInput
+    team?: MedicalTeamCreateNestedOneWithoutPostsInput
   }
 
   export type PostUncheckedCreateWithoutLikesInput = {
@@ -87951,6 +96488,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput
   }
 
@@ -88013,6 +96551,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLikesInput = {
@@ -88069,6 +96610,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLikesInput = {
@@ -88103,6 +96647,7 @@ export namespace Prisma {
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
     university?: UniversityUpdateOneRequiredWithoutPostsNestedInput
+    team?: MedicalTeamUpdateOneWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateWithoutLikesInput = {
@@ -88120,6 +96665,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
   }
 
@@ -88188,6 +96734,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLikesInput = {
@@ -88244,6 +96793,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CommentCreateWithoutLikesInput = {
@@ -88327,6 +96879,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCommentLikesInput = {
@@ -88383,6 +96938,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCommentLikesInput = {
@@ -88488,6 +97046,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentLikesInput = {
@@ -88544,6 +97105,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutNotificationsInput = {
@@ -88600,6 +97164,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -88656,6 +97223,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -88728,6 +97298,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -88784,6 +97357,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutNotifMutesInput = {
@@ -88840,6 +97416,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotifMutesInput = {
@@ -88896,6 +97475,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotifMutesInput = {
@@ -88968,6 +97550,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotifMutesInput = {
@@ -89024,6 +97609,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutRankInput = {
@@ -89080,6 +97668,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRankInput = {
@@ -89136,6 +97727,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRankInput = {
@@ -89218,6 +97812,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutEngagementLogsInput = {
@@ -89274,6 +97871,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutEngagementLogsInput = {
@@ -89346,6 +97946,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEngagementLogsInput = {
@@ -89402,6 +98005,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAiUsageLogsInput = {
@@ -89458,6 +98064,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAiUsageLogsInput = {
@@ -89514,6 +98123,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAiUsageLogsInput = {
@@ -89586,6 +98198,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAiUsageLogsInput = {
@@ -89642,6 +98257,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type SemesterCreateWithoutAdBannersInput = {
@@ -89691,6 +98309,7 @@ export namespace Prisma {
     posts?: PostCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
     users?: UserCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityUncheckedCreateWithoutAdBannersInput = {
@@ -89709,6 +98328,7 @@ export namespace Prisma {
     posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
     yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
     users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutUniversityInput
   }
 
   export type UniversityCreateOrConnectWithoutAdBannersInput = {
@@ -89780,6 +98400,7 @@ export namespace Prisma {
     posts?: PostUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
     users?: UserUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutUniversityNestedInput
   }
 
   export type UniversityUncheckedUpdateWithoutAdBannersInput = {
@@ -89798,6 +98419,7 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
     yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
     users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutUniversityNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -89854,6 +98476,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -89910,6 +98535,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -89982,6 +98610,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -90038,6 +98669,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutDocumentTemplatesInput = {
@@ -90094,6 +98728,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDocumentTemplatesInput = {
@@ -90150,6 +98787,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDocumentTemplatesInput = {
@@ -90222,6 +98862,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDocumentTemplatesInput = {
@@ -90278,6 +98921,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -90334,6 +98980,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -90390,6 +99039,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -90462,6 +99114,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -90518,6 +99173,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutTasksInput = {
@@ -90574,6 +99232,9 @@ export namespace Prisma {
     following?: UserFollowCreateNestedManyWithoutFollowerInput
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTasksInput = {
@@ -90630,6 +99291,9 @@ export namespace Prisma {
     following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTasksInput = {
@@ -90702,6 +99366,9 @@ export namespace Prisma {
     following?: UserFollowUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTasksInput = {
@@ -90758,6 +99425,9 @@ export namespace Prisma {
     following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LibraryResourceCreateWithoutSourceBookInput = {
@@ -90806,6 +99476,7 @@ export namespace Prisma {
     university: UniversityCreateNestedOneWithoutFacultiesInput
     guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutFacultyInput
     users?: UserCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyUncheckedCreateWithoutSourceBooksInput = {
@@ -90818,6 +99489,7 @@ export namespace Prisma {
     academicYears?: AcademicYearUncheckedCreateNestedManyWithoutFacultyInput
     guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutFacultyInput
     users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+    medicalTeams?: MedicalTeamUncheckedCreateNestedManyWithoutFacultyInput
   }
 
   export type FacultyCreateOrConnectWithoutSourceBooksInput = {
@@ -90879,6 +99551,7 @@ export namespace Prisma {
     university?: UniversityUpdateOneRequiredWithoutFacultiesNestedInput
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutFacultyNestedInput
     users?: UserUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyUncheckedUpdateWithoutSourceBooksInput = {
@@ -90891,6 +99564,7 @@ export namespace Prisma {
     academicYears?: AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutFacultyNestedInput
     users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type SourceBookCreateWithoutLibraryResourcesInput = {
@@ -91082,6 +99756,9 @@ export namespace Prisma {
     followers?: UserFollowCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
     tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutChannelFollowsInput = {
@@ -91138,6 +99815,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
     lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
     tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutChannelFollowsInput = {
@@ -91245,6 +99925,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutChannelFollowsInput = {
@@ -91301,6 +99984,1031 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type FacultyCreateWithoutMedicalTeamsInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    createdAt?: Date | string
+    category?: $Enums.FacultyCategory
+    academicYears?: AcademicYearCreateNestedManyWithoutFacultyInput
+    university: UniversityCreateNestedOneWithoutFacultiesInput
+    guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutFacultyInput
+    sourceBooks?: SourceBookCreateNestedManyWithoutFacultyInput
+    users?: UserCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyUncheckedCreateWithoutMedicalTeamsInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    universityId: string
+    createdAt?: Date | string
+    category?: $Enums.FacultyCategory
+    academicYears?: AcademicYearUncheckedCreateNestedManyWithoutFacultyInput
+    guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutFacultyInput
+    sourceBooks?: SourceBookUncheckedCreateNestedManyWithoutFacultyInput
+    users?: UserUncheckedCreateNestedManyWithoutFacultyInput
+  }
+
+  export type FacultyCreateOrConnectWithoutMedicalTeamsInput = {
+    where: FacultyWhereUniqueInput
+    create: XOR<FacultyCreateWithoutMedicalTeamsInput, FacultyUncheckedCreateWithoutMedicalTeamsInput>
+  }
+
+  export type UniversityCreateWithoutMedicalTeamsInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    idMinLength?: number
+    idMaxLength?: number
+    createdAt?: Date | string
+    academicYears?: AcademicYearCreateNestedManyWithoutUniversityInput
+    adBanners?: AdBannerCreateNestedManyWithoutUniversityInput
+    comments?: CommentCreateNestedManyWithoutUniversityInput
+    faculties?: FacultyCreateNestedManyWithoutUniversityInput
+    featureFlags?: FeatureFlagCreateNestedManyWithoutUniversityInput
+    forums?: ForumCreateNestedManyWithoutUniversityInput
+    guestQuizUsers?: GuestQuizUserCreateNestedManyWithoutUniversityInput
+    posts?: PostCreateNestedManyWithoutUniversityInput
+    yearIdFormats?: UniversityYearIdFormatCreateNestedManyWithoutUniversityInput
+    users?: UserCreateNestedManyWithoutUniversityInput
+  }
+
+  export type UniversityUncheckedCreateWithoutMedicalTeamsInput = {
+    id?: string
+    name: string
+    logoUrl?: string | null
+    idMinLength?: number
+    idMaxLength?: number
+    createdAt?: Date | string
+    academicYears?: AcademicYearUncheckedCreateNestedManyWithoutUniversityInput
+    adBanners?: AdBannerUncheckedCreateNestedManyWithoutUniversityInput
+    comments?: CommentUncheckedCreateNestedManyWithoutUniversityInput
+    faculties?: FacultyUncheckedCreateNestedManyWithoutUniversityInput
+    featureFlags?: FeatureFlagUncheckedCreateNestedManyWithoutUniversityInput
+    forums?: ForumUncheckedCreateNestedManyWithoutUniversityInput
+    guestQuizUsers?: GuestQuizUserUncheckedCreateNestedManyWithoutUniversityInput
+    posts?: PostUncheckedCreateNestedManyWithoutUniversityInput
+    yearIdFormats?: UniversityYearIdFormatUncheckedCreateNestedManyWithoutUniversityInput
+    users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+  }
+
+  export type UniversityCreateOrConnectWithoutMedicalTeamsInput = {
+    where: UniversityWhereUniqueInput
+    create: XOR<UniversityCreateWithoutMedicalTeamsInput, UniversityUncheckedCreateWithoutMedicalTeamsInput>
+  }
+
+  export type TeamMemberCreateWithoutTeamInput = {
+    id?: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutTeamMembershipsInput
+  }
+
+  export type TeamMemberUncheckedCreateWithoutTeamInput = {
+    id?: string
+    userId: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+  }
+
+  export type TeamMemberCreateOrConnectWithoutTeamInput = {
+    where: TeamMemberWhereUniqueInput
+    create: XOR<TeamMemberCreateWithoutTeamInput, TeamMemberUncheckedCreateWithoutTeamInput>
+  }
+
+  export type TeamMemberCreateManyTeamInputEnvelope = {
+    data: TeamMemberCreateManyTeamInput | TeamMemberCreateManyTeamInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TeamFollowerCreateWithoutTeamInput = {
+    id?: string
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutFollowedTeamsInput
+  }
+
+  export type TeamFollowerUncheckedCreateWithoutTeamInput = {
+    id?: string
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type TeamFollowerCreateOrConnectWithoutTeamInput = {
+    where: TeamFollowerWhereUniqueInput
+    create: XOR<TeamFollowerCreateWithoutTeamInput, TeamFollowerUncheckedCreateWithoutTeamInput>
+  }
+
+  export type TeamFollowerCreateManyTeamInputEnvelope = {
+    data: TeamFollowerCreateManyTeamInput | TeamFollowerCreateManyTeamInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type LectureCreateWithoutTeamInput = {
+    id?: string
+    title: string
+    videoUrl?: string | null
+    order?: number
+    notesMarkdown?: string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    flashcards?: FlashcardCreateNestedManyWithoutLectureInput
+    subject: SubjectCreateNestedOneWithoutLecturesInput
+    files?: LectureFileCreateNestedManyWithoutLectureInput
+    records?: LectureRecordCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoCreateNestedManyWithoutLectureInput
+    PastPaper?: PastPaperCreateNestedOneWithoutQuizLectureInput
+    questions?: QuestionCreateNestedManyWithoutLectureInput
+    activities?: UserLectureActivityCreateNestedManyWithoutLectureInput
+    notes?: NoteCreateNestedManyWithoutLectureInput
+  }
+
+  export type LectureUncheckedCreateWithoutTeamInput = {
+    id?: string
+    title: string
+    videoUrl?: string | null
+    order?: number
+    subjectId: string
+    notesMarkdown?: string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    flashcards?: FlashcardUncheckedCreateNestedManyWithoutLectureInput
+    files?: LectureFileUncheckedCreateNestedManyWithoutLectureInput
+    records?: LectureRecordUncheckedCreateNestedManyWithoutLectureInput
+    videos?: LectureVideoUncheckedCreateNestedManyWithoutLectureInput
+    PastPaper?: PastPaperUncheckedCreateNestedOneWithoutQuizLectureInput
+    questions?: QuestionUncheckedCreateNestedManyWithoutLectureInput
+    activities?: UserLectureActivityUncheckedCreateNestedManyWithoutLectureInput
+    notes?: NoteUncheckedCreateNestedManyWithoutLectureInput
+  }
+
+  export type LectureCreateOrConnectWithoutTeamInput = {
+    where: LectureWhereUniqueInput
+    create: XOR<LectureCreateWithoutTeamInput, LectureUncheckedCreateWithoutTeamInput>
+  }
+
+  export type LectureCreateManyTeamInputEnvelope = {
+    data: LectureCreateManyTeamInput | LectureCreateManyTeamInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PostCreateWithoutTeamInput = {
+    id?: string
+    content: string
+    imageUrl?: string | null
+    interactionsDisabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    audience?: $Enums.PostAudience
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
+    comments?: CommentCreateNestedManyWithoutPostInput
+    likes?: LikeCreateNestedManyWithoutPostInput
+    author: UserCreateNestedOneWithoutPostsInput
+    forum: ForumCreateNestedOneWithoutPostsInput
+    university: UniversityCreateNestedOneWithoutPostsInput
+  }
+
+  export type PostUncheckedCreateWithoutTeamInput = {
+    id?: string
+    content: string
+    imageUrl?: string | null
+    interactionsDisabled?: boolean
+    authorId: string
+    forumId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    audience?: $Enums.PostAudience
+    universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
+    comments?: CommentUncheckedCreateNestedManyWithoutPostInput
+    likes?: LikeUncheckedCreateNestedManyWithoutPostInput
+  }
+
+  export type PostCreateOrConnectWithoutTeamInput = {
+    where: PostWhereUniqueInput
+    create: XOR<PostCreateWithoutTeamInput, PostUncheckedCreateWithoutTeamInput>
+  }
+
+  export type PostCreateManyTeamInputEnvelope = {
+    data: PostCreateManyTeamInput | PostCreateManyTeamInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FacultyUpsertWithoutMedicalTeamsInput = {
+    update: XOR<FacultyUpdateWithoutMedicalTeamsInput, FacultyUncheckedUpdateWithoutMedicalTeamsInput>
+    create: XOR<FacultyCreateWithoutMedicalTeamsInput, FacultyUncheckedCreateWithoutMedicalTeamsInput>
+    where?: FacultyWhereInput
+  }
+
+  export type FacultyUpdateToOneWithWhereWithoutMedicalTeamsInput = {
+    where?: FacultyWhereInput
+    data: XOR<FacultyUpdateWithoutMedicalTeamsInput, FacultyUncheckedUpdateWithoutMedicalTeamsInput>
+  }
+
+  export type FacultyUpdateWithoutMedicalTeamsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: EnumFacultyCategoryFieldUpdateOperationsInput | $Enums.FacultyCategory
+    academicYears?: AcademicYearUpdateManyWithoutFacultyNestedInput
+    university?: UniversityUpdateOneRequiredWithoutFacultiesNestedInput
+    guestQuizUsers?: GuestQuizUserUpdateManyWithoutFacultyNestedInput
+    sourceBooks?: SourceBookUpdateManyWithoutFacultyNestedInput
+    users?: UserUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type FacultyUncheckedUpdateWithoutMedicalTeamsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: EnumFacultyCategoryFieldUpdateOperationsInput | $Enums.FacultyCategory
+    academicYears?: AcademicYearUncheckedUpdateManyWithoutFacultyNestedInput
+    guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutFacultyNestedInput
+    sourceBooks?: SourceBookUncheckedUpdateManyWithoutFacultyNestedInput
+    users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+  }
+
+  export type UniversityUpsertWithoutMedicalTeamsInput = {
+    update: XOR<UniversityUpdateWithoutMedicalTeamsInput, UniversityUncheckedUpdateWithoutMedicalTeamsInput>
+    create: XOR<UniversityCreateWithoutMedicalTeamsInput, UniversityUncheckedCreateWithoutMedicalTeamsInput>
+    where?: UniversityWhereInput
+  }
+
+  export type UniversityUpdateToOneWithWhereWithoutMedicalTeamsInput = {
+    where?: UniversityWhereInput
+    data: XOR<UniversityUpdateWithoutMedicalTeamsInput, UniversityUncheckedUpdateWithoutMedicalTeamsInput>
+  }
+
+  export type UniversityUpdateWithoutMedicalTeamsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    idMinLength?: IntFieldUpdateOperationsInput | number
+    idMaxLength?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUpdateManyWithoutUniversityNestedInput
+    adBanners?: AdBannerUpdateManyWithoutUniversityNestedInput
+    comments?: CommentUpdateManyWithoutUniversityNestedInput
+    faculties?: FacultyUpdateManyWithoutUniversityNestedInput
+    featureFlags?: FeatureFlagUpdateManyWithoutUniversityNestedInput
+    forums?: ForumUpdateManyWithoutUniversityNestedInput
+    guestQuizUsers?: GuestQuizUserUpdateManyWithoutUniversityNestedInput
+    posts?: PostUpdateManyWithoutUniversityNestedInput
+    yearIdFormats?: UniversityYearIdFormatUpdateManyWithoutUniversityNestedInput
+    users?: UserUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type UniversityUncheckedUpdateWithoutMedicalTeamsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    idMinLength?: IntFieldUpdateOperationsInput | number
+    idMaxLength?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    academicYears?: AcademicYearUncheckedUpdateManyWithoutUniversityNestedInput
+    adBanners?: AdBannerUncheckedUpdateManyWithoutUniversityNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutUniversityNestedInput
+    faculties?: FacultyUncheckedUpdateManyWithoutUniversityNestedInput
+    featureFlags?: FeatureFlagUncheckedUpdateManyWithoutUniversityNestedInput
+    forums?: ForumUncheckedUpdateManyWithoutUniversityNestedInput
+    guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutUniversityNestedInput
+    posts?: PostUncheckedUpdateManyWithoutUniversityNestedInput
+    yearIdFormats?: UniversityYearIdFormatUncheckedUpdateManyWithoutUniversityNestedInput
+    users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type TeamMemberUpsertWithWhereUniqueWithoutTeamInput = {
+    where: TeamMemberWhereUniqueInput
+    update: XOR<TeamMemberUpdateWithoutTeamInput, TeamMemberUncheckedUpdateWithoutTeamInput>
+    create: XOR<TeamMemberCreateWithoutTeamInput, TeamMemberUncheckedCreateWithoutTeamInput>
+  }
+
+  export type TeamMemberUpdateWithWhereUniqueWithoutTeamInput = {
+    where: TeamMemberWhereUniqueInput
+    data: XOR<TeamMemberUpdateWithoutTeamInput, TeamMemberUncheckedUpdateWithoutTeamInput>
+  }
+
+  export type TeamMemberUpdateManyWithWhereWithoutTeamInput = {
+    where: TeamMemberScalarWhereInput
+    data: XOR<TeamMemberUpdateManyMutationInput, TeamMemberUncheckedUpdateManyWithoutTeamInput>
+  }
+
+  export type TeamFollowerUpsertWithWhereUniqueWithoutTeamInput = {
+    where: TeamFollowerWhereUniqueInput
+    update: XOR<TeamFollowerUpdateWithoutTeamInput, TeamFollowerUncheckedUpdateWithoutTeamInput>
+    create: XOR<TeamFollowerCreateWithoutTeamInput, TeamFollowerUncheckedCreateWithoutTeamInput>
+  }
+
+  export type TeamFollowerUpdateWithWhereUniqueWithoutTeamInput = {
+    where: TeamFollowerWhereUniqueInput
+    data: XOR<TeamFollowerUpdateWithoutTeamInput, TeamFollowerUncheckedUpdateWithoutTeamInput>
+  }
+
+  export type TeamFollowerUpdateManyWithWhereWithoutTeamInput = {
+    where: TeamFollowerScalarWhereInput
+    data: XOR<TeamFollowerUpdateManyMutationInput, TeamFollowerUncheckedUpdateManyWithoutTeamInput>
+  }
+
+  export type LectureUpsertWithWhereUniqueWithoutTeamInput = {
+    where: LectureWhereUniqueInput
+    update: XOR<LectureUpdateWithoutTeamInput, LectureUncheckedUpdateWithoutTeamInput>
+    create: XOR<LectureCreateWithoutTeamInput, LectureUncheckedCreateWithoutTeamInput>
+  }
+
+  export type LectureUpdateWithWhereUniqueWithoutTeamInput = {
+    where: LectureWhereUniqueInput
+    data: XOR<LectureUpdateWithoutTeamInput, LectureUncheckedUpdateWithoutTeamInput>
+  }
+
+  export type LectureUpdateManyWithWhereWithoutTeamInput = {
+    where: LectureScalarWhereInput
+    data: XOR<LectureUpdateManyMutationInput, LectureUncheckedUpdateManyWithoutTeamInput>
+  }
+
+  export type PostUpsertWithWhereUniqueWithoutTeamInput = {
+    where: PostWhereUniqueInput
+    update: XOR<PostUpdateWithoutTeamInput, PostUncheckedUpdateWithoutTeamInput>
+    create: XOR<PostCreateWithoutTeamInput, PostUncheckedCreateWithoutTeamInput>
+  }
+
+  export type PostUpdateWithWhereUniqueWithoutTeamInput = {
+    where: PostWhereUniqueInput
+    data: XOR<PostUpdateWithoutTeamInput, PostUncheckedUpdateWithoutTeamInput>
+  }
+
+  export type PostUpdateManyWithWhereWithoutTeamInput = {
+    where: PostScalarWhereInput
+    data: XOR<PostUpdateManyMutationInput, PostUncheckedUpdateManyWithoutTeamInput>
+  }
+
+  export type MedicalTeamCreateWithoutMembersInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    faculty: FacultyCreateNestedOneWithoutMedicalTeamsInput
+    university: UniversityCreateNestedOneWithoutMedicalTeamsInput
+    followers?: TeamFollowerCreateNestedManyWithoutTeamInput
+    lectures?: LectureCreateNestedManyWithoutTeamInput
+    posts?: PostCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUncheckedCreateWithoutMembersInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    followers?: TeamFollowerUncheckedCreateNestedManyWithoutTeamInput
+    lectures?: LectureUncheckedCreateNestedManyWithoutTeamInput
+    posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamCreateOrConnectWithoutMembersInput = {
+    where: MedicalTeamWhereUniqueInput
+    create: XOR<MedicalTeamCreateWithoutMembersInput, MedicalTeamUncheckedCreateWithoutMembersInput>
+  }
+
+  export type UserCreateWithoutTeamMembershipsInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    hideRank?: boolean
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facebookUrl?: string | null
+    instagramUrl?: string | null
+    isPrivate?: boolean
+    canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
+    aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
+    comments?: CommentCreateNestedManyWithoutAuthorInput
+    commentLikes?: CommentLikeCreateNestedManyWithoutUserInput
+    dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
+    dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeCreateNestedManyWithoutUserInput
+    likes?: LikeCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteCreateNestedOneWithoutUserInput
+    posts?: PostCreateNestedManyWithoutAuthorInput
+    receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
+    sentInvites?: PrivateForumInviteCreateNestedManyWithoutSenderInput
+    forumMemberships?: PrivateForumMemberCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
+    rank?: RankCreateNestedOneWithoutUsersInput
+    semester?: SemesterCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
+    following?: UserFollowCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutTeamMembershipsInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    hideRank?: boolean
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facebookUrl?: string | null
+    instagramUrl?: string | null
+    isPrivate?: boolean
+    canManageReports?: boolean
+    facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
+    aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
+    comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
+    commentLikes?: CommentLikeUncheckedCreateNestedManyWithoutUserInput
+    dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
+    dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogUncheckedCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentUncheckedCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeUncheckedCreateNestedManyWithoutUserInput
+    likes?: LikeUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteUncheckedCreateNestedOneWithoutUserInput
+    posts?: PostUncheckedCreateNestedManyWithoutAuthorInput
+    receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
+    sentInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutSenderInput
+    forumMemberships?: PrivateForumMemberUncheckedCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    quizAttempts?: QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedCreateNestedOneWithoutUserInput
+    following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    followedTeams?: TeamFollowerUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutTeamMembershipsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutTeamMembershipsInput, UserUncheckedCreateWithoutTeamMembershipsInput>
+  }
+
+  export type MedicalTeamUpsertWithoutMembersInput = {
+    update: XOR<MedicalTeamUpdateWithoutMembersInput, MedicalTeamUncheckedUpdateWithoutMembersInput>
+    create: XOR<MedicalTeamCreateWithoutMembersInput, MedicalTeamUncheckedCreateWithoutMembersInput>
+    where?: MedicalTeamWhereInput
+  }
+
+  export type MedicalTeamUpdateToOneWithWhereWithoutMembersInput = {
+    where?: MedicalTeamWhereInput
+    data: XOR<MedicalTeamUpdateWithoutMembersInput, MedicalTeamUncheckedUpdateWithoutMembersInput>
+  }
+
+  export type MedicalTeamUpdateWithoutMembersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    faculty?: FacultyUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    university?: UniversityUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    followers?: TeamFollowerUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUpdateManyWithoutTeamNestedInput
+    posts?: PostUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateWithoutMembersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    followers?: TeamFollowerUncheckedUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUncheckedUpdateManyWithoutTeamNestedInput
+    posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+  }
+
+  export type UserUpsertWithoutTeamMembershipsInput = {
+    update: XOR<UserUpdateWithoutTeamMembershipsInput, UserUncheckedUpdateWithoutTeamMembershipsInput>
+    create: XOR<UserCreateWithoutTeamMembershipsInput, UserUncheckedCreateWithoutTeamMembershipsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutTeamMembershipsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutTeamMembershipsInput, UserUncheckedUpdateWithoutTeamMembershipsInput>
+  }
+
+  export type UserUpdateWithoutTeamMembershipsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
+    aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
+    comments?: CommentUpdateManyWithoutAuthorNestedInput
+    commentLikes?: CommentLikeUpdateManyWithoutUserNestedInput
+    dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
+    dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUpdateManyWithoutUserNestedInput
+    likes?: LikeUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUpdateOneWithoutUserNestedInput
+    posts?: PostUpdateManyWithoutAuthorNestedInput
+    receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
+    sentInvites?: PrivateForumInviteUpdateManyWithoutSenderNestedInput
+    forumMemberships?: PrivateForumMemberUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
+    rank?: RankUpdateOneWithoutUsersNestedInput
+    semester?: SemesterUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
+    following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
+    aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
+    commentLikes?: CommentLikeUncheckedUpdateManyWithoutUserNestedInput
+    dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUncheckedUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUncheckedUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUncheckedUpdateManyWithoutUserNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUncheckedUpdateOneWithoutUserNestedInput
+    posts?: PostUncheckedUpdateManyWithoutAuthorNestedInput
+    receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
+    forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    quizAttempts?: QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedUpdateOneWithoutUserNestedInput
+    following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type MedicalTeamCreateWithoutFollowersInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    faculty: FacultyCreateNestedOneWithoutMedicalTeamsInput
+    university: UniversityCreateNestedOneWithoutMedicalTeamsInput
+    members?: TeamMemberCreateNestedManyWithoutTeamInput
+    lectures?: LectureCreateNestedManyWithoutTeamInput
+    posts?: PostCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamUncheckedCreateWithoutFollowersInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
+    members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    lectures?: LectureUncheckedCreateNestedManyWithoutTeamInput
+    posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type MedicalTeamCreateOrConnectWithoutFollowersInput = {
+    where: MedicalTeamWhereUniqueInput
+    create: XOR<MedicalTeamCreateWithoutFollowersInput, MedicalTeamUncheckedCreateWithoutFollowersInput>
+  }
+
+  export type UserCreateWithoutFollowedTeamsInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    hideRank?: boolean
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facebookUrl?: string | null
+    instagramUrl?: string | null
+    isPrivate?: boolean
+    canManageReports?: boolean
+    personalGeminiKey?: string | null
+    handle?: string | null
+    aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
+    comments?: CommentCreateNestedManyWithoutAuthorInput
+    commentLikes?: CommentLikeCreateNestedManyWithoutUserInput
+    dmReceived?: DirectMessageCreateNestedManyWithoutReceiverInput
+    dmSent?: DirectMessageCreateNestedManyWithoutSenderInput
+    documentTemplates?: DocumentTemplateCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeCreateNestedManyWithoutUserInput
+    likes?: LikeCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteCreateNestedOneWithoutUserInput
+    posts?: PostCreateNestedManyWithoutAuthorInput
+    receivedInvites?: PrivateForumInviteCreateNestedManyWithoutReceiverInput
+    sentInvites?: PrivateForumInviteCreateNestedManyWithoutSenderInput
+    forumMemberships?: PrivateForumMemberCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportCreateNestedManyWithoutUserInput
+    quizAttempts?: QuizAttemptCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileCreateNestedOneWithoutUserInput
+    faculty?: FacultyCreateNestedOneWithoutUsersInput
+    rank?: RankCreateNestedOneWithoutUsersInput
+    semester?: SemesterCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
+    following?: UserFollowCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowCreateNestedManyWithoutFollowingInput
+    lectureActivities?: UserLectureActivityCreateNestedManyWithoutUserInput
+    tasks?: UserTaskCreateNestedManyWithoutUserInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutFollowedTeamsInput = {
+    id?: string
+    name: string
+    nickname?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    bio?: string | null
+    phone?: string | null
+    phoneVisible?: boolean
+    hideRank?: boolean
+    theme?: $Enums.Theme
+    role?: $Enums.Role
+    points?: number
+    password?: string | null
+    studentId?: string | null
+    universityId?: string | null
+    semesterId?: string | null
+    rankId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facebookUrl?: string | null
+    instagramUrl?: string | null
+    isPrivate?: boolean
+    canManageReports?: boolean
+    facultyId?: string | null
+    personalGeminiKey?: string | null
+    handle?: string | null
+    aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
+    comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
+    commentLikes?: CommentLikeUncheckedCreateNestedManyWithoutUserInput
+    dmReceived?: DirectMessageUncheckedCreateNestedManyWithoutReceiverInput
+    dmSent?: DirectMessageUncheckedCreateNestedManyWithoutSenderInput
+    documentTemplates?: DocumentTemplateUncheckedCreateNestedManyWithoutUserInput
+    engagementLogs?: EngagementLogUncheckedCreateNestedManyWithoutUserInput
+    videoComments?: LectureVideoCommentUncheckedCreateNestedManyWithoutUserInput
+    videoLikes?: LectureVideoLikeUncheckedCreateNestedManyWithoutUserInput
+    likes?: LikeUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    notifMutes?: NotificationMuteUncheckedCreateNestedOneWithoutUserInput
+    posts?: PostUncheckedCreateNestedManyWithoutAuthorInput
+    receivedInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutReceiverInput
+    sentInvites?: PrivateForumInviteUncheckedCreateNestedManyWithoutSenderInput
+    forumMemberships?: PrivateForumMemberUncheckedCreateNestedManyWithoutUserInput
+    questionReports?: QuestionReportUncheckedCreateNestedManyWithoutUserInput
+    quizAttempts?: QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+    savedQuestions?: SavedQuestionUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedCreateNestedOneWithoutUserInput
+    following?: UserFollowUncheckedCreateNestedManyWithoutFollowerInput
+    followers?: UserFollowUncheckedCreateNestedManyWithoutFollowingInput
+    lectureActivities?: UserLectureActivityUncheckedCreateNestedManyWithoutUserInput
+    tasks?: UserTaskUncheckedCreateNestedManyWithoutUserInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    teamMemberships?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutFollowedTeamsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFollowedTeamsInput, UserUncheckedCreateWithoutFollowedTeamsInput>
+  }
+
+  export type MedicalTeamUpsertWithoutFollowersInput = {
+    update: XOR<MedicalTeamUpdateWithoutFollowersInput, MedicalTeamUncheckedUpdateWithoutFollowersInput>
+    create: XOR<MedicalTeamCreateWithoutFollowersInput, MedicalTeamUncheckedCreateWithoutFollowersInput>
+    where?: MedicalTeamWhereInput
+  }
+
+  export type MedicalTeamUpdateToOneWithWhereWithoutFollowersInput = {
+    where?: MedicalTeamWhereInput
+    data: XOR<MedicalTeamUpdateWithoutFollowersInput, MedicalTeamUncheckedUpdateWithoutFollowersInput>
+  }
+
+  export type MedicalTeamUpdateWithoutFollowersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    faculty?: FacultyUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    university?: UniversityUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUpdateManyWithoutTeamNestedInput
+    posts?: PostUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateWithoutFollowersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUncheckedUpdateManyWithoutTeamNestedInput
+    posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+  }
+
+  export type UserUpsertWithoutFollowedTeamsInput = {
+    update: XOR<UserUpdateWithoutFollowedTeamsInput, UserUncheckedUpdateWithoutFollowedTeamsInput>
+    create: XOR<UserCreateWithoutFollowedTeamsInput, UserUncheckedCreateWithoutFollowedTeamsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutFollowedTeamsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutFollowedTeamsInput, UserUncheckedUpdateWithoutFollowedTeamsInput>
+  }
+
+  export type UserUpdateWithoutFollowedTeamsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
+    aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
+    comments?: CommentUpdateManyWithoutAuthorNestedInput
+    commentLikes?: CommentLikeUpdateManyWithoutUserNestedInput
+    dmReceived?: DirectMessageUpdateManyWithoutReceiverNestedInput
+    dmSent?: DirectMessageUpdateManyWithoutSenderNestedInput
+    documentTemplates?: DocumentTemplateUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUpdateManyWithoutUserNestedInput
+    likes?: LikeUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUpdateOneWithoutUserNestedInput
+    posts?: PostUpdateManyWithoutAuthorNestedInput
+    receivedInvites?: PrivateForumInviteUpdateManyWithoutReceiverNestedInput
+    sentInvites?: PrivateForumInviteUpdateManyWithoutSenderNestedInput
+    forumMemberships?: PrivateForumMemberUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUpdateManyWithoutUserNestedInput
+    quizAttempts?: QuizAttemptUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUpdateOneWithoutUserNestedInput
+    faculty?: FacultyUpdateOneWithoutUsersNestedInput
+    rank?: RankUpdateOneWithoutUsersNestedInput
+    semester?: SemesterUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
+    following?: UserFollowUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUpdateManyWithoutFollowingNestedInput
+    lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFollowedTeamsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nickname?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneVisible?: BoolFieldUpdateOperationsInput | boolean
+    hideRank?: BoolFieldUpdateOperationsInput | boolean
+    theme?: EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    points?: IntFieldUpdateOperationsInput | number
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    studentId?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: NullableStringFieldUpdateOperationsInput | string | null
+    semesterId?: NullableStringFieldUpdateOperationsInput | string | null
+    rankId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facebookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    instagramUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    canManageReports?: BoolFieldUpdateOperationsInput | boolean
+    facultyId?: NullableStringFieldUpdateOperationsInput | string | null
+    personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    handle?: NullableStringFieldUpdateOperationsInput | string | null
+    aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
+    commentLikes?: CommentLikeUncheckedUpdateManyWithoutUserNestedInput
+    dmReceived?: DirectMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    dmSent?: DirectMessageUncheckedUpdateManyWithoutSenderNestedInput
+    documentTemplates?: DocumentTemplateUncheckedUpdateManyWithoutUserNestedInput
+    engagementLogs?: EngagementLogUncheckedUpdateManyWithoutUserNestedInput
+    videoComments?: LectureVideoCommentUncheckedUpdateManyWithoutUserNestedInput
+    videoLikes?: LectureVideoLikeUncheckedUpdateManyWithoutUserNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    notifMutes?: NotificationMuteUncheckedUpdateOneWithoutUserNestedInput
+    posts?: PostUncheckedUpdateManyWithoutAuthorNestedInput
+    receivedInvites?: PrivateForumInviteUncheckedUpdateManyWithoutReceiverNestedInput
+    sentInvites?: PrivateForumInviteUncheckedUpdateManyWithoutSenderNestedInput
+    forumMemberships?: PrivateForumMemberUncheckedUpdateManyWithoutUserNestedInput
+    questionReports?: QuestionReportUncheckedUpdateManyWithoutUserNestedInput
+    quizAttempts?: QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+    savedQuestions?: SavedQuestionUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    studyAssistantProfile?: StudyAssistantProfileUncheckedUpdateOneWithoutUserNestedInput
+    following?: UserFollowUncheckedUpdateManyWithoutFollowerNestedInput
+    followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
+    lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AcademicYearCreateManyUniversityInput = {
@@ -91377,6 +101085,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
   }
 
   export type UniversityYearIdFormatCreateManyUniversityInput = {
@@ -91414,6 +101123,17 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+  }
+
+  export type MedicalTeamCreateManyUniversityInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    facultyId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
   }
 
   export type AcademicYearUpdateWithoutUniversityInput = {
@@ -91504,6 +101224,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUpdateManyWithoutFacultyNestedInput
     users?: UserUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyUncheckedUpdateWithoutUniversityInput = {
@@ -91516,6 +101237,7 @@ export namespace Prisma {
     guestQuizUsers?: GuestQuizUserUncheckedUpdateManyWithoutFacultyNestedInput
     sourceBooks?: SourceBookUncheckedUpdateManyWithoutFacultyNestedInput
     users?: UserUncheckedUpdateManyWithoutFacultyNestedInput
+    medicalTeams?: MedicalTeamUncheckedUpdateManyWithoutFacultyNestedInput
   }
 
   export type FacultyUncheckedUpdateManyWithoutUniversityInput = {
@@ -91634,6 +101356,7 @@ export namespace Prisma {
     likes?: LikeUpdateManyWithoutPostNestedInput
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
+    team?: MedicalTeamUpdateOneWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateWithoutUniversityInput = {
@@ -91650,6 +101373,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -91668,6 +101392,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UniversityYearIdFormatUpdateWithoutUniversityInput = {
@@ -91748,6 +101473,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUniversityInput = {
@@ -91804,6 +101532,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutUniversityInput = {
@@ -91833,6 +101564,47 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MedicalTeamUpdateWithoutUniversityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    faculty?: FacultyUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUpdateManyWithoutTeamNestedInput
+    posts?: PostUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateWithoutUniversityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUncheckedUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUncheckedUpdateManyWithoutTeamNestedInput
+    posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateManyWithoutUniversityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    facultyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
   }
 
   export type AcademicYearCreateManyFacultyInput = {
@@ -91890,6 +101662,17 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+  }
+
+  export type MedicalTeamCreateManyFacultyInput = {
+    id?: string
+    name: string
+    description?: string | null
+    imageUrl?: string | null
+    universityId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    followersCount?: number
   }
 
   export type AcademicYearUpdateWithoutFacultyInput = {
@@ -92036,6 +101819,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFacultyInput = {
@@ -92092,6 +101878,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutFacultyInput = {
@@ -92121,6 +101910,47 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MedicalTeamUpdateWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    university?: UniversityUpdateOneRequiredWithoutMedicalTeamsNestedInput
+    members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUpdateManyWithoutTeamNestedInput
+    posts?: PostUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
+    members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    followers?: TeamFollowerUncheckedUpdateManyWithoutTeamNestedInput
+    lectures?: LectureUncheckedUpdateManyWithoutTeamNestedInput
+    posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+  }
+
+  export type MedicalTeamUncheckedUpdateManyWithoutFacultyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    universityId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    followersCount?: IntFieldUpdateOperationsInput | number
   }
 
   export type SemesterCreateManyAcademicYearInput = {
@@ -92540,6 +102370,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSemesterInput = {
@@ -92596,6 +102429,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutSemesterInput = {
@@ -92749,6 +102585,7 @@ export namespace Prisma {
     notesMarkdown?: string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: string | null
   }
 
   export type LectureUpdateWithoutSubjectInput = {
@@ -92766,6 +102603,8 @@ export namespace Prisma {
     PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+    team?: MedicalTeamUpdateOneWithoutLecturesNestedInput
   }
 
   export type LectureUncheckedUpdateWithoutSubjectInput = {
@@ -92776,6 +102615,7 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
     files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
     records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
@@ -92783,6 +102623,7 @@ export namespace Prisma {
     PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
     questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
     activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
   }
 
   export type LectureUncheckedUpdateManyWithoutSubjectInput = {
@@ -92793,6 +102634,7 @@ export namespace Prisma {
     notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
     extras?: NullableJsonNullValueInput | InputJsonValue
     uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type FlashcardCreateManyLectureInput = {
@@ -92852,6 +102694,14 @@ export namespace Prisma {
     source?: string | null
     lastViewedAt?: Date | string
     isCompleted?: boolean
+  }
+
+  export type NoteCreateManyLectureInput = {
+    id?: string
+    content: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type FlashcardUpdateWithoutLectureInput = {
@@ -93039,6 +102889,30 @@ export namespace Prisma {
     source?: NullableStringFieldUpdateOperationsInput | string | null
     lastViewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type NoteUpdateWithoutLectureInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutNotesNestedInput
+  }
+
+  export type NoteUncheckedUpdateWithoutLectureInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteUncheckedUpdateManyWithoutLectureInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LectureVideoCommentCreateManyVideoInput = {
@@ -93479,6 +103353,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
   }
 
   export type PrivateForumInviteCreateManyReceiverInput = {
@@ -93562,6 +103437,27 @@ export namespace Prisma {
     lectureId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type NoteCreateManyUserInput = {
+    id?: string
+    content: string
+    lectureId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeamMemberCreateManyUserInput = {
+    id?: string
+    teamId: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+  }
+
+  export type TeamFollowerCreateManyUserInput = {
+    id?: string
+    teamId: string
+    createdAt?: Date | string
   }
 
   export type AIUsageLogUpdateWithoutUserInput = {
@@ -93886,6 +103782,7 @@ export namespace Prisma {
     likes?: LikeUpdateManyWithoutPostNestedInput
     forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
     university?: UniversityUpdateOneRequiredWithoutPostsNestedInput
+    team?: MedicalTeamUpdateOneWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateWithoutAuthorInput = {
@@ -93902,6 +103799,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -93920,6 +103818,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PrivateForumInviteUpdateWithoutReceiverInput = {
@@ -94173,6 +104072,69 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type NoteUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lecture?: LectureUpdateOneRequiredWithoutNotesNestedInput
+  }
+
+  export type NoteUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    lectureId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    lectureId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamMemberUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: MedicalTeamUpdateOneRequiredWithoutMembersNestedInput
+  }
+
+  export type TeamMemberUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamMemberUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamFollowerUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: MedicalTeamUpdateOneRequiredWithoutFollowersNestedInput
+  }
+
+  export type TeamFollowerUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamFollowerUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    teamId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PostCreateManyForumInput = {
     id?: string
     content: string
@@ -94187,6 +104149,7 @@ export namespace Prisma {
     isPinned?: boolean
     isChatMessage?: boolean
     isForumPost?: boolean
+    teamId?: string | null
   }
 
   export type PrivateForumInviteCreateManyForumInput = {
@@ -94218,6 +104181,7 @@ export namespace Prisma {
     likes?: LikeUpdateManyWithoutPostNestedInput
     author?: UserUpdateOneRequiredWithoutPostsNestedInput
     university?: UniversityUpdateOneRequiredWithoutPostsNestedInput
+    team?: MedicalTeamUpdateOneWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateWithoutForumInput = {
@@ -94234,6 +104198,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
     likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
   }
@@ -94252,6 +104217,7 @@ export namespace Prisma {
     isPinned?: BoolFieldUpdateOperationsInput | boolean
     isChatMessage?: BoolFieldUpdateOperationsInput | boolean
     isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PrivateForumInviteUpdateWithoutForumInput = {
@@ -94496,6 +104462,9 @@ export namespace Prisma {
     followers?: UserFollowUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUpdateManyWithoutUserNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRankInput = {
@@ -94552,6 +104521,9 @@ export namespace Prisma {
     followers?: UserFollowUncheckedUpdateManyWithoutFollowingNestedInput
     lectureActivities?: UserLectureActivityUncheckedUpdateManyWithoutUserNestedInput
     tasks?: UserTaskUncheckedUpdateManyWithoutUserNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    teamMemberships?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    followedTeams?: TeamFollowerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutRankInput = {
@@ -94659,6 +104631,190 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TeamMemberCreateManyTeamInput = {
+    id?: string
+    userId: string
+    role?: $Enums.TeamRole
+    createdAt?: Date | string
+  }
+
+  export type TeamFollowerCreateManyTeamInput = {
+    id?: string
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type LectureCreateManyTeamInput = {
+    id?: string
+    title: string
+    videoUrl?: string | null
+    order?: number
+    subjectId: string
+    notesMarkdown?: string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type PostCreateManyTeamInput = {
+    id?: string
+    content: string
+    imageUrl?: string | null
+    interactionsDisabled?: boolean
+    authorId: string
+    forumId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    audience?: $Enums.PostAudience
+    universityId: string
+    expiresAt?: Date | string | null
+    isPinned?: boolean
+    isChatMessage?: boolean
+    isForumPost?: boolean
+  }
+
+  export type TeamMemberUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTeamMembershipsNestedInput
+  }
+
+  export type TeamMemberUncheckedUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamMemberUncheckedUpdateManyWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    role?: EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamFollowerUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFollowedTeamsNestedInput
+  }
+
+  export type TeamFollowerUncheckedUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeamFollowerUncheckedUpdateManyWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LectureUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    flashcards?: FlashcardUpdateManyWithoutLectureNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutLecturesNestedInput
+    files?: LectureFileUpdateManyWithoutLectureNestedInput
+    records?: LectureRecordUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUpdateManyWithoutLectureNestedInput
+    PastPaper?: PastPaperUpdateOneWithoutQuizLectureNestedInput
+    questions?: QuestionUpdateManyWithoutLectureNestedInput
+    activities?: UserLectureActivityUpdateManyWithoutLectureNestedInput
+    notes?: NoteUpdateManyWithoutLectureNestedInput
+  }
+
+  export type LectureUncheckedUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    subjectId?: StringFieldUpdateOperationsInput | string
+    notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+    flashcards?: FlashcardUncheckedUpdateManyWithoutLectureNestedInput
+    files?: LectureFileUncheckedUpdateManyWithoutLectureNestedInput
+    records?: LectureRecordUncheckedUpdateManyWithoutLectureNestedInput
+    videos?: LectureVideoUncheckedUpdateManyWithoutLectureNestedInput
+    PastPaper?: PastPaperUncheckedUpdateOneWithoutQuizLectureNestedInput
+    questions?: QuestionUncheckedUpdateManyWithoutLectureNestedInput
+    activities?: UserLectureActivityUncheckedUpdateManyWithoutLectureNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutLectureNestedInput
+  }
+
+  export type LectureUncheckedUpdateManyWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    subjectId?: StringFieldUpdateOperationsInput | string
+    notesMarkdown?: NullableStringFieldUpdateOperationsInput | string | null
+    extras?: NullableJsonNullValueInput | InputJsonValue
+    uiConfig?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type PostUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    comments?: CommentUpdateManyWithoutPostNestedInput
+    likes?: LikeUpdateManyWithoutPostNestedInput
+    author?: UserUpdateOneRequiredWithoutPostsNestedInput
+    forum?: ForumUpdateOneRequiredWithoutPostsNestedInput
+    university?: UniversityUpdateOneRequiredWithoutPostsNestedInput
+  }
+
+  export type PostUncheckedUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
+    authorId?: StringFieldUpdateOperationsInput | string
+    forumId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
+    comments?: CommentUncheckedUpdateManyWithoutPostNestedInput
+    likes?: LikeUncheckedUpdateManyWithoutPostNestedInput
+  }
+
+  export type PostUncheckedUpdateManyWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    interactionsDisabled?: BoolFieldUpdateOperationsInput | boolean
+    authorId?: StringFieldUpdateOperationsInput | string
+    forumId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    audience?: EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+    universityId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPinned?: BoolFieldUpdateOperationsInput | boolean
+    isChatMessage?: BoolFieldUpdateOperationsInput | boolean
+    isForumPost?: BoolFieldUpdateOperationsInput | boolean
+  }
+
 
 
   /**
@@ -94744,6 +104900,10 @@ export namespace Prisma {
      * @deprecated Use AllowedChannelCountOutputTypeDefaultArgs instead
      */
     export type AllowedChannelCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AllowedChannelCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use MedicalTeamCountOutputTypeDefaultArgs instead
+     */
+    export type MedicalTeamCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = MedicalTeamCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use SiteConfigDefaultArgs instead
      */
@@ -94849,6 +105009,10 @@ export namespace Prisma {
      */
     export type UserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserDefaultArgs<ExtArgs>
     /**
+     * @deprecated Use NoteDefaultArgs instead
+     */
+    export type NoteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NoteDefaultArgs<ExtArgs>
+    /**
      * @deprecated Use UserLectureActivityDefaultArgs instead
      */
     export type UserLectureActivityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserLectureActivityDefaultArgs<ExtArgs>
@@ -94952,6 +105116,22 @@ export namespace Prisma {
      * @deprecated Use YoutubeUploadTaskDefaultArgs instead
      */
     export type YoutubeUploadTaskArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = YoutubeUploadTaskDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use MedicalTeamDefaultArgs instead
+     */
+    export type MedicalTeamArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = MedicalTeamDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use TeamMemberDefaultArgs instead
+     */
+    export type TeamMemberArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TeamMemberDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use TeamFollowerDefaultArgs instead
+     */
+    export type TeamFollowerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TeamFollowerDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PlatformMemberDefaultArgs instead
+     */
+    export type PlatformMemberArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PlatformMemberDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany
