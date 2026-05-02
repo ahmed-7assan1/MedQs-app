@@ -41,10 +41,22 @@ const MOCK_TEAMS = [
 
 export default function TeamsDirectory() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [teams, setTeams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredTeams = MOCK_TEAMS.filter(team => 
+  useEffect(() => {
+    fetch("/api/v1/teams")
+      .then(res => res.json())
+      .then(data => {
+        setTeams(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filteredTeams = teams.filter(team => 
     team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    team.faculty.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (team.faculty?.name || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -72,62 +84,75 @@ export default function TeamsDirectory() {
       </div>
 
       {/* Teams Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredTeams.map((team, i) => (
-          <Link href={`/teams/${team.id}`} key={team.id}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="group flex flex-col h-full overflow-hidden rounded-[24px] border border-white/5 bg-[#131220] hover:bg-[#1a182b] transition-all hover:-translate-y-1 hover:shadow-xl hover:border-primary/20"
-            >
-              {/* Card Header (Banner) */}
-              <div className="h-24 w-full bg-gradient-to-br from-white/5 to-white/0 relative overflow-hidden">
-                 <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-                 
-                 {/* Floating Badge */}
-                 <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1.5 border border-white/10">
-                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">{team.faculty.name}</span>
-                 </div>
-              </div>
+      {loading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-[320px] rounded-[24px] bg-white/5 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredTeams.map((team, i) => (
+            <Link href={`/teams/${team.id}`} key={team.id}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="group flex flex-col h-full overflow-hidden rounded-[24px] border border-white/5 bg-[#131220] hover:bg-[#1a182b] transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-primary/20"
+              >
+                {/* Card Header (Banner) */}
+                <div className="h-24 w-full bg-gradient-to-br from-white/5 to-white/0 relative overflow-hidden">
+                  {team.coverUrl ? (
+                    <img src={team.coverUrl} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="" />
+                  ) : (
+                    <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+                  )}
+                  
+                   {/* Floating Badge */}
+                   <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1.5 border border-white/10">
+                      <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-widest">{team.faculty?.name || "General"}</span>
+                   </div>
+                </div>
 
-              {/* Card Body */}
-              <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
-                 {/* Avatar */}
-                 <div className="h-20 w-20 rounded-2xl bg-black border-4 border-[#131220] group-hover:border-[#1a182b] transition-colors -mt-10 mb-4 overflow-hidden shadow-lg relative z-10">
-                    <img src={team.imageUrl} alt={team.name} className="h-full w-full object-cover" />
-                 </div>
+                {/* Card Body */}
+                <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
+                   {/* Avatar */}
+                   <div className="h-20 w-20 rounded-2xl bg-black border-4 border-[#131220] group-hover:border-[#1a182b] transition-colors -mt-10 mb-4 overflow-hidden shadow-lg relative z-10">
+                      <img src={team.imageUrl || `https://api.dicebear.com/7.x/shapes/svg?seed=${team.id}&backgroundColor=6c5ff0`} alt={team.name} className="h-full w-full object-cover" />
+                   </div>
 
-                 <h2 className="text-xl font-black text-white mb-2 group-hover:text-primary transition-colors">{team.name}</h2>
-                 <p className="text-sm font-medium text-white/40 mb-6 flex-1 line-clamp-2">
-                    {team.description}
-                 </p>
+                   <h2 className="text-xl font-black text-white mb-2 group-hover:text-primary transition-colors">{team.name}</h2>
+                   <p className="text-sm font-medium text-white/40 mb-6 flex-1 line-clamp-2">
+                      {team.description}
+                   </p>
 
-                 {/* Stats Row */}
-                 <div className="flex items-center gap-4 pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-1.5">
-                       <Users className="h-4 w-4 text-white/30" />
-                       <span className="text-xs font-bold text-white/60">{team.followersCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                       <BookOpen className="h-4 w-4 text-white/30" />
-                       <span className="text-xs font-bold text-white/60">{team.lecturesCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                       <Activity className="h-4 w-4 text-white/30" />
-                       <span className="text-xs font-bold text-white/60">{team.postsCount}</span>
-                    </div>
+                   {/* Stats Row */}
+                   <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                      <div className="flex items-center gap-1.5">
+                         <Users className="h-4 w-4 text-white/30" />
+                         <span className="text-xs font-bold text-white/60">{team.followersCount || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                         <BookOpen className="h-4 w-4 text-white/30" />
+                         <span className="text-xs font-bold text-white/60">{team._count?.lectures || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                         <Activity className="h-4 w-4 text-white/30" />
+                         <span className="text-xs font-bold text-white/60">{team._count?.posts || 0}</span>
+                      </div>
 
-                    <div className="ml-auto h-8 w-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white text-white/20 transition-all">
-                       <ArrowRight className="h-4 w-4" />
-                    </div>
-                 </div>
-              </div>
-            </motion.div>
-          </Link>
-        ))}
-      </div>
+                      <div className="ml-auto h-8 w-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white text-white/20 transition-all">
+                         <ArrowRight className="h-4 w-4" />
+                      </div>
+                   </div>
+                </div>
+              </motion.div>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {filteredTeams.length === 0 && (
         <div className="text-center py-20">

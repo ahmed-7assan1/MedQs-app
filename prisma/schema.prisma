@@ -901,6 +901,7 @@ model MedicalTeam {
   name           String
   description    String?         @db.Text
   imageUrl       String?
+  coverUrl       String?
   facultyId      String
   universityId   String
   createdAt      DateTime        @default(now())

@@ -14,6 +14,7 @@ export type ProfileViewUser = {
   hideRank: boolean;
   nickname: string | null;
   handle: string | null;
+  studentId: string | null;
   isPrivate: boolean;
   instagramUrl: string | null;
   facebookUrl: string | null;
@@ -56,6 +57,7 @@ const SELECT_FULL = {
   hideRank: true,
   nickname: true,
   handle: true,
+  studentId: true,
   isPrivate: true,
   instagramUrl: true,
   facebookUrl: true,
@@ -73,6 +75,7 @@ const SELECT_COMPAT = {
   image: true,
   createdAt: true,
   points: true,
+  studentId: true,
   university: { select: { name: true } },
   semester: { select: { name: true } },
   rank: { select: { label: true, badge: true } },
@@ -87,6 +90,7 @@ const SELECT_MIN = {
   image: true,
   createdAt: true,
   points: true,
+  studentId: true,
   university: { select: { name: true } },
   semester: { select: { name: true } },
   rank: { select: { label: true } },
@@ -124,6 +128,7 @@ function asProfileView(
     hideRank: filled.hideRank ?? false,
     nickname: (filled.nickname ?? null) as string | null,
     handle: (filled.handle ?? null) as string | null,
+    studentId: (row.studentId as string | null) ?? null,
     isPrivate: filled.isPrivate ?? false,
     instagramUrl: (filled.instagramUrl ?? null) as string | null,
     facebookUrl: (filled.facebookUrl ?? null) as string | null,

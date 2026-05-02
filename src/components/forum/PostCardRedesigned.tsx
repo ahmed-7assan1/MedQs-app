@@ -34,12 +34,12 @@ export function PostCardRedesigned({ post, currentUserId }: Props) {
 
   const getReactionIcon = (r: ReactType) => {
     switch (r) {
-      case 'love': return '❤️';
-      case 'haha': return '😂';
-      case 'wow': return '😯';
-      case 'sad': return '😢';
-      case 'angry': return '😡';
-      default: return '👍';
+      case 'love': return <Heart className="h-5 w-5 fill-red-500 text-red-500" />;
+      case 'haha': return <span className="text-xl">😆</span>;
+      case 'wow': return <span className="text-xl">🔥</span>;
+      case 'sad': return <span className="text-xl">💡</span>;
+      case 'angry': return <span className="text-xl">🎯</span>;
+      default: return <Heart className="h-5 w-5 fill-primary text-primary" />;
     }
   };
 
@@ -62,7 +62,11 @@ export function PostCardRedesigned({ post, currentUserId }: Props) {
     }
 
     try {
-      await fetch(`/api/v1/posts/${post.id}/like`, { method: "POST" });
+      await fetch(`/api/v1/posts/${post.id}/like`, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type })
+      });
     } catch {
       setActiveReaction(prevReaction);
       if (wasLiked !== isLiked) {
@@ -164,12 +168,12 @@ export function PostCardRedesigned({ post, currentUserId }: Props) {
                      onMouseLeave={() => setShowReacts(false)}
                   >
                      {[
-                        { type: 'like', icon: '👍', color: 'text-blue-500' },
-                        { type: 'love', icon: '❤️', color: 'text-red-500' },
-                        { type: 'haha', icon: '😂', color: 'text-yellow-500' },
-                        { type: 'wow', icon: '😯', color: 'text-yellow-500' },
-                        { type: 'sad', icon: '😢', color: 'text-yellow-500' },
-                        { type: 'angry', icon: '😡', color: 'text-orange-500' }
+                        { type: 'like', icon: <Heart className="h-5 w-5 fill-primary text-primary" />, label: 'Like' },
+                        { type: 'love', icon: <Heart className="h-5 w-5 fill-red-500 text-red-500" />, label: 'Love' },
+                        { type: 'haha', icon: <span className="text-xl">😆</span>, label: 'Haha' },
+                        { type: 'wow', icon: <span className="text-xl">🔥</span>, label: 'Fire' },
+                        { type: 'sad', icon: <span className="text-xl">💡</span>, label: 'Smart' },
+                        { type: 'angry', icon: <span className="text-xl">🎯</span>, label: 'Target' }
                      ].map(react => (
                         <button
                            key={react.type}
@@ -177,9 +181,12 @@ export function PostCardRedesigned({ post, currentUserId }: Props) {
                               e.stopPropagation();
                               handleReact(react.type as ReactType);
                            }}
-                           className="hover:-translate-y-2 hover:scale-125 transition-transform duration-200 p-1.5 text-2xl"
+                           className="relative group/btn hover:-translate-y-2 hover:scale-125 transition-all duration-300 p-2.5 rounded-full hover:bg-white/10"
                         >
                            {react.icon}
+                           <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                              {react.label}
+                           </span>
                         </button>
                      ))}
                   </motion.div>

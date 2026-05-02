@@ -692,6 +692,7 @@ exports.Prisma.MedicalTeamScalarFieldEnum = {
   name: 'name',
   description: 'description',
   imageUrl: 'imageUrl',
+  coverUrl: 'coverUrl',
   facultyId: 'facultyId',
   universityId: 'universityId',
   createdAt: 'createdAt',

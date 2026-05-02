@@ -6,8 +6,9 @@ export async function GET() {
   try {
     const teams = await prisma.medicalTeam.findMany({
       include: {
+        faculty: { select: { name: true } },
         _count: {
-          select: { followers: true, posts: true }
+          select: { followers: true, posts: true, lectures: true }
         }
       },
       orderBy: { createdAt: 'desc' }
@@ -20,7 +21,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
+  if ((session?.user as any)?.role !== "ADMIN" && (session?.user as any)?.role !== "SUPER_ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

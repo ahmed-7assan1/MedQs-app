@@ -103,27 +103,28 @@ export default function VideosHubPage() {
   return (
     <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pb-32">
       {/* Hero */}
-      <div className="relative h-[280px] md:h-[360px] w-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-red-600/30 via-red-950/60 to-transparent dark:to-[#0a0a0a] to-slate-50 z-10" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492619334760-22c69e46a788?q=80&w=2000')] bg-cover bg-center opacity-40" />
+      <div className="relative h-[240px] md:h-[320px] w-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-red-600/20 via-transparent to-transparent z-10" />
+        <div className="absolute inset-0 dark:bg-black/40 bg-white/20 z-15" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492619334760-22c69e46a788?q=80&w=2000')] bg-cover bg-center opacity-30" />
         
         <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-8 md:pb-10">
           <Link 
             href="/dashboard-app" 
-            className="absolute top-6 left-6 flex items-center justify-center h-10 w-10 rounded-full bg-black/30 border border-white/20 text-white hover:bg-black/50 transition-all shadow-lg backdrop-blur-md"
+            className="absolute top-6 left-6 flex items-center justify-center h-10 w-10 rounded-full bg-black/10 border border-white/10 dark:text-white text-slate-800 hover:bg-black/20 transition-all shadow-sm backdrop-blur-md"
           >
             <Home className="h-5 w-5" />
           </Link>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 backdrop-blur-md border border-red-400/30 text-[10px] font-black uppercase tracking-[0.2em] text-red-300 mb-4 w-max">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 backdrop-blur-md border border-red-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-red-500 mb-4 w-max">
             <Video className="h-3.5 w-3.5" />
             Visual Learning Engine
           </div>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-2">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter dark:text-white text-slate-900 mb-2">
             Videos.
           </h1>
-          <p className="text-base text-white/70 max-w-xl font-medium">
-            Immersive medical lectures from top educators.
+          <p className="text-sm md:text-base dark:text-white/40 text-slate-500 max-w-xl font-bold uppercase tracking-widest">
+            Medical lectures from top educators worldwide.
           </p>
         </div>
       </div>
@@ -132,13 +133,13 @@ export default function VideosHubPage() {
         {/* Search & Filters */}
         <div className="flex flex-col lg:flex-row items-center gap-4">
           {/* Instant Search Bar */}
-          <div className="relative w-full lg:w-[480px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500/60" />
+          <div className="relative w-full lg:w-[480px] group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500/40 group-focus-within:text-red-500 transition-colors" />
             <input 
               value={globalQuery}
               onChange={(e) => setGlobalQuery(e.target.value)}
               placeholder="Search lectures, topics, educators..." 
-              className="w-full h-14 dark:bg-[#1a1a1a] bg-white border dark:border-white/5 border-slate-200 rounded-2xl pl-12 pr-12 text-base font-medium focus:outline-none focus:ring-2 focus:ring-red-500/40 transition-all dark:placeholder:text-white/20 placeholder:text-slate-400 shadow-sm dark:shadow-none dark:text-white text-slate-800"
+              className="w-full h-14 dark:bg-[#1a1a1a] bg-white border dark:border-white/5 border-slate-200 rounded-2xl pl-12 pr-12 text-base font-bold focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all dark:placeholder:text-white/20 placeholder:text-slate-400 shadow-sm dark:shadow-none dark:text-white text-slate-800"
             />
             <AnimatePresence>
               {globalQuery && (
@@ -162,10 +163,10 @@ export default function VideosHubPage() {
                 key={mod}
                 onClick={() => setActiveSubject(mod)}
                 className={cn(
-                  "px-5 py-2 rounded-xl text-[12px] font-bold transition-all shrink-0 border",
+                  "px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 border",
                   activeSubject === mod 
-                    ? "bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20" 
-                    : "dark:bg-[#1a1a1a] bg-white dark:border-white/5 border-slate-200 dark:text-white/50 text-slate-500 hover:border-red-400/50 hover:text-red-500"
+                    ? "bg-red-500 border-red-500 text-white shadow-xl shadow-red-500/20" 
+                    : "dark:bg-[#1a1a1a] bg-white dark:border-white/5 border-slate-200 dark:text-white/40 text-slate-500 hover:border-red-400/50 hover:text-red-500"
                 )}
               >
                 {mod}
@@ -176,24 +177,24 @@ export default function VideosHubPage() {
 
         {/* Top Educators */}
         {instructors.length > 0 && (
-          <div>
-            <div className="flex items-center gap-2 mb-5">
+          <div className="pt-2">
+            <div className="flex items-center gap-2 mb-6">
               <Star className="h-4 w-4 text-red-500" />
-              <h2 className="text-lg font-black tracking-tight dark:text-white text-slate-800">Top Educators</h2>
+              <h2 className="text-[11px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-slate-400">Top Educators</h2>
             </div>
-            <div className="flex items-center gap-5 overflow-x-auto no-scrollbar pb-2">
+            <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2">
               {instructors.map((inst) => (
-                <div key={inst.id} className="flex flex-col items-center gap-2 shrink-0 group cursor-pointer">
-                  <div className="h-16 w-16 rounded-full border-2 dark:border-white/10 border-slate-200 p-0.5 group-hover:border-red-500 transition-all duration-300 overflow-hidden shadow-md">
-                    <div className="h-full w-full rounded-full overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500 dark:bg-[#1a1a1a] bg-slate-100">
+                <div key={inst.id} className="flex flex-col items-center gap-3 shrink-0 group cursor-pointer">
+                  <div className="h-20 w-20 rounded-3xl border-2 dark:border-white/5 border-slate-200 p-1 group-hover:border-red-500 group-hover:rotate-3 transition-all duration-500 overflow-hidden shadow-sm">
+                    <div className="h-full w-full rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 dark:bg-[#1a1a1a] bg-slate-100">
                       <img 
-                        src={inst.thumbnail || `https://ui-avatars.com/api/?name=${inst.name}&background=534AB7&color=fff`} 
+                        src={inst.thumbnail || `https://ui-avatars.com/api/?name=${inst.name}&background=6c5ff0&color=fff`} 
                         alt={inst.name}
                         className="h-full w-full object-cover"
                       />
                     </div>
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-500 group-hover:text-red-500 transition-colors">
+                  <span className="text-[10px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400 group-hover:text-red-500 transition-colors">
                     {inst.name.split(' ')[0]}
                   </span>
                 </div>
@@ -203,9 +204,9 @@ export default function VideosHubPage() {
         )}
 
         {/* Content Grid */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black tracking-tighter dark:text-white text-slate-800">
+        <section className="pt-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-black tracking-tighter dark:text-white text-slate-900">
               {globalQuery 
                 ? <span>Results for <span className="text-red-500">"{globalQuery}"</span> — {displayVideos.length} found</span>
                 : activeSubject === "All" ? "Featured Lectures" : `${activeSubject} Lectures`
@@ -214,30 +215,30 @@ export default function VideosHubPage() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="aspect-video rounded-[28px] dark:bg-white/5 bg-slate-200 animate-pulse" />
+                <div key={i} className="aspect-video rounded-[32px] dark:bg-white/5 bg-slate-200 animate-pulse" />
               ))}
             </div>
           ) : feedItems.length === 0 ? (
-            <div className="py-24 flex flex-col items-center justify-center dark:text-white/20 text-slate-300">
-              <Clapperboard className="h-20 w-20 mb-4" />
-              <p className="text-lg font-bold">No videos found matching your criteria</p>
+            <div className="py-32 flex flex-col items-center justify-center dark:text-white/10 text-slate-200">
+              <Clapperboard className="h-24 w-24 mb-6" />
+              <p className="text-xl font-black uppercase tracking-widest">No signals found</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {feedItems.map((item, idx) => {
                 if (item.type === "post") {
                   return (
                     <motion.div 
                       key={`post-${item.data.id}`} 
-                      initial={{ opacity: 0, scale: 0.95 }}
+                      initial={{ opacity: 0, scale: 0.98 }}
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
-                      className="rounded-[28px] overflow-hidden dark:bg-white/[0.02] bg-white dark:border-white/5 border-slate-200 border p-2 flex flex-col shadow-sm"
+                      className="rounded-[32px] overflow-hidden dark:bg-[#1a1a1a] bg-white dark:border-white/5 border-slate-200 border p-2 flex flex-col shadow-xl"
                     >
-                      <div className="px-4 pt-3 pb-1 text-[10px] font-black text-red-500 uppercase tracking-[0.2em]">
-                        From the community
+                      <div className="px-5 pt-4 pb-2 text-[10px] font-black text-red-500 uppercase tracking-[0.25em]">
+                        Student Voice
                       </div>
                       <PostCardRedesigned post={item.data} />
                     </motion.div>
@@ -267,67 +268,78 @@ function VideoCard({ video, href }: { video: VideoResult, href: string }) {
     <motion.div 
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      whileHover={{ y: -6 }}
-      className="group relative flex flex-col p-3 rounded-[28px] dark:bg-[#1a1a1a] bg-white dark:hover:bg-[#222] hover:bg-slate-50 dark:border-white/5 border-slate-200 border transition-all shadow-md dark:shadow-none overflow-hidden"
+      whileHover={{ y: -8 }}
+      className="group relative flex flex-col p-3.5 rounded-[32px] dark:bg-[#1a1a1a] bg-white dark:hover:bg-[#222] hover:bg-slate-100/50 dark:border-white/5 border-slate-200 border transition-all shadow-xl hover:shadow-2xl dark:shadow-none overflow-hidden"
     >
-      <Link href={href} className="relative aspect-video rounded-[20px] overflow-hidden mb-4 border dark:border-white/5 border-slate-200 dark:bg-black bg-slate-100 block">
+      <Link href={href} className="relative aspect-video rounded-[24px] overflow-hidden mb-5 border dark:border-white/5 border-slate-200 dark:bg-black bg-slate-200 block">
         <div className={cn("absolute inset-0 transition-opacity duration-700", isHovered ? "opacity-0" : "opacity-100")}>
           <img 
             src={video.thumbnail || `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
             alt={video.title} 
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="h-14 w-14 rounded-full bg-white text-red-500 flex items-center justify-center shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-400">
-              <Play className="h-6 w-6 fill-current ml-1" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="h-16 w-16 rounded-full bg-red-500 text-white flex items-center justify-center shadow-2xl transform translate-y-6 group-hover:translate-y-0 transition-all duration-500">
+              <Play className="h-7 w-7 fill-current ml-1" />
             </div>
           </div>
         </div>
 
         {isHovered && video.videoId && (
-          <div className="absolute inset-0 z-0 bg-black animate-in fade-in duration-700">
+          <div className="absolute inset-0 z-0 bg-black animate-in fade-in duration-1000">
             <iframe 
-              src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&playsinline=1`}
-              className="w-full h-full scale-150 pointer-events-none"
+              src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&playsinline=1&showinfo=0&rel=0&iv_load_policy=3&disablekb=1`}
+              className="w-full h-full scale-[1.35] pointer-events-none"
               allow="autoplay; encrypted-media"
             />
+            {/* Overlay to catch clicks and hide any persistent YT UI */}
+            <div className="absolute inset-0 z-10" />
           </div>
         )}
 
         {video.source === "medqs" && (
-          <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-xl rounded-xl border border-white/10 text-[9px] font-black text-white uppercase tracking-widest z-20">
-            Official
+          <div className="absolute top-4 left-4 px-3 py-1.5 bg-red-500 rounded-xl text-[10px] font-black text-white uppercase tracking-widest z-20 shadow-lg">
+            OFFICIAL
           </div>
         )}
       </Link>
       
-      <div className="px-1 space-y-1.5">
-        <div className="flex items-start gap-2.5">
-          <img 
-            src={video.channelThumbnail || `https://ui-avatars.com/api/?name=${video.channelTitle}&background=534AB7&color=fff`} 
-            className="h-8 w-8 rounded-full dark:border-white/10 border-slate-200 border object-cover shrink-0" 
-            alt="" 
-          />
+      <div className="px-2 space-y-3">
+        <div className="flex items-start gap-3.5">
+          <div className="h-11 w-11 rounded-2xl overflow-hidden dark:border-white/10 border-slate-200 border shrink-0 bg-slate-100">
+            <img 
+              src={video.channelThumbnail || `https://ui-avatars.com/api/?name=${video.channelTitle}&background=6c5ff0&color=fff`} 
+              className="h-full w-full object-cover" 
+              alt="" 
+            />
+          </div>
           <div className="flex-1 min-w-0">
-            <Link href={href} className="font-bold text-[15px] leading-snug line-clamp-2 dark:text-white text-slate-800 group-hover:text-red-500 transition-colors">
+            <Link href={href} className="font-black text-[16px] leading-tight line-clamp-2 dark:text-white text-slate-900 group-hover:text-red-500 transition-colors">
               {video.title}
             </Link>
-            <p className="text-xs dark:text-white/40 text-slate-500 mt-0.5 truncate">{video.channelTitle}</p>
+            <p className="text-[11px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400 mt-1 truncate">
+              {video.channelTitle}
+            </p>
           </div>
         </div>
         
-        {video.moduleName && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-red-500/70 dark:bg-red-500/10 bg-red-50 px-2 py-0.5 rounded-full border border-red-500/10">
-            {video.moduleName}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {video.moduleName && (
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-red-500 dark:bg-red-500/10 bg-red-50 px-3 py-1 rounded-lg border border-red-500/10">
+              {video.moduleName}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t dark:border-white/[0.04] border-slate-100 flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest dark:text-white/20 text-slate-400">
-          <Clock className="h-3 w-3" /> Lecture
+      <div className="mt-6 pt-4 border-t dark:border-white/[0.04] border-slate-100 flex items-center justify-between px-2">
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] dark:text-white/20 text-slate-400">
+          <Clock className="h-3.5 w-3.5" /> 45 MINS
         </div>
-        <ArrowRight className="h-4 w-4 text-red-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+        <div className="flex items-center gap-1 text-red-500">
+           <span className="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">Watch Now</span>
+           <ArrowRight className="h-4 w-4" />
+        </div>
       </div>
     </motion.div>
   );

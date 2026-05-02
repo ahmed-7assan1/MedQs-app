@@ -61166,6 +61166,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     imageUrl: string | null
+    coverUrl: string | null
     facultyId: string | null
     universityId: string | null
     createdAt: Date | null
@@ -61178,6 +61179,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     imageUrl: string | null
+    coverUrl: string | null
     facultyId: string | null
     universityId: string | null
     createdAt: Date | null
@@ -61190,6 +61192,7 @@ export namespace Prisma {
     name: number
     description: number
     imageUrl: number
+    coverUrl: number
     facultyId: number
     universityId: number
     createdAt: number
@@ -61212,6 +61215,7 @@ export namespace Prisma {
     name?: true
     description?: true
     imageUrl?: true
+    coverUrl?: true
     facultyId?: true
     universityId?: true
     createdAt?: true
@@ -61224,6 +61228,7 @@ export namespace Prisma {
     name?: true
     description?: true
     imageUrl?: true
+    coverUrl?: true
     facultyId?: true
     universityId?: true
     createdAt?: true
@@ -61236,6 +61241,7 @@ export namespace Prisma {
     name?: true
     description?: true
     imageUrl?: true
+    coverUrl?: true
     facultyId?: true
     universityId?: true
     createdAt?: true
@@ -61335,6 +61341,7 @@ export namespace Prisma {
     name: string
     description: string | null
     imageUrl: string | null
+    coverUrl: string | null
     facultyId: string
     universityId: string
     createdAt: Date
@@ -61366,6 +61373,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     imageUrl?: boolean
+    coverUrl?: boolean
     facultyId?: boolean
     universityId?: boolean
     createdAt?: boolean
@@ -61385,6 +61393,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     imageUrl?: boolean
+    coverUrl?: boolean
     facultyId?: boolean
     universityId?: boolean
     createdAt?: boolean
@@ -61399,6 +61408,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     imageUrl?: boolean
+    coverUrl?: boolean
     facultyId?: boolean
     universityId?: boolean
     createdAt?: boolean
@@ -61435,6 +61445,7 @@ export namespace Prisma {
       name: string
       description: string | null
       imageUrl: string | null
+      coverUrl: string | null
       facultyId: string
       universityId: string
       createdAt: Date
@@ -61843,6 +61854,7 @@ export namespace Prisma {
     readonly name: FieldRef<"MedicalTeam", 'String'>
     readonly description: FieldRef<"MedicalTeam", 'String'>
     readonly imageUrl: FieldRef<"MedicalTeam", 'String'>
+    readonly coverUrl: FieldRef<"MedicalTeam", 'String'>
     readonly facultyId: FieldRef<"MedicalTeam", 'String'>
     readonly universityId: FieldRef<"MedicalTeam", 'String'>
     readonly createdAt: FieldRef<"MedicalTeam", 'DateTime'>
@@ -65817,6 +65829,7 @@ export namespace Prisma {
     name: 'name',
     description: 'description',
     imageUrl: 'imageUrl',
+    coverUrl: 'coverUrl',
     facultyId: 'facultyId',
     universityId: 'universityId',
     createdAt: 'createdAt',
@@ -70165,6 +70178,7 @@ export namespace Prisma {
     name?: StringFilter<"MedicalTeam"> | string
     description?: StringNullableFilter<"MedicalTeam"> | string | null
     imageUrl?: StringNullableFilter<"MedicalTeam"> | string | null
+    coverUrl?: StringNullableFilter<"MedicalTeam"> | string | null
     facultyId?: StringFilter<"MedicalTeam"> | string
     universityId?: StringFilter<"MedicalTeam"> | string
     createdAt?: DateTimeFilter<"MedicalTeam"> | Date | string
@@ -70183,6 +70197,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    coverUrl?: SortOrderInput | SortOrder
     facultyId?: SortOrder
     universityId?: SortOrder
     createdAt?: SortOrder
@@ -70204,6 +70219,7 @@ export namespace Prisma {
     name?: StringFilter<"MedicalTeam"> | string
     description?: StringNullableFilter<"MedicalTeam"> | string | null
     imageUrl?: StringNullableFilter<"MedicalTeam"> | string | null
+    coverUrl?: StringNullableFilter<"MedicalTeam"> | string | null
     facultyId?: StringFilter<"MedicalTeam"> | string
     universityId?: StringFilter<"MedicalTeam"> | string
     createdAt?: DateTimeFilter<"MedicalTeam"> | Date | string
@@ -70222,6 +70238,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    coverUrl?: SortOrderInput | SortOrder
     facultyId?: SortOrder
     universityId?: SortOrder
     createdAt?: SortOrder
@@ -70242,6 +70259,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"MedicalTeam"> | string
     description?: StringNullableWithAggregatesFilter<"MedicalTeam"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"MedicalTeam"> | string | null
+    coverUrl?: StringNullableWithAggregatesFilter<"MedicalTeam"> | string | null
     facultyId?: StringWithAggregatesFilter<"MedicalTeam"> | string
     universityId?: StringWithAggregatesFilter<"MedicalTeam"> | string
     createdAt?: DateTimeWithAggregatesFilter<"MedicalTeam"> | Date | string
@@ -74651,6 +74669,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     followersCount?: number
@@ -74667,6 +74686,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     universityId: string
     createdAt?: Date | string
@@ -74683,6 +74703,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -74699,6 +74720,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74715,6 +74737,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     universityId: string
     createdAt?: Date | string
@@ -74727,6 +74750,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -74737,6 +74761,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77907,6 +77932,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     imageUrl?: SortOrder
+    coverUrl?: SortOrder
     facultyId?: SortOrder
     universityId?: SortOrder
     createdAt?: SortOrder
@@ -77923,6 +77949,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     imageUrl?: SortOrder
+    coverUrl?: SortOrder
     facultyId?: SortOrder
     universityId?: SortOrder
     createdAt?: SortOrder
@@ -77935,6 +77962,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     imageUrl?: SortOrder
+    coverUrl?: SortOrder
     facultyId?: SortOrder
     universityId?: SortOrder
     createdAt?: SortOrder
@@ -84145,6 +84173,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     followersCount?: number
@@ -84160,6 +84189,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -84518,6 +84548,7 @@ export namespace Prisma {
     name?: StringFilter<"MedicalTeam"> | string
     description?: StringNullableFilter<"MedicalTeam"> | string | null
     imageUrl?: StringNullableFilter<"MedicalTeam"> | string | null
+    coverUrl?: StringNullableFilter<"MedicalTeam"> | string | null
     facultyId?: StringFilter<"MedicalTeam"> | string
     universityId?: StringFilter<"MedicalTeam"> | string
     createdAt?: DateTimeFilter<"MedicalTeam"> | Date | string
@@ -84793,6 +84824,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     followersCount?: number
@@ -84808,6 +84840,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     universityId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -86599,6 +86632,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     followersCount?: number
@@ -86614,6 +86648,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     universityId: string
     createdAt?: Date | string
@@ -86934,6 +86969,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -86949,6 +86985,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -95052,6 +95089,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     followersCount?: number
@@ -95067,6 +95105,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     universityId: string
     createdAt?: Date | string
@@ -95345,6 +95384,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -95360,6 +95400,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -100360,6 +100401,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     followersCount?: number
@@ -100375,6 +100417,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     universityId: string
     createdAt?: Date | string
@@ -100529,6 +100572,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -100544,6 +100588,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -100688,6 +100733,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     followersCount?: number
@@ -100703,6 +100749,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     universityId: string
     createdAt?: Date | string
@@ -100857,6 +100904,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -100872,6 +100920,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -101130,6 +101179,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     facultyId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -101571,6 +101621,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -101586,6 +101637,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -101601,6 +101653,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     facultyId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -101669,6 +101722,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     imageUrl?: string | null
+    coverUrl?: string | null
     universityId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -101917,6 +101971,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     followersCount?: IntFieldUpdateOperationsInput | number
@@ -101932,6 +101987,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -101947,6 +102003,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     universityId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
