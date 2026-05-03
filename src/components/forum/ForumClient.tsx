@@ -414,8 +414,8 @@ export function ForumClient({
       className={cn(
         "flex w-full flex-col font-sans",
         isChatTab
-          ? "min-h-0 flex-1 px-0 pb-0 pt-3 md:pt-4"
-          : "mx-auto max-w-[700px] px-4 py-10"
+          ? "min-h-0 flex-1 px-0 pb-0 pt-20"
+          : "mx-auto max-w-[700px] px-4 pt-20 pb-10"
       )}
     >
       {/* Header & Navigation */}

@@ -27,7 +27,7 @@ export default function PublicFoundersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07080f] pb-32 pt-24">
+    <div className="min-h-screen bg-[#07080f] pb-32 pt-0">
       {/* Hero Section */}
       <div className="relative h-[400px] w-full overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-[#07080f] z-10" />

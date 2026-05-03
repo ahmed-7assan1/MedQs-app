@@ -101,7 +101,7 @@ export default function VideosHubPage() {
   }, [displayVideos, posts]);
 
   return (
-    <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pb-32">
+    <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pt-24 pb-32">
       {/* Hero */}
       <div className="relative h-[240px] md:h-[320px] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-red-600/20 via-transparent to-transparent z-10" />

@@ -87,7 +87,7 @@ export default async function ModulesPage() {
   const totalMastered = Object.values(correctByModule).reduce((acc, set) => acc + set.size, 0);
 
   return (
-    <div className="min-h-screen bg-[#07080f] pb-32 pt-24">
+    <div className="min-h-screen bg-[#07080f] pb-32 pt-0">
       {/* ── Immersive Hero ── */}
       <div className="relative h-[300px] md:h-[400px] w-full overflow-hidden flex items-end">
         <div className="absolute inset-0 bg-gradient-to-b from-[#534AB7]/20 via-transparent to-[#07080f] z-10" />

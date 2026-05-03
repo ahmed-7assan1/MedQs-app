@@ -33,7 +33,7 @@ export default function AboutPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#07080f] px-4 py-8 md:px-8 pb-32">
+    <div className="min-h-screen bg-[#07080f] px-4 pt-24 pb-32 md:px-8">
       {/* Header */}
       <div className="mx-auto max-w-4xl pt-8 pb-16">
         <button 
