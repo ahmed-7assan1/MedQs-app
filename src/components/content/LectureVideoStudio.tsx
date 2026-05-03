@@ -97,13 +97,49 @@ export function LectureVideoStudio({
 
   const toggleLike = async () => {
     if (!active) return;
+    const isLiking = !active.likedByMe;
+    
+    // Optimistic UI
     const updated = videos.map(v => 
       v.id === active.id 
-        ? { ...v, likedByMe: !v.likedByMe, likesCount: v.likedByMe ? v.likesCount - 1 : v.likesCount + 1 } 
+        ? { ...v, likedByMe: isLiking, likesCount: isLiking ? v.likesCount + 1 : v.likesCount - 1 } 
         : v
     );
     setVideos(updated);
-    toast.success(active.likedByMe ? "Removed from liked videos" : "Added to liked videos");
+
+    try {
+      // 1. Local Like
+      await fetch(`/api/v1/lectures/${lectureId}/videos/${active.id}/like`, { method: "POST" });
+      
+      // 2. YouTube Sync
+      const embed = getEmbed(active.url);
+      if (embed?.kind === "youtube") {
+        await fetch("/api/v1/youtube/like", {
+          method: "POST",
+          body: JSON.stringify({ videoId: embed.id, rating: isLiking ? "like" : "none" })
+        });
+      }
+      
+      toast.success(isLiking ? "Added to liked videos" : "Removed from liked videos");
+    } catch (err) {
+      toast.error("Failed to sync like");
+    }
+  };
+
+  const toggleFollow = async () => {
+    if (!channelMetadata?.id) return;
+    const isFollowingNow = !isFollowing;
+    setIsFollowing(isFollowingNow);
+
+    try {
+      await fetch("/api/v1/youtube/subscribe", {
+        method: "POST",
+        body: JSON.stringify({ channelId: channelMetadata.id, subscribe: isFollowingNow })
+      });
+      toast.success(isFollowingNow ? `Following ${channelMetadata.name} on YouTube!` : "Unfollowed");
+    } catch (err) {
+      toast.error("Follow sync failed");
+    }
   };
 
   const shareVideo = async () => {
@@ -196,7 +232,7 @@ export function LectureVideoStudio({
   return (
     <div className="w-full flex flex-col gap-8 animate-in fade-in duration-700">
       {/* 1. INTERNAL SUB-HEADER (Breadcrumbs & Progress) */}
-      <div className="w-full py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-16 z-40 mb-4 transition-all duration-300">
+      <div className="w-full py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-[64px] z-40 mb-4 transition-all duration-300">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {hubUrl && (
@@ -269,26 +305,26 @@ export function LectureVideoStudio({
                           <div className="bg-[#4f46e5] rounded-full p-0.5"><Check className="h-3 w-3 text-white" /></div>
                         </div>
                         <span className="text-[12px] text-[#4a4b6a] font-bold uppercase tracking-wider">
-                          {channelMetadata?.subscriberCount || "250K"} Mentors
+                          {channelMetadata?.subscriberCount || "250K"} Subscribers
                         </span>
                       </div>
                       <button 
-                        onClick={() => setIsFollowing(!isFollowing)}
+                        onClick={toggleFollow}
                         className={cn(
                           "ml-4 rounded-xl px-6 py-2.5 text-[14px] font-[700] transition-all active:scale-95",
                           isFollowing 
                             ? "bg-[#13142a] text-[#818cf8] border border-[#1a1b2e]" 
-                            : "bg-[#4f46e5] text-white shadow-lg shadow-[#4f46e5]/20 hover:bg-[#6366f1]"
+                            : "bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600"
                         )}
                       >
-                        {isFollowing ? "Mentor Joined" : "Join Mentorship"}
+                        {isFollowing ? "Following" : "Follow Channel"}
                       </button>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <div className="flex items-center rounded-2xl bg-[#0c0d18] p-1.5 border border-[#1a1b2e]">
                         <button 
-                          onClick={() => void toggleLike()}
+                          onClick={toggleLike}
                           className={cn(
                             "flex items-center gap-2 px-5 py-2 rounded-xl text-[14px] font-[700] transition-all",
                             active.likedByMe ? "bg-[#4f46e5] text-white" : "text-[#4a4b6a] hover:bg-[#13142a]"

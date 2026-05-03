@@ -184,7 +184,11 @@ export default function VideosHubPage() {
             </div>
             <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2">
               {instructors.map((inst) => (
-                <div key={inst.id} className="flex flex-col items-center gap-3 shrink-0 group cursor-pointer">
+                <Link 
+                  key={inst.id} 
+                  href={`/channels/${inst.youtubeId}`}
+                  className="flex flex-col items-center gap-3 shrink-0 group cursor-pointer"
+                >
                   <div className="h-20 w-20 rounded-3xl border-2 dark:border-white/5 border-slate-200 p-1 group-hover:border-red-500 group-hover:rotate-3 transition-all duration-500 overflow-hidden shadow-sm">
                     <div className="h-full w-full rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 dark:bg-[#1a1a1a] bg-slate-100">
                       <img 
@@ -197,7 +201,7 @@ export default function VideosHubPage() {
                   <span className="text-[10px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400 group-hover:text-red-500 transition-colors">
                     {inst.name.split(' ')[0]}
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -317,9 +321,12 @@ function VideoCard({ video, href }: { video: VideoResult, href: string }) {
             <Link href={href} className="font-black text-[16px] leading-tight line-clamp-2 dark:text-white text-slate-900 group-hover:text-red-500 transition-colors">
               {video.title}
             </Link>
-            <p className="text-[11px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400 mt-1 truncate">
+            <Link 
+              href={`/channels/${video.channelId}`}
+              className="text-[11px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400 mt-1 truncate hover:text-red-500 transition-colors block"
+            >
               {video.channelTitle}
-            </p>
+            </Link>
           </div>
         </div>
         

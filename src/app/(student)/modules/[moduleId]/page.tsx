@@ -6,7 +6,7 @@ import {
   ChevronRight, Layers, FileText, Clock, BarChart3,
   Brain, Bone, Microscope, Shield, Pill, Activity,
   HelpCircle, FlaskConical, Dna, Atom,
-  Stethoscope, HeartPulse, Syringe, Bandage, Tablets, 
+  Stethoscope, HeartPulse, Syringe, CheckCircle2, Tablets, 
   ClipboardList, Thermometer, Eye, Ear, Hand, Biohazard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ import { SubjectInlineManager } from "@/components/admin-inline/SubjectInlineMan
 // Map subject names to discipline icons + colors
 const ICON_MAP: Record<string, any> = {
   Brain, Bone, HeartPulse, Activity, Microscope, Pill, FlaskConical, 
-  Dna, Atom, Stethoscope, Syringe, Baby, Bandage, Tablets, 
+  Dna, Atom, Stethoscope, Syringe, CheckCircle2, Tablets, 
   ClipboardList, Thermometer, Eye, Ear, Hand, Biohazard, Layers
 };
 
@@ -115,10 +115,10 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
   const totalLectures = mod.subjects.flatMap(s => s.lectures).length;
 
   return (
-    <div className="min-h-screen bg-[#07080f] pb-32 pt-0">
+    <div className="min-h-screen bg-background pb-32 pt-0">
       {/* ── Immersive Hero Section ── */}
       <div className="relative h-[400px] w-full overflow-hidden flex items-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-transparent to-[#07080f] z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-transparent to-background z-10" />
         {/* Background Patterns */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4" />
@@ -127,7 +127,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
              {/* Large Module Icon */}
              <div className="h-24 w-24 md:h-32 md:w-32 rounded-[32px] bg-gradient-to-br from-primary to-primary/40 p-[2px] shadow-2xl shadow-primary/20 rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="h-full w-full rounded-[30px] bg-[#131220] flex items-center justify-center">
+                <div className="h-full w-full rounded-[30px] bg-card flex items-center justify-center">
                    <Brain className="h-10 w-10 md:h-14 md:w-14 text-primary" />
                 </div>
              </div>
@@ -137,39 +137,39 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                   <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
                     Academic Module
                   </span>
-                  <div className="h-1 w-1 rounded-full bg-white/20" />
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                  <div className="h-1 w-1 rounded-full bg-foreground/20" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     {mod.subjects.length} Disciplines
                   </span>
                 </div>
                 
-                <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white">
+                <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground">
                   {mod.name}.
                 </h1>
 
                 {/* Quick Stats Row */}
                 <div className="flex flex-wrap items-center gap-6 pt-2">
                    <div className="space-y-1">
-                      <p className="text-xl font-black text-white">{totalLectures}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Total Lectures</p>
+                      <p className="text-xl font-black text-foreground">{totalLectures}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Lectures</p>
                    </div>
-                   <div className="h-8 w-px bg-white/5" />
+                   <div className="h-8 w-px bg-border" />
                    <div className="space-y-1">
-                      <p className="text-xl font-black text-white">{totalQ}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Practice Items</p>
+                      <p className="text-xl font-black text-foreground">{totalQ}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Practice Items</p>
                    </div>
-                   <div className="h-8 w-px bg-white/5" />
+                   <div className="h-8 w-px bg-border" />
                    <div className="flex items-center gap-4">
                       <div className="space-y-1">
                         <p className={cn(
                           "text-xl font-black",
-                          modPct >= 70 ? "text-emerald-500" : modPct > 0 ? "text-amber-500" : "text-white/40"
+                          modPct >= 70 ? "text-emerald-500" : modPct > 0 ? "text-amber-500" : "text-muted-foreground"
                         )}>
                           {modPct}%
                         </p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Completion</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Completion</p>
                       </div>
-                      <div className="w-32 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                      <div className="w-32 h-1.5 rounded-full bg-muted overflow-hidden">
                         <div 
                           className="h-full bg-gradient-to-r from-primary to-blue-400 transition-all duration-1000"
                           style={{ width: `${modPct}%` }}
@@ -198,12 +198,12 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
             <div className="flex items-center gap-3">
               <div className="h-8 w-1.5 rounded-full bg-primary" />
               <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Curriculum</h2>
-                <p className="text-xs font-bold text-white/20 uppercase tracking-widest">Available Disciplines</p>
+                <h2 className="text-2xl font-black text-foreground tracking-tight">Curriculum</h2>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Available Disciplines</p>
               </div>
             </div>
             
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-bold text-white/40 uppercase tracking-widest">
+            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-muted rounded-xl border border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                <Activity className="h-4 w-4 text-primary" /> Tracking Progress
             </div>
           </div>
@@ -221,7 +221,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                 <Link
                   key={subject.id}
                   href={`/modules/${mod.id}/subjects/${subject.id}`}
-                  className="group relative flex flex-col bg-[#131220] border border-white/5 rounded-[32px] p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/20 overflow-hidden"
+                  className="group relative flex flex-col bg-card border border-border rounded-[32px] p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/20 overflow-hidden"
                 >
                   {/* Subject Glow */}
                   <div className={cn("absolute -top-12 -right-12 h-32 w-32 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity", accent.bgColor)} />
@@ -238,7 +238,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                         "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border",
                         subjPct >= 70 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
                         : subjPct > 0 ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                        : "bg-white/5 text-white/20 border-white/5"
+                        : "bg-muted text-muted-foreground border-border"
                       )}>
                         {subjPct}% Done
                       </div>
@@ -246,13 +246,13 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <h3 className="text-xl font-bold text-white group-hover:text-primary transition-colors line-clamp-1">{subject.name}</h3>
-                    <div className="flex items-center gap-3 text-xs font-bold text-white/30 uppercase tracking-widest">
+                    <h3 className="text-xl font-bold text-card-foreground group-hover:text-primary transition-colors line-clamp-1">{subject.name}</h3>
+                    <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                        <span className="flex items-center gap-1.5">
                          <Layers className="h-3.5 w-3.5" />
                          {subject.lectures.length}
                        </span>
-                       <div className="h-1 w-1 rounded-full bg-white/10" />
+                       <div className="h-1 w-1 rounded-full bg-border" />
                        <span className="flex items-center gap-1.5">
                          <HelpCircle className="h-3.5 w-3.5" />
                          {subjQ}
@@ -263,7 +263,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                   {/* Bottom Progress Bar */}
                   {subjQ > 0 && (
                     <div className="mt-8 space-y-2">
-                       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                       <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                          <div 
                            className={cn("h-full transition-all duration-1000", accent.progressColor)}
                            style={{ width: `${subjPct}%` }}
@@ -287,8 +287,8 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
             <div className="flex items-center gap-3">
               <div className="h-8 w-1.5 rounded-full bg-violet-500" />
               <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Assessments</h2>
-                <p className="text-xs font-bold text-white/20 uppercase tracking-widest">Previous Years & Mock Exams</p>
+                <h2 className="text-2xl font-black text-foreground tracking-tight">Assessments</h2>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Previous Years & Mock Exams</p>
               </div>
             </div>
 
@@ -297,7 +297,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                 <Link
                   key={paper.id}
                   href={`/quiz/${paper.id}`}
-                  className="group relative bg-[#131220] border border-white/5 rounded-3xl p-5 transition-all hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/5 hover:-translate-y-1"
+                  className="group relative bg-card border border-border rounded-3xl p-5 transition-all hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/5 hover:-translate-y-1"
                 >
                   <div className="flex flex-col h-full space-y-4">
                     <div className="flex items-center justify-between">
@@ -311,16 +311,16 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                       )}
                     </div>
                     
-                    <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight group-hover:text-violet-400 transition-colors">
+                    <h3 className="text-sm font-bold text-card-foreground line-clamp-2 leading-tight group-hover:text-violet-400 transition-colors">
                       {paper.title}
                     </h3>
 
-                    <div className="mt-auto pt-4 flex items-center gap-4 border-t border-white/5">
-                      <div className="flex items-center gap-1 text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                    <div className="mt-auto pt-4 flex items-center gap-4 border-t border-border">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                          <Clock className="h-3 w-3" />
                          {paper.timeLimitMin || 0}m
                       </div>
-                      <div className="flex items-center gap-1 text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                          <BarChart3 className="h-3 w-3" />
                          {paper._count.attempts}
                       </div>

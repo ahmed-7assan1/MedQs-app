@@ -36,24 +36,35 @@
   --primary-foreground: 0 0% 100%;
   
   /* Light Mode Tokens (Clean & Balanced) */
-  --background: 240 10% 98%; /* #FBFBFC */
-  --foreground: 240 10% 10%; /* #1D1D1F */
+  --background: 220 20% 97%; /* #F4F5F8 — soft cool white */
+  --foreground: 230 15% 12%; /* near-black */
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 10%;
-  --muted: 240 10% 95%; /* #F5F5F7 */
-  --muted-foreground: 240 4% 46%; 
-  --secondary: 0 0% 100% / 0.04;
-  --secondary-foreground: 240 10% 10%;
+  --card-foreground: 230 15% 12%;
+  --muted: 220 14% 93%;
+  --muted-foreground: 230 8% 48%; 
+  --secondary: 0 0% 0% / 0.04;
+  --secondary-foreground: 230 15% 12%;
   --accent: 245 82% 66% / 0.1;
   --accent-foreground: 245 82% 66%;
-  --border: 0 0% 0% / 0.05;
-  --input: 0 0% 0% / 0.05;
+  --border: 220 13% 88%;
+  --input: 220 13% 88%;
   --ring: 245 82% 66%;
   --radius: 12px;
+
+  /* ── Surface bridge vars ── 
+     Used to make hardcoded dark hex values theme-aware via global CSS below */
+  --surface-bg: 220 20% 97%;   /* replaces #09080F in light mode */
+  --surface-card: 0 0% 100%;   /* replaces #131220 in light mode */
+  --surface-text: 230 15% 12%; /* white text → dark in light mode */
+  --surface-text-muted: 230 8% 48%;
+  --surface-border: 220 13% 88%;
+  --surface-white-10: rgba(0,0,0,0.06);
+  --surface-white-5: rgba(0,0,0,0.04);
+  --surface-white-20: rgba(0,0,0,0.1);
 }
 
 .dark {
-  /* Dark Mode Tokens (Based on Quiz Page Design) */
+  /* Dark Mode Tokens */
   --background: 248 31% 5%; /* #09080F */
   --foreground: 0 0% 100%;
   --card: 244 28% 10%; /* #131220 */
@@ -67,6 +78,15 @@
   --border: 0 0% 100% / 0.07;
   --input: 0 0% 100% / 0.07;
   --ring: 245 82% 66%;
+
+  --surface-bg: 248 31% 5%;
+  --surface-card: 244 28% 10%;
+  --surface-text: 0 0% 100%;
+  --surface-text-muted: 240 5% 65%;
+  --surface-border: 0 0% 100% / 0.07;
+  --surface-white-10: rgba(255,255,255,0.10);
+  --surface-white-5: rgba(255,255,255,0.05);
+  --surface-white-20: rgba(255,255,255,0.20);
 }
 
 /* ── Dr. Q Redesign Design System (AI Chat Page) ── */
@@ -156,6 +176,109 @@ html[data-theme="dark"] body,
   background-attachment: fixed;
 }
 
+/* ══════════════════════════════════════════════════════════
+   ██  PROFESSIONAL WHITE MODE — Global Theme Overrides  ██
+   Override every hardcoded dark hex used across all pages.
+   ══════════════════════════════════════════════════════════ */
+
+/* 1. Page-level dark background → clean off-white */
+html[data-theme="light"] .bg-\[\#09080F\],
+html[data-theme="light"] [class*="bg-[#09080F]"] {
+  background-color: #F4F5F8 !important;
+}
+html[data-theme="light"] .bg-\[\#07080f\],
+html[data-theme="light"] [class*="bg-[#07080f]"] {
+  background-color: #F4F5F8 !important;
+}
+
+/* 2. Card-level dark background → white */
+html[data-theme="light"] .bg-\[\#131220\],
+html[data-theme="light"] [class*="bg-[#131220]"] {
+  background-color: #FFFFFF !important;
+  color: hsl(230 15% 12%) !important;
+}
+
+/* 3. Gradient backgrounds that start from dark */
+html[data-theme="light"] .from-\[\#131220\] {
+  --tw-gradient-from: #F0F1F6 !important;
+}
+html[data-theme="light"] .to-\[\#09080F\],
+html[data-theme="light"] .to-\[\#07080f\] {
+  --tw-gradient-to: #F4F5F8 !important;
+}
+
+/* 4. White text on dark → dark text in light */
+html[data-theme="light"] .text-white {
+  color: hsl(230 15% 12%) !important;
+}
+html[data-theme="light"] .text-white\/40,
+html[data-theme="light"] .text-white\/30,
+html[data-theme="light"] .text-white\/20,
+html[data-theme="light"] .text-white\/10 {
+  color: hsl(230 8% 52%) !important;
+}
+html[data-theme="light"] .text-white\/50,
+html[data-theme="light"] .text-white\/60,
+html[data-theme="light"] .text-white\/70 {
+  color: hsl(230 10% 38%) !important;
+}
+
+/* 5. White border utilities → subtle light borders */
+html[data-theme="light"] .border-white\/5,
+html[data-theme="light"] .border-white\/10 {
+  border-color: hsl(220 13% 88%) !important;
+}
+
+/* 6. White background opacity utilities → black opacity (inverted) */
+html[data-theme="light"] .bg-white\/5 {
+  background-color: rgba(0,0,0,0.04) !important;
+}
+html[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(0,0,0,0.06) !important;
+}
+html[data-theme="light"] .hover\:bg-white\/10:hover {
+  background-color: rgba(0,0,0,0.06) !important;
+}
+
+/* 7. Backdrop blur containers on dark bg → white frosted */
+html[data-theme="light"] .bg-\[\#09080F\]\/80,
+html[data-theme="light"] .bg-\[\#09080F\]\/90 {
+  background-color: rgba(244, 245, 248, 0.85) !important;
+}
+html[data-theme="light"] .bg-\[\#131220\]\/50,
+html[data-theme="light"] .bg-\[\#131220\]\/90 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* 8. Prose in dark → legible in light */
+html[data-theme="light"] .prose-invert {
+  --tw-prose-body: hsl(230 10% 25%);
+  --tw-prose-headings: hsl(230 15% 12%);
+  --tw-prose-links: hsl(245 82% 55%);
+  --tw-prose-bold: hsl(230 15% 12%);
+  --tw-prose-code: hsl(245 82% 55%);
+}
+
+/* 9. Lecture hero gradient in light mode */
+html[data-theme="light"] .from-\[\#131220\].to-\[\#09080F\] {
+  background: linear-gradient(to bottom, #EEEEF6, #F4F5F8) !important;
+}
+
+/* 10. Dark inline-style backgrounds used in module/lecture pages */
+html[data-theme="light"] [style*="background: #09080F"],
+html[data-theme="light"] [style*="background-color: #09080F"],
+html[data-theme="light"] [style*="background: #07080f"],
+html[data-theme="light"] [style*="background-color: #07080f"] {
+  background: #F4F5F8 !important;
+  background-color: #F4F5F8 !important;
+}
+
+/* 11. min-h-screen dark pages */
+html[data-theme="light"] .min-h-screen.bg-\[\#09080F\],
+html[data-theme="light"] .min-h-screen.bg-\[\#07080f\] {
+  background-color: #F4F5F8 !important;
+}
+
 /* ── MedOneX Modern Design System (Quiz-Inspired) ── */
 .btn-gradient {
   background: linear-gradient(135deg, #534AB7 0%, #7C6FF5 100%);
@@ -171,12 +294,26 @@ html[data-theme="dark"] body,
 }
 
 .stat-card-new {
-  @apply rounded-xl border border-transparent bg-[#131220] p-[18px_20px] transition-all shadow-md;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  padding: 18px 20px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .row-card-new {
-  @apply relative flex items-center gap-4 rounded-xl border border-transparent bg-[#131220] p-[18px_20px] transition-all overflow-hidden shadow-sm;
-  border-left-width: 3px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  padding: 18px 20px;
+  transition: all 0.2s;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   border-left-color: rgba(108, 95, 240, 0.4);
 }
 .row-card-new:hover {

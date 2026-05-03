@@ -1,21 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
-  BookOpen,
-  FileText,
-  Layers,
-  HelpCircle,
-  Video,
-  Sparkles,
-  PlayCircle,
-  ChevronRight,
-  GraduationCap,
-  X,
-  Loader2,
-  Clock,
-  ArrowLeft
+  FileText, Layers, HelpCircle, Video, Sparkles, PlayCircle,
+  ArrowLeft, CheckCircle2, BookOpen, Brain, Zap, Star,
+  Clock, Award, ChevronRight, BarChart2, AlignLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
@@ -23,110 +13,148 @@ import ReactMarkdown from "react-markdown";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 import { AIAssistantPanel } from "@/components/ai/AIAssistant";
-import toast from "react-hot-toast";
 
-type TabId = "overview" | "video" | "flashcards" | "questions" | "notes";
+type TabId = "overview" | "video" | "flashcards" | "questions" | "notes" | "drq";
 
-export function LectureExperienceClient({ lecture, moduleId }: { lecture: any; moduleId: string }) {
+const TAB_META: Record<string, { icon: any; color: string; glow: string }> = {
+  overview:   { icon: Layers,       color: "text-violet-500",  glow: "shadow-violet-500/20" },
+  video:      { icon: PlayCircle,   color: "text-sky-500",     glow: "shadow-sky-500/20" },
+  flashcards: { icon: Brain,        color: "text-amber-500",   glow: "shadow-amber-500/20" },
+  questions:  { icon: CheckCircle2, color: "text-emerald-500", glow: "shadow-emerald-500/20" },
+  notes:      { icon: AlignLeft,    color: "text-rose-400",    glow: "shadow-rose-400/20" },
+  drq:        { icon: Sparkles,     color: "text-primary",     glow: "shadow-primary/20" },
+};
+
+export function LectureExperienceClient({
+  lecture, moduleId, isAdmin = false,
+}: { lecture: any; moduleId: string; isAdmin?: boolean }) {
   const [active, setActive] = useState<TabId>("overview");
-  const [showAiChat, setShowAiChat] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const tabs: { id: TabId; label: string; icon: any }[] = [
-    { id: "overview", label: "Overview", icon: Layers },
-    { id: "video", label: "Video", icon: Video },
-    { id: "flashcards", label: "Flashcards", icon: HelpCircle },
-    { id: "questions", label: "Quiz", icon: HelpCircle },
-    { id: "notes", label: "Study Notes", icon: FileText },
+  const tabs: { id: TabId; label: string }[] = [
+    { id: "overview",   label: "Overview" },
+    { id: "video",      label: "Video" },
+    { id: "flashcards", label: "Flashcards" },
+    { id: "questions",  label: "Quiz" },
+    { id: "notes",      label: "Notes" },
   ];
+  if (isAdmin) tabs.push({ id: "drq", label: "Dr. Q" });
 
-  async function handleAnalyze() {
-    setIsAnalyzing(true);
-    const tid = toast.loading("AI is analyzing lecture content...");
-    try {
-      const res = await fetch("/api/v1/admin/ai/manus-agent", {
-        method: "POST",
-        body: JSON.stringify({ lectureId: lecture.id, url: "" }),
-      });
-      if (res.ok) {
-        toast.success("Analysis complete! New cards and notes added.", { id: tid });
-        window.location.reload();
-      } else {
-        toast.error("Analysis failed. Ensure valid lecture materials are attached.", { id: tid });
-      }
-    } catch (e) {
-      toast.error("Connection error.", { id: tid });
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }
-
-  const base = `/modules/${moduleId}/lectures/${lecture.id}`;
+  const base  = `/modules/${moduleId}/lectures/${lecture.id}`;
   const extras = lecture.extras || {};
 
+  const flashcardCount = lecture?.flashcards?.length || 0;
+  const questionCount  = lecture?.questions?.length  || 0;
+  const hasNotes       = !!lecture?.notesMarkdown;
+
   return (
-    <div className="flex flex-col min-h-screen bg-[#09080F] text-white pt-16">
-      {/* ── Minimalist Hero ── */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-[#131220] to-[#09080F] pb-8 pt-4">
-        <div className="mx-auto max-w-6xl px-4 md:px-8">
-          <Link href={`/modules/${moduleId}`} className="mb-6 inline-flex items-center gap-2 text-xs font-bold text-white/40 hover:text-white transition-colors">
-            <ArrowLeft className="h-3 w-3" /> Back to Module
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+
+      {/* ══════════════ IMMERSIVE HERO ══════════════ */}
+      <div className="relative overflow-hidden pt-14">
+        {/* Ambient glow layers */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 left-1/4 h-96 w-96 rounded-full bg-primary/10 blur-[100px]" />
+          <div className="absolute -top-12 right-0 h-64 w-64 rounded-full bg-violet-500/8 blur-[80px]" />
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-4 pb-6 md:px-8">
+          {/* Breadcrumb */}
+          <Link
+            href={`/modules/${moduleId}`}
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-[11px] font-bold text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/30 hover:text-primary hover:bg-primary/5"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to Module
           </Link>
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <div className="mb-3 flex items-center gap-2">
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-primary ring-1 ring-primary/20">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            {/* Left — Title block */}
+            <div className="flex-1 space-y-4">
+              {/* Subject badge + lecture number */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary ring-1 ring-primary/20">
+                  <BookOpen className="h-3 w-3" />
                   {lecture?.subject?.name || "Academic Lecture"}
                 </span>
+                {lecture?.order != null && (
+                  <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    Lecture #{lecture.order}
+                  </span>
+                )}
               </div>
-              <h1 className="font-display text-4xl font-black tracking-tight text-white md:text-5xl">
-                {lecture.title.toLowerCase()}
+
+              <h1 className="font-display text-4xl font-black leading-tight tracking-tight text-foreground md:text-5xl capitalize">
+                {lecture.title}
               </h1>
-              <p className="mt-3 text-sm font-medium text-white/40">
-                {lecture?.flashcards?.length || 0} Flashcards • {lecture?.questions?.length || 0} Quiz Items
-              </p>
+
+              {/* Stats row */}
+              <div className="flex flex-wrap items-center gap-4 pt-1">
+                <StatPill icon={Brain} label="Flashcards" value={flashcardCount} color="text-amber-500" />
+                <StatPill icon={CheckCircle2} label="Quiz" value={questionCount} color="text-emerald-500" />
+                <StatPill icon={FileText} label="Notes" value={hasNotes ? "Yes" : "—"} color="text-rose-400" />
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleAnalyze}
-                disabled={isAnalyzing}
-                className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-xs font-bold text-white/70 hover:bg-white/10 transition-all border border-white/5"
+            {/* Right — Quick action cards */}
+            <div className="flex flex-col gap-3 lg:w-72 shrink-0">
+              <Link
+                href={`${base}/video`}
+                className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-500/30 hover:shadow-md hover:shadow-sky-500/10"
               >
-                {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                Analyze
-              </button>
-              <button
-                onClick={() => setShowAiChat(true)}
-                className="btn-gradient flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs font-bold shadow-lg shadow-primary/20"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Ask Dr. Q
-              </button>
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10">
+                  <PlayCircle className="h-5 w-5 text-sky-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground">Watch Lecture</p>
+                  <p className="text-[11px] text-muted-foreground">Open Video Player</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-sky-500 transition-colors" />
+              </Link>
+
+              {questionCount > 0 && (
+                <button
+                  onClick={() => setActive("questions")}
+                  className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-500/30 hover:shadow-md hover:shadow-emerald-500/10"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                    <Zap className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-bold text-foreground">Quick Quiz</p>
+                    <p className="text-[11px] text-muted-foreground">{questionCount} MCQ questions</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-emerald-500 transition-colors" />
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Main Tab Navigation ── */}
-      <div className="sticky top-0 z-50 border-b border-white/5 bg-[#09080F]/80 backdrop-blur-md">
+      {/* ══════════════ TAB BAR ══════════════ */}
+      <div className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
-          <div className="flex gap-8 overflow-x-auto scrollbar-hide py-4">
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
+              const meta   = TAB_META[tab.id];
               const active_ = active === tab.id;
+              const Icon   = meta.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActive(tab.id)}
                   className={cn(
-                    "relative whitespace-nowrap text-xs font-bold uppercase tracking-widest transition-colors",
-                    active_ ? "text-primary" : "text-white/30 hover:text-white/60"
+                    "relative flex shrink-0 items-center gap-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-all",
+                    active_
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
+                  <Icon className={cn("h-3.5 w-3.5 transition-colors", active_ ? meta.color : "text-muted-foreground/60")} />
                   {tab.label}
                   {active_ && (
-                    <span className="absolute -bottom-[17px] left-0 h-[2px] w-full bg-primary" />
+                    <span className={cn("absolute bottom-0 left-0 h-[2px] w-full rounded-full bg-current", meta.color)} />
                   )}
                 </button>
               );
@@ -135,97 +163,188 @@ export function LectureExperienceClient({ lecture, moduleId }: { lecture: any; m
         </div>
       </div>
 
-      {/* ── Content Body ── */}
-      <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-8">
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* ══════════════ CONTENT ══════════════ */}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8">
+        <div key={active} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+
+          {/* ── Overview ── */}
           {active === "overview" && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-6">
               {Array.isArray(extras?.overviewCards) && extras.overviewCards.length > 0 ? (
-                extras.overviewCards.map((card: any, i: number) => (
-                  <div key={i} className="rounded-2xl border border-white/5 bg-[#131220] p-6 shadow-sm">
-                    <h5 className="mb-3 font-display text-base font-bold text-white">{card?.title}</h5>
-                    <p className="text-sm leading-relaxed text-white/50">{card?.body}</p>
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-full py-20 text-center">
-                  <Layers className="mx-auto h-10 w-10 text-white/10 mb-4" />
-                  <p className="text-white/20 font-bold uppercase tracking-widest text-[10px]">No overview concepts found</p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {extras.overviewCards.map((card: any, i: number) => (
+                    <div
+                      key={i}
+                      className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5"
+                    >
+                      <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-primary/5 blur-2xl" />
+                      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                        <Star className="h-4 w-4 text-primary" />
+                      </div>
+                      <h5 className="mb-2 font-display text-sm font-bold text-card-foreground">{card?.title}</h5>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{card?.body}</p>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <EmptyState
+                  icon={Layers}
+                  title="No Overview Yet"
+                  desc="Overview cards will appear here once the lecture is analyzed."
+                  color="violet"
+                />
               )}
             </div>
           )}
 
+          {/* ── Video ── */}
           {active === "video" && (
-            <div className="flex flex-col items-center justify-center py-24 rounded-3xl border border-white/5 bg-[#131220] text-center">
-              <PlayCircle className="h-16 w-16 text-primary mb-6" />
-              <h3 className="text-xl font-bold text-white">Lecture Video Studio</h3>
-              <p className="mt-2 text-white/40 max-w-sm text-sm">Access the interactive player with timestamps and shared notes.</p>
-              <Link href={`${base}/video`} className="btn-gradient mt-8 rounded-xl px-8 py-3 text-sm font-bold">
-                Open Player
-              </Link>
+            <div className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-xl">
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-48 w-48 rounded-full bg-sky-500/10 blur-3xl" />
+              </div>
+              <div className="relative flex flex-col items-center justify-center py-20 text-center px-6">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[28px] bg-sky-500/10 ring-1 ring-sky-500/20 shadow-xl shadow-sky-500/10">
+                  <PlayCircle className="h-10 w-10 text-sky-500" />
+                </div>
+                <h3 className="text-2xl font-black text-card-foreground">Lecture Video Studio</h3>
+                <p className="mt-3 max-w-sm text-sm text-muted-foreground leading-relaxed">
+                  Access the full interactive player with timestamps, shared notes, and speed controls.
+                </p>
+                <Link
+                  href={`${base}/video`}
+                  className="btn-gradient mt-8 inline-flex items-center gap-2 rounded-2xl px-8 py-3.5 text-sm font-bold shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-shadow"
+                >
+                  <PlayCircle className="h-4 w-4" /> Open Player
+                </Link>
+              </div>
             </div>
           )}
 
+          {/* ── Flashcards ── */}
           {active === "flashcards" && (
             <div className="min-h-[400px]">
-              {Array.isArray(lecture?.flashcards) && lecture.flashcards.length > 0 ? (
+              {flashcardCount > 0 ? (
                 <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" />
               ) : (
-                <div className="py-24 text-center rounded-2xl border border-dashed border-white/5">
-                  <p className="text-white/20 font-bold uppercase tracking-widest text-[10px]">No flashcards available</p>
-                </div>
+                <EmptyState
+                  icon={Brain}
+                  title="No Flashcards Yet"
+                  desc="Flashcards for this lecture haven't been created yet. Check back soon."
+                  color="amber"
+                />
               )}
             </div>
           )}
 
+          {/* ── Quiz ── */}
           {active === "questions" && (
             <div className="min-h-[400px]">
-              {Array.isArray(lecture?.questions) && lecture.questions.length > 0 ? (
+              {questionCount > 0 ? (
                 <LectureClient flashcards={[]} questions={lecture.questions} mode="questions" />
               ) : (
-                <div className="py-24 text-center rounded-2xl border border-dashed border-white/5">
-                  <p className="text-white/20 font-bold uppercase tracking-widest text-[10px]">No quiz items available</p>
-                </div>
+                <EmptyState
+                  icon={CheckCircle2}
+                  title="No Quiz Items Yet"
+                  desc="MCQ questions for this lecture will appear here once added."
+                  color="emerald"
+                />
               )}
             </div>
           )}
 
+          {/* ── Notes ── */}
           {active === "notes" && (
-            <div className="rounded-3xl border border-white/5 bg-[#131220] p-8 md:p-12 shadow-xl">
-              {lecture?.notesMarkdown ? (
-                <div className="prose prose-invert prose-sm max-w-none prose-headings:font-display prose-headings:font-bold prose-p:text-white/70">
-                  <ReactMarkdown components={markdownComponentsWithImages}>
-                    {enhancePlainImageUrls(lecture.notesMarkdown)}
-                  </ReactMarkdown>
+            <div className="rounded-3xl border border-border bg-card shadow-xl overflow-hidden">
+              {hasNotes ? (
+                <div className="p-8 md:p-12">
+                  {/* Notes header */}
+                  <div className="mb-8 flex items-center gap-3 pb-6 border-b border-border">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-400/10">
+                      <AlignLeft className="h-5 w-5 text-rose-400" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Study Notes</p>
+                      <h2 className="text-lg font-black text-foreground">{lecture.title}</h2>
+                    </div>
+                  </div>
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight prose-p:leading-relaxed prose-p:text-muted-foreground">
+                    <ReactMarkdown components={markdownComponentsWithImages}>
+                      {enhancePlainImageUrls(lecture.notesMarkdown)}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               ) : (
-                <div className="py-24 text-center">
-                  <FileText className="mx-auto h-10 w-10 text-white/10 mb-4" />
-                  <p className="text-white/20 font-bold uppercase tracking-widest text-[10px]">Notes haven't been generated yet</p>
-                </div>
+                <EmptyState
+                  icon={FileText}
+                  title="Notes Not Generated"
+                  desc="Study notes haven't been added to this lecture yet."
+                  color="rose"
+                />
               )}
             </div>
           )}
+
+          {/* ── Dr. Q (Admin only) ── */}
+          {active === "drq" && isAdmin && (
+            <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl">
+              <div className="flex items-center gap-3 border-b border-border px-6 py-4 bg-gradient-to-r from-primary/5 to-transparent">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">AI Assistant</p>
+                  <h3 className="text-sm font-black text-foreground">Ask Dr. Q</h3>
+                </div>
+                <span className="ml-auto rounded-full bg-primary/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-primary border border-primary/20">Admin</span>
+              </div>
+              <div className="h-[560px]">
+                <AIAssistantPanel embedded fullPage lectureId={lecture.id} lectureTitle={lecture.title} />
+              </div>
+            </div>
+          )}
+
         </div>
       </main>
+    </div>
+  );
+}
 
-      {/* --- CHAT MODAL --- */}
-      {showAiChat && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-2xl bg-[#131220] rounded-3xl border border-white/10 shadow-2xl h-[80vh] overflow-hidden flex flex-col">
-             <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-                <h3 className="font-bold">Ask Dr. Q</h3>
-                <button onClick={() => setShowAiChat(false)} className="text-white/40 hover:text-white transition-colors">
-                   <X className="h-5 w-5" />
-                </button>
-             </div>
-             <div className="flex-1 overflow-hidden">
-                <AIAssistantPanel embedded={true} fullPage={true} lectureId={lecture.id} lectureTitle={lecture.title} />
-             </div>
-          </div>
-        </div>
-      )}
+/* ── Shared Sub-Components ── */
+
+function StatPill({ icon: Icon, label, value, color }: {
+  icon: any; label: string; value: string | number; color: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 shadow-sm">
+      <Icon className={cn("h-3.5 w-3.5 shrink-0", color)} />
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-sm font-black text-foreground">{value}</span>
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</span>
+      </div>
+    </div>
+  );
+}
+
+const EMPTY_COLORS: Record<string, { bg: string; icon: string; ring: string }> = {
+  violet:  { bg: "bg-violet-500/10",  icon: "text-violet-500",  ring: "ring-violet-500/20"  },
+  amber:   { bg: "bg-amber-500/10",   icon: "text-amber-500",   ring: "ring-amber-500/20"   },
+  emerald: { bg: "bg-emerald-500/10", icon: "text-emerald-500", ring: "ring-emerald-500/20" },
+  rose:    { bg: "bg-rose-400/10",    icon: "text-rose-400",    ring: "ring-rose-400/20"    },
+  sky:     { bg: "bg-sky-500/10",     icon: "text-sky-500",     ring: "ring-sky-500/20"     },
+};
+
+function EmptyState({ icon: Icon, title, desc, color = "violet" }: {
+  icon: any; title: string; desc: string; color?: string;
+}) {
+  const c = EMPTY_COLORS[color] || EMPTY_COLORS.violet;
+  return (
+    <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-muted/30 py-24 text-center px-6">
+      <div className={cn("mb-5 flex h-16 w-16 items-center justify-center rounded-2xl ring-1", c.bg, c.ring)}>
+        <Icon className={cn("h-7 w-7", c.icon)} />
+      </div>
+      <h4 className="text-base font-black text-foreground">{title}</h4>
+      <p className="mt-2 max-w-xs text-sm text-muted-foreground">{desc}</p>
     </div>
   );
 }

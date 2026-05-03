@@ -4,9 +4,9 @@ import { useState } from "react";
 import { 
   Plus, Save, Trash2, X, Check, Search, 
   Stethoscope, HeartPulse, Activity, Microscope, Pill, FlaskConical, 
-  Dna, Atom, Brain, Bone, Baby, Syringe, Bandage, Tablets, 
+  Dna, Atom, Brain, Bone, Syringe, Tablets, 
   ClipboardList, Thermometer, Eye, Ear, Hand, Biohazard,
-  Layers, ChevronDown
+  Layers, ChevronDown, CheckCircle2
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
@@ -27,8 +27,7 @@ const MEDICAL_ICONS = [
   { id: "Atom", icon: Atom, label: "Microbiology" },
   { id: "Stethoscope", icon: Stethoscope, label: "General Med" },
   { id: "Syringe", icon: Syringe, label: "Immunology" },
-  { id: "Baby", icon: Baby, label: "Pediatrics" },
-  { id: "Bandage", icon: Bandage, label: "Surgery" },
+  { id: "CheckCircle2", icon: CheckCircle2, label: "Surgery" },
   { id: "Tablets", icon: Tablets, label: "Pharma" },
   { id: "ClipboardList", icon: ClipboardList, label: "Notes" },
   { id: "Thermometer", icon: Thermometer, label: "Internal Med" },

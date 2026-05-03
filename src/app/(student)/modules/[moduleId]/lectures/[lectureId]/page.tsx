@@ -50,7 +50,7 @@ export default async function LectureHubPage({
         </div>
       ) : null}
 
-      <LectureExperienceClient lecture={lectureClient as any} moduleId={params.moduleId} />
+      <LectureExperienceClient lecture={lectureClient as any} moduleId={params.moduleId} isAdmin={isAdmin} />
     </div>
   );
 }

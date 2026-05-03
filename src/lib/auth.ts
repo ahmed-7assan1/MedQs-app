@@ -23,6 +23,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId:     process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: "openid email profile https://www.googleapis.com/auth/youtube.force-ssl"
+        }
+      }
     }),
     Facebook({
       clientId:     process.env.FACEBOOK_CLIENT_ID!,
@@ -57,7 +62,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, account, trigger, session }) {
       if (user) {
         token.id         = user.id;
         token.role       = (user as any).role;
@@ -67,6 +72,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.studentId  = (user as any).studentId;
         token.nickname   = (user as any).nickname;
         token.hideRank   = (user as any).hideRank;
+      }
+      if (account) {
+        token.accessToken = account.access_token;
       }
       // Legacy / edge: some JWTs only had `sub` (still the DB user id with Prisma adapter)
       if (!token.id && token.sub) {
