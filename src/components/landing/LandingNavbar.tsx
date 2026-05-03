@@ -22,7 +22,7 @@ export function LandingNavbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-white/[0.02] bg-white/80 backdrop-blur-2xl dark:border-white/[0.02] dark:bg-[#0b0f1a]/85">
-      <div className="mx-auto flex h-[60px] max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-[60px] max-w-7xl items-center justify-between px-4 sm:px-6">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 decoration-transparent">

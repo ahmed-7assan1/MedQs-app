@@ -193,7 +193,7 @@ export default function PDFToolsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 md:px-6 space-y-8 pb-24">
+    <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 space-y-8 pb-24">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <p className="text-xs font-semibold uppercase tracking-widest text-rose-500">Document Intelligence</p>

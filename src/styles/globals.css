@@ -10,6 +10,20 @@
     color: hsl(var(--foreground));
   }
 
+  /* Global Responsive Utilities */
+  img, video, iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .fluid-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(1rem, 5vw, 2.5rem);
+    padding-right: clamp(1rem, 5vw, 2.5rem);
+  }
+
   :where(a, button, input, textarea, select, summary):focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;

@@ -4,7 +4,7 @@ import { UnderConstruction } from "@/components/ui/UnderConstruction";
 export default function StudyToolsPage() {
   return (
     <StudentPageShell
-      maxWidthClass="max-w-6xl"
+      maxWidthClass="max-w-7xl"
       eyebrow="Study tools"
       title="Study tools"
       subtitle="This area is being rebuilt and will reopen soon."

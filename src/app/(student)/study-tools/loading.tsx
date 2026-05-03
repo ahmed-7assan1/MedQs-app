@@ -2,7 +2,7 @@ import { ListCardRowSkeleton, StudentShellHeaderSkeleton, Skeleton } from "@/com
 
 export default function StudyToolsLoading() {
   return (
-    <div className="relative mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
+    <div className="relative mx-auto w-full max-w-7xl px-4 py-8 md:px-8 md:py-10">
       <StudentShellHeaderSkeleton />
       <Skeleton className="mb-10 h-40 w-full max-w-4xl rounded-2xl" />
       <Skeleton className="mb-6 h-7 w-48" />

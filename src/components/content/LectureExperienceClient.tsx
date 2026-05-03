@@ -165,7 +165,7 @@ export function LectureExperienceClient({
           <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-6 md:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 pb-6 md:px-8">
           {/* Breadcrumb */}
           <Link
             href={`/modules/${moduleId}`}
@@ -256,7 +256,7 @@ export function LectureExperienceClient({
 
       {/* ══════════════ TAB BAR ══════════════ */}
       <div className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex gap-1 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
               const meta    = TAB_META[tab.id] || TAB_META.overview;
@@ -284,7 +284,7 @@ export function LectureExperienceClient({
       </div>
 
       {/* ══════════════ CONTENT ══════════════ */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">
         <div key={active} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
 
           {/* Overview */}

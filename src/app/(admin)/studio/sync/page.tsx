@@ -95,7 +95,7 @@ export default function YouTubeSyncPage() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-8">
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-3 text-primary mb-1">

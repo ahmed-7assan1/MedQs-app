@@ -163,7 +163,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24 pt-6">
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-6">
         <ScrollReveal>
           <div className="mb-14 text-center">
             <div className="mb-3 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-blue-500">
@@ -216,7 +216,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24">
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-24">
         <ScrollReveal>
           <div className="mb-14 text-center">
             <div className="mb-3 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-purple-500">
@@ -262,7 +262,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── AI SECTION ── */}
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24">
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-24">
         <ScrollReveal>
           <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 p-[clamp(32px,6vw,60px)]"
             style={{ background: "linear-gradient(135deg, rgba(26,107,204,0.08) 0%, rgba(107,72,204,0.06) 100%)" }}>
@@ -321,7 +321,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── SOCIAL PROOF ── */}
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24">
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-24">
         <ScrollReveal>
           <div className="mb-12 text-center">
             <div className="mb-3 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-amber-500">
@@ -364,7 +364,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── FACULTY SECTION ── */}
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24">
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-24">
         <ScrollReveal>
           <div className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-card/50 p-[clamp(30px,5vw,56px)] dark:bg-slate-900/50">
             <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2"
@@ -432,7 +432,7 @@ export default async function LandingPage() {
 
       {/* ── FOOTER ── */}
       <footer className="relative z-10 border-t border-white/[0.05] bg-card/20 pb-10 pt-14">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-7xl px-6">
           <div className="mb-12 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
             <div className="lg:col-span-2">
               <Link href="/" className="mb-5 flex items-center gap-3 decoration-transparent">

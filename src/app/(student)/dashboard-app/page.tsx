@@ -56,7 +56,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 pb-16 pt-20 md:px-8">
+      <div className="mx-auto max-w-7xl px-4 pb-16 pt-20 md:px-8">
 
         {/* ══════════════ HERO GREETING ══════════════ */}
         <div className="relative mb-8 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card via-card to-primary/5 p-8 shadow-sm">

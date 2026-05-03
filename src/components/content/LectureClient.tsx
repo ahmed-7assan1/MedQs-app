@@ -93,7 +93,7 @@ function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
       {/* Card — wide, page-like (no nested heavy card frame) */}
       <div
         className="relative w-full cursor-pointer"
-        style={{ perspective: "1200px", minHeight: "min(45vh, 440px)" }}
+        style={{ perspective: "1200px", minHeight: "min(50vh, 480px)" }}
         onClick={() => setFlipped((f) => !f)}
         onKeyDown={(e) => {
           if (e.key === " " || e.key === "Enter") {
@@ -106,59 +106,61 @@ function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
         aria-label={flipped ? "Show question" : "Show answer"}
       >
         <div
-          className="relative min-h-[min(45vh,440px)] w-full transition-transform duration-500"
+          className="relative min-h-[min(50vh,480px)] w-full transition-transform duration-500"
           style={{
             transformStyle: "preserve-3d",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
           }}
         >
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-muted/35 p-6 text-center ring-1 ring-border/50 md:p-10"
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-muted/35 p-6 text-center ring-1 ring-border/50 sm:p-10"
             style={{ backfaceVisibility: "hidden" }}
           >
-            <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Front</p>
-            <p className="max-w-3xl text-base font-medium leading-relaxed text-foreground md:text-lg">{card.front}</p>
-            <p className="mt-6 text-xs text-muted-foreground">Tap to reveal answer</p>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Front</p>
+            <p className="max-w-3xl text-lg font-black leading-tight text-foreground sm:text-2xl">{card.front}</p>
+            <p className="mt-8 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground animate-pulse">Tap to reveal answer</p>
           </div>
 
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-primary/[0.07] p-6 text-center ring-1 ring-primary/25 md:p-10"
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-primary/[0.07] p-6 text-center ring-1 ring-primary/25 sm:p-10"
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
-            <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-primary">Back</p>
-            <p className="max-w-3xl text-base leading-relaxed text-foreground md:text-lg">{card.back}</p>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-wider text-primary/70">Back</p>
+            <p className="max-w-3xl text-lg leading-relaxed text-foreground sm:text-2xl">{card.back}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"
           onClick={prev}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-card transition-all hover:bg-muted hover:scale-105 active:scale-95"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
-        <button
-          type="button"
-          onClick={markAgain}
-          className="flex min-h-11 min-w-[6.5rem] flex-1 items-center justify-center rounded-xl border border-border px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted sm:flex-initial sm:px-6"
-        >
-          Study again
-        </button>
-        <button
-          type="button"
-          onClick={markKnown}
-          className="flex min-h-11 min-w-[6.5rem] flex-1 items-center justify-center rounded-xl bg-emerald-600 px-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 sm:flex-initial sm:px-6"
-        >
-          Got it
-        </button>
+        <div className="flex flex-1 items-center gap-2 sm:flex-none">
+          <button
+            type="button"
+            onClick={markAgain}
+            className="flex min-h-12 flex-1 items-center justify-center rounded-2xl border border-border px-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground transition-all hover:bg-muted sm:w-40 sm:flex-none"
+          >
+            Study again
+          </button>
+          <button
+            type="button"
+            onClick={markKnown}
+            className="btn-gradient flex min-h-12 flex-1 items-center justify-center rounded-2xl px-6 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-primary/20 sm:w-40 sm:flex-none"
+          >
+            Got it
+          </button>
+        </div>
         <button
           type="button"
           onClick={next}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-card transition-all hover:bg-muted hover:scale-105 active:scale-95"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </button>
       </div>
 

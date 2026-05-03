@@ -137,8 +137,8 @@ export function FloatingIslandNavbar({
         animate={{ 
           y: 0, 
           opacity: 1,
-          width: isExpanded ? "100%" : isScrolled ? (typeof window !== 'undefined' && window.innerWidth < 768 ? "300px" : "420px") : "100%",
-          maxWidth: isExpanded ? "1300px" : isScrolled ? "420px" : "1350px",
+          width: isExpanded ? "100%" : isScrolled ? "min(420px, calc(100vw - 32px))" : "100%",
+          maxWidth: isExpanded ? "1400px" : isScrolled ? "420px" : "1400px",
           height: isExpanded ? "auto" : "64px",
         }}
         transition={{ type: "spring", stiffness: 350, damping: 25 }}

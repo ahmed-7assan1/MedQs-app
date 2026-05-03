@@ -46,7 +46,7 @@ function IconPicker({ selected, onSelect }: { selected: string | null; onSelect:
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"
+        className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center hover:bg-muted/80 transition-all text-muted-foreground hover:text-primary"
         title="Select Icon"
       >
         <SelectedIcon className="h-5 w-5" />
@@ -60,7 +60,7 @@ function IconPicker({ selected, onSelect }: { selected: string | null; onSelect:
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="absolute left-0 bottom-full mb-2 z-[70] w-[280px] bg-[#1a1b2e] border border-white/10 rounded-2xl p-4 shadow-2xl grid grid-cols-5 gap-2"
+              className="absolute left-0 bottom-full mb-2 z-[70] w-[280px] bg-card border border-border rounded-2xl p-4 shadow-2xl grid grid-cols-5 gap-2"
             >
               {MEDICAL_ICONS.map((item) => (
                 <button
@@ -68,7 +68,7 @@ function IconPicker({ selected, onSelect }: { selected: string | null; onSelect:
                   onClick={() => { onSelect(item.id); setOpen(false); }}
                   className={cn(
                     "h-10 w-10 rounded-lg flex items-center justify-center transition-all",
-                    selected === item.id ? "bg-primary text-white" : "text-white/40 hover:bg-white/5 hover:text-white"
+                    selected === item.id ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                   title={item.label}
                 >
@@ -136,22 +136,22 @@ export function SubjectInlineManager({
   }
 
   return (
-    <div className="mb-12 rounded-[32px] border border-white/5 bg-[#131220]/50 backdrop-blur-xl p-8 shadow-2xl">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="mb-12 rounded-[32px] border border-border bg-card/50 backdrop-blur-xl p-6 md:p-8 shadow-sm">
+      <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
             <Activity className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-black text-white tracking-tight">Curriculum Studio</h3>
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Manage module disciplines</p>
+            <h3 className="text-lg font-black text-foreground tracking-tight">Curriculum Studio</h3>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Manage module disciplines</p>
           </div>
         </div>
         <button 
           onClick={() => setOpen((v) => !v)} 
           className={cn(
-            "rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest transition-all",
-            open ? "bg-white/5 text-white/40 hover:text-white" : "bg-primary text-white shadow-lg shadow-primary/20 hover:scale-105"
+            "w-full sm:w-auto rounded-xl px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all",
+            open ? "bg-muted text-muted-foreground hover:text-foreground" : "btn-gradient text-white shadow-lg"
           )}
         >
           {open ? "Close Editor" : "Open Editor"}
@@ -166,19 +166,21 @@ export function SubjectInlineManager({
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="mb-8 flex gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
-              <IconPicker selected={newIcon} onSelect={setNewIcon} />
-              <input
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="New discipline name (e.g. Anatomy)"
-                className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder:text-white/20 text-sm font-bold"
-              />
+            <div className="mb-8 flex flex-col sm:flex-row gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+              <div className="flex gap-3 flex-1">
+                <IconPicker selected={newIcon} onSelect={setNewIcon} />
+                <input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="New discipline name..."
+                  className="flex-1 bg-transparent border-none focus:ring-0 text-foreground placeholder:text-muted-foreground/40 text-sm font-bold"
+                />
+              </div>
               <button 
                 onClick={() => void addSubject()} 
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+                className="btn-gradient inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-105 transition-all"
               >
-                <Plus className="h-4 w-4" /> Add
+                <Plus className="h-4 w-4" /> Add Discipline
               </button>
             </div>
 
@@ -210,13 +212,13 @@ function SubjectRow({
   const hasChanges = name !== subject.name || icon !== subject.icon;
 
   return (
-    <div className="group flex items-center gap-4 rounded-2xl bg-white/[0.02] border border-white/5 p-3 hover:bg-white/5 transition-all">
+    <div className="group flex items-center gap-4 rounded-2xl bg-muted/20 border border-border p-3 hover:bg-muted/40 transition-all">
       <IconPicker selected={icon} onSelect={(id) => { setIcon(id); setIsEditing(true); }} />
       
       <input 
         value={name} 
         onChange={(e) => { setName(e.target.value); setIsEditing(true); }} 
-        className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold text-white/80 group-hover:text-white transition-colors" 
+        className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold text-foreground group-hover:text-primary transition-colors" 
       />
 
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -25,7 +25,7 @@ export default async function AdminReportsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600">
           <Flag className="h-6 w-6" />
