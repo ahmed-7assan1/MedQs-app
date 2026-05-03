@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShieldCheck, Users, Star, Award, Heart, Loader2 } from "lucide-react";
+import { ShieldCheck, Users, Star, Award, Heart, Loader2, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export default function PublicFoundersPage() {
+  const router = useRouter();
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
