@@ -1,3 +1,9 @@
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { LectureInlineManager } from "@/components/admin-inline/LectureInlineManager";
 import { 
   Video, FileQuestion, Layers, FileText, ChevronRight, 
   ArrowLeft, Clock, PlayCircle, BookOpen, GraduationCap,
@@ -133,7 +139,7 @@ export default async function SubjectLecturesPage({
           <div className="mb-12">
             <LectureInlineManager
               subjectId={subject.id}
-              initialLectures={subject.lectures.map((l) => ({ id: l.id, title: l.title, videoUrl: l.videoUrl }))}
+              initialLectures={subject.lectures.map((l: any) => ({ id: l.id, title: l.title, videoUrl: l.videoUrl }))}
             />
           </div>
         )}
@@ -155,7 +161,7 @@ export default async function SubjectLecturesPage({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {subject.lectures.map((lecture, idx) => (
+            {subject.lectures.map((lecture: any, idx: number) => (
               <Link
                 key={lecture.id}
                 href={`/modules/${params.moduleId}/lectures/${lecture.id}`}
