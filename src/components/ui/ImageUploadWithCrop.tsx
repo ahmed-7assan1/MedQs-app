@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Camera, Loader2, Upload, X, Crop } from "lucide-react";
+import { Camera, Loader2, Upload, X, Crop, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageCropModal } from "./ImageCropModal";
+import { UPLOADCARE_CONFIG } from "@/lib/uploadcare";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -26,6 +27,7 @@ export function ImageUploadWithCrop({
   const [uploading, setUploading] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [fileName, setFileName] = useState("image.jpg");
+  const [imageError, setImageError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 1. Handle file selection
@@ -59,7 +61,7 @@ export function ImageUploadWithCrop({
       // Actually, it's safer to have a generic upload API route if configured, 
       // but since the user showed Uploadcare, we'll try to use their public key.
       
-      const publicKey = process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY || "bc350ec4b8e6479202fd"; 
+      const publicKey = UPLOADCARE_CONFIG.publicKey;
       formData.append("UPLOADCARE_PUB_KEY", publicKey);
       formData.append("UPLOADCARE_STORE", "1");
 
@@ -71,8 +73,13 @@ export function ImageUploadWithCrop({
       if (!res.ok) throw new Error("Upload failed");
       
       const data = await res.json();
-      const fileUrl = `https://ucarecdn.com/${data.file}/`;
+      const uuid = data.file || data.uuid || (typeof data === 'string' ? data : null);
       
+      if (!uuid) throw new Error("Invalid response from upload service");
+      
+      const fileUrl = `${UPLOADCARE_CONFIG.baseCDN}${uuid}/`;
+      
+      setImageError(false);
       onChange(fileUrl);
       toast.success("Image uploaded successfully!");
     } catch (error) {
@@ -116,10 +123,17 @@ export function ImageUploadWithCrop({
           )}
           onClick={() => fileInputRef.current?.click()}
         >
-          {value ? (
-            <img src={value} alt="Preview" className="h-full w-full object-cover" />
+          {value && !imageError ? (
+            <img 
+              src={value} 
+              alt="" 
+              className="h-full w-full object-cover" 
+              onError={() => setImageError(true)}
+            />
           ) : (
-            <Upload className="h-6 w-6 text-muted-foreground/30" />
+            <div className="flex flex-col items-center gap-1">
+              {imageError ? <ImageIcon className="h-6 w-6 text-red-500/50" /> : <Upload className="h-6 w-6 text-muted-foreground/30" />}
+            </div>
           )}
           
           {uploading && (

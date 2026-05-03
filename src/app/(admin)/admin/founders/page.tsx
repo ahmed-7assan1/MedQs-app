@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GraduationCap, Plus, Trash2, Edit3, Save, X, Loader2, Code, Stethoscope, Sparkles, Star } from "lucide-react";
+import { GraduationCap, Plus, Trash2, Edit3, Save, X, Loader2, Code, Stethoscope, Sparkles, Star, Image as ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { ImageUploadWithCrop } from "@/components/ui/ImageUploadWithCrop";
@@ -193,7 +193,17 @@ export default function AdminFoundersPage() {
             {/* Preview */}
             {form.imageUrl && (
               <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border">
-                <img src={form.imageUrl} alt="Preview" className="h-14 w-14 rounded-2xl object-cover border border-border" />
+                <div className="h-14 w-14 rounded-2xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
+                   <img 
+                     src={form.imageUrl} 
+                     alt="" 
+                     className="h-full w-full object-cover"
+                     onError={(e) => {
+                       (e.target as HTMLImageElement).style.display = 'none';
+                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-muted-foreground/30"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>';
+                     }}
+                   />
+                </div>
                 <div>
                   <p className="font-bold text-sm">{form.name || "Name"}</p>
                   <p className="text-xs text-primary font-bold uppercase tracking-widest">{form.role}</p>
@@ -240,9 +250,17 @@ export default function AdminFoundersPage() {
               className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3 hover:shadow-md transition-all"
             >
               <div className="flex items-start gap-3">
-                <div className="h-14 w-14 rounded-2xl overflow-hidden bg-muted border border-border shrink-0">
+                <div className="h-14 w-14 rounded-2xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
                   {member.imageUrl ? (
-                    <img src={member.imageUrl} alt={member.name} className="h-full w-full object-cover" />
+                    <img 
+                      src={member.imageUrl} 
+                      alt={member.name} 
+                      className="h-full w-full object-cover" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = `<div class="h-full w-full flex items-center justify-center bg-primary/10 text-primary text-xl font-black">${member.name.charAt(0)}</div>`;
+                      }}
+                    />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary text-xl font-black">
                       {member.name.charAt(0)}

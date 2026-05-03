@@ -8,7 +8,7 @@ import tw from 'twrnc';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
-import Animated, { FadeIn, FadeInDown, SlideInRight, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeInUp, SlideInRight, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import {
   ChevronLeft, Timer, CheckCircle2,
   XCircle, ArrowRight, HelpCircle,
