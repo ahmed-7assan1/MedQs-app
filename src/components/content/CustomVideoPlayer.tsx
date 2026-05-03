@@ -354,26 +354,32 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         setHoverPosition(null);
       }}
     >
-      {/* SECURITY MASKS (Hides YouTube Branding & Controls completely) */}
+      {/* SECURITY MASKS (Hides YouTube Branding & Controls completely) - Now Dynamic */}
       {(ytId) && (
-        <>
-          {/* Top title mask - Gradient to hide any top-left/top-right text/icons */}
-          <div className="absolute inset-x-0 top-0 z-[35] h-20 bg-gradient-to-b from-black via-black/80 to-transparent pointer-events-auto cursor-default" /> 
-          {/* Bottom left logo mask */}
-          <div className="absolute bottom-0 left-0 z-[35] h-16 w-48 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-auto cursor-default" /> 
-          {/* Bottom right mask (where YT logo often appears) */}
-          <div className="absolute bottom-0 right-0 z-[35] h-20 w-48 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-auto cursor-default flex items-end justify-end p-4">
-             {/* Dynamic branding to replace YT logo */}
-             {!showControls && (
-                <div className="flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-md px-3 py-1.5 border border-white/10 shadow-xl opacity-80">
-                  <div className="h-4 w-4 rounded-full bg-primary flex items-center justify-center">
-                    <Play className="h-2.5 w-2.5 fill-white text-white ml-0.5" />
-                  </div>
-                  <span className="text-[9px] font-bold tracking-widest text-white uppercase">MedOneX</span>
-                </div>
-             )}
-          </div>
-        </>
+        <AnimatePresence>
+          {(showControls || buffering || !videoReady) && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-[35] pointer-events-none"
+            >
+              {/* Top title mask - Gradient to hide any top-left/top-right text/icons */}
+              <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black via-black/80 to-transparent" /> 
+              {/* Bottom left logo mask */}
+              <div className="absolute bottom-0 left-0 h-20 w-56 bg-gradient-to-t from-black via-black/80 to-transparent" /> 
+              {/* Bottom right mask (where YT logo often appears) */}
+              <div className="absolute bottom-0 right-0 h-24 w-56 bg-gradient-to-t from-black via-black/90 to-transparent flex items-end justify-end p-4">
+                 <div className="flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-md px-3 py-1.5 border border-white/10 shadow-xl opacity-80">
+                   <div className="h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                     <Play className="h-2.5 w-2.5 fill-white text-white ml-0.5" />
+                   </div>
+                   <span className="text-[9px] font-bold tracking-widest text-white uppercase">MedOneX</span>
+                 </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
 
       <div 
