@@ -101,7 +101,7 @@ export default function VideosHubPage() {
   }, [displayVideos, posts]);
 
   return (
-    <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pt-24 pb-32">
+    <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pt-0 pb-32">
       {/* Hero */}
       <div className="relative h-[240px] md:h-[320px] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-red-600/20 via-transparent to-transparent z-10" />
@@ -111,7 +111,7 @@ export default function VideosHubPage() {
         <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-8 md:pb-10">
           <Link 
             href="/dashboard-app" 
-            className="absolute top-6 left-6 flex items-center justify-center h-10 w-10 rounded-full bg-black/10 border border-white/10 dark:text-white text-slate-800 hover:bg-black/20 transition-all shadow-sm backdrop-blur-md"
+            className="absolute top-20 left-6 flex items-center justify-center h-10 w-10 rounded-full bg-black/10 border border-white/10 dark:text-white text-slate-800 hover:bg-black/20 transition-all shadow-sm backdrop-blur-md"
           >
             <Home className="h-5 w-5" />
           </Link>

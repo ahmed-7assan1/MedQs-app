@@ -31,6 +31,12 @@ export default function PublicFoundersPage() {
       {/* Hero Section */}
       <div className="relative h-[400px] w-full overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-[#07080f] z-10" />
+        <button 
+          onClick={() => router.back()}
+          className="absolute top-20 left-8 flex items-center justify-center h-10 w-10 rounded-full bg-white/5 border border-white/10 dark:text-white text-slate-800 hover:bg-white/10 transition-all shadow-sm backdrop-blur-md z-30"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
         
         <div className="relative z-20 text-center px-6">

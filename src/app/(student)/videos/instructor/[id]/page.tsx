@@ -99,7 +99,7 @@ export default function InstructorProfilePage({ params }: { params: { id: string
         {/* Banner Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[300px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2" />
         
-        <div className="max-w-7xl mx-auto px-4 pt-4 md:pt-10 pb-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 pt-20 pb-12 relative z-10">
           {/* Back Button */}
           <button 
            onClick={() => router.back()}

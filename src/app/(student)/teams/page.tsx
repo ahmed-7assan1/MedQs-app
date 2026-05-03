@@ -60,7 +60,7 @@ export default function TeamsDirectory() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-24 pb-32 md:px-8">
+    <div className="mx-auto max-w-6xl px-4 pt-16 pb-32 md:px-8">
       {/* Header */}
       <div className="mb-12">
         <h1 className="font-display text-4xl md:text-5xl font-black text-white tracking-tight mb-4">

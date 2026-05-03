@@ -48,7 +48,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 pt-20 md:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 pt-16 md:px-8">
       {/* ── Greeting ── */}
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
