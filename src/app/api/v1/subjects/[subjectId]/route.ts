@@ -14,13 +14,16 @@ export async function PUT(
   const boundary = await assertSubject(w.scope, subjectId);
   if (boundary) return boundary;
 
-  const { name } = await req.json();
+  const { name, icon } = await req.json();
   if (!name?.trim())
     return NextResponse.json({ error: "Name required" }, { status: 400 });
 
   const subject = await prisma.subject.update({
     where: { id: subjectId },
-    data: { name: name.trim() },
+    data: { 
+      name: name.trim(),
+      icon: icon || null
+    },
   });
   return NextResponse.json(subject);
 }

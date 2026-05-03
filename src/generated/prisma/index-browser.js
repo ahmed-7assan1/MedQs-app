@@ -214,12 +214,14 @@ exports.Prisma.PlaylistSyncTaskScalarFieldEnum = {
 exports.Prisma.ModuleScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  icon: 'icon',
   semesterId: 'semesterId'
 };
 
 exports.Prisma.SubjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  icon: 'icon',
   moduleId: 'moduleId',
   isQuizSystemBank: 'isQuizSystemBank',
   semesterId: 'semesterId'

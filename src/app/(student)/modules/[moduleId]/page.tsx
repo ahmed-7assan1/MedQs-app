@@ -5,38 +5,52 @@ import { notFound, redirect } from "next/navigation";
 import {
   ChevronRight, Layers, FileText, Clock, BarChart3,
   Brain, Bone, Microscope, Shield, Pill, Activity,
-  HelpCircle, FlaskConical, Dna, Atom
+  HelpCircle, FlaskConical, Dna, Atom,
+  Stethoscope, HeartPulse, Syringe, Bandage, Tablets, 
+  ClipboardList, Thermometer, Eye, Ear, Hand, Biohazard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SubjectInlineManager } from "@/components/admin-inline/SubjectInlineManager";
 
 // Map subject names to discipline icons + colors
-function getSubjectAccent(name: string): {
+const ICON_MAP: Record<string, any> = {
+  Brain, Bone, HeartPulse, Activity, Microscope, Pill, FlaskConical, 
+  Dna, Atom, Stethoscope, Syringe, Baby, Bandage, Tablets, 
+  ClipboardList, Thermometer, Eye, Ear, Hand, Biohazard, Layers
+};
+
+function getSubjectAccent(name: string, customIcon?: string | null): {
   icon: any; iconColor: string; bgColor: string; borderColor: string; progressColor: string;
 } {
   const n = name.toUpperCase();
+  let iconObj: any = customIcon && ICON_MAP[customIcon] ? ICON_MAP[customIcon] : null;
+
+  const getReturn = (icon: any, iconColor: string, bgColor: string, borderColor: string, progressColor: string) => ({
+    icon: iconObj || icon, iconColor, bgColor, borderColor, progressColor
+  });
+
   if (n.includes("ANATOMY") || n.includes("ANAT"))
-    return { icon: Bone, iconColor: "text-red-500", bgColor: "bg-red-500/10", borderColor: "border-l-red-500", progressColor: "bg-gradient-to-r from-red-500 to-rose-400" };
+    return getReturn(Bone, "text-red-500", "bg-red-500/10", "border-l-red-500", "bg-gradient-to-r from-red-500 to-rose-400");
   if (n.includes("HISTO") || n.includes("HISTOLOGY"))
-    return { icon: Microscope, iconColor: "text-pink-500", bgColor: "bg-pink-500/10", borderColor: "border-l-pink-500", progressColor: "bg-gradient-to-r from-pink-500 to-fuchsia-400" };
+    return getReturn(Microscope, "text-pink-500", "bg-pink-500/10", "border-l-pink-500", "bg-gradient-to-r from-pink-500 to-fuchsia-400");
   if (n.includes("MICRO") || n.includes("MICROBIO"))
-    return { icon: Atom, iconColor: "text-teal-500", bgColor: "bg-teal-500/10", borderColor: "border-l-teal-500", progressColor: "bg-gradient-to-r from-teal-500 to-cyan-400" };
+    return getReturn(Atom, "text-teal-500", "bg-teal-500/10", "border-l-teal-500", "bg-gradient-to-r from-teal-500 to-cyan-400");
   if (n.includes("PARA") || n.includes("PARASITO"))
-    return { icon: Shield, iconColor: "text-amber-500", bgColor: "bg-amber-500/10", borderColor: "border-l-amber-500", progressColor: "bg-gradient-to-r from-amber-500 to-orange-400" };
+    return getReturn(Shield, "text-amber-500", "bg-amber-500/10", "border-l-amber-500", "bg-gradient-to-r from-amber-500 to-orange-400");
   if (n.includes("PATHO") || n.includes("PATHOLOGY"))
-    return { icon: FlaskConical, iconColor: "text-orange-500", bgColor: "bg-orange-500/10", borderColor: "border-l-orange-500", progressColor: "bg-gradient-to-r from-orange-500 to-red-400" };
+    return getReturn(FlaskConical, "text-orange-500", "bg-orange-500/10", "border-l-orange-500", "bg-gradient-to-r from-orange-500 to-red-400");
   if (n.includes("PHARMA") || n.includes("PHARMACOLOGY"))
-    return { icon: Pill, iconColor: "text-emerald-500", bgColor: "bg-emerald-500/10", borderColor: "border-l-emerald-500", progressColor: "bg-gradient-to-r from-emerald-500 to-green-400" };
+    return getReturn(Pill, "text-emerald-500", "bg-emerald-500/10", "border-l-emerald-500", "bg-gradient-to-r from-emerald-500 to-green-400");
   if (n.includes("PHYSIO") || n.includes("PHYSIOLOGY"))
-    return { icon: Activity, iconColor: "text-blue-500", bgColor: "bg-blue-500/10", borderColor: "border-l-blue-500", progressColor: "bg-gradient-to-r from-blue-500 to-sky-400" };
+    return getReturn(Activity, "text-blue-500", "bg-blue-500/10", "border-l-blue-500", "bg-gradient-to-r from-blue-500 to-sky-400");
   if (n.includes("QUIZ") || n.includes("QUESTION") || n.includes("BANK"))
-    return { icon: HelpCircle, iconColor: "text-violet-500", bgColor: "bg-violet-500/10", borderColor: "border-l-violet-500", progressColor: "bg-gradient-to-r from-violet-500 to-purple-400" };
+    return getReturn(HelpCircle, "text-violet-500", "bg-violet-500/10", "border-l-violet-500", "bg-gradient-to-r from-violet-500 to-purple-400");
   if (n.includes("NEURO") || n.includes("CNS"))
-    return { icon: Brain, iconColor: "text-purple-500", bgColor: "bg-purple-500/10", borderColor: "border-l-purple-500", progressColor: "bg-gradient-to-r from-purple-500 to-violet-400" };
+    return getReturn(Brain, "text-purple-500", "bg-purple-500/10", "border-l-purple-500", "bg-gradient-to-r from-purple-500 to-violet-400");
   if (n.includes("BIOCHEM") || n.includes("GENETICS") || n.includes("DNA"))
-    return { icon: Dna, iconColor: "text-sky-500", bgColor: "bg-sky-500/10", borderColor: "border-l-sky-500", progressColor: "bg-gradient-to-r from-sky-500 to-blue-400" };
-  // Default
-  return { icon: Layers, iconColor: "text-primary", bgColor: "bg-primary/10", borderColor: "border-l-primary", progressColor: "bg-gradient-to-r from-primary to-blue-400" };
+    return getReturn(Dna, "text-sky-500", "bg-sky-500/10", "border-l-sky-500", "bg-gradient-to-r from-sky-500 to-blue-400");
+
+  return getReturn(Layers, "text-primary", "bg-primary/10", "border-l-primary", "bg-gradient-to-r from-primary to-blue-400");
 }
 
 export default async function ModuleDetailPage({ params }: { params: { moduleId: string } }) {
@@ -173,7 +187,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
           <div className="mb-12">
             <SubjectInlineManager
               moduleId={mod.id}
-              initialSubjects={mod.subjects.map((s) => ({ id: s.id, name: s.name }))}
+              initialSubjects={mod.subjects.map((s) => ({ id: s.id, name: s.name, icon: s.icon }))}
             />
           </div>
         )}
@@ -199,7 +213,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
               const subjQ = subject.lectures.reduce((a, l) => a + l._count.questions, 0);
               const subjCorr = correctBySubject[subject.id]?.size ?? 0;
               const subjPct = subjQ > 0 ? Math.round((subjCorr / subjQ) * 100) : 0;
-              const accent = getSubjectAccent(subject.name);
+              const accent = getSubjectAccent(subject.name, subject.icon);
               const IconComp = accent.icon;
               const isStarted = subjCorr > 0;
 

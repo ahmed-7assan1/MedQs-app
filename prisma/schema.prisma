@@ -147,6 +147,7 @@ model PlaylistSyncTask {
 model Module {
   id         String      @id @default(uuid())
   name       String
+  icon       String?
   semesterId String
   semester   Semester    @relation(fields: [semesterId], references: [id])
   pastPapers PastPaper[]
@@ -156,6 +157,7 @@ model Module {
 model Subject {
   id               String    @id @default(uuid())
   name             String
+  icon             String?
   moduleId         String?
   isQuizSystemBank Boolean   @default(false)
   semesterId       String?

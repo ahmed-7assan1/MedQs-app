@@ -36,12 +36,16 @@ export async function POST(
   const boundary = await assertModule(w.scope, moduleId);
   if (boundary) return boundary;
 
-  const { name } = await req.json();
+  const { name, icon } = await req.json();
   if (!name?.trim())
     return NextResponse.json({ error: "Name required" }, { status: 400 });
 
   const subject = await prisma.subject.create({
-    data: { name, moduleId },
+    data: { 
+      name: name.trim(), 
+      moduleId,
+      icon: icon || null
+    },
   });
   return NextResponse.json(subject, { status: 201 });
 }

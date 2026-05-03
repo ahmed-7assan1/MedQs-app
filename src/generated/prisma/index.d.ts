@@ -15520,18 +15520,21 @@ export namespace Prisma {
   export type ModuleMinAggregateOutputType = {
     id: string | null
     name: string | null
+    icon: string | null
     semesterId: string | null
   }
 
   export type ModuleMaxAggregateOutputType = {
     id: string | null
     name: string | null
+    icon: string | null
     semesterId: string | null
   }
 
   export type ModuleCountAggregateOutputType = {
     id: number
     name: number
+    icon: number
     semesterId: number
     _all: number
   }
@@ -15540,18 +15543,21 @@ export namespace Prisma {
   export type ModuleMinAggregateInputType = {
     id?: true
     name?: true
+    icon?: true
     semesterId?: true
   }
 
   export type ModuleMaxAggregateInputType = {
     id?: true
     name?: true
+    icon?: true
     semesterId?: true
   }
 
   export type ModuleCountAggregateInputType = {
     id?: true
     name?: true
+    icon?: true
     semesterId?: true
     _all?: true
   }
@@ -15631,6 +15637,7 @@ export namespace Prisma {
   export type ModuleGroupByOutputType = {
     id: string
     name: string
+    icon: string | null
     semesterId: string
     _count: ModuleCountAggregateOutputType | null
     _min: ModuleMinAggregateOutputType | null
@@ -15654,6 +15661,7 @@ export namespace Prisma {
   export type ModuleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    icon?: boolean
     semesterId?: boolean
     semester?: boolean | SemesterDefaultArgs<ExtArgs>
     pastPapers?: boolean | Module$pastPapersArgs<ExtArgs>
@@ -15664,6 +15672,7 @@ export namespace Prisma {
   export type ModuleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    icon?: boolean
     semesterId?: boolean
     semester?: boolean | SemesterDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["module"]>
@@ -15671,6 +15680,7 @@ export namespace Prisma {
   export type ModuleSelectScalar = {
     id?: boolean
     name?: boolean
+    icon?: boolean
     semesterId?: boolean
   }
 
@@ -15694,6 +15704,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
+      icon: string | null
       semesterId: string
     }, ExtArgs["result"]["module"]>
     composites: {}
@@ -16093,6 +16104,7 @@ export namespace Prisma {
   interface ModuleFieldRefs {
     readonly id: FieldRef<"Module", 'String'>
     readonly name: FieldRef<"Module", 'String'>
+    readonly icon: FieldRef<"Module", 'String'>
     readonly semesterId: FieldRef<"Module", 'String'>
   }
     
@@ -16479,6 +16491,7 @@ export namespace Prisma {
   export type SubjectMinAggregateOutputType = {
     id: string | null
     name: string | null
+    icon: string | null
     moduleId: string | null
     isQuizSystemBank: boolean | null
     semesterId: string | null
@@ -16487,6 +16500,7 @@ export namespace Prisma {
   export type SubjectMaxAggregateOutputType = {
     id: string | null
     name: string | null
+    icon: string | null
     moduleId: string | null
     isQuizSystemBank: boolean | null
     semesterId: string | null
@@ -16495,6 +16509,7 @@ export namespace Prisma {
   export type SubjectCountAggregateOutputType = {
     id: number
     name: number
+    icon: number
     moduleId: number
     isQuizSystemBank: number
     semesterId: number
@@ -16505,6 +16520,7 @@ export namespace Prisma {
   export type SubjectMinAggregateInputType = {
     id?: true
     name?: true
+    icon?: true
     moduleId?: true
     isQuizSystemBank?: true
     semesterId?: true
@@ -16513,6 +16529,7 @@ export namespace Prisma {
   export type SubjectMaxAggregateInputType = {
     id?: true
     name?: true
+    icon?: true
     moduleId?: true
     isQuizSystemBank?: true
     semesterId?: true
@@ -16521,6 +16538,7 @@ export namespace Prisma {
   export type SubjectCountAggregateInputType = {
     id?: true
     name?: true
+    icon?: true
     moduleId?: true
     isQuizSystemBank?: true
     semesterId?: true
@@ -16602,6 +16620,7 @@ export namespace Prisma {
   export type SubjectGroupByOutputType = {
     id: string
     name: string
+    icon: string | null
     moduleId: string | null
     isQuizSystemBank: boolean
     semesterId: string | null
@@ -16627,6 +16646,7 @@ export namespace Prisma {
   export type SubjectSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    icon?: boolean
     moduleId?: boolean
     isQuizSystemBank?: boolean
     semesterId?: boolean
@@ -16639,6 +16659,7 @@ export namespace Prisma {
   export type SubjectSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    icon?: boolean
     moduleId?: boolean
     isQuizSystemBank?: boolean
     semesterId?: boolean
@@ -16649,6 +16670,7 @@ export namespace Prisma {
   export type SubjectSelectScalar = {
     id?: boolean
     name?: boolean
+    icon?: boolean
     moduleId?: boolean
     isQuizSystemBank?: boolean
     semesterId?: boolean
@@ -16675,6 +16697,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
+      icon: string | null
       moduleId: string | null
       isQuizSystemBank: boolean
       semesterId: string | null
@@ -17076,6 +17099,7 @@ export namespace Prisma {
   interface SubjectFieldRefs {
     readonly id: FieldRef<"Subject", 'String'>
     readonly name: FieldRef<"Subject", 'String'>
+    readonly icon: FieldRef<"Subject", 'String'>
     readonly moduleId: FieldRef<"Subject", 'String'>
     readonly isQuizSystemBank: FieldRef<"Subject", 'Boolean'>
     readonly semesterId: FieldRef<"Subject", 'String'>
@@ -65216,6 +65240,7 @@ export namespace Prisma {
   export const ModuleScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    icon: 'icon',
     semesterId: 'semesterId'
   };
 
@@ -65225,6 +65250,7 @@ export namespace Prisma {
   export const SubjectScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    icon: 'icon',
     moduleId: 'moduleId',
     isQuizSystemBank: 'isQuizSystemBank',
     semesterId: 'semesterId'
@@ -66807,6 +66833,7 @@ export namespace Prisma {
     NOT?: ModuleWhereInput | ModuleWhereInput[]
     id?: StringFilter<"Module"> | string
     name?: StringFilter<"Module"> | string
+    icon?: StringNullableFilter<"Module"> | string | null
     semesterId?: StringFilter<"Module"> | string
     semester?: XOR<SemesterRelationFilter, SemesterWhereInput>
     pastPapers?: PastPaperListRelationFilter
@@ -66816,6 +66843,7 @@ export namespace Prisma {
   export type ModuleOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrderInput | SortOrder
     semesterId?: SortOrder
     semester?: SemesterOrderByWithRelationInput
     pastPapers?: PastPaperOrderByRelationAggregateInput
@@ -66828,6 +66856,7 @@ export namespace Prisma {
     OR?: ModuleWhereInput[]
     NOT?: ModuleWhereInput | ModuleWhereInput[]
     name?: StringFilter<"Module"> | string
+    icon?: StringNullableFilter<"Module"> | string | null
     semesterId?: StringFilter<"Module"> | string
     semester?: XOR<SemesterRelationFilter, SemesterWhereInput>
     pastPapers?: PastPaperListRelationFilter
@@ -66837,6 +66866,7 @@ export namespace Prisma {
   export type ModuleOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrderInput | SortOrder
     semesterId?: SortOrder
     _count?: ModuleCountOrderByAggregateInput
     _max?: ModuleMaxOrderByAggregateInput
@@ -66849,6 +66879,7 @@ export namespace Prisma {
     NOT?: ModuleScalarWhereWithAggregatesInput | ModuleScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Module"> | string
     name?: StringWithAggregatesFilter<"Module"> | string
+    icon?: StringNullableWithAggregatesFilter<"Module"> | string | null
     semesterId?: StringWithAggregatesFilter<"Module"> | string
   }
 
@@ -66858,6 +66889,7 @@ export namespace Prisma {
     NOT?: SubjectWhereInput | SubjectWhereInput[]
     id?: StringFilter<"Subject"> | string
     name?: StringFilter<"Subject"> | string
+    icon?: StringNullableFilter<"Subject"> | string | null
     moduleId?: StringNullableFilter<"Subject"> | string | null
     isQuizSystemBank?: BoolFilter<"Subject"> | boolean
     semesterId?: StringNullableFilter<"Subject"> | string | null
@@ -66869,6 +66901,7 @@ export namespace Prisma {
   export type SubjectOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrderInput | SortOrder
     moduleId?: SortOrderInput | SortOrder
     isQuizSystemBank?: SortOrder
     semesterId?: SortOrderInput | SortOrder
@@ -66883,6 +66916,7 @@ export namespace Prisma {
     OR?: SubjectWhereInput[]
     NOT?: SubjectWhereInput | SubjectWhereInput[]
     name?: StringFilter<"Subject"> | string
+    icon?: StringNullableFilter<"Subject"> | string | null
     moduleId?: StringNullableFilter<"Subject"> | string | null
     isQuizSystemBank?: BoolFilter<"Subject"> | boolean
     semesterId?: StringNullableFilter<"Subject"> | string | null
@@ -66894,6 +66928,7 @@ export namespace Prisma {
   export type SubjectOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrderInput | SortOrder
     moduleId?: SortOrderInput | SortOrder
     isQuizSystemBank?: SortOrder
     semesterId?: SortOrderInput | SortOrder
@@ -66908,6 +66943,7 @@ export namespace Prisma {
     NOT?: SubjectScalarWhereWithAggregatesInput | SubjectScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Subject"> | string
     name?: StringWithAggregatesFilter<"Subject"> | string
+    icon?: StringNullableWithAggregatesFilter<"Subject"> | string | null
     moduleId?: StringNullableWithAggregatesFilter<"Subject"> | string | null
     isQuizSystemBank?: BoolWithAggregatesFilter<"Subject"> | boolean
     semesterId?: StringNullableWithAggregatesFilter<"Subject"> | string | null
@@ -71168,6 +71204,7 @@ export namespace Prisma {
   export type ModuleCreateInput = {
     id?: string
     name: string
+    icon?: string | null
     semester: SemesterCreateNestedOneWithoutModulesInput
     pastPapers?: PastPaperCreateNestedManyWithoutModuleInput
     subjects?: SubjectCreateNestedManyWithoutModuleInput
@@ -71176,6 +71213,7 @@ export namespace Prisma {
   export type ModuleUncheckedCreateInput = {
     id?: string
     name: string
+    icon?: string | null
     semesterId: string
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutModuleInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutModuleInput
@@ -71184,6 +71222,7 @@ export namespace Prisma {
   export type ModuleUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     semester?: SemesterUpdateOneRequiredWithoutModulesNestedInput
     pastPapers?: PastPaperUpdateManyWithoutModuleNestedInput
     subjects?: SubjectUpdateManyWithoutModuleNestedInput
@@ -71192,6 +71231,7 @@ export namespace Prisma {
   export type ModuleUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     pastPapers?: PastPaperUncheckedUpdateManyWithoutModuleNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutModuleNestedInput
@@ -71200,23 +71240,27 @@ export namespace Prisma {
   export type ModuleCreateManyInput = {
     id?: string
     name: string
+    icon?: string | null
     semesterId: string
   }
 
   export type ModuleUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ModuleUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
   }
 
   export type SubjectCreateInput = {
     id?: string
     name: string
+    icon?: string | null
     isQuizSystemBank?: boolean
     lectures?: LectureCreateNestedManyWithoutSubjectInput
     module?: ModuleCreateNestedOneWithoutSubjectsInput
@@ -71226,6 +71270,7 @@ export namespace Prisma {
   export type SubjectUncheckedCreateInput = {
     id?: string
     name: string
+    icon?: string | null
     moduleId?: string | null
     isQuizSystemBank?: boolean
     semesterId?: string | null
@@ -71235,6 +71280,7 @@ export namespace Prisma {
   export type SubjectUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     lectures?: LectureUpdateManyWithoutSubjectNestedInput
     module?: ModuleUpdateOneWithoutSubjectsNestedInput
@@ -71244,6 +71290,7 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     moduleId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71253,6 +71300,7 @@ export namespace Prisma {
   export type SubjectCreateManyInput = {
     id?: string
     name: string
+    icon?: string | null
     moduleId?: string | null
     isQuizSystemBank?: boolean
     semesterId?: string | null
@@ -71261,12 +71309,14 @@ export namespace Prisma {
   export type SubjectUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SubjectUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     moduleId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75656,18 +75706,21 @@ export namespace Prisma {
   export type ModuleCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrder
     semesterId?: SortOrder
   }
 
   export type ModuleMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrder
     semesterId?: SortOrder
   }
 
   export type ModuleMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrder
     semesterId?: SortOrder
   }
 
@@ -75694,6 +75747,7 @@ export namespace Prisma {
   export type SubjectCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrder
     moduleId?: SortOrder
     isQuizSystemBank?: SortOrder
     semesterId?: SortOrder
@@ -75702,6 +75756,7 @@ export namespace Prisma {
   export type SubjectMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrder
     moduleId?: SortOrder
     isQuizSystemBank?: SortOrder
     semesterId?: SortOrder
@@ -75710,6 +75765,7 @@ export namespace Prisma {
   export type SubjectMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    icon?: SortOrder
     moduleId?: SortOrder
     isQuizSystemBank?: SortOrder
     semesterId?: SortOrder
@@ -85418,6 +85474,7 @@ export namespace Prisma {
   export type ModuleCreateWithoutSemesterInput = {
     id?: string
     name: string
+    icon?: string | null
     pastPapers?: PastPaperCreateNestedManyWithoutModuleInput
     subjects?: SubjectCreateNestedManyWithoutModuleInput
   }
@@ -85425,6 +85482,7 @@ export namespace Prisma {
   export type ModuleUncheckedCreateWithoutSemesterInput = {
     id?: string
     name: string
+    icon?: string | null
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutModuleInput
     subjects?: SubjectUncheckedCreateNestedManyWithoutModuleInput
   }
@@ -85543,6 +85601,7 @@ export namespace Prisma {
   export type SubjectCreateWithoutSemesterInput = {
     id?: string
     name: string
+    icon?: string | null
     isQuizSystemBank?: boolean
     lectures?: LectureCreateNestedManyWithoutSubjectInput
     module?: ModuleCreateNestedOneWithoutSubjectsInput
@@ -85551,6 +85610,7 @@ export namespace Prisma {
   export type SubjectUncheckedCreateWithoutSemesterInput = {
     id?: string
     name: string
+    icon?: string | null
     moduleId?: string | null
     isQuizSystemBank?: boolean
     lectures?: LectureUncheckedCreateNestedManyWithoutSubjectInput
@@ -85764,6 +85824,7 @@ export namespace Prisma {
     NOT?: ModuleScalarWhereInput | ModuleScalarWhereInput[]
     id?: StringFilter<"Module"> | string
     name?: StringFilter<"Module"> | string
+    icon?: StringNullableFilter<"Module"> | string | null
     semesterId?: StringFilter<"Module"> | string
   }
 
@@ -85883,6 +85944,7 @@ export namespace Prisma {
     NOT?: SubjectScalarWhereInput | SubjectScalarWhereInput[]
     id?: StringFilter<"Subject"> | string
     name?: StringFilter<"Subject"> | string
+    icon?: StringNullableFilter<"Subject"> | string | null
     moduleId?: StringNullableFilter<"Subject"> | string | null
     isQuizSystemBank?: BoolFilter<"Subject"> | boolean
     semesterId?: StringNullableFilter<"Subject"> | string | null
@@ -86060,6 +86122,7 @@ export namespace Prisma {
   export type SubjectCreateWithoutModuleInput = {
     id?: string
     name: string
+    icon?: string | null
     isQuizSystemBank?: boolean
     lectures?: LectureCreateNestedManyWithoutSubjectInput
     semester?: SemesterCreateNestedOneWithoutSubjectsInput
@@ -86068,6 +86131,7 @@ export namespace Prisma {
   export type SubjectUncheckedCreateWithoutModuleInput = {
     id?: string
     name: string
+    icon?: string | null
     isQuizSystemBank?: boolean
     semesterId?: string | null
     lectures?: LectureUncheckedCreateNestedManyWithoutSubjectInput
@@ -86203,6 +86267,7 @@ export namespace Prisma {
   export type ModuleCreateWithoutSubjectsInput = {
     id?: string
     name: string
+    icon?: string | null
     semester: SemesterCreateNestedOneWithoutModulesInput
     pastPapers?: PastPaperCreateNestedManyWithoutModuleInput
   }
@@ -86210,6 +86275,7 @@ export namespace Prisma {
   export type ModuleUncheckedCreateWithoutSubjectsInput = {
     id?: string
     name: string
+    icon?: string | null
     semesterId: string
     pastPapers?: PastPaperUncheckedCreateNestedManyWithoutModuleInput
   }
@@ -86295,6 +86361,7 @@ export namespace Prisma {
   export type ModuleUpdateWithoutSubjectsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     semester?: SemesterUpdateOneRequiredWithoutModulesNestedInput
     pastPapers?: PastPaperUpdateManyWithoutModuleNestedInput
   }
@@ -86302,6 +86369,7 @@ export namespace Prisma {
   export type ModuleUncheckedUpdateWithoutSubjectsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     pastPapers?: PastPaperUncheckedUpdateManyWithoutModuleNestedInput
   }
@@ -86368,6 +86436,7 @@ export namespace Prisma {
   export type SubjectCreateWithoutLecturesInput = {
     id?: string
     name: string
+    icon?: string | null
     isQuizSystemBank?: boolean
     module?: ModuleCreateNestedOneWithoutSubjectsInput
     semester?: SemesterCreateNestedOneWithoutSubjectsInput
@@ -86376,6 +86445,7 @@ export namespace Prisma {
   export type SubjectUncheckedCreateWithoutLecturesInput = {
     id?: string
     name: string
+    icon?: string | null
     moduleId?: string | null
     isQuizSystemBank?: boolean
     semesterId?: string | null
@@ -86704,6 +86774,7 @@ export namespace Prisma {
   export type SubjectUpdateWithoutLecturesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     module?: ModuleUpdateOneWithoutSubjectsNestedInput
     semester?: SemesterUpdateOneWithoutSubjectsNestedInput
@@ -86712,6 +86783,7 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateWithoutLecturesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     moduleId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88476,6 +88548,7 @@ export namespace Prisma {
   export type ModuleCreateWithoutPastPapersInput = {
     id?: string
     name: string
+    icon?: string | null
     semester: SemesterCreateNestedOneWithoutModulesInput
     subjects?: SubjectCreateNestedManyWithoutModuleInput
   }
@@ -88483,6 +88556,7 @@ export namespace Prisma {
   export type ModuleUncheckedCreateWithoutPastPapersInput = {
     id?: string
     name: string
+    icon?: string | null
     semesterId: string
     subjects?: SubjectUncheckedCreateNestedManyWithoutModuleInput
   }
@@ -88638,6 +88712,7 @@ export namespace Prisma {
   export type ModuleUpdateWithoutPastPapersInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     semester?: SemesterUpdateOneRequiredWithoutModulesNestedInput
     subjects?: SubjectUpdateManyWithoutModuleNestedInput
   }
@@ -88645,6 +88720,7 @@ export namespace Prisma {
   export type ModuleUncheckedUpdateWithoutPastPapersInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     semesterId?: StringFieldUpdateOperationsInput | string
     subjects?: SubjectUncheckedUpdateManyWithoutModuleNestedInput
   }
@@ -102078,6 +102154,7 @@ export namespace Prisma {
   export type ModuleCreateManySemesterInput = {
     id?: string
     name: string
+    icon?: string | null
   }
 
   export type PastPaperCreateManySemesterInput = {
@@ -102112,6 +102189,7 @@ export namespace Prisma {
   export type SubjectCreateManySemesterInput = {
     id?: string
     name: string
+    icon?: string | null
     moduleId?: string | null
     isQuizSystemBank?: boolean
   }
@@ -102243,6 +102321,7 @@ export namespace Prisma {
   export type ModuleUpdateWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     pastPapers?: PastPaperUpdateManyWithoutModuleNestedInput
     subjects?: SubjectUpdateManyWithoutModuleNestedInput
   }
@@ -102250,6 +102329,7 @@ export namespace Prisma {
   export type ModuleUncheckedUpdateWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     pastPapers?: PastPaperUncheckedUpdateManyWithoutModuleNestedInput
     subjects?: SubjectUncheckedUpdateManyWithoutModuleNestedInput
   }
@@ -102257,6 +102337,7 @@ export namespace Prisma {
   export type ModuleUncheckedUpdateManyWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PastPaperUpdateWithoutSemesterInput = {
@@ -102353,6 +102434,7 @@ export namespace Prisma {
   export type SubjectUpdateWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     lectures?: LectureUpdateManyWithoutSubjectNestedInput
     module?: ModuleUpdateOneWithoutSubjectsNestedInput
@@ -102361,6 +102443,7 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     moduleId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     lectures?: LectureUncheckedUpdateManyWithoutSubjectNestedInput
@@ -102369,6 +102452,7 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateManyWithoutSemesterInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     moduleId?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -102543,6 +102627,7 @@ export namespace Prisma {
   export type SubjectCreateManyModuleInput = {
     id?: string
     name: string
+    icon?: string | null
     isQuizSystemBank?: boolean
     semesterId?: string | null
   }
@@ -102614,6 +102699,7 @@ export namespace Prisma {
   export type SubjectUpdateWithoutModuleInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     lectures?: LectureUpdateManyWithoutSubjectNestedInput
     semester?: SemesterUpdateOneWithoutSubjectsNestedInput
@@ -102622,6 +102708,7 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateWithoutModuleInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
     lectures?: LectureUncheckedUpdateManyWithoutSubjectNestedInput
@@ -102630,6 +102717,7 @@ export namespace Prisma {
   export type SubjectUncheckedUpdateManyWithoutModuleInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     isQuizSystemBank?: BoolFieldUpdateOperationsInput | boolean
     semesterId?: NullableStringFieldUpdateOperationsInput | string | null
   }
