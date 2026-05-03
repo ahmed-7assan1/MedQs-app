@@ -82,11 +82,22 @@ export default async function SubjectLecturesPage({
       {/* ── Immersive Subject Hero ── */}
       <div className="relative h-[380px] w-full overflow-hidden flex items-center">
         {/* Dynamic Background Gradient */}
-        <div className={cn("absolute inset-0 bg-gradient-to-b via-transparent to-[#07080f] z-10", accent.bgColor.replace("/10", "/20"))} />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#07080f] z-10" />
         
-        {/* Texture & Glow */}
+        {/* Texture & Glows */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-        <div className={cn("absolute top-0 right-0 w-1/2 h-full blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4 opacity-20", accent.bgColor)} />
+        
+        {/* Glow 1 (Top Right) */}
+        <div className={cn(
+          "absolute top-0 right-0 w-[60%] h-full blur-[140px] rounded-full -translate-y-1/2 translate-x-1/4 opacity-40 transition-colors duration-1000",
+          accent.bgColor.replace("/10", "/30")
+        )} />
+        
+        {/* Glow 2 (Bottom Left) */}
+        <div className={cn(
+          "absolute bottom-0 left-0 w-[40%] h-1/2 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 opacity-20 transition-colors duration-1000",
+          accent.bgColor.replace("/10", "/20")
+        )} />
 
         <div className="container mx-auto px-6 relative z-20 pt-20">
           <div className="flex flex-col gap-6">
