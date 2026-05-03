@@ -196,7 +196,7 @@ export function LectureVideoStudio({
   return (
     <div className="w-full flex flex-col gap-8 animate-in fade-in duration-700">
       {/* 1. INTERNAL SUB-HEADER (Breadcrumbs & Progress) */}
-      <div className="w-full py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-0 z-40 -mt-10 mb-4">
+      <div className="w-full py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-16 z-40 mb-4 transition-all duration-300">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {hubUrl && (

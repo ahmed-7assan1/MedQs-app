@@ -67,6 +67,8 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
   const hideTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const [playing, setPlaying] = useState(false);
+  const playingRef = useRef(false);
+  useEffect(() => { playingRef.current = playing; }, [playing]);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [played, setPlayed] = useState(0);
@@ -109,6 +111,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
     if (typeof window !== "undefined" && !document.querySelector('script[src*="youtube.com/iframe_api"]')) {
       const tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
+      tag.async = true;
       document.head.appendChild(tag);
     }
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -159,7 +162,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
             const rawQualities = event.target.getAvailableQualityLevels?.() ?? [];
             setAvailableQualities(rawQualities.filter((q: string) => q !== "auto"));
             setAvailableRates(event.target.getAvailablePlaybackRates?.() ?? [0.5, 0.75, 1, 1.25, 1.5, 2]);
-            if (playing) {
+            if (playingRef.current) {
               event.target.unMute();
               event.target.playVideo();
             }

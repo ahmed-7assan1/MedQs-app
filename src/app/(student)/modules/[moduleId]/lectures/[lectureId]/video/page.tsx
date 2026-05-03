@@ -62,8 +62,8 @@ export default async function LectureVideoPage({
   const likedSet = new Set(likedRows.map((r) => r.videoId));
 
   return (
-    <div className="w-full min-h-screen bg-[#07080f] animate-in fade-in duration-500 overflow-x-hidden">
-      <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 lg:py-10">
+    <div className="min-h-screen bg-[#07080f] animate-in fade-in duration-500 overflow-x-hidden pt-16">
+      <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-8 lg:py-12">
         {videos.length > 0 ? (
           <LectureVideoStudio
             lectureId={lecture.id}

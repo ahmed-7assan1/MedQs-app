@@ -65,9 +65,9 @@ export function LectureExperienceClient({ lecture, moduleId }: { lecture: any; m
   const extras = lecture.extras || {};
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#09080F] text-white">
+    <div className="flex flex-col min-h-screen bg-[#09080F] text-white pt-16">
       {/* ── Minimalist Hero ── */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-[#131220] to-[#09080F] pb-12 pt-20">
+      <div className="relative overflow-hidden bg-gradient-to-b from-[#131220] to-[#09080F] pb-12 pt-12">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <Link href={`/modules/${moduleId}`} className="mb-6 inline-flex items-center gap-2 text-xs font-bold text-white/40 hover:text-white transition-colors">
             <ArrowLeft className="h-3 w-3" /> Back to Module
