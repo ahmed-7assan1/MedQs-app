@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                 <Link href="/modules" className="text-xs font-bold text-primary hover:underline">See all modules</Link>
              </div>
              <div className="grid gap-4 sm:grid-cols-2">
-                {moduleProgress.slice(0, 4).map((mod) => (
+                {moduleProgress.slice(0, 4).map((mod: any) => (
                   <div key={mod.id} className="rounded-[20px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-5 transition-all hover:shadow-md">
                      <div className="mb-4 flex items-center justify-between">
                         <span className="text-sm font-bold dark:text-white/90 text-slate-700">{mod.name}</span>
