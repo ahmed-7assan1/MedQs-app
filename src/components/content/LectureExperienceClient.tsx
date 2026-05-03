@@ -6,7 +6,7 @@ import {
   FileText, Layers, HelpCircle, Video, Sparkles, PlayCircle,
   ArrowLeft, CheckCircle2, BookOpen, Brain, Zap, Star,
   AlignLeft, ChevronRight, Music2, Mic2, Radio, ExternalLink,
-  Youtube, Play,
+  Youtube, Play, Download, FileImage, FolderArchive,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
@@ -20,12 +20,47 @@ type TabId = "overview" | "video" | "recordings" | "flashcards" | "questions" | 
 const TAB_META: Record<string, { icon: any; color: string }> = {
   overview:   { icon: Layers,       color: "text-violet-500"  },
   video:      { icon: PlayCircle,   color: "text-sky-500"     },
+  materials:  { icon: FolderArchive,color: "text-orange-500"  },
   recordings: { icon: Mic2,         color: "text-pink-500"    },
   flashcards: { icon: Brain,        color: "text-amber-500"   },
   questions:  { icon: CheckCircle2, color: "text-emerald-500" },
   notes:      { icon: AlignLeft,    color: "text-rose-400"    },
   drq:        { icon: Sparkles,     color: "text-primary"     },
 };
+
+function FileCard({ file }: { file: { id: string; name: string; url: string; mimeType: string } }) {
+  const isPDF = file.mimeType.includes("pdf");
+  const isImg = file.mimeType.includes("image");
+
+  return (
+    <a
+      href={file.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5"
+    >
+      <div className={cn(
+        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors",
+        isPDF ? "bg-red-500/10" : isImg ? "bg-sky-500/10" : "bg-orange-500/10"
+      )}>
+        {isPDF ? <FileText className="h-5 w-5 text-red-500" /> :
+         isImg ? <FileImage className="h-5 w-5 text-sky-500" /> :
+                 <FolderArchive className="h-5 w-5 text-orange-500" />}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="truncate text-sm font-bold text-card-foreground group-hover:text-primary transition-colors">
+          {file.name}
+        </p>
+        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          {file.mimeType.split("/")[1] || "File"}
+        </p>
+      </div>
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all">
+        <Download className="h-4 w-4" />
+      </div>
+    </a>
+  );
+}
 
 /* ── helpers ── */
 function getRecordEmbed(url: string): { type: "youtube" | "spotify" | "other"; embedUrl: string; id?: string } {
@@ -137,6 +172,7 @@ export function LectureExperienceClient({
   const [active, setActive] = useState<TabId>("overview");
 
   const recordCount   = lecture?.records?.length || 0;
+  const fileCount     = lecture?.files?.length || 0;
   const flashcardCount = lecture?.flashcards?.length || 0;
   const questionCount  = lecture?.questions?.length  || 0;
   const hasNotes       = !!lecture?.notesMarkdown;
@@ -144,6 +180,7 @@ export function LectureExperienceClient({
   const tabs: { id: TabId; label: string }[] = [
     { id: "overview",   label: "Overview"   },
     { id: "video",      label: "Video"      },
+    { id: "materials",  label: `Materials${fileCount > 0 ? ` (${fileCount})` : ""}` },
     { id: "recordings", label: `Recordings${recordCount > 0 ? ` (${recordCount})` : ""}` },
     { id: "flashcards", label: "Flashcards" },
     { id: "questions",  label: "Quiz"       },
@@ -197,6 +234,7 @@ export function LectureExperienceClient({
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <StatPill icon={Brain}     label="Flashcards" value={flashcardCount} color="text-amber-500" />
                 <StatPill icon={CheckCircle2} label="Quiz"    value={questionCount}  color="text-emerald-500" />
+                <StatPill icon={FolderArchive} label="Files"   value={fileCount}      color="text-orange-500" />
                 <StatPill icon={Mic2}      label="Recordings" value={recordCount}    color="text-pink-500" />
                 <StatPill icon={FileText}  label="Notes"      value={hasNotes ? "Yes" : "—"} color="text-rose-400" />
               </div>
@@ -330,6 +368,39 @@ export function LectureExperienceClient({
             </div>
           )}
 
+          {/* ── MATERIALS (FILES) ── */}
+          {active === "materials" && (
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
+                  <FolderArchive className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-foreground">Lecture Materials</h2>
+                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                    {fileCount} {fileCount === 1 ? "document" : "documents"} available
+                  </p>
+                </div>
+              </div>
+
+              {fileCount > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {lecture.files.map((file: any) => (
+                    <FileCard key={file.id} file={file} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={FolderArchive}
+                  title="No Materials Yet"
+                  desc="Downloadable files and PDFs for this lecture haven't been uploaded yet."
+                  color="orange"
+                />
+              )}
+            </div>
+          )}
+
           {/* ── RECORDINGS ── */}
           {active === "recordings" && (
             <div className="space-y-4">
@@ -457,6 +528,7 @@ const EMPTY_COLORS: Record<string, { bg: string; icon: string; ring: string }> =
   rose:    { bg: "bg-rose-400/10",    icon: "text-rose-400",    ring: "ring-rose-400/20"    },
   pink:    { bg: "bg-pink-500/10",    icon: "text-pink-500",    ring: "ring-pink-500/20"    },
   sky:     { bg: "bg-sky-500/10",     icon: "text-sky-500",     ring: "ring-sky-500/20"     },
+  orange:  { bg: "bg-orange-500/10",  icon: "text-orange-500",  ring: "ring-orange-500/20"  },
 };
 
 function EmptyState({ icon: Icon, title, desc, color = "violet" }: { icon: any; title: string; desc: string; color?: string }) {
