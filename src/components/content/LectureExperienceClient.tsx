@@ -15,7 +15,7 @@ import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 import { AIAssistantPanel } from "@/components/ai/AIAssistant";
 
-type TabId = "overview" | "video" | "recordings" | "flashcards" | "questions" | "notes" | "drq";
+type TabId = "overview" | "video" | "materials" | "recordings" | "flashcards" | "questions" | "notes" | "drq";
 
 const TAB_META: Record<string, { icon: any; color: string }> = {
   overview:   { icon: Layers,       color: "text-violet-500"  },
