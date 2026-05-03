@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Camera, Loader2, Upload, X, Crop, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageCropModal } from "./ImageCropModal";
-import { UPLOADCARE_CONFIG } from "@/lib/uploadcare";
+import { uploadFiles } from "@/lib/uploadthing-react";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -53,31 +53,16 @@ export function ImageUploadWithCrop({
     setUploading(true);
     
     try {
-      const formData = new FormData();
-      formData.append("file", blob, name.replace(/\.[^.]+$/, ".jpg"));
+      // Convert Blob to File for Uploadthing
+      const file = new File([blob], name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
       
-      // We use the public key from the screenshot or environment
-      // For now, let's try to fetch it or use a default
-      // Actually, it's safer to have a generic upload API route if configured, 
-      // but since the user showed Uploadcare, we'll try to use their public key.
-      
-      const publicKey = UPLOADCARE_CONFIG.publicKey;
-      formData.append("UPLOADCARE_PUB_KEY", publicKey);
-      formData.append("UPLOADCARE_STORE", "1");
-
-      const res = await fetch("https://upload.uploadcare.com/base/", {
-        method: "POST",
-        body: formData,
+      const res = await uploadFiles("avatar", {
+        files: [file],
       });
 
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res || res.length === 0) throw new Error("Upload failed");
       
-      const data = await res.json();
-      const uuid = data.file || data.uuid || (typeof data === 'string' ? data : null);
-      
-      if (!uuid) throw new Error("Invalid response from upload service");
-      
-      const fileUrl = `${UPLOADCARE_CONFIG.baseCDN}${uuid}/`;
+      const fileUrl = res[0].url;
       
       setImageError(false);
       onChange(fileUrl);
