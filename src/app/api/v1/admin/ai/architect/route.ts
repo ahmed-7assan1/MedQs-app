@@ -15,6 +15,31 @@ function semanticMatch(a: string, b: string): boolean {
   return false;
 }
 
+function compactText(text: string): string {
+  if (!text) return "";
+  const lines = text.split("\n");
+  const seen = new Set<string>();
+  const clean: string[] = [];
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) continue;
+    
+    // Skip common boilerplate
+    if (/^Page \d+$/i.test(line)) continue;
+    if (/^\d+$/i.test(line)) continue; // skip solitary page numbers
+    if (line.toLowerCase().includes("student guide") && line.length < 30) continue;
+    
+    // Basic deduplication for headers/footers appearing on every page
+    if (seen.has(line) && line.length > 50) continue; 
+    seen.add(line);
+    
+    clean.push(line);
+  }
+
+  return clean.join("\n").slice(0, 450000); // safety cap
+}
+
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
@@ -111,15 +136,14 @@ export async function POST(req: NextRequest) {
       const rawText = String(form.get("text") || "").trim();
       const personalKey = String(form.get("apiKey") || "");
       const personalProvider = String(form.get("provider") || "gemini");
-      let text = rawText;
-
       if (file) {
         text = await fileToText(file);
       }
 
       if (!text) return NextResponse.json({ error: "No text found in input" }, { status: 422 });
-      // Increase limit to 500,000 characters (approx 100-150 pages) to ensure nothing is cut off
-      const cap = text.length > 500000 ? text.slice(0, 500000) : text;
+      
+      const cap = compactText(text);
+      
       const scopeInstructions = scope === "module" 
         ? "IMPORTANT: The user uploaded a guide for a SINGLE MODULE. DO NOT invent multiple modules. Return exactly ONE module in the modules array, and group all subjects and lectures within it."
         : "Extract the complete semester structure, which usually contains MULTIPLE modules.";

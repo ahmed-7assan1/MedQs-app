@@ -4,7 +4,7 @@ type ProviderResult = {
   provider: string;
   text: string;
 };
-export type AIProviderId = "manus" | "gemini" | "openai" | "anthropic" | "deepseek";
+export type AIProviderId = "manus" | "gemini" | "openai" | "anthropic" | "deepseek" | "groq";
 
 export type AIFallbackMeta = {
   provider: string;
@@ -77,14 +77,15 @@ function hasAnyAiKey(): boolean {
     process.env.GEMINI_API_KEY?.trim() ||
     process.env.OPENAI_API_KEY?.trim() ||
     process.env.ANTHROPIC_API_KEY?.trim() ||
-    process.env.DEEPSEEK_API_KEY?.trim()
+    process.env.DEEPSEEK_API_KEY?.trim() ||
+    process.env.GROQ_API_KEY?.trim()
   );
 }
 
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek" || s === "manus") return s as AIProviderId;
+  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek" || s === "manus" || s === "groq") return s as AIProviderId;
   return undefined;
 }
 
@@ -93,6 +94,7 @@ function hasProviderKey(provider: AIProviderId): boolean {
   if (provider === "gemini") return !!process.env.GEMINI_API_KEY?.trim();
   if (provider === "openai") return !!process.env.OPENAI_API_KEY?.trim();
   if (provider === "anthropic") return !!process.env.ANTHROPIC_API_KEY?.trim();
+  if (provider === "groq") return !!process.env.GROQ_API_KEY?.trim();
   return !!process.env.DEEPSEEK_API_KEY?.trim();
 }
 
@@ -100,11 +102,12 @@ function providerDisplayName(provider: AIProviderId): string {
   if (provider === "openai") return "OpenAI";
   if (provider === "anthropic") return "Anthropic";
   if (provider === "deepseek") return "DeepSeek";
+  if (provider === "groq") return "Groq (High Speed)";
   return "Gemini";
 }
 
 function buildProviderOrder(preferred?: AIProviderId, contextLength?: number): AIProviderId[] {
-  const base: AIProviderId[] = ["manus", "gemini", "openai", "anthropic", "deepseek"];
+  const base: AIProviderId[] = ["manus", "gemini", "groq", "openai", "anthropic", "deepseek"];
   
   // Skip models with small context windows for large prompts
   const filtered = base.filter((p) => {
@@ -314,6 +317,35 @@ async function callDeepSeek(message: string, systemPrompt: string, personalKey?:
   return { provider: "deepseek", text };
 }
 
+async function callGroq(message: string, systemPrompt: string, personalKey?: string): Promise<ProviderResult> {
+  const key = personalKey?.trim() || process.env.GROQ_API_KEY?.trim();
+  if (!key) throw new Error("Groq key missing");
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+      temperature: 0.1,
+    }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`Groq call failed (${res.status}): ${errData?.error?.message ?? res.statusText}`);
+  }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("Groq empty response");
+  return { provider: "groq", text };
+}
+
 export async function generateAIReplyWithFallback(
   message: string,
   systemPrompt: string,
@@ -355,7 +387,9 @@ export async function generateAIReplyWithFallback(
             ? () => callOpenAI(message, systemPrompt, personalKey)
             : id === "anthropic"
               ? () => callAnthropic(message, systemPrompt, personalKey)
-              : () => callDeepSeek(message, systemPrompt, personalKey),
+              : id === "groq"
+                ? () => callGroq(message, systemPrompt, personalKey)
+                : () => callDeepSeek(message, systemPrompt, personalKey),
   }));
 
   if (runners.length === 0) {
