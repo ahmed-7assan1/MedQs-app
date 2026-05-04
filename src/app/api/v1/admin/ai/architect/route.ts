@@ -88,7 +88,11 @@ async function fileToText(file: File): Promise<string> {
            fullText += textLine + '\n';
            textLine = textStr;
         } else {
-           textLine += textStr; // appending tightly, AI handles spaces
+           // Add space if there's a horizontal gap
+           if (textLine && !textLine.endsWith(' ') && !textStr.startsWith(' ')) {
+             textLine += ' ';
+           }
+           textLine += textStr;
         }
         lastY = y;
       }
@@ -159,6 +163,8 @@ Hierarchy Rules:
 1. MODULES: High-level system blocks (e.g., "CNS", "Endocrine", "Research").
 2. SUBJECTS: Academic departments teaching within that module (e.g., "Anatomy", "Physiology", "Pathology").
 3. LECTURES: The specific topic titles.
+   - CRITICAL: Use the EXACT title as written in the guide. Do not rephrase, shorten, or correct spelling.
+   - If a lecture has a code (e.g., "LEC 1: Anatomy"), include the whole string.
 
 Return ONLY valid JSON matching this schema:
 {
@@ -188,9 +194,10 @@ Return ONLY valid JSON matching this schema:
 - We have encoded hyperlinked text into MarkDown (e.g. [VIDEOS](https://...), [RECORD](https://...), [POWERPOINT](https://...)).
 - For \`videoUrls\`, \`fileUrls\`, and \`recordUrls\`: If a lecture has multiple links, extract ALL of them!
 - How to categorize: 
-  1. If the markdown link text says "[RECORD]" or "[AUDIO]" OR the URL is spotify.com/soundcloud, MUST put it strictly in \`recordUrls\`.
-  2. If the markdown link text implies a video (e.g., "[VIDEOS]", "[Video]") OR the URL is YouTube/Vimeo/mp4, MUST put it in \`videoUrls\`.
-  3. Put documents, powerpoints, handouts, MCQs, or generic portal links into \`fileUrls\`.
+  1. If the markdown link text says "[RECORD]" or "[AUDIO]" OR the URL is spotify.com/soundcloud/anchor.fm, MUST put it strictly in \`recordUrls\`.
+  2. If the markdown link text implies a video (e.g., "[VIDEOS]", "[Video]", "[V]") OR the URL is YouTube/Vimeo/mp4/Drive Video, MUST put it in \`videoUrls\`.
+  3. Put documents, powerpoints, handouts, PDFs, MCQs, or generic portal links into \`fileUrls\`.
+- If you see a table of contents or a schedule table, be extremely careful to link the right URLs to the right lecture title.
 - Use empty arrays [] if none.`;
 
       const prompt = `Extract the semester structure for ${semester.name} (Year ${semester.academicYear.yearNumber}) - Faculty: ${semester.academicYear.faculty?.name || "Medicine"}.
