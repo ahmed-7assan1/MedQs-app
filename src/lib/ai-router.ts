@@ -84,7 +84,7 @@ function hasAnyAiKey(): boolean {
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek" || s === "manus") return s as AIProviderId;
   return undefined;
 }
 
@@ -343,7 +343,7 @@ export async function generateAIReplyWithFallback(
   }
 
   // If user provided a personal key, we ONLY try that specific provider and skip fallbacks
-  const order = personalKey ? [preferred] : buildProviderOrder(preferred, contextLength);
+  const order = personalKey ? [(preferred || "gemini")] : buildProviderOrder(preferred, contextLength);
   const runners: Array<{ id: string; run: () => Promise<ProviderResult> }> = order.map((id) => ({
     id,
     run:
