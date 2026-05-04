@@ -139,6 +139,8 @@ async function callGemini(
 
   const keys = getGeminiKeys(personalKey);
   if (keys.length === 0) throw new Error("No Gemini API keys configured");
+  
+  console.log(`[AI Router] Attempting Gemini with ${keys.length} keys. First key starts with: ${keys[0].substring(0, 4)}...`);
 
   const body = JSON.stringify({ contents: [{ parts }] });
   const chain = geminiModelChain();
@@ -302,10 +304,9 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
   return { provider: "deepseek", text };
 }
 
-export async function generateAIReplyWithFallback(
   message: string,
   systemPrompt: string,
-  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string; personalGeminiKey?: string }
+  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string; personalGeminiKey?: string; failFast?: boolean }
 ): Promise<ProviderResult & AIFallbackMeta> {
   if (!hasAnyAiKey()) {
     throw new AIConfigurationError(
@@ -362,6 +363,9 @@ export async function generateAIReplyWithFallback(
       };
     } catch (err) {
       console.warn(`[AI Router] Provider ${row.id} failed, trying next... Error:`, err instanceof Error ? err.message : err);
+      if (options?.failFast && row.id === preferred) {
+         throw err;
+      }
       lastError = err;
     }
   }
@@ -370,16 +374,16 @@ export async function generateAIReplyWithFallback(
   throw new Error(hint);
 }
 
-export async function generateJsonWithFallback<T>(
   prompt: string,
   fallback: T,
-  options?: { preferredProvider?: AIProviderId | string; systemPrompt?: string }
+  options?: { preferredProvider?: AIProviderId | string; systemPrompt?: string; failFast?: boolean }
 ): Promise<{ data: T } & AIFallbackMeta> {
   const systemPrompt =
     options?.systemPrompt ??
     "You are a precise assistant. Return only valid JSON matching the requested schema.";
   const out = await generateAIReplyWithFallback(prompt, systemPrompt, {
     preferredProvider: options?.preferredProvider,
+    failFast: options?.failFast,
   });
   const clean = out.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
   try {
