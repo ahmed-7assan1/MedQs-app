@@ -374,6 +374,7 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
   throw new Error(hint);
 }
 
+export async function generateJsonWithFallback<T>(
   prompt: string,
   fallback: T,
   options?: { preferredProvider?: AIProviderId | string; systemPrompt?: string; failFast?: boolean }
