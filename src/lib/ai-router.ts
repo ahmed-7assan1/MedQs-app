@@ -224,7 +224,7 @@ async function callManus(message: string, systemPrompt: string): Promise<Provide
   });
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
-    throw new Error(`MANUS call failed (${res.status}): ${errData?.error?.message ?? res.statusText}`);
+    throw new Error(`MANUS call failed (${res.status}): ${errData?.error?.message ?? errData?.message ?? res.statusText}`);
   }
   const data = await res.json();
   const text = data?.choices?.[0]?.message?.content;
@@ -251,7 +251,10 @@ async function callOpenAI(message: string, systemPrompt: string): Promise<Provid
       temperature: 0.3,
     }),
   });
-  if (!res.ok) throw new Error("OpenAI call failed");
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`OpenAI call failed (${res.status}): ${errData?.error?.message ?? res.statusText}`);
+  }
   const data = await res.json();
   const text = data?.choices?.[0]?.message?.content;
   if (!text) throw new Error("OpenAI empty response");
@@ -301,7 +304,10 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
       ],
     }),
   });
-  if (!res.ok) throw new Error("DeepSeek call failed");
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`DeepSeek call failed (${res.status}): ${errData?.error?.message ?? res.statusText}`);
+  }
   const data = await res.json();
   const text = data?.choices?.[0]?.message?.content;
   if (!text) throw new Error("DeepSeek empty response");
