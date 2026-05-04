@@ -304,6 +304,7 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
   return { provider: "deepseek", text };
 }
 
+export async function generateAIReplyWithFallback(
   message: string,
   systemPrompt: string,
   options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string; personalGeminiKey?: string; failFast?: boolean }
