@@ -2,7 +2,7 @@ import { StudentPageShell } from "@/components/layout/StudentPageShell";
 
 export const metadata = {
   title: "Privacy Policy",
-  description: "How MedQs handles your data and account information.",
+  description: "How MedOneX handles your data and account information.",
 };
 
 export default function PrivacyPage() {
@@ -10,7 +10,7 @@ export default function PrivacyPage() {
     <StudentPageShell
       eyebrow="Legal"
       title="Privacy Policy"
-      subtitle="Summary of how we treat personal data on this platform. For the full legal text, consult your institution if MedQs is deployed on their behalf."
+      subtitle="Summary of how we treat personal data on this platform. For the full legal text, consult your institution if MedOneX is deployed on their behalf."
       maxWidthClass="max-w-3xl"
     >
       <div className="prose prose-sm dark:prose-invert max-w-none space-y-6 text-muted-foreground">

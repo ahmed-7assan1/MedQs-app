@@ -466,7 +466,14 @@ export default async function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.02] pt-7">
-            <p className="text-xs text-muted-foreground">© 2026 MedOneX. Excellence in medical education.</p>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-muted-foreground">© 2026 MedOneX. Excellence in medical education.</p>
+              <div className="flex items-center gap-3 mt-1">
+                <Link href="/privacy" className="text-[10px] text-muted-foreground/60 hover:text-blue-500 transition-colors">Privacy Policy</Link>
+                <span className="text-[10px] text-muted-foreground/30">•</span>
+                <Link href="/terms" className="text-[10px] text-muted-foreground/60 hover:text-blue-500 transition-colors">Terms of Use</Link>
+              </div>
+            </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               Crafted with <Heart className="h-3.5 w-3.5 animate-pulse text-rose-500" /> for future healthcare leaders
             </div>

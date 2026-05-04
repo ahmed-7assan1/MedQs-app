@@ -80,7 +80,7 @@ function clampPct(n: number): number {
 }
 
 function safeMetadataBase(): URL | undefined {
-  const raw = process.env.NEXTAUTH_URL?.trim() || "https://med-qs0.vercel.app";
+  const raw = process.env.NEXTAUTH_URL?.trim() || "https://medonex.vercel.app";
   if (!raw) return undefined;
   try {
     return new URL(raw);
@@ -130,7 +130,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     "Elevate your medical studies with MedOneX: Curated lectures, interactive MCQs, smart spaced repetition, AI-powered study assistance, and a community of doctors and students.";
   const base = safeMetadataBase();
-  const ogImage = base ? `${base.origin}/og-image.png` : "https://med-qs0.vercel.app/og-image.png";
+  const ogImage = base ? `${base.origin}/og-image.png` : "https://medonex.vercel.app/og-image.png";
   return {
     metadataBase: base,
     title: { default: title, template: `%s | ${config.siteName}` },
@@ -240,20 +240,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               "@graph": [
                 {
                   "@type": "WebSite",
-                  "@id": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/#website`,
-                  "url": safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app",
+                  "@id": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/#website`,
+                  "url": safeMetadataBase()?.origin ?? "https://medonex.vercel.app",
                   "name": config.siteName,
                   "description": "The Ultimate Medical Education Platform",
-                  "publisher": { "@id": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/#organization` },
+                  "publisher": { "@id": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/#organization` },
                 },
                 {
                   "@type": "Organization",
-                  "@id": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/#organization`,
+                  "@id": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/#organization`,
                   "name": config.siteName,
-                  "url": safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app",
+                  "url": safeMetadataBase()?.origin ?? "https://medonex.vercel.app",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": `${safeMetadataBase()?.origin ?? "https://med-qs0.vercel.app"}/og-image.png`,
+                    "url": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/og-image.png`,
                   },
                 },
               ],

@@ -2,7 +2,7 @@ import { StudentPageShell } from "@/components/layout/StudentPageShell";
 
 export const metadata = {
   title: "Terms of Use",
-  description: "Terms and acceptable use for the MedQs platform.",
+  description: "Terms and acceptable use for the MedOneX platform.",
 };
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">Educational use</h2>
           <p>
-            MedQs is intended for learning and assessment practice. Content and AI-generated explanations may
+            MedOneX is intended for learning and assessment practice. Content and AI-generated explanations may
             contain errors; always verify critical information with official course materials and your doctors
             or faculty.
           </p>
