@@ -203,8 +203,8 @@ async function callGemini(
 
 
 /** MANUS fallback — uses DeepSeek-compatible endpoint style via OpenAI-compatible v1 */
-async function callManus(message: string, systemPrompt: string): Promise<ProviderResult> {
-  const key = process.env.MANUS_API_KEY?.trim();
+async function callManus(message: string, systemPrompt: string, personalKey?: string): Promise<ProviderResult> {
+  const key = personalKey?.trim() || process.env.MANUS_API_KEY?.trim();
   if (!key) throw new Error("MANUS key missing");
   // MANUS exposes an OpenAI-compatible endpoint
   const res = await fetch("https://api.manus.ai/v1/chat/completions", {
@@ -232,8 +232,8 @@ async function callManus(message: string, systemPrompt: string): Promise<Provide
   return { provider: "manus", text };
 }
 
-async function callOpenAI(message: string, systemPrompt: string): Promise<ProviderResult> {
-  const key = process.env.OPENAI_API_KEY;
+async function callOpenAI(message: string, systemPrompt: string, personalKey?: string): Promise<ProviderResult> {
+  const key = personalKey?.trim() || process.env.OPENAI_API_KEY;
   if (!key) throw new Error("OpenAI key missing");
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -261,8 +261,8 @@ async function callOpenAI(message: string, systemPrompt: string): Promise<Provid
   return { provider: "openai", text };
 }
 
-async function callAnthropic(message: string, systemPrompt: string): Promise<ProviderResult> {
-  const key = process.env.ANTHROPIC_API_KEY;
+async function callAnthropic(message: string, systemPrompt: string, personalKey?: string): Promise<ProviderResult> {
+  const key = personalKey?.trim() || process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("Anthropic key missing");
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -286,8 +286,8 @@ async function callAnthropic(message: string, systemPrompt: string): Promise<Pro
   return { provider: "anthropic", text };
 }
 
-async function callDeepSeek(message: string, systemPrompt: string): Promise<ProviderResult> {
-  const key = process.env.DEEPSEEK_API_KEY;
+async function callDeepSeek(message: string, systemPrompt: string, personalKey?: string): Promise<ProviderResult> {
+  const key = personalKey?.trim() || process.env.DEEPSEEK_API_KEY;
   if (!key) throw new Error("DeepSeek key missing");
   const res = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
@@ -317,9 +317,10 @@ async function callDeepSeek(message: string, systemPrompt: string): Promise<Prov
 export async function generateAIReplyWithFallback(
   message: string,
   systemPrompt: string,
-  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string; personalGeminiKey?: string; failFast?: boolean }
+  options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string; personalKey?: string; failFast?: boolean }
 ): Promise<ProviderResult & AIFallbackMeta> {
   const contextLength = (message.length + systemPrompt.length);
+  const personalKey = options?.personalKey?.trim() || undefined;
 
   if (!hasAnyAiKey()) {
     throw new AIConfigurationError(
@@ -330,15 +331,14 @@ export async function generateAIReplyWithFallback(
   const images = options?.images?.filter((i) => i.data && i.mimeType) ?? [];
   const pdfs = options?.pdfs?.filter((p) => p.data && p.mimeType === "application/pdf") ?? [];
   const preferred = normalizePreferredProvider(options?.preferredProvider);
-  const personalGeminiKey = options?.personalGeminiKey?.trim() || undefined;
-
+  
   if (images.length > 0 || pdfs.length > 0) {
-    if (!personalGeminiKey && !process.env.GEMINI_API_KEY?.trim()) {
+    if (!personalKey && !process.env.GEMINI_API_KEY?.trim()) {
       throw new AIConfigurationError(
         "Images and PDFs in chat require **GEMINI_API_KEY** on the server (multimodal). Add it in Vercel env and redeploy."
       );
     }
-    const row = await callGemini(message, systemPrompt, images, pdfs, personalGeminiKey);
+    const row = await callGemini(message, systemPrompt, images, pdfs, personalKey);
     return { ...row, provider: row.provider, triedProviders: ["gemini"] };
   }
 
@@ -347,14 +347,14 @@ export async function generateAIReplyWithFallback(
     id,
     run:
       id === "manus"
-        ? () => callManus(message, systemPrompt)
+        ? () => callManus(message, systemPrompt, preferred === "manus" ? personalKey : undefined)
         : id === "gemini"
-          ? () => callGemini(message, systemPrompt, [], [], personalGeminiKey)
+          ? () => callGemini(message, systemPrompt, [], [], preferred === "gemini" ? personalKey : undefined)
           : id === "openai"
-            ? () => callOpenAI(message, systemPrompt)
+            ? () => callOpenAI(message, systemPrompt, preferred === "openai" ? personalKey : undefined)
             : id === "anthropic"
-              ? () => callAnthropic(message, systemPrompt)
-              : () => callDeepSeek(message, systemPrompt),
+              ? () => callAnthropic(message, systemPrompt, preferred === "anthropic" ? personalKey : undefined)
+              : () => callDeepSeek(message, systemPrompt, preferred === "deepseek" ? personalKey : undefined),
   }));
 
   if (runners.length === 0) {
@@ -393,7 +393,7 @@ export async function generateAIReplyWithFallback(
 export async function generateJsonWithFallback<T>(
   prompt: string,
   fallback: T,
-  options?: { preferredProvider?: AIProviderId | string; systemPrompt?: string; failFast?: boolean }
+  options?: { preferredProvider?: AIProviderId | string; systemPrompt?: string; failFast?: boolean; personalKey?: string }
 ): Promise<{ data: T } & AIFallbackMeta> {
   const systemPrompt =
     options?.systemPrompt ??
@@ -401,6 +401,7 @@ export async function generateJsonWithFallback<T>(
   const out = await generateAIReplyWithFallback(prompt, systemPrompt, {
     preferredProvider: options?.preferredProvider,
     failFast: options?.failFast,
+    personalKey: options?.personalKey,
   });
   const clean = out.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
   try {

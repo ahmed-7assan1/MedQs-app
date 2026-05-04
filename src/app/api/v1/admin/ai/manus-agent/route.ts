@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const lectureId = String(body.lectureId || "").trim();
     const url = String(body.url || "").trim();
+    const personalKey = String(body.apiKey || "").trim();
+    const personalProvider = String(body.provider || "").trim();
 
     if (!lectureId || !url) {
       return NextResponse.json({ error: "lectureId and url are required" }, { status: 400 });
@@ -76,8 +78,9 @@ Rules:
 
     const fallback = { notesMarkdown: "", flashcards: [], questions: [] };
     const row = await generateJsonWithFallback<typeof fallback>(prompt, fallback, {
-      preferredProvider: site?.aiPreferredProvider || undefined,
+      preferredProvider: personalProvider || site?.aiPreferredProvider || undefined,
       systemPrompt: "You are the MANUS Agent. Return only JSON.",
+      personalKey: personalKey || undefined,
     });
 
     const flashcardsClean = (row.data.flashcards ?? [])

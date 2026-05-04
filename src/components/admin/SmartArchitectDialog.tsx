@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { 
   X, Zap, FileText, Loader2, Check, AlertCircle, 
   Trash2, Plus, ChevronRight, Layout, BookOpen, Layers,
-  Save, RefreshCw, Bot, Sparkles
+  Save, RefreshCw, Bot, Sparkles, Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -43,6 +43,11 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
   const [enableSmartImages, setEnableSmartImages] = useState(false);
   const [scope, setScope] = useState<"semester"|"module">("semester");
   
+  // Advanced Settings
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [customProvider, setCustomProvider] = useState("gemini");
+  const [customApiKey, setCustomApiKey] = useState("");
+  
   // MANUS Agent State
   const [agentTasks, setAgentTasks] = useState<any[]>([]);
   const [agentIndex, setAgentIndex] = useState(0);
@@ -67,6 +72,12 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
       fd.append("scope", scope);
       if (file) fd.append("file", file);
       if (textInput) fd.append("text", textInput);
+      
+      // Pass custom API details if provided
+      if (customApiKey.trim()) {
+        fd.append("apiKey", customApiKey.trim());
+        fd.append("provider", customProvider);
+      }
 
       const res = await fetch("/api/v1/admin/ai/architect", {
         method: "POST",
@@ -126,7 +137,6 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
     
     setAgentLogs(prev => [...prev, `[MANUS] Starting High-Speed Pipeline (Concurrency: ${CONCURRENCY})...`]);
 
-    // Worker function
     const worker = async () => {
       while (queue.length > 0) {
         const task = queue.shift();
@@ -142,7 +152,9 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
             body: JSON.stringify({ 
               lectureId: task.lectureId, 
               url: task.url,
-              enableSmartImages 
+              enableSmartImages,
+              apiKey: customApiKey,
+              provider: customProvider
             })
           });
           const data = await res.json();
@@ -154,13 +166,11 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
           setAgentLogs(prev => [...prev, `[ERROR] Failed to process "${task.lectureTitle}": ${e.message}`]);
         } finally {
           completedCount++;
-          // Use functional update to ensure we don't overwrite concurrent updates
           setAgentIndex(completedCount);
         }
       }
     };
 
-    // Start workers
     const workers = Array(CONCURRENCY).fill(null).map(() => worker());
     await Promise.all(workers);
     
@@ -355,17 +365,69 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                   <div className="relative flex justify-center text-xs uppercase font-black tracking-widest text-slate-600"><span className="bg-slate-900 px-4">OR PASTE TEXT</span></div>
                </div>
 
-               <textarea 
-                  placeholder="Paste schedule contents here..."
-                  className="w-full min-h-[200px] rounded-[1.5rem] bg-white/5 border border-white/[0.03] p-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-               />
+               <div className="space-y-4">
+                 <textarea 
+                    placeholder="Paste schedule contents here..."
+                    className="w-full min-h-[200px] rounded-[1.5rem] bg-white/5 border border-white/[0.03] p-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                 />
+
+                 {/* Advanced Settings Section */}
+                 <div className="space-y-3">
+                   <button 
+                     onClick={() => setShowAdvanced(!showAdvanced)}
+                     className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-blue-400 transition-colors mx-auto"
+                   >
+                     <Settings className={cn("h-3 w-3", showAdvanced && "animate-spin-slow")} />
+                     {showAdvanced ? "Hide API Settings" : "Use Custom API Key (Advanced)"}
+                   </button>
+
+                   {showAdvanced && (
+                     <div className="p-6 rounded-[2rem] bg-blue-500/5 border border-blue-500/10 space-y-4 animate-in slide-in-from-top-4 duration-300">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                           <div className="space-y-2">
+                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">AI Provider</label>
+                              <select 
+                                value={customProvider}
+                                onChange={(e) => setCustomProvider(e.target.value)}
+                                className="w-full bg-slate-800/50 border border-white/5 rounded-xl px-4 py-3 text-sm focus:ring-2 ring-blue-500/50 outline-none transition-all"
+                              >
+                                <option value="gemini">Google Gemini (Recommended)</option>
+                                <option value="openai">OpenAI (GPT-4o)</option>
+                                <option value="deepseek">DeepSeek (V3)</option>
+                                <option value="anthropic">Anthropic (Claude)</option>
+                                <option value="manus">Manus AI</option>
+                              </select>
+                           </div>
+                           <div className="space-y-2">
+                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Your API Key</label>
+                              <input 
+                                type="password"
+                                placeholder="Paste your key here..."
+                                value={customApiKey}
+                                onChange={(e) => setCustomApiKey(e.target.value)}
+                                className="w-full bg-slate-800/50 border border-white/5 rounded-xl px-4 py-3 text-sm focus:ring-2 ring-blue-500/50 outline-none transition-all font-mono"
+                              />
+                           </div>
+                        </div>
+                        <div className="flex items-start gap-2 px-1">
+                          <AlertCircle className="h-3 w-3 text-slate-500 mt-0.5" />
+                          <p className="text-[10px] text-slate-500 italic leading-relaxed">
+                            Your personal key will be used only for this session and is never stored on our servers. 
+                            If you use Gemini, you can create free keys at AI Studio.
+                          </p>
+                        </div>
+                     </div>
+                   )}
+                 </div>
+               </div>
 
                <button 
                  onClick={handleAnalyze}
-                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-bold text-lg shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all"
+                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-bold text-lg shadow-lg shadow-blue-600/20 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-3"
                >
+                 <Zap className="h-5 w-5" />
                  Analyze Curriculum
                </button>
             </div>
@@ -381,7 +443,7 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                </div>
                <div className="text-center space-y-2">
                  <p className="text-xl font-bold tracking-tight">{loadingMsg}</p>
-                 <p className="text-sm text-slate-500 animate-pulse">Consulting Gemini to map your medical modules...</p>
+                 <p className="text-sm text-slate-500 animate-pulse">Consulting the AI Architect to map your curriculum...</p>
                </div>
             </div>
           )}
@@ -422,9 +484,9 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
                                 <Layout className="h-5 w-5" />
                              </div>
                              <input 
-                               value={mod.name} 
-                               onChange={(e) => updateModuleName(mIdx, e.target.value)}
-                               className="bg-transparent text-lg font-bold focus:outline-none focus:ring-1 ring-blue-500/50 rounded px-1 flex-1" 
+                                value={mod.name} 
+                                onChange={(e) => updateModuleName(mIdx, e.target.value)}
+                                className="bg-transparent text-lg font-bold focus:outline-none focus:ring-1 ring-blue-500/50 rounded px-1 flex-1" 
                              />
                           </div>
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -636,5 +698,3 @@ export function SmartArchitectDialog({ isOpen, onClose, semester, onSuccess }: S
     </div>
   );
 }
-
-

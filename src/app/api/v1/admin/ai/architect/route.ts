@@ -109,6 +109,8 @@ export async function POST(req: NextRequest) {
     if (mode === "analyze") {
       const file = form.get("file") as File | null;
       const rawText = String(form.get("text") || "").trim();
+      const personalKey = String(form.get("apiKey") || "");
+      const personalProvider = String(form.get("provider") || "gemini");
       let text = rawText;
 
       if (file) {
@@ -173,7 +175,8 @@ ${cap}`;
       const fallback = { modules: [] };
       const row = await generateJsonWithFallback<typeof fallback>(prompt, fallback, {
         systemPrompt,
-        preferredProvider: "gemini",
+        preferredProvider: personalProvider,
+        personalKey: personalKey || undefined,
       });
 
       return NextResponse.json({ ok: true, structure: row.data });
