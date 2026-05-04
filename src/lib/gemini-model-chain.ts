@@ -28,8 +28,8 @@ export function geminiModelChain(): string[] {
    * Order: try widely-available flash first, then lite / older flash, then Pro.
    */
   const fallbacks = [
-    "gemini-2.0-flash",
     "gemini-1.5-flash",
+    "gemini-2.0-flash",
     "gemini-2.0-flash-lite",
     "gemini-1.5-flash-8b",
     "gemini-2.0-pro-exp",

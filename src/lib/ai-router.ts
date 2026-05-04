@@ -342,19 +342,20 @@ export async function generateAIReplyWithFallback(
     return { ...row, provider: row.provider, triedProviders: ["gemini"] };
   }
 
-  const order = buildProviderOrder(preferred, contextLength);
+  // If user provided a personal key, we ONLY try that specific provider and skip fallbacks
+  const order = personalKey ? [preferred] : buildProviderOrder(preferred, contextLength);
   const runners: Array<{ id: string; run: () => Promise<ProviderResult> }> = order.map((id) => ({
     id,
     run:
       id === "manus"
-        ? () => callManus(message, systemPrompt, preferred === "manus" ? personalKey : undefined)
+        ? () => callManus(message, systemPrompt, personalKey)
         : id === "gemini"
-          ? () => callGemini(message, systemPrompt, [], [], preferred === "gemini" ? personalKey : undefined)
+          ? () => callGemini(message, systemPrompt, [], [], personalKey)
           : id === "openai"
-            ? () => callOpenAI(message, systemPrompt, preferred === "openai" ? personalKey : undefined)
+            ? () => callOpenAI(message, systemPrompt, personalKey)
             : id === "anthropic"
-              ? () => callAnthropic(message, systemPrompt, preferred === "anthropic" ? personalKey : undefined)
-              : () => callDeepSeek(message, systemPrompt, preferred === "deepseek" ? personalKey : undefined),
+              ? () => callAnthropic(message, systemPrompt, personalKey)
+              : () => callDeepSeek(message, systemPrompt, personalKey),
   }));
 
   if (runners.length === 0) {
