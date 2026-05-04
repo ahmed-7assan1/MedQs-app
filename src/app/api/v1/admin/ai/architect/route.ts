@@ -173,6 +173,7 @@ ${cap}`;
       const fallback = { modules: [] };
       const row = await generateJsonWithFallback<typeof fallback>(prompt, fallback, {
         systemPrompt,
+        preferredProvider: "gemini",
       });
 
       return NextResponse.json({ ok: true, structure: row.data });

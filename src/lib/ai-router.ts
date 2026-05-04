@@ -163,6 +163,7 @@ async function callGemini(
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         const apiMsg = typeof data?.error?.message === "string" ? data.error.message : res.statusText;
+        console.error(`[AI Router] Gemini failure [${keyLabel}/${model}]: ${res.status} - ${apiMsg}`);
         lastErr = `Gemini error (${res.status}) [${keyLabel}/${model}]: ${apiMsg}`;
 
         const isQuota = res.status === 429 || /quota|limit:\s*0|free_tier|resource_exhausted/i.test(apiMsg);
@@ -360,6 +361,7 @@ export async function generateAIReplyWithFallback(
         triedProviders,
       };
     } catch (err) {
+      console.warn(`[AI Router] Provider ${row.id} failed, trying next... Error:`, err instanceof Error ? err.message : err);
       lastError = err;
     }
   }
