@@ -31,15 +31,9 @@ function isKeyFresh(key: string): boolean {
   const t = geminiQuotaExhaustedAt.get(key);
   if (!t) return true;
   const now = Date.now();
-  // Check if we've crossed a UTC midnight since exhaustion
-  const exhaustedDate = new Date(t);
-  const nowDate = new Date(now);
-  // Reset if it's been >= 24h OR if UTC day has changed
-  const dayChanged =
-    exhaustedDate.getUTCFullYear() !== nowDate.getUTCFullYear() ||
-    exhaustedDate.getUTCMonth() !== nowDate.getUTCMonth() ||
-    exhaustedDate.getUTCDate() !== nowDate.getUTCDate();
-  if (dayChanged || now - t > 24 * 60 * 60 * 1000) {
+  // Quota (429) is usually RPM (Rate Per Minute). 
+  // We reset after 65 seconds to be safe.
+  if (now - t > 65 * 1000) {
     geminiQuotaExhaustedAt.delete(key);
     return true;
   }
@@ -53,8 +47,8 @@ function getGeminiKeys(personalKey?: string): string[] {
   // Check GEMINI_API_KEY (no number suffix — backwards compat)
   const base = process.env.GEMINI_API_KEY?.trim();
   if (base) envKeys.push(base);
-  // GEMINI_API_KEY_2 through GEMINI_API_KEY_10
-  for (let i = 2; i <= 10; i++) {
+  // GEMINI_API_KEY_2 through GEMINI_API_KEY_20
+  for (let i = 2; i <= 20; i++) {
     const k = process.env[`GEMINI_API_KEY_${i}`]?.trim();
     if (k) envKeys.push(k);
   }
