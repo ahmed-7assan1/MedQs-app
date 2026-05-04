@@ -82,6 +82,14 @@ async function fileToText(file: File): Promise<string> {
         }
 
         let textStr = item.str;
+        
+        // Backup: If not a native PDF link, check for plain text URL via regex
+        if (!matchedLink) {
+           const urlRegex = /(https?:\/\/[^\s)]+)/g;
+           const match = urlRegex.exec(textStr);
+           if (match) matchedLink = match[1];
+        }
+
         if (matchedLink) textStr = `[${textStr}](${matchedLink})`;
 
         if (lastY !== -1 && Math.abs(y - lastY) > 5) {
@@ -256,28 +264,29 @@ ${cap}`;
                         if (url.includes('youtube.com') || url.includes('youtu.be') || url.endsWith('.mp4')) {
                            lec.extractedVideos.push({ url, title: "Lecture Video" });
                         } else {
-                           // Attempt to scrape
-                           let extractedAny = false;
+                           // Attempt to scrape for nested videos/content
                            try {
-                              const res = await fetch(url, { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Mozilla/5.0' } });
+                              const res = await fetch(url, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Mozilla/5.0' } });
                               if (res.ok) {
                                   const text = await res.text();
+                                  
+                                  // 1. Find Videos
                                   const ytLinks = new Set<string>();
-                                  const embedRegex = /(https?:\/\/(?:www\.)?youtube\.com\/(?:embed\/|watch\?v=)[^"'\s<>]+)/g;
-                                  let match;
-                                  while ((match = embedRegex.exec(text)) !== null) {
-                                     ytLinks.add(match[1]);
-                                  }
-                                  for (const link of ytLinks) {
-                                     lec.extractedVideos.push({ url: link, title: "Lecture Video" });
-                                     extractedAny = true;
+                                  const ytRegex = /(https?:\/\/(?:www\.)?youtube\.com\/(?:embed\/|watch\?v=)[^"'\s<>]+|https?:\/\/youtu\.be\/[a-zA-Z0-9_-]+)/g;
+                                  let m;
+                                  while ((m = ytRegex.exec(text)) !== null) ytLinks.add(m[1]);
+                                  for (const link of ytLinks) lec.extractedVideos.push({ url: link, title: "Lecture Video (Auto-Scraped)" });
+
+                                  // 2. Find Files (PDFs/PPTs)
+                                  const fileRegex = /(https?:\/\/[^"'\s<>]+\.(?:pdf|pptx?|docx?))/gi;
+                                  while ((m = fileRegex.exec(text)) !== null) {
+                                    if (!lec.fileUrls.includes(m[1])) lec.fileUrls.push(m[1]);
                                   }
                               }
                            } catch(e) {}
                            
-                           // If scraping failed, KEEP IT as a video because the AI classified it as one
-                           if (!extractedAny) {
-                              lec.extractedVideos.push({ url, title: "External Video" });
+                           if (lec.extractedVideos.length === 0) {
+                              lec.extractedVideos.push({ url, title: "External Video Portal" });
                            }
                         }
                      }
@@ -434,7 +443,11 @@ ${cap}`;
                                   mimeType: "application/pdf"
                                 }
                              });
-                             agentTasks.push({ lectureId: lecture.id, lectureTitle: lecture.title, url: fUrl });
+                           }
+                           // Queue for Manus Agent even if it existed (to ensure population)
+                           const hasContent = await tx.question.count({ where: { lectureId: lecture.id } });
+                           if (hasContent === 0) {
+                              agentTasks.push({ lectureId: lecture.id, lectureTitle: lecture.title, url: fUrl });
                            }
                         }
                      }
