@@ -428,7 +428,14 @@ export async function generateAIReplyWithFallback(
 export async function generateJsonWithFallback<T>(
   prompt: string,
   fallback: T,
-  options?: { preferredProvider?: AIProviderId | string; systemPrompt?: string; failFast?: boolean; personalKey?: string }
+  options?: { 
+    preferredProvider?: AIProviderId | string; 
+    systemPrompt?: string; 
+    failFast?: boolean; 
+    personalKey?: string;
+    images?: ChatImagePart[];
+    pdfs?: ChatPdfPart[];
+  }
 ): Promise<{ data: T } & AIFallbackMeta> {
   const systemPrompt =
     options?.systemPrompt ??
@@ -437,6 +444,8 @@ export async function generateJsonWithFallback<T>(
     preferredProvider: options?.preferredProvider,
     failFast: options?.failFast,
     personalKey: options?.personalKey,
+    images: options?.images,
+    pdfs: options?.pdfs,
   });
   const clean = out.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
   try {

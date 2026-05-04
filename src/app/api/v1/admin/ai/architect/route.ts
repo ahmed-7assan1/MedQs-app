@@ -214,10 +214,21 @@ GUIDE TEXT:
 ${cap}`;
 
       const fallback = { modules: [] };
+      
+      const pdfs = [];
+      if (file && (file.name.toLowerCase().endsWith(".pdf") || file.type === "application/pdf")) {
+         const pdfBuffer = Buffer.from(await file.arrayBuffer());
+         pdfs.push({
+            data: pdfBuffer.toString("base64"),
+            mimeType: "application/pdf"
+         });
+      }
+
       const row = await generateJsonWithFallback<typeof fallback>(prompt, fallback, {
         systemPrompt,
         preferredProvider: personalProvider,
         personalKey: personalKey || undefined,
+        pdfs: pdfs.length > 0 ? pdfs : undefined,
       });
 
       return NextResponse.json({ ok: true, structure: row.data });
