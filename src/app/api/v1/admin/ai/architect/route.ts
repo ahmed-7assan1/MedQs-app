@@ -136,6 +136,8 @@ export async function POST(req: NextRequest) {
       const rawText = String(form.get("text") || "").trim();
       const personalKey = String(form.get("apiKey") || "");
       const personalProvider = String(form.get("provider") || "gemini");
+      let text = rawText;
+
       if (file) {
         text = await fileToText(file);
       }
