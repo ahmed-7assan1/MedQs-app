@@ -24,7 +24,7 @@ async function fileToText(file: File): Promise<string> {
   
   if (name.endsWith(".pdf") || file.type === "application/pdf") {
     // Dynamic import to avoid edge runtime issues. Hidden from webpack to prevent transpile errors.
-    const pdfjsLib = await Function('return import("pdfjs-dist/legacy/build/pdf.mjs")')();
+    const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
     const data = new Uint8Array(buffer);
     const doc = await pdfjsLib.getDocument({ data }).promise;
 

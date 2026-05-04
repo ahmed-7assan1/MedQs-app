@@ -77,6 +77,7 @@ const nextConfig = {
 
   // ── Experimental ─────────────────────────────────────────────────────────────
   experimental: {
+    serverComponentsExternalPackages: ["pdfjs-dist"],
     serverActions: {
       allowedOrigins: [
         "localhost:3000",

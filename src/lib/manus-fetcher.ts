@@ -1,6 +1,6 @@
 // Dynamic import to avoid edge runtime issues. Hidden from webpack to prevent transpile errors.
 async function extractPdfText(buffer: ArrayBuffer): Promise<string> {
-  const pdfjsLib = await Function('return import("pdfjs-dist/legacy/build/pdf.mjs")')();
+  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const data = new Uint8Array(buffer);
   const doc = await pdfjsLib.getDocument({ data }).promise;
 
