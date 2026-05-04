@@ -103,14 +103,24 @@ function providerDisplayName(provider: AIProviderId): string {
   return "Gemini";
 }
 
-function buildProviderOrder(preferred?: AIProviderId): AIProviderId[] {
+function buildProviderOrder(preferred?: AIProviderId, contextLength?: number): AIProviderId[] {
   const base: AIProviderId[] = ["manus", "gemini", "openai", "anthropic", "deepseek"];
-  const withKeys = base.filter((p) => hasProviderKey(p));
   
-  if (!preferred || !withKeys.includes(preferred)) {
-    return withKeys;
+  // Skip models with small context windows for large prompts
+  const filtered = base.filter((p) => {
+    if (!hasProviderKey(p)) return false;
+    if (contextLength && contextLength > 100000) {
+      // DeepSeek (64k) and OpenAI (128k) might struggle with very large prompts
+      if (p === "deepseek" && contextLength > 50000) return false;
+      if (p === "openai" && contextLength > 120000) return false;
+    }
+    return true;
+  });
+  
+  if (!preferred || !filtered.includes(preferred)) {
+    return filtered;
   }
-  return [preferred, ...withKeys.filter((p) => p !== preferred)];
+  return [preferred, ...filtered.filter((p) => p !== preferred)];
 }
 
 async function callGemini(
@@ -303,6 +313,8 @@ export async function generateAIReplyWithFallback(
   systemPrompt: string,
   options?: { images?: ChatImagePart[]; pdfs?: ChatPdfPart[]; preferredProvider?: AIProviderId | string; personalGeminiKey?: string; failFast?: boolean }
 ): Promise<ProviderResult & AIFallbackMeta> {
+  const contextLength = (message.length + systemPrompt.length);
+
   if (!hasAnyAiKey()) {
     throw new AIConfigurationError(
       "AI is not configured on the server. In Vercel: Project → Settings → Environment Variables → add **GEMINI_API_KEY** (free key: https://aistudio.google.com/app/apikey), then redeploy. You can also set OPENAI_API_KEY, ANTHROPIC_API_KEY, or DEEPSEEK_API_KEY."
@@ -324,7 +336,7 @@ export async function generateAIReplyWithFallback(
     return { ...row, provider: row.provider, triedProviders: ["gemini"] };
   }
 
-  const order = buildProviderOrder(preferred);
+  const order = buildProviderOrder(preferred, contextLength);
   const runners: Array<{ id: string; run: () => Promise<ProviderResult> }> = order.map((id) => ({
     id,
     run:
@@ -357,16 +369,19 @@ export async function generateAIReplyWithFallback(
         triedProviders,
       };
     } catch (err) {
-      console.warn(`[AI Router] Provider ${row.id} failed, trying next... Error:`, err instanceof Error ? err.message : err);
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI Router] Provider ${row.id} failed, trying next... Error:`, msg);
       if (options?.failFast && row.id === preferred) {
          throw err;
       }
+      triedProviders[triedProviders.length - 1] = `${row.id} (FAILED: ${msg.substring(0, 60)}...)`;
       lastError = err;
     }
   }
 
   const hint = lastError instanceof Error ? lastError.message : "All configured AI providers failed";
-  throw new Error(hint);
+  const summary = `Tried: ${triedProviders.join(" -> ")}. Last Err: ${hint}`;
+  throw new Error(summary);
 }
 
 export async function generateJsonWithFallback<T>(
