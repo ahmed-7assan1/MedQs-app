@@ -9,12 +9,38 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 // ─── Telegram Bot Logic ──────────────────────────────────────────────────────
 
 bot.start((ctx) => {
-  ctx.reply(`أهلاً بك يا ${ctx.from.first_name} في MedOneX AI Assistant! 🩺🌌\n\nأنا دكتور Q، مساعدك الطبي الذكي. يمكنك سؤالي عن أي شيء يخص دراستك الطبية أو الاستفسارات الصحية العامة.`);
+  ctx.reply(`أهلاً بك يا ${ctx.from.first_name} في MedOneX AI Assistant! 🩺🌌\n\nأنا دكتور Q، مساعدك الطبي الذكي. يمكنك سؤالي عن أي شيء يخص دراستك الطبية أو الاستفسارات الصحية العامة.\n\nاستخدم /help لرؤية قائمة الأوامر المتاحة.`);
 });
 
 bot.help((ctx) => {
-  ctx.reply('أرسل لي سؤالك الطبي مباشرة، أو قم برفع صورة لتحليلها (قريباً). يمكنك أيضاً استخدام /start لبدء محادثة جديدة.');
+  ctx.reply(` قائمة الأوامر المتاحة:
+🩺 /start - بدء المحادثة والترحيب.
+❓ /help - عرض قائمة المساعدة هذه.
+🏥 /about - معلومات عن دكتور Q ومنصة MedOneX.
+🌐 /website - الانتقال إلى موقع المنصة الرسمي.
+💬 فقط أرسل سؤالك الطبي مباشرة وسأرد عليك فوراً!`);
 });
+
+bot.command('about', (ctx) => {
+  ctx.reply(`👨‍⚕️ دكتور Q (Dr. Q):
+هو رفيقك الذكي في رحلة الطب، مبرمج ومدرب على أحدث المناهج الطبية لمساعدتك في فهم الحالات الصعبة والمذاكرة بذكاء.\n\nمنصة MedOneX: هي منصتك التعليمية الشاملة لطلاب الطب.`);
+});
+
+bot.command('website', (ctx) => {
+  ctx.reply('تفضل بزيارة منصتنا لمتابعة محاضراتك وكويزاتك:\nhttps://medonex.vercel.app');
+});
+
+// Register commands in the Telegram menu automatically
+try {
+  bot.telegram.setMyCommands([
+    { command: 'start', description: 'بدء المحادثة' },
+    { command: 'help', description: 'قائمة المساعدة' },
+    { command: 'about', description: 'عن دكتور Q' },
+    { command: 'website', description: 'رابط المنصة' }
+  ]);
+} catch (e) {
+  console.error('Failed to set commands:', e);
+}
 
 // Handle text messages with AI
 bot.on('text', async (ctx) => {
