@@ -300,6 +300,11 @@ export type TeamFollower = $Result.DefaultSelection<Prisma.$TeamFollowerPayload>
  * 
  */
 export type PlatformMember = $Result.DefaultSelection<Prisma.$PlatformMemberPayload>
+/**
+ * Model BotUser
+ * 
+ */
+export type BotUser = $Result.DefaultSelection<Prisma.$BotUserPayload>
 
 /**
  * Enums
@@ -1140,6 +1145,16 @@ export class PrismaClient<
     * ```
     */
   get platformMember(): Prisma.PlatformMemberDelegate<ExtArgs>;
+
+  /**
+   * `prisma.botUser`: Exposes CRUD operations for the **BotUser** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BotUsers
+    * const botUsers = await prisma.botUser.findMany()
+    * ```
+    */
+  get botUser(): Prisma.BotUserDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1637,7 +1652,8 @@ export namespace Prisma {
     MedicalTeam: 'MedicalTeam',
     TeamMember: 'TeamMember',
     TeamFollower: 'TeamFollower',
-    PlatformMember: 'PlatformMember'
+    PlatformMember: 'PlatformMember',
+    BotUser: 'BotUser'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1653,7 +1669,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "note" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow" | "youtubeUploadTask" | "medicalTeam" | "teamMember" | "teamFollower" | "platformMember"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "note" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow" | "youtubeUploadTask" | "medicalTeam" | "teamMember" | "teamFollower" | "platformMember" | "botUser"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5644,6 +5660,76 @@ export namespace Prisma {
           count: {
             args: Prisma.PlatformMemberCountArgs<ExtArgs>
             result: $Utils.Optional<PlatformMemberCountAggregateOutputType> | number
+          }
+        }
+      }
+      BotUser: {
+        payload: Prisma.$BotUserPayload<ExtArgs>
+        fields: Prisma.BotUserFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BotUserFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BotUserFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>
+          }
+          findFirst: {
+            args: Prisma.BotUserFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BotUserFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>
+          }
+          findMany: {
+            args: Prisma.BotUserFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>[]
+          }
+          create: {
+            args: Prisma.BotUserCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>
+          }
+          createMany: {
+            args: Prisma.BotUserCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BotUserCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>[]
+          }
+          delete: {
+            args: Prisma.BotUserDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>
+          }
+          update: {
+            args: Prisma.BotUserUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>
+          }
+          deleteMany: {
+            args: Prisma.BotUserDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BotUserUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.BotUserUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotUserPayload>
+          }
+          aggregate: {
+            args: Prisma.BotUserAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBotUser>
+          }
+          groupBy: {
+            args: Prisma.BotUserGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BotUserGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BotUserCountArgs<ExtArgs>
+            result: $Utils.Optional<BotUserCountAggregateOutputType> | number
           }
         }
       }
@@ -65111,6 +65197,908 @@ export namespace Prisma {
 
 
   /**
+   * Model BotUser
+   */
+
+  export type AggregateBotUser = {
+    _count: BotUserCountAggregateOutputType | null
+    _min: BotUserMinAggregateOutputType | null
+    _max: BotUserMaxAggregateOutputType | null
+  }
+
+  export type BotUserMinAggregateOutputType = {
+    id: string | null
+    telegramId: string | null
+    personalKey: string | null
+    preferredProvider: string | null
+    customModel: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BotUserMaxAggregateOutputType = {
+    id: string | null
+    telegramId: string | null
+    personalKey: string | null
+    preferredProvider: string | null
+    customModel: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BotUserCountAggregateOutputType = {
+    id: number
+    telegramId: number
+    personalKey: number
+    preferredProvider: number
+    customModel: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BotUserMinAggregateInputType = {
+    id?: true
+    telegramId?: true
+    personalKey?: true
+    preferredProvider?: true
+    customModel?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BotUserMaxAggregateInputType = {
+    id?: true
+    telegramId?: true
+    personalKey?: true
+    preferredProvider?: true
+    customModel?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BotUserCountAggregateInputType = {
+    id?: true
+    telegramId?: true
+    personalKey?: true
+    preferredProvider?: true
+    customModel?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BotUserAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BotUser to aggregate.
+     */
+    where?: BotUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotUsers to fetch.
+     */
+    orderBy?: BotUserOrderByWithRelationInput | BotUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BotUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BotUsers
+    **/
+    _count?: true | BotUserCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BotUserMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BotUserMaxAggregateInputType
+  }
+
+  export type GetBotUserAggregateType<T extends BotUserAggregateArgs> = {
+        [P in keyof T & keyof AggregateBotUser]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBotUser[P]>
+      : GetScalarType<T[P], AggregateBotUser[P]>
+  }
+
+
+
+
+  export type BotUserGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BotUserWhereInput
+    orderBy?: BotUserOrderByWithAggregationInput | BotUserOrderByWithAggregationInput[]
+    by: BotUserScalarFieldEnum[] | BotUserScalarFieldEnum
+    having?: BotUserScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BotUserCountAggregateInputType | true
+    _min?: BotUserMinAggregateInputType
+    _max?: BotUserMaxAggregateInputType
+  }
+
+  export type BotUserGroupByOutputType = {
+    id: string
+    telegramId: string
+    personalKey: string | null
+    preferredProvider: string | null
+    customModel: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: BotUserCountAggregateOutputType | null
+    _min: BotUserMinAggregateOutputType | null
+    _max: BotUserMaxAggregateOutputType | null
+  }
+
+  type GetBotUserGroupByPayload<T extends BotUserGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BotUserGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BotUserGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BotUserGroupByOutputType[P]>
+            : GetScalarType<T[P], BotUserGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BotUserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    telegramId?: boolean
+    personalKey?: boolean
+    preferredProvider?: boolean
+    customModel?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["botUser"]>
+
+  export type BotUserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    telegramId?: boolean
+    personalKey?: boolean
+    preferredProvider?: boolean
+    customModel?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["botUser"]>
+
+  export type BotUserSelectScalar = {
+    id?: boolean
+    telegramId?: boolean
+    personalKey?: boolean
+    preferredProvider?: boolean
+    customModel?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+
+  export type $BotUserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BotUser"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      telegramId: string
+      personalKey: string | null
+      preferredProvider: string | null
+      customModel: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["botUser"]>
+    composites: {}
+  }
+
+  type BotUserGetPayload<S extends boolean | null | undefined | BotUserDefaultArgs> = $Result.GetResult<Prisma.$BotUserPayload, S>
+
+  type BotUserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<BotUserFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: BotUserCountAggregateInputType | true
+    }
+
+  export interface BotUserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BotUser'], meta: { name: 'BotUser' } }
+    /**
+     * Find zero or one BotUser that matches the filter.
+     * @param {BotUserFindUniqueArgs} args - Arguments to find a BotUser
+     * @example
+     * // Get one BotUser
+     * const botUser = await prisma.botUser.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BotUserFindUniqueArgs>(args: SelectSubset<T, BotUserFindUniqueArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one BotUser that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {BotUserFindUniqueOrThrowArgs} args - Arguments to find a BotUser
+     * @example
+     * // Get one BotUser
+     * const botUser = await prisma.botUser.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BotUserFindUniqueOrThrowArgs>(args: SelectSubset<T, BotUserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first BotUser that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotUserFindFirstArgs} args - Arguments to find a BotUser
+     * @example
+     * // Get one BotUser
+     * const botUser = await prisma.botUser.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BotUserFindFirstArgs>(args?: SelectSubset<T, BotUserFindFirstArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first BotUser that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotUserFindFirstOrThrowArgs} args - Arguments to find a BotUser
+     * @example
+     * // Get one BotUser
+     * const botUser = await prisma.botUser.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BotUserFindFirstOrThrowArgs>(args?: SelectSubset<T, BotUserFindFirstOrThrowArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more BotUsers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotUserFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BotUsers
+     * const botUsers = await prisma.botUser.findMany()
+     * 
+     * // Get first 10 BotUsers
+     * const botUsers = await prisma.botUser.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const botUserWithIdOnly = await prisma.botUser.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BotUserFindManyArgs>(args?: SelectSubset<T, BotUserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a BotUser.
+     * @param {BotUserCreateArgs} args - Arguments to create a BotUser.
+     * @example
+     * // Create one BotUser
+     * const BotUser = await prisma.botUser.create({
+     *   data: {
+     *     // ... data to create a BotUser
+     *   }
+     * })
+     * 
+     */
+    create<T extends BotUserCreateArgs>(args: SelectSubset<T, BotUserCreateArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many BotUsers.
+     * @param {BotUserCreateManyArgs} args - Arguments to create many BotUsers.
+     * @example
+     * // Create many BotUsers
+     * const botUser = await prisma.botUser.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BotUserCreateManyArgs>(args?: SelectSubset<T, BotUserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BotUsers and returns the data saved in the database.
+     * @param {BotUserCreateManyAndReturnArgs} args - Arguments to create many BotUsers.
+     * @example
+     * // Create many BotUsers
+     * const botUser = await prisma.botUser.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BotUsers and only return the `id`
+     * const botUserWithIdOnly = await prisma.botUser.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BotUserCreateManyAndReturnArgs>(args?: SelectSubset<T, BotUserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a BotUser.
+     * @param {BotUserDeleteArgs} args - Arguments to delete one BotUser.
+     * @example
+     * // Delete one BotUser
+     * const BotUser = await prisma.botUser.delete({
+     *   where: {
+     *     // ... filter to delete one BotUser
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BotUserDeleteArgs>(args: SelectSubset<T, BotUserDeleteArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one BotUser.
+     * @param {BotUserUpdateArgs} args - Arguments to update one BotUser.
+     * @example
+     * // Update one BotUser
+     * const botUser = await prisma.botUser.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BotUserUpdateArgs>(args: SelectSubset<T, BotUserUpdateArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more BotUsers.
+     * @param {BotUserDeleteManyArgs} args - Arguments to filter BotUsers to delete.
+     * @example
+     * // Delete a few BotUsers
+     * const { count } = await prisma.botUser.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BotUserDeleteManyArgs>(args?: SelectSubset<T, BotUserDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BotUsers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotUserUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BotUsers
+     * const botUser = await prisma.botUser.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BotUserUpdateManyArgs>(args: SelectSubset<T, BotUserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one BotUser.
+     * @param {BotUserUpsertArgs} args - Arguments to update or create a BotUser.
+     * @example
+     * // Update or create a BotUser
+     * const botUser = await prisma.botUser.upsert({
+     *   create: {
+     *     // ... data to create a BotUser
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BotUser we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BotUserUpsertArgs>(args: SelectSubset<T, BotUserUpsertArgs<ExtArgs>>): Prisma__BotUserClient<$Result.GetResult<Prisma.$BotUserPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of BotUsers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotUserCountArgs} args - Arguments to filter BotUsers to count.
+     * @example
+     * // Count the number of BotUsers
+     * const count = await prisma.botUser.count({
+     *   where: {
+     *     // ... the filter for the BotUsers we want to count
+     *   }
+     * })
+    **/
+    count<T extends BotUserCountArgs>(
+      args?: Subset<T, BotUserCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BotUserCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BotUser.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotUserAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BotUserAggregateArgs>(args: Subset<T, BotUserAggregateArgs>): Prisma.PrismaPromise<GetBotUserAggregateType<T>>
+
+    /**
+     * Group by BotUser.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotUserGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BotUserGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BotUserGroupByArgs['orderBy'] }
+        : { orderBy?: BotUserGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BotUserGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBotUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BotUser model
+   */
+  readonly fields: BotUserFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BotUser.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BotUserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BotUser model
+   */ 
+  interface BotUserFieldRefs {
+    readonly id: FieldRef<"BotUser", 'String'>
+    readonly telegramId: FieldRef<"BotUser", 'String'>
+    readonly personalKey: FieldRef<"BotUser", 'String'>
+    readonly preferredProvider: FieldRef<"BotUser", 'String'>
+    readonly customModel: FieldRef<"BotUser", 'String'>
+    readonly createdAt: FieldRef<"BotUser", 'DateTime'>
+    readonly updatedAt: FieldRef<"BotUser", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BotUser findUnique
+   */
+  export type BotUserFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * Filter, which BotUser to fetch.
+     */
+    where: BotUserWhereUniqueInput
+  }
+
+  /**
+   * BotUser findUniqueOrThrow
+   */
+  export type BotUserFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * Filter, which BotUser to fetch.
+     */
+    where: BotUserWhereUniqueInput
+  }
+
+  /**
+   * BotUser findFirst
+   */
+  export type BotUserFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * Filter, which BotUser to fetch.
+     */
+    where?: BotUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotUsers to fetch.
+     */
+    orderBy?: BotUserOrderByWithRelationInput | BotUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BotUsers.
+     */
+    cursor?: BotUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BotUsers.
+     */
+    distinct?: BotUserScalarFieldEnum | BotUserScalarFieldEnum[]
+  }
+
+  /**
+   * BotUser findFirstOrThrow
+   */
+  export type BotUserFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * Filter, which BotUser to fetch.
+     */
+    where?: BotUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotUsers to fetch.
+     */
+    orderBy?: BotUserOrderByWithRelationInput | BotUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BotUsers.
+     */
+    cursor?: BotUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BotUsers.
+     */
+    distinct?: BotUserScalarFieldEnum | BotUserScalarFieldEnum[]
+  }
+
+  /**
+   * BotUser findMany
+   */
+  export type BotUserFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * Filter, which BotUsers to fetch.
+     */
+    where?: BotUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotUsers to fetch.
+     */
+    orderBy?: BotUserOrderByWithRelationInput | BotUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BotUsers.
+     */
+    cursor?: BotUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotUsers.
+     */
+    skip?: number
+    distinct?: BotUserScalarFieldEnum | BotUserScalarFieldEnum[]
+  }
+
+  /**
+   * BotUser create
+   */
+  export type BotUserCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * The data needed to create a BotUser.
+     */
+    data: XOR<BotUserCreateInput, BotUserUncheckedCreateInput>
+  }
+
+  /**
+   * BotUser createMany
+   */
+  export type BotUserCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BotUsers.
+     */
+    data: BotUserCreateManyInput | BotUserCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BotUser createManyAndReturn
+   */
+  export type BotUserCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many BotUsers.
+     */
+    data: BotUserCreateManyInput | BotUserCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BotUser update
+   */
+  export type BotUserUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * The data needed to update a BotUser.
+     */
+    data: XOR<BotUserUpdateInput, BotUserUncheckedUpdateInput>
+    /**
+     * Choose, which BotUser to update.
+     */
+    where: BotUserWhereUniqueInput
+  }
+
+  /**
+   * BotUser updateMany
+   */
+  export type BotUserUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BotUsers.
+     */
+    data: XOR<BotUserUpdateManyMutationInput, BotUserUncheckedUpdateManyInput>
+    /**
+     * Filter which BotUsers to update
+     */
+    where?: BotUserWhereInput
+  }
+
+  /**
+   * BotUser upsert
+   */
+  export type BotUserUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * The filter to search for the BotUser to update in case it exists.
+     */
+    where: BotUserWhereUniqueInput
+    /**
+     * In case the BotUser found by the `where` argument doesn't exist, create a new BotUser with this data.
+     */
+    create: XOR<BotUserCreateInput, BotUserUncheckedCreateInput>
+    /**
+     * In case the BotUser was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BotUserUpdateInput, BotUserUncheckedUpdateInput>
+  }
+
+  /**
+   * BotUser delete
+   */
+  export type BotUserDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+    /**
+     * Filter which BotUser to delete.
+     */
+    where: BotUserWhereUniqueInput
+  }
+
+  /**
+   * BotUser deleteMany
+   */
+  export type BotUserDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BotUsers to delete
+     */
+    where?: BotUserWhereInput
+  }
+
+  /**
+   * BotUser without action
+   */
+  export type BotUserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotUser
+     */
+    select?: BotUserSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -65899,6 +66887,19 @@ export namespace Prisma {
   };
 
   export type PlatformMemberScalarFieldEnum = (typeof PlatformMemberScalarFieldEnum)[keyof typeof PlatformMemberScalarFieldEnum]
+
+
+  export const BotUserScalarFieldEnum: {
+    id: 'id',
+    telegramId: 'telegramId',
+    personalKey: 'personalKey',
+    preferredProvider: 'preferredProvider',
+    customModel: 'customModel',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BotUserScalarFieldEnum = (typeof BotUserScalarFieldEnum)[keyof typeof BotUserScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -70485,6 +71486,68 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"PlatformMember"> | Date | string
   }
 
+  export type BotUserWhereInput = {
+    AND?: BotUserWhereInput | BotUserWhereInput[]
+    OR?: BotUserWhereInput[]
+    NOT?: BotUserWhereInput | BotUserWhereInput[]
+    id?: StringFilter<"BotUser"> | string
+    telegramId?: StringFilter<"BotUser"> | string
+    personalKey?: StringNullableFilter<"BotUser"> | string | null
+    preferredProvider?: StringNullableFilter<"BotUser"> | string | null
+    customModel?: StringNullableFilter<"BotUser"> | string | null
+    createdAt?: DateTimeFilter<"BotUser"> | Date | string
+    updatedAt?: DateTimeFilter<"BotUser"> | Date | string
+  }
+
+  export type BotUserOrderByWithRelationInput = {
+    id?: SortOrder
+    telegramId?: SortOrder
+    personalKey?: SortOrderInput | SortOrder
+    preferredProvider?: SortOrderInput | SortOrder
+    customModel?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BotUserWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    telegramId?: string
+    AND?: BotUserWhereInput | BotUserWhereInput[]
+    OR?: BotUserWhereInput[]
+    NOT?: BotUserWhereInput | BotUserWhereInput[]
+    personalKey?: StringNullableFilter<"BotUser"> | string | null
+    preferredProvider?: StringNullableFilter<"BotUser"> | string | null
+    customModel?: StringNullableFilter<"BotUser"> | string | null
+    createdAt?: DateTimeFilter<"BotUser"> | Date | string
+    updatedAt?: DateTimeFilter<"BotUser"> | Date | string
+  }, "id" | "telegramId">
+
+  export type BotUserOrderByWithAggregationInput = {
+    id?: SortOrder
+    telegramId?: SortOrder
+    personalKey?: SortOrderInput | SortOrder
+    preferredProvider?: SortOrderInput | SortOrder
+    customModel?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BotUserCountOrderByAggregateInput
+    _max?: BotUserMaxOrderByAggregateInput
+    _min?: BotUserMinOrderByAggregateInput
+  }
+
+  export type BotUserScalarWhereWithAggregatesInput = {
+    AND?: BotUserScalarWhereWithAggregatesInput | BotUserScalarWhereWithAggregatesInput[]
+    OR?: BotUserScalarWhereWithAggregatesInput[]
+    NOT?: BotUserScalarWhereWithAggregatesInput | BotUserScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BotUser"> | string
+    telegramId?: StringWithAggregatesFilter<"BotUser"> | string
+    personalKey?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
+    preferredProvider?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
+    customModel?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"BotUser"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BotUser"> | Date | string
+  }
+
   export type SiteConfigCreateInput = {
     id?: string
     siteName?: string
@@ -74997,6 +76060,76 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BotUserCreateInput = {
+    id?: string
+    telegramId: string
+    personalKey?: string | null
+    preferredProvider?: string | null
+    customModel?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BotUserUncheckedCreateInput = {
+    id?: string
+    telegramId: string
+    personalKey?: string | null
+    preferredProvider?: string | null
+    customModel?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BotUserUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BotUserUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BotUserCreateManyInput = {
+    id?: string
+    telegramId: string
+    personalKey?: string | null
+    preferredProvider?: string | null
+    customModel?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BotUserUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BotUserUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -78146,6 +79279,36 @@ export namespace Prisma {
 
   export type PlatformMemberSumOrderByAggregateInput = {
     sortOrder?: SortOrder
+  }
+
+  export type BotUserCountOrderByAggregateInput = {
+    id?: SortOrder
+    telegramId?: SortOrder
+    personalKey?: SortOrder
+    preferredProvider?: SortOrder
+    customModel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BotUserMaxOrderByAggregateInput = {
+    id?: SortOrder
+    telegramId?: SortOrder
+    personalKey?: SortOrder
+    preferredProvider?: SortOrder
+    customModel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BotUserMinOrderByAggregateInput = {
+    id?: SortOrder
+    telegramId?: SortOrder
+    personalKey?: SortOrder
+    preferredProvider?: SortOrder
+    customModel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -105277,6 +106440,10 @@ export namespace Prisma {
      * @deprecated Use PlatformMemberDefaultArgs instead
      */
     export type PlatformMemberArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PlatformMemberDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use BotUserDefaultArgs instead
+     */
+    export type BotUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BotUserDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

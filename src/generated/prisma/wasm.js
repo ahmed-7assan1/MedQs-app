@@ -728,6 +728,16 @@ exports.Prisma.PlatformMemberScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.BotUserScalarFieldEnum = {
+  id: 'id',
+  telegramId: 'telegramId',
+  personalKey: 'personalKey',
+  preferredProvider: 'preferredProvider',
+  customModel: 'customModel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -879,7 +889,8 @@ exports.Prisma.ModelName = {
   MedicalTeam: 'MedicalTeam',
   TeamMember: 'TeamMember',
   TeamFollower: 'TeamFollower',
-  PlatformMember: 'PlatformMember'
+  PlatformMember: 'PlatformMember',
+  BotUser: 'BotUser'
 };
 
 /**
