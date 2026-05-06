@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string; // for generated images
+  type?: "text" | "image"; // message type
 }
 
 export interface Thread {
@@ -15,32 +17,131 @@ export interface Thread {
   messages: ChatMessage[];
 }
 
-const THREADS_KEY = "medqs-dr-q-threads-v1";
+// ─── All Puter-available models ─────────────────────────────────────────────
+export interface PuterModel {
+  id: string;
+  label: string;
+  provider: string;
+  icon: string;
+  badge?: string;
+}
 
+export const PUTER_MODELS: PuterModel[] = [
+  // OpenAI
+  { id: "gpt-4o",            label: "GPT-4o",          provider: "OpenAI",    icon: "🟢", badge: "Latest" },
+  { id: "gpt-4o-mini",       label: "GPT-4o Mini",     provider: "OpenAI",    icon: "🟢" },
+  { id: "o1",                label: "o1",               provider: "OpenAI",    icon: "🟢", badge: "Reasoning" },
+  { id: "o1-mini",           label: "o1 Mini",          provider: "OpenAI",    icon: "🟢" },
+  { id: "o3-mini",           label: "o3 Mini",          provider: "OpenAI",    icon: "🟢", badge: "Reasoning" },
+  { id: "o4-mini",           label: "o4 Mini",          provider: "OpenAI",    icon: "🟢", badge: "New" },
+  // Anthropic
+  { id: "claude-3-7-sonnet-20250219", label: "Claude 3.7 Sonnet", provider: "Anthropic", icon: "🟠", badge: "Thinking" },
+  { id: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet", provider: "Anthropic", icon: "🟠" },
+  { id: "claude-3-haiku-20240307",    label: "Claude 3 Haiku",    provider: "Anthropic", icon: "🟠", badge: "Fast" },
+  // Google
+  { id: "gemini-2.5-pro-exp-03-25",   label: "Gemini 2.5 Pro",    provider: "Google",    icon: "🔵", badge: "Best" },
+  { id: "gemini-2.0-flash",           label: "Gemini 2.0 Flash",  provider: "Google",    icon: "🔵", badge: "Fast" },
+  { id: "gemini-1.5-pro",             label: "Gemini 1.5 Pro",    provider: "Google",    icon: "🔵" },
+  // Meta
+  { id: "meta-llama/llama-3.3-70b-instruct:free", label: "Llama 3.3 70B",    provider: "Meta", icon: "⚫" },
+  { id: "meta-llama/llama-4-maverick:free",        label: "Llama 4 Maverick", provider: "Meta", icon: "⚫", badge: "New" },
+  // DeepSeek
+  { id: "deepseek/deepseek-r1:free",  label: "DeepSeek R1",       provider: "DeepSeek",  icon: "🟣", badge: "Reasoning" },
+  { id: "deepseek/deepseek-chat-v3-0324:free", label: "DeepSeek V3", provider: "DeepSeek", icon: "🟣" },
+  // Mistral
+  { id: "mistralai/mistral-small-3.1-24b-instruct:free", label: "Mistral Small 3.1", provider: "Mistral", icon: "🔴" },
+  // Qwen
+  { id: "qwen/qwq-32b:free",          label: "QwQ 32B",            provider: "Qwen",      icon: "🟡", badge: "Reasoning" },
+  { id: "qwen/qwen2.5-vl-72b-instruct:free", label: "Qwen 2.5 VL", provider: "Qwen",     icon: "🟡" },
+  // xAI
+  { id: "x-ai/grok-2-vision-1212",    label: "Grok 2 Vision",     provider: "xAI",       icon: "🔲" },
+  { id: "x-ai/grok-3-mini-beta",      label: "Grok 3 Mini",       provider: "xAI",       icon: "🔲", badge: "New" },
+  // Groq (Added)
+  { id: "groq:llama-3.3-70b-versatile", label: "Groq: Llama 3.3 70B", provider: "Groq", icon: "⚡", badge: "Super Fast" },
+  { id: "groq:llama-3.1-70b-versatile", label: "Groq: Llama 3.1 70B", provider: "Groq", icon: "⚡" },
+  { id: "groq:mixtral-8x7b-32768",      label: "Groq: Mixtral 8x7B", provider: "Groq", icon: "⚡" },
+  { id: "groq:deepseek-r1-distill-llama-70b", label: "Groq: DeepSeek R1", provider: "Groq", icon: "🟣", badge: "Reasoning" },
+];
+
+export const PUTER_AGENTS = [
+  { name: "Dr. Q Coach",    subtitle: "Full Medical Tutor",  icon: "🧠", gradClass: "grad-1",
+    desc: "Your all-in-one medical tutor — explains, quizzes, and summarizes any topic.",
+    systemPrompt: "You are Dr. Q, an expert medical AI tutor helping Egyptian medical students. You explain complex medical topics clearly in the student's preferred language (Arabic or English), give clinical pearls, and adapt your depth to their level." },
+  { name: "Quiz Master",    subtitle: "MCQ Practice",         icon: "🎯", gradClass: "grad-2",
+    desc: "Focused MCQ practice with instant explanation and feedback after every answer.",
+    systemPrompt: "You are Quiz Master, an AI focused exclusively on medical MCQ practice. Generate challenging multiple-choice questions, evaluate the student's answers, explain why each option is right or wrong, and track weak areas." },
+  { name: "Flash Coach",    subtitle: "Anki Flashcards",      icon: "⚡", gradClass: "grad-3",
+    desc: "Auto-generates Anki-style flashcards from any lecture or topic.",
+    systemPrompt: "You are Flash Coach, an AI specialized in creating high-yield Anki-style flashcards for medical students. When given a topic or lecture content, produce concise Question → Answer pairs. Format as: **Q:** ... **A:** ..." },
+  { name: "Case Solver",    subtitle: "Clinical Cases",       icon: "🩺", gradClass: "grad-4",
+    desc: "Works through clinical scenarios step by step, just like real exam cases.",
+    systemPrompt: "You are Case Solver, a clinical reasoning AI. Present and work through clinical cases step by step: History → Examination → Investigations → Diagnosis → Management. Guide the student Socratically, asking questions before revealing answers." },
+  { name: "Summarizer",     subtitle: "Smart Notes",          icon: "📋", gradClass: "grad-1",
+    desc: "Condenses any lecture or topic into structured, high-yield summary notes.",
+    systemPrompt: "You are Summarizer, specialized in creating concise, structured medical notes. Use bullet points, bold key terms, and organize by: Definition → Etiology → Pathophysiology → Clinical Features → Investigations → Treatment → Complications." },
+  { name: "Image Analyst",  subtitle: "Medical Images",       icon: "🔬", gradClass: "grad-2",
+    desc: "Analyzes medical images, diagrams, and explains radiological findings.",
+    systemPrompt: "You are Image Analyst, an AI specialized in interpreting medical images and diagrams. Describe findings systematically, provide differential diagnoses, and explain the pathological basis of visible changes." },
+];
+
+const THREADS_KEY = "medqs-dr-q-threads-v2";
+
+// ─── Helper: call Puter.js AI (client-side only) ─────────────────────────────
+async function callPuterAI(
+  model: string,
+  messages: Array<{ role: string; content: string }>,
+  stream: boolean = false
+): Promise<string> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const puter = (window as any).puter;
+  if (!puter?.ai?.chat) throw new Error("Puter.js not loaded");
+
+  if (stream) {
+    const response = await puter.ai.chat(messages, { model, stream: true });
+    let full = "";
+    for await (const part of response) {
+      full += part?.text ?? "";
+    }
+    return full;
+  } else {
+    const response = await puter.ai.chat(messages, { model });
+    return typeof response === "string" ? response : (response?.message?.content?.[0]?.text ?? response?.message?.content ?? String(response));
+  }
+}
+
+// ─── Helper: generate image via Puter.js ─────────────────────────────────────
+async function callPuterImage(prompt: string): Promise<string> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const puter = (window as any).puter;
+  if (!puter?.ai?.txt2img) throw new Error("Puter.js not loaded");
+  const img = await puter.ai.txt2img(prompt);
+  // img is an <img> DOM element — get its src
+  return img?.src ?? "";
+}
+
+// ─── Main hook ────────────────────────────────────────────────────────────────
 export function useAIChat() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Load threads
+  // ─ Load threads from localStorage on mount
   useEffect(() => {
-    const raw = localStorage.getItem(THREADS_KEY);
-    if (raw) {
-      try {
+    try {
+      const raw = localStorage.getItem(THREADS_KEY);
+      if (raw) {
         const parsed = JSON.parse(raw);
         setThreads(parsed);
         if (parsed.length > 0) {
           setActiveThreadId(parsed[0].id);
           setMessages(parsed[0].messages);
         }
-      } catch (e) {
-        console.error("Failed to load threads", e);
       }
-    }
+    } catch { }
   }, []);
 
-  // Save threads
+  // ─ Persist threads
   useEffect(() => {
     if (threads.length > 0) {
       localStorage.setItem(THREADS_KEY, JSON.stringify(threads));
@@ -61,57 +162,175 @@ export function useAIChat() {
     setMessages([]);
   }, []);
 
+  // ─ Customization
+  const [bgImage, setBgImageState] = useState<string | null>(null);
+  const [userBubbleColor, setUserBubbleColorState] = useState<string>("grad-1");
+  const [puterModel, setPuterModelState] = useState<string>("gpt-4o");
+  const [bgBlur, setBgBlurState] = useState<number>(20);
+  const [bgOpacity, setBgOpacityState] = useState<number>(10);
+  const [activeMode, setActiveMode] = useState<string>("Ask");
+  const [activeAgent, setActiveAgent] = useState(PUTER_AGENTS[0]);
+
+  useEffect(() => {
+    try {
+      const bg = localStorage.getItem("medqs-chat-bg");
+      if (bg !== null) setBgImageState(bg);
+      const col = localStorage.getItem("medqs-chat-color");
+      if (col !== null) setUserBubbleColorState(col);
+      const model = localStorage.getItem("medqs-chat-model");
+      if (model !== null) setPuterModelState(model);
+      const blur = localStorage.getItem("medqs-chat-blur");
+      if (blur !== null) setBgBlurState(Number(blur));
+      const op = localStorage.getItem("medqs-chat-opacity");
+      if (op !== null) setBgOpacityState(Number(op));
+      const agentIdx = localStorage.getItem("medqs-chat-agent-idx");
+      if (agentIdx !== null) setActiveAgent(PUTER_AGENTS[Number(agentIdx)] ?? PUTER_AGENTS[0]);
+    } catch { }
+  }, []);
+
+  const setBgBlur = (val: number) => {
+    setBgBlurState(val);
+    localStorage.setItem("medqs-chat-blur", String(val));
+  };
+  const setBgOpacity = (val: number) => {
+    setBgOpacityState(val);
+    localStorage.setItem("medqs-chat-opacity", String(val));
+  };
+
+  const setBgImage = (url: string | null) => {
+    setBgImageState(url);
+    if (url) localStorage.setItem("medqs-chat-bg", url);
+    else localStorage.removeItem("medqs-chat-bg");
+  };
+  const setUserBubbleColor = (col: string) => {
+    setUserBubbleColorState(col);
+    localStorage.setItem("medqs-chat-color", col);
+  };
+  const setPuterModel = (mod: string) => {
+    setPuterModelState(mod);
+    localStorage.setItem("medqs-chat-model", mod);
+  };
+  const handleSetAgent = (agent: typeof PUTER_AGENTS[0]) => {
+    setActiveAgent(agent);
+    const idx = PUTER_AGENTS.findIndex(a => a.name === agent.name);
+    localStorage.setItem("medqs-chat-agent-idx", String(idx));
+  };
+
+  // ─── Send a TEXT message via Puter.js ────────────────────────────────────
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || loading) return;
 
-    const userMessage: ChatMessage = { role: "user", content };
+    const userMessage: ChatMessage = { role: "user", content, type: "text" };
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
     setLoading(true);
 
     try {
+      const history = nextMessages
+        .filter(m => m.type !== "image")
+        .map(m => ({ role: m.role, content: m.content }));
+
       const res = await fetch("/api/v1/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content, conversationHistory: messages }),
+        body: JSON.stringify({
+          message: content,
+          conversationHistory: history,
+          preferredProvider: puterModel.includes(":") ? puterModel.split(":")[0] : "puter",
+          puterModel: puterModel.includes(":") ? puterModel.split(":")[1] : puterModel,
+          specializedModel: activeAgent.name === "Quiz Master" ? "medical-quiz" : undefined
+        }),
       });
-      const data = await res.json();
-      
-      if (res.ok) {
-        const aiMessage: ChatMessage = { role: "assistant", content: data.reply };
-        const finalMessages = [...nextMessages, aiMessage];
-        setMessages(finalMessages);
 
-        // Update thread title if first message
-        setThreads((prev) => 
-          prev.map((t) => 
-            t.id === activeThreadId 
-              ? { 
-                  ...t, 
-                  messages: finalMessages, 
-                  updatedAt: Date.now(),
-                  title: t.title === "New topic" ? content.slice(0, 40) : t.title 
-                } 
-              : t
-          )
-        );
-      } else {
-        toast.error(data.error || "Failed to get response");
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to get AI reply");
       }
-    } catch (e) {
-      toast.error("Network error");
+
+      const data = await res.json();
+      const reply = data.reply;
+
+      const aiMessage: ChatMessage = { role: "assistant", content: reply, type: "text" };
+      const finalMessages = [...nextMessages, aiMessage];
+      setMessages(finalMessages);
+
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === activeThreadId
+            ? { ...t, messages: finalMessages, updatedAt: Date.now(), title: t.title === "New topic" ? content.slice(0, 40) : t.title }
+            : t
+        )
+      );
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e.message : String(e);
+      toast.error(`Puter AI Error: ${err}`);
+      // Remove the user message on failure
+      setMessages(messages);
+    } finally {
+      setLoading(false);
+    }
+  }, [messages, loading, activeThreadId, puterModel, activeAgent]);
+
+  // ─── Generate IMAGE via Puter.js ─────────────────────────────────────────
+  const generateImage = useCallback(async (prompt: string) => {
+    if (!prompt.trim() || loading) return;
+
+    const userMessage: ChatMessage = { role: "user", content: `🖼️ Generate image: ${prompt}`, type: "text" };
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
+    setLoading(true);
+
+    try {
+      const imageUrl = await callPuterImage(prompt);
+      const aiMessage: ChatMessage = {
+        role: "assistant",
+        content: `Here is the generated image for: **${prompt}**`,
+        imageUrl,
+        type: "image"
+      };
+      const finalMessages = [...nextMessages, aiMessage];
+      setMessages(finalMessages);
+
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === activeThreadId
+            ? { ...t, messages: finalMessages, updatedAt: Date.now(), title: t.title === "New topic" ? `Image: ${prompt}`.slice(0, 40) : t.title }
+            : t
+        )
+      );
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e.message : String(e);
+      toast.error(`Image generation failed: ${err}`);
+      setMessages(messages);
     } finally {
       setLoading(false);
     }
   }, [messages, loading, activeThreadId]);
 
+  // ─── Text-to-Speech via Puter.js ─────────────────────────────────────────
+  const speakText = useCallback(async (text: string) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const puter = (window as any).puter;
+      if (!puter?.ai?.txt2speech) { toast.error("Speech not available"); return; }
+      const audio = await puter.ai.txt2speech(text);
+      audio.play();
+    } catch (e: unknown) {
+      toast.error("TTS Error: " + (e instanceof Error ? e.message : String(e)));
+    }
+  }, []);
+
   return {
-    threads,
-    activeThreadId,
-    messages,
-    loading,
-    sendMessage,
-    selectThread,
-    newTopic
+    threads, activeThreadId, messages, loading,
+    sendMessage, generateImage, speakText,
+    selectThread, newTopic,
+    bgImage, setBgImage,
+    userBubbleColor, setUserBubbleColor,
+    puterModel, setPuterModel,
+    bgBlur, setBgBlur,
+    bgOpacity, setBgOpacity,
+    activeMode, setActiveMode,
+    activeAgent, setActiveAgent: handleSetAgent,
+    PUTER_AGENTS, PUTER_MODELS,
   };
 }

@@ -95,6 +95,10 @@ export const mobileApi = {
   // Home Dashboard
   getHome: () => api.get<any>('/home'),
 
+  // Bootstrap (Batched Startup)
+  getBootstrap: (universityId?: string) => 
+    api.get<{ config: any; user: any; home: any }>(`/bootstrap${universityId ? `?universityId=${universityId}` : ''}`),
+
   // User
   getUserStats: () => api.get<any>('/users/stats'),
   updateProfile: (data: Partial<{ name: string; nickname: string; bio: string; image: string; theme: string; handle: string }>) =>
@@ -237,7 +241,7 @@ export const mobileApi = {
   },
 
   // AI Study Assistant Chat (uses v1/mobile base path with Bearer token)
-  sendAiMessage: async (messages: { role: string; content: string }[]) => {
+  sendAiMessage: async (messages: { role: string; content: string }[], puterModel?: string) => {
     const { getItemAsync } = await import('expo-secure-store');
     const token = await getItemAsync('sessionToken').catch(() => null);
     const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
@@ -253,6 +257,7 @@ export const mobileApi = {
       body: JSON.stringify({
         message: last?.content || '',
         conversationHistory: history,
+        puterModel,
       }),
     }).then(async r => {
       const data = await r.json();

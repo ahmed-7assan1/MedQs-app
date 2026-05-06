@@ -13,8 +13,11 @@ import {
   Brain, Send, Sparkles, Calendar,
   Image as ImageIcon, ChevronLeft,
   MessageSquare, Clock, CheckCircle2,
-  AlertCircle, RefreshCw, TrendingUp
+  AlertCircle, RefreshCw, TrendingUp, Settings, Copy, Check, X
 } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
+import Markdown from 'react-native-markdown-display';
+import { useChatConfigStore } from '../store/useChatConfigStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { mobileApi } from '../lib/api';
@@ -52,25 +55,54 @@ function SendButton({ onPress, disabled, color }: { onPress: () => void; disable
 // ─── Chat Bubble ──────────────────────────────────────────────────────────────
 function ChatBubble({ msg, idx, color }: { msg: Message; idx: number; color: string }) {
   const isUser = msg.role === 'user';
+  const { bubbleColor, userBubbleColor } = useChatConfigStore();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await Clipboard.setStringAsync(msg.content);
+    setCopied(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const bgAssistant = bubbleColor === 'white/5' ? 'rgba(255,255,255,0.05)' : bubbleColor;
+  
   return (
     <Animated.View
       entering={FadeInDown.delay(50).springify()}
       style={[
         tw`mb-4 max-w-[88%] rounded-3xl p-4`,
         isUser
-          ? [tw`self-end bg-[#111827] border border-[#1E2D4D]`, { borderBottomRightRadius: 6 }]
-          : [tw`self-start bg-white/5 border border-white/10`, { borderBottomLeftRadius: 6 }]
+          ? [tw`self-end border border-[#1E2D4D]`, { backgroundColor: userBubbleColor, borderBottomRightRadius: 6 }]
+          : [tw`self-start border border-white/10`, { backgroundColor: bgAssistant, borderBottomLeftRadius: 6 }]
       ]}
     >
       {!isUser && (
-        <View style={tw`flex-row items-center mb-2`}>
-          <Sparkles color={color} size={13} style={tw`mr-1.5`} />
-          <Text style={[tw`text-[10px] font-black uppercase tracking-widest`, { color }]}>
-            MedOneX AI
-          </Text>
+        <View style={tw`flex-row items-center justify-between mb-2`}>
+          <View style={tw`flex-row items-center`}>
+            <Sparkles color={color} size={13} style={tw`mr-1.5`} />
+            <Text style={[tw`text-[10px] font-black uppercase tracking-widest`, { color }]}>
+              MedOneX AI
+            </Text>
+          </View>
+          <TouchableOpacity onPress={handleCopy} style={tw`p-1`}>
+            {copied ? <Check color="#10B981" size={14} /> : <Copy color="#6B7280" size={14} />}
+          </TouchableOpacity>
         </View>
       )}
-      <Text style={tw`text-white text-[15px] leading-6 font-medium`}>{msg.content}</Text>
+      {isUser ? (
+        <Text style={tw`text-white text-[15px] leading-6 font-medium`}>{msg.content}</Text>
+      ) : (
+        <Markdown style={{ 
+          body: tw`text-white text-[15px] leading-6 font-medium`,
+          code_block: tw`bg-black/30 p-3 rounded-lg border border-white/10 mt-2 mb-2`,
+          code_inline: tw`bg-black/30 px-1.5 py-0.5 rounded text-white`,
+          strong: tw`text-white font-black`,
+          em: tw`text-white font-bold italic`
+        }}>
+          {msg.content}
+        </Markdown>
+      )}
     </Animated.View>
   );
 }
@@ -101,8 +133,14 @@ function UsageBar({ used, limit, color }: { used: number; limit: number; color: 
 export function StudyAssistantScreen({ navigation }: any) {
   const { primaryColor } = useThemeStore();
   const { user } = useAuthStore();
+  const { backgroundImage, userBubbleColor, bubbleColor, setBackgroundImage, setBubbleColor, setUserBubbleColor } = useChatConfigStore();
   const [activeTab, setActiveTab] = useState<'chat' | 'plan'>('chat');
   const [message, setMessage] = useState('');
+  
+  const isAdmin = user?.role === 'ADMIN';
+  const [puterModel, setPuterModel] = useState('gpt-4o');
+  const [showSettings, setShowSettings] = useState(false);
+
   const [chat, setChat] = useState<Message[]>([
     {
       role: 'assistant',
@@ -144,7 +182,8 @@ export function StudyAssistantScreen({ navigation }: any) {
     try {
       // Send the full conversation history for context
       const result = await mobileApi.sendAiMessage(
-        newChat.map(m => ({ role: m.role, content: m.content }))
+        newChat.map(m => ({ role: m.role, content: m.content })),
+        isAdmin ? puterModel : undefined
       );
 
       setChat(prev => [...prev, { role: 'assistant', content: result.reply }]);
@@ -200,13 +239,18 @@ export function StudyAssistantScreen({ navigation }: any) {
     'Summarize my weak areas',
   ];
 
+  const AVAILABLE_MODELS = [
+    'gpt-4o', 'claude-3-7-sonnet-20250219', 'gemini-2.5-pro',
+    'deepseek-chat', 'o3-mini', 'llama-3.3-70b-versatile'
+  ];
+
   return (
     <View style={tw`flex-1 bg-black`}>
       <StatusBar barStyle="light-content" />
       <ImageBackground
-        source={require('../../assets/medical_login_bg.png')}
+        source={backgroundImage ? { uri: backgroundImage } : require('../../assets/medical_login_bg.png')}
         style={tw`flex-1`}
-        imageStyle={{ opacity: 0.1 }}
+        imageStyle={{ opacity: backgroundImage ? 0.3 : 0.1 }}
       >
         <SafeAreaView style={tw`flex-1`}>
 
@@ -229,6 +273,13 @@ export function StudyAssistantScreen({ navigation }: any) {
               </View>
             </View>
             <View style={tw`flex-row`}>
+              <TouchableOpacity
+                onPress={() => { setShowSettings(!showSettings); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                activeOpacity={0.8}
+                style={tw`p-2.5 bg-white/5 rounded-xl border border-white/10 mr-2`}
+              >
+                <Settings color="white" size={18} />
+              </TouchableOpacity>
               {activeTab === 'chat' && (
                 <TouchableOpacity
                   onPress={clearChat}
@@ -281,6 +332,51 @@ export function StudyAssistantScreen({ navigation }: any) {
               style={tw`flex-1`}
               keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
             >
+              {showSettings && (
+                <Animated.View entering={FadeInUp} style={tw`px-6 mb-4`}>
+                  <View style={tw`bg-[#0D1117] p-5 rounded-3xl border border-[#1E2D4D]`}>
+                    <View style={tw`flex-row justify-between items-center mb-4`}>
+                      <Text style={tw`text-white font-black text-lg`}>Chat Settings</Text>
+                      <TouchableOpacity onPress={() => setShowSettings(false)}>
+                        <X color="white" size={20} />
+                      </TouchableOpacity>
+                    </View>
+
+                    {isAdmin && (
+                      <View style={tw`mb-5`}>
+                        <Text style={tw`text-slate-400 text-xs font-bold uppercase tracking-widest mb-2`}>Admin: Puter Model</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                          {AVAILABLE_MODELS.map(m => (
+                            <TouchableOpacity
+                              key={m}
+                              onPress={() => { setPuterModel(m); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                              style={[tw`px-4 py-2 rounded-xl mr-2 border`, puterModel === m ? [tw`border-transparent`, {backgroundColor: primaryColor}] : tw`bg-white/5 border-white/10`]}
+                            >
+                              <Text style={[tw`font-bold`, puterModel === m ? tw`text-white` : tw`text-slate-400`]}>{m}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </View>
+                    )}
+
+                    <View>
+                      <Text style={tw`text-slate-400 text-xs font-bold uppercase tracking-widest mb-2`}>Customization</Text>
+                      <View style={tw`flex-row justify-between items-center`}>
+                        <TouchableOpacity onPress={() => setBackgroundImage(backgroundImage ? null : 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000&auto=format&fit=crop')} style={tw`bg-white/5 px-4 py-2 rounded-xl border border-white/10`}>
+                          <Text style={tw`text-white font-bold text-xs`}>{backgroundImage ? 'Remove Background' : 'Set Background'}</Text>
+                        </TouchableOpacity>
+                        
+                        <View style={tw`flex-row gap-2`}>
+                          <TouchableOpacity onPress={() => setUserBubbleColor('#2563EB')} style={[tw`w-8 h-8 rounded-full border border-white/20`, {backgroundColor: '#2563EB'}]} />
+                          <TouchableOpacity onPress={() => setUserBubbleColor('#059669')} style={[tw`w-8 h-8 rounded-full border border-white/20`, {backgroundColor: '#059669'}]} />
+                          <TouchableOpacity onPress={() => setUserBubbleColor('#111827')} style={[tw`w-8 h-8 rounded-full border border-white/20`, {backgroundColor: '#111827'}]} />
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                </Animated.View>
+              )}
+
               <ScrollView
                 ref={scrollRef}
                 style={tw`flex-1 px-6`}

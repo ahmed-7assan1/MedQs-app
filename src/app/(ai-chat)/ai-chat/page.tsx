@@ -11,7 +11,8 @@ export default async function AIChatPage() {
 
   const user = {
     name: session.user.name || "Student",
-    rank: "Elite"
+    rank: "Elite",
+    role: session.user.role || "STUDENT"
   };
 
   return <AIChatClient user={user} />;

@@ -7,6 +7,8 @@ import tw from 'twrnc';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
+import { useHomeStore } from '../store/useHomeStore';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { mobileApi } from '../lib/api';
 import { Skeleton } from '../components/ui/Skeleton';
 import {
@@ -48,54 +50,26 @@ const StatItem = ({ label, value, icon: Icon, color }: any) => (
 export function HomeScreen({ navigation }: any) {
   const { user } = useAuthStore();
   const { primaryColor, primaryLight } = useThemeStore();
+  const { homeData: bootstrapData } = useHomeStore();
+  const queryClient = useQueryClient();
 
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [homeData, setHomeData] = useState<any>(null);
-
-  const fetchData = useCallback(async (isRefreshing = false) => {
-    if (!isRefreshing) setLoading(true);
-    setError(null);
-    try {
-      const data = await mobileApi.getHome();
-      setHomeData(data);
-    } catch (err: any) {
-      console.warn('API Failed, using mock data for demo');
-      // Mock data for demo mode
-      setHomeData({
-        user: { name: 'Demo Doctor' },
-        unreadNotifs: 2,
-        stats: { points: 1250, rank: { label: 'Eagle' }, totalAttempts: 15, avgScore: 85 },
-        adBanners: [{ id: '1', imageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=80' }],
-        recentActivity: [
-          { id: '1', lecture: { id: '1', title: 'Anatomy of Heart', subject: { name: 'Anatomy' } } }
-        ],
-        suggestedPapers: [
-          { id: '1', title: 'Midterm Exam 2023', module: { name: 'Cardiology' } }
-        ],
-        todayTasks: [
-          { id: '1', title: 'Study Heart Valves', completed: false, time: '10:00 AM' },
-          { id: '2', title: 'Practice ECG Quiz', completed: true, time: '02:00 PM' }
-        ],
-        topUsers: [
-          { id: '1', name: 'Dr. Ahmed', points: 5200, rank: { label: 'Legend' } },
-          { id: '2', name: 'Dr. Sara', points: 4800, rank: { label: 'Legend' } }
-        ]
-      });
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  // ─── Caching with React Query ───
+  const { 
+    data: homeData, 
+    isLoading, 
+    isRefetching, 
+    refetch, 
+    error: queryError 
+  } = useQuery({
+    queryKey: ['home'],
+    queryFn: () => mobileApi.getHome(),
+    initialData: bootstrapData,
+    staleTime: 1000 * 60 * 5, // Keep data fresh for 5 minutes
+  });
 
   const onRefresh = () => {
-    setRefreshing(true);
-    fetchData(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    refetch();
   };
 
   const handlePress = (target: string, params?: any) => {
@@ -107,10 +81,10 @@ export function HomeScreen({ navigation }: any) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       await mobileApi.toggleTask(taskId, !completed);
-      // Optimistic update
-      setHomeData((prev: any) => ({
-        ...prev,
-        todayTasks: prev.todayTasks.map((t: any) =>
+      // Optimistically update the cache
+      queryClient.setQueryData(['home'], (old: any) => ({
+        ...old,
+        todayTasks: old.todayTasks.map((t: any) =>
           t.id === taskId ? { ...t, completed: !completed } : t
         )
       }));
@@ -119,7 +93,8 @@ export function HomeScreen({ navigation }: any) {
     }
   };
 
-  if (error && !homeData) {
+  // Error handling
+  if (queryError && !homeData) {
     return (
       <SafeAreaView style={tw`flex-1 bg-[#07090F] justify-center items-center px-10`}>
         <AlertCircle color="#ef4444" size={64} style={tw`mb-4`} />
@@ -142,7 +117,7 @@ export function HomeScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={tw`pb-32 pt-6`}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} tintColor={primaryColor} />
         }
       >
         {/* ── Header ── */}
@@ -167,7 +142,7 @@ export function HomeScreen({ navigation }: any) {
         </View>
 
         {/* ── Ads Carousel ── */}
-        {loading ? (
+        {isLoading ? (
           <View style={tw`px-6 mb-8`}>
             <Skeleton height={160} borderRadius={24} />
           </View>
@@ -196,7 +171,7 @@ export function HomeScreen({ navigation }: any) {
 
         {/* ── Stats Grid ── */}
         <View style={tw`flex-row flex-wrap justify-between px-6 mb-4`}>
-          {loading ? (
+          {isLoading ? (
             [1, 2, 3, 4].map(i => <View key={i} style={tw`w-[48%] mb-4`}><Skeleton height={100} borderRadius={24} /></View>)
           ) : (
             <>
@@ -234,7 +209,7 @@ export function HomeScreen({ navigation }: any) {
         {/* ── Continue Learning ── */}
         <SectionHeader title="Continue Learning" onSeeAll={() => handlePress('Lectures')} />
         <View style={tw`px-6 mb-8`}>
-          {loading ? (
+          {isLoading ? (
             <Skeleton height={80} borderRadius={24} />
           ) : homeData?.recentActivity?.length > 0 ? (
             homeData.recentActivity.slice(0, 3).map((act: any) => (
@@ -264,7 +239,7 @@ export function HomeScreen({ navigation }: any) {
         {/* ── Recommended Quizzes ── */}
         <SectionHeader title="Recommended Quiz" onSeeAll={() => handlePress('Quizzes')} />
         <View style={tw`px-6 mb-8`}>
-          {loading ? (
+          {isLoading ? (
             <Skeleton height={120} borderRadius={24} />
           ) : homeData?.suggestedPapers?.length > 0 ? (
             <FlatList
@@ -299,7 +274,7 @@ export function HomeScreen({ navigation }: any) {
         {/* ── Today's Tasks ── */}
         <SectionHeader title="Today's Tasks" onSeeAll={() => handlePress('Taskat')} />
         <View style={tw`px-6 mb-8`}>
-          {loading ? (
+          {isLoading ? (
             <Skeleton height={60} borderRadius={24} />
           ) : homeData?.todayTasks?.length > 0 ? (
             homeData.todayTasks.map((task: any) => (
@@ -326,7 +301,7 @@ export function HomeScreen({ navigation }: any) {
         <SectionHeader title="Top Performers" onSeeAll={() => handlePress('Leaderboard')} />
         <View style={tw`px-6 mb-10`}>
           <View style={tw`bg-[#0D1117] rounded-[32px] p-6 border border-[#1E2D4D]`}>
-            {loading ? (
+            {isLoading ? (
               [1, 2, 3].map(i => <Skeleton key={i} mb={4} height={50} />)
             ) : homeData?.topUsers?.length > 0 ? (
               homeData.topUsers.map((u: any, idx: number) => (

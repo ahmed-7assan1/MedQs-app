@@ -15,25 +15,41 @@ import { AdminQuizManagerScreen } from '../screens/AdminQuizManagerScreen';
 import { StudyAssistantScreen } from '../screens/StudyAssistantScreen';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
+import { useHomeStore } from '../store/useHomeStore';
+import { mobileApi } from '../lib/api';
 import { View, ActivityIndicator, StatusBar } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
 export function RootNavigator() {
-  const { user, isLoading: authLoading, checkAuth } = useAuthStore();
-  const { loadConfig, primaryColor } = useThemeStore();
+  const { user, isLoading: authLoading, checkAuth, updateUser } = useAuthStore();
+  const { setConfig, primaryColor } = useThemeStore();
+  const { setHomeData, setLoading: setHomeLoading } = useHomeStore();
   const [configLoading, setConfigLoading] = useState(true);
 
   useEffect(() => {
     async function init() {
-      // 1. Check if user is logged in
-      await checkAuth();
-      // 2. Load site configuration (branding, features)
-      await loadConfig();
-      setConfigLoading(false);
+      try {
+        // 1. Initial auth check (checks local storage only)
+        await checkAuth();
+        
+        // 2. Fetch Bootstrap data (Batched API)
+        // This returns fresh user stats, site config, and home dashboard
+        const { config, user: freshUser, home } = await mobileApi.getBootstrap();
+        
+        if (config) setConfig(config);
+        if (freshUser) updateUser(freshUser);
+        if (home) setHomeData(home);
+        
+      } catch (err) {
+        console.error('[RootNavigator] Bootstrap failed:', err);
+      } finally {
+        setConfigLoading(false);
+        setHomeLoading(false);
+      }
     }
     init();
-  }, [checkAuth, loadConfig]);
+  }, [checkAuth, setConfig, updateUser, setHomeData, setHomeLoading]);
 
   if (authLoading || configLoading) {
     return (

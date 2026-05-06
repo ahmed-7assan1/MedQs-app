@@ -14,6 +14,8 @@ const config: Config = {
         display: ["var(--font-jakarta)", "var(--font-tajawal)", "system-ui", "sans-serif"],
         arabic: ["var(--font-tajawal)", "var(--font-jakarta)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
+        "dm-sans": ["var(--font-dm-sans)", "sans-serif"],
+        syne: ["var(--font-syne)", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -91,6 +93,18 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "fade-up": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "pop-in": {
+          from: { opacity: "0", transform: "scale(0.95)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
         "slide-in-right": {
           from: { opacity: "0", transform: "translateX(20px)" },
           to: { opacity: "1", transform: "translateX(0)" },
@@ -104,6 +118,9 @@ const config: Config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
+        "fade-up": "fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        "pop-in": "pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        "slide-up": "slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "slide-in": "slide-in-right 0.3s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },

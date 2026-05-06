@@ -15,6 +15,9 @@ import {
   Paperclip,
   PanelLeftClose,
   PanelLeft,
+  Settings,
+  Check,
+  Copy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -24,6 +27,7 @@ interface UsageInfo {
   used: number;
   limit: number;
   rankLabel: string;
+  isAdmin?: boolean;
 }
 
 /** Shown in thread; binary omitted when saving to localStorage */
@@ -227,6 +231,40 @@ export function AIAssistantPanel({
   const [attachPdf, setAttachPdf] = useState<PendingPdf | null>(null);
   const [attachTexts, setAttachTexts] = useState<PendingText[]>([]);
   const [lang, setLang] = useState<"en" | "ar">("ar"); // Default to Arabic as requested
+  
+  // Customization & Admin State
+  const [showSettings, setShowSettings] = useState(false);
+  const [puterModel, setPuterModel] = useState<string>("gpt-4o");
+  const [bgImage, setBgImage] = useState<string | null>(null);
+  const [userBubbleColor, setUserBubbleColor] = useState<string>("bg-primary");
+
+  useEffect(() => {
+    try {
+      const storedBg = localStorage.getItem("medqs-chat-bg");
+      if (storedBg !== null) setBgImage(storedBg);
+      const storedColor = localStorage.getItem("medqs-chat-color");
+      if (storedColor !== null) setUserBubbleColor(storedColor);
+      const storedPuter = localStorage.getItem("medqs-chat-puter-model");
+      if (storedPuter !== null) setPuterModel(storedPuter);
+    } catch {}
+  }, []);
+
+  const handleSetBg = (url: string | null) => {
+    setBgImage(url);
+    if (url) localStorage.setItem("medqs-chat-bg", url);
+    else localStorage.removeItem("medqs-chat-bg");
+  };
+
+  const handleSetColor = (col: string) => {
+    setUserBubbleColor(col);
+    localStorage.setItem("medqs-chat-color", col);
+  };
+
+  const handleSetPuterModel = (mod: string) => {
+    setPuterModel(mod);
+    localStorage.setItem("medqs-chat-puter-model", mod);
+  };
+
   const labels = {
     en: {
       drq: "Dr. Q",
@@ -372,7 +410,8 @@ export function AIAssistantPanel({
       pdfs: { mimeType: "application/pdf"; data: string }[],
       history: { role: string; content: string }[],
       currentLectureId?: string,
-      currentModel?: string
+      currentModel?: string,
+      currentPuterModel?: string
     ) => {
       const res = await fetch("/api/v1/ai/chat", {
         method: "POST",
@@ -384,6 +423,7 @@ export function AIAssistantPanel({
           conversationHistory: history.length ? history : undefined,
           lectureId: currentLectureId,
           specializedModel: currentModel !== "general" ? currentModel : undefined,
+          puterModel: currentPuterModel,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -473,7 +513,7 @@ export function AIAssistantPanel({
     setLoading(true);
     setLastFailedPayload(null);
     try {
-      await postChat(combined || "(See attached materials.)", imgs, pdfs, history, lectureId, specializedModel);
+      await postChat(combined || "(See attached materials.)", imgs, pdfs, history, lectureId, specializedModel, puterModel);
     } catch (err) {
       setLastFailedPayload({
         message: combined || "(See attached materials.)",
@@ -630,6 +670,16 @@ export function AIAssistantPanel({
             {t.newTopic}
           </button>
         ) : null}
+        
+        <button
+          type="button"
+          onClick={() => setShowSettings(!showSettings)}
+          className={cn("rounded-lg p-1.5 transition-colors hover:bg-primary/10", showSettings ? "bg-primary/20 text-primary" : "text-muted-foreground")}
+          aria-label="Settings"
+        >
+          <Settings className="h-4 w-4" aria-hidden />
+        </button>
+
         {!embedded && (
           <button
             type="button"
@@ -641,6 +691,51 @@ export function AIAssistantPanel({
           </button>
         )}
       </div>
+
+      {showSettings && (
+        <div className="border-b border-primary/10 bg-black/40 p-3 space-y-4 animate-in fade-in slide-in-from-top-2">
+          {usage?.isAdmin && (
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Admin: Puter Model</label>
+              <div className="flex flex-wrap gap-1.5">
+                {["gpt-4o", "claude-3-7-sonnet-20250219", "gemini-2.5-pro", "deepseek-chat", "o3-mini", "llama-3.3-70b-versatile"].map(m => (
+                  <button
+                    key={m}
+                    onClick={() => handleSetPuterModel(m)}
+                    className={cn(
+                      "px-2 py-1 rounded border text-[10px] font-bold transition-all",
+                      puterModel === m ? "bg-primary text-primary-foreground border-transparent" : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10"
+                    )}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Customization</label>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => handleSetBg(bgImage ? null : "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000&auto=format&fit=crop")}
+                className="text-[11px] font-bold text-primary hover:underline"
+              >
+                {bgImage ? "Remove Background" : "Set Background"}
+              </button>
+              <div className="flex items-center gap-2">
+                {["bg-primary", "bg-emerald-600", "bg-slate-800"].map(col => (
+                  <button
+                    key={col}
+                    onClick={() => handleSetColor(col)}
+                    className={cn("w-5 h-5 rounded-full border border-white/20", col, userBubbleColor === col && "ring-2 ring-white")}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between px-4 pb-3 gap-2">
         <div className="flex flex-1 items-center gap-2 min-w-0">
@@ -673,79 +768,105 @@ export function AIAssistantPanel({
 
 
   const messagesArea = (
-    <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-      {messages.length === 0 && (
-        <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 transition-transform hover:scale-110">
-            <div className="ai-glow-orb absolute h-8 w-8" />
-            <Sparkles className="h-8 w-8 text-primary" aria-hidden />
-          </div>
-          <div className="space-y-1">
-            <p className="text-lg font-bold tracking-tight text-foreground">{t.howHelp}</p>
-            <p className="mx-auto max-w-[320px] text-xs leading-relaxed text-muted-foreground font-medium">
-              {t.medicalTutor}
-            </p>
-          </div>
-          <div className="flex max-w-full flex-wrap justify-center gap-2 px-1">
-            {t.suggestions.map((q) => (
-              <button
-                key={q}
-                type="button"
-                onClick={() => {
-                  setInput(q);
-                  inputRef.current?.focus();
-                }}
-                className="rounded-xl border border-primary/10 bg-primary/5 px-3 py-1.5 text-[11px] font-medium text-primary transition-all hover:bg-primary/10 hover:shadow-sm"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div 
+      className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 relative"
+    >
+      {bgImage && (
+        <div 
+          className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
+          style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} 
+        />
       )}
+      <div className="relative z-10 space-y-3">
+        {messages.length === 0 && (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center mt-12">
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 transition-transform hover:scale-110">
+              <div className="ai-glow-orb absolute h-8 w-8" />
+              <Sparkles className="h-8 w-8 text-primary" aria-hidden />
+            </div>
+            <div className="space-y-1">
+              <p className="text-lg font-bold tracking-tight text-foreground">{t.howHelp}</p>
+              <p className="mx-auto max-w-[320px] text-xs leading-relaxed text-muted-foreground font-medium">
+                {t.medicalTutor}
+              </p>
+            </div>
+            <div className="flex max-w-full flex-wrap justify-center gap-2 px-1">
+              {t.suggestions.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => {
+                    setInput(q);
+                    inputRef.current?.focus();
+                  }}
+                  className="rounded-xl border border-primary/10 bg-primary/5 px-3 py-1.5 text-[11px] font-medium text-primary transition-all hover:bg-primary/10 hover:shadow-sm"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {messages.map((m, i) => (
-        <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-          <div
-            className={cn(
-              "max-w-[min(100%,520px)] rounded-2xl px-3 py-2.5 text-sm leading-relaxed",
-              m.role === "user"
-                ? "rounded-br-sm bg-primary text-primary-foreground"
-                : "rounded-bl-sm bg-muted text-foreground"
-            )}
-          >
-            {m.attachments && m.attachments.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-2">
-                {m.attachments.map((a, j) =>
-                  a.kind === "image" ? (
-                    <div
-                      key={j}
-                      className="overflow-hidden rounded-lg border border-white/[0.02] bg-black/10"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={a.preview} alt="" className="max-h-40 max-w-[200px] object-contain" />
-                    </div>
-                  ) : null
+        {messages.map((m, i) => (
+          <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+            <div className="flex flex-col gap-1 max-w-[min(100%,520px)]">
+              <div
+                className={cn(
+                  "rounded-2xl px-3 py-2.5 text-sm leading-relaxed",
+                  m.role === "user"
+                    ? cn("rounded-br-sm text-primary-foreground", userBubbleColor)
+                    : "rounded-bl-sm bg-muted/80 backdrop-blur-sm border border-white/5 text-foreground"
+                )}
+              >
+                {m.attachments && m.attachments.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    {m.attachments.map((a, j) =>
+                      a.kind === "image" ? (
+                        <div
+                          key={j}
+                          className="overflow-hidden rounded-lg border border-white/[0.02] bg-black/10"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={a.preview} alt="" className="max-h-40 max-w-[200px] object-contain" />
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+                )}
+                {m.role === "assistant" ? (
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                      ul: ({ children }) => <ul className="my-1 list-inside list-disc space-y-0.5">{children}</ul>,
+                      li: ({ children }) => <li className="text-[13px]">{children}</li>,
+                      code: ({ children }) => <code className="bg-black/30 px-1 py-0.5 rounded text-primary/90 text-xs">{children}</code>
+                    }}
+                  >
+                    {m.content}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="whitespace-pre-wrap break-words">{m.content}</p>
                 )}
               </div>
-            )}
-            {m.role === "assistant" ? (
-              <ReactMarkdown
-                components={{
-                  p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
-                  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                  ul: ({ children }) => <ul className="my-1 list-inside list-disc space-y-0.5">{children}</ul>,
-                  li: ({ children }) => <li className="text-[13px]">{children}</li>,
-                }}
-              >
-                {m.content}
-              </ReactMarkdown>
-            ) : (
-              <p className="whitespace-pre-wrap break-words">{m.content}</p>
-            )}
+              {m.role === "assistant" && (
+                <div className="flex justify-start px-1">
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(m.content);
+                      toast.success("Copied to clipboard");
+                    }}
+                    className="p-1 rounded hover:bg-white/5 text-muted-foreground transition-colors"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {loading && (
         <div className="flex justify-start">

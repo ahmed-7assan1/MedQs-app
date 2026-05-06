@@ -1,66 +1,131 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Paperclip, SendHorizontal } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Paperclip, SendHorizontal, Image, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 interface AIChatInputProps {
   onSend: (text: string) => void;
+  onGenerateImage?: (prompt: string) => void;
   disabled?: boolean;
+  activeMode: string;
+  setActiveMode: (mode: string) => void;
 }
 
-export function AIChatInput({ onSend, disabled }: AIChatInputProps) {
+export function AIChatInput({ onSend, onGenerateImage, disabled, activeMode, setActiveMode }: AIChatInputProps) {
   const [input, setInput] = useState("");
+  const [imgMode, setImgMode] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
     if (!input.trim() || disabled) return;
-    onSend(input);
+    if (imgMode && onGenerateImage) {
+      onGenerateImage(input);
+    } else {
+      onSend(input);
+    }
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
-  return (
-    <div className="border-t border-drq-border bg-drq-bg/80 p-4 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[680px] items-center gap-3">
-        {/* Attach Button */}
-        <button
-          type="button"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-drq-surface text-drq-purple-light hover:bg-white/10 transition-colors"
-        >
-          <Paperclip className="h-4 w-4" />
-        </button>
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
+    }
+  }, [input]);
 
-        {/* Text Input Pill */}
-        <div className="relative flex-1">
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="Ask Dr. Q anything..."
+  const modes = ["Ask", "Quiz me", "Explain", "Summarize", "Flashcards"];
+
+  return (
+    <div className="max-w-[800px] mx-auto w-full">
+      {/* Mode Toolbar */}
+      <div className="flex items-center gap-2 mb-3 px-2 flex-wrap">
+        {modes.map(mode => (
+          <button
+            key={mode}
+            onClick={() => { setActiveMode(mode); setImgMode(false); }}
             className={cn(
-              "w-full resize-none rounded-full bg-drq-surface border border-drq-border px-5 py-2.5 text-[13px] text-white",
-              "placeholder:text-white/20 focus:outline-none focus:border-drq-primary/50 focus:ring-1 focus:ring-drq-primary/30 transition-all",
-              "min-h-[44px] flex items-center"
+              "px-4 py-1.5 rounded-full text-[12px] font-bold transition-all",
+              !imgMode && activeMode === mode 
+                ? "bg-drq-primary text-white border border-drq-primary" 
+                : "bg-drq-surface border border-drq-border text-drq-secondary hover:text-white hover:border-drq-secondary"
             )}
+          >
+            {mode}
+          </button>
+        ))}
+        {/* Image Mode Button */}
+        <button
+          onClick={() => setImgMode(v => !v)}
+          className={cn(
+            "px-4 py-1.5 rounded-full text-[12px] font-bold transition-all flex items-center gap-1.5",
+            imgMode
+              ? "bg-emerald-500 text-white border border-emerald-500"
+              : "bg-drq-surface border border-drq-border text-drq-secondary hover:text-white hover:border-emerald-500"
+          )}
+        >
+          <Image className="w-3.5 h-3.5" />
+          Image Gen
+        </button>
+      </div>
+
+      {/* Input Box */}
+      <div className="bg-drq-surface border border-drq-border rounded-2xl p-2 flex items-end gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all focus-within:border-drq-primary focus-within:shadow-[0_10px_40px_rgba(124,110,250,0.2)]">
+        
+        {/* Attachment Button */}
+        <div className="relative group">
+          <input 
+            type="file" 
+            id="chat-file-upload" 
+            className="hidden" 
+            onChange={(e) => {
+              // handle file upload logic here or via props
+              toast.success("File selected: " + e.target.files?.[0]?.name);
+            }} 
           />
+          <button
+            type="button"
+            onClick={() => document.getElementById('chat-file-upload')?.click()}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-drq-secondary hover:bg-drq-primary/20 hover:text-drq-primary transition-all duration-300 mb-0.5 border border-white/5"
+          >
+            <Paperclip className="h-5 w-5" />
+          </button>
         </div>
 
-        {/* Send Button */}
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!input.trim() || disabled}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-drq-primary text-white shadow-lg shadow-drq-primary/20 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 transition-all"
-        >
-          <SendHorizontal className="h-5 w-5" />
-        </button>
+        {/* Text Area */}
+        <textarea
+          ref={textareaRef}
+          rows={1}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+          placeholder={imgMode ? "Describe your vision..." : "Message Dr. Q..."}
+          className="flex-1 resize-none bg-transparent border-none text-[16px] text-white placeholder:text-drq-secondary focus:outline-none focus:ring-0 py-3.5 min-h-[50px] max-h-[150px] scrollbar-none font-medium"
+        />
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 mb-0.5 shrink-0 px-1">
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!input.trim() || disabled}
+            className={cn(
+              "flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-300 shadow-lg",
+              input.trim() && !disabled
+                ? "bg-drq-primary text-white hover:scale-105 hover:shadow-drq-primary/30"
+                : "bg-white/5 text-drq-secondary opacity-50"
+            )}
+          >
+            <SendHorizontal className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     </div>
   );

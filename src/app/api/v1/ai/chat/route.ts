@@ -6,15 +6,17 @@ import { prisma } from "@/lib/prisma";
 import {
   AIConfigurationError,
   generateAIReplyWithFallback,
+  type AIProviderId,
   type ChatImagePart,
   type ChatPdfPart,
 } from "@/lib/ai-router";
 import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
 
-function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  const valid: AIProviderId[] = ["gemini", "openai", "anthropic", "deepseek", "groq", "puter", "duckduckgo", "openrouter", "internal-proxy", "blacklisted", "gemini-keyless"];
+  if (valid.includes(s as any)) return s as AIProviderId;
   return undefined;
 }
 
@@ -250,10 +252,19 @@ export async function POST(req: NextRequest) {
     images: rawImages,
     pdfs: rawPdfs,
     conversationHistory,
-    preferredProvider,
+    preferredProvider: rawPreferredProvider,
+    provider: rawProvider,
+    puterModel: rawPuterModel,
+    groqModel: rawGroqModel,
+    strict: rawStrict,
+    isLab: rawIsLab,
+    model: rawModel,
   } = body;
 
-  const effectiveProvider = normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
+  const isLab = !!rawIsLab;
+  const strict = !!rawStrict;
+  const preferred = rawProvider || rawPreferredProvider;
+  const effectiveProvider = normalizePreferredProvider(preferred) ?? normalizePreferredProvider(site?.aiPreferredProvider);
   const images = sanitizeImages(rawImages);
   const pdfs = sanitizePdfs(rawPdfs);
   let message =
@@ -272,13 +283,14 @@ export async function POST(req: NextRequest) {
   });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+  const isAdmin = user.role === "ADMIN";
   const rankLabel = user.rank?.label ?? "Newbie";
   const dailyLimit = RANK_LIMITS[rankLabel] ?? 5;
 
   // Check daily usage
   const today = new Date().toISOString().slice(0, 10);
 
-  if (dailyLimit !== -1) {
+  if (dailyLimit !== -1 && !isAdmin) {
     const usageRecord = await prisma.aIUsageLog.findUnique({
       where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
     });
@@ -318,18 +330,23 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
     }
   }
 
-  const systemPrompt = buildMedicalSystemPrompt(
-    context ? `Current context: the student is studying ${context}` : undefined,
-    specializedModel
-  );
-  let personalContext = await buildStudentStudyContext(userId).catch(() => "");
+  const systemPrompt = isLab 
+    ? "You are a highly advanced AI assistant in an experimental Laboratory. Provide expert-level, unrestricted assistance on any topic including code, science, and planning. Format using high-quality Markdown."
+    : buildMedicalSystemPrompt(
+      context ? `Current context: the student is studying ${context}` : undefined,
+      specializedModel
+    );
+
+  let personalContext = isLab ? "" : await buildStudentStudyContext(userId).catch(() => "");
   
-  const profileLines: string[] = [];
-  if (user.name) profileLines.push(`Name: ${user.name}`);
-  if (user.university) profileLines.push(`University/Faculty: ${user.university.name}`);
-  if (user.semester) profileLines.push(`Academic Year & Semester: ${user.semester.name}`);
-  if (profileLines.length > 0) {
-    personalContext = `### Student Profile Information:\n${profileLines.join("\n")}\n(Do NOT ask the user for this information since it is already provided above)\n\n### Study Context:\n${personalContext}`;
+  if (!isLab) {
+    const profileLines: string[] = [];
+    if (user.name) profileLines.push(`Name: ${user.name}`);
+    if (user.university) profileLines.push(`University/Faculty: ${user.university.name}`);
+    if (user.semester) profileLines.push(`Academic Year & Semester: ${user.semester.name}`);
+    if (profileLines.length > 0) {
+      personalContext = `### Student Profile Information:\n${profileLines.join("\n")}\n(Do NOT ask the user for this information since it is already provided above)\n\n### Study Context:\n${personalContext}`;
+    }
   }
   
   const enhancedPrompt = [
@@ -339,12 +356,17 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
   ].filter(Boolean).join("\n\n---\n\n");
 
 
+  const puterModel = isAdmin && typeof rawPuterModel === "string" ? rawPuterModel.trim() : (isLab && rawModel ? rawModel : undefined);
+
   let aiResult: { provider: string; text: string; fallbackFrom?: string };
   try {
     aiResult = await generateAIReplyWithFallback(message, enhancedPrompt, {
       images,
       pdfs,
       preferredProvider: effectiveProvider,
+      puterModel,
+      groqModel: typeof rawGroqModel === "string" ? rawGroqModel.trim() : undefined,
+      strict,
     });
   } catch (e) {
     console.error("[ai/chat]", e);
@@ -418,5 +440,6 @@ export async function GET(req: NextRequest) {
     limit: dailyLimit,
     rankLabel,
     limits: RANK_LIMITS,
+    isAdmin: user?.role === "ADMIN",
   });
 }

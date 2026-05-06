@@ -260,6 +260,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }),
           }}
         />
+        {/* Puter.js — free AI, storage, and cloud services (user-pays model) */}
+        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
+        <script src="https://js.puter.com/v2/" defer></script>
       </head>
       <body className="font-sans antialiased">
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />

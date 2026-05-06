@@ -17,6 +17,7 @@ interface ThemeState {
   toggleDarkMode: () => void;
   getTheme: () => ThemeType;
   loadConfig: (universityId?: string) => Promise<void>;
+  setConfig: (config: any) => void;
 }
 
 export const useThemeStore = create<ThemeState>((set, get) => ({
@@ -59,6 +60,21 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
         }
       } catch {}
     }
+  },
+
+  setConfig: (cfg: any) => {
+    if (!cfg) return;
+    const light = cfg.primaryColor ? cfg.primaryColor + 'cc' : '#38bdf8';
+    set({
+      primaryColor: cfg.primaryColor || '#0ea5e9',
+      primaryLight: light,
+      siteName: cfg.siteName || 'MedOneX',
+      logoUrl: cfg.logoUrl || null,
+      enableForum: cfg.enableForum ?? true,
+      enableLeaderboard: cfg.enableLeaderboard ?? true,
+      enableAI: cfg.enableAI ?? true,
+    });
+    storage.setItem('siteConfig', JSON.stringify(cfg));
   },
 }));
 
