@@ -99,9 +99,9 @@ export function HomeScreen({ navigation }: any) {
       <SafeAreaView style={tw`flex-1 bg-[#07090F] justify-center items-center px-10`}>
         <AlertCircle color="#ef4444" size={64} style={tw`mb-4`} />
         <Text style={tw`text-white text-xl font-bold text-center mb-2`}>Connection Error</Text>
-        <Text style={tw`text-slate-400 text-center mb-8`}>{error}</Text>
+        <Text style={tw`text-slate-400 text-center mb-8`}>{queryError?.message || 'Something went wrong'}</Text>
         <TouchableOpacity
-          onPress={() => fetchData()}
+          onPress={() => refetch()}
           style={[tw`px-10 py-4 rounded-2xl`, { backgroundColor: primaryColor }]}
         >
           <Text style={tw`text-white font-black`}>Try Again</Text>

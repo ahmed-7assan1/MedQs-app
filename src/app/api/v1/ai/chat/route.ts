@@ -15,7 +15,7 @@ import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  const valid: AIProviderId[] = ["gemini", "openai", "anthropic", "deepseek", "groq", "puter", "duckduckgo", "openrouter", "internal-proxy", "blacklisted", "gemini-keyless"];
+  const valid: AIProviderId[] = ["proxy", "gemini", "openai", "anthropic", "deepseek", "groq", "puter", "duckduckgo", "custom"];
   if (valid.includes(s as any)) return s as AIProviderId;
   return undefined;
 }
@@ -147,7 +147,7 @@ async function buildStudentStudyContext(userId: string): Promise<string> {
 function sanitizeImages(raw: unknown): ChatImagePart[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];
   const out: ChatImagePart[] = [];
-  for (const item of raw.slice(0, 2)) {
+  for (const item of raw.slice(0, 3)) { // Max 3 images
     if (!item || typeof item !== "object") continue;
     const o = item as Record<string, unknown>;
     const mimeType = typeof o.mimeType === "string" ? o.mimeType : "";
@@ -167,7 +167,7 @@ function sanitizeImages(raw: unknown): ChatImagePart[] {
 function sanitizePdfs(raw: unknown): ChatPdfPart[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];
   const out: ChatPdfPart[] = [];
-  for (const item of raw.slice(0, 1)) {
+  for (const item of raw.slice(0, 3)) { // Max 3 PDFs
     if (!item || typeof item !== "object") continue;
     const o = item as Record<string, unknown>;
     const mimeType = typeof o.mimeType === "string" ? o.mimeType.toLowerCase() : "";
@@ -191,7 +191,6 @@ function clip(s: string, max: number) {
   return t.length <= max ? t : `${t.slice(0, max)}…`;
 }
 
-/** Fold recent thread into the text prompt (Gemini gets one user turn; PDFs/images are separate parts). */
 function applyConversationHistory(message: string, rawHistory: unknown): string {
   if (!Array.isArray(rawHistory) || rawHistory.length === 0) return message;
   const turns: HistoryTurn[] = [];
@@ -211,7 +210,6 @@ function applyConversationHistory(message: string, rawHistory: unknown): string 
   return `Earlier in this same conversation (for context):\n${block}\n\n---\n\nCurrent message:\n${message}`;
 }
 
-// Daily chat limits per rank (label → daily limit; -1 = unlimited). ×20 vs original caps.
 const RANK_LIMITS: Record<string, number> = {
   Newbie:       100,
   Active:       300,
@@ -220,8 +218,15 @@ const RANK_LIMITS: Record<string, number> = {
   Elite:        -1, // unlimited
 };
 
+const FILE_LIMITS: Record<string, number> = {
+  Newbie:       3,
+  Active:       5,
+  Contributor:  10,
+  Expert:       20,
+  Elite:        -1, // unlimited
+};
+
 export async function POST(req: NextRequest) {
-  // Support both cookie session and Bearer token (mobile)
   let userId: string | null = null;
   const authHeader = req.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
@@ -254,17 +259,17 @@ export async function POST(req: NextRequest) {
     conversationHistory,
     preferredProvider: rawPreferredProvider,
     provider: rawProvider,
-    puterModel: rawPuterModel,
-    groqModel: rawGroqModel,
-    strict: rawStrict,
+    // BYOK properties
+    customKey,
+    customProvider,
+    customModel,
+    useCustomKey,
     isLab: rawIsLab,
-    model: rawModel,
   } = body;
 
   const isLab = !!rawIsLab;
-  const strict = !!rawStrict;
   const preferred = rawProvider || rawPreferredProvider;
-  const effectiveProvider = normalizePreferredProvider(preferred) ?? normalizePreferredProvider(site?.aiPreferredProvider);
+  const effectiveProvider = normalizePreferredProvider(preferred) ?? normalizePreferredProvider(site?.aiPreferredProvider) ?? "proxy";
   const images = sanitizeImages(rawImages);
   const pdfs = sanitizePdfs(rawPdfs);
   let message =
@@ -276,7 +281,6 @@ export async function POST(req: NextRequest) {
   if (!message) return NextResponse.json({ error: "Message or attachment required" }, { status: 400 });
   message = applyConversationHistory(message, conversationHistory);
 
-  // Get user with rank
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: { rank: true, university: true, semester: true },
@@ -285,12 +289,42 @@ export async function POST(req: NextRequest) {
 
   const isAdmin = user.role === "ADMIN";
   const rankLabel = user.rank?.label ?? "Newbie";
-  const dailyLimit = RANK_LIMITS[rankLabel] ?? 5;
-
-  // Check daily usage
+  const dailyLimit = RANK_LIMITS[rankLabel] ?? 100;
+  const fileLimit = FILE_LIMITS[rankLabel] ?? 3;
   const today = new Date().toISOString().slice(0, 10);
 
-  if (dailyLimit !== -1 && !isAdmin) {
+  // File quota check
+  const fileCount = images.length + pdfs.length;
+  if (fileCount > 0 && !isAdmin && !useCustomKey) {
+    const fileUsageRecord = await prisma.aIUsageLog.findUnique({
+      where: { userId_type_date: { userId: user.id, type: "file_upload", date: today } },
+    });
+    const filesUsed = fileUsageRecord?.count ?? 0;
+    
+    if (filesUsed + fileCount > fileLimit && fileLimit !== -1) {
+      return NextResponse.json(
+        {
+          error: `File limit reached`,
+          limit: fileLimit,
+          used: filesUsed,
+          rankLabel,
+          nextRankHint: rankLabel !== "Elite" ? `Upgrade your rank to send more files today!` : null,
+          resetsAt: "Midnight UTC"
+        },
+        { status: 429 }
+      );
+    }
+    
+    // Increment file usage
+    await prisma.aIUsageLog.upsert({
+      where: { userId_type_date: { userId: user.id, type: "file_upload", date: today } },
+      create: { userId: user.id, type: "file_upload", date: today, count: fileCount },
+      update: { count: { increment: fileCount } },
+    });
+  }
+
+  // Chat message quota check
+  if (dailyLimit !== -1 && !isAdmin && !useCustomKey) {
     const usageRecord = await prisma.aIUsageLog.findUnique({
       where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
     });
@@ -356,17 +390,16 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
   ].filter(Boolean).join("\n\n---\n\n");
 
 
-  const puterModel = isAdmin && typeof rawPuterModel === "string" ? rawPuterModel.trim() : (isLab && rawModel ? rawModel : undefined);
-
   let aiResult: { provider: string; text: string; fallbackFrom?: string };
   try {
     aiResult = await generateAIReplyWithFallback(message, enhancedPrompt, {
       images,
       pdfs,
       preferredProvider: effectiveProvider,
-      puterModel,
-      groqModel: typeof rawGroqModel === "string" ? rawGroqModel.trim() : undefined,
-      strict,
+      personalKey: customKey,
+      customProvider,
+      customModel,
+      useCustomKey,
     });
   } catch (e) {
     console.error("[ai/chat]", e);
@@ -375,24 +408,33 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
     }
     const detail = e instanceof Error ? e.message.trim() : "";
     const safe =
-      detail && detail.length < 500
+      detail && detail.length < 1500
         ? detail
-        : "The AI service did not respond. Set GEMINI_API_KEY, restart `npm run dev`, or try GEMINI_MODEL=gemini-1.5-flash in .env if the model is unavailable.";
+        : "The AI service did not respond. Check your internet connection or API keys.";
     return NextResponse.json({ error: safe }, { status: 503 });
   }
   const reply = aiResult.text;
 
-  // Increment usage counter
-  await prisma.aIUsageLog.upsert({
-    where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
-    create: { userId: user.id, type: "chat", date: today, count: 1 },
-    update: { count: { increment: 1 } },
-  });
+  // Increment usage counter (Only if not using custom key)
+  let updatedUsage = null;
+  if (!useCustomKey && !isAdmin) {
+    await prisma.aIUsageLog.upsert({
+      where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
+      create: { userId: user.id, type: "chat", date: today, count: 1 },
+      update: { count: { increment: 1 } },
+    });
+    updatedUsage = await prisma.aIUsageLog.findUnique({
+      where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
+    });
+  }
 
-  // Get updated count
-  const updatedUsage = await prisma.aIUsageLog.findUnique({
-    where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
-  });
+  // Get updated file usage to send to client
+  let updatedFileUsage = null;
+  if (!useCustomKey && !isAdmin) {
+    updatedFileUsage = await prisma.aIUsageLog.findUnique({
+      where: { userId_type_date: { userId: user.id, type: "file_upload", date: today } },
+    });
+  }
 
   return NextResponse.json({
     reply,
@@ -400,12 +442,13 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
     fallbackFrom: aiResult.fallbackFrom,
     used: updatedUsage?.count ?? 1,
     limit: dailyLimit,
+    filesUsed: updatedFileUsage?.count ?? 0,
+    fileLimit: fileLimit,
     rankLabel,
   });
 }
 
 export async function GET(req: NextRequest) {
-  // Support both cookie session and Bearer token (mobile)
   let userId: string | null = null;
   const authHeader = req.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
@@ -428,18 +471,26 @@ export async function GET(req: NextRequest) {
   });
 
   const rankLabel = user?.rank?.label ?? "Newbie";
-  const dailyLimit = RANK_LIMITS[rankLabel] ?? 5;
+  const dailyLimit = RANK_LIMITS[rankLabel] ?? 100;
+  const fileLimit = FILE_LIMITS[rankLabel] ?? 3;
   const today = new Date().toISOString().slice(0, 10);
 
   const usage = await prisma.aIUsageLog.findUnique({
     where: { userId_type_date: { userId, type: "chat", date: today } },
   });
+  
+  const fileUsage = await prisma.aIUsageLog.findUnique({
+    where: { userId_type_date: { userId, type: "file_upload", date: today } },
+  });
 
   return NextResponse.json({
     used: usage?.count ?? 0,
     limit: dailyLimit,
+    filesUsed: fileUsage?.count ?? 0,
+    fileLimit: fileLimit,
     rankLabel,
     limits: RANK_LIMITS,
+    fileLimits: FILE_LIMITS,
     isAdmin: user?.role === "ADMIN",
   });
 }

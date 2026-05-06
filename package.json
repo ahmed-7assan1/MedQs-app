@@ -28,6 +28,7 @@
     "cap:build": "next build && cap sync"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.2.2",
     "@auth/prisma-adapter": "^2.4.2",
     "@aws-sdk/client-s3": "^3.614.0",
     "@aws-sdk/s3-request-presigner": "^3.614.0",
@@ -52,6 +53,7 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@uploadthing/react": "^7.3.3",
+    "antd": "^6.3.7",
     "assemblyai": "^4.32.1",
     "autoprefixer": "^10.4.27",
     "axios": "^1.15.1",
@@ -84,9 +86,10 @@
     "react-dom": "^18",
     "react-easy-crop": "^5.5.7",
     "react-hot-toast": "^2.4.1",
-    "react-markdown": "^9.0.1",
+    "react-markdown": "^9.1.0",
     "react-player": "^3.4.0",
     "react-syntax-highlighter": "^16.1.1",
+    "remark-gfm": "^4.0.1",
     "screenfull": "^6.0.2",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",

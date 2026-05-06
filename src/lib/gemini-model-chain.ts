@@ -24,17 +24,25 @@ export function geminiModelChain(): string[] {
   const envRaw = process.env.GEMINI_MODEL?.trim();
   const env = envRaw ? normalizeEnvModel(envRaw) : "";
   /**
-   * Current-generation IDs for Google AI (generateContent). Avoid gemini-1.5-pro (often 404).
-   * Order: try widely-available flash first, then lite / older flash, then Pro.
+   * Comprehensive fallback chain supporting the latest Google models.
+   * Order: Try high-performance 2.0/2.5 Flash models first, then stable 1.5 Flash, then Pro models.
    */
   const fallbacks = [
-    "gemini-1.5-flash",
     "gemini-2.0-flash",
     "gemini-2.0-flash-lite",
+    "gemini-1.5-flash",
     "gemini-1.5-flash-8b",
     "gemini-2.0-pro-exp",
     "gemini-1.5-pro",
   ];
-  const raw = env ? [env, ...fallbacks.filter((m) => m !== env)] : fallbacks;
+  
+  // Also add future-proofing for "2.5" if it becomes available in v1beta
+  const futureModels = [
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-pro",
+  ];
+
+  const raw = env ? [env, ...futureModels, ...fallbacks.filter((m) => m !== env)] : [...futureModels, ...fallbacks];
   return [...new Set(raw)];
 }
