@@ -113,14 +113,38 @@ try {
 
 // Handle text messages with AI
 bot.on('text', async (ctx) => {
-  const userMessage = ctx.message.text;
+  const userMessage = ctx.message.text.toLowerCase();
   
+  // 🔍 Founder Recognition Logic
+  const founderKeywords = ['مؤسس', 'الفاوندر', 'اللى عملك', 'مين عملك', 'مين برمجك', 'founder', 'who made you', 'who created you'];
+  if (founderKeywords.some(k => userMessage.includes(k))) {
+    try {
+      const founder = await prisma.platformMember.findFirst({
+        where: { role: { contains: 'Founder', mode: 'insensitive' } }
+      });
+
+      if (founder) {
+        if (founder.imageUrl) {
+          await ctx.replyWithPhoto(founder.imageUrl, {
+            caption: `👨‍⚕️ أنا من ابتكار المبدع: *${founder.name}*\n\n🌟 الدور: ${founder.role}\n\n📖 نبذة: ${founder.description || 'المؤسس والعقل المدبر وراء منصة MedOneX وذكاء Dr. Q.'}\n\nلقد تم تطويري لأكون رفيقك الطبي الأمثل! 🩺🌌`,
+            parse_mode: 'Markdown'
+          });
+        } else {
+          await ctx.reply(`👨‍⚕️ أنا من ابتكار المبدع: *${founder.name}* (المؤسس).\n\nلقد تم تطويري لأكون رفيقك الطبي الأمثل! 🩺🌌`, { parse_mode: 'Markdown' });
+        }
+        return;
+      }
+    } catch (e) {
+      console.error('Founder Fetch Error:', e);
+    }
+  }
+
   // Show "typing" status in Telegram
   await ctx.sendChatAction('typing');
 
   try {
     const user = await getBotUser(ctx.from.id.toString());
-    const systemPrompt = `${DR_Q_SYSTEM_PROMPT}\n\n(Context: You are answering via Telegram. Be concise, use emojis where appropriate, and ensure formatting is clean for mobile reading.)`;
+    const systemPrompt = `${DR_Q_SYSTEM_PROMPT}\n\n(Identity Rule: You were created by Ahmed M. Hassan, the founder of MedOneX. If asked about your origin, always mention him with respect.)\n\n(Context: You are answering via Telegram. Be concise, use emojis where appropriate, and ensure formatting is clean for mobile reading.)`;
     
     const aiResponse = await generateAIReplyWithFallback(userMessage, systemPrompt, {
       preferredProvider: user.preferredProvider || undefined,
