@@ -34,37 +34,37 @@ async function getGlobalConfig() {
   });
 }
 
-// ─── Bot Logic ───
+// ─── Bot Logic (English UI) ───
 
 bot.start(async (ctx) => {
   const config = await getGlobalConfig();
   if (config?.botStatus === 'MAINTENANCE') {
-    return ctx.reply('⚠️ عذراً، البوت في حالة صيانة حالياً لتحسين الخدمة. سنعود قريباً! 🩺');
+    return ctx.reply('⚠️ Maintenance Mode: We will be back soon! 🩺');
   }
 
   const telegramId = ctx.from.id.toString();
   const linkedUser = await getLinkedUser(telegramId);
   
   if (linkedUser) {
-    ctx.reply(`أهلاً بك مجدداً يا دكتور ${linkedUser.name}! 🩺🌌\n\nأنا جاهز لمساعدتك في أي استفسار طبي أو أكاديمي.`, {
+    ctx.reply(`Welcome back, Dr. ${linkedUser.name}! 🩺🌌\nHow can I assist you today?`, {
       reply_markup: {
         keyboard: [
-          [{ text: "🧠 اسأل دكتور Q" }, { text: "📚 محاضراتي" }],
-          [{ text: "⚙️ الإعدادات" }, { text: "👤 بروفايلي" }]
+          [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
+          [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
+          [{ text: "👤 My Profile" }]
         ],
         resize_keyboard: true
       }
     });
   } else {
-    const welcome = config?.welcomeMessage || `مرحباً بك في MedOneX AI Assistant! 🩺🌌\n\nلاستخدام البوت، يجب أن يكون لديك حساب في المنصة.`;
-    ctx.reply(welcome, Markup.inlineKeyboard([
-      [Markup.button.callback('🔐 تسجيل دخول', 'auth_login')],
-      [Markup.button.callback('📝 إنشاء حساب جديد', 'auth_register')]
+    ctx.reply(`Welcome to MedOneX AI Assistant! 🩺🌌\n\nPlease log in or create a new account to access your medical lectures and AI features.`, Markup.inlineKeyboard([
+      [Markup.button.callback('🔐 Login', 'auth_login')],
+      [Markup.button.callback('📝 Register', 'auth_register')]
     ]));
   }
 });
 
-// ─── Auth Actions ───
+// ─── Auth Flow (English) ───
 
 bot.action('auth_register', async (ctx) => {
   await prisma.botUser.upsert({
@@ -72,7 +72,7 @@ bot.action('auth_register', async (ctx) => {
     update: { tempData: { step: 'REG_NAME' } },
     create: { telegramId: ctx.from!.id.toString(), tempData: { step: 'REG_NAME' } }
   });
-  ctx.editMessageText('ممتاز! لنبدأ بإنشاء حسابك. ما هو اسمك الكامل؟');
+  ctx.editMessageText('Excellent! Let\'s create your account. What is your full name?');
 });
 
 bot.action('auth_login', async (ctx) => {
@@ -81,74 +81,143 @@ bot.action('auth_login', async (ctx) => {
     update: { tempData: { step: 'LOG_EMAIL' } },
     create: { telegramId: ctx.from!.id.toString(), tempData: { step: 'LOG_EMAIL' } }
   });
-  ctx.editMessageText('أهلاً بك مجدداً! يرجى إرسال بريدك الإلكتروني المسجل في الموقع:');
+  ctx.editMessageText('Please send your registered email address:');
 });
 
-// ─── Settings & API Flow ───
+// ─── Modules & Academic Navigation ───
 
-bot.command('settings', async (ctx) => {
-  const user = await getBotUser(ctx.from.id.toString());
-  const provider = user.preferredProvider || 'Default';
+bot.hears('📚 My Modules', async (ctx) => {
+  const user = await getLinkedUser(ctx.from.id.toString());
+  if (!user?.semesterId) return ctx.reply('⚠️ Please link your account first.');
   
-  ctx.reply(`⚙️ إعدادات الذكاء الاصطناعي الخاصة بك:
+  const modules = await prisma.module.findMany({
+    where: { semesterId: user.semesterId }
+  });
+
+  if (modules.length === 0) return ctx.reply('No modules found for your current semester.');
+
+  ctx.reply('Select a Module:', Markup.inlineKeyboard(
+    modules.map(m => [Markup.button.callback(`📦 ${m.name}`, `mod_${m.id}`)])
+  ));
+});
+
+bot.action(/mod_(.+)/, async (ctx) => {
+  const moduleId = ctx.match[1];
+  const subjects = await prisma.subject.findMany({ where: { moduleId } });
   
-📍 المحرك الحالي: ${provider.toUpperCase()}
-🔑 مفتاح الـ API: ${user.personalKey ? '✅ مضاف' : '❌ غير مضاف'}
+  if (subjects.length === 0) return ctx.answerCbQuery('No subjects in this module.');
 
-يمكنك تغيير المحرك أو إضافة مفتاحك الخاص باستخدام الأزرار أدناه:`, 
-  Markup.inlineKeyboard([
-    [Markup.button.callback('تغيير المحرك 🤖', 'change_provider')],
-    [Markup.button.callback('إضافة API Key 🔑', 'set_key_hint')]
-  ]));
+  ctx.editMessageText('Select a Subject:', Markup.inlineKeyboard(
+    subjects.map(s => [Markup.button.callback(`📖 ${s.name}`, `sub_${s.id}`)])
+  ));
 });
 
-bot.action('change_provider', (ctx) => {
-  ctx.editMessageText('اختر محرك الذكاء الاصطناعي المفضل لديك:', 
-    Markup.inlineKeyboard([
-      [Markup.button.callback('Google Gemini', 'prov_gemini'), Markup.button.callback('Groq (Llama)', 'prov_groq')],
-      [Markup.button.callback('xAI Grok', 'prov_xai'), Markup.button.callback('DuckDuckGo (Free)', 'prov_duckduckgo')],
-      [Markup.button.callback('العودة للافتراضي', 'prov_proxy')]
-    ])
-  );
-});
-
-bot.action(/prov_(.+)/, async (ctx) => {
-  const provider = ctx.match[1];
-  await prisma.botUser.update({
-    where: { telegramId: ctx.from!.id.toString() },
-    data: { preferredProvider: provider }
+bot.action(/sub_(.+)/, async (ctx) => {
+  const subjectId = ctx.match[1];
+  const lectures = await prisma.lecture.findMany({ 
+    where: { subjectId },
+    orderBy: { order: 'asc' }
   });
-  ctx.answerCbQuery(`تم تغيير المحرك إلى ${provider}`);
-  ctx.editMessageText(`✅ تم تحديث المحرك بنجاح إلى: ${provider.toUpperCase()}`);
+  
+  if (lectures.length === 0) return ctx.answerCbQuery('No lectures found.');
+
+  ctx.editMessageText('Select a Lecture:', Markup.inlineKeyboard(
+    lectures.map(l => [Markup.button.callback(`📝 ${l.title}`, `lec_${l.id}`)])
+  ));
 });
 
-bot.action('set_key_hint', (ctx) => {
-  ctx.editMessageText('اختر المحرك الذي تريد إضافة مفتاحه:', 
-    Markup.inlineKeyboard([
-      [Markup.button.callback('Gemini 🧠', 'setup_gemini'), Markup.button.callback('Groq ⚡️', 'setup_groq')],
-      [Markup.button.callback('OpenAI 🦾', 'setup_openai'), Markup.button.callback('إلغاء ❌', 'back_to_settings')]
-    ])
-  );
-});
-
-bot.action(/setup_(.+)/, async (ctx) => {
-  const provider = ctx.match[1];
-  await prisma.botUser.update({
-    where: { telegramId: ctx.from!.id.toString() },
-    data: { waitingForKeyProvider: provider }
+bot.action(/lec_(.+)/, async (ctx) => {
+  const lecId = ctx.match[1];
+  const lec = await prisma.lecture.findUnique({
+    where: { id: lecId },
+    include: { videos: true, records: true, files: true, notes: true, questions: true }
   });
-  ctx.editMessageText(`🔑 أرسل مفتاح الـ API الخاص بـ *${provider.toUpperCase()}* الآن.\n\nيمكنك الحصول عليه من الموقع الرسمي للمزود.`, { parse_mode: 'Markdown' });
+
+  if (!lec) return ctx.answerCbQuery('Lecture not found.');
+
+  let response = `🎓 *${lec.title}*\n\n`;
+  
+  if (lec.videos.length > 0) {
+    response += `📺 *Videos:*\n`;
+    lec.videos.forEach(v => response += `• [${v.title}](${v.url})\n`);
+    response += `\n`;
+  }
+
+  if (lec.records.length > 0) {
+    response += `🎙 *Records:*\n`;
+    lec.records.forEach(r => response += `• [${r.title}](${r.url})\n`);
+    response += `\n`;
+  }
+
+  if (lec.files.length > 0) {
+    response += `📂 *Files:*\n`;
+    lec.files.forEach(f => response += `• [${f.name}](${f.url})\n`);
+    response += `\n`;
+  }
+
+  if (lec.notes.length > 0) {
+    response += `📝 *My Notes:*\n`;
+    lec.notes.forEach(n => response += `[View Note Content] - _(Sent separately if requested)_ \n`);
+  }
+
+  const buttons = [];
+  if (lec.questions.length > 0) buttons.push([Markup.button.callback(`✍️ Start Quiz (${lec.questions.length})`, `quiz_${lec.id}`)]);
+  buttons.push([Markup.button.callback('⬅️ Back to Subjects', `mod_back`)]);
+
+  await ctx.editMessageText(response, { 
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard(buttons)
+  });
 });
 
-bot.action('back_to_settings', async (ctx) => {
-  const user = await getBotUser(ctx.from!.id.toString());
-  ctx.editMessageText('⚙️ الإعدادات:', Markup.inlineKeyboard([
-    [Markup.button.callback('تغيير المحرك 🤖', 'change_provider')],
-    [Markup.button.callback('إضافة API Key 🔑', 'set_key_hint')]
-  ]));
+// ─── Telegram Quizzes (Poll Mode) ───
+
+bot.action(/quiz_(.+)/, async (ctx) => {
+  const lecId = ctx.match[1];
+  const questions = await prisma.question.findMany({ where: { lectureId: lecId } });
+
+  if (questions.length === 0) return ctx.answerCbQuery('No questions available.');
+
+  for (const q of questions) {
+    const choices = q.choices as string[];
+    const correctIndex = choices.indexOf(q.answer);
+
+    await ctx.replyWithQuiz(q.body, choices, {
+      correct_option_id: correctIndex >= 0 ? correctIndex : 0,
+      explanation: q.explanation || 'No explanation provided.',
+      explanation_parse_mode: 'Markdown'
+    });
+  }
 });
 
-// ─── Text Handling ───
+// ─── Voice Interaction ───
+
+bot.on('voice', async (ctx) => {
+  const telegramId = ctx.from.id.toString();
+  const linkedUser = await getLinkedUser(telegramId);
+  if (!linkedUser) return ctx.reply('Please login to use Dr. Q Voice features.');
+
+  await ctx.sendChatAction('typing');
+  
+  try {
+    const fileLink = await ctx.telegram.getFileLink(ctx.message.voice.file_id);
+    
+    // Using AI to process voice (Multimodal)
+    const prompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: ${linkedUser.name}] The user sent a voice message. Please listen to it (transcribed or processed) and respond.`;
+    
+    // For now, we inform the user we are listening. 
+    // In a full implementation, we'd fetch the file and send to Gemini.
+    const aiResponse = await generateAIReplyWithFallback(`[Voice Message Attached: ${fileLink.href}]`, prompt, {
+      preferredProvider: 'gemini'
+    });
+
+    await ctx.reply(`🎙 *Dr. Q Voice Response:*\n\n${aiResponse.text}`, { parse_mode: 'Markdown' });
+  } catch (e) {
+    ctx.reply('Sorry, I had trouble processing your voice message.');
+  }
+});
+
+// ─── Text & Auth Logic ───
 
 bot.on('text', async (ctx) => {
   const telegramId = ctx.from.id.toString();
@@ -156,16 +225,6 @@ bot.on('text', async (ctx) => {
   const userMessage = ctx.message.text.trim();
   const tempData = (botUser.tempData as any) || {};
 
-  // Handle waiting for API Key
-  if (botUser.waitingForKeyProvider) {
-    await prisma.botUser.update({
-      where: { telegramId },
-      data: { personalKey: userMessage, waitingForKeyProvider: null, preferredProvider: botUser.waitingForKeyProvider }
-    });
-    return ctx.reply(`✅ تم حفظ مفتاح الـ API لـ ${botUser.waitingForKeyProvider.toUpperCase()} بنجاح!`);
-  }
-
-  // Handle Auth Steps
   if (tempData.step) {
     switch (tempData.step) {
       case 'LOG_EMAIL':
@@ -173,60 +232,62 @@ bot.on('text', async (ctx) => {
         if (existing) {
           await prisma.user.update({ where: { id: existing.id }, data: { telegramId, telegramVerified: true } });
           await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
-          return ctx.reply(`✅ أهلاً دكتور ${existing.name}! تم تسجيل الدخول بنجاح.`, {
-            ...Markup.keyboard([
-              [{ text: "🧠 اسأل دكتور Q" }, { text: "📚 محاضراتي" }],
-              [{ text: "⚙️ الإعدادات" }, { text: "👤 بروفايلي" }]
-            ]).resize()
-          });
+          return ctx.reply(`✅ Welcome, Dr. ${existing.name}! Login successful.`, Markup.keyboard([
+            [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
+            [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
+            [{ text: "👤 My Profile" }]
+          ]).resize());
         }
-        return ctx.reply('❌ البريد غير موجود. حاول مجدداً أو اضغط /start.');
+        return ctx.reply('❌ Email not found. Try again or press /start.');
 
       case 'REG_NAME':
         await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_EMAIL', name: userMessage } } });
-        return ctx.reply(`أهلاً دكتور ${userMessage}! أرسل بريدك الإلكتروني الآن:`);
+        return ctx.reply(`Hello Dr. ${userMessage}! Now send your email:`);
 
       case 'REG_EMAIL':
         const check = await prisma.user.findUnique({ where: { email: userMessage } });
-        if (check) return ctx.reply('❌ البريد مسجل بالفعل. اختر بريداً آخر:');
+        if (check) return ctx.reply('❌ Email already registered. Try another:');
         await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_PASS', email: userMessage } } });
-        return ctx.reply('اختر كلمة مرور (6 أحرف على الأقل):');
+        return ctx.reply('Choose a password (min 6 characters):');
 
       case 'REG_PASS':
-        if (userMessage.length < 6) return ctx.reply('⚠️ قصيرة جداً، اختر كلمة أخرى:');
+        if (userMessage.length < 6) return ctx.reply('⚠️ Too short, choose another:');
         const hashed = await bcrypt.hash(userMessage, 10);
         await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_UNI', password: hashed } } });
         const unis = await prisma.university.findMany({ select: { id: true, name: true }, take: 8 });
-        return ctx.reply('اختر جامعتك:', Markup.inlineKeyboard(unis.map(u => [Markup.button.callback(u.name, `reg_uni_${u.id}`)])));
+        return ctx.reply('Select your University:', Markup.inlineKeyboard(unis.map(u => [Markup.button.callback(u.name, `reg_uni_${u.id}`)])));
     }
   }
 
-  // AI Response
+  // AI Response Flow (English)
   const linkedUser = await getLinkedUser(telegramId);
   if (!linkedUser) {
-    return ctx.reply('⚠️ يجب تسجيل الدخول أولاً.', Markup.inlineKeyboard([
-      [Markup.button.callback('🔐 تسجيل دخول', 'auth_login')],
-      [Markup.button.callback('📝 إنشاء حساب جديد', 'auth_register')]
+    if (userMessage.startsWith('/')) return; // Let commands handle themselves
+    return ctx.reply('Please login to chat with Dr. Q.', Markup.inlineKeyboard([
+      [Markup.button.callback('🔐 Login', 'auth_login')],
+      [Markup.button.callback('📝 Register', 'auth_register')]
     ]));
   }
 
+  if (userMessage === "🧠 Ask Dr. Q") return ctx.reply("I'm listening! Ask me any medical question.");
+  if (userMessage === "📊 Dashboard") return ctx.reply(`📊 *Dashboard*\n\nName: ${linkedUser.name}\nUni: ${linkedUser.university?.name}\nPoints: ${linkedUser.points || 0}`, { parse_mode: 'Markdown' });
+
   await ctx.sendChatAction('typing');
   try {
-    const globalConfig = await getGlobalConfig();
-    const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER INFO] Name: ${linkedUser.name}, Uni: ${linkedUser.university?.name}, Sem: ${linkedUser.semester?.name}`;
-    const provider = botUser.preferredProvider !== 'proxy' ? botUser.preferredProvider : (globalConfig?.defaultProvider || 'gemini');
+    const config = await getGlobalConfig();
+    const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER INFO] Dr. ${linkedUser.name} from ${linkedUser.university?.name}. Current Semester: ${linkedUser.semester?.name}`;
     const aiResponse = await generateAIReplyWithFallback(userMessage, systemPrompt, {
-      preferredProvider: provider as any,
+      preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
       personalKey: botUser.personalKey || undefined,
       useCustomKey: !!botUser.personalKey
     });
     await ctx.reply(aiResponse.text, { parse_mode: 'Markdown' });
   } catch (e: any) {
-    ctx.reply(`خطأ: ${e.message}`);
+    ctx.reply(`Error: ${e.message}`);
   }
 });
 
-// ─── University/Faculty/Semester Callbacks ───
+// ─── University Selection Handlers ───
 
 bot.action(/reg_uni_(.+)/, async (ctx) => {
   const uniId = ctx.match[1];
@@ -235,7 +296,7 @@ bot.action(/reg_uni_(.+)/, async (ctx) => {
   const tempData = (botUser.tempData as any) || {};
   await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_FAC', universityId: uniId } } });
   const faculties = await prisma.faculty.findMany({ where: { universityId: uniId }, select: { id: true, name: true } });
-  ctx.editMessageText('اختر كليتك:', Markup.inlineKeyboard(faculties.map(f => [Markup.button.callback(f.name, `reg_fac_${f.id}`)])));
+  ctx.editMessageText('Select your Faculty:', Markup.inlineKeyboard(faculties.map(f => [Markup.button.callback(f.name, `reg_fac_${f.id}`)])));
 });
 
 bot.action(/reg_fac_(.+)/, async (ctx) => {
@@ -244,16 +305,11 @@ bot.action(/reg_fac_(.+)/, async (ctx) => {
   const botUser = await getBotUser(telegramId);
   const tempData = (botUser.tempData as any) || {};
   await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_SEM', facultyId: facId } } });
-  // Find semesters that belong to this faculty
   const semesters = await prisma.semester.findMany({ 
-    where: { 
-      facultySemesters: {
-        some: { facultyId: facId }
-      }
-    }, 
+    where: { academicYear: { facultyId: facId } }, 
     select: { id: true, name: true } 
   });
-  ctx.editMessageText('اختر السيمستر:', Markup.inlineKeyboard(semesters.map(s => [Markup.button.callback(s.name, `reg_sem_${s.id}`)])));
+  ctx.editMessageText('Select your Semester:', Markup.inlineKeyboard(semesters.map(s => [Markup.button.callback(s.name, `reg_sem_${s.id}`)])));
 });
 
 bot.action(/reg_sem_(.+)/, async (ctx) => {
@@ -269,15 +325,25 @@ bot.action(/reg_sem_(.+)/, async (ctx) => {
     }
   });
   await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
-  ctx.editMessageText(`🎊 مبروك يا دكتور ${newUser.name}! تم إنشاء حسابك.`, {
-    ...Markup.keyboard([
-      [{ text: "🧠 اسأل دكتور Q" }, { text: "📚 محاضراتي" }],
-      [{ text: "⚙️ الإعدادات" }, { text: "👤 بروفايلي" }]
-    ]).resize()
-  });
+  ctx.editMessageText(`🎉 Congratulations Dr. ${newUser.name}! Your account is ready.`, Markup.keyboard([
+    [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
+    [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
+    [{ text: "👤 My Profile" }]
+  ]).resize());
 });
 
-// ─── API Route ───
+// ─── Finalize Menu & Commands ───
+
+try {
+  bot.telegram.setMyCommands([
+    { command: 'start', description: 'Main Menu' },
+    { command: 'modules', description: 'Browse My Modules' },
+    { command: 'dashboard', description: 'View My Stats' },
+    { command: 'settings', description: 'AI Engine Settings' },
+    { command: 'founders', description: 'Founders of MedOneX' },
+    { command: 'profile', description: 'My Account' }
+  ]);
+} catch (e) {}
 
 export async function POST(req: Request) {
   try {
@@ -285,6 +351,6 @@ export async function POST(req: Request) {
     await bot.handleUpdate(body);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: 'Error' }, { status: 500 });
+    return NextResponse.json({ ok: false }, { status: 500 });
   }
 }
