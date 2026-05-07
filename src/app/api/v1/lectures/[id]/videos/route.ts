@@ -47,7 +47,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const sortOrder = await prisma.lectureVideo.count({ where: { lectureId: id } });
   
   // Optional: Sync to Telegram if it's a direct link
-  const tgSync = await syncFileToTelegram(url, title, "video/mp4");
+  const isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
+  const tgSync = !isYoutube ? await syncFileToTelegram(url, title, "video/mp4") : null;
 
   const row = await prisma.lectureVideo.create({
     data: {
@@ -60,6 +61,24 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       telegramChatId: tgSync?.chatId,
     },
   });
+
+  // If it's YouTube, create a background migration task for Colab
+  if (isYoutube) {
+    try {
+      await prisma.telegramMigrationTask.create({
+        data: {
+          title,
+          sourceUrl: url,
+          lectureVideoId: row.id,
+          status: 'PENDING'
+        }
+      });
+      console.log(`[MIGRATION] Created task for YouTube video: ${title}`);
+    } catch (err) {
+      console.error("[MIGRATION] Failed to create task:", err);
+    }
+  }
+
   return NextResponse.json({ ...row, likedByMe: false }, { status: 201 });
 }
 

@@ -159,6 +159,18 @@ def api_get(path: str, params: dict = {}):
     print(f"  ❌ API Error [{path}]: {r.status_code} — {r.text[:200]}")
     return None
 
+def api_patch(path: str, data: dict):
+    """Update data on MedOneX API."""
+    headers = {'Content-Type': 'application/json'}
+    if ADMIN_SECRET:
+        headers['Authorization'] = f"Bearer {ADMIN_SECRET}"
+    
+    r = requests.patch(f"{API_BASE_URL}{path}", json=data, headers=headers, timeout=30)
+    if r.status_code == 200:
+        return r.json()
+    print(f"  ❌ API Patch Error [{path}]: {r.status_code} — {r.text[:200]}")
+    return None
+
 def fetch_modules_with_content(semester_id: str):
     """Fetch all modules → subjects → lectures with files for a semester."""
     print(f"📡 Fetching modules for semester: {semester_id}")
@@ -372,18 +384,78 @@ def sync_module_to_group(module: dict, color: int):
     
     print(f"\n✅ Module '{mod_name}' synced successfully!")
 
-# ─── Cell 7: Run Sync ────────────────────────────────────────────────────────
-print("🚀 Starting MedOneX → Telegram Group Sync...")
-print(f"📡 Platform: {API_BASE_URL}")
-print(f"📢 Group ID: {GROUP_ID}")
-print(f"📚 Modules to sync: {len(modules)}")
-print("="*60)
+# ─── Cell 7: Real-time Migration Worker ───────────────────────────────────────
+def run_migration_worker():
+    """Polls the API for pending YouTube migration tasks and processes them."""
+    print(f"\n{'='*60}")
+    print("🤖 STARTING REAL-TIME MIGRATION WORKER")
+    print(f"📡 API: {API_BASE_URL}")
+    print(f"📢 Target Group: {GROUP_ID}")
+    print("='*60}\n")
 
-for idx, module in enumerate(modules):
-    color = TOPIC_COLORS[idx % len(TOPIC_COLORS)]
-    sync_module_to_group(module, color)
-    time.sleep(2)  # Pause between modules
+    while True:
+        try:
+            # 1. Fetch pending tasks
+            tasks = api_get("/api/v1/admin/migration-tasks", {"status": "PENDING"})
+            if not tasks or len(tasks) == 0:
+                print("  💤 No pending tasks. Waiting 30s...")
+                time.sleep(30)
+                continue
 
-print("\n" + "="*60)
-print("🎉 SYNC COMPLETE! All modules uploaded to Telegram Group.")
-print("="*60)
+            for task in tasks:
+                task_id = task['id']
+                title = task.get('title', 'Video')
+                url = task['sourceUrl']
+
+                print(f"🚀 Processing Task: {title} ({url})")
+                
+                # 2. Mark as processing
+                api_patch("/api/v1/admin/migration-tasks", {"id": task_id, "status": "PROCESSING"})
+
+                # 3. Download from YouTube
+                local_path = download_video_ytdlp(url, WORK_DIR, title)
+                
+                if local_path and os.path.exists(local_path):
+                    # 4. Upload to Telegram
+                    # Note: We send to the main chat or a specific thread if needed.
+                    # Defaulting to thread 1 (General) if not specified
+                    result = send_file_to_tg(1, local_path, caption=f"🎬 {title}", as_video=True)
+                    
+                    if result:
+                        print(f"  ✅ Uploaded to Telegram! Msg ID: {result['message_id']}")
+                        # 5. Update task as completed
+                        api_patch("/api/v1/admin/migration-tasks", {
+                            "id": task_id, 
+                            "status": "COMPLETED",
+                            "telegramMessageId": result['message_id'],
+                            "telegramChatId": str(GROUP_ID)
+                        })
+                    else:
+                        print("  ❌ Telegram upload failed.")
+                        api_patch("/api/v1/admin/migration-tasks", {"id": task_id, "status": "FAILED", "error": "Telegram upload failed (likely too large)"})
+                    
+                    try: os.remove(local_path)
+                    except: pass
+                else:
+                    print("  ❌ YouTube download failed.")
+                    api_patch("/api/v1/admin/migration-tasks", {"id": task_id, "status": "FAILED", "error": "YouTube download failed (yt-dlp error)"})
+                
+                time.sleep(2)
+        
+        except Exception as e:
+            print(f"💥 Worker Crash: {e}")
+            time.sleep(60)
+
+# To run the worker, uncomment the line below:
+# run_migration_worker()
+
+# ─── Cell 8: Legacy Full Sync (Run once) ─────────────────────────────────────
+def run_full_sync():
+    print("🚀 Starting MedOneX → Telegram Group Full Sync...")
+    for idx, module in enumerate(modules):
+        color = TOPIC_COLORS[idx % len(TOPIC_COLORS)]
+        sync_module_to_group(module, color)
+        time.sleep(2)
+    print("\n🎉 FULL SYNC COMPLETE!")
+
+# run_full_sync()
