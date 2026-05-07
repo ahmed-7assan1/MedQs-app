@@ -94,14 +94,22 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
 
   if (!mod) notFound();
 
+  const subjectIds = mod.subjects.map(s => s.id);
   const correctBySubject: Record<string, Set<string>> = {};
+  
+  // Only fetch correct items for the subjects in this module to reduce DB load
   const items = await prisma.quizAttemptItem.findMany({
-    where: { attempt: { userId: session.user.id }, isCorrect: true },
+    where: { 
+      attempt: { userId: session.user.id }, 
+      isCorrect: true,
+      question: { lecture: { subjectId: { in: subjectIds } } }
+    },
     select: {
       questionId: true,
       question: { select: { lecture: { select: { subjectId: true } } } },
     },
   });
+
   for (const item of items) {
     const sid = item.question.lecture.subjectId;
     if (!correctBySubject[sid]) correctBySubject[sid] = new Set();

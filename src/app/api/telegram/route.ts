@@ -236,19 +236,39 @@ bot.action(/quiz_(.+)/, async (ctx) => {
       const options = q.choices as string[];
       const correctIdx = options.indexOf(q.answer);
       
-      await ctx.replyWithQuiz(
-        `[${i+1}/${shuffled.length}] ${q.body}`,
-        options,
-        {
-          correct_option_id: correctIdx >= 0 ? correctIdx : 0,
-          explanation: q.explanation || "Review the lecture material for details.",
-          is_anonymous: false
-        }
-      );
-      // Small delay to prevent flood trigger if many questions
-      await new Promise(r => setTimeout(r, 500));
-    } catch (err) {
-      console.error("Poll Send Error:", err);
+      const questionText = `[${i+1}/${shuffled.length}] ${q.body}`;
+      
+      // Telegram Poll question limit is 300 chars. 
+      // If it's longer, send the text first, then an empty-ish poll question.
+      if (questionText.length > 300) {
+        await ctx.reply(questionText, { parse_mode: 'Markdown' });
+        await ctx.replyWithQuiz(
+          `☝️ Solve the question above:`,
+          options,
+          {
+            correct_option_id: correctIdx >= 0 ? correctIdx : 0,
+            explanation: q.explanation || "Review the lecture material.",
+            is_anonymous: false
+          }
+        );
+      } else {
+        await ctx.replyWithQuiz(
+          questionText,
+          options,
+          {
+            correct_option_id: correctIdx >= 0 ? correctIdx : 0,
+            explanation: q.explanation || "Review the lecture material.",
+            is_anonymous: false
+          }
+        );
+      }
+      
+      // Increase delay to be safer against flood limits (1 second)
+      await new Promise(r => setTimeout(r, 1000));
+    } catch (err: any) {
+      console.error(`[BOT] Poll ${i+1} Error:`, err?.message);
+      // Fallback: send as text buttons if poll fails
+      await ctx.reply(`⚠️ Could not send poll for Q${i+1}. Skipping...`);
     }
   }
 
@@ -318,6 +338,7 @@ bot.on('text', async (ctx) => {
   const telegramId = ctx.from.id.toString();
   const botUser = await getBotUser(telegramId);
   const text = ctx.message.text;
+  const linkedUser = await getLinkedUser(telegramId);
 
   // 🤫 Group Silence Mode
   if (ctx.chat.type !== 'private') {
@@ -395,13 +416,11 @@ bot.on('text', async (ctx) => {
   }
 
   // Standard AI Chat
-  const linkedUser = await getLinkedUser(telegramId);
   if (!linkedUser) return ctx.reply('Please login to chat. /start');
 
   if (text === "🧠 Ask Dr. Q") return ctx.reply("I'm listening! Ask me anything.");
   if (text === "📊 Dashboard") {
-    const dash = await getLinkedUser(telegramId);
-    return ctx.reply(`📊 *Dashboard*\n\nName: ${dash?.name}\nPoints: ${dash?.points || 0}`, { parse_mode: 'Markdown' });
+    return ctx.reply(`📊 *Dashboard*\n\nName: ${linkedUser?.name}\nPoints: ${linkedUser?.points || 0}`, { parse_mode: 'Markdown' });
   }
 
   try {
