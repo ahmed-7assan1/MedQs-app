@@ -2,13 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Settings, Users, MessageSquare, AlertCircle } from "lucide-react";
+import { Send, Settings, Users, MessageSquare, AlertCircle, ChevronRight } from "lucide-react";
 
 interface TelegramAdminClientProps {
   linkedUsers: any[];
@@ -62,7 +57,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Settings & Broadcast */}
       <div className="lg:col-span-2 space-y-6">
-        <Card className="p-6 bg-zinc-900/40 border-white/5 backdrop-blur-md">
+        <div className="p-6 bg-zinc-900/40 border border-white/5 backdrop-blur-md rounded-3xl">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-teal-500/20 rounded-lg text-teal-400">
               <MessageSquare size={20} />
@@ -70,28 +65,28 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
             <h2 className="text-xl font-semibold text-white">إرسال إشعار جماعي (Broadcast)</h2>
           </div>
           
-          <Textarea 
+          <textarea 
             placeholder="اكتب رسالتك هنا لجميع الطلاب المشتركين في البوت..."
-            className="bg-zinc-950/50 border-white/10 min-h-[120px] mb-4 text-white placeholder:text-zinc-600"
+            className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl p-4 min-h-[120px] mb-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all"
             value={broadcastText}
-            onChange={(e) => setBroadcastText(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBroadcastText(e.target.value)}
           />
           
-          <div className="flex items-center gap-4">
-            <Button 
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <button 
               onClick={startBroadcast}
               disabled={isBroadcasting}
-              className="bg-teal-600 hover:bg-teal-500 text-white rounded-xl px-8"
+              className="w-full sm:w-auto bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-xl px-8 py-3 font-bold transition-all flex items-center justify-center gap-2"
             >
-              {isBroadcasting ? "جاري الإرسال..." : "إرسال الآن"} <Send size={16} className="mr-2 ml-2" />
-            </Button>
+              {isBroadcasting ? "جاري الإرسال..." : "إرسال الآن"} <Send size={16} />
+            </button>
             <p className="text-xs text-zinc-500">
               سيتم إرسال هذه الرسالة لـ {linkedUsers.length} طالب مربوطين حالياً.
             </p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-6 bg-zinc-900/40 border-white/5 backdrop-blur-md">
+        <div className="p-6 bg-zinc-900/40 border border-white/5 backdrop-blur-md rounded-3xl">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
               <Settings size={20} />
@@ -101,27 +96,27 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-zinc-500 uppercase font-bold mb-1 block">رسالة الترحيب الافتراضية</label>
-              <Textarea 
+              <label className="text-xs text-zinc-500 uppercase font-bold mb-2 block">رسالة الترحيب الافتراضية</label>
+              <textarea 
                 value={config.welcomeMessage || ""}
-                onChange={(e) => setConfig({...config, welcomeMessage: e.target.value})}
-                className="bg-zinc-950/50 border-white/10 text-white"
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setConfig({...config, welcomeMessage: e.target.value})}
+                className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            <Button 
+            <button 
               onClick={saveConfig} 
               disabled={isSaving}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl border border-white/5"
+              className="bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl border border-white/5 px-6 py-2 transition-all"
             >
               {isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}
-            </Button>
+            </button>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Users List */}
       <div className="space-y-6">
-        <Card className="p-6 bg-zinc-900/40 border-white/5 backdrop-blur-md h-full max-h-[800px] flex flex-col">
+        <div className="p-6 bg-zinc-900/40 border border-white/5 backdrop-blur-md h-full max-h-[800px] flex flex-col rounded-3xl overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400">
               <Users size={20} />
@@ -129,30 +124,35 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
             <h2 className="text-xl font-semibold text-white">الطلاب المشتركون</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
             {linkedUsers.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 hover:border-teal-500/30 transition-colors group">
-                <Avatar className="h-10 w-10 ring-2 ring-zinc-800 group-hover:ring-teal-500/50 transition-all">
-                  <AvatarImage src={u.image} />
-                  <AvatarFallback className="bg-zinc-800 text-zinc-400">{u.name?.[0]}</AvatarFallback>
-                </Avatar>
+              <div key={u.id} className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/5 hover:border-teal-500/30 transition-all group cursor-pointer">
+                <div className="h-10 w-10 rounded-full bg-zinc-800 ring-2 ring-zinc-800 group-hover:ring-teal-500/50 overflow-hidden flex items-center justify-center text-zinc-500 font-bold shrink-0">
+                  {u.image ? (
+                    <img src={u.image} alt={u.name} className="w-full h-full object-cover" />
+                  ) : (
+                    u.name?.[0]
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-white truncate">{u.name}</p>
-                  <p className="text-[10px] text-zinc-500 truncate">{u.university?.name} • {u.semester?.name}</p>
+                  <p className="text-[10px] text-zinc-500 truncate uppercase tracking-tighter">
+                    {u.university?.name || "No University"}
+                  </p>
                 </div>
-                <div className="p-2 bg-teal-500/10 rounded-full text-teal-500">
-                  <Send size={12} />
+                <div className="text-zinc-600 group-hover:text-teal-500 transition-colors">
+                  <ChevronRight size={14} />
                 </div>
               </div>
             ))}
             {linkedUsers.length === 0 && (
-              <div className="text-center py-10">
-                <AlertCircle size={40} className="mx-auto text-zinc-700 mb-4" />
-                <p className="text-zinc-500 text-sm">لا يوجد طلاب مربوطين حالياً.</p>
+              <div className="text-center py-20">
+                <AlertCircle size={40} className="mx-auto text-zinc-800 mb-4 opacity-50" />
+                <p className="text-zinc-600 text-sm">لا يوجد طلاب مربوطين حالياً.</p>
               </div>
             )}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
