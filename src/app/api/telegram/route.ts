@@ -325,7 +325,7 @@ bot.action(/reg_sem_(.+)/, async (ctx) => {
     }
   });
   await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
-  ctx.editMessageText(`🎉 Congratulations Dr. ${newUser.name}! Your account is ready.`, Markup.keyboard([
+  await ctx.reply(`🎉 Congratulations Dr. ${newUser.name}! Your account is ready.`, Markup.keyboard([
     [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
     [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
     [{ text: "👤 My Profile" }]
