@@ -6,7 +6,7 @@ import {
   LayoutDashboard, BookOpen, MessageSquare, Clock, Settings, LogOut,
   ShieldCheck, Bell, X, Sparkles, HelpCircle, Library, User,
   Sun, Moon, Bookmark, Menu, Search as SearchIcon, BarChart3, Video, Mic2,
-  Maximize, Minimize, Youtube
+  Maximize, Minimize, Youtube, Send
 } from "lucide-react";
 
 import { signOut } from "next-auth/react";
@@ -32,6 +32,7 @@ export const NAV = [
   { href: "/podcasts", label: "Podcasts", icon: Mic2 },
   { href: "/forum", label: "Community", icon: MessageSquare },
   { href: "/taskat", label: "Taskat", icon: Clock },
+  { href: "/profile/telegram", label: "Telegram Link", icon: Send, badge: "NEW" },
 ];
 
 

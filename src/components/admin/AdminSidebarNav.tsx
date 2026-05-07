@@ -51,6 +51,7 @@ const NAV_GROUPS: {
   {
     label: "Platform",
     items: [
+      { href: "/admin/telegram", label: "Telegram Bot", icon: MessageSquare, badge: "NEW" },
       { href: "/admin/settings", label: "Settings", icon: Settings },
     ],
   },
