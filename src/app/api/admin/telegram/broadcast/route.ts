@@ -18,7 +18,10 @@ export async function POST(req: Request) {
   const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
   
   const linkedUsers = await prisma.user.findMany({
-    where: { telegramId: { not: null } },
+    where: { 
+      telegramId: { notIn: [null, ""] },
+      telegramVerified: true
+    },
     select: { telegramId: true }
   });
 
