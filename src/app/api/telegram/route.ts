@@ -8,8 +8,9 @@ import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
 
 const STORAGE_GROUP_ID = process.env.TELEGRAM_STORAGE_GROUP_ID;
+const BASE_URL = process.env.NEXTAUTH_URL || 'https://medonex.vercel.app';
 
-const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || '8730612796:AAEgChDIg9OU7-uSTffYeb_sjsE5kXGg9eY');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -40,7 +41,7 @@ const MAIN_KEYBOARD = Markup.keyboard([
   [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
   [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
   [{ text: "👤 My Profile" }],
-  [Markup.button.webApp("📱 Open MedOneX App", `${process.env.NEXTAUTH_URL}/dashboard-app`)]
+  [Markup.button.webApp("📱 Open MedOneX App", `${BASE_URL}/dashboard-app`)]
 ]).resize();
 
 // ─── Bot Logic ───
@@ -59,7 +60,7 @@ bot.start(async (ctx) => {
       { 
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
-          [Markup.button.webApp('📱 Open MedOneX App', `${process.env.NEXTAUTH_URL}/dashboard-app`)],
+          [Markup.button.webApp('📱 Open MedOneX App', `${BASE_URL}/dashboard-app`)],
           [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
           [Markup.button.callback('📝 Quick Register', 'auth_register')]
         ])
@@ -467,11 +468,17 @@ export async function POST(req: Request) {
     console.log(`[TELEGRAM] Incoming update: ${body.update_id} (${Object.keys(body)[1]})`);
     
     // Explicitly handle update to ensure it doesn't hang
-    await bot.handleUpdate(body);
+    // We use a timeout to prevent the edge function from hanging too long
+    await Promise.race([
+      bot.handleUpdate(body),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+    ]);
     
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error("[TELEGRAM] Webhook Error:", e?.message);
-    return NextResponse.json({ ok: false, error: e?.message }, { status: 500 });
+    console.error("[TELEGRAM] Webhook Error:", e);
+    // Return 200 even on error to prevent Telegram from retrying endlessly if the error is persistent
+    // but log it so we can see it in Vercel
+    return NextResponse.json({ ok: false, error: e?.message }, { status: 200 });
   }
 }
