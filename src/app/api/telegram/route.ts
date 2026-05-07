@@ -462,9 +462,14 @@ bot.on('text', async (ctx) => {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    console.log(`[TELEGRAM] Incoming update: ${body.update_id} (${Object.keys(body)[1]})`);
+    
+    // Explicitly handle update to ensure it doesn't hang
     await bot.handleUpdate(body);
+    
     return NextResponse.json({ ok: true });
-  } catch (e) {
-    return NextResponse.json({ ok: false }, { status: 500 });
+  } catch (e: any) {
+    console.error("[TELEGRAM] Webhook Error:", e?.message);
+    return NextResponse.json({ ok: false, error: e?.message }, { status: 500 });
   }
 }
