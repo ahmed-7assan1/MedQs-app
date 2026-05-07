@@ -20,9 +20,14 @@
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: clamp(1rem, 5vw, 2.5rem);
-    padding-right: clamp(1rem, 5vw, 2.5rem);
+    padding-left: clamp(1rem, 6vw, 1.5rem); /* 16px to 24px based on screen */
+    padding-right: clamp(1rem, 6vw, 1.5rem);
   }
+
+  /* 📏 8pt GRID & PROXIMITY UTILITIES */
+  .space-y-title > * + * { margin-top: 0.5rem; }    /* 8px */
+  .space-y-section > * + * { margin-top: 1.5rem; }  /* 24px */
+  .space-y-block > * + * { margin-top: 2.5rem; }    /* 40px */
 
   :where(a, button, input, textarea, select, summary):focus-visible {
     outline: 2px solid hsl(var(--ring));
@@ -33,6 +38,46 @@
     html {
       scroll-behavior: auto;
     }
+  }
+
+  /* 📱 MOBILE UX REVOLUTION: Global Tap Targets & Feedback */
+  @media (max-width: 768px) {
+    button, a, [role="button"], input, select {
+      min-height: 44px; /* Basic guard */
+      touch-action: manipulation;
+    }
+    
+    /* Haptic Feedback on active state */
+    .btn-haptic:active, 
+    button:active:not(:disabled),
+    a:active:not(.no-haptic) {
+      transform: scale(0.96);
+      transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  }
+
+  /* 🦴 SKELETON LOADERS: Premium feel */
+  .skeleton-box {
+    overflow: hidden;
+    background: hsl(var(--muted) / 0.5);
+    position: relative;
+  }
+  .skeleton-box::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0,
+      hsl(var(--muted) / 0.8) 50%,
+      transparent 100%
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
   }
 }
 

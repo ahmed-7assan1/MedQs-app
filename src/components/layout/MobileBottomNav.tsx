@@ -3,7 +3,7 @@
 import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpenText, MessageSquare, Clapperboard, Settings2, PlusCircle, LayoutDashboard, Compass, Sparkles, BookCheck, Clock } from "lucide-react";
+import { House, BookOpenText, Sparkles, BookCheck, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS: {
@@ -20,25 +20,25 @@ const TABS: {
   },
   {
     href: "/modules",
-    label: "Lectures",
+    label: "Library",
     icon: BookOpenText,
     match: (p) => p.startsWith("/modules"),
   },
   {
     href: "/taskat",
-    label: "Tasks",
+    label: "Schedule",
     icon: Clock,
     match: (p) => p.startsWith("/taskat"),
   },
   {
     href: "/quizzes",
-    label: "Quizzes",
+    label: "Practice",
     icon: BookCheck,
     match: (p) => p.startsWith("/quizzes") || p.startsWith("/quiz"),
   },
   {
     href: "/ai-chat",
-    label: "Dr. Q",
+    label: "Ask Dr.Q",
     icon: Sparkles,
     match: (p) => p.startsWith("/ai-chat"),
   },
@@ -49,72 +49,48 @@ export function MobileBottomNav() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[118] flex justify-center md:hidden"
-      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))" }}
+      className="pointer-events-none fixed inset-x-0 bottom-4 z-[118] flex justify-center md:hidden"
     >
       <nav
         className={cn(
-          "pointer-events-auto mx-4 mb-1 w-full max-w-[420px]",
-          "rounded-[22px] border border-white/[0.05] dark:border-white/[0.02]",
-          "bg-background/85 dark:bg-[#141418]/92",
-          "shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_48px_rgba(0,0,0,0.55)]",
-          "backdrop-blur-2xl px-2 py-2"
+          "pointer-events-auto mx-4 w-[92%] max-w-[420px]",
+          "rounded-[28px] border border-white/[0.1] dark:border-white/[0.05]",
+          "bg-white/80 dark:bg-black/80",
+          "shadow-[0_12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]",
+          "backdrop-blur-xl px-2 py-2"
         )}
-        aria-label="Primary navigation"
+        aria-label="Mobile Navigation Bar"
       >
-        <ul className="flex items-center justify-between gap-0">
+        <ul className="flex items-center justify-around">
           {TABS.map(({ href, label, icon: Icon, match }) => {
             const active = match(pathname);
             return (
-              <li key={href} className="flex flex-1 justify-center">
+              <li key={href} className="flex-1">
                 <Link
                   href={href}
-                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative flex min-w-0 flex-1 flex-col items-center gap-[3px]",
-                    "rounded-[16px] px-1 py-2",
-                    "transition-all duration-200 active:scale-90",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    "flex flex-col items-center justify-center gap-1",
+                    "min-h-[48px] min-w-[48px] py-1 transition-all duration-300",
+                    "active:scale-90"
                   )}
                 >
-                  {/* Active pill indicator */}
-                  {active && (
-                    <span
-                      className={cn(
-                        "absolute inset-0 rounded-[16px]",
-                        "bg-primary/10 dark:bg-primary/[0.12]",
-                        "animate-in fade-in zoom-in-90 duration-200"
-                      )}
-                    />
-                  )}
-
-                  {/* Icon wrapper */}
-                  <span
-                    className={cn(
-                      "relative z-10 flex items-center justify-center",
-                      "h-7 w-7 rounded-[11px] transition-all duration-200",
-                      active
-                        ? "text-primary scale-110"
-                        : "text-muted-foreground/60 dark:text-white/35 hover:text-foreground/80"
+                  <div className="relative flex items-center justify-center h-8 w-8">
+                    {active && (
+                      <span className="absolute inset-0 bg-primary/20 dark:bg-primary/30 blur-md rounded-full animate-pulse" />
                     )}
-                  >
                     <Icon
-                      className="h-[1.05rem] w-[1.05rem] transition-transform duration-200"
-                      strokeWidth={active ? 2.5 : 1.8}
-                      aria-hidden
+                      className={cn(
+                        "h-6 w-6 transition-all duration-300",
+                        active ? "text-primary scale-110 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" : "text-muted-foreground/60"
+                      )}
+                      strokeWidth={active ? 2.5 : 2}
                     />
-                  </span>
-
-                  {/* Label */}
+                  </div>
                   <span
                     className={cn(
-                      "relative z-10 max-w-full truncate text-center leading-none",
-                      "transition-all duration-200",
-                      active
-                        ? "text-[9.5px] font-bold text-primary"
-                        : "text-[9px] font-medium text-muted-foreground/50 dark:text-white/30"
+                      "text-[10px] font-bold tracking-tight transition-colors duration-300",
+                      active ? "text-primary" : "text-muted-foreground/50"
                     )}
-                    style={{ fontFeatureSettings: '"ss01"' }}
                   >
                     {label}
                   </span>

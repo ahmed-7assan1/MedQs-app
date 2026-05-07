@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse rounded-lg bg-muted", className)} />
+    <div className={cn("skeleton-box rounded-lg", className)} />
   );
 }
 

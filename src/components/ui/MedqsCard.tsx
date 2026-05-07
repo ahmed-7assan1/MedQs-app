@@ -20,7 +20,7 @@ export function MedqsCard({
         ? "p-4"
         : padding === "lg"
           ? "p-8"
-          : "p-5 md:p-6";
+          : "p-6"; // 24px — perfect for 8pt grid
 
   return (
     <div
