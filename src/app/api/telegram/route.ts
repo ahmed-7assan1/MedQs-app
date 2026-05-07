@@ -141,21 +141,59 @@ bot.action(/lec_(.+)/, async (ctx) => {
 // ─── Telegram Quiz System (Poll Mode) ───
 
 bot.action(/quiz_(.+)/, async (ctx) => {
+  // ✅ Acknowledge IMMEDIATELY to prevent Telegram from retrying the callback
+  await ctx.answerCbQuery('Quiz started! 🎯');
+  
   const lecId = ctx.match[1];
   const questions = await prisma.question.findMany({ where: { lectureId: lecId } });
-  if (questions.length === 0) return ctx.answerCbQuery('No questions available.');
+  if (questions.length === 0) return;
 
-  await ctx.reply(`Starting Quiz (${questions.length} questions)... ✍️`);
+  await ctx.reply(`📝 *Starting Quiz — ${questions.length} questions*\nAnswer each question, then use the 💡 explanation to learn more!`, { parse_mode: 'Markdown' });
   
   for (const q of questions) {
     const choices = q.choices as string[];
     const correctIndex = choices.indexOf(q.answer);
     
+    // Store question body in BotUser tempData so poll_answer can reference it
     await ctx.replyWithQuiz(q.body, choices, {
       correct_option_id: correctIndex >= 0 ? correctIndex : 0,
-      explanation: q.explanation || 'No explanation provided.',
-      explanation_parse_mode: 'Markdown'
+      explanation: (q.explanation || 'No explanation provided.').substring(0, 200),
+      is_anonymous: false  // Non-anonymous so we get poll_answer events
     });
+
+    // Small delay to prevent rate limiting
+    await new Promise(r => setTimeout(r, 500));
+  }
+});
+
+// ─── Poll Answer Handler (AI Interaction on Quiz Answers) ───
+
+bot.on('poll_answer', async (ctx) => {
+  const telegramId = ctx.pollAnswer.user.id.toString();
+  const linkedUser = await getLinkedUser(telegramId);
+  if (!linkedUser) return;
+
+  const optionIds = ctx.pollAnswer.option_ids;
+  if (optionIds.length === 0) return; // User retracted answer
+
+  try {
+    await ctx.telegram.sendChatAction(telegramId, 'typing');
+    
+    const botUser = await getBotUser(telegramId);
+    const config = await getGlobalConfig();
+    
+    const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}] The student just answered a quiz question. Provide a SHORT (2-3 sentences) educational tip or follow-up question to deepen their understanding on this topic. Be encouraging.`;
+    
+    const prompt = `The student answered a medical quiz question. Selected option index: ${optionIds[0]}. Please give a quick educational insight or ask a follow-up question to help them learn more about this topic.`;
+    
+    const aiResponse = await generateAIReplyWithFallback(prompt, systemPrompt, {
+      preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
+    });
+
+    await ctx.telegram.sendMessage(telegramId, `🧠 *Dr. Q:*\n\n${aiResponse.text}`, { parse_mode: 'Markdown' });
+  } catch (e) {
+    // Silent fail — don't interrupt quiz flow
+    console.error('poll_answer AI error:', e);
   }
 });
 
