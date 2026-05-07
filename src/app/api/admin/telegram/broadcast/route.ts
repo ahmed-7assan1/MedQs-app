@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   
   const linkedUsers = await prisma.user.findMany({
     where: { 
-      telegramId: { notIn: [null, ""] },
+      telegramId: { not: null, not: "" },
       telegramVerified: true
     },
     select: { telegramId: true }

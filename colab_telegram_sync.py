@@ -4,7 +4,7 @@
 # ╚══════════════════════════════════════════════════════════════╝
 
 # ─── Cell 1: Install Dependencies ───────────────────────────────────────────
-!pip install requests tqdm yt-dlp -q
+# !pip install requests tqdm yt-dlp -q  # Uncomment if running in Google Colab
 
 # ─── Cell 2: Configuration ──────────────────────────────────────────────────
 import requests, os, time, json, re
@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 # ── Fill these in ──
 BOT_TOKEN    = "8730612796:AAEgChDIg9OU7-uSTffYeb_sjsE5kXGg9eY"   # Your bot token
-GROUP_ID     = -1002xxxxxxxxx   # Your supergroup ID (negative number, must have Topics enabled)
+GROUP_ID     = -1003146628517   # Your supergroup ID (negative number, must have Topics enabled)
 API_BASE_URL = "https://medonex.vercel.app"                         # Your platform URL
 SEMESTER_ID  = "PASTE_SEMESTER_ID_HERE"                             # Target semester ID
 ADMIN_SECRET = ""   # Optional: admin API key if your routes require auth
