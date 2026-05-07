@@ -168,33 +168,37 @@ bot.action(/quiz_(.+)/, async (ctx) => {
 
 // ─── Poll Answer Handler (AI Interaction on Quiz Answers) ───
 
-bot.on('poll_answer', async (ctx) => {
-  const telegramId = ctx.pollAnswer.user.id.toString();
-  const linkedUser = await getLinkedUser(telegramId);
-  if (!linkedUser) return;
-
+bot.on('poll_answer', (ctx) => {
+  // 🔥 Fire-and-forget: never block the quiz flow
+  const user = ctx.pollAnswer.user;
+  if (!user) return;
+  
   const optionIds = ctx.pollAnswer.option_ids;
-  if (optionIds.length === 0) return; // User retracted answer
+  if (optionIds.length === 0) return;
 
-  try {
-    await ctx.telegram.sendChatAction(telegramId, 'typing');
-    
-    const botUser = await getBotUser(telegramId);
-    const config = await getGlobalConfig();
-    
-    const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}] The student just answered a quiz question. Provide a SHORT (2-3 sentences) educational tip or follow-up question to deepen their understanding on this topic. Be encouraging.`;
-    
-    const prompt = `The student answered a medical quiz question. Selected option index: ${optionIds[0]}. Please give a quick educational insight or ask a follow-up question to help them learn more about this topic.`;
-    
-    const aiResponse = await generateAIReplyWithFallback(prompt, systemPrompt, {
-      preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
-    });
+  const telegramId = user.id.toString();
 
-    await ctx.telegram.sendMessage(telegramId, `🧠 *Dr. Q:*\n\n${aiResponse.text}`, { parse_mode: 'Markdown' });
-  } catch (e) {
-    // Silent fail — don't interrupt quiz flow
-    console.error('poll_answer AI error:', e);
-  }
+  // Run AI response asynchronously without awaiting
+  (async () => {
+    try {
+      const linkedUser = await getLinkedUser(telegramId);
+      if (!linkedUser) return;
+
+      const botUser = await getBotUser(telegramId);
+      const config = await getGlobalConfig();
+
+      const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}] Give a SHORT (2-3 sentences max) educational insight after the student answered a quiz question. Be encouraging and concise.`;
+      const prompt = `Student answered option index ${optionIds[0]} on a medical quiz. Give a brief educational tip or follow-up question on this medical topic.`;
+
+      const aiResponse = await generateAIReplyWithFallback(prompt, systemPrompt, {
+        preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
+      });
+
+      await ctx.telegram.sendMessage(telegramId, `🧠 *Dr. Q:* ${aiResponse.text}`, { parse_mode: 'Markdown' });
+    } catch {
+      // Silent fail — never show errors for quiz follow-up
+    }
+  })();
 });
 
 // ─── Handlers for Registration Selections ───
@@ -273,19 +277,24 @@ bot.on('text', async (ctx) => {
   const linkedUser = await getLinkedUser(telegramId);
   if (!linkedUser) return ctx.reply('Please login to continue.');
 
-  if (userMessage === "🧠 Ask Dr. Q") return ctx.reply("I'm listening! Ask me any medical question.");
-  if (userMessage === "📊 Dashboard") return ctx.reply(`📊 *Dashboard*\n\nName: ${linkedUser.name}\nUni: ${linkedUser.university?.name || 'N/A'}\nPoints: ${linkedUser.points || 0}`, { parse_mode: 'Markdown' });
+  if (userMessage === "🧠 Ask Dr. Q") return ctx.reply("I'm listening! Ask me any medical question. 🩺");
+  if (userMessage === "📊 Dashboard") {
+    const dashUser = await getLinkedUser(telegramId);
+    return ctx.reply(`📊 *Dashboard*\n\nName: ${dashUser?.name}\nUni: ${dashUser?.university?.name || 'N/A'}\nPoints: ${dashUser?.points || 0}`, { parse_mode: 'Markdown' });
+  }
 
   await ctx.sendChatAction('typing');
   try {
     const config = await getGlobalConfig();
     const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}]`;
+    // Try all providers silently — no error messages shown to user
     const aiResponse = await generateAIReplyWithFallback(userMessage, systemPrompt, {
       preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
     });
     await ctx.reply(aiResponse.text, { parse_mode: 'Markdown' });
-  } catch (e: any) {
-    ctx.reply(`AI Error: ${e.message}`);
+  } catch {
+    // All providers exhausted — show a friendly generic message, not a technical error
+    ctx.reply('🩺 Dr. Q is temporarily busy. Please try again in a moment.');
   }
 });
 
