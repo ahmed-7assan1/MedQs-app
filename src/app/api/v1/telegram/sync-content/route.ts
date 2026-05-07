@@ -47,3 +47,35 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+/**
+ * 📥 Save Telegram File IDs from Colab
+ */
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { type, id, telegramMessageId, telegramChatId, botToken } = body;
+
+    // Security Check
+    if (!botToken || botToken !== process.env.TELEGRAM_BOT_TOKEN) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const data = { 
+      telegramMessageId: parseInt(telegramMessageId), 
+      telegramChatId: telegramChatId.toString() 
+    };
+
+    if (type === 'file') {
+      await prisma.lectureFile.update({ where: { id }, data });
+    } else if (type === 'video') {
+      await prisma.lectureVideo.update({ where: { id }, data });
+    } else if (type === 'record') {
+      await prisma.lectureRecord.update({ where: { id }, data });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

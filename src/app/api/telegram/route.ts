@@ -182,25 +182,41 @@ bot.action(/lec_(.+)/, async (ctx) => {
   });
   if (!lec) return ctx.answerCbQuery('Lecture not found.');
 
+  await ctx.answerCbQuery();
+
   let res = `🎓 *${lec.title}*\n\n`;
-  if (lec.records.length > 0) {
-    res += `🎙 *Records:*\n`;
-    lec.records.forEach(r => res += `• [${r.title}](${r.url})\n`);
-  }
-  if (lec.files.length > 0) {
-    res += `\n📂 *Files:*\n`;
-    lec.files.forEach(f => res += `• [${f.name}](${f.url})\n`);
-  }
-  if (lec.videos.length > 0) {
-    res += `\n📺 *Videos:*\n`;
-    lec.videos.forEach(v => res += `• [${v.title}](${v.url})\n`);
+  if (lec.records.length > 0) res += `🎙 *Records:*\n`;
+  if (lec.files.length > 0) res += `\n📂 *Files:*\n`;
+  if (lec.videos.length > 0) res += `\n📺 *Videos:*\n`;
+
+  // 🚀 INSTANT DELIVERY SYSTEM
+  // If files are archived in the group, send them directly!
+  const allAttachments = [...lec.files, ...lec.videos, ...lec.records];
+  
+  for (const item of allAttachments) {
+    if (item.telegramMessageId && item.telegramChatId) {
+      try {
+        await ctx.telegram.copyMessage(ctx.from!.id, item.telegramChatId, item.telegramMessageId);
+      } catch (e) {
+        // Fallback to link if copy fails
+        const title = (item as any).name || (item as any).title;
+        await ctx.reply(`🔗 [${title}](${item.url})`, { parse_mode: 'Markdown' });
+      }
+    } else {
+      // Send as link if not archived yet
+      const title = (item as any).name || (item as any).title;
+      await ctx.reply(`🔗 [${title}](${item.url})`, { parse_mode: 'Markdown' });
+    }
   }
 
   const buttons: ReturnType<typeof Markup.button.callback>[][] = [];
   if (lec.questions.length > 0) buttons.push([Markup.button.callback(`✍️ Start Quiz (${lec.questions.length})`, `quiz_${lec.id}`)]);
-  buttons.push([Markup.button.callback('⬅️ Back', `mod_back`)]);
+  buttons.push([Markup.button.callback('⬅️ Back', `mod_${lec.subjectId}`)]);
 
-  await ctx.editMessageText(res, { parse_mode: 'Markdown', ...Markup.inlineKeyboard(buttons) }).catch(() => ctx.reply(res, { parse_mode: 'Markdown', ...Markup.inlineKeyboard(buttons) }));
+  await ctx.reply(`_Select an option:_`, { 
+    parse_mode: 'Markdown', 
+    ...Markup.inlineKeyboard(buttons) 
+  });
 });
 
 // ─── Telegram Quiz System (Poll Mode) ───
