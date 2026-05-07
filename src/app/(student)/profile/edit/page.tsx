@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Loader2, User, Phone, BookOpen, Palette } from "lucide-react";
+import { Save, Loader2, User, Phone, BookOpen, Palette, Send } from "lucide-react";
 import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -33,6 +33,9 @@ export default function EditProfilePage() {
     facebookUrl: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [telegramVerified, setTelegramVerified] = useState(false);
+  const [telegramCode, setTelegramCode] = useState("");
+  const [linking, setLinking] = useState(false);
   const [selectedUni,    setSelectedUni]    = useState("");
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [selectedYear,   setSelectedYear]   = useState("");
@@ -84,6 +87,7 @@ export default function EditProfilePage() {
             facebookUrl:   me.facebookUrl   ?? "",
           });
           setAvatarUrl(me.image ?? null);
+          setTelegramVerified(me.telegramVerified ?? false);
           setSelectedUni(me.universityId ?? "");
           setSelectedFaculty(me.facultyId ?? "");
           const mySem = sems.find((s) => s.id === me.semesterId);
@@ -117,6 +121,30 @@ export default function EditProfilePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     });
+  }
+
+  async function handleLinkTelegram() {
+    if (!telegramCode.trim()) return;
+    setLinking(true);
+    try {
+      const res = await fetch("/api/v1/auth/link-telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: telegramCode.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to link Telegram");
+        return;
+      }
+      toast.success("Telegram linked successfully!");
+      setTelegramVerified(true);
+      setTelegramCode("");
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setLinking(false);
+    }
   }
 
   async function handleSave() {
@@ -242,6 +270,50 @@ export default function EditProfilePage() {
             </div>
             <span className="text-sm">Private profile — visitors see only limited details</span>
           </div>
+        </div>
+
+        {/* Telegram Linking */}
+        <div className="rounded-2xl border border-white/[0.02] bg-white/[0.02] p-5 lg:p-6 space-y-5">
+          <div className="flex items-center gap-2">
+            <Send className="h-4 w-4 text-[#0088cc]" />
+            <h2 className="font-semibold text-white">Telegram Account</h2>
+          </div>
+          
+          {telegramVerified ? (
+            <div className="flex items-center gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4">
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-sm font-bold text-emerald-500">Your account is linked to Telegram! ✅</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-[13px] text-white/60 leading-relaxed">
+                Link your account to the <b>MedOneX Bot</b> to receive lecture files, take interactive quizzes, and chat with Dr. Q directly on Telegram.
+              </p>
+              
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={telegramCode} 
+                  onChange={(e) => setTelegramCode(e.target.value)}
+                  placeholder="Enter 6-digit code..."
+                  className="flex-1 rounded-xl border border-white/[0.02] bg-white/[0.04] px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#0088cc] transition-all" 
+                />
+                <button 
+                  onClick={handleLinkTelegram}
+                  disabled={linking || !telegramCode}
+                  className="px-6 rounded-xl bg-[#0088cc] text-sm font-bold text-white hover:bg-[#007bb5] disabled:opacity-50 transition-all flex items-center gap-2"
+                >
+                  {linking ? <Loader2 className="h-4 w-4 animate-spin" /> : "Link Now"}
+                </button>
+              </div>
+              
+              <div className="rounded-xl bg-white/5 p-3">
+                <p className="text-[11px] text-white/40 italic">
+                  Don't have a code? Open <a href="https://t.me/MedOneX_bot" target="_blank" className="text-[#0088cc] hover:underline">@MedOneX_bot</a> and click <b>Start</b> then <b>Login</b>.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5 space-y-3">
