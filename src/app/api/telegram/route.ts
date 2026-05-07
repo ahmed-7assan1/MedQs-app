@@ -39,7 +39,8 @@ async function getGlobalConfig() {
 const MAIN_KEYBOARD = Markup.keyboard([
   [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
   [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
-  [{ text: "👤 My Profile" }]
+  [{ text: "👤 My Profile" }],
+  [Markup.button.webApp("📱 Open MedOneX App", `${process.env.NEXTAUTH_URL}/dashboard-app`)]
 ]).resize();
 
 // ─── Bot Logic ───
@@ -58,6 +59,7 @@ bot.start(async (ctx) => {
       { 
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
+          [Markup.button.webApp('📱 Open MedOneX App', `${process.env.NEXTAUTH_URL}/dashboard-app`)],
           [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
           [Markup.button.callback('📝 Quick Register', 'auth_register')]
         ])
