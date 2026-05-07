@@ -67208,6 +67208,7 @@ export namespace Prisma {
     preferredProvider: number
     personalKey: number
     waitingForKeyProvider: number
+    tempData: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -67240,6 +67241,7 @@ export namespace Prisma {
     preferredProvider?: true
     personalKey?: true
     waitingForKeyProvider?: true
+    tempData?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -67323,6 +67325,7 @@ export namespace Prisma {
     preferredProvider: string | null
     personalKey: string | null
     waitingForKeyProvider: string | null
+    tempData: JsonValue | null
     createdAt: Date
     updatedAt: Date
     _count: BotUserCountAggregateOutputType | null
@@ -67350,6 +67353,7 @@ export namespace Prisma {
     preferredProvider?: boolean
     personalKey?: boolean
     waitingForKeyProvider?: boolean
+    tempData?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["botUser"]>
@@ -67360,6 +67364,7 @@ export namespace Prisma {
     preferredProvider?: boolean
     personalKey?: boolean
     waitingForKeyProvider?: boolean
+    tempData?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["botUser"]>
@@ -67370,6 +67375,7 @@ export namespace Prisma {
     preferredProvider?: boolean
     personalKey?: boolean
     waitingForKeyProvider?: boolean
+    tempData?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -67384,6 +67390,7 @@ export namespace Prisma {
       preferredProvider: string | null
       personalKey: string | null
       waitingForKeyProvider: string | null
+      tempData: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["botUser"]>
@@ -67784,6 +67791,7 @@ export namespace Prisma {
     readonly preferredProvider: FieldRef<"BotUser", 'String'>
     readonly personalKey: FieldRef<"BotUser", 'String'>
     readonly waitingForKeyProvider: FieldRef<"BotUser", 'String'>
+    readonly tempData: FieldRef<"BotUser", 'Json'>
     readonly createdAt: FieldRef<"BotUser", 'DateTime'>
     readonly updatedAt: FieldRef<"BotUser", 'DateTime'>
   }
@@ -68897,6 +68905,7 @@ export namespace Prisma {
     preferredProvider: 'preferredProvider',
     personalKey: 'personalKey',
     waitingForKeyProvider: 'waitingForKeyProvider',
+    tempData: 'tempData',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -73621,6 +73630,7 @@ export namespace Prisma {
     preferredProvider?: StringNullableFilter<"BotUser"> | string | null
     personalKey?: StringNullableFilter<"BotUser"> | string | null
     waitingForKeyProvider?: StringNullableFilter<"BotUser"> | string | null
+    tempData?: JsonNullableFilter<"BotUser">
     createdAt?: DateTimeFilter<"BotUser"> | Date | string
     updatedAt?: DateTimeFilter<"BotUser"> | Date | string
   }
@@ -73631,6 +73641,7 @@ export namespace Prisma {
     preferredProvider?: SortOrderInput | SortOrder
     personalKey?: SortOrderInput | SortOrder
     waitingForKeyProvider?: SortOrderInput | SortOrder
+    tempData?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -73644,6 +73655,7 @@ export namespace Prisma {
     preferredProvider?: StringNullableFilter<"BotUser"> | string | null
     personalKey?: StringNullableFilter<"BotUser"> | string | null
     waitingForKeyProvider?: StringNullableFilter<"BotUser"> | string | null
+    tempData?: JsonNullableFilter<"BotUser">
     createdAt?: DateTimeFilter<"BotUser"> | Date | string
     updatedAt?: DateTimeFilter<"BotUser"> | Date | string
   }, "id" | "telegramId">
@@ -73654,6 +73666,7 @@ export namespace Prisma {
     preferredProvider?: SortOrderInput | SortOrder
     personalKey?: SortOrderInput | SortOrder
     waitingForKeyProvider?: SortOrderInput | SortOrder
+    tempData?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: BotUserCountOrderByAggregateInput
@@ -73670,6 +73683,7 @@ export namespace Prisma {
     preferredProvider?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
     personalKey?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
     waitingForKeyProvider?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
+    tempData?: JsonNullableWithAggregatesFilter<"BotUser">
     createdAt?: DateTimeWithAggregatesFilter<"BotUser"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BotUser"> | Date | string
   }
@@ -78332,6 +78346,7 @@ export namespace Prisma {
     preferredProvider?: string | null
     personalKey?: string | null
     waitingForKeyProvider?: string | null
+    tempData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78342,6 +78357,7 @@ export namespace Prisma {
     preferredProvider?: string | null
     personalKey?: string | null
     waitingForKeyProvider?: string | null
+    tempData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78352,6 +78368,7 @@ export namespace Prisma {
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
     personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    tempData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78362,6 +78379,7 @@ export namespace Prisma {
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
     personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    tempData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78372,6 +78390,7 @@ export namespace Prisma {
     preferredProvider?: string | null
     personalKey?: string | null
     waitingForKeyProvider?: string | null
+    tempData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78382,6 +78401,7 @@ export namespace Prisma {
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
     personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    tempData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78392,6 +78412,7 @@ export namespace Prisma {
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
     personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    tempData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -81613,6 +81634,7 @@ export namespace Prisma {
     preferredProvider?: SortOrder
     personalKey?: SortOrder
     waitingForKeyProvider?: SortOrder
+    tempData?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

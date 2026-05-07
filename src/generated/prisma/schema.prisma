@@ -978,7 +978,8 @@ model BotUser {
   telegramId            String   @unique
   preferredProvider     String?  @default("gemini")
   personalKey           String?  @db.Text
-  waitingForKeyProvider String? // To track state (e.g., "gemini", "groq")
+  waitingForKeyProvider String?
+  tempData              Json? // To store registration steps (name, email, etc.)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

@@ -754,6 +754,7 @@ exports.Prisma.BotUserScalarFieldEnum = {
   preferredProvider: 'preferredProvider',
   personalKey: 'personalKey',
   waitingForKeyProvider: 'waitingForKeyProvider',
+  tempData: 'tempData',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
