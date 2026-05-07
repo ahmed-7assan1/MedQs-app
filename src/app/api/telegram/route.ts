@@ -97,7 +97,7 @@ bot.command('settings', async (ctx) => {
 
 // Action Handlers
 bot.action('change_provider', (ctx) => {
-  ctx.editMessageText('اختر محرك الذكاء الاصطناعي المفضل لديك:', 
+  ctx.editMessageText('اختر محرك الذكاء الاصطناعي المفضل لديك ليتم استخدامه افتراضياً:', 
     Markup.inlineKeyboard([
       [Markup.button.callback('Google Gemini', 'prov_gemini'), Markup.button.callback('Groq (Llama)', 'prov_groq')],
       [Markup.button.callback('xAI Grok', 'prov_xai'), Markup.button.callback('DuckDuckGo (Free)', 'prov_duckduckgo')],
@@ -116,8 +116,70 @@ bot.action(/prov_(.+)/, async (ctx) => {
   ctx.editMessageText(`✅ تم تحديث المحرك بنجاح إلى: ${provider.toUpperCase()}`);
 });
 
+// Interactive API Key Setup
 bot.action('set_key_hint', (ctx) => {
-  ctx.reply('لإضافة مفتاح الـ API الخاص بك، استخدم الأمر التالي:\n\n`/setkey YOUR_API_KEY`', { parse_mode: 'Markdown' });
+  ctx.editMessageText('اختر المحرك الذي تريد إضافة مفتاح الـ API الخاص به:', 
+    Markup.inlineKeyboard([
+      [Markup.button.callback('Google Gemini 🧠', 'setup_gemini'), Markup.button.callback('Groq (Llama) ⚡️', 'setup_groq')],
+      [Markup.button.callback('xAI Grok 🌌', 'setup_xai'), Markup.button.callback('OpenAI (GPT) 🦾', 'setup_openai')],
+      [Markup.button.callback('العودة للإعدادات ⚙️', 'back_to_settings')]
+    ])
+  );
+});
+
+bot.action(/setup_(.+)/, async (ctx) => {
+  const provider = ctx.match[1];
+  await prisma.botUser.update({
+    where: { telegramId: ctx.from!.id.toString() },
+    data: { waitingForKeyProvider: provider }
+  });
+  
+  let helpText = '';
+  let helpUrl = '';
+  
+  switch(provider) {
+    case 'gemini': 
+      helpText = 'للحصول على مفتاح Gemini مجاناً:\n1. اذهب إلى Google AI Studio.\n2. اضغط على Get API Key.';
+      helpUrl = 'https://aistudio.google.com/app/apikey';
+      break;
+    case 'groq':
+      helpText = 'للحصول على مفتاح Groq (الأسرع):\n1. اذهب إلى Groq Console.\n2. أنشئ مفتاحاً جديداً.';
+      helpUrl = 'https://console.groq.com/keys';
+      break;
+    case 'openai':
+      helpText = 'للحصول على مفتاح OpenAI:\n1. اذهب إلى OpenAI Dashboard.\n2. أنشئ API Key.';
+      helpUrl = 'https://platform.openai.com/api-keys';
+      break;
+    default:
+      helpText = 'يرجى الذهاب لموقع المزود الرسمي للحصول على المفتاح.';
+  }
+
+  await ctx.editMessageText(`🔑 لقد اخترت إعداد مفتاح لـ *${provider.toUpperCase()}*\n\n${helpText}\n\n*أرسل المفتاح الآن في رسالة نصية ليتم حفظه.*`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.url('فتح صفحة الـ API 🔗', helpUrl)],
+      [Markup.button.callback('إلغاء ❌', 'back_to_settings')]
+    ])
+  });
+});
+
+bot.action('back_to_settings', async (ctx) => {
+  const user = await getBotUser(ctx.from!.id.toString());
+  const provider = user.preferredProvider || 'Default';
+  await prisma.botUser.update({
+    where: { telegramId: ctx.from!.id.toString() },
+    data: { waitingForKeyProvider: null }
+  });
+  ctx.editMessageText(`⚙️ إعدادات الذكاء الاصطناعي الخاصة بك:
+  
+📍 المحرك الحالي: ${provider.toUpperCase()}
+🔑 مفتاح الـ API: ${user.personalKey ? '✅ مضاف' : '❌ غير مضاف'}
+
+يمكنك تغيير المحرك أو إضافة مفتاحك الخاص باستخدام الأزرار أدناه:`, 
+  Markup.inlineKeyboard([
+    [Markup.button.callback('تغيير المحرك 🤖', 'change_provider')],
+    [Markup.button.callback('إضافة/تعديل API Key 🔑', 'set_key_hint')]
+  ]));
 });
 
 bot.command('setkey', async (ctx) => {
@@ -126,10 +188,10 @@ bot.command('setkey', async (ctx) => {
   
   await prisma.botUser.update({
     where: { telegramId: ctx.from.id.toString() },
-    data: { personalKey: key }
+    data: { personalKey: key, waitingForKeyProvider: null }
   });
   
-  ctx.reply('✅ تم حفظ مفتاح الـ API الخاص بك بنجاح! سأقوم باستخدامه في ردودي القادمة.');
+  ctx.reply('✅ تم حفظ مفتاح الـ API الخاص بك بنجاح!');
 });
 
 bot.command('about', (ctx) => {
@@ -156,6 +218,26 @@ try {
 
 // Handle text messages with AI
 bot.on('text', async (ctx) => {
+  const telegramId = ctx.from.id.toString();
+  const user = await getBotUser(telegramId);
+
+  // Check if we are waiting for an API Key
+  if (user.waitingForKeyProvider) {
+    const key = ctx.message.text.trim();
+    if (key.length < 10) return ctx.reply('❌ يبدو أن المفتاح غير صحيح، يرجى التأكد وإرساله مجدداً أو الضغط على /start للإلغاء.');
+    
+    await prisma.botUser.update({
+      where: { telegramId },
+      data: { 
+        personalKey: key, 
+        waitingForKeyProvider: null,
+        preferredProvider: user.waitingForKeyProvider 
+      }
+    });
+    
+    return ctx.reply(`✅ تم بنجاح حفظ مفتاح الـ API لـ *${user.waitingForKeyProvider.toUpperCase()}*\nسأستخدمه الآن في جميع ردودي القادمة.`, { parse_mode: 'Markdown' });
+  }
+
   const userMessage = ctx.message.text.toLowerCase();
   
   // 🔍 Founder Recognition Logic
@@ -186,9 +268,7 @@ bot.on('text', async (ctx) => {
   await ctx.sendChatAction('typing');
 
   try {
-    const telegramId = ctx.from.id.toString();
-    const [user, linkedUser, globalConfig] = await Promise.all([
-      getBotUser(telegramId),
+    const [linkedUser, globalConfig] = await Promise.all([
       getLinkedUser(telegramId),
       getGlobalConfig()
     ]);

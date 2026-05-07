@@ -67185,9 +67185,9 @@ export namespace Prisma {
   export type BotUserMinAggregateOutputType = {
     id: string | null
     telegramId: string | null
-    personalKey: string | null
     preferredProvider: string | null
-    customModel: string | null
+    personalKey: string | null
+    waitingForKeyProvider: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -67195,9 +67195,9 @@ export namespace Prisma {
   export type BotUserMaxAggregateOutputType = {
     id: string | null
     telegramId: string | null
-    personalKey: string | null
     preferredProvider: string | null
-    customModel: string | null
+    personalKey: string | null
+    waitingForKeyProvider: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -67205,9 +67205,9 @@ export namespace Prisma {
   export type BotUserCountAggregateOutputType = {
     id: number
     telegramId: number
-    personalKey: number
     preferredProvider: number
-    customModel: number
+    personalKey: number
+    waitingForKeyProvider: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -67217,9 +67217,9 @@ export namespace Prisma {
   export type BotUserMinAggregateInputType = {
     id?: true
     telegramId?: true
-    personalKey?: true
     preferredProvider?: true
-    customModel?: true
+    personalKey?: true
+    waitingForKeyProvider?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -67227,9 +67227,9 @@ export namespace Prisma {
   export type BotUserMaxAggregateInputType = {
     id?: true
     telegramId?: true
-    personalKey?: true
     preferredProvider?: true
-    customModel?: true
+    personalKey?: true
+    waitingForKeyProvider?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -67237,9 +67237,9 @@ export namespace Prisma {
   export type BotUserCountAggregateInputType = {
     id?: true
     telegramId?: true
-    personalKey?: true
     preferredProvider?: true
-    customModel?: true
+    personalKey?: true
+    waitingForKeyProvider?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -67320,9 +67320,9 @@ export namespace Prisma {
   export type BotUserGroupByOutputType = {
     id: string
     telegramId: string
-    personalKey: string | null
     preferredProvider: string | null
-    customModel: string | null
+    personalKey: string | null
+    waitingForKeyProvider: string | null
     createdAt: Date
     updatedAt: Date
     _count: BotUserCountAggregateOutputType | null
@@ -67347,9 +67347,9 @@ export namespace Prisma {
   export type BotUserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     telegramId?: boolean
-    personalKey?: boolean
     preferredProvider?: boolean
-    customModel?: boolean
+    personalKey?: boolean
+    waitingForKeyProvider?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["botUser"]>
@@ -67357,9 +67357,9 @@ export namespace Prisma {
   export type BotUserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     telegramId?: boolean
-    personalKey?: boolean
     preferredProvider?: boolean
-    customModel?: boolean
+    personalKey?: boolean
+    waitingForKeyProvider?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["botUser"]>
@@ -67367,9 +67367,9 @@ export namespace Prisma {
   export type BotUserSelectScalar = {
     id?: boolean
     telegramId?: boolean
-    personalKey?: boolean
     preferredProvider?: boolean
-    customModel?: boolean
+    personalKey?: boolean
+    waitingForKeyProvider?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -67381,9 +67381,9 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       telegramId: string
-      personalKey: string | null
       preferredProvider: string | null
-      customModel: string | null
+      personalKey: string | null
+      waitingForKeyProvider: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["botUser"]>
@@ -67781,9 +67781,9 @@ export namespace Prisma {
   interface BotUserFieldRefs {
     readonly id: FieldRef<"BotUser", 'String'>
     readonly telegramId: FieldRef<"BotUser", 'String'>
-    readonly personalKey: FieldRef<"BotUser", 'String'>
     readonly preferredProvider: FieldRef<"BotUser", 'String'>
-    readonly customModel: FieldRef<"BotUser", 'String'>
+    readonly personalKey: FieldRef<"BotUser", 'String'>
+    readonly waitingForKeyProvider: FieldRef<"BotUser", 'String'>
     readonly createdAt: FieldRef<"BotUser", 'DateTime'>
     readonly updatedAt: FieldRef<"BotUser", 'DateTime'>
   }
@@ -68894,9 +68894,9 @@ export namespace Prisma {
   export const BotUserScalarFieldEnum: {
     id: 'id',
     telegramId: 'telegramId',
-    personalKey: 'personalKey',
     preferredProvider: 'preferredProvider',
-    customModel: 'customModel',
+    personalKey: 'personalKey',
+    waitingForKeyProvider: 'waitingForKeyProvider',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -73618,9 +73618,9 @@ export namespace Prisma {
     NOT?: BotUserWhereInput | BotUserWhereInput[]
     id?: StringFilter<"BotUser"> | string
     telegramId?: StringFilter<"BotUser"> | string
-    personalKey?: StringNullableFilter<"BotUser"> | string | null
     preferredProvider?: StringNullableFilter<"BotUser"> | string | null
-    customModel?: StringNullableFilter<"BotUser"> | string | null
+    personalKey?: StringNullableFilter<"BotUser"> | string | null
+    waitingForKeyProvider?: StringNullableFilter<"BotUser"> | string | null
     createdAt?: DateTimeFilter<"BotUser"> | Date | string
     updatedAt?: DateTimeFilter<"BotUser"> | Date | string
   }
@@ -73628,9 +73628,9 @@ export namespace Prisma {
   export type BotUserOrderByWithRelationInput = {
     id?: SortOrder
     telegramId?: SortOrder
-    personalKey?: SortOrderInput | SortOrder
     preferredProvider?: SortOrderInput | SortOrder
-    customModel?: SortOrderInput | SortOrder
+    personalKey?: SortOrderInput | SortOrder
+    waitingForKeyProvider?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -73641,9 +73641,9 @@ export namespace Prisma {
     AND?: BotUserWhereInput | BotUserWhereInput[]
     OR?: BotUserWhereInput[]
     NOT?: BotUserWhereInput | BotUserWhereInput[]
-    personalKey?: StringNullableFilter<"BotUser"> | string | null
     preferredProvider?: StringNullableFilter<"BotUser"> | string | null
-    customModel?: StringNullableFilter<"BotUser"> | string | null
+    personalKey?: StringNullableFilter<"BotUser"> | string | null
+    waitingForKeyProvider?: StringNullableFilter<"BotUser"> | string | null
     createdAt?: DateTimeFilter<"BotUser"> | Date | string
     updatedAt?: DateTimeFilter<"BotUser"> | Date | string
   }, "id" | "telegramId">
@@ -73651,9 +73651,9 @@ export namespace Prisma {
   export type BotUserOrderByWithAggregationInput = {
     id?: SortOrder
     telegramId?: SortOrder
-    personalKey?: SortOrderInput | SortOrder
     preferredProvider?: SortOrderInput | SortOrder
-    customModel?: SortOrderInput | SortOrder
+    personalKey?: SortOrderInput | SortOrder
+    waitingForKeyProvider?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: BotUserCountOrderByAggregateInput
@@ -73667,9 +73667,9 @@ export namespace Prisma {
     NOT?: BotUserScalarWhereWithAggregatesInput | BotUserScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"BotUser"> | string
     telegramId?: StringWithAggregatesFilter<"BotUser"> | string
-    personalKey?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
     preferredProvider?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
-    customModel?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
+    personalKey?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
+    waitingForKeyProvider?: StringNullableWithAggregatesFilter<"BotUser"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BotUser"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BotUser"> | Date | string
   }
@@ -78329,9 +78329,9 @@ export namespace Prisma {
   export type BotUserCreateInput = {
     id?: string
     telegramId: string
-    personalKey?: string | null
     preferredProvider?: string | null
-    customModel?: string | null
+    personalKey?: string | null
+    waitingForKeyProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78339,9 +78339,9 @@ export namespace Prisma {
   export type BotUserUncheckedCreateInput = {
     id?: string
     telegramId: string
-    personalKey?: string | null
     preferredProvider?: string | null
-    customModel?: string | null
+    personalKey?: string | null
+    waitingForKeyProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78349,9 +78349,9 @@ export namespace Prisma {
   export type BotUserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     telegramId?: StringFieldUpdateOperationsInput | string
-    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
-    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78359,9 +78359,9 @@ export namespace Prisma {
   export type BotUserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     telegramId?: StringFieldUpdateOperationsInput | string
-    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
-    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78369,9 +78369,9 @@ export namespace Prisma {
   export type BotUserCreateManyInput = {
     id?: string
     telegramId: string
-    personalKey?: string | null
     preferredProvider?: string | null
-    customModel?: string | null
+    personalKey?: string | null
+    waitingForKeyProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78379,9 +78379,9 @@ export namespace Prisma {
   export type BotUserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     telegramId?: StringFieldUpdateOperationsInput | string
-    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
-    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78389,9 +78389,9 @@ export namespace Prisma {
   export type BotUserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     telegramId?: StringFieldUpdateOperationsInput | string
-    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
     preferredProvider?: NullableStringFieldUpdateOperationsInput | string | null
-    customModel?: NullableStringFieldUpdateOperationsInput | string | null
+    personalKey?: NullableStringFieldUpdateOperationsInput | string | null
+    waitingForKeyProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -81610,9 +81610,9 @@ export namespace Prisma {
   export type BotUserCountOrderByAggregateInput = {
     id?: SortOrder
     telegramId?: SortOrder
-    personalKey?: SortOrder
     preferredProvider?: SortOrder
-    customModel?: SortOrder
+    personalKey?: SortOrder
+    waitingForKeyProvider?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -81620,9 +81620,9 @@ export namespace Prisma {
   export type BotUserMaxOrderByAggregateInput = {
     id?: SortOrder
     telegramId?: SortOrder
-    personalKey?: SortOrder
     preferredProvider?: SortOrder
-    customModel?: SortOrder
+    personalKey?: SortOrder
+    waitingForKeyProvider?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -81630,9 +81630,9 @@ export namespace Prisma {
   export type BotUserMinOrderByAggregateInput = {
     id?: SortOrder
     telegramId?: SortOrder
-    personalKey?: SortOrder
     preferredProvider?: SortOrder
-    customModel?: SortOrder
+    personalKey?: SortOrder
+    waitingForKeyProvider?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

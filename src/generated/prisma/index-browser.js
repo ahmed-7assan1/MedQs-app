@@ -751,9 +751,9 @@ exports.Prisma.PlatformMemberScalarFieldEnum = {
 exports.Prisma.BotUserScalarFieldEnum = {
   id: 'id',
   telegramId: 'telegramId',
-  personalKey: 'personalKey',
   preferredProvider: 'preferredProvider',
-  customModel: 'customModel',
+  personalKey: 'personalKey',
+  waitingForKeyProvider: 'waitingForKeyProvider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

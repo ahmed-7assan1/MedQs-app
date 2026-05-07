@@ -974,11 +974,11 @@ model PlatformMember {
 }
 
 model BotUser {
-  id                String   @id @default(uuid())
-  telegramId        String   @unique
-  personalKey       String?
-  preferredProvider String?  @default("gemini")
-  customModel       String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  telegramId            String   @unique
+  preferredProvider     String?  @default("gemini")
+  personalKey           String?  @db.Text
+  waitingForKeyProvider String? // To track state (e.g., "gemini", "groq")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
