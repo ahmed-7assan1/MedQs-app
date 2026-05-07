@@ -131,7 +131,7 @@ bot.action(/lec_(.+)/, async (ctx) => {
     lec.videos.forEach(v => res += `• [${v.title}](${v.url})\n`);
   }
 
-  const buttons = [];
+  const buttons: ReturnType<typeof Markup.button.callback>[][] = [];
   if (lec.questions.length > 0) buttons.push([Markup.button.callback(`✍️ Start Quiz (${lec.questions.length})`, `quiz_${lec.id}`)]);
   buttons.push([Markup.button.callback('⬅️ Back', `mod_back`)]);
 
