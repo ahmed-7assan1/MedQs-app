@@ -27,13 +27,20 @@ export async function POST(req: Request) {
     }
 
     // Link user
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { 
-        telegramId: authEntry.telegramId,
-        telegramVerified: true 
+    try {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { 
+          telegramId: authEntry.telegramId,
+          telegramVerified: true 
+        }
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        return NextResponse.json({ error: 'حساب التيليجرام هذا مرتبط بالفعل بمستخدم آخر' }, { status: 400 });
       }
-    });
+      throw err;
+    }
 
     // Cleanup
     await prisma.botAuth.delete({ where: { id: authEntry.id } });
@@ -41,6 +48,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, message: 'تم ربط حساب تيليجرام بنجاح!' });
   } catch (error) {
     console.error('Link Telegram Error:', error);
-    return NextResponse.json({ error: 'حدث خطأ أثناء الربط' }, { status: 500 });
+    return NextResponse.json({ error: 'حدث خطأ أثناء الربط. حاول مرة أخرى' }, { status: 500 });
   }
 }

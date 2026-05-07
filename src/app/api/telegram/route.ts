@@ -361,7 +361,9 @@ bot.on('text', async (ctx) => {
   if (ctx.chat.type !== 'private') {
     const isMentioned = text.includes(`@${ctx.botInfo.username}`);
     const isMedonex = text.toLowerCase().startsWith('medonex');
-    if (!isMentioned && !isMedonex) return; // Ignore if not summoned
+    const isReplyToBot = ctx.message.reply_to_message?.from?.id === ctx.botInfo.id;
+    
+    if (!isMentioned && !isMedonex && !isReplyToBot) return; // Ignore if not summoned
   }
 
   // Handle multi-step tempData flows
@@ -424,7 +426,12 @@ bot.on('text', async (ctx) => {
       customProvider: (botUser.preferredProvider as any) || 'gemini'
     });
 
-    const replyMessage = await ctx.reply(ai.text, { parse_mode: 'Markdown' });
+    const replyOptions: any = { parse_mode: 'Markdown' };
+    if (ctx.chat.type !== 'private') {
+      replyOptions.reply_to_message_id = ctx.message.message_id;
+    }
+
+    const replyMessage = await ctx.reply(ai.text, replyOptions);
 
     // Forward AI response to data group for searchable archive
     if (STORAGE_GROUP_ID && replyMessage) {
