@@ -51,10 +51,18 @@ bot.start(async (ctx) => {
   if (linkedUser) {
     ctx.reply(`Welcome back, Dr. ${linkedUser.name}! 🩺🌌\nHow can I help you today?`, MAIN_KEYBOARD);
   } else {
-    ctx.reply(`Welcome to MedOneX! 🩺🌌\nPlease login to access your lectures and start learning.`, Markup.inlineKeyboard([
-      [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
-      [Markup.button.callback('📝 Quick Register', 'auth_register')]
-    ]));
+    ctx.reply(
+      `Welcome to MedOneX! 🩺🌌\n\n` +
+      `🚀 *Quick Login:* Just send me the *Email* you used to register on the site, and I'll link your account instantly!\n\n` +
+      `Or use the traditional methods:`, 
+      { 
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
+          [Markup.button.callback('📝 Quick Register', 'auth_register')]
+        ])
+      }
+    );
   }
 });
 
@@ -187,13 +195,17 @@ bot.action(/get_all_(.+)/, async (ctx) => {
     // Forward to data group if configured and not already there
     if (STORAGE_GROUP_ID && sentMessage && !itemAny.telegramChatId) {
       try {
-        const forwarded = await ctx.telegram.forwardMessage(STORAGE_GROUP_ID, ctx.from!.id, sentMessage.message_id);
+        const forwarded = await ctx.telegram.copyMessage(STORAGE_GROUP_ID, ctx.from!.id, sentMessage.message_id, {
+          message_thread_id: 1 // General topic
+        });
         // Save the IDs for next time to reduce DB/Link load
-        const modelName = (itemAny.url.includes('video') || itemAny.title) ? 'lectureVideo' : 'lectureFile';
-        await (prisma as any)[modelName].update({
-          where: { id: itemAny.id },
-          data: { telegramChatId: STORAGE_GROUP_ID.toString(), telegramMessageId: forwarded.message_id }
-        }).catch(() => {});
+        const modelName = itemAny.title ? 'lectureVideo' : (itemAny.name ? 'lectureFile' : null);
+        if (modelName) {
+          await (prisma as any)[modelName].update({
+            where: { id: itemAny.id },
+            data: { telegramChatId: STORAGE_GROUP_ID.toString(), telegramMessageId: forwarded.message_id }
+          }).catch(() => {});
+        }
       } catch (err) {
         console.error("Storage Group Forward Error:", err);
       }
@@ -206,95 +218,45 @@ bot.action(/get_all_(.+)/, async (ctx) => {
 bot.action(/quiz_(.+)/, async (ctx) => {
   const lecId = ctx.match[1];
   const questions = await (prisma.question as any).findMany({
-    where: { lectureId: lecId },
-    orderBy: { createdAt: 'asc' }
+    where: { lectureId: lecId }
   });
 
-  if (questions.length === 0) return ctx.answerCbQuery('No questions for this lecture.');
+  if (questions.length === 0) {
+    return ctx.answerCbQuery('⚠️ No questions found for this lecture.');
+  }
 
-  await ctx.answerCbQuery();
+  // Shuffle and take 10
+  const shuffled = questions.sort(() => 0.5 - Math.random()).slice(0, 10);
   
-  // Store session in BotUser tempData
-  await (prisma as any).botUser.update({
-    where: { telegramId: ctx.from!.id.toString() },
-    data: { 
-      tempData: { 
-        type: 'quiz', 
-        lecId, 
-        qIdx: 0, 
-        score: 0,
-        qIds: questions.map((q: any) => q.id)
-      } 
+  await ctx.answerCbQuery('Starting Quiz Batch! 📝');
+  await ctx.editMessageText(`📝 *Starting Quiz Session*\nLecture: ${lecId.slice(0,8)}...\nQuestions: ${shuffled.length}\n\n_Sending questions as native polls..._`, { parse_mode: 'Markdown' });
+
+  for (const [i, q] of shuffled.entries()) {
+    try {
+      const options = q.choices as string[];
+      const correctIdx = options.indexOf(q.answer);
+      
+      await ctx.replyWithQuiz(
+        `[${i+1}/${shuffled.length}] ${q.body}`,
+        options,
+        {
+          correct_option_id: correctIdx >= 0 ? correctIdx : 0,
+          explanation: q.explanation || "Review the lecture material for details.",
+          is_anonymous: false
+        }
+      );
+      // Small delay to prevent flood trigger if many questions
+      await new Promise(r => setTimeout(r, 500));
+    } catch (err) {
+      console.error("Poll Send Error:", err);
     }
-  });
+  }
 
-  return sendQuizQuestion(ctx, questions[0], 0, questions.length);
+  return ctx.reply("🏁 All questions delivered! Solve them at your own pace.");
 });
 
-async function sendQuizQuestion(ctx: any, q: any, idx: number, total: number) {
-  const choices = q.choices as string[];
-  const buttons = choices.map((choice, i) => [
-    Markup.button.callback(choice, `ans_${i}`)
-  ]);
-
-  const msg = `❓ *Question ${idx + 1}/${total}*\n\n${q.body}`;
-  
-  if (ctx.updateType === 'callback_query') {
-    await ctx.editMessageText(msg, {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard(buttons)
-    });
-  } else {
-    await ctx.reply(msg, {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard(buttons)
-    });
-  }
-}
-
-bot.action(/ans_(.+)/, async (ctx) => {
-  const choiceIdx = parseInt(ctx.match[1]);
-  const telegramId = ctx.from!.id.toString();
-  const botUser = await getBotUser(telegramId);
-  const quiz = botUser.tempData;
-
-  if (!quiz || quiz.type !== 'quiz') return ctx.answerCbQuery();
-
-  const qId = quiz.qIds[quiz.qIdx];
-  const q = await (prisma.question as any).findUnique({ where: { id: qId } });
-  if (!q) return ctx.answerCbQuery();
-
-  const isCorrect = q.choices[choiceIdx] === q.answer;
-  const newScore = isCorrect ? quiz.score + 1 : quiz.score;
-  const nextIdx = quiz.qIdx + 1;
-
-  if (isCorrect) {
-    await ctx.answerCbQuery('✅ Correct!');
-  } else {
-    await ctx.answerCbQuery(`❌ Wrong! Correct: ${q.answer}`);
-  }
-
-  if (nextIdx < quiz.qIds.length) {
-    const nextQId = quiz.qIds[nextIdx];
-    const nextQ = await (prisma.question as any).findUnique({ where: { id: nextQId } });
-    
-    await (prisma as any).botUser.update({
-      where: { telegramId },
-      data: { tempData: { ...quiz, qIdx: nextIdx, score: newScore } }
-    });
-
-    return sendQuizQuestion(ctx, nextQ, nextIdx, quiz.qIds.length);
-  } else {
-    await (prisma as any).botUser.update({
-      where: { telegramId },
-      data: { tempData: null }
-    });
-    return ctx.editMessageText(
-      `🏁 *Quiz Finished!*\n\nYour Score: *${newScore}/${quiz.qIds.length}*\nPoints earned: *${newScore * 5}*`,
-      { parse_mode: 'Markdown' }
-    );
-  }
-});
+// Remove the old ans_ handler as we use native polls now
+bot.action(/ans_(.+)/, (ctx) => ctx.answerCbQuery());
 
 // ─── Settings (Provider Selection) ───
 
@@ -364,6 +326,34 @@ bot.on('text', async (ctx) => {
     const isReplyToBot = ctx.message.reply_to_message?.from?.id === ctx.botInfo.id;
     
     if (!isMentioned && !isMedonex && !isReplyToBot) return; // Ignore if not summoned
+  }
+
+  // Handle Email-based Login Linking
+  if (!linkedUser) {
+    const emailMatch = text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
+    if (emailMatch) {
+      const email = emailMatch[0].toLowerCase();
+      const userToLink = await (prisma.user as any).findUnique({ where: { email } });
+      
+      if (userToLink) {
+        // Unlink old telegram if any
+        await (prisma.user as any).updateMany({
+           where: { telegramId },
+           data: { telegramId: null, telegramVerified: false }
+        });
+
+        await (prisma.user as any).update({
+          where: { id: userToLink.id },
+          data: { 
+            telegramId: telegramId,
+            telegramVerified: true 
+          }
+        });
+        return ctx.reply(`✅ Account successfully linked!\n\nWelcome Dr. ${userToLink.name}! 🩺🌌\nYou can now access all your lectures and clinical tools here.`, MAIN_KEYBOARD);
+      } else {
+        return ctx.reply(`❌ We couldn't find an account with the email: ${email}\n\nPlease make sure you are registered on the MedOneX platform.`);
+      }
+    }
   }
 
   // Handle multi-step tempData flows
@@ -436,7 +426,9 @@ bot.on('text', async (ctx) => {
     // Forward AI response to data group for searchable archive
     if (STORAGE_GROUP_ID && replyMessage) {
       try {
-        await ctx.telegram.forwardMessage(STORAGE_GROUP_ID, ctx.from!.id, replyMessage.message_id);
+        await ctx.telegram.copyMessage(STORAGE_GROUP_ID, ctx.from!.id, replyMessage.message_id, {
+          message_thread_id: 1 // General topic
+        });
       } catch (err) {
         console.error("AI Storage Forward Error:", err);
       }

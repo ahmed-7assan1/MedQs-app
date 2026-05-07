@@ -26,10 +26,10 @@ export async function GET(req: NextRequest) {
   const take = 8;
   const contains = { contains: q, mode: "insensitive" as const };
 
-  const users: { id: string; label: string; sub: string; href: string }[] = [];
-  const modules: { id: string; label: string; sub: string; href: string }[] = [];
-  const lectures: { id: string; label: string; sub: string; href: string }[] = [];
-  const quizzes: { id: string; label: string; sub: string; href: string }[] = [];
+  const users: { id: string; label: string; sub: string; href: string; type: string }[] = [];
+  const modules: { id: string; label: string; sub: string; href: string; type: string }[] = [];
+  const lectures: { id: string; label: string; sub: string; href: string; type: string }[] = [];
+  const quizzes: { id: string; label: string; sub: string; href: string; type: string }[] = [];
 
   // Users: exact id, studentId match, or name contains (scoped)
   if (UUID_RE.test(q)) {
@@ -44,8 +44,9 @@ export async function GET(req: NextRequest) {
       users.push({
         id: u.id,
         label: u.nickname || u.name,
-        sub: u.studentId ? `ID ${u.studentId}` : "Student",
+        sub: u.studentId ? `ID ${u.studentId}` : "Medical Student",
         href: `/profile/u/${u.id}`,
+        type: "user",
       });
     }
   }
@@ -69,8 +70,9 @@ export async function GET(req: NextRequest) {
     users.push({
       id: u.id,
       label: u.nickname || u.name,
-      sub: u.studentId ? `ID ${u.studentId}` : "Student",
+      sub: u.studentId ? `ID ${u.studentId}` : "Medical Student",
       href: `/profile/u/${u.id}`,
+      type: "user",
     });
   }
 
@@ -87,7 +89,7 @@ export async function GET(req: NextRequest) {
     take,
   });
   for (const m of modRows) {
-    modules.push({ id: m.id, label: m.name, sub: "Module", href: `/modules/${m.id}` });
+    modules.push({ id: m.id, label: m.name, sub: "Academic Module", href: `/modules/${m.id}`, type: "module" });
   }
 
   const lecRows = await prisma.lecture.findMany({
@@ -113,6 +115,7 @@ export async function GET(req: NextRequest) {
       label: l.title,
       sub: `${l.subject.module?.name ?? "General"} · ${l.subject.name}`,
       href: `/modules/${mid}/lectures/${l.id}`,
+      type: "lecture",
     });
   }
 
@@ -128,8 +131,9 @@ export async function GET(req: NextRequest) {
     quizzes.push({
       id: p.id,
       label: p.title,
-      sub: p.module?.name ? `Quiz · ${p.module.name}` : "Quiz",
+      sub: p.module?.name ? `Quiz · ${p.module.name}` : "Clinical Quiz",
       href: `/quiz/${p.id}`,
+      type: "quiz",
     });
   }
 

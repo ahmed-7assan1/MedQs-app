@@ -39,6 +39,7 @@ const ProfileSchema = z.object({
   facultyId:   z.string().nullable().optional(),
   semesterId:  z.string().nullable().optional(),
   studentId: z.string().min(6).max(16).nullable().optional(),
+  coverImage: z.string().nullable().optional(),
 });
 
 async function generateStudentId(): Promise<string> {
@@ -89,6 +90,7 @@ export async function PUT(req: NextRequest) {
       id: true, name: true, nickname: true, bio: true, phone: true, phoneVisible: true,
       hideRank: true, isPrivate: true, instagramUrl: true, facebookUrl: true,
       semesterId: true, universityId: true, facultyId: true, studentId: true,
+      coverImage: true,
     },
   });
 
@@ -97,4 +99,16 @@ export async function PUT(req: NextRequest) {
   revalidatePath("/", "layout");
 
   return NextResponse.json(user);
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    await prisma.user.delete({ where: { id: session.user.id } });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json({ error: "Failed to delete account" }, { status: 500 });
+  }
 }

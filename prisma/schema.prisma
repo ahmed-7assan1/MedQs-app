@@ -474,6 +474,7 @@ model User {
   followedTeams         TeamFollower[]
   telegramId           String?                @unique
   telegramVerified     Boolean                @default(false)
+  coverImage           String?
 }
 
 model TelegramConfig {

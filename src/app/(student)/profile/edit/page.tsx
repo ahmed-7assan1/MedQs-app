@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Save, Loader2, User, Phone, BookOpen, Palette, Send, Sparkles, ShieldCheck, ChevronLeft } from "lucide-react";
+import { Save, Loader2, User, Phone, BookOpen, Palette, Send, Sparkles, ShieldCheck, ChevronLeft, Camera, Trash2, LogOut, ShieldAlert } from "lucide-react";
 import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -9,6 +9,7 @@ import { StudentPageShell } from "@/components/layout/StudentPageShell";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import { ImageUploadWithCrop } from "@/components/ui/ImageUploadWithCrop";
+import { signOut } from "next-auth/react";
 
 interface University { id: string; name: string }
 interface Faculty { id: string; name: string; universityId: string }
@@ -35,6 +36,7 @@ function EditProfileContent() {
     facebookUrl: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [telegramVerified, setTelegramVerified] = useState(false);
   const [telegramCode, setTelegramCode] = useState("");
   const [linking, setLinking] = useState(false);
@@ -98,6 +100,7 @@ function EditProfileContent() {
             facebookUrl: me.facebookUrl ?? "",
           });
           setAvatarUrl(me.image ?? null);
+          setCoverUrl(me.coverImage ?? null);
           setTelegramVerified(me.telegramVerified ?? false);
           setSelectedUni(me.universityId ?? "");
           setSelectedFaculty(me.facultyId ?? "");
@@ -132,6 +135,11 @@ function EditProfileContent() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     });
+  }
+
+  async function handleCoverUpdate(url: string) {
+    setCoverUrl(url);
+    // Note: This API should be updated to handle coverImage
   }
 
   async function handleLinkTelegram() {
@@ -171,6 +179,7 @@ function EditProfileContent() {
         universityId: selectedUni.trim() ? selectedUni : null,
         facultyId: selectedFaculty.trim() ? selectedFaculty : null,
         semesterId: selectedSem.trim() ? selectedSem : null,
+        coverImage: coverUrl,
       };
       const res = await fetch("/api/v1/auth/profile", {
         method: "PUT",
@@ -192,6 +201,21 @@ function EditProfileContent() {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (!confirm("Are you absolutely sure? This will delete all your data permanently.")) return;
+    try {
+      const res = await fetch("/api/v1/auth/profile", { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Account deleted.");
+        signOut({ callbackUrl: "/" });
+      } else {
+        toast.error("Failed to delete account.");
+      }
+    } catch {
+      toast.error("Error occurred.");
+    }
+  }
+
   if (loading)
     return (
       <StudentPageShell maxWidthClass="max-w-xl">
@@ -203,40 +227,63 @@ function EditProfileContent() {
 
   return (
     <StudentPageShell
-      maxWidthClass="max-w-3xl"
-      eyebrow="Workspace Configuration"
-      title={TABS.find(t => t.id === activeTab)?.label + " Settings"}
-      subtitle="Precision control over your digital medical presence."
+      maxWidthClass="max-w-4xl"
+      eyebrow="Clinical Workspace"
+      title="Environment Editor"
+      subtitle="Configure your professional presence and academic synchronization."
     >
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32">
         
-        {/* Navigation Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b dark:border-white/5 border-slate-200 pb-6">
-           <button 
-             onClick={() => router.push("/settings")}
-             className="flex items-center gap-2 text-xs font-black uppercase tracking-widest dark:text-white/30 text-slate-400 hover:text-primary transition-colors"
-           >
-             <ChevronLeft className="h-4 w-4" />
-             Back to Hub
-           </button>
-           
-           <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-2 sm:pb-0">
-             {TABS.map((tab) => (
-               <button
-                 key={tab.id}
-                 onClick={() => router.push(`/profile/edit?tab=${tab.id}`)}
-                 className={cn(
-                   "flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
-                   activeTab === tab.id 
-                     ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                     : "dark:text-white/40 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5"
-                 )}
-               >
-                 <tab.icon className="h-3.5 w-3.5" />
-                 {tab.label}
-               </button>
-             ))}
+        {/* Floating Top Header (Fixed on scroll) */}
+        <div className="sticky top-20 z-[50] flex items-center justify-between gap-4 rounded-3xl border dark:border-white/10 border-slate-200 dark:bg-black/60 bg-white/80 backdrop-blur-xl p-3 shadow-2xl transition-all">
+           <div className="flex items-center gap-3 pl-2">
+              <button 
+                onClick={() => router.push("/settings")}
+                className="flex h-10 w-10 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <div className="hidden sm:block">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-primary">Editing Phase</p>
+                 <p className="text-sm font-black dark:text-white text-slate-800">{TABS.find(t => t.id === activeTab)?.label}</p>
+              </div>
            </div>
+
+           <div className="flex items-center gap-2">
+              <button 
+                onClick={() => router.push("/settings")}
+                className="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest dark:text-white/40 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {saving ? "Syncing..." : "Save"}
+              </button>
+           </div>
+        </div>
+        
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-2 border-b dark:border-white/5 border-slate-200">
+           {TABS.map((tab) => (
+             <button
+               key={tab.id}
+               onClick={() => router.push(`/profile/edit?tab=${tab.id}`)}
+               className={cn(
+                 "flex items-center gap-2 px-5 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                 activeTab === tab.id 
+                   ? "dark:bg-white/10 bg-slate-100 dark:text-white text-slate-900 shadow-sm" 
+                   : "dark:text-white/40 text-slate-400 hover:text-primary"
+               )}
+             >
+               <tab.icon className={cn("h-4 w-4", activeTab === tab.id ? "text-primary" : "")} />
+               {tab.label}
+             </button>
+           ))}
         </div>
 
         <div className="min-h-[400px]">
@@ -303,49 +350,53 @@ function EditProfileContent() {
           {/* TAB: BRANDING */}
           {activeTab === "branding" && (
             <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
-               <section className="relative overflow-hidden rounded-[3rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-10 shadow-2xl backdrop-blur-3xl">
-                  <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
-                  <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 rounded-full bg-purple-500/10 blur-[100px]" />
+               {/* Cover Image Section */}
+               <section className="relative overflow-hidden rounded-[3rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-4 shadow-xl">
+                  <div className="relative h-48 w-full rounded-[2rem] overflow-hidden bg-slate-100 dark:bg-white/5 group">
+                     {coverUrl ? (
+                       <img src={coverUrl} alt="Cover" className="h-full w-full object-cover" />
+                     ) : (
+                       <div className="h-full w-full flex items-center justify-center text-slate-300 dark:text-white/10">
+                          <Palette className="h-12 w-12" />
+                       </div>
+                     )}
+                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <ImageUploadWithCrop
+                          label=""
+                          value={coverUrl || ""}
+                          onChange={handleCoverUpdate}
+                          cropShape="rect"
+                          aspect={16/6}
+                          className="!absolute inset-0 opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center gap-2 pointer-events-none">
+                           <Camera className="h-8 w-8 text-white" />
+                           <span className="text-[10px] font-black text-white uppercase tracking-widest">Update Cover Photo</span>
+                        </div>
+                     </div>
+                  </div>
                   
-                  <div className="relative space-y-10">
-                    <div className="flex items-center gap-4">
-                       <div className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-purple-500/10 text-purple-500 border border-purple-500/20 shadow-inner">
-                          <Sparkles className="h-7 w-7" />
+                  {/* Avatar Overlay */}
+                  <div className="relative -mt-16 ml-10 flex items-end gap-6">
+                    <div className="relative group">
+                       <div className="h-32 w-32 rounded-full border-4 dark:border-[#131220] border-white bg-slate-200 overflow-hidden shadow-2xl">
+                          <img src={avatarUrl || "/placeholder-user.jpg"} alt="Avatar" className="h-full w-full object-cover" />
                        </div>
-                       <div>
-                          <h2 className="text-2xl font-black dark:text-white text-slate-800 tracking-tight">Avatar & Brand</h2>
-                          <p className="text-[11px] font-black dark:text-purple-400/60 text-purple-500 uppercase tracking-[0.2em]">Visual Identity System</p>
-                       </div>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row items-center gap-12">
-                      <div className="relative group">
-                        <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-primary via-purple-500 to-pink-500 opacity-30 blur-xl transition duration-700 group-hover:opacity-60 animate-pulse" />
-                        <div className="relative h-48 w-48 rounded-full border-4 dark:border-white/10 border-white bg-slate-100 shadow-2xl overflow-hidden">
+                       <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                           <ImageUploadWithCrop
                             label=""
                             value={avatarUrl || ""}
                             onChange={handleAvatarUpdate}
                             cropShape="round"
                             aspect={1}
-                            className="w-full h-full"
+                            className="!absolute inset-0 opacity-0 cursor-pointer"
                           />
-                        </div>
-                      </div>
-
-                      <div className="flex-1 space-y-6 text-center md:text-left">
-                         <div className="space-y-2">
-                            <h4 className="text-lg font-black dark:text-white text-slate-800">Professional Headshot</h4>
-                            <p className="text-sm dark:text-white/50 text-slate-500 font-medium leading-relaxed">
-                              Your avatar is the first thing peers see. Use a clear, high-resolution photo to build clinical authority.
-                            </p>
-                         </div>
-                         <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                            <div className="px-4 py-2 rounded-full dark:bg-white/5 bg-slate-100 text-[10px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400">JPG/PNG</div>
-                            <div className="px-4 py-2 rounded-full dark:bg-white/5 bg-slate-100 text-[10px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400">Max 5MB</div>
-                            <div className="px-4 py-2 rounded-full dark:bg-white/5 bg-slate-100 text-[10px] font-black uppercase tracking-widest dark:text-white/30 text-slate-400">1:1 Ratio</div>
-                         </div>
-                      </div>
+                          <Camera className="h-6 w-6 text-white" />
+                       </div>
+                    </div>
+                    <div className="pb-4">
+                       <h3 className="text-xl font-black dark:text-white text-slate-800">Visual Branding</h3>
+                       <p className="text-[10px] font-black dark:text-white/40 text-slate-400 uppercase tracking-widest">Personalize your public aesthetic</p>
                     </div>
                   </div>
                </section>
@@ -395,47 +446,49 @@ function EditProfileContent() {
                      </div>
                   </div>
 
-                  <div className="grid gap-8">
-                    <div>
-                      <label className="mb-3 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">University Institution</label>
-                      <MedqsSelect
-                        value={selectedUni}
-                        onChange={(e) => {
-                          setSelectedUni(e.target.value);
-                          setSelectedFaculty("");
-                          setSelectedYear("");
-                          setSelectedSem("");
-                        }}
-                        className="w-full h-14 rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 px-6 text-sm font-bold"
-                      >
-                        <option value="">Select University...</option>
-                        {universities.map((u) => (
-                          <option key={u.id} value={u.id}>{u.name}</option>
-                        ))}
-                      </MedqsSelect>
+                  <div className="grid gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       <div>
+                         <label className="mb-3 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">University Institution</label>
+                         <MedqsSelect
+                           value={selectedUni}
+                           onChange={(e) => {
+                             setSelectedUni(e.target.value);
+                             setSelectedFaculty("");
+                             setSelectedYear("");
+                             setSelectedSem("");
+                           }}
+                           className="w-full h-14 rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 px-6 text-sm font-bold"
+                         >
+                           <option value="">Select University...</option>
+                           {universities.map((u) => (
+                             <option key={u.id} value={u.id}>{u.name}</option>
+                           ))}
+                         </MedqsSelect>
+                       </div>
+
+                       {selectedUni && (
+                         <div>
+                           <label className="mb-3 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">Medical Faculty</label>
+                           <MedqsSelect
+                             value={selectedFaculty}
+                             onChange={(e) => {
+                               setSelectedFaculty(e.target.value);
+                               setSelectedYear("");
+                               setSelectedSem("");
+                             }}
+                             className="w-full h-14 rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 px-6 text-sm font-bold"
+                           >
+                             <option value="">Select Faculty...</option>
+                             {uniFaculties.map((f) => (
+                               <option key={f.id} value={f.id}>{f.name}</option>
+                             ))}
+                           </MedqsSelect>
+                         </div>
+                       )}
                     </div>
 
-                    {selectedUni && uniFaculties.length > 0 && (
-                      <div>
-                        <label className="mb-3 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">Medical Faculty</label>
-                        <MedqsSelect
-                          value={selectedFaculty}
-                          onChange={(e) => {
-                            setSelectedFaculty(e.target.value);
-                            setSelectedYear("");
-                            setSelectedSem("");
-                          }}
-                          className="w-full h-14 rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 px-6 text-sm font-bold"
-                        >
-                          <option value="">Select Faculty...</option>
-                          {uniFaculties.map((f) => (
-                            <option key={f.id} value={f.id}>{f.name}</option>
-                          ))}
-                        </MedqsSelect>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div>
                         <label className="mb-3 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">Academic Level</label>
                         <MedqsSelect
@@ -602,6 +655,51 @@ function EditProfileContent() {
                     </div>
                   </div>
                </section>
+
+               {/* Danger Zone */}
+               <section className="space-y-6 rounded-[2.5rem] border border-red-500/20 dark:bg-red-500/5 bg-red-50 p-8 shadow-xl">
+                  <div className="flex items-center gap-3 mb-2">
+                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+                        <ShieldAlert className="h-6 w-6" />
+                     </div>
+                     <div>
+                        <h2 className="text-xl font-black dark:text-white text-slate-800">Danger Zone</h2>
+                        <p className="text-xs font-bold dark:text-red-400/50 text-red-600 uppercase tracking-widest">Account Management</p>
+                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <button 
+                       onClick={() => signOut({ callbackUrl: "/" })}
+                       className="flex items-center justify-between gap-4 rounded-2xl border border-red-200 dark:border-red-500/10 bg-white dark:bg-white/5 p-6 transition-all hover:bg-red-100 dark:hover:bg-red-500/10 group"
+                     >
+                        <div className="flex items-center gap-4">
+                           <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                              <LogOut className="h-5 w-5" />
+                           </div>
+                           <div className="text-left">
+                              <p className="text-sm font-black dark:text-white text-slate-800">Sign Out</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">End Session</p>
+                           </div>
+                        </div>
+                     </button>
+
+                     <button 
+                       onClick={handleDeleteAccount}
+                       className="flex items-center justify-between gap-4 rounded-2xl border border-red-200 dark:border-red-500/10 bg-white dark:bg-white/5 p-6 transition-all hover:bg-red-100 dark:hover:bg-red-500/10 group"
+                     >
+                        <div className="flex items-center gap-4">
+                           <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                              <Trash2 className="h-5 w-5" />
+                           </div>
+                           <div className="text-left">
+                              <p className="text-sm font-black dark:text-white text-slate-800">Delete Account</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">Permanent Action</p>
+                           </div>
+                        </div>
+                     </button>
+                  </div>
+               </section>
             </div>
           )}
 
@@ -654,28 +752,6 @@ function EditProfileContent() {
             </div>
           )}
         </div>
-
-        {/* Floating Actions */}
-        <div className="sticky bottom-8 left-0 right-0 flex gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
-           <button 
-             onClick={() => router.push("/settings")}
-             className="flex-1 rounded-[1.5rem] border dark:border-white/10 border-slate-200 dark:bg-black/60 bg-white/60 backdrop-blur-xl py-5 text-xs font-black dark:text-white text-slate-800 hover:bg-slate-50 dark:hover:bg-white/10 transition-all uppercase tracking-widest shadow-2xl"
-           >
-              Cancel
-           </button>
-           <button 
-             onClick={handleSave} 
-             disabled={saving}
-             className="group relative flex-[2] overflow-hidden rounded-[1.5rem] bg-primary py-5 text-xs font-black text-white shadow-2xl shadow-primary/40 hover:shadow-primary/60 transition-all active:scale-[0.98] disabled:opacity-60"
-           >
-             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-             <div className="flex items-center justify-center gap-3">
-                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
-                <span className="uppercase tracking-widest">{saving ? "Deploying Updates..." : "Save Configuration"}</span>
-             </div>
-           </button>
-        </div>
-
       </div>
     </StudentPageShell>
   );

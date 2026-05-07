@@ -21,8 +21,8 @@ export function StudentPageShell({
 }: StudentPageShellProps & { noTopPaddingMobile?: boolean }) {
   return (
     <div className={cn(
-      "relative mx-auto w-full px-4 sm:px-6 lg:px-8 pb-8 pt-16 md:pt-20",
-      noTopPaddingMobile && "pt-6 md:pt-20",
+      "relative mx-auto w-full px-4 sm:px-6 lg:px-8 pb-8 pt-24 md:pt-32",
+      noTopPaddingMobile && "pt-6 md:pt-32",
       maxWidthClass, 
       className
     )}>
