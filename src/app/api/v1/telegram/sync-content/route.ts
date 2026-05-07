@@ -67,11 +67,11 @@ export async function POST(req: Request) {
     };
 
     if (type === 'file') {
-      await prisma.lectureFile.update({ where: { id }, data });
+      await (prisma.lectureFile as any).update({ where: { id }, data });
     } else if (type === 'video') {
-      await prisma.lectureVideo.update({ where: { id }, data });
+      await (prisma.lectureVideo as any).update({ where: { id }, data });
     } else if (type === 'record') {
-      await prisma.lectureRecord.update({ where: { id }, data });
+      await (prisma.lectureRecord as any).update({ where: { id }, data });
     }
 
     return NextResponse.json({ success: true });

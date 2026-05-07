@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 import { generateAIReplyWithFallback } from '@/lib/ai-router';
 import { MEDICAL_TUTOR_SYSTEM_PREFIX } from '@/lib/medical-ai-prompts';
 import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
@@ -12,25 +11,24 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function getLinkedUser(telegramId: string) {
-  // findUnique works because telegramId has @unique in schema — fixes IDE TS error
-  return await prisma.user.findUnique({
-    where: { telegramId },
+  return await (prisma.user as any).findFirst({
+    where: { telegramId: telegramId.toString() },
     include: { university: true, semester: true }
   });
 }
 
 async function getBotUser(telegramId: string) {
-  let user = await prisma.botUser.findUnique({ where: { telegramId } });
+  let user = await (prisma as any).botUser.findUnique({ where: { telegramId: telegramId.toString() } });
   if (!user) {
-    user = await prisma.botUser.create({
-      data: { telegramId, preferredProvider: 'gemini' }
+    user = await (prisma as any).botUser.create({
+      data: { telegramId: telegramId.toString(), preferredProvider: 'gemini' }
     });
   }
   return user;
 }
 
 async function getGlobalConfig() {
-  return await prisma.telegramConfig.findUnique({
+  return await (prisma as any).telegramConfig.findUnique({
     where: { id: 'global' }
   });
 }
@@ -50,29 +48,11 @@ bot.start(async (ctx) => {
   if (linkedUser) {
     ctx.reply(`Welcome back, Dr. ${linkedUser.name}! 🩺🌌\nHow can I help you today?`, MAIN_KEYBOARD);
   } else {
-    ctx.reply(`Welcome to MedOneX! 🩺🌌\nPlease login to access your lectures or register a new account.`, Markup.inlineKeyboard([
+    ctx.reply(`Welcome to MedOneX! 🩺🌌\nPlease login to access your lectures.`, Markup.inlineKeyboard([
       [Markup.button.callback('🔐 Login', 'auth_login')],
       [Markup.button.callback('📝 Register', 'auth_register')]
     ]));
   }
-});
-
-// ─── Authentication Flow ───
-
-bot.action('auth_login', async (ctx) => {
-  await prisma.botUser.update({
-    where: { telegramId: ctx.from!.id.toString() },
-    data: { tempData: { step: 'LOG_EMAIL' } }
-  });
-  ctx.editMessageText('Please send your registered email address:');
-});
-
-bot.action('auth_register', async (ctx) => {
-  await prisma.botUser.update({
-    where: { telegramId: ctx.from!.id.toString() },
-    data: { tempData: { step: 'REG_NAME' } }
-  });
-  ctx.editMessageText('Excellent! What is your full name?');
 });
 
 // ─── Academic Navigation ───
@@ -81,317 +61,197 @@ const showModules = async (ctx: any) => {
   const user = await getLinkedUser(ctx.from.id.toString());
   if (!user?.semesterId) return ctx.reply('⚠️ Please link your account first.');
   
-  const modules = await prisma.module.findMany({ where: { semesterId: user.semesterId } });
+  const modules = await (prisma.module as any).findMany({ where: { semesterId: user.semesterId } });
   if (modules.length === 0) return ctx.reply('No modules found for your semester.');
 
   ctx.reply('Select a Module:', Markup.inlineKeyboard(
-    modules.map(m => [Markup.button.callback(`📦 ${m.name}`, `mod_${m.id}`)])
+    modules.map((m: any) => [Markup.button.callback(`📦 ${m.name}`, `mod_${m.id}`)])
   ));
 };
 
 bot.command('modules', showModules);
 bot.hears('📚 My Modules', showModules);
 
-// ─── Settings Menu (Per-Student AI Config) ───
-
-const showSettings = async (ctx: any) => {
-  const telegramId = ctx.from.id.toString();
-  const botUser = await getBotUser(telegramId);
-  const currentProvider = botUser.preferredProvider || 'gemini';
-  const hasPersonalKey = !!botUser.personalKey;
-
-  const providerLabels: Record<string, string> = {
-    gemini: 'Google Gemini',
-    groq: 'Groq',
-    custom: 'Custom API'
-  };
-
-  const msg = `⚙️ *Your AI Settings*
-
-🤖 Current Provider: *${providerLabels[currentProvider] || currentProvider}*
-🔑 Personal API Key: ${hasPersonalKey ? '✅ Configured' : '❌ Not set (using shared keys)'}
-
-_Each student has independent settings._`;
-
-  ctx.reply(msg, {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('🌐 Use Google Gemini', 'set_provider_gemini')],
-      [Markup.button.callback('⚡ Use Groq (Fast)', 'set_provider_groq')],
-      [Markup.button.callback('🔑 Set My Personal API Key', 'set_personal_key')],
-      [Markup.button.callback('🗑️ Clear My Personal Key', 'clear_personal_key')],
-    ])
-  });
-};
-
-bot.command('settings', showSettings);
-bot.hears('⚙️ Settings', showSettings);
-
-bot.action(/set_provider_(.+)/, async (ctx) => {
-  await ctx.answerCbQuery();
-  const provider = ctx.match[1];
-  const telegramId = ctx.from!.id.toString();
-  await prisma.botUser.update({ where: { telegramId }, data: { preferredProvider: provider } });
-  const labels: Record<string, string> = { gemini: 'Google Gemini 🌐', groq: 'Groq ⚡' };
-  ctx.editMessageText(`✅ AI Provider updated to *${labels[provider] || provider}*.
-
-All your future messages will use this provider.`, { parse_mode: 'Markdown' });
-});
-
-bot.action('set_personal_key', async (ctx) => {
-  await ctx.answerCbQuery();
-  const telegramId = ctx.from!.id.toString();
-  await prisma.botUser.update({ where: { telegramId }, data: { tempData: { step: 'SET_API_KEY' } } });
-  ctx.editMessageText(`🔑 *Set Your Personal API Key*
-
-Please send your API key now. It will be used exclusively for your account and won\'t affect other students.
-
-_Tip: Use your own Gemini/Groq key to avoid shared quota limits._`, { parse_mode: 'Markdown' });
-});
-
-bot.action('clear_personal_key', async (ctx) => {
-  await ctx.answerCbQuery();
-  const telegramId = ctx.from!.id.toString();
-  await prisma.botUser.update({ where: { telegramId }, data: { personalKey: null } });
-  ctx.editMessageText('✅ Your personal API key has been cleared. You are now using shared keys.');
-});
-
 bot.action(/mod_(.+)/, async (ctx) => {
   const moduleId = ctx.match[1];
-  const subjects = await prisma.subject.findMany({ where: { moduleId } });
+  const subjects = await (prisma.subject as any).findMany({ where: { moduleId } });
   if (subjects.length === 0) return ctx.answerCbQuery('No subjects in this module.');
   ctx.editMessageText('Select a Subject:', Markup.inlineKeyboard(
-    subjects.map(s => [Markup.button.callback(`📖 ${s.name}`, `sub_${s.id}`)])
+    subjects.map((s: any) => [Markup.button.callback(`📖 ${s.name}`, `sub_${s.id}`)])
   ));
 });
 
 bot.action(/sub_(.+)/, async (ctx) => {
   const subjectId = ctx.match[1];
-  const lectures = await prisma.lecture.findMany({ where: { subjectId }, orderBy: { order: 'asc' } });
+  const lectures = await (prisma.lecture as any).findMany({ where: { subjectId }, orderBy: { order: 'asc' } });
   if (lectures.length === 0) return ctx.answerCbQuery('No lectures found.');
   ctx.editMessageText('Select a Lecture:', Markup.inlineKeyboard(
-    lectures.map(l => [Markup.button.callback(`📝 ${l.title}`, `lec_${l.id}`)])
+    lectures.map((l: any) => [Markup.button.callback(`📝 ${l.title}`, `lec_${l.id}`)])
   ));
 });
 
 bot.action(/lec_(.+)/, async (ctx) => {
   const lecId = ctx.match[1];
-  const lec = await prisma.lecture.findUnique({
+  const lec = await (prisma.lecture as any).findUnique({
     where: { id: lecId },
     include: { videos: true, records: true, files: true, questions: true }
   });
   if (!lec) return ctx.answerCbQuery('Lecture not found.');
 
   await ctx.answerCbQuery();
-
-  let res = `🎓 *${lec.title}*\n\n`;
-  if (lec.records.length > 0) res += `🎙 *Records:*\n`;
-  if (lec.files.length > 0) res += `\n📂 *Files:*\n`;
-  if (lec.videos.length > 0) res += `\n📺 *Videos:*\n`;
-
-  // 🚀 INSTANT DELIVERY SYSTEM
-  // If files are archived in the group, send them directly!
-  const allAttachments = [...lec.files, ...lec.videos, ...lec.records];
   
-  for (const item of allAttachments) {
-    if (item.telegramMessageId && item.telegramChatId) {
-      try {
-        await ctx.telegram.copyMessage(ctx.from!.id, item.telegramChatId, item.telegramMessageId);
-      } catch (e) {
-        // Fallback to link if copy fails
-        const title = (item as any).name || (item as any).title;
-        await ctx.reply(`🔗 [${title}](${item.url})`, { parse_mode: 'Markdown' });
-      }
-    } else {
-      // Send as link if not archived yet
+  let msg = `🎓 *${lec.title}*\n\n`;
+  const attachments = [...lec.files, ...lec.videos, ...lec.records];
+  
+  if (attachments.length === 0) {
+    msg += "_No files available yet._";
+  } else {
+    msg += `📦 *Lecture Content (${attachments.length} items):*\n`;
+    for (const item of attachments) {
       const title = (item as any).name || (item as any).title;
-      await ctx.reply(`🔗 [${title}](${item.url})`, { parse_mode: 'Markdown' });
+      msg += `• ${title}\n`;
     }
   }
 
-  const buttons: ReturnType<typeof Markup.button.callback>[][] = [];
+  const buttons: any[][] = [];
+  if (attachments.length > 0) buttons.push([Markup.button.callback('📥 Get All Files', `get_all_${lec.id}`)]);
   if (lec.questions.length > 0) buttons.push([Markup.button.callback(`✍️ Start Quiz (${lec.questions.length})`, `quiz_${lec.id}`)]);
-  buttons.push([Markup.button.callback('⬅️ Back', `mod_${lec.subjectId}`)]);
+  buttons.push([Markup.button.callback('⬅️ Back', `sub_${lec.subjectId}`)]);
 
-  await ctx.reply(`_Select an option:_`, { 
+  await ctx.reply(msg, { 
     parse_mode: 'Markdown', 
     ...Markup.inlineKeyboard(buttons) 
   });
 });
 
-// ─── Telegram Quiz System (Poll Mode) ───
-
-bot.action(/quiz_(.+)/, async (ctx) => {
-  // ✅ Acknowledge IMMEDIATELY to prevent Telegram from retrying the callback
-  await ctx.answerCbQuery('Quiz started! 🎯');
-  
+bot.action(/get_all_(.+)/, async (ctx) => {
   const lecId = ctx.match[1];
-  const questions = await prisma.question.findMany({ where: { lectureId: lecId } });
-  if (questions.length === 0) return;
-
-  await ctx.reply(`📝 *Starting Quiz — ${questions.length} questions*\nAnswer each question, then use the 💡 explanation to learn more!`, { parse_mode: 'Markdown' });
+  const lec = await (prisma.lecture as any).findUnique({
+    where: { id: lecId },
+    include: { videos: true, records: true, files: true }
+  });
+  if (!lec) return ctx.answerCbQuery();
   
-  for (const q of questions) {
-    const choices = q.choices as string[];
-    const correctIndex = choices.indexOf(q.answer);
-    
-    // Store question body in BotUser tempData so poll_answer can reference it
-    await ctx.replyWithQuiz(q.body, choices, {
-      correct_option_id: correctIndex >= 0 ? correctIndex : 0,
-      explanation: (q.explanation || 'No explanation provided.').substring(0, 200),
-      is_anonymous: false  // Non-anonymous so we get poll_answer events
-    });
-
-    // Small delay to prevent rate limiting
-    await new Promise(r => setTimeout(r, 500));
+  await ctx.answerCbQuery('Delivering files... 🚀');
+  const all = [...lec.files, ...lec.videos, ...lec.records];
+  
+  for (const item of all) {
+    const itemAny = item as any;
+    if (itemAny.telegramMessageId && itemAny.telegramChatId) {
+      try {
+        await ctx.telegram.copyMessage(ctx.from!.id, itemAny.telegramChatId, itemAny.telegramMessageId);
+      } catch {
+        await ctx.reply(`🔗 [${itemAny.name || itemAny.title}](${itemAny.url})`, { parse_mode: 'Markdown' });
+      }
+    } else {
+      await ctx.reply(`🔗 [${itemAny.name || itemAny.title}](${itemAny.url})`, { parse_mode: 'Markdown' });
+    }
   }
 });
 
-// ─── Poll Answer Handler (AI Interaction on Quiz Answers) ───
+// ─── Settings (Provider Selection) ───
 
-bot.on('poll_answer', (ctx) => {
-  // 🔥 Fire-and-forget: never block the quiz flow
-  const user = ctx.pollAnswer.user;
-  if (!user) return;
-  
-  const optionIds = ctx.pollAnswer.option_ids;
-  if (optionIds.length === 0) return;
-
-  const telegramId = user.id.toString();
-
-  // Run AI response asynchronously without awaiting
-  (async () => {
-    try {
-      const linkedUser = await getLinkedUser(telegramId);
-      if (!linkedUser) return;
-
-      const botUser = await getBotUser(telegramId);
-      const config = await getGlobalConfig();
-
-      const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}] Give a SHORT (2-3 sentences max) educational insight after the student answered a quiz question. Be encouraging and concise.`;
-      const prompt = `Student answered option index ${optionIds[0]} on a medical quiz. Give a brief educational tip or follow-up question on this medical topic.`;
-
-      const aiResponse = await generateAIReplyWithFallback(prompt, systemPrompt, {
-        preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
-      });
-
-      await ctx.telegram.sendMessage(telegramId, `🧠 *Dr. Q:* ${aiResponse.text}`, { parse_mode: 'Markdown' });
-    } catch {
-      // Silent fail — never show errors for quiz follow-up
-    }
-  })();
-});
-
-// ─── Handlers for Registration Selections ───
-
-bot.action(/reg_uni_(.+)/, async (ctx) => {
-  const uniId = ctx.match[1];
-  const botUser = await getBotUser(ctx.from!.id.toString());
-  const tempData = (botUser.tempData as any) || {};
-  await prisma.botUser.update({ where: { telegramId: ctx.from!.id.toString() }, data: { tempData: { ...tempData, step: 'REG_FAC', universityId: uniId } } });
-  const faculties = await prisma.faculty.findMany({ where: { universityId: uniId } });
-  ctx.editMessageText('Select your Faculty:', Markup.inlineKeyboard(faculties.map(f => [Markup.button.callback(f.name, `reg_fac_${f.id}`)])));
-});
-
-bot.action(/reg_fac_(.+)/, async (ctx) => {
-  const facId = ctx.match[1];
-  const botUser = await getBotUser(ctx.from!.id.toString());
-  const tempData = (botUser.tempData as any) || {};
-  await prisma.botUser.update({ where: { telegramId: ctx.from!.id.toString() }, data: { tempData: { ...tempData, step: 'REG_SEM', facultyId: facId } } });
-  const semesters = await prisma.semester.findMany({ where: { academicYear: { facultyId: facId } } });
-  ctx.editMessageText('Select your Semester:', Markup.inlineKeyboard(semesters.map(s => [Markup.button.callback(s.name, `reg_sem_${s.id}`)])));
-});
-
-bot.action(/reg_sem_(.+)/, async (ctx) => {
-  const semId = ctx.match[1];
-  const telegramId = ctx.from!.id.toString();
-  const botUser = await getBotUser(telegramId);
-  const tempData = (botUser.tempData as any) || {};
-  
-  const newUser = await prisma.user.create({
-    data: {
-      name: tempData.name, email: tempData.email, password: tempData.password,
-      universityId: tempData.universityId, facultyId: tempData.facultyId, semesterId: semId,
-      telegramId, telegramVerified: true, role: 'STUDENT'
-    }
+bot.action('set_provider_menu', async (ctx) => {
+  await ctx.answerCbQuery();
+  ctx.editMessageText('🧠 *Choose AI Provider:*', {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('🌐 Google Gemini', 'set_prov_gemini')],
+      [Markup.button.callback('⚡ Groq (Llama 3)', 'set_prov_groq')],
+      [Markup.button.callback('🔗 OpenRouter', 'set_prov_openrouter')],
+      [Markup.button.callback('⬅️ Back', 'settings')]
+    ])
   });
-  
-  await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
-  await ctx.reply(`🎊 CONGRATULATIONS DR. ${newUser.name}! 🎊\nAccount linked successfully.`, MAIN_KEYBOARD);
 });
 
-// ─── Text & AI Logic ───
+bot.action(/set_prov_(.+)/, async (ctx) => {
+  const prov = ctx.match[1];
+  const telegramId = ctx.from!.id.toString();
+  await (prisma as any).botUser.update({ where: { telegramId }, data: { preferredProvider: prov } });
+  ctx.editMessageText(`✅ Provider set to *${prov.toUpperCase()}*.\n\nWould you like to set a personal API key for this provider?`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('🔑 Set API Key', `ask_key_${prov}`)],
+      [Markup.button.callback('⬅️ Done', 'settings')]
+    ])
+  });
+});
+
+bot.action(/ask_key_(.+)/, async (ctx) => {
+  const prov = ctx.match[1];
+  await (prisma as any).botUser.update({ 
+    where: { telegramId: ctx.from!.id.toString() }, 
+    data: { waitingForKeyProvider: prov } 
+  });
+  ctx.editMessageText(`Please send your API key for *${prov.toUpperCase()}*:`, { parse_mode: 'Markdown' });
+});
+
+bot.hears('⚙️ Settings', async (ctx) => {
+  const bUser = await getBotUser(ctx.from.id.toString());
+  const msg = `⚙️ *Settings*\n\nAI Provider: *${bUser.preferredProvider?.toUpperCase()}*\nKey: ${bUser.personalKey ? '✅ Saved' : '❌ Using Shared'}`;
+  ctx.reply(msg, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('🤖 Change Provider', 'set_provider_menu')],
+      [Markup.button.callback('🗑️ Clear My Key', 'clear_personal_key')]
+    ])
+  });
+});
+
+bot.action('clear_personal_key', async (ctx) => {
+  await (prisma as any).botUser.update({ where: { telegramId: ctx.from!.id.toString() }, data: { personalKey: null } });
+  ctx.answerCbQuery('Key cleared! ✅');
+});
+
+// ─── Group Logic ───
 
 bot.on('text', async (ctx) => {
   const telegramId = ctx.from.id.toString();
   const botUser = await getBotUser(telegramId);
-  const userMessage = ctx.message.text.trim();
-  const tempData = (botUser.tempData as any) || {};
+  const text = ctx.message.text;
 
-  if (tempData.step) {
-    if (tempData.step === 'SET_API_KEY') {
-      const key = userMessage.trim();
-      if (key.length < 10) return ctx.reply("That doesn't look valid. Send a proper API key:");
-      await prisma.botUser.update({ where: { telegramId }, data: { personalKey: key, tempData: Prisma.JsonNull } });
-      return ctx.reply("Personal API Key saved! Your key is used only for your account.", MAIN_KEYBOARD);
-    }
-    if (tempData.step === 'LOG_EMAIL') {
-      const existing = await prisma.user.findUnique({ where: { email: userMessage } });
-      if (existing) {
-        await prisma.user.update({ where: { id: existing.id }, data: { telegramId, telegramVerified: true } });
-        await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
-        return ctx.reply(`✅ Welcome, Dr. ${existing.name}! Login successful.`, MAIN_KEYBOARD);
-      }
-      return ctx.reply('❌ Email not found. Try again or /start.');
-    }
-    // Handle Registration steps (Name, Email, Pass)
-    if (tempData.step === 'REG_NAME') {
-      await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_EMAIL', name: userMessage } } });
-      return ctx.reply('Please send your email:');
-    }
-    if (tempData.step === 'REG_EMAIL') {
-      await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_PASS', email: userMessage } } });
-      return ctx.reply('Choose a password:');
-    }
-    if (tempData.step === 'REG_PASS') {
-      const hashed = await bcrypt.hash(userMessage, 10);
-      await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_UNI', password: hashed } } });
-      const unis = await prisma.university.findMany({ take: 8 });
-      return ctx.reply('Select University:', Markup.inlineKeyboard(unis.map(u => [Markup.button.callback(u.name, `reg_uni_${u.id}`)])));
-    }
+  // 🤫 Group Silence Mode
+  if (ctx.chat.type !== 'private') {
+    const isMentioned = text.includes(`@${ctx.botInfo.username}`);
+    const isMedonex = text.toLowerCase().startsWith('medonex');
+    if (!isMentioned && !isMedonex) return; // Ignore if not summoned
   }
 
-  const linkedUser = await getLinkedUser(telegramId);
-  if (!linkedUser) return ctx.reply('Please login to continue.');
+  // Handle waiting for key
+  if (botUser.waitingForKeyProvider) {
+    await (prisma as any).botUser.update({
+      where: { telegramId },
+      data: { personalKey: text.trim(), waitingForKeyProvider: null }
+    });
+    return ctx.reply(`✅ API Key saved for ${botUser.waitingForKeyProvider.toUpperCase()}!`, MAIN_KEYBOARD);
+  }
 
-  if (userMessage === "🧠 Ask Dr. Q") return ctx.reply("I'm listening! Ask me any medical question. 🩺");
-  if (userMessage === "📊 Dashboard") {
-    const dashUser = await getLinkedUser(telegramId);
-    return ctx.reply(`📊 *Dashboard*\n\nName: ${dashUser?.name}\nUni: ${dashUser?.university?.name || 'N/A'}\nPoints: ${dashUser?.points || 0}`, { parse_mode: 'Markdown' });
+  // Standard AI Chat
+  const linkedUser = await getLinkedUser(telegramId);
+  if (!linkedUser) return ctx.reply('Please login to chat. /start');
+
+  if (text === "🧠 Ask Dr. Q") return ctx.reply("I'm listening! Ask me anything.");
+  if (text === "📊 Dashboard") {
+    const dash = await getLinkedUser(telegramId);
+    return ctx.reply(`📊 *Dashboard*\n\nName: ${dash?.name}\nPoints: ${dash?.points || 0}`, { parse_mode: 'Markdown' });
   }
 
   await ctx.sendChatAction('typing');
   try {
     const config = await getGlobalConfig();
-    const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}]`;
-    // Try all providers silently — no error messages shown to user
-    const aiResponse = await generateAIReplyWithFallback(userMessage, systemPrompt, {
+    const sys = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}]`;
+    const ai = await generateAIReplyWithFallback(text, sys, {
       preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
     });
-    await ctx.reply(aiResponse.text, { parse_mode: 'Markdown' });
+    await ctx.reply(ai.text, { parse_mode: 'Markdown' });
   } catch {
-    // All providers exhausted — show a friendly generic message, not a technical error
-    ctx.reply('🩺 Dr. Q is temporarily busy. Please try again in a moment.');
+    ctx.reply('🩺 Dr. Q is currently resting. Try again in a bit.');
   }
 });
 
-// Webhook Handler
+// Webhook
 export async function POST(req: Request) {
   try {
-    const secretToken = req.headers.get('x-telegram-bot-api-secret-token');
-    if (process.env.TELEGRAM_SECRET_TOKEN && secretToken !== process.env.TELEGRAM_SECRET_TOKEN) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const body = await req.json();
     await bot.handleUpdate(body);
     return NextResponse.json({ ok: true });
