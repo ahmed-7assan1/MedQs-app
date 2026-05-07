@@ -325,11 +325,13 @@ bot.action(/reg_sem_(.+)/, async (ctx) => {
     }
   });
   await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
-  await ctx.reply(`🎉 Congratulations Dr. ${newUser.name}! Your account is ready.`, Markup.keyboard([
-    [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
-    [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
-    [{ text: "👤 My Profile" }]
-  ]).resize());
+  await ctx.reply(`🎊 CONGRATULATIONS DR. ${newUser.name}! 🎊\n\nYour account has been created successfully and linked to your Telegram.\n\nYou can now browse your lectures, subjects, and chat with Dr. Q using the buttons below.`, {
+    ...Markup.keyboard([
+      [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
+      [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
+      [{ text: "👤 My Profile" }]
+    ]).resize()
+  });
 });
 
 // ─── Finalize Menu & Commands ───
@@ -347,10 +349,17 @@ try {
 
 export async function POST(req: Request) {
   try {
+    // Security Check: Verify secret token if configured
+    const secretToken = req.headers.get('x-telegram-bot-api-secret-token');
+    if (process.env.TELEGRAM_SECRET_TOKEN && secretToken !== process.env.TELEGRAM_SECRET_TOKEN) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     await bot.handleUpdate(body);
     return NextResponse.json({ ok: true });
   } catch (e) {
+    console.error('Telegram Webhook Error:', e);
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 }
