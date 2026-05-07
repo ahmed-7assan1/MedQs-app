@@ -475,6 +475,8 @@ model TelegramConfig {
   welcomeMessage   String?  @db.Text
   broadcastMessage String?  @db.Text
   botStatus        String   @default("ACTIVE") // ACTIVE, MAINTENANCE
+  defaultProvider  String   @default("gemini")
+  defaultModel     String?
   updatedAt        DateTime @updatedAt
 }
 

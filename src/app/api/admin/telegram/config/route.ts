@@ -18,11 +18,15 @@ export async function POST(req: Request) {
       update: {
         welcomeMessage: data.welcomeMessage,
         botStatus: data.botStatus,
+        defaultProvider: data.defaultProvider,
+        defaultModel: data.defaultModel,
       },
       create: {
         id: 'global',
         welcomeMessage: data.welcomeMessage,
         botStatus: data.botStatus,
+        defaultProvider: data.defaultProvider || 'gemini',
+        defaultModel: data.defaultModel,
       }
     });
 

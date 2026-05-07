@@ -35171,6 +35171,8 @@ export namespace Prisma {
     welcomeMessage: string | null
     broadcastMessage: string | null
     botStatus: string | null
+    defaultProvider: string | null
+    defaultModel: string | null
     updatedAt: Date | null
   }
 
@@ -35179,6 +35181,8 @@ export namespace Prisma {
     welcomeMessage: string | null
     broadcastMessage: string | null
     botStatus: string | null
+    defaultProvider: string | null
+    defaultModel: string | null
     updatedAt: Date | null
   }
 
@@ -35187,6 +35191,8 @@ export namespace Prisma {
     welcomeMessage: number
     broadcastMessage: number
     botStatus: number
+    defaultProvider: number
+    defaultModel: number
     updatedAt: number
     _all: number
   }
@@ -35197,6 +35203,8 @@ export namespace Prisma {
     welcomeMessage?: true
     broadcastMessage?: true
     botStatus?: true
+    defaultProvider?: true
+    defaultModel?: true
     updatedAt?: true
   }
 
@@ -35205,6 +35213,8 @@ export namespace Prisma {
     welcomeMessage?: true
     broadcastMessage?: true
     botStatus?: true
+    defaultProvider?: true
+    defaultModel?: true
     updatedAt?: true
   }
 
@@ -35213,6 +35223,8 @@ export namespace Prisma {
     welcomeMessage?: true
     broadcastMessage?: true
     botStatus?: true
+    defaultProvider?: true
+    defaultModel?: true
     updatedAt?: true
     _all?: true
   }
@@ -35294,6 +35306,8 @@ export namespace Prisma {
     welcomeMessage: string | null
     broadcastMessage: string | null
     botStatus: string
+    defaultProvider: string
+    defaultModel: string | null
     updatedAt: Date
     _count: TelegramConfigCountAggregateOutputType | null
     _min: TelegramConfigMinAggregateOutputType | null
@@ -35319,6 +35333,8 @@ export namespace Prisma {
     welcomeMessage?: boolean
     broadcastMessage?: boolean
     botStatus?: boolean
+    defaultProvider?: boolean
+    defaultModel?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["telegramConfig"]>
 
@@ -35327,6 +35343,8 @@ export namespace Prisma {
     welcomeMessage?: boolean
     broadcastMessage?: boolean
     botStatus?: boolean
+    defaultProvider?: boolean
+    defaultModel?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["telegramConfig"]>
 
@@ -35335,6 +35353,8 @@ export namespace Prisma {
     welcomeMessage?: boolean
     broadcastMessage?: boolean
     botStatus?: boolean
+    defaultProvider?: boolean
+    defaultModel?: boolean
     updatedAt?: boolean
   }
 
@@ -35347,6 +35367,8 @@ export namespace Prisma {
       welcomeMessage: string | null
       broadcastMessage: string | null
       botStatus: string
+      defaultProvider: string
+      defaultModel: string | null
       updatedAt: Date
     }, ExtArgs["result"]["telegramConfig"]>
     composites: {}
@@ -35745,6 +35767,8 @@ export namespace Prisma {
     readonly welcomeMessage: FieldRef<"TelegramConfig", 'String'>
     readonly broadcastMessage: FieldRef<"TelegramConfig", 'String'>
     readonly botStatus: FieldRef<"TelegramConfig", 'String'>
+    readonly defaultProvider: FieldRef<"TelegramConfig", 'String'>
+    readonly defaultModel: FieldRef<"TelegramConfig", 'String'>
     readonly updatedAt: FieldRef<"TelegramConfig", 'DateTime'>
   }
     
@@ -68449,6 +68473,8 @@ export namespace Prisma {
     welcomeMessage: 'welcomeMessage',
     broadcastMessage: 'broadcastMessage',
     botStatus: 'botStatus',
+    defaultProvider: 'defaultProvider',
+    defaultModel: 'defaultModel',
     updatedAt: 'updatedAt'
   };
 
@@ -71368,6 +71394,8 @@ export namespace Prisma {
     welcomeMessage?: StringNullableFilter<"TelegramConfig"> | string | null
     broadcastMessage?: StringNullableFilter<"TelegramConfig"> | string | null
     botStatus?: StringFilter<"TelegramConfig"> | string
+    defaultProvider?: StringFilter<"TelegramConfig"> | string
+    defaultModel?: StringNullableFilter<"TelegramConfig"> | string | null
     updatedAt?: DateTimeFilter<"TelegramConfig"> | Date | string
   }
 
@@ -71376,6 +71404,8 @@ export namespace Prisma {
     welcomeMessage?: SortOrderInput | SortOrder
     broadcastMessage?: SortOrderInput | SortOrder
     botStatus?: SortOrder
+    defaultProvider?: SortOrder
+    defaultModel?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
   }
 
@@ -71387,6 +71417,8 @@ export namespace Prisma {
     welcomeMessage?: StringNullableFilter<"TelegramConfig"> | string | null
     broadcastMessage?: StringNullableFilter<"TelegramConfig"> | string | null
     botStatus?: StringFilter<"TelegramConfig"> | string
+    defaultProvider?: StringFilter<"TelegramConfig"> | string
+    defaultModel?: StringNullableFilter<"TelegramConfig"> | string | null
     updatedAt?: DateTimeFilter<"TelegramConfig"> | Date | string
   }, "id">
 
@@ -71395,6 +71427,8 @@ export namespace Prisma {
     welcomeMessage?: SortOrderInput | SortOrder
     broadcastMessage?: SortOrderInput | SortOrder
     botStatus?: SortOrder
+    defaultProvider?: SortOrder
+    defaultModel?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
     _count?: TelegramConfigCountOrderByAggregateInput
     _max?: TelegramConfigMaxOrderByAggregateInput
@@ -71409,6 +71443,8 @@ export namespace Prisma {
     welcomeMessage?: StringNullableWithAggregatesFilter<"TelegramConfig"> | string | null
     broadcastMessage?: StringNullableWithAggregatesFilter<"TelegramConfig"> | string | null
     botStatus?: StringWithAggregatesFilter<"TelegramConfig"> | string
+    defaultProvider?: StringWithAggregatesFilter<"TelegramConfig"> | string
+    defaultModel?: StringNullableWithAggregatesFilter<"TelegramConfig"> | string | null
     updatedAt?: DateTimeWithAggregatesFilter<"TelegramConfig"> | Date | string
   }
 
@@ -76018,6 +76054,8 @@ export namespace Prisma {
     welcomeMessage?: string | null
     broadcastMessage?: string | null
     botStatus?: string
+    defaultProvider?: string
+    defaultModel?: string | null
     updatedAt?: Date | string
   }
 
@@ -76026,6 +76064,8 @@ export namespace Prisma {
     welcomeMessage?: string | null
     broadcastMessage?: string | null
     botStatus?: string
+    defaultProvider?: string
+    defaultModel?: string | null
     updatedAt?: Date | string
   }
 
@@ -76034,6 +76074,8 @@ export namespace Prisma {
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
     botStatus?: StringFieldUpdateOperationsInput | string
+    defaultProvider?: StringFieldUpdateOperationsInput | string
+    defaultModel?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -76042,6 +76084,8 @@ export namespace Prisma {
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
     botStatus?: StringFieldUpdateOperationsInput | string
+    defaultProvider?: StringFieldUpdateOperationsInput | string
+    defaultModel?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -76050,6 +76094,8 @@ export namespace Prisma {
     welcomeMessage?: string | null
     broadcastMessage?: string | null
     botStatus?: string
+    defaultProvider?: string
+    defaultModel?: string | null
     updatedAt?: Date | string
   }
 
@@ -76058,6 +76104,8 @@ export namespace Prisma {
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
     botStatus?: StringFieldUpdateOperationsInput | string
+    defaultProvider?: StringFieldUpdateOperationsInput | string
+    defaultModel?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -76066,6 +76114,8 @@ export namespace Prisma {
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
     botStatus?: StringFieldUpdateOperationsInput | string
+    defaultProvider?: StringFieldUpdateOperationsInput | string
+    defaultModel?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -80333,6 +80383,8 @@ export namespace Prisma {
     welcomeMessage?: SortOrder
     broadcastMessage?: SortOrder
     botStatus?: SortOrder
+    defaultProvider?: SortOrder
+    defaultModel?: SortOrder
     updatedAt?: SortOrder
   }
 
@@ -80341,6 +80393,8 @@ export namespace Prisma {
     welcomeMessage?: SortOrder
     broadcastMessage?: SortOrder
     botStatus?: SortOrder
+    defaultProvider?: SortOrder
+    defaultModel?: SortOrder
     updatedAt?: SortOrder
   }
 
@@ -80349,6 +80403,8 @@ export namespace Prisma {
     welcomeMessage?: SortOrder
     broadcastMessage?: SortOrder
     botStatus?: SortOrder
+    defaultProvider?: SortOrder
+    defaultModel?: SortOrder
     updatedAt?: SortOrder
   }
 

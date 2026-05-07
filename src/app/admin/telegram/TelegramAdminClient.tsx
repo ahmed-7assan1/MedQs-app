@@ -94,6 +94,35 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
             <h2 className="text-xl font-semibold text-white">إعدادات البوت العامة</h2>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="text-xs text-zinc-500 uppercase font-bold mb-2 block">المحرك الافتراضي (Global)</label>
+              <select 
+                value={config.defaultProvider || "gemini"}
+                onChange={(e) => setConfig({...config, defaultProvider: e.target.value})}
+                className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none cursor-pointer"
+              >
+                <option value="gemini">Google Gemini (Default)</option>
+                <option value="groq">Groq (Llama 3)</option>
+                <option value="xai">xAI Grok</option>
+                <option value="openai">OpenAI (GPT-4o)</option>
+                <option value="duckduckgo">DuckDuckGo (Free)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-zinc-500 uppercase font-bold mb-2 block">الحالة العامة للبوت</label>
+              <select 
+                value={config.botStatus || "ACTIVE"}
+                onChange={(e) => setConfig({...config, botStatus: e.target.value})}
+                className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none cursor-pointer"
+              >
+                <option value="ACTIVE">نشط (Active)</option>
+                <option value="MAINTENANCE">صيانة (Maintenance)</option>
+                <option value="DISABLED">معطل (Disabled)</option>
+              </select>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <div>
               <label className="text-xs text-zinc-500 uppercase font-bold mb-2 block">رسالة الترحيب الافتراضية</label>
@@ -106,7 +135,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
             <button 
               onClick={saveConfig} 
               disabled={isSaving}
-              className="bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl border border-white/5 px-6 py-2 transition-all"
+              className="bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl border border-white/5 px-6 py-2 transition-all font-bold"
             >
               {isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}
             </button>

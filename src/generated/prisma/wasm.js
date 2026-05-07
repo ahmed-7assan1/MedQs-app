@@ -429,6 +429,8 @@ exports.Prisma.TelegramConfigScalarFieldEnum = {
   welcomeMessage: 'welcomeMessage',
   broadcastMessage: 'broadcastMessage',
   botStatus: 'botStatus',
+  defaultProvider: 'defaultProvider',
+  defaultModel: 'defaultModel',
   updatedAt: 'updatedAt'
 };
 

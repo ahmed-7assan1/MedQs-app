@@ -16,6 +16,12 @@ async function getLinkedUser(telegramId: string) {
   });
 }
 
+async function getGlobalConfig() {
+  return await prisma.telegramConfig.findUnique({
+    where: { id: 'global' }
+  });
+}
+
 async function getBotUser(telegramId: string) {
   let user = await prisma.botUser.findUnique({ where: { telegramId } });
   if (!user) {
@@ -29,11 +35,17 @@ async function getBotUser(telegramId: string) {
 // ─── Telegram Bot Logic ──────────────────────────────────────────────────────
 
 bot.start(async (ctx) => {
+  const config = await getGlobalConfig();
+  if (config?.botStatus === 'MAINTENANCE') {
+    return ctx.reply('⚠️ عذراً، البوت في حالة صيانة حالياً لتحسين الخدمة. سنعود قريباً! 🩺');
+  }
+
   const linkedUser = await getLinkedUser(ctx.from.id.toString());
   if (linkedUser) {
     ctx.reply(`أهلاً بك مجدداً يا دكتور ${linkedUser.name}! 🩺🌌\n\nلقد تم ربط حسابك بنجاح. أنا الآن أعرف أنك طالب في ${linkedUser.university?.name || 'جامعتك'} (السيمستر ${linkedUser.semester?.name || '-'}). كيف يمكنني مساعدتك اليوم؟`);
   } else {
-    ctx.reply(`أهلاً بك في MedOneX AI Assistant! 🩺🌌\n\nللبدء، يجب عليك ربط حسابك بالموقع لتتمكن من الوصول لبياناتك ومحاضراتك.\n\nاستخدم أمر /login للحصول على كود الربط.`);
+    const welcome = config?.welcomeMessage || `أهلاً بك في MedOneX AI Assistant! 🩺🌌\n\nللبدء، يجب عليك ربط حسابك بالموقع لتتمكن من الوصول لبياناتك ومحاضراتك.\n\nاستخدم أمر /login للحصول على كود الربط.`;
+    ctx.reply(welcome);
   }
 });
 
@@ -175,10 +187,15 @@ bot.on('text', async (ctx) => {
 
   try {
     const telegramId = ctx.from.id.toString();
-    const [user, linkedUser] = await Promise.all([
+    const [user, linkedUser, globalConfig] = await Promise.all([
       getBotUser(telegramId),
-      getLinkedUser(telegramId)
+      getLinkedUser(telegramId),
+      getGlobalConfig()
     ]);
+
+    if (globalConfig?.botStatus === 'MAINTENANCE') {
+      return ctx.reply('⚠️ عذراً، البوت في حالة صيانة حالياً. سنعود قريباً!');
+    }
 
     let personalizedSystemPrompt = DR_Q_SYSTEM_PROMPT;
     
@@ -192,8 +209,12 @@ bot.on('text', async (ctx) => {
 
     personalizedSystemPrompt += `\n\n(Identity Rule: You were created by Ahmed M. Hassan, the founder of MedOneX. If asked about your origin, always mention him with respect.)\n\n(Context: You are answering via Telegram. Be concise, use emojis where appropriate, and ensure formatting is clean for mobile reading.)`;
     
+    const preferredProvider = user.preferredProvider && user.preferredProvider !== 'proxy' 
+      ? user.preferredProvider 
+      : (globalConfig?.defaultProvider || 'gemini');
+
     const aiResponse = await generateAIReplyWithFallback(userMessage, personalizedSystemPrompt, {
-      preferredProvider: user.preferredProvider || undefined,
+      preferredProvider: preferredProvider as any,
       personalKey: user.personalKey || undefined,
       useCustomKey: !!user.personalKey,
       customProvider: user.preferredProvider as any
@@ -218,17 +239,13 @@ bot.on('text', async (ctx) => {
 // ─── API Route Handler ───────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
-  if (!process.env.TELEGRAM_BOT_TOKEN) {
-    return NextResponse.json({ error: 'Bot token not configured' }, { status: 500 });
-  }
-
   try {
     const body = await req.json();
     await bot.handleUpdate(body);
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error('Webhook Error:', error);
-    return NextResponse.json({ error: 'Webhook failed' }, { status: 500 });
+  } catch (e) {
+    console.error('Webhook Error:', e);
+    return NextResponse.json({ error: 'Internal Error' }, { status: 500 });
   }
 }
 
