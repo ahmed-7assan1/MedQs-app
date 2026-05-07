@@ -24,8 +24,9 @@ export function geminiModelChain(): string[] {
   const envRaw = process.env.GEMINI_MODEL?.trim();
   const env = envRaw ? normalizeEnvModel(envRaw) : "";
   /**
-   * Comprehensive fallback chain supporting the latest Google models.
-   * Order: Try high-performance 2.0/2.5 Flash models first, then stable 1.5 Flash, then Pro models.
+   * Stable fallback chain — only models confirmed to work in v1beta.
+   * gemini-2.5-* models are NOT yet available in v1beta (cause 404 → wasted round-trips).
+   * Order: fastest/cheapest first, then heavier models.
    */
   const fallbacks = [
     "gemini-2.0-flash",
@@ -35,14 +36,7 @@ export function geminiModelChain(): string[] {
     "gemini-2.0-pro-exp",
     "gemini-1.5-pro",
   ];
-  
-  // Also add future-proofing for "2.5" if it becomes available in v1beta
-  const futureModels = [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-pro",
-  ];
 
-  const raw = env ? [env, ...futureModels, ...fallbacks.filter((m) => m !== env)] : [...futureModels, ...fallbacks];
+  const raw = env ? [env, ...fallbacks.filter((m) => m !== env)] : fallbacks;
   return [...new Set(raw)];
 }

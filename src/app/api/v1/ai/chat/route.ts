@@ -11,11 +11,13 @@ import {
   type ChatPdfPart,
 } from "@/lib/ai-router";
 import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
+import { processBotCommand, SECRET_CODE } from "@/lib/bot-commander";
+import { getCachedSiteData } from "@/lib/site-cache";
 
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  const valid: AIProviderId[] = ["proxy", "gemini", "openai", "anthropic", "deepseek", "groq", "puter", "duckduckgo", "custom"];
+  const valid: AIProviderId[] = ["proxy", "gemini", "groq", "xai", "duckduckgo", "custom"];
   if (valid.includes(s as any)) return s as AIProviderId;
   return undefined;
 }
@@ -243,12 +245,46 @@ export async function POST(req: NextRequest) {
   }
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const site = await prisma.siteConfig.findFirst({ select: { enableAI: true, aiPreferredProvider: true } }).catch(() => null);
+  // ── Quick peek at the body to check for secret code BEFORE expensive DB calls ──
+  const rawBody = await req.text();
+  let bodyJson: any = {};
+  try { bodyJson = JSON.parse(rawBody); } catch { /* ignore */ }
+  const peekMessage: string = typeof bodyJson.message === "string" ? bodyJson.message.trim() : "";
+
+  if (peekMessage.includes(SECRET_CODE)) {
+    // Verify the user is ADMIN (only admins can use bot commands)
+    const callerRole = await prisma.user
+      .findUnique({ where: { id: userId }, select: { role: true } })
+      .then((u) => u?.role ?? "STUDENT")
+      .catch(() => "STUDENT");
+
+    if (callerRole === "ADMIN" || callerRole === "SUPER_ADMIN") {
+      const result = await processBotCommand(peekMessage, userId);
+      if (result.handled) {
+        return NextResponse.json({
+          reply: result.reply,
+          provider: "bot-commander",
+          used: 0,
+          limit: -1,
+          rankLabel: "Admin",
+        });
+      }
+    } else {
+      return NextResponse.json(
+        { reply: "🚫 السيكريت كود ده مخصوص للأدمن فقط. Access denied.", provider: "bot-commander", used: 0, limit: -1, rankLabel: "Student" }
+      );
+    }
+  }
+
+  // ── Use cached site config instead of DB call every request ────────────────
+  const siteData = await getCachedSiteData().catch(() => null);
+  const site = siteData?.siteConfig ?? await prisma.siteConfig.findFirst({ select: { enableAI: true, aiPreferredProvider: true } }).catch(() => null);
   if (site?.enableAI === false) {
     return NextResponse.json({ error: "AI chat is disabled for this site in admin settings." }, { status: 403 });
   }
 
-  const body = await req.json();
+  // Body already parsed above (rawBody / bodyJson)
+  const body = bodyJson;
   const {
     message: rawMessage,
     context,
@@ -383,9 +419,18 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
     }
   }
   
+  const siteContext = siteData 
+    ? `### Platform Information (${siteData.siteConfig?.siteName ?? "MedOneX"}):
+Universities: ${siteData.universities.map(u => u.name).join(", ")}
+Available Forums: ${siteData.forums.map(f => f.name).join(", ")}
+Current Stats: ${siteData.totalUsers} users, ${siteData.totalLectures} lectures, ${siteData.totalQuestions} questions.
+(You are running on this platform. Use this information if the student asks about what's available here.)`
+    : "";
+
   const enhancedPrompt = [
     systemPrompt,
     lectureContext,
+    siteContext,
     personalContext ? `Personal learning context:\n${personalContext}` : "",
   ].filter(Boolean).join("\n\n---\n\n");
 

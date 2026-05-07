@@ -15,7 +15,7 @@ export type AIFallbackMeta = {
 export type ChatImagePart = { mimeType: string; data: string };
 export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
-const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 150_000;
+const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 30_000;
 
 /** In-memory quota exhaustion tracker — key → timestamp of last 429 */
 const geminiQuotaExhaustedAt = new Map<string, number>();
@@ -258,6 +258,7 @@ async function callGroq(message: string, systemPrompt: string, personalKey?: str
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
+      signal: AbortSignal.timeout(FETCH_MS),
       body: JSON.stringify({
         model: modelToUse,
         messages: [
