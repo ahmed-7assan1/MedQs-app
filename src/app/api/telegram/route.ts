@@ -2,9 +2,10 @@
 import { Telegraf, Markup } from 'telegraf';
 import { NextResponse } from 'next/server';
 import { generateAIReplyWithFallback } from '@/lib/ai-router';
-import { DR_Q_SYSTEM_PROMPT } from '@/lib/medical-ai-prompts';
+import { MEDICAL_TUTOR_SYSTEM_PREFIX } from '@/lib/medical-ai-prompts';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { Prisma } from '@prisma/client';
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 
@@ -171,11 +172,13 @@ bot.on('text', async (ctx) => {
         const existing = await prisma.user.findUnique({ where: { email: userMessage } });
         if (existing) {
           await prisma.user.update({ where: { id: existing.id }, data: { telegramId, telegramVerified: true } });
-          await prisma.botUser.update({ where: { telegramId }, data: { tempData: null } });
-          return ctx.reply(`✅ أهلاً دكتور ${existing.name}! تم تسجيل الدخول بنجاح.`, Markup.keyboard([
-            [{ text: "🧠 اسأل دكتور Q" }, { text: "📚 محاضراتي" }],
-            [{ text: "⚙️ الإعدادات" }, { text: "👤 بروفايلي" }]
-          ]).resize());
+          await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
+          return ctx.reply(`✅ أهلاً دكتور ${existing.name}! تم تسجيل الدخول بنجاح.`, {
+            ...Markup.keyboard([
+              [{ text: "🧠 اسأل دكتور Q" }, { text: "📚 محاضراتي" }],
+              [{ text: "⚙️ الإعدادات" }, { text: "👤 بروفايلي" }]
+            ]).resize()
+          });
         }
         return ctx.reply('❌ البريد غير موجود. حاول مجدداً أو اضغط /start.');
 
@@ -210,7 +213,7 @@ bot.on('text', async (ctx) => {
   await ctx.sendChatAction('typing');
   try {
     const globalConfig = await getGlobalConfig();
-    const systemPrompt = `${DR_Q_SYSTEM_PROMPT}\n\n[USER INFO] Name: ${linkedUser.name}, Uni: ${linkedUser.university?.name}, Sem: ${linkedUser.semester?.name}`;
+    const systemPrompt = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER INFO] Name: ${linkedUser.name}, Uni: ${linkedUser.university?.name}, Sem: ${linkedUser.semester?.name}`;
     const provider = botUser.preferredProvider !== 'proxy' ? botUser.preferredProvider : (globalConfig?.defaultProvider || 'gemini');
     const aiResponse = await generateAIReplyWithFallback(userMessage, systemPrompt, {
       preferredProvider: provider as any,
@@ -241,7 +244,15 @@ bot.action(/reg_fac_(.+)/, async (ctx) => {
   const botUser = await getBotUser(telegramId);
   const tempData = (botUser.tempData as any) || {};
   await prisma.botUser.update({ where: { telegramId }, data: { tempData: { ...tempData, step: 'REG_SEM', facultyId: facId } } });
-  const semesters = await prisma.semester.findMany({ where: { facultyId: facId }, select: { id: true, name: true } });
+  // Find semesters that belong to this faculty
+  const semesters = await prisma.semester.findMany({ 
+    where: { 
+      facultySemesters: {
+        some: { facultyId: facId }
+      }
+    }, 
+    select: { id: true, name: true } 
+  });
   ctx.editMessageText('اختر السيمستر:', Markup.inlineKeyboard(semesters.map(s => [Markup.button.callback(s.name, `reg_sem_${s.id}`)])));
 });
 
@@ -257,11 +268,13 @@ bot.action(/reg_sem_(.+)/, async (ctx) => {
       telegramId, telegramVerified: true, role: 'STUDENT'
     }
   });
-  await prisma.botUser.update({ where: { telegramId }, data: { tempData: null } });
-  ctx.editMessageText(`🎊 مبروك يا دكتور ${newUser.name}! تم إنشاء حسابك.`, Markup.keyboard([
-    [{ text: "🧠 اسأل دكتور Q" }, { text: "📚 محاضراتي" }],
-    [{ text: "⚙️ الإعدادات" }, { text: "👤 بروفايلي" }]
-  ]).resize());
+  await prisma.botUser.update({ where: { telegramId }, data: { tempData: Prisma.JsonNull } });
+  ctx.editMessageText(`🎊 مبروك يا دكتور ${newUser.name}! تم إنشاء حسابك.`, {
+    ...Markup.keyboard([
+      [{ text: "🧠 اسأل دكتور Q" }, { text: "📚 محاضراتي" }],
+      [{ text: "⚙️ الإعدادات" }, { text: "👤 بروفايلي" }]
+    ]).resize()
+  });
 });
 
 // ─── API Route ───
