@@ -12,8 +12,9 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function getLinkedUser(telegramId: string) {
-  return await prisma.user.findFirst({
-    where: { telegramId: telegramId },
+  // findUnique works because telegramId has @unique in schema — fixes IDE TS error
+  return await prisma.user.findUnique({
+    where: { telegramId },
     include: { university: true, semester: true }
   });
 }
@@ -90,6 +91,70 @@ const showModules = async (ctx: any) => {
 
 bot.command('modules', showModules);
 bot.hears('📚 My Modules', showModules);
+
+// ─── Settings Menu (Per-Student AI Config) ───
+
+const showSettings = async (ctx: any) => {
+  const telegramId = ctx.from.id.toString();
+  const botUser = await getBotUser(telegramId);
+  const currentProvider = botUser.preferredProvider || 'gemini';
+  const hasPersonalKey = !!botUser.personalKey;
+
+  const providerLabels: Record<string, string> = {
+    gemini: 'Google Gemini',
+    groq: 'Groq',
+    custom: 'Custom API'
+  };
+
+  const msg = `⚙️ *Your AI Settings*
+
+🤖 Current Provider: *${providerLabels[currentProvider] || currentProvider}*
+🔑 Personal API Key: ${hasPersonalKey ? '✅ Configured' : '❌ Not set (using shared keys)'}
+
+_Each student has independent settings._`;
+
+  ctx.reply(msg, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('🌐 Use Google Gemini', 'set_provider_gemini')],
+      [Markup.button.callback('⚡ Use Groq (Fast)', 'set_provider_groq')],
+      [Markup.button.callback('🔑 Set My Personal API Key', 'set_personal_key')],
+      [Markup.button.callback('🗑️ Clear My Personal Key', 'clear_personal_key')],
+    ])
+  });
+};
+
+bot.command('settings', showSettings);
+bot.hears('⚙️ Settings', showSettings);
+
+bot.action(/set_provider_(.+)/, async (ctx) => {
+  await ctx.answerCbQuery();
+  const provider = ctx.match[1];
+  const telegramId = ctx.from!.id.toString();
+  await prisma.botUser.update({ where: { telegramId }, data: { preferredProvider: provider } });
+  const labels: Record<string, string> = { gemini: 'Google Gemini 🌐', groq: 'Groq ⚡' };
+  ctx.editMessageText(`✅ AI Provider updated to *${labels[provider] || provider}*.
+
+All your future messages will use this provider.`, { parse_mode: 'Markdown' });
+});
+
+bot.action('set_personal_key', async (ctx) => {
+  await ctx.answerCbQuery();
+  const telegramId = ctx.from!.id.toString();
+  await prisma.botUser.update({ where: { telegramId }, data: { tempData: { step: 'SET_API_KEY' } } });
+  ctx.editMessageText(`🔑 *Set Your Personal API Key*
+
+Please send your API key now. It will be used exclusively for your account and won\'t affect other students.
+
+_Tip: Use your own Gemini/Groq key to avoid shared quota limits._`, { parse_mode: 'Markdown' });
+});
+
+bot.action('clear_personal_key', async (ctx) => {
+  await ctx.answerCbQuery();
+  const telegramId = ctx.from!.id.toString();
+  await prisma.botUser.update({ where: { telegramId }, data: { personalKey: null } });
+  ctx.editMessageText('✅ Your personal API key has been cleared. You are now using shared keys.');
+});
 
 bot.action(/mod_(.+)/, async (ctx) => {
   const moduleId = ctx.match[1];
@@ -248,6 +313,12 @@ bot.on('text', async (ctx) => {
   const tempData = (botUser.tempData as any) || {};
 
   if (tempData.step) {
+    if (tempData.step === 'SET_API_KEY') {
+      const key = userMessage.trim();
+      if (key.length < 10) return ctx.reply("That doesn't look valid. Send a proper API key:");
+      await prisma.botUser.update({ where: { telegramId }, data: { personalKey: key, tempData: Prisma.JsonNull } });
+      return ctx.reply("Personal API Key saved! Your key is used only for your account.", MAIN_KEYBOARD);
+    }
     if (tempData.step === 'LOG_EMAIL') {
       const existing = await prisma.user.findUnique({ where: { email: userMessage } });
       if (existing) {
