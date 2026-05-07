@@ -19,8 +19,8 @@ export function MedqsCard({
       : padding === "sm"
         ? "p-4"
         : padding === "lg"
-          ? "p-8"
-          : "p-6"; // 24px — perfect for 8pt grid
+          ? "p-6 md:p-10"
+          : "p-4 md:p-8"; // 16px mobile, 32px desktop — balanced!
 
   return (
     <div

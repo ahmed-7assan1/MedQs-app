@@ -24,10 +24,15 @@
     padding-right: clamp(1rem, 6vw, 1.5rem);
   }
 
-  /* 📏 8pt GRID & PROXIMITY UTILITIES */
+  /* 📏 8pt GRID & PROXIMITY UTILITIES (Responsive) */
   .space-y-title > * + * { margin-top: 0.5rem; }    /* 8px */
-  .space-y-section > * + * { margin-top: 1.5rem; }  /* 24px */
-  .space-y-block > * + * { margin-top: 2.5rem; }    /* 40px */
+  .space-y-section > * + * { margin-top: 1rem; }    /* 16px mobile */
+  .space-y-block > * + * { margin-top: 2rem; }      /* 32px mobile */
+
+  @media (min-width: 768px) {
+    .space-y-section > * + * { margin-top: 1.5rem; } /* 24px desktop */
+    .space-y-block > * + * { margin-top: 3rem; }   /* 48px desktop */
+  }
 
   :where(a, button, input, textarea, select, summary):focus-visible {
     outline: 2px solid hsl(var(--ring));
