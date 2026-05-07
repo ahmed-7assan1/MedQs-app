@@ -146,6 +146,16 @@ export type QuizAttemptItem = $Result.DefaultSelection<Prisma.$QuizAttemptItemPa
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model TelegramConfig
+ * 
+ */
+export type TelegramConfig = $Result.DefaultSelection<Prisma.$TelegramConfigPayload>
+/**
+ * Model BotAuth
+ * 
+ */
+export type BotAuth = $Result.DefaultSelection<Prisma.$BotAuthPayload>
+/**
  * Model Note
  * 
  */
@@ -835,6 +845,26 @@ export class PrismaClient<
     * ```
     */
   get user(): Prisma.UserDelegate<ExtArgs>;
+
+  /**
+   * `prisma.telegramConfig`: Exposes CRUD operations for the **TelegramConfig** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TelegramConfigs
+    * const telegramConfigs = await prisma.telegramConfig.findMany()
+    * ```
+    */
+  get telegramConfig(): Prisma.TelegramConfigDelegate<ExtArgs>;
+
+  /**
+   * `prisma.botAuth`: Exposes CRUD operations for the **BotAuth** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BotAuths
+    * const botAuths = await prisma.botAuth.findMany()
+    * ```
+    */
+  get botAuth(): Prisma.BotAuthDelegate<ExtArgs>;
 
   /**
    * `prisma.note`: Exposes CRUD operations for the **Note** model.
@@ -1622,6 +1652,8 @@ export namespace Prisma {
     StudyAssistantProfile: 'StudyAssistantProfile',
     QuizAttemptItem: 'QuizAttemptItem',
     User: 'User',
+    TelegramConfig: 'TelegramConfig',
+    BotAuth: 'BotAuth',
     Note: 'Note',
     UserLectureActivity: 'UserLectureActivity',
     DirectMessage: 'DirectMessage',
@@ -1669,7 +1701,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "note" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow" | "youtubeUploadTask" | "medicalTeam" | "teamMember" | "teamFollower" | "platformMember" | "botUser"
+      modelProps: "siteConfig" | "featureFlag" | "university" | "faculty" | "universityYearIdFormat" | "academicYear" | "semester" | "playlistSyncTask" | "module" | "subject" | "lecture" | "flashcard" | "lectureFile" | "lectureVideo" | "lectureRecord" | "lectureVideoComment" | "lectureVideoLike" | "question" | "pastPaper" | "questionReport" | "savedQuestion" | "guestQuizUser" | "quizAttempt" | "studyAssistantProfile" | "quizAttemptItem" | "user" | "telegramConfig" | "botAuth" | "note" | "userLectureActivity" | "directMessage" | "forum" | "privateForumMember" | "privateForumInvite" | "post" | "comment" | "userFollow" | "like" | "commentLike" | "notification" | "notificationMute" | "rank" | "engagementLog" | "aIUsageLog" | "adBanner" | "account" | "documentTemplate" | "session" | "verificationToken" | "userTask" | "sourceBook" | "libraryResource" | "allowedChannel" | "channelFollow" | "youtubeUploadTask" | "medicalTeam" | "teamMember" | "teamFollower" | "platformMember" | "botUser"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3490,6 +3522,146 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      TelegramConfig: {
+        payload: Prisma.$TelegramConfigPayload<ExtArgs>
+        fields: Prisma.TelegramConfigFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TelegramConfigFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TelegramConfigFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>
+          }
+          findFirst: {
+            args: Prisma.TelegramConfigFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TelegramConfigFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>
+          }
+          findMany: {
+            args: Prisma.TelegramConfigFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>[]
+          }
+          create: {
+            args: Prisma.TelegramConfigCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>
+          }
+          createMany: {
+            args: Prisma.TelegramConfigCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TelegramConfigCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>[]
+          }
+          delete: {
+            args: Prisma.TelegramConfigDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>
+          }
+          update: {
+            args: Prisma.TelegramConfigUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>
+          }
+          deleteMany: {
+            args: Prisma.TelegramConfigDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TelegramConfigUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.TelegramConfigUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramConfigPayload>
+          }
+          aggregate: {
+            args: Prisma.TelegramConfigAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTelegramConfig>
+          }
+          groupBy: {
+            args: Prisma.TelegramConfigGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TelegramConfigGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TelegramConfigCountArgs<ExtArgs>
+            result: $Utils.Optional<TelegramConfigCountAggregateOutputType> | number
+          }
+        }
+      }
+      BotAuth: {
+        payload: Prisma.$BotAuthPayload<ExtArgs>
+        fields: Prisma.BotAuthFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BotAuthFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BotAuthFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>
+          }
+          findFirst: {
+            args: Prisma.BotAuthFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BotAuthFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>
+          }
+          findMany: {
+            args: Prisma.BotAuthFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>[]
+          }
+          create: {
+            args: Prisma.BotAuthCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>
+          }
+          createMany: {
+            args: Prisma.BotAuthCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BotAuthCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>[]
+          }
+          delete: {
+            args: Prisma.BotAuthDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>
+          }
+          update: {
+            args: Prisma.BotAuthUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>
+          }
+          deleteMany: {
+            args: Prisma.BotAuthDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BotAuthUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.BotAuthUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BotAuthPayload>
+          }
+          aggregate: {
+            args: Prisma.BotAuthAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBotAuth>
+          }
+          groupBy: {
+            args: Prisma.BotAuthGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BotAuthGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BotAuthCountArgs<ExtArgs>
+            result: $Utils.Optional<BotAuthCountAggregateOutputType> | number
           }
         }
       }
@@ -32987,6 +33159,8 @@ export namespace Prisma {
     facultyId: string | null
     personalGeminiKey: string | null
     handle: string | null
+    telegramId: string | null
+    telegramVerified: boolean | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -33017,6 +33191,8 @@ export namespace Prisma {
     facultyId: string | null
     personalGeminiKey: string | null
     handle: string | null
+    telegramId: string | null
+    telegramVerified: boolean | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -33047,6 +33223,8 @@ export namespace Prisma {
     facultyId: number
     personalGeminiKey: number
     handle: number
+    telegramId: number
+    telegramVerified: number
     _all: number
   }
 
@@ -33087,6 +33265,8 @@ export namespace Prisma {
     facultyId?: true
     personalGeminiKey?: true
     handle?: true
+    telegramId?: true
+    telegramVerified?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -33117,6 +33297,8 @@ export namespace Prisma {
     facultyId?: true
     personalGeminiKey?: true
     handle?: true
+    telegramId?: true
+    telegramVerified?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -33147,6 +33329,8 @@ export namespace Prisma {
     facultyId?: true
     personalGeminiKey?: true
     handle?: true
+    telegramId?: true
+    telegramVerified?: true
     _all?: true
   }
 
@@ -33264,6 +33448,8 @@ export namespace Prisma {
     facultyId: string | null
     personalGeminiKey: string | null
     handle: string | null
+    telegramId: string | null
+    telegramVerified: boolean
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -33313,6 +33499,8 @@ export namespace Prisma {
     facultyId?: boolean
     personalGeminiKey?: boolean
     handle?: boolean
+    telegramId?: boolean
+    telegramVerified?: boolean
     aiUsageLogs?: boolean | User$aiUsageLogsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
     channelFollows?: boolean | User$channelFollowsArgs<ExtArgs>
@@ -33378,6 +33566,8 @@ export namespace Prisma {
     facultyId?: boolean
     personalGeminiKey?: boolean
     handle?: boolean
+    telegramId?: boolean
+    telegramVerified?: boolean
     faculty?: boolean | User$facultyArgs<ExtArgs>
     rank?: boolean | User$rankArgs<ExtArgs>
     semester?: boolean | User$semesterArgs<ExtArgs>
@@ -33412,6 +33602,8 @@ export namespace Prisma {
     facultyId?: boolean
     personalGeminiKey?: boolean
     handle?: boolean
+    telegramId?: boolean
+    telegramVerified?: boolean
   }
 
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -33524,6 +33716,8 @@ export namespace Prisma {
       facultyId: string | null
       personalGeminiKey: string | null
       handle: string | null
+      telegramId: string | null
+      telegramVerified: boolean
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -33978,6 +34172,8 @@ export namespace Prisma {
     readonly facultyId: FieldRef<"User", 'String'>
     readonly personalGeminiKey: FieldRef<"User", 'String'>
     readonly handle: FieldRef<"User", 'String'>
+    readonly telegramId: FieldRef<"User", 'String'>
+    readonly telegramVerified: FieldRef<"User", 'Boolean'>
   }
     
 
@@ -34957,6 +35153,1762 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TelegramConfig
+   */
+
+  export type AggregateTelegramConfig = {
+    _count: TelegramConfigCountAggregateOutputType | null
+    _min: TelegramConfigMinAggregateOutputType | null
+    _max: TelegramConfigMaxAggregateOutputType | null
+  }
+
+  export type TelegramConfigMinAggregateOutputType = {
+    id: string | null
+    welcomeMessage: string | null
+    broadcastMessage: string | null
+    botStatus: string | null
+    updatedAt: Date | null
+  }
+
+  export type TelegramConfigMaxAggregateOutputType = {
+    id: string | null
+    welcomeMessage: string | null
+    broadcastMessage: string | null
+    botStatus: string | null
+    updatedAt: Date | null
+  }
+
+  export type TelegramConfigCountAggregateOutputType = {
+    id: number
+    welcomeMessage: number
+    broadcastMessage: number
+    botStatus: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TelegramConfigMinAggregateInputType = {
+    id?: true
+    welcomeMessage?: true
+    broadcastMessage?: true
+    botStatus?: true
+    updatedAt?: true
+  }
+
+  export type TelegramConfigMaxAggregateInputType = {
+    id?: true
+    welcomeMessage?: true
+    broadcastMessage?: true
+    botStatus?: true
+    updatedAt?: true
+  }
+
+  export type TelegramConfigCountAggregateInputType = {
+    id?: true
+    welcomeMessage?: true
+    broadcastMessage?: true
+    botStatus?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TelegramConfigAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TelegramConfig to aggregate.
+     */
+    where?: TelegramConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramConfigs to fetch.
+     */
+    orderBy?: TelegramConfigOrderByWithRelationInput | TelegramConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TelegramConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TelegramConfigs
+    **/
+    _count?: true | TelegramConfigCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TelegramConfigMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TelegramConfigMaxAggregateInputType
+  }
+
+  export type GetTelegramConfigAggregateType<T extends TelegramConfigAggregateArgs> = {
+        [P in keyof T & keyof AggregateTelegramConfig]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTelegramConfig[P]>
+      : GetScalarType<T[P], AggregateTelegramConfig[P]>
+  }
+
+
+
+
+  export type TelegramConfigGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TelegramConfigWhereInput
+    orderBy?: TelegramConfigOrderByWithAggregationInput | TelegramConfigOrderByWithAggregationInput[]
+    by: TelegramConfigScalarFieldEnum[] | TelegramConfigScalarFieldEnum
+    having?: TelegramConfigScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TelegramConfigCountAggregateInputType | true
+    _min?: TelegramConfigMinAggregateInputType
+    _max?: TelegramConfigMaxAggregateInputType
+  }
+
+  export type TelegramConfigGroupByOutputType = {
+    id: string
+    welcomeMessage: string | null
+    broadcastMessage: string | null
+    botStatus: string
+    updatedAt: Date
+    _count: TelegramConfigCountAggregateOutputType | null
+    _min: TelegramConfigMinAggregateOutputType | null
+    _max: TelegramConfigMaxAggregateOutputType | null
+  }
+
+  type GetTelegramConfigGroupByPayload<T extends TelegramConfigGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TelegramConfigGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TelegramConfigGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TelegramConfigGroupByOutputType[P]>
+            : GetScalarType<T[P], TelegramConfigGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TelegramConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    welcomeMessage?: boolean
+    broadcastMessage?: boolean
+    botStatus?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["telegramConfig"]>
+
+  export type TelegramConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    welcomeMessage?: boolean
+    broadcastMessage?: boolean
+    botStatus?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["telegramConfig"]>
+
+  export type TelegramConfigSelectScalar = {
+    id?: boolean
+    welcomeMessage?: boolean
+    broadcastMessage?: boolean
+    botStatus?: boolean
+    updatedAt?: boolean
+  }
+
+
+  export type $TelegramConfigPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TelegramConfig"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      welcomeMessage: string | null
+      broadcastMessage: string | null
+      botStatus: string
+      updatedAt: Date
+    }, ExtArgs["result"]["telegramConfig"]>
+    composites: {}
+  }
+
+  type TelegramConfigGetPayload<S extends boolean | null | undefined | TelegramConfigDefaultArgs> = $Result.GetResult<Prisma.$TelegramConfigPayload, S>
+
+  type TelegramConfigCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<TelegramConfigFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: TelegramConfigCountAggregateInputType | true
+    }
+
+  export interface TelegramConfigDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TelegramConfig'], meta: { name: 'TelegramConfig' } }
+    /**
+     * Find zero or one TelegramConfig that matches the filter.
+     * @param {TelegramConfigFindUniqueArgs} args - Arguments to find a TelegramConfig
+     * @example
+     * // Get one TelegramConfig
+     * const telegramConfig = await prisma.telegramConfig.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TelegramConfigFindUniqueArgs>(args: SelectSubset<T, TelegramConfigFindUniqueArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one TelegramConfig that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {TelegramConfigFindUniqueOrThrowArgs} args - Arguments to find a TelegramConfig
+     * @example
+     * // Get one TelegramConfig
+     * const telegramConfig = await prisma.telegramConfig.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TelegramConfigFindUniqueOrThrowArgs>(args: SelectSubset<T, TelegramConfigFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first TelegramConfig that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramConfigFindFirstArgs} args - Arguments to find a TelegramConfig
+     * @example
+     * // Get one TelegramConfig
+     * const telegramConfig = await prisma.telegramConfig.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TelegramConfigFindFirstArgs>(args?: SelectSubset<T, TelegramConfigFindFirstArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first TelegramConfig that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramConfigFindFirstOrThrowArgs} args - Arguments to find a TelegramConfig
+     * @example
+     * // Get one TelegramConfig
+     * const telegramConfig = await prisma.telegramConfig.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TelegramConfigFindFirstOrThrowArgs>(args?: SelectSubset<T, TelegramConfigFindFirstOrThrowArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more TelegramConfigs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramConfigFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TelegramConfigs
+     * const telegramConfigs = await prisma.telegramConfig.findMany()
+     * 
+     * // Get first 10 TelegramConfigs
+     * const telegramConfigs = await prisma.telegramConfig.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const telegramConfigWithIdOnly = await prisma.telegramConfig.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TelegramConfigFindManyArgs>(args?: SelectSubset<T, TelegramConfigFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a TelegramConfig.
+     * @param {TelegramConfigCreateArgs} args - Arguments to create a TelegramConfig.
+     * @example
+     * // Create one TelegramConfig
+     * const TelegramConfig = await prisma.telegramConfig.create({
+     *   data: {
+     *     // ... data to create a TelegramConfig
+     *   }
+     * })
+     * 
+     */
+    create<T extends TelegramConfigCreateArgs>(args: SelectSubset<T, TelegramConfigCreateArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many TelegramConfigs.
+     * @param {TelegramConfigCreateManyArgs} args - Arguments to create many TelegramConfigs.
+     * @example
+     * // Create many TelegramConfigs
+     * const telegramConfig = await prisma.telegramConfig.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TelegramConfigCreateManyArgs>(args?: SelectSubset<T, TelegramConfigCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TelegramConfigs and returns the data saved in the database.
+     * @param {TelegramConfigCreateManyAndReturnArgs} args - Arguments to create many TelegramConfigs.
+     * @example
+     * // Create many TelegramConfigs
+     * const telegramConfig = await prisma.telegramConfig.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TelegramConfigs and only return the `id`
+     * const telegramConfigWithIdOnly = await prisma.telegramConfig.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TelegramConfigCreateManyAndReturnArgs>(args?: SelectSubset<T, TelegramConfigCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a TelegramConfig.
+     * @param {TelegramConfigDeleteArgs} args - Arguments to delete one TelegramConfig.
+     * @example
+     * // Delete one TelegramConfig
+     * const TelegramConfig = await prisma.telegramConfig.delete({
+     *   where: {
+     *     // ... filter to delete one TelegramConfig
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TelegramConfigDeleteArgs>(args: SelectSubset<T, TelegramConfigDeleteArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one TelegramConfig.
+     * @param {TelegramConfigUpdateArgs} args - Arguments to update one TelegramConfig.
+     * @example
+     * // Update one TelegramConfig
+     * const telegramConfig = await prisma.telegramConfig.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TelegramConfigUpdateArgs>(args: SelectSubset<T, TelegramConfigUpdateArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more TelegramConfigs.
+     * @param {TelegramConfigDeleteManyArgs} args - Arguments to filter TelegramConfigs to delete.
+     * @example
+     * // Delete a few TelegramConfigs
+     * const { count } = await prisma.telegramConfig.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TelegramConfigDeleteManyArgs>(args?: SelectSubset<T, TelegramConfigDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TelegramConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramConfigUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TelegramConfigs
+     * const telegramConfig = await prisma.telegramConfig.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TelegramConfigUpdateManyArgs>(args: SelectSubset<T, TelegramConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one TelegramConfig.
+     * @param {TelegramConfigUpsertArgs} args - Arguments to update or create a TelegramConfig.
+     * @example
+     * // Update or create a TelegramConfig
+     * const telegramConfig = await prisma.telegramConfig.upsert({
+     *   create: {
+     *     // ... data to create a TelegramConfig
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TelegramConfig we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TelegramConfigUpsertArgs>(args: SelectSubset<T, TelegramConfigUpsertArgs<ExtArgs>>): Prisma__TelegramConfigClient<$Result.GetResult<Prisma.$TelegramConfigPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of TelegramConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramConfigCountArgs} args - Arguments to filter TelegramConfigs to count.
+     * @example
+     * // Count the number of TelegramConfigs
+     * const count = await prisma.telegramConfig.count({
+     *   where: {
+     *     // ... the filter for the TelegramConfigs we want to count
+     *   }
+     * })
+    **/
+    count<T extends TelegramConfigCountArgs>(
+      args?: Subset<T, TelegramConfigCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TelegramConfigCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TelegramConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramConfigAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TelegramConfigAggregateArgs>(args: Subset<T, TelegramConfigAggregateArgs>): Prisma.PrismaPromise<GetTelegramConfigAggregateType<T>>
+
+    /**
+     * Group by TelegramConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramConfigGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TelegramConfigGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TelegramConfigGroupByArgs['orderBy'] }
+        : { orderBy?: TelegramConfigGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TelegramConfigGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTelegramConfigGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TelegramConfig model
+   */
+  readonly fields: TelegramConfigFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TelegramConfig.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TelegramConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TelegramConfig model
+   */ 
+  interface TelegramConfigFieldRefs {
+    readonly id: FieldRef<"TelegramConfig", 'String'>
+    readonly welcomeMessage: FieldRef<"TelegramConfig", 'String'>
+    readonly broadcastMessage: FieldRef<"TelegramConfig", 'String'>
+    readonly botStatus: FieldRef<"TelegramConfig", 'String'>
+    readonly updatedAt: FieldRef<"TelegramConfig", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TelegramConfig findUnique
+   */
+  export type TelegramConfigFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * Filter, which TelegramConfig to fetch.
+     */
+    where: TelegramConfigWhereUniqueInput
+  }
+
+  /**
+   * TelegramConfig findUniqueOrThrow
+   */
+  export type TelegramConfigFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * Filter, which TelegramConfig to fetch.
+     */
+    where: TelegramConfigWhereUniqueInput
+  }
+
+  /**
+   * TelegramConfig findFirst
+   */
+  export type TelegramConfigFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * Filter, which TelegramConfig to fetch.
+     */
+    where?: TelegramConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramConfigs to fetch.
+     */
+    orderBy?: TelegramConfigOrderByWithRelationInput | TelegramConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TelegramConfigs.
+     */
+    cursor?: TelegramConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TelegramConfigs.
+     */
+    distinct?: TelegramConfigScalarFieldEnum | TelegramConfigScalarFieldEnum[]
+  }
+
+  /**
+   * TelegramConfig findFirstOrThrow
+   */
+  export type TelegramConfigFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * Filter, which TelegramConfig to fetch.
+     */
+    where?: TelegramConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramConfigs to fetch.
+     */
+    orderBy?: TelegramConfigOrderByWithRelationInput | TelegramConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TelegramConfigs.
+     */
+    cursor?: TelegramConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TelegramConfigs.
+     */
+    distinct?: TelegramConfigScalarFieldEnum | TelegramConfigScalarFieldEnum[]
+  }
+
+  /**
+   * TelegramConfig findMany
+   */
+  export type TelegramConfigFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * Filter, which TelegramConfigs to fetch.
+     */
+    where?: TelegramConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramConfigs to fetch.
+     */
+    orderBy?: TelegramConfigOrderByWithRelationInput | TelegramConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TelegramConfigs.
+     */
+    cursor?: TelegramConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramConfigs.
+     */
+    skip?: number
+    distinct?: TelegramConfigScalarFieldEnum | TelegramConfigScalarFieldEnum[]
+  }
+
+  /**
+   * TelegramConfig create
+   */
+  export type TelegramConfigCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * The data needed to create a TelegramConfig.
+     */
+    data: XOR<TelegramConfigCreateInput, TelegramConfigUncheckedCreateInput>
+  }
+
+  /**
+   * TelegramConfig createMany
+   */
+  export type TelegramConfigCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TelegramConfigs.
+     */
+    data: TelegramConfigCreateManyInput | TelegramConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TelegramConfig createManyAndReturn
+   */
+  export type TelegramConfigCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many TelegramConfigs.
+     */
+    data: TelegramConfigCreateManyInput | TelegramConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TelegramConfig update
+   */
+  export type TelegramConfigUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * The data needed to update a TelegramConfig.
+     */
+    data: XOR<TelegramConfigUpdateInput, TelegramConfigUncheckedUpdateInput>
+    /**
+     * Choose, which TelegramConfig to update.
+     */
+    where: TelegramConfigWhereUniqueInput
+  }
+
+  /**
+   * TelegramConfig updateMany
+   */
+  export type TelegramConfigUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TelegramConfigs.
+     */
+    data: XOR<TelegramConfigUpdateManyMutationInput, TelegramConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which TelegramConfigs to update
+     */
+    where?: TelegramConfigWhereInput
+  }
+
+  /**
+   * TelegramConfig upsert
+   */
+  export type TelegramConfigUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * The filter to search for the TelegramConfig to update in case it exists.
+     */
+    where: TelegramConfigWhereUniqueInput
+    /**
+     * In case the TelegramConfig found by the `where` argument doesn't exist, create a new TelegramConfig with this data.
+     */
+    create: XOR<TelegramConfigCreateInput, TelegramConfigUncheckedCreateInput>
+    /**
+     * In case the TelegramConfig was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TelegramConfigUpdateInput, TelegramConfigUncheckedUpdateInput>
+  }
+
+  /**
+   * TelegramConfig delete
+   */
+  export type TelegramConfigDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+    /**
+     * Filter which TelegramConfig to delete.
+     */
+    where: TelegramConfigWhereUniqueInput
+  }
+
+  /**
+   * TelegramConfig deleteMany
+   */
+  export type TelegramConfigDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TelegramConfigs to delete
+     */
+    where?: TelegramConfigWhereInput
+  }
+
+  /**
+   * TelegramConfig without action
+   */
+  export type TelegramConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramConfig
+     */
+    select?: TelegramConfigSelect<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BotAuth
+   */
+
+  export type AggregateBotAuth = {
+    _count: BotAuthCountAggregateOutputType | null
+    _min: BotAuthMinAggregateOutputType | null
+    _max: BotAuthMaxAggregateOutputType | null
+  }
+
+  export type BotAuthMinAggregateOutputType = {
+    id: string | null
+    code: string | null
+    telegramId: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type BotAuthMaxAggregateOutputType = {
+    id: string | null
+    code: string | null
+    telegramId: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type BotAuthCountAggregateOutputType = {
+    id: number
+    code: number
+    telegramId: number
+    expiresAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type BotAuthMinAggregateInputType = {
+    id?: true
+    code?: true
+    telegramId?: true
+    expiresAt?: true
+    createdAt?: true
+  }
+
+  export type BotAuthMaxAggregateInputType = {
+    id?: true
+    code?: true
+    telegramId?: true
+    expiresAt?: true
+    createdAt?: true
+  }
+
+  export type BotAuthCountAggregateInputType = {
+    id?: true
+    code?: true
+    telegramId?: true
+    expiresAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type BotAuthAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BotAuth to aggregate.
+     */
+    where?: BotAuthWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotAuths to fetch.
+     */
+    orderBy?: BotAuthOrderByWithRelationInput | BotAuthOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BotAuthWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotAuths from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotAuths.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BotAuths
+    **/
+    _count?: true | BotAuthCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BotAuthMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BotAuthMaxAggregateInputType
+  }
+
+  export type GetBotAuthAggregateType<T extends BotAuthAggregateArgs> = {
+        [P in keyof T & keyof AggregateBotAuth]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBotAuth[P]>
+      : GetScalarType<T[P], AggregateBotAuth[P]>
+  }
+
+
+
+
+  export type BotAuthGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BotAuthWhereInput
+    orderBy?: BotAuthOrderByWithAggregationInput | BotAuthOrderByWithAggregationInput[]
+    by: BotAuthScalarFieldEnum[] | BotAuthScalarFieldEnum
+    having?: BotAuthScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BotAuthCountAggregateInputType | true
+    _min?: BotAuthMinAggregateInputType
+    _max?: BotAuthMaxAggregateInputType
+  }
+
+  export type BotAuthGroupByOutputType = {
+    id: string
+    code: string
+    telegramId: string
+    expiresAt: Date
+    createdAt: Date
+    _count: BotAuthCountAggregateOutputType | null
+    _min: BotAuthMinAggregateOutputType | null
+    _max: BotAuthMaxAggregateOutputType | null
+  }
+
+  type GetBotAuthGroupByPayload<T extends BotAuthGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BotAuthGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BotAuthGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BotAuthGroupByOutputType[P]>
+            : GetScalarType<T[P], BotAuthGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BotAuthSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    telegramId?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["botAuth"]>
+
+  export type BotAuthSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    telegramId?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["botAuth"]>
+
+  export type BotAuthSelectScalar = {
+    id?: boolean
+    code?: boolean
+    telegramId?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+  }
+
+
+  export type $BotAuthPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BotAuth"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      code: string
+      telegramId: string
+      expiresAt: Date
+      createdAt: Date
+    }, ExtArgs["result"]["botAuth"]>
+    composites: {}
+  }
+
+  type BotAuthGetPayload<S extends boolean | null | undefined | BotAuthDefaultArgs> = $Result.GetResult<Prisma.$BotAuthPayload, S>
+
+  type BotAuthCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<BotAuthFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: BotAuthCountAggregateInputType | true
+    }
+
+  export interface BotAuthDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BotAuth'], meta: { name: 'BotAuth' } }
+    /**
+     * Find zero or one BotAuth that matches the filter.
+     * @param {BotAuthFindUniqueArgs} args - Arguments to find a BotAuth
+     * @example
+     * // Get one BotAuth
+     * const botAuth = await prisma.botAuth.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BotAuthFindUniqueArgs>(args: SelectSubset<T, BotAuthFindUniqueArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one BotAuth that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {BotAuthFindUniqueOrThrowArgs} args - Arguments to find a BotAuth
+     * @example
+     * // Get one BotAuth
+     * const botAuth = await prisma.botAuth.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BotAuthFindUniqueOrThrowArgs>(args: SelectSubset<T, BotAuthFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first BotAuth that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotAuthFindFirstArgs} args - Arguments to find a BotAuth
+     * @example
+     * // Get one BotAuth
+     * const botAuth = await prisma.botAuth.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BotAuthFindFirstArgs>(args?: SelectSubset<T, BotAuthFindFirstArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first BotAuth that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotAuthFindFirstOrThrowArgs} args - Arguments to find a BotAuth
+     * @example
+     * // Get one BotAuth
+     * const botAuth = await prisma.botAuth.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BotAuthFindFirstOrThrowArgs>(args?: SelectSubset<T, BotAuthFindFirstOrThrowArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more BotAuths that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotAuthFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BotAuths
+     * const botAuths = await prisma.botAuth.findMany()
+     * 
+     * // Get first 10 BotAuths
+     * const botAuths = await prisma.botAuth.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const botAuthWithIdOnly = await prisma.botAuth.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BotAuthFindManyArgs>(args?: SelectSubset<T, BotAuthFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a BotAuth.
+     * @param {BotAuthCreateArgs} args - Arguments to create a BotAuth.
+     * @example
+     * // Create one BotAuth
+     * const BotAuth = await prisma.botAuth.create({
+     *   data: {
+     *     // ... data to create a BotAuth
+     *   }
+     * })
+     * 
+     */
+    create<T extends BotAuthCreateArgs>(args: SelectSubset<T, BotAuthCreateArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many BotAuths.
+     * @param {BotAuthCreateManyArgs} args - Arguments to create many BotAuths.
+     * @example
+     * // Create many BotAuths
+     * const botAuth = await prisma.botAuth.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BotAuthCreateManyArgs>(args?: SelectSubset<T, BotAuthCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BotAuths and returns the data saved in the database.
+     * @param {BotAuthCreateManyAndReturnArgs} args - Arguments to create many BotAuths.
+     * @example
+     * // Create many BotAuths
+     * const botAuth = await prisma.botAuth.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BotAuths and only return the `id`
+     * const botAuthWithIdOnly = await prisma.botAuth.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BotAuthCreateManyAndReturnArgs>(args?: SelectSubset<T, BotAuthCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a BotAuth.
+     * @param {BotAuthDeleteArgs} args - Arguments to delete one BotAuth.
+     * @example
+     * // Delete one BotAuth
+     * const BotAuth = await prisma.botAuth.delete({
+     *   where: {
+     *     // ... filter to delete one BotAuth
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BotAuthDeleteArgs>(args: SelectSubset<T, BotAuthDeleteArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one BotAuth.
+     * @param {BotAuthUpdateArgs} args - Arguments to update one BotAuth.
+     * @example
+     * // Update one BotAuth
+     * const botAuth = await prisma.botAuth.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BotAuthUpdateArgs>(args: SelectSubset<T, BotAuthUpdateArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more BotAuths.
+     * @param {BotAuthDeleteManyArgs} args - Arguments to filter BotAuths to delete.
+     * @example
+     * // Delete a few BotAuths
+     * const { count } = await prisma.botAuth.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BotAuthDeleteManyArgs>(args?: SelectSubset<T, BotAuthDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BotAuths.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotAuthUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BotAuths
+     * const botAuth = await prisma.botAuth.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BotAuthUpdateManyArgs>(args: SelectSubset<T, BotAuthUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one BotAuth.
+     * @param {BotAuthUpsertArgs} args - Arguments to update or create a BotAuth.
+     * @example
+     * // Update or create a BotAuth
+     * const botAuth = await prisma.botAuth.upsert({
+     *   create: {
+     *     // ... data to create a BotAuth
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BotAuth we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BotAuthUpsertArgs>(args: SelectSubset<T, BotAuthUpsertArgs<ExtArgs>>): Prisma__BotAuthClient<$Result.GetResult<Prisma.$BotAuthPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of BotAuths.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotAuthCountArgs} args - Arguments to filter BotAuths to count.
+     * @example
+     * // Count the number of BotAuths
+     * const count = await prisma.botAuth.count({
+     *   where: {
+     *     // ... the filter for the BotAuths we want to count
+     *   }
+     * })
+    **/
+    count<T extends BotAuthCountArgs>(
+      args?: Subset<T, BotAuthCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BotAuthCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BotAuth.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotAuthAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BotAuthAggregateArgs>(args: Subset<T, BotAuthAggregateArgs>): Prisma.PrismaPromise<GetBotAuthAggregateType<T>>
+
+    /**
+     * Group by BotAuth.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BotAuthGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BotAuthGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BotAuthGroupByArgs['orderBy'] }
+        : { orderBy?: BotAuthGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BotAuthGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBotAuthGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BotAuth model
+   */
+  readonly fields: BotAuthFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BotAuth.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BotAuthClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BotAuth model
+   */ 
+  interface BotAuthFieldRefs {
+    readonly id: FieldRef<"BotAuth", 'String'>
+    readonly code: FieldRef<"BotAuth", 'String'>
+    readonly telegramId: FieldRef<"BotAuth", 'String'>
+    readonly expiresAt: FieldRef<"BotAuth", 'DateTime'>
+    readonly createdAt: FieldRef<"BotAuth", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BotAuth findUnique
+   */
+  export type BotAuthFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * Filter, which BotAuth to fetch.
+     */
+    where: BotAuthWhereUniqueInput
+  }
+
+  /**
+   * BotAuth findUniqueOrThrow
+   */
+  export type BotAuthFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * Filter, which BotAuth to fetch.
+     */
+    where: BotAuthWhereUniqueInput
+  }
+
+  /**
+   * BotAuth findFirst
+   */
+  export type BotAuthFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * Filter, which BotAuth to fetch.
+     */
+    where?: BotAuthWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotAuths to fetch.
+     */
+    orderBy?: BotAuthOrderByWithRelationInput | BotAuthOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BotAuths.
+     */
+    cursor?: BotAuthWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotAuths from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotAuths.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BotAuths.
+     */
+    distinct?: BotAuthScalarFieldEnum | BotAuthScalarFieldEnum[]
+  }
+
+  /**
+   * BotAuth findFirstOrThrow
+   */
+  export type BotAuthFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * Filter, which BotAuth to fetch.
+     */
+    where?: BotAuthWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotAuths to fetch.
+     */
+    orderBy?: BotAuthOrderByWithRelationInput | BotAuthOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BotAuths.
+     */
+    cursor?: BotAuthWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotAuths from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotAuths.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BotAuths.
+     */
+    distinct?: BotAuthScalarFieldEnum | BotAuthScalarFieldEnum[]
+  }
+
+  /**
+   * BotAuth findMany
+   */
+  export type BotAuthFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * Filter, which BotAuths to fetch.
+     */
+    where?: BotAuthWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BotAuths to fetch.
+     */
+    orderBy?: BotAuthOrderByWithRelationInput | BotAuthOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BotAuths.
+     */
+    cursor?: BotAuthWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BotAuths from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BotAuths.
+     */
+    skip?: number
+    distinct?: BotAuthScalarFieldEnum | BotAuthScalarFieldEnum[]
+  }
+
+  /**
+   * BotAuth create
+   */
+  export type BotAuthCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * The data needed to create a BotAuth.
+     */
+    data: XOR<BotAuthCreateInput, BotAuthUncheckedCreateInput>
+  }
+
+  /**
+   * BotAuth createMany
+   */
+  export type BotAuthCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BotAuths.
+     */
+    data: BotAuthCreateManyInput | BotAuthCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BotAuth createManyAndReturn
+   */
+  export type BotAuthCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many BotAuths.
+     */
+    data: BotAuthCreateManyInput | BotAuthCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BotAuth update
+   */
+  export type BotAuthUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * The data needed to update a BotAuth.
+     */
+    data: XOR<BotAuthUpdateInput, BotAuthUncheckedUpdateInput>
+    /**
+     * Choose, which BotAuth to update.
+     */
+    where: BotAuthWhereUniqueInput
+  }
+
+  /**
+   * BotAuth updateMany
+   */
+  export type BotAuthUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BotAuths.
+     */
+    data: XOR<BotAuthUpdateManyMutationInput, BotAuthUncheckedUpdateManyInput>
+    /**
+     * Filter which BotAuths to update
+     */
+    where?: BotAuthWhereInput
+  }
+
+  /**
+   * BotAuth upsert
+   */
+  export type BotAuthUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * The filter to search for the BotAuth to update in case it exists.
+     */
+    where: BotAuthWhereUniqueInput
+    /**
+     * In case the BotAuth found by the `where` argument doesn't exist, create a new BotAuth with this data.
+     */
+    create: XOR<BotAuthCreateInput, BotAuthUncheckedCreateInput>
+    /**
+     * In case the BotAuth was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BotAuthUpdateInput, BotAuthUncheckedUpdateInput>
+  }
+
+  /**
+   * BotAuth delete
+   */
+  export type BotAuthDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
+    /**
+     * Filter which BotAuth to delete.
+     */
+    where: BotAuthWhereUniqueInput
+  }
+
+  /**
+   * BotAuth deleteMany
+   */
+  export type BotAuthDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BotAuths to delete
+     */
+    where?: BotAuthWhereInput
+  }
+
+  /**
+   * BotAuth without action
+   */
+  export type BotAuthDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BotAuth
+     */
+    select?: BotAuthSelect<ExtArgs> | null
   }
 
 
@@ -66484,10 +68436,34 @@ export namespace Prisma {
     canManageReports: 'canManageReports',
     facultyId: 'facultyId',
     personalGeminiKey: 'personalGeminiKey',
-    handle: 'handle'
+    handle: 'handle',
+    telegramId: 'telegramId',
+    telegramVerified: 'telegramVerified'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const TelegramConfigScalarFieldEnum: {
+    id: 'id',
+    welcomeMessage: 'welcomeMessage',
+    broadcastMessage: 'broadcastMessage',
+    botStatus: 'botStatus',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TelegramConfigScalarFieldEnum = (typeof TelegramConfigScalarFieldEnum)[keyof typeof TelegramConfigScalarFieldEnum]
+
+
+  export const BotAuthScalarFieldEnum: {
+    id: 'id',
+    code: 'code',
+    telegramId: 'telegramId',
+    expiresAt: 'expiresAt',
+    createdAt: 'createdAt'
+  };
+
+  export type BotAuthScalarFieldEnum = (typeof BotAuthScalarFieldEnum)[keyof typeof BotAuthScalarFieldEnum]
 
 
   export const NoteScalarFieldEnum: {
@@ -69139,6 +71115,8 @@ export namespace Prisma {
     facultyId?: StringNullableFilter<"User"> | string | null
     personalGeminiKey?: StringNullableFilter<"User"> | string | null
     handle?: StringNullableFilter<"User"> | string | null
+    telegramId?: StringNullableFilter<"User"> | string | null
+    telegramVerified?: BoolFilter<"User"> | boolean
     aiUsageLogs?: AIUsageLogListRelationFilter
     accounts?: AccountListRelationFilter
     channelFollows?: ChannelFollowListRelationFilter
@@ -69203,6 +71181,8 @@ export namespace Prisma {
     facultyId?: SortOrderInput | SortOrder
     personalGeminiKey?: SortOrderInput | SortOrder
     handle?: SortOrderInput | SortOrder
+    telegramId?: SortOrderInput | SortOrder
+    telegramVerified?: SortOrder
     aiUsageLogs?: AIUsageLogOrderByRelationAggregateInput
     accounts?: AccountOrderByRelationAggregateInput
     channelFollows?: ChannelFollowOrderByRelationAggregateInput
@@ -69243,6 +71223,7 @@ export namespace Prisma {
     id?: string
     email?: string
     handle?: string
+    telegramId?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
@@ -69270,6 +71251,7 @@ export namespace Prisma {
     canManageReports?: BoolFilter<"User"> | boolean
     facultyId?: StringNullableFilter<"User"> | string | null
     personalGeminiKey?: StringNullableFilter<"User"> | string | null
+    telegramVerified?: BoolFilter<"User"> | boolean
     aiUsageLogs?: AIUsageLogListRelationFilter
     accounts?: AccountListRelationFilter
     channelFollows?: ChannelFollowListRelationFilter
@@ -69304,7 +71286,7 @@ export namespace Prisma {
     notes?: NoteListRelationFilter
     teamMemberships?: TeamMemberListRelationFilter
     followedTeams?: TeamFollowerListRelationFilter
-  }, "id" | "email" | "handle">
+  }, "id" | "email" | "handle" | "telegramId">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
@@ -69334,6 +71316,8 @@ export namespace Prisma {
     facultyId?: SortOrderInput | SortOrder
     personalGeminiKey?: SortOrderInput | SortOrder
     handle?: SortOrderInput | SortOrder
+    telegramId?: SortOrderInput | SortOrder
+    telegramVerified?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -69372,6 +71356,112 @@ export namespace Prisma {
     facultyId?: StringNullableWithAggregatesFilter<"User"> | string | null
     personalGeminiKey?: StringNullableWithAggregatesFilter<"User"> | string | null
     handle?: StringNullableWithAggregatesFilter<"User"> | string | null
+    telegramId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    telegramVerified?: BoolWithAggregatesFilter<"User"> | boolean
+  }
+
+  export type TelegramConfigWhereInput = {
+    AND?: TelegramConfigWhereInput | TelegramConfigWhereInput[]
+    OR?: TelegramConfigWhereInput[]
+    NOT?: TelegramConfigWhereInput | TelegramConfigWhereInput[]
+    id?: StringFilter<"TelegramConfig"> | string
+    welcomeMessage?: StringNullableFilter<"TelegramConfig"> | string | null
+    broadcastMessage?: StringNullableFilter<"TelegramConfig"> | string | null
+    botStatus?: StringFilter<"TelegramConfig"> | string
+    updatedAt?: DateTimeFilter<"TelegramConfig"> | Date | string
+  }
+
+  export type TelegramConfigOrderByWithRelationInput = {
+    id?: SortOrder
+    welcomeMessage?: SortOrderInput | SortOrder
+    broadcastMessage?: SortOrderInput | SortOrder
+    botStatus?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TelegramConfigWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TelegramConfigWhereInput | TelegramConfigWhereInput[]
+    OR?: TelegramConfigWhereInput[]
+    NOT?: TelegramConfigWhereInput | TelegramConfigWhereInput[]
+    welcomeMessage?: StringNullableFilter<"TelegramConfig"> | string | null
+    broadcastMessage?: StringNullableFilter<"TelegramConfig"> | string | null
+    botStatus?: StringFilter<"TelegramConfig"> | string
+    updatedAt?: DateTimeFilter<"TelegramConfig"> | Date | string
+  }, "id">
+
+  export type TelegramConfigOrderByWithAggregationInput = {
+    id?: SortOrder
+    welcomeMessage?: SortOrderInput | SortOrder
+    broadcastMessage?: SortOrderInput | SortOrder
+    botStatus?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TelegramConfigCountOrderByAggregateInput
+    _max?: TelegramConfigMaxOrderByAggregateInput
+    _min?: TelegramConfigMinOrderByAggregateInput
+  }
+
+  export type TelegramConfigScalarWhereWithAggregatesInput = {
+    AND?: TelegramConfigScalarWhereWithAggregatesInput | TelegramConfigScalarWhereWithAggregatesInput[]
+    OR?: TelegramConfigScalarWhereWithAggregatesInput[]
+    NOT?: TelegramConfigScalarWhereWithAggregatesInput | TelegramConfigScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TelegramConfig"> | string
+    welcomeMessage?: StringNullableWithAggregatesFilter<"TelegramConfig"> | string | null
+    broadcastMessage?: StringNullableWithAggregatesFilter<"TelegramConfig"> | string | null
+    botStatus?: StringWithAggregatesFilter<"TelegramConfig"> | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TelegramConfig"> | Date | string
+  }
+
+  export type BotAuthWhereInput = {
+    AND?: BotAuthWhereInput | BotAuthWhereInput[]
+    OR?: BotAuthWhereInput[]
+    NOT?: BotAuthWhereInput | BotAuthWhereInput[]
+    id?: StringFilter<"BotAuth"> | string
+    code?: StringFilter<"BotAuth"> | string
+    telegramId?: StringFilter<"BotAuth"> | string
+    expiresAt?: DateTimeFilter<"BotAuth"> | Date | string
+    createdAt?: DateTimeFilter<"BotAuth"> | Date | string
+  }
+
+  export type BotAuthOrderByWithRelationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    telegramId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BotAuthWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    code?: string
+    telegramId?: string
+    AND?: BotAuthWhereInput | BotAuthWhereInput[]
+    OR?: BotAuthWhereInput[]
+    NOT?: BotAuthWhereInput | BotAuthWhereInput[]
+    expiresAt?: DateTimeFilter<"BotAuth"> | Date | string
+    createdAt?: DateTimeFilter<"BotAuth"> | Date | string
+  }, "id" | "code" | "telegramId">
+
+  export type BotAuthOrderByWithAggregationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    telegramId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    _count?: BotAuthCountOrderByAggregateInput
+    _max?: BotAuthMaxOrderByAggregateInput
+    _min?: BotAuthMinOrderByAggregateInput
+  }
+
+  export type BotAuthScalarWhereWithAggregatesInput = {
+    AND?: BotAuthScalarWhereWithAggregatesInput | BotAuthScalarWhereWithAggregatesInput[]
+    OR?: BotAuthScalarWhereWithAggregatesInput[]
+    NOT?: BotAuthScalarWhereWithAggregatesInput | BotAuthScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BotAuth"> | string
+    code?: StringWithAggregatesFilter<"BotAuth"> | string
+    telegramId?: StringWithAggregatesFilter<"BotAuth"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"BotAuth"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"BotAuth"> | Date | string
   }
 
   export type NoteWhereInput = {
@@ -73607,6 +75697,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -73671,6 +75763,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -73727,6 +75821,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -73791,6 +75887,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -73851,6 +75949,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
   }
 
   export type UserUpdateManyMutationInput = {
@@ -73877,6 +75977,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -73907,6 +76009,120 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type TelegramConfigCreateInput = {
+    id?: string
+    welcomeMessage?: string | null
+    broadcastMessage?: string | null
+    botStatus?: string
+    updatedAt?: Date | string
+  }
+
+  export type TelegramConfigUncheckedCreateInput = {
+    id?: string
+    welcomeMessage?: string | null
+    broadcastMessage?: string | null
+    botStatus?: string
+    updatedAt?: Date | string
+  }
+
+  export type TelegramConfigUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    botStatus?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TelegramConfigUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    botStatus?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TelegramConfigCreateManyInput = {
+    id?: string
+    welcomeMessage?: string | null
+    broadcastMessage?: string | null
+    botStatus?: string
+    updatedAt?: Date | string
+  }
+
+  export type TelegramConfigUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    botStatus?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TelegramConfigUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    broadcastMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    botStatus?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BotAuthCreateInput = {
+    id?: string
+    code: string
+    telegramId: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+  }
+
+  export type BotAuthUncheckedCreateInput = {
+    id?: string
+    code: string
+    telegramId: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+  }
+
+  export type BotAuthUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BotAuthUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BotAuthCreateManyInput = {
+    id?: string
+    code: string
+    telegramId: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+  }
+
+  export type BotAuthUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BotAuthUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    telegramId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type NoteCreateInput = {
@@ -78002,6 +80218,8 @@ export namespace Prisma {
     facultyId?: SortOrder
     personalGeminiKey?: SortOrder
     handle?: SortOrder
+    telegramId?: SortOrder
+    telegramVerified?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -78036,6 +80254,8 @@ export namespace Prisma {
     facultyId?: SortOrder
     personalGeminiKey?: SortOrder
     handle?: SortOrder
+    telegramId?: SortOrder
+    telegramVerified?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -78066,6 +80286,8 @@ export namespace Prisma {
     facultyId?: SortOrder
     personalGeminiKey?: SortOrder
     handle?: SortOrder
+    telegramId?: SortOrder
+    telegramVerified?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -78104,6 +80326,54 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
+  }
+
+  export type TelegramConfigCountOrderByAggregateInput = {
+    id?: SortOrder
+    welcomeMessage?: SortOrder
+    broadcastMessage?: SortOrder
+    botStatus?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TelegramConfigMaxOrderByAggregateInput = {
+    id?: SortOrder
+    welcomeMessage?: SortOrder
+    broadcastMessage?: SortOrder
+    botStatus?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TelegramConfigMinOrderByAggregateInput = {
+    id?: SortOrder
+    welcomeMessage?: SortOrder
+    broadcastMessage?: SortOrder
+    botStatus?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BotAuthCountOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    telegramId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BotAuthMaxOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    telegramId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BotAuthMinOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    telegramId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type NoteUserIdLectureIdCompoundUniqueInput = {
@@ -85283,6 +87553,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -85345,6 +87617,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -85741,6 +88015,8 @@ export namespace Prisma {
     facultyId?: StringNullableFilter<"User"> | string | null
     personalGeminiKey?: StringNullableFilter<"User"> | string | null
     handle?: StringNullableFilter<"User"> | string | null
+    telegramId?: StringNullableFilter<"User"> | string | null
+    telegramVerified?: BoolFilter<"User"> | boolean
   }
 
   export type MedicalTeamUpsertWithWhereUniqueWithoutUniversityInput = {
@@ -85934,6 +88210,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -85996,6 +88274,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -86813,6 +89093,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -86875,6 +89157,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -88775,6 +91059,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -88838,6 +91124,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -88991,6 +91279,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -89054,6 +91344,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -89152,6 +91444,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -89215,6 +91509,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -89323,6 +91619,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -89386,6 +91684,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -90134,6 +92434,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -90197,6 +92499,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -90370,6 +92674,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -90433,6 +92739,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -90529,6 +92837,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -90592,6 +92902,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -90710,6 +93022,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -90773,6 +93087,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -91180,6 +93496,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -91243,6 +93561,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -91428,6 +93748,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -91491,6 +93813,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -91562,6 +93886,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -91625,6 +93951,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -91696,6 +94024,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -91759,6 +94089,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -93755,6 +96087,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -93818,6 +96152,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -93938,6 +96274,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -94001,6 +96339,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -94099,6 +96439,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -94162,6 +96504,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -94282,6 +96626,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -94345,6 +96691,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -94400,6 +96748,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -94463,6 +96813,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -94523,6 +96875,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -94586,6 +96940,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -94657,6 +97013,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -94720,6 +97078,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -94786,6 +97146,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -94849,6 +97211,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -95237,6 +97601,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -95300,6 +97666,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -95408,6 +97776,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -95471,6 +97841,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -95557,6 +97929,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -95620,6 +97994,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -95680,6 +98056,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -95743,6 +98121,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -95851,6 +98231,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -95914,6 +98296,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -95980,6 +98364,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -96043,6 +98429,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -96150,6 +98538,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -96213,6 +98603,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -96427,6 +98819,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -96490,6 +98884,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -96674,6 +99070,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -96737,6 +99135,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -96973,6 +99373,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -97036,6 +99438,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -97254,6 +99658,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -97317,6 +99723,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -97377,6 +99785,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -97440,6 +99850,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -97511,6 +99923,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -97574,6 +99988,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -97640,6 +100056,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -97703,6 +100121,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -97801,6 +100221,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -97864,6 +100286,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -97984,6 +100408,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -98047,6 +100473,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -98129,6 +100557,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -98192,6 +100622,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -98296,6 +100728,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -98359,6 +100793,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -98414,6 +100850,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -98477,6 +100915,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -98548,6 +100988,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -98611,6 +101053,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -98666,6 +101110,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -98729,6 +101175,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -98800,6 +101248,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -98863,6 +101313,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -98918,6 +101370,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -98980,6 +101434,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -99062,6 +101518,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -99125,6 +101583,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -99196,6 +101656,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -99259,6 +101721,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -99314,6 +101778,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutAuthorInput
@@ -99377,6 +101843,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
@@ -99448,6 +101916,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutAuthorNestedInput
@@ -99511,6 +101981,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
@@ -99726,6 +102198,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutAuthorInput
@@ -99789,6 +102263,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
@@ -99860,6 +102336,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutAuthorNestedInput
@@ -99923,6 +102401,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
@@ -99978,6 +102458,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -100041,6 +102523,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -100112,6 +102596,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -100175,6 +102661,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -100230,6 +102718,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -100293,6 +102783,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -100364,6 +102856,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -100427,6 +102921,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -100482,6 +102978,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -100545,6 +103043,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -100616,6 +103116,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -100679,6 +103181,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -101006,6 +103510,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutAuthorInput
@@ -101069,6 +103575,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput
@@ -101175,6 +103683,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutAuthorNestedInput
@@ -101238,6 +103748,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutAuthorNestedInput
@@ -101696,6 +104208,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -101759,6 +104273,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -101873,6 +104389,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -101936,6 +104454,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -102028,6 +104548,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowCreateNestedManyWithoutUserInput
@@ -102091,6 +104613,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
     aiUsageLogs?: AIUsageLogUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     channelFollows?: ChannelFollowUncheckedCreateNestedManyWithoutUserInput
@@ -102205,6 +104729,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -102268,6 +104794,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -102411,6 +104939,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
   }
 
   export type MedicalTeamCreateManyUniversityInput = {
@@ -102732,6 +105262,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -102794,6 +105326,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -102853,6 +105387,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type MedicalTeamUpdateWithoutUniversityInput = {
@@ -102954,6 +105490,8 @@ export namespace Prisma {
     canManageReports?: boolean
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
   }
 
   export type MedicalTeamCreateManyFacultyInput = {
@@ -103082,6 +105620,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -103144,6 +105684,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -103203,6 +105745,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type MedicalTeamUpdateWithoutFacultyInput = {
@@ -103384,6 +105928,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
   }
 
   export type AdBannerUpdateWithoutSemesterInput = {
@@ -103644,6 +106190,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -103706,6 +106254,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -103765,6 +106315,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type PastPaperCreateManyModuleInput = {
@@ -105714,6 +108266,8 @@ export namespace Prisma {
     facultyId?: string | null
     personalGeminiKey?: string | null
     handle?: string | null
+    telegramId?: string | null
+    telegramVerified?: boolean
   }
 
   export type UserUpdateWithoutRankInput = {
@@ -105740,6 +108294,8 @@ export namespace Prisma {
     canManageReports?: BoolFieldUpdateOperationsInput | boolean
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUpdateManyWithoutUserNestedInput
@@ -105802,6 +108358,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
     aiUsageLogs?: AIUsageLogUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     channelFollows?: ChannelFollowUncheckedUpdateManyWithoutUserNestedInput
@@ -105861,6 +108419,8 @@ export namespace Prisma {
     facultyId?: NullableStringFieldUpdateOperationsInput | string | null
     personalGeminiKey?: NullableStringFieldUpdateOperationsInput | string | null
     handle?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramId?: NullableStringFieldUpdateOperationsInput | string | null
+    telegramVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type LibraryResourceCreateManySourceBookInput = {
@@ -106316,6 +108876,14 @@ export namespace Prisma {
      * @deprecated Use UserDefaultArgs instead
      */
     export type UserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use TelegramConfigDefaultArgs instead
+     */
+    export type TelegramConfigArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TelegramConfigDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use BotAuthDefaultArgs instead
+     */
+    export type BotAuthArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BotAuthDefaultArgs<ExtArgs>
     /**
      * @deprecated Use NoteDefaultArgs instead
      */

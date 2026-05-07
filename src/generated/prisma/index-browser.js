@@ -419,7 +419,25 @@ exports.Prisma.UserScalarFieldEnum = {
   canManageReports: 'canManageReports',
   facultyId: 'facultyId',
   personalGeminiKey: 'personalGeminiKey',
-  handle: 'handle'
+  handle: 'handle',
+  telegramId: 'telegramId',
+  telegramVerified: 'telegramVerified'
+};
+
+exports.Prisma.TelegramConfigScalarFieldEnum = {
+  id: 'id',
+  welcomeMessage: 'welcomeMessage',
+  broadcastMessage: 'broadcastMessage',
+  botStatus: 'botStatus',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BotAuthScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  telegramId: 'telegramId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.NoteScalarFieldEnum = {
@@ -859,6 +877,8 @@ exports.Prisma.ModelName = {
   StudyAssistantProfile: 'StudyAssistantProfile',
   QuizAttemptItem: 'QuizAttemptItem',
   User: 'User',
+  TelegramConfig: 'TelegramConfig',
+  BotAuth: 'BotAuth',
   Note: 'Note',
   UserLectureActivity: 'UserLectureActivity',
   DirectMessage: 'DirectMessage',

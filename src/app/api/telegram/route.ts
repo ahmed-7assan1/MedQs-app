@@ -9,6 +9,13 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
+async function getLinkedUser(telegramId: string) {
+  return await prisma.user.findUnique({
+    where: { telegramId },
+    include: { university: true, semester: true }
+  });
+}
+
 async function getBotUser(telegramId: string) {
   let user = await prisma.botUser.findUnique({ where: { telegramId } });
   if (!user) {
@@ -21,17 +28,41 @@ async function getBotUser(telegramId: string) {
 
 // ─── Telegram Bot Logic ──────────────────────────────────────────────────────
 
-bot.start((ctx) => {
-  ctx.reply(`أهلاً بك يا ${ctx.from.first_name} في MedOneX AI Assistant! 🩺🌌\n\nأنا دكتور Q، مساعدك الطبي الذكي. يمكنك سؤالي عن أي شيء يخص دراستك الطبية أو الاستفسارات الصحية العامة.\n\nاستخدم /settings لضبط إعدادات الـ API الخاصة بك.`);
+bot.start(async (ctx) => {
+  const linkedUser = await getLinkedUser(ctx.from.id.toString());
+  if (linkedUser) {
+    ctx.reply(`أهلاً بك مجدداً يا دكتور ${linkedUser.name}! 🩺🌌\n\nلقد تم ربط حسابك بنجاح. أنا الآن أعرف أنك طالب في ${linkedUser.university?.name || 'جامعتك'} (السيمستر ${linkedUser.semester?.name || '-'}). كيف يمكنني مساعدتك اليوم؟`);
+  } else {
+    ctx.reply(`أهلاً بك في MedOneX AI Assistant! 🩺🌌\n\nللبدء، يجب عليك ربط حسابك بالموقع لتتمكن من الوصول لبياناتك ومحاضراتك.\n\nاستخدم أمر /login للحصول على كود الربط.`);
+  }
+});
+
+bot.command('login', async (ctx) => {
+  const telegramId = ctx.from.id.toString();
+  const existingUser = await getLinkedUser(telegramId);
+  
+  if (existingUser) {
+    return ctx.reply(`حسابك مربوط بالفعل باسم: ${existingUser.name}`);
+  }
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+  await prisma.botAuth.upsert({
+    where: { telegramId },
+    update: { code, expiresAt },
+    create: { telegramId, code, expiresAt }
+  });
+
+  ctx.reply(`🔑 كود الربط الخاص بك هو: \`${code}\`\n\nقم بنسخ هذا الكود والذهاب إلى "إعدادات البروفايل" في الموقع ووضعه هناك لإتمام عملية الربط.\n\n⚠️ الكود صالح لمدة 10 دقائق فقط.`, { parse_mode: 'MarkdownV2' });
 });
 
 bot.help((ctx) => {
   ctx.reply(` قائمة الأوامر المتاحة:
 🩺 /start - بدء المحادثة والترحيب.
+🔑 /login - ربط حسابك بالموقع.
 ⚙️ /settings - ضبط محرك الذكاء الاصطناعي و الـ API Key.
 ❓ /help - عرض قائمة المساعدة هذه.
-🏥 /about - معلومات عن دكتور Q ومنصة MedOneX.
-🌐 /website - الانتقال إلى موقع المنصة الرسمي.
 💬 فقط أرسل سؤالك الطبي مباشرة وسأرد عليك فوراً!`);
 });
 
@@ -143,10 +174,25 @@ bot.on('text', async (ctx) => {
   await ctx.sendChatAction('typing');
 
   try {
-    const user = await getBotUser(ctx.from.id.toString());
-    const systemPrompt = `${DR_Q_SYSTEM_PROMPT}\n\n(Identity Rule: You were created by Ahmed M. Hassan, the founder of MedOneX. If asked about your origin, always mention him with respect.)\n\n(Context: You are answering via Telegram. Be concise, use emojis where appropriate, and ensure formatting is clean for mobile reading.)`;
+    const telegramId = ctx.from.id.toString();
+    const [user, linkedUser] = await Promise.all([
+      getBotUser(telegramId),
+      getLinkedUser(telegramId)
+    ]);
+
+    let personalizedSystemPrompt = DR_Q_SYSTEM_PROMPT;
     
-    const aiResponse = await generateAIReplyWithFallback(userMessage, systemPrompt, {
+    if (linkedUser) {
+      personalizedSystemPrompt += `\n\n[USER INFO]
+- Name: ${linkedUser.name}
+- University: ${linkedUser.university?.name || 'Unknown'}
+- Semester: ${linkedUser.semester?.name || 'Unknown'}
+- Instruction: Address the user as "Doctor ${linkedUser.name}". Be aware of their university and semester context when answering academic questions.`;
+    }
+
+    personalizedSystemPrompt += `\n\n(Identity Rule: You were created by Ahmed M. Hassan, the founder of MedOneX. If asked about your origin, always mention him with respect.)\n\n(Context: You are answering via Telegram. Be concise, use emojis where appropriate, and ensure formatting is clean for mobile reading.)`;
+    
+    const aiResponse = await generateAIReplyWithFallback(userMessage, personalizedSystemPrompt, {
       preferredProvider: user.preferredProvider || undefined,
       personalKey: user.personalKey || undefined,
       useCustomKey: !!user.personalKey,

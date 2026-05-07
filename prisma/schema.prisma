@@ -466,6 +466,24 @@ model User {
   notes                 Note[]
   teamMemberships       TeamMember[]
   followedTeams         TeamFollower[]
+  telegramId           String?                @unique
+  telegramVerified     Boolean                @default(false)
+}
+
+model TelegramConfig {
+  id               String   @id @default("global")
+  welcomeMessage   String?  @db.Text
+  broadcastMessage String?  @db.Text
+  botStatus        String   @default("ACTIVE") // ACTIVE, MAINTENANCE
+  updatedAt        DateTime @updatedAt
+}
+
+model BotAuth {
+  id         String   @id @default(uuid())
+  code       String   @unique
+  telegramId String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
 }
 
 model Note {
