@@ -47,25 +47,30 @@ const MAIN_KEYBOARD = Markup.keyboard([
 // ─── Bot Logic ───
 
 bot.start(async (ctx) => {
-  const telegramId = ctx.from.id.toString();
-  const linkedUser = await getLinkedUser(telegramId);
-  
-  if (linkedUser) {
-    ctx.reply(`Welcome back, Dr. ${linkedUser.name}! 🩺🌌\nHow can I help you today?`, MAIN_KEYBOARD);
-  } else {
-    ctx.reply(
-      `Welcome to MedOneX! 🩺🌌\n\n` +
-      `🚀 *Quick Login:* Just send me the *Email* you used to register on the site, and I'll link your account instantly!\n\n` +
-      `Or use the traditional methods:`, 
-      { 
-        parse_mode: 'Markdown',
-        ...Markup.inlineKeyboard([
-          [Markup.button.webApp('📱 Open MedOneX App', `${BASE_URL}/dashboard-app`)],
-          [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
-          [Markup.button.callback('📝 Quick Register', 'auth_register')]
-        ])
-      }
-    );
+  try {
+    const telegramId = ctx.from.id.toString();
+    const linkedUser = await getLinkedUser(telegramId);
+    
+    if (linkedUser) {
+      await ctx.reply(`Welcome back, Dr. ${linkedUser.name}! 🩺🌌\nHow can I help you today?`, MAIN_KEYBOARD);
+    } else {
+      await ctx.reply(
+        `Welcome to MedOneX! 🩺🌌\n\n` +
+        `🚀 *Quick Login:* Just send me the *Email* you used to register on the site, and I'll link your account instantly!\n\n` +
+        `Or use the traditional methods:`, 
+        { 
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard([
+            [Markup.button.webApp('📱 Open MedOneX App', `${BASE_URL}/dashboard-app`)],
+            [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
+            [Markup.button.callback('📝 Quick Register', 'auth_register')]
+          ])
+        }
+      );
+    }
+  } catch (err: any) {
+    console.error("[BOT] Start Error:", err);
+    ctx.reply(`❌ Error during start: ${err.message}`);
   }
 });
 
@@ -457,7 +462,7 @@ bot.on('text', async (ctx) => {
     }
   } catch (error: any) {
     console.error("Bot AI Error:", error);
-    ctx.reply('🩺 Dr. Q is currently resting. Try again in a bit.');
+    ctx.reply(`🩺 Dr. Q Error: ${error.message || 'Unknown failure'}`);
   }
 });
 
