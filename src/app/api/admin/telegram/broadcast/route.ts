@@ -6,34 +6,42 @@ import { Telegraf } from 'telegraf';
 
 export async function POST(req: Request) {
   const session = await auth();
-  const userRole = (session?.user as any)?.role;
+  const currentUser = session?.user as any;
+  const userRole = currentUser?.role;
 
   if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { message } = await req.json();
+  const { message, telegramId } = await req.json();
   if (!message) return NextResponse.json({ error: 'Message required' }, { status: 400 });
 
   const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
   
-  const linkedUsers = await prisma.user.findMany({
-    where: { 
-      AND: [
-        { telegramId: { not: null } },
-        { telegramId: { not: "" } }
-      ],
-      telegramVerified: true
-    },
-    select: { telegramId: true }
-  });
+  let targetUsers: { telegramId: string | null }[] = [];
+
+  if (telegramId) {
+    // Single user target
+    targetUsers = [{ telegramId }];
+  } else {
+    // Broadcast target - Filter by admin's semester if not SUPER_ADMIN
+    const adminSemesterId = currentUser?.semesterId;
+    
+    targetUsers = await prisma.user.findMany({
+      where: { 
+        telegramId: { not: null },
+        telegramVerified: true,
+        // Filter by semester if it's a regular ADMIN
+        ...(userRole === "ADMIN" && adminSemesterId ? { semesterId: adminSemesterId } : {})
+      },
+      select: { telegramId: true }
+    });
+  }
 
   let successCount = 0;
   let failCount = 0;
 
-  // We do it in sequence to avoid hitting rate limits too hard, 
-  // but for a large user base, a queue system is better.
-  for (const user of linkedUsers) {
+  for (const user of targetUsers) {
     try {
       if (user.telegramId) {
         await bot.telegram.sendMessage(user.telegramId, message, { parse_mode: 'Markdown' });
