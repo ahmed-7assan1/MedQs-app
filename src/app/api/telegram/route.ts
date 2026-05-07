@@ -236,15 +236,20 @@ bot.on('text', async (ctx) => {
     return ctx.reply(`📊 *Dashboard*\n\nName: ${dash?.name}\nPoints: ${dash?.points || 0}`, { parse_mode: 'Markdown' });
   }
 
-  await ctx.sendChatAction('typing');
   try {
     const config = await getGlobalConfig();
     const sys = `${MEDICAL_TUTOR_SYSTEM_PREFIX}\n\n[USER: Dr. ${linkedUser.name}]`;
+    
+    // Pass personal keys if available
     const ai = await generateAIReplyWithFallback(text, sys, {
       preferredProvider: botUser.preferredProvider || (config?.defaultProvider as any) || 'gemini',
+      personalKey: botUser.personalKey || undefined,
+      useCustomKey: !!botUser.personalKey,
+      customProvider: (botUser.preferredProvider as any) || 'gemini'
     });
     await ctx.reply(ai.text, { parse_mode: 'Markdown' });
-  } catch {
+  } catch (error: any) {
+    console.error("Bot AI Error:", error);
     ctx.reply('🩺 Dr. Q is currently resting. Try again in a bit.');
   }
 });
