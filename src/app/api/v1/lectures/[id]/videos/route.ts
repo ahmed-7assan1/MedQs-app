@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
+import { syncFileToTelegram } from "@/lib/telegram-storage";
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
   const session = await auth();
@@ -44,6 +45,10 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (!title || !url) return NextResponse.json({ error: "title and url are required" }, { status: 400 });
 
   const sortOrder = await prisma.lectureVideo.count({ where: { lectureId: id } });
+  
+  // Optional: Sync to Telegram if it's a direct link
+  const tgSync = await syncFileToTelegram(url, title, "video/mp4");
+
   const row = await prisma.lectureVideo.create({
     data: {
       lectureId: id,
@@ -51,6 +56,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       url,
       sortOrder: sortOrder + 1,
       sharingEnabled: body?.sharingEnabled !== false,
+      telegramMessageId: tgSync?.messageId,
+      telegramChatId: tgSync?.chatId,
     },
   });
   return NextResponse.json({ ...row, likedByMe: false }, { status: 201 });
