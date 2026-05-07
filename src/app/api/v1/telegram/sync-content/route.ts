@@ -1,0 +1,49 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+/**
+ * 🛰️ Specialized Endpoint for Colab Sync
+ * Protected by TELEGRAM_BOT_TOKEN to ensure only your bot/script can access it.
+ */
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const semesterId = searchParams.get("semesterId");
+    const botToken = req.headers.get("x-bot-token");
+
+    // 1. Security Check
+    if (!botToken || botToken !== process.env.TELEGRAM_BOT_TOKEN) {
+      return NextResponse.json({ error: "Unauthorized: Invalid Bot Token" }, { status: 401 });
+    }
+
+    if (!semesterId) {
+      return NextResponse.json({ error: "semesterId is required" }, { status: 400 });
+    }
+
+    // 2. Fetch Deeply Nested Content (Module -> Subject -> Lecture -> Files/Videos)
+    const modules = await prisma.module.findMany({
+      where: { semesterId },
+      orderBy: { name: 'asc' },
+      include: {
+        subjects: {
+          orderBy: { name: 'asc' },
+          include: {
+            lectures: {
+              orderBy: { order: 'asc' },
+              include: {
+                files: true,
+                videos: true,
+                records: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return NextResponse.json({ modules });
+  } catch (error: any) {
+    console.error("Sync Content Error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
