@@ -8,7 +8,7 @@ export default async function TelegramAdminPage() {
   const session = await auth();
   const userRole = (session?.user as any)?.role;
 
-  if (userRole !== "ADMIN") {
+  if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
     redirect("/");
   }
 
