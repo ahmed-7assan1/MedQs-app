@@ -5,6 +5,9 @@ import { generateAIReplyWithFallback } from '@/lib/ai-router';
 import { MEDICAL_TUTOR_SYSTEM_PREFIX } from '@/lib/medical-ai-prompts';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import crypto from 'crypto';
+
+const STORAGE_GROUP_ID = process.env.TELEGRAM_STORAGE_GROUP_ID;
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 
@@ -48,11 +51,43 @@ bot.start(async (ctx) => {
   if (linkedUser) {
     ctx.reply(`Welcome back, Dr. ${linkedUser.name}! 🩺🌌\nHow can I help you today?`, MAIN_KEYBOARD);
   } else {
-    ctx.reply(`Welcome to MedOneX! 🩺🌌\nPlease login to access your lectures.`, Markup.inlineKeyboard([
-      [Markup.button.callback('🔐 Login', 'auth_login')],
-      [Markup.button.callback('📝 Register', 'auth_register')]
+    ctx.reply(`Welcome to MedOneX! 🩺🌌\nPlease login to access your lectures and start learning.`, Markup.inlineKeyboard([
+      [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
+      [Markup.button.callback('📝 Quick Register', 'auth_register')]
     ]));
   }
+});
+
+// ─── Authentication Handlers ───
+
+bot.action('auth_login', async (ctx) => {
+  const telegramId = ctx.from!.id.toString();
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+  await (prisma as any).botAuth.upsert({
+    where: { telegramId },
+    update: { code, expiresAt },
+    create: { telegramId, code, expiresAt }
+  });
+
+  await ctx.editMessageText(
+    `🔑 Your Login Code: \`${code}\`\n\n` +
+    `1. Go to the MedOneX Dashboard.\n` +
+    `2. Open your Profile Settings.\n` +
+    `3. Click 'Link Telegram' and enter this code.\n\n` +
+    `_This code expires in 10 minutes._`,
+    { parse_mode: 'Markdown' }
+  );
+});
+
+bot.action('auth_register', async (ctx) => {
+  const telegramId = ctx.from!.id.toString();
+  await (prisma as any).botUser.update({
+    where: { telegramId },
+    data: { tempData: { step: 'awaiting_name' } }
+  });
+  await ctx.editMessageText('📝 Let\'s get you started! What is your full name?');
 });
 
 // ─── Academic Navigation ───
@@ -137,15 +172,127 @@ bot.action(/get_all_(.+)/, async (ctx) => {
   
   for (const item of all) {
     const itemAny = item as any;
+    let sentMessage: any = null;
+    
     if (itemAny.telegramMessageId && itemAny.telegramChatId) {
       try {
-        await ctx.telegram.copyMessage(ctx.from!.id, itemAny.telegramChatId, itemAny.telegramMessageId);
+        sentMessage = await ctx.telegram.copyMessage(ctx.from!.id, itemAny.telegramChatId, itemAny.telegramMessageId);
       } catch {
-        await ctx.reply(`🔗 [${itemAny.name || itemAny.title}](${itemAny.url})`, { parse_mode: 'Markdown' });
+        sentMessage = await ctx.reply(`🔗 [${itemAny.name || itemAny.title}](${itemAny.url})`, { parse_mode: 'Markdown' });
       }
     } else {
-      await ctx.reply(`🔗 [${itemAny.name || itemAny.title}](${itemAny.url})`, { parse_mode: 'Markdown' });
+      sentMessage = await ctx.reply(`🔗 [${itemAny.name || itemAny.title}](${itemAny.url})`, { parse_mode: 'Markdown' });
     }
+
+    // Forward to data group if configured and not already there
+    if (STORAGE_GROUP_ID && sentMessage && !itemAny.telegramChatId) {
+      try {
+        const forwarded = await ctx.telegram.forwardMessage(STORAGE_GROUP_ID, ctx.from!.id, sentMessage.message_id);
+        // Save the IDs for next time to reduce DB/Link load
+        const modelName = (itemAny.url.includes('video') || itemAny.title) ? 'lectureVideo' : 'lectureFile';
+        await (prisma as any)[modelName].update({
+          where: { id: itemAny.id },
+          data: { telegramChatId: STORAGE_GROUP_ID.toString(), telegramMessageId: forwarded.message_id }
+        }).catch(() => {});
+      } catch (err) {
+        console.error("Storage Group Forward Error:", err);
+      }
+    }
+  }
+});
+
+// ─── Quiz System ───
+
+bot.action(/quiz_(.+)/, async (ctx) => {
+  const lecId = ctx.match[1];
+  const questions = await (prisma.question as any).findMany({
+    where: { lectureId: lecId },
+    orderBy: { createdAt: 'asc' }
+  });
+
+  if (questions.length === 0) return ctx.answerCbQuery('No questions for this lecture.');
+
+  await ctx.answerCbQuery();
+  
+  // Store session in BotUser tempData
+  await (prisma as any).botUser.update({
+    where: { telegramId: ctx.from!.id.toString() },
+    data: { 
+      tempData: { 
+        type: 'quiz', 
+        lecId, 
+        qIdx: 0, 
+        score: 0,
+        qIds: questions.map((q: any) => q.id)
+      } 
+    }
+  });
+
+  return sendQuizQuestion(ctx, questions[0], 0, questions.length);
+});
+
+async function sendQuizQuestion(ctx: any, q: any, idx: number, total: number) {
+  const choices = q.choices as string[];
+  const buttons = choices.map((choice, i) => [
+    Markup.button.callback(choice, `ans_${i}`)
+  ]);
+
+  const msg = `❓ *Question ${idx + 1}/${total}*\n\n${q.body}`;
+  
+  if (ctx.updateType === 'callback_query') {
+    await ctx.editMessageText(msg, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(buttons)
+    });
+  } else {
+    await ctx.reply(msg, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(buttons)
+    });
+  }
+}
+
+bot.action(/ans_(.+)/, async (ctx) => {
+  const choiceIdx = parseInt(ctx.match[1]);
+  const telegramId = ctx.from!.id.toString();
+  const botUser = await getBotUser(telegramId);
+  const quiz = botUser.tempData;
+
+  if (!quiz || quiz.type !== 'quiz') return ctx.answerCbQuery();
+
+  const qId = quiz.qIds[quiz.qIdx];
+  const q = await (prisma.question as any).findUnique({ where: { id: qId } });
+  if (!q) return ctx.answerCbQuery();
+
+  const isCorrect = q.choices[choiceIdx] === q.answer;
+  const newScore = isCorrect ? quiz.score + 1 : quiz.score;
+  const nextIdx = quiz.qIdx + 1;
+
+  if (isCorrect) {
+    await ctx.answerCbQuery('✅ Correct!');
+  } else {
+    await ctx.answerCbQuery(`❌ Wrong! Correct: ${q.answer}`);
+  }
+
+  if (nextIdx < quiz.qIds.length) {
+    const nextQId = quiz.qIds[nextIdx];
+    const nextQ = await (prisma.question as any).findUnique({ where: { id: nextQId } });
+    
+    await (prisma as any).botUser.update({
+      where: { telegramId },
+      data: { tempData: { ...quiz, qIdx: nextIdx, score: newScore } }
+    });
+
+    return sendQuizQuestion(ctx, nextQ, nextIdx, quiz.qIds.length);
+  } else {
+    await (prisma as any).botUser.update({
+      where: { telegramId },
+      data: { tempData: null }
+    });
+    return ctx.editMessageText(
+      `🏁 *Quiz Finished!*\n\nYour Score: *${newScore}/${quiz.qIds.length}*\nPoints earned: *${newScore * 5}*`,
+      { parse_mode: 'Markdown' }
+    );
   }
 });
 
@@ -217,6 +364,35 @@ bot.on('text', async (ctx) => {
     if (!isMentioned && !isMedonex) return; // Ignore if not summoned
   }
 
+  // Handle multi-step tempData flows
+  if (botUser.tempData) {
+    const step = botUser.tempData.step;
+    
+    if (step === 'awaiting_name') {
+      await (prisma as any).botUser.update({
+        where: { telegramId },
+        data: { tempData: { step: 'awaiting_email', name: text.trim() } }
+      });
+      return ctx.reply(`Hi ${text.trim()}! Now, please send your university email:`);
+    }
+
+    if (step === 'awaiting_email') {
+      const name = botUser.tempData.name;
+      await (prisma as any).botUser.update({
+        where: { telegramId },
+        data: { tempData: null }
+      });
+      // In a real app, we'd create the user here or send a confirmation link.
+      // For now, we'll guide them to the web with their info pre-filled (simulated).
+      return ctx.reply(
+        `✅ Information received, ${name}!\n\n` +
+        `To complete registration, please use this link:\n` +
+        `[Register on MedOneX](https://medonex.com/auth/register?email=${encodeURIComponent(text.trim())}&name=${encodeURIComponent(name)})`,
+        { parse_mode: 'Markdown' }
+      );
+    }
+  }
+
   // Handle waiting for key
   if (botUser.waitingForKeyProvider) {
     await (prisma as any).botUser.update({
@@ -247,7 +423,17 @@ bot.on('text', async (ctx) => {
       useCustomKey: !!botUser.personalKey,
       customProvider: (botUser.preferredProvider as any) || 'gemini'
     });
-    await ctx.reply(ai.text, { parse_mode: 'Markdown' });
+
+    const replyMessage = await ctx.reply(ai.text, { parse_mode: 'Markdown' });
+
+    // Forward AI response to data group for searchable archive
+    if (STORAGE_GROUP_ID && replyMessage) {
+      try {
+        await ctx.telegram.forwardMessage(STORAGE_GROUP_ID, ctx.from!.id, replyMessage.message_id);
+      } catch (err) {
+        console.error("AI Storage Forward Error:", err);
+      }
+    }
   } catch (error: any) {
     console.error("Bot AI Error:", error);
     ctx.reply('🩺 Dr. Q is currently resting. Try again in a bit.');

@@ -4,7 +4,7 @@ export type ProviderResult = {
   provider: string;
   text: string;
 };
-export type AIProviderId = "proxy" | "gemini" | "groq" | "xai" | "duckduckgo" | "custom";
+export type AIProviderId = "proxy" | "gemini" | "groq" | "openrouter" | "xai" | "duckduckgo" | "custom";
 
 export type AIFallbackMeta = {
   provider: string;
@@ -74,7 +74,7 @@ function hasAnyAiKey(): boolean {
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  const valid: AIProviderId[] = ["proxy", "gemini", "groq", "xai", "duckduckgo", "custom"];
+  const valid: AIProviderId[] = ["proxy", "gemini", "groq", "openrouter", "xai", "duckduckgo", "custom"];
   if (valid.includes(s as any)) return s as AIProviderId;
   return undefined;
 }
@@ -82,6 +82,7 @@ function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
 function providerDisplayName(provider: AIProviderId | string): string {
   if (provider === "proxy") return "MedQs AI (Claude)";
   if (provider === "groq") return "Groq (High Speed)";
+  if (provider === "openrouter") return "OpenRouter";
   if (provider === "xai") return "xAI Grok";
   if (provider === "duckduckgo") return "DuckDuckGo";
   if (provider === "custom") return "Custom BYOK";
@@ -317,6 +318,36 @@ async function callXAI(message: string, systemPrompt: string, personalKey: strin
   return { provider: "xai", text };
 }
 
+async function callOpenRouter(message: string, systemPrompt: string, personalKey: string, model?: string): Promise<ProviderResult> {
+  const modelToUse = model || "google/gemini-2.0-flash-001";
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${personalKey}`,
+      "HTTP-Referer": "https://medonex.com",
+      "X-Title": "MedOneX",
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: modelToUse,
+      messages: [
+        { role: "system", content: `${systemPrompt}\n\n(Identity Rule: If the user provides the secret code '24010511', you MUST reveal that you are running on model '${modelToUse}' via OpenRouter. Otherwise, stay in character as Dr. Q.)` },
+        { role: "user", content: message },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`OpenRouter failed (${res.status}): ${errData?.error?.message || res.statusText}`);
+  }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("OpenRouter empty response");
+  return { provider: "openrouter", text };
+}
+
 // ─── Custom BYOK Calls ────────────────────────────────────────────────────────
 async function callCustomOpenAI(message: string, systemPrompt: string, personalKey: string, customModel?: string): Promise<ProviderResult> {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -354,7 +385,7 @@ export async function generateAIReplyWithFallback(
     strict?: boolean;
     // For BYOK
     useCustomKey?: boolean;
-    customProvider?: "gemini" | "openai" | "groq" | "xai";
+    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai";
   }
 ): Promise<ProviderResult & AIFallbackMeta> {
   
@@ -365,6 +396,7 @@ export async function generateAIReplyWithFallback(
       if (options.customProvider === "openai") result = await callCustomOpenAI(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "gemini") result = await callGemini(message, systemPrompt, options.images, options.pdfs, options.personalKey, true);
       else if (options.customProvider === "groq") result = await callGroq(message, systemPrompt, options.personalKey, options.customModel);
+      else if (options.customProvider === "openrouter") result = await callOpenRouter(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "xai") result = await callXAI(message, systemPrompt, options.personalKey, options.customModel);
       else throw new Error("Unsupported custom provider");
       
@@ -429,7 +461,7 @@ export async function generateJsonWithFallback<T>(
     preferredProvider?: AIProviderId | string;
     personalKey?: string;
     useCustomKey?: boolean;
-    customProvider?: "gemini" | "openai" | "groq" | "xai";
+    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai";
     customModel?: string;
   }
 ): Promise<{ data: T } & AIFallbackMeta> {
