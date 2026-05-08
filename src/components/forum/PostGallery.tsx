@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Maximize2, Download, X } from "lucide-react";
+import { 
+  CaretLeft, 
+  CaretRight, 
+  ArrowsOut, 
+  DownloadSimple, 
+  X,
+  Play
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 import dynamic from "next/dynamic";
@@ -71,7 +78,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                            light={true} 
                            playIcon={
                              <div className="h-10 w-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/10 hover:bg-black/60 transition-all">
-                                <Maximize2 className="h-5 w-5 text-white/80" />
+                                <Play size={20} weight="fill" className="text-white/80" />
                              </div>
                            }
                            onClickPreview={() => setViewIndex(i)}
@@ -102,13 +109,13 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                     onClick={() => setViewIndex(prev => Math.max(0, (prev || 0) - 1))}
                     className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white/40 backdrop-blur-md hover:bg-black/40 hover:text-white transition-all"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <CaretLeft size={20} weight="bold" />
                   </button>
                   <button 
                     onClick={() => setViewIndex(prev => Math.min(media.length - 1, (prev || 0) + 1))}
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white/40 backdrop-blur-md hover:bg-black/40 hover:text-white transition-all"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <CaretRight size={20} weight="bold" />
                   </button>
                 </>
               )}
@@ -134,7 +141,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
             <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/10">
-                  <Download className="h-4 w-4" />
+                  <DownloadSimple size={18} weight="bold" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold text-white/80 truncate">Asset_{i + 1}.file</p>
@@ -145,7 +152,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                 onClick={() => handleDownload(file.url)}
                 className="p-2 text-white/20 hover:text-primary transition-all"
               >
-                <Download className="h-3.5 w-3.5" />
+                <DownloadSimple size={18} weight="bold" />
               </button>
             </div>
           ))}
@@ -165,11 +172,11 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                 onClick={() => handleDownload(media[viewIndex].url)} 
                 className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all text-[10px] font-black uppercase tracking-widest border border-white/5"
               >
-                <Download className="h-3 w-3" />
+                <DownloadSimple size={16} weight="bold" />
                 Get Asset
               </button>
               <button onClick={() => setViewIndex(null)} className="h-8 w-8 flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all text-white/20">
-                <X className="h-5 w-5" />
+                <X size={20} weight="bold" />
               </button>
             </div>
           </header>
@@ -182,7 +189,15 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                   playing
                   width="100%" 
                   height="100%" 
-                  config={{ file: { attributes: { controlsList: 'nodownload' } } } as any}
+                  config={{ 
+                    file: { 
+                      forceVideo: true,
+                      attributes: { 
+                        controlsList: 'nodownload',
+                        playsInline: true
+                      } 
+                    } 
+                  } as any}
                 />
               </div>
             ) : media[viewIndex].type === 'image' ? (
@@ -207,13 +222,13 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                   onClick={() => setViewIndex(prev => prev! > 0 ? prev! - 1 : media.length - 1)}
                   className="absolute left-4 sm:left-10 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/30 hover:text-white transition-all backdrop-blur-md border border-white/5"
                 >
-                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <CaretLeft size={24} weight="bold" />
                 </button>
                 <button 
                   onClick={() => setViewIndex(prev => prev! < media.length - 1 ? prev! + 1 : 0)}
                   className="absolute right-4 sm:right-10 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/30 hover:text-white transition-all backdrop-blur-md border border-white/5"
                 >
-                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <CaretRight size={24} weight="bold" />
                 </button>
               </>
             )}

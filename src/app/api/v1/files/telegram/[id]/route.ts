@@ -63,20 +63,20 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     return NextResponse.json({ error: "Failed to retrieve link from Telegram" }, { status: 502 });
   }
 
-  // 4. Handle View/Stream (Proxy the content to avoid CORS/Redirect issues)
-  try {
-    const res = await fetch(telegramUrl);
-    if (!res.ok) throw new Error("Failed to fetch from Telegram CDN");
-    
-    const blob = await res.blob();
+    // 4. Handle View/Stream (Proxy the content with streaming for performance)
+    const response = await fetch(telegramUrl);
+    if (!response.ok) throw new Error("Failed to fetch from Telegram CDN");
+
+    const { readable, writable } = new TransformStream();
+    response.body?.pipeTo(writable);
+
     const headers = new Headers();
-    
     if (isDownload) {
-      // Try to extract filename from URL or use a default with correct extension
       const urlParts = telegramUrl.split("/");
       let fileName = urlParts[urlParts.length - 1] || "file";
+      const contentType = response.headers.get("Content-Type") || "application/octet-stream";
       if (!fileName.includes(".")) {
-        const ext = blob.type.split("/")[1] || "bin";
+        const ext = contentType.split("/")[1] || "bin";
         fileName = `${fileName}.${ext}`;
       }
       headers.set("Content-Disposition", `attachment; filename="${fileName}"`);
@@ -84,12 +84,12 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       headers.set("Content-Disposition", "inline");
     }
 
-    headers.set("Content-Type", blob.type);
-    headers.set("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+    headers.set("Content-Type", response.headers.get("Content-Type") || "application/octet-stream");
+    headers.set("Cache-Control", "public, max-age=3600");
     
-    return new NextResponse(blob, { headers });
+    return new NextResponse(readable, { headers });
   } catch (err: any) {
-    console.error("[TG-PROXY] Fetch Error:", err);
-    return NextResponse.redirect(telegramUrl); // Fallback to redirect if proxy fails
+    console.error("[TG-PROXY] Streaming Error:", err);
+    return NextResponse.redirect(telegramUrl);
   }
 }

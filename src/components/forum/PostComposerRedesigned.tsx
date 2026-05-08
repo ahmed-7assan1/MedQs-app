@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Bold, Italic, Image as ImageIcon, Send, Loader2, X, MessageSquareShare, Download } from "lucide-react";
+import { 
+  TextB, 
+  TextItalic, 
+  Image as ImageIcon, 
+  PaperPlaneTilt, 
+  CircleNotch, 
+  X, 
+  ChatCircleDots, 
+  DownloadSimple 
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
@@ -150,7 +159,7 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
                         <img src={at.url} className="h-24 w-24 object-cover" alt="" />
                       ) : (
                         <div className="h-24 w-24 flex flex-col items-center justify-center p-2 text-center bg-white/5">
-                           <Download className="h-6 w-6 text-[#AFA9EC] mb-1" />
+                           <DownloadSimple size={24} weight="bold" className="text-[#AFA9EC] mb-1" />
                            <span className="text-[8px] font-black uppercase text-white/40 truncate w-full">File</span>
                         </div>
                       )}
@@ -158,7 +167,7 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
                         onClick={() => removeAttachment(i)}
                         className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 shadow-lg hover:bg-red-500 transition-all opacity-0 group-hover:opacity-100"
                       >
-                        <X className="h-3 w-3" />
+                        <X size={12} weight="bold" />
                       </button>
                     </div>
                   ))}
@@ -174,20 +183,20 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
               {/* Toolbar */}
               <div className="flex items-center justify-between pt-4 border-t border-white/5">
                 <div className="flex items-center gap-1.5">
-                  <button
+                   <button
                     onClick={() => injectText("**", "**")}
                     className="p-2.5 text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                   >
-                    <Bold className="h-4 w-4" />
+                    <TextB size={18} weight="bold" />
                   </button>
                   <button
                     onClick={() => injectText("*", "*")}
                     className="p-2.5 text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                   >
-                    <Italic className="h-4 w-4" />
+                    <TextItalic size={18} weight="bold" />
                   </button>
                   <label className="p-2.5 text-white/30 hover:text-[#AFA9EC] hover:bg-[#534AB7]/10 rounded-xl transition-all cursor-pointer group">
-                    {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
+                    {isUploading ? <CircleNotch size={20} weight="bold" className="animate-spin" /> : <ImageIcon size={20} weight="bold" />}
                     <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={isUploading} />
                   </label>
                   
@@ -203,7 +212,7 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
                             : "text-white/20 hover:text-white/40"
                         )}
                       >
-                        <MessageSquareShare className="h-4 w-4" />
+                        <ChatCircleDots size={18} weight="bold" />
                         Thread
                       </button>
 
@@ -234,12 +243,12 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
                       {content.length} / 5000
                     </span>
                   </div>
-                  <button
+                   <button
                     onClick={handlePost}
                     disabled={isPosting || (!content.trim() && attachments.length === 0)}
                     className="flex items-center gap-2 px-8 py-3 bg-[#534AB7] text-white rounded-2xl text-[14px] font-black uppercase tracking-widest hover:bg-[#6056CD] hover:scale-105 disabled:opacity-20 disabled:scale-100 transition-all shadow-xl shadow-[#534AB7]/30"
                   >
-                    {isPosting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {isPosting ? <CircleNotch size={20} weight="bold" className="animate-spin" /> : <PaperPlaneTilt size={20} weight="bold" />}
                     Broadcast
                   </button>
                 </div>

@@ -4,21 +4,21 @@ import Link from "next/link";
 import { PostCardRedesigned } from "./PostCardRedesigned";
 import { PostComposerRedesigned } from "./PostComposerRedesigned";
 import {
-  MessageSquare,
-  Send,
-  Loader2,
+  ChatCircle,
+  PaperPlaneTilt,
+  CircleNotch,
   Globe,
   Users,
   PlusCircle,
-  Type,
-  Link2,
-  ImagePlus,
+  TextT,
+  Link as LinkIcon,
+  ImageSquare,
   X,
   List,
-  Quote,
-  Code2,
-  MoreVertical,
-} from "lucide-react";
+  Quotes,
+  Code,
+  DotsThreeVertical,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import toast from "react-hot-toast";
@@ -416,15 +416,13 @@ export function ForumClient({
     }
   }
 
-  if (forumList.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <MessageSquare className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
+        <ChatCircle size={48} weight="bold" className="mb-3 text-muted-foreground opacity-30" />
         <h2 className="font-display text-xl font-bold">No forums available</h2>
         <p className="text-sm text-muted-foreground">Forums will appear here once created.</p>
       </div>
     );
-  }
 
   return (
     <div
@@ -498,7 +496,7 @@ export function ForumClient({
                   onClick={() => setMobileThreadsOpen(true)}
                   className="md:hidden flex items-center gap-2 rounded-xl border border-white/[0.03] bg-white/5 px-4 py-2 text-xs font-bold text-white/70 hover:bg-white/10 active:scale-95 transition-all"
                 >
-                  <List className="h-4 w-4" />
+                  <List size={16} weight="bold" />
                   Groups
                 </button>
                 <MedqsSelect
@@ -581,7 +579,7 @@ export function ForumClient({
                     placeholder="Filter Groups..."
                     className="w-full h-10 rounded-xl bg-black/40 border border-white/[0.03] px-4 pl-10 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-[#534AB7]"
                   />
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20" />
+                  <Globe size={18} weight="bold" className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-2.5 space-y-1 custom-scrollbar">
@@ -602,7 +600,7 @@ export function ForumClient({
                         "h-10 w-10 flex items-center justify-center rounded-xl transition-all",
                         active ? "bg-[#534AB7] text-white shadow-lg shadow-[#534AB7]/40" : "bg-white/5 text-white/20 group-hover:bg-white/10 group-hover:text-white/40"
                       )}>
-                        {forum.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
+                        {forum.type === "GLOBAL" ? <Globe size={20} weight="bold" /> : <Users size={20} weight="bold" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className={cn("truncate text-sm font-bold", active ? "text-white" : "text-white/50 group-hover:text-white/80")}>
@@ -636,14 +634,14 @@ export function ForumClient({
                     {filteredForums.map((f) => (
                       <button
                         key={f.id}
-                        onClick={() => { setActiveForum(f); setMobileThreadsOpen(false); }}
-                        className={cn("flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all", activeForum?.id === f.id ? "bg-[#534AB7] text-white shadow-xl" : "bg-white/5 text-white/40")}
-                      >
-                         <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-black/20">
-                            {f.type === "GLOBAL" ? <Globe className="h-5 w-5" /> : <Users className="h-5 w-5" />}
-                         </div>
-                         <span className="font-bold">{f.name}</span>
-                      </button>
+                          onClick={() => { setActiveForum(f); setMobileThreadsOpen(false); }}
+                          className={cn("flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all", activeForum?.id === f.id ? "bg-[#534AB7] text-white shadow-xl" : "bg-white/5 text-white/40")}
+                        >
+                           <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-black/20">
+                              {f.type === "GLOBAL" ? <Globe size={20} weight="bold" /> : <Users size={20} weight="bold" />}
+                           </div>
+                           <span className="font-bold">{f.name}</span>
+                        </button>
                     ))}
                   </div>
                 </div>
@@ -656,7 +654,7 @@ export function ForumClient({
                 <header className="flex items-center justify-between px-6 py-5 border-b border-white/[0.03] bg-white/5 backdrop-blur-xl">
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-[#534AB7]/10 text-[#534AB7] border border-[#534AB7]/20">
-                       {activeForum?.type === "GLOBAL" ? <Globe className="h-6 w-6" /> : <Users className="h-6 w-6" />}
+                       {activeForum?.type === "GLOBAL" ? <Globe size={24} weight="bold" /> : <Users size={24} weight="bold" />}
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-lg font-black text-white truncate leading-tight">
@@ -668,9 +666,9 @@ export function ForumClient({
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                   <div className="flex items-center gap-2">
                      <button className="hidden sm:flex rounded-xl bg-white/5 p-2.5 text-white/30 hover:bg-white/10 hover:text-white transition-all">
-                       <Send className="h-5 w-5 rotate-45" />
+                       <PaperPlaneTilt size={20} weight="bold" className="rotate-45" />
                      </button>
                   </div>
                 </header>
@@ -687,10 +685,10 @@ export function ForumClient({
                         ref={chatScrollRef}
                         className="flex-1 overflow-y-auto px-6 py-8 space-y-8 custom-scrollbar scroll-smooth"
                       >
-                        {discussionPostsChronological.length === 0 ? (
+                         {discussionPostsChronological.length === 0 ? (
                           <div className="flex h-full flex-col items-center justify-center text-center opacity-20 py-20 translate-y-[-20px]">
-                            <div className="h-24 w-24 flex items-center justify-center rounded-ull mb-6 bg-white/5 ring-1 ring-white/10">
-                               <MessageSquare className="h-12 w-12" />
+                            <div className="h-24 w-24 flex items-center justify-center rounded-full mb-6 bg-white/5 ring-1 ring-white/10">
+                               <ChatCircle size={40} weight="bold" />
                             </div>
                             <h4 className="text-xl font-bold text-white mb-2 italic">Radio Silence...</h4>
                             <p className="text-sm font-medium w-64">Initialize the sequence by being the first to broadcast a message here.</p>
@@ -723,21 +721,21 @@ export function ForumClient({
                               placeholder="Coordinate thoughts here..."
                               className="flex-1 min-h-[46px] max-h-40 bg-transparent border-none px-3 py-3 text-sm font-medium text-white placeholder:text-white/20 focus:ring-0 resize-none leading-relaxed"
                             />
-                            <button
+                             <button
                               onClick={handleDiscussionSend}
                               disabled={posting || !discussionDraft.trim()}
                               className="h-12 w-12 shrink-0 flex items-center justify-center bg-[#534AB7] text-white rounded-2xl transition-all shadow-xl shadow-[#534AB7]/40 hover:bg-[#6056CD] hover:scale-105 active:scale-95 disabled:opacity-20 disabled:scale-100 disabled:shadow-none"
                             >
-                              {posting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                              {posting ? <CircleNotch size={20} weight="bold" className="animate-spin" /> : <PaperPlaneTilt size={20} weight="bold" />}
                             </button>
                           </div>
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
+                     <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
                       <div className="h-32 w-32 flex items-center justify-center rounded-[40px] bg-white/5 ring-1 ring-white/10 mb-8 border border-white/[0.02] shadow-2xl">
-                         <Users className="h-16 w-16" />
+                         <Users size={64} weight="bold" />
                       </div>
                       <h4 className="text-2xl font-black text-white italic mb-2 tracking-tighter">Connection Pending</h4>
                       <p className="text-sm font-bold text-white/40 max-w-[280px]">Select a discussion vector from the left console to establish real-time link.</p>

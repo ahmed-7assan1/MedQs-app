@@ -2,7 +2,20 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Heart, MessageSquare, Share2, MoreHorizontal, Pin, Lock, Loader2, Send, Trash2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { 
+  Heart, 
+  ChatCircle, 
+  ShareNetwork, 
+  DotsThreeOutline, 
+  PushPin, 
+  Lock, 
+  Trash, 
+  CaretLeft, 
+  CaretRight, 
+  XCircle,
+  PaperPlaneTilt,
+  CheckCircle
+} from "@phosphor-icons/react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
@@ -105,12 +118,12 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
 
   const getReactionIcon = (r: ReactType) => {
     switch (r) {
-      case 'love': return <Heart className="h-5 w-5 fill-red-500 text-red-500" />;
+      case 'love': return <Heart size={24} weight="fill" className="text-red-500" />;
       case 'haha': return <span className="text-xl animate-bounce">😆</span>;
       case 'wow': return <span className="text-xl animate-pulse">🔥</span>;
       case 'sad': return <span className="text-xl">💡</span>;
       case 'angry': return <span className="text-xl rotate-12">🎯</span>;
-      default: return <Heart className="h-5 w-5 fill-primary text-primary shadow-lg shadow-primary/20" />;
+      default: return <Heart size={24} weight="fill" className="text-primary" />;
     }
   };
 
@@ -188,7 +201,7 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
                   {post.author.rank.label}
                 </span>
               )}
-              {post.isPinned && <Pin className="h-3 w-3 text-[#AFA9EC] fill-[#AFA9EC]" />}
+              {post.isPinned && <PushPin size={16} weight="fill" className="text-[#AFA9EC]" />}
             </div>
             <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/30 uppercase tracking-widest">
               <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
@@ -209,7 +222,7 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
             onClick={() => setShowOptions(!showOptions)}
             className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-all"
           >
-            <MoreHorizontal className="h-5 w-5" />
+            <DotsThreeOutline size={20} weight="fill" />
           </button>
 
           <AnimatePresence>
@@ -227,7 +240,7 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
                       onClick={() => { setShowOptions(false); setShowDeleteConfirm(true); }}
                       className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 transition-all text-xs font-black uppercase tracking-widest"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash size={18} weight="bold" />
                       Delete Asset
                     </button>
                   )}
@@ -235,7 +248,7 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
                     onClick={() => { setShowOptions(false); handleShare(); }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-white/40 hover:bg-white/5 transition-all text-xs font-black uppercase tracking-widest"
                   >
-                    <Share2 className="h-4 w-4" />
+                    <ShareNetwork size={18} weight="bold" />
                     Copy Signal
                   </button>
                 </motion.div>
@@ -264,9 +277,9 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
                 )}
               >
                 {activeReaction ? (
-                  activeReaction === 'like' ? <Heart className="h-7 w-7 fill-red-500" /> : getReactionIcon(activeReaction)
+                  activeReaction === 'like' ? <Heart size={28} weight="fill" className="text-red-500" /> : getReactionIcon(activeReaction)
                 ) : (
-                  <Heart className="h-7 w-7" />
+                  <Heart size={28} weight="bold" />
                 )}
               </button>
               
@@ -296,19 +309,19 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
               onClick={() => setShowComments(!showComments)}
               className="text-white hover:text-white/70 transition-all active:scale-125"
             >
-              <MessageSquare className="h-7 w-7" />
+              <ChatCircle size={28} weight="bold" />
             </button>
             
             <button 
               onClick={handleShare}
               className="text-white hover:text-white/70 transition-all active:scale-125"
             >
-              <Share2 className="h-7 w-7" />
+              <ShareNetwork size={28} weight="bold" />
             </button>
           </div>
           
           <button className="text-white hover:text-white/70 transition-all active:scale-125">
-             <Pin className="h-7 w-7" />
+             <PushPin size={28} weight="bold" />
           </button>
         </div>
 
