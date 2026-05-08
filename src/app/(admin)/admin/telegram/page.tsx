@@ -1,4 +1,3 @@
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -56,7 +55,7 @@ export default async function TelegramAdminPage() {
       <div className="flex justify-between items-center bg-zinc-900/50 p-6 rounded-2xl border border-white/5 backdrop-blur-xl">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Telegram Bot Center 🤖</h1>
-          <p className="text-zinc-400">إدارة الربط الذكي، الإشعارات، وإحصائيات الطلاب.</p>
+          <p className="text-zinc-400">Manage smart linking, notifications, and student statistics.</p>
         </div>
         <div className="text-right">
           <div className="text-4xl font-black text-teal-400">{stats}</div>

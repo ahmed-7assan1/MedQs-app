@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { syncFileToTelegram } from "@/lib/telegram-storage";
 
 /** Extract Cloudinary public_id from a Cloudinary delivery URL */
 function extractCloudinaryPublicId(url: string): string | null {
@@ -46,14 +47,22 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Save new URL to database ─────────────────────────────────────────────
+  let finalUrl = url;
+  if (!url.includes("/api/v1/files/telegram")) {
+    const tgSync = await syncFileToTelegram(url, "avatar.jpg", "image/jpeg");
+    if (tgSync?.fileId) {
+      finalUrl = `/api/v1/files/telegram/avatar?fileId=${tgSync.fileId}`;
+    }
+  }
+
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { image: url },
+    data: { image: finalUrl },
   });
 
   revalidatePath("/profile/me");
   revalidatePath(`/profile/u/${session.user.id}`);
   revalidatePath("/", "layout");
 
-  return NextResponse.json({ ok: true, url });
+  return NextResponse.json({ ok: true, url: finalUrl });
 }

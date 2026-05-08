@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { 
-  House, BookOpenText, HelpCircle, Sparkles, Search, X,
-  MessageSquare, Clock, Sun, Moon, Settings, Users,
-  PlayCircle, Mic, Maximize, ChevronDown, Send
-} from "lucide-react";
+  House, Books, Question, Sparkle, MagnifyingGlass, X,
+  Chats, Clock, Sun, Moon, Gear, UsersThree,
+  PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt
+} from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
@@ -16,13 +16,13 @@ import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 
 const NAV_ITEMS = [
   { href: "/dashboard-app", label: "Home", icon: House },
-  { href: "/modules", label: "Lectures", icon: BookOpenText },
+  { href: "/modules", label: "Lectures", icon: Books },
   { href: "/videos", label: "Videos", icon: PlayCircle },
-  { href: "/podcasts", label: "Podcasts", icon: Mic },
-  { href: "/past-papers", label: "Quizzes", icon: HelpCircle },
-  { href: "/forum", label: "Community", icon: MessageSquare },
+  { href: "/podcasts", label: "Podcasts", icon: Microphone },
+  { href: "/past-papers", label: "Quizzes", icon: Question },
+  { href: "/forum", label: "Community", icon: Chats },
   { href: "/taskat", label: "Tasks", icon: Clock },
-  { href: "/teams", label: "Teams", icon: Users },
+  { href: "/teams", label: "Teams", icon: UsersThree },
 ];
 
 export function FloatingIslandNavbar({ 
@@ -147,7 +147,7 @@ export function FloatingIslandNavbar({
                 onClick={() => setIsExpanded(true)}
                 className="flex items-center gap-2 px-3 py-2 rounded-full dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 hover:border-primary/30 transition-all group"
               >
-                <Search className="h-4 w-4 dark:text-white/40 text-black/40 group-hover:text-primary" />
+                <MagnifyingGlass className="h-4 w-4 dark:text-white/40 text-black/40 group-hover:text-primary" />
                 <span className="text-[11px] font-black uppercase dark:text-white/20 text-black/30 hidden sm:block">Search...</span>
               </button>
 
@@ -160,7 +160,7 @@ export function FloatingIslandNavbar({
                 }}
                 className="hidden lg:flex h-10 w-10 items-center justify-center rounded-xl dark:bg-white/5 bg-black/5 hover:bg-primary/10 hover:text-primary transition-all dark:text-white/40 text-black/40"
               >
-                <Maximize className="h-4 w-4" />
+                <CornersOut className="h-4 w-4" />
               </button>
 
               <button
@@ -176,7 +176,7 @@ export function FloatingIslandNavbar({
                     </div>
                   )}
                 </div>
-                <ChevronDown className="h-3 w-3 dark:text-white/30 text-black/30" />
+                <CaretDown className="h-3 w-3 dark:text-white/30 text-black/30" />
               </button>
             </div>
           </div>
@@ -217,7 +217,7 @@ export function FloatingIslandNavbar({
 
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 dark:text-white/20 text-black/20" />
+                <MagnifyingGlass className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 dark:text-white/20 text-black/20" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -248,7 +248,7 @@ export function FloatingIslandNavbar({
 
               {/* Grid Menu */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[...NAV_ITEMS, { href: "/settings", label: "Settings", icon: Settings }].map((item) => (
+                {[...NAV_ITEMS, { href: "/settings", label: "Settings", icon: Gear }].map((item) => (
                   <Link key={item.href} href={item.href} onClick={() => setIsExpanded(false)}
                     className="flex items-center gap-3 rounded-[20px] dark:bg-white/[0.03] bg-black/[0.03] p-4 border dark:border-white/[0.05] border-black/[0.05] hover:border-primary/30 hover:bg-primary/5 transition-all group">
                     <div className="h-10 w-10 rounded-[14px] dark:bg-white/5 bg-black/5 flex shrink-0 items-center justify-center dark:text-white/50 text-black/50 group-hover:text-primary group-hover:bg-primary/10 transition-all">
@@ -263,12 +263,12 @@ export function FloatingIslandNavbar({
               <div className="flex gap-3">
                 <Link href="/ai-chat" className="flex-1" onClick={() => setIsExpanded(false)}>
                   <button className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-primary/30 hover:scale-[1.02] transition-all">
-                    <Sparkles className="h-4 w-4" /> Consult Dr. Q
+                    <Sparkle className="h-4 w-4" /> Consult Dr. Q
                   </button>
                 </Link>
                 <a href="https://t.me/MedOneX_bot" target="_blank" rel="noreferrer" className="flex-1">
                   <button className="w-full flex items-center justify-center gap-2 rounded-2xl dark:bg-white/10 bg-slate-100 px-6 py-4 text-xs font-black uppercase tracking-widest dark:text-white text-slate-800 hover:scale-[1.02] transition-all border dark:border-white/5 border-slate-200">
-                    <Send className="h-4 w-4 text-sky-500" /> Telegram
+                    <PaperPlaneTilt className="h-4 w-4 text-sky-500" /> Telegram
                   </button>
                 </a>
               </div>

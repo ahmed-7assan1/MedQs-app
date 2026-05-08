@@ -477,6 +477,7 @@ model User {
   telegramId           String?                @unique
   telegramVerified     Boolean                @default(false)
   coverImage           String?
+  pushSubscriptions    PushSubscription[]
 }
 
 model TelegramConfig {
@@ -1009,4 +1010,16 @@ model BotUser {
   tempData              Json?    // To store registration steps (name, email, etc.)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

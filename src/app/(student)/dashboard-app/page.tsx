@@ -68,7 +68,7 @@ export default async function DashboardPage() {
         <div className="absolute bottom-[10%] left-[20%] w-[25%] h-[25%] bg-blue-500/5 blur-[100px] rounded-full" />
       </div>
 
-      <div className="relative mx-auto max-w-[1440px] px-4 pb-20 pt-28 md:px-8 lg:pt-32">
+      <div className="relative mx-auto max-w-[1440px] px-4 pb-20 pt-6 md:px-8 md:pt-28 lg:pt-32">
         
         {/* ══════════════ TOP COMMAND BAR ══════════════ */}
         <div className="mb-8 flex flex-col gap-6">
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* ══════════════ KEY PERFORMANCE INDICATORS ══════════════ */}
-        <div className="mb-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-10 grid gap-3 grid-cols-2 lg:gap-5 xl:grid-cols-4">
           <KPICard
             label="Daily Objective"
             value={`${dailyPct}%`}
@@ -200,9 +200,9 @@ export default async function DashboardPage() {
                <div className="flex items-center justify-between px-2">
                   <div className="flex items-center gap-4">
                      <div className="h-10 w-1 rounded-full bg-primary" />
-                     <h2 className="text-2xl font-black text-white tracking-tight">Active Specializations</h2>
+                     <h2 className="text-2xl font-black dark:text-white text-slate-900 tracking-tight">Active Specializations</h2>
                   </div>
-                  <Link href="/modules" className="group flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-primary transition-colors">
+                  <Link href="/modules" className="group flex items-center gap-2 text-[11px] font-black uppercase tracking-widest dark:text-white/40 text-slate-500 hover:text-primary transition-colors">
                      View All Curricula <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                </div>
@@ -216,17 +216,17 @@ export default async function DashboardPage() {
                     >
                       <div className="relative z-10">
                         <div className="mb-4 flex items-center justify-between">
-                           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/20 group-hover:text-primary group-hover:bg-primary/10 transition-all">
+                           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 dark:text-white/20 text-slate-400 group-hover:text-primary group-hover:bg-primary/10 transition-all">
                               <BookOpen className="h-5 w-5" />
                            </div>
                            <span className={cn(
                              "text-sm font-black",
-                             mod.pct >= 70 ? "text-emerald-500" : mod.pct > 0 ? "text-amber-500" : "text-white/20"
+                             mod.pct >= 70 ? "text-emerald-500" : mod.pct > 0 ? "text-amber-500" : "dark:text-white/20 text-slate-400"
                            )}>
                              {mod.pct}%
                            </span>
                         </div>
-                        <h4 className="text-lg font-black text-white group-hover:text-primary transition-colors truncate">{mod.name}</h4>
+                        <h4 className="text-lg font-black dark:text-white text-slate-900 group-hover:text-primary transition-colors truncate">{mod.name}</h4>
                         <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
                            <div 
                              className={cn("h-full rounded-full transition-all duration-1000", mod.pct >= 70 ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-primary")} 
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
                   <div className={cn("flex h-14 w-14 items-center justify-center rounded-2xl transition-all group-hover:scale-110 group-hover:shadow-2xl", item.bg)}>
                     <item.icon className={cn("h-7 w-7", item.color)} />
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">{item.label}</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest dark:text-white/40 text-slate-500 dark:group-hover:text-white group-hover:text-slate-900 transition-colors">{item.label}</span>
                 </Link>
               ))}
             </div>
@@ -271,9 +271,9 @@ export default async function DashboardPage() {
             <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 shadow-xl backdrop-blur-md">
               <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Learning Intensity</p>
-                  <p className="text-2xl font-black text-white">
-                    {activityArr.reduce((a: number, b: any) => a + b.count, 0)} <span className="text-xs text-white/30 uppercase tracking-tighter">Units / Week</span>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] dark:text-white/20 text-slate-400">Learning Intensity</p>
+                  <p className="text-2xl font-black dark:text-white text-slate-900">
+                    {activityArr.reduce((a: number, b: any) => a + b.count, 0)} <span className="text-xs dark:text-white/30 text-slate-500 uppercase tracking-tighter">Units / Week</span>
                   </p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
@@ -289,12 +289,12 @@ export default async function DashboardPage() {
                   const isToday = i === chartDays.length - 1;
                   return (
                     <div key={i} className="flex flex-1 flex-col items-center gap-3">
-                      <div className="relative w-full flex-1 overflow-hidden rounded-full bg-white/5">
+                      <div className="relative w-full flex-1 overflow-hidden rounded-full dark:bg-white/5 bg-black/5">
                         <AnimatedBar height={Math.max(h, val > 0 ? 15 : 5)} delay={i * 0.1} isToday={isToday} />
                       </div>
                       <span className={cn(
                         "text-[9px] font-black uppercase tracking-tighter",
-                        isToday ? "text-primary" : "text-white/20"
+                        isToday ? "text-primary" : "dark:text-white/20 text-slate-400"
                       )}>{d.shortLabel}</span>
                     </div>
                   );
@@ -312,10 +312,10 @@ export default async function DashboardPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Sentinel AI</p>
-                    <h4 className="text-xl font-black text-white">Ask Dr. Q</h4>
+                    <h4 className="text-xl font-black dark:text-white text-slate-900">Ask Dr. Q</h4>
                   </div>
                 </div>
-                <p className="mb-8 text-sm leading-relaxed text-white/50 font-medium">
+                <p className="mb-8 text-sm leading-relaxed dark:text-white/50 text-slate-600 font-medium">
                   Instant synthesis of clinical data and curriculum-aligned medical explanations.
                 </p>
                 <Link
@@ -335,21 +335,21 @@ export default async function DashboardPage() {
                   <Star className="h-6 w-6 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Prestige Standing</p>
-                  <p className="text-xl font-black text-white">{rankLabel}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest dark:text-white/20 text-slate-400">Prestige Standing</p>
+                  <p className="text-xl font-black dark:text-white text-slate-900">{rankLabel}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest text-white/30 mb-3">
+              <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest dark:text-white/30 text-slate-500 mb-3">
                 <span>{(rankPoints || 0).toLocaleString()} pts</span>
                 <span className="text-primary">Next Phase</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
+              <div className="h-2 w-full overflow-hidden rounded-full dark:bg-white/5 bg-black/5">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-400 transition-all duration-1000 shadow-[0_0_10px_rgba(245,158,11,0.4)]"
                   style={{ width: `${Math.min(((rankInfo as any)?.progressToNext || 0), 100)}%` }}
                 />
               </div>
-              <p className="mt-4 text-[10px] font-bold text-center text-white/20 uppercase tracking-tighter">
+              <p className="mt-4 text-[10px] font-bold text-center dark:text-white/20 text-slate-400 uppercase tracking-tighter">
                 Accelerate your studies to reach the next professional tier.
               </p>
             </div>
@@ -375,16 +375,16 @@ function KPICard({ label, value, sub, icon: Icon, color, progress }: {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl border dark:border-white/5 border-black/5 dark:bg-white/[0.03] bg-white p-5 md:p-6 transition-all active:scale-[0.98] shadow-lg">
+    <div className="group relative overflow-hidden rounded-[1.25rem] md:rounded-3xl border dark:border-white/5 border-black/5 dark:bg-white/[0.03] bg-white p-3.5 md:p-6 transition-all active:scale-[0.98] shadow-lg">
       <div className="relative">
-        <div className={cn("mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border backdrop-blur-xl transition-all", colors[color])}>
-          <Icon className="h-6 w-6" />
+        <div className={cn("mb-2 md:mb-4 flex h-8 w-8 md:h-12 md:w-12 items-center justify-center rounded-lg md:rounded-2xl border backdrop-blur-xl transition-all", colors[color])}>
+          <Icon className="h-4 w-4 md:h-6 md:w-6" />
         </div>
-        <p className="text-[9px] font-black uppercase tracking-[0.2em] dark:text-white/30 text-slate-400">{label}</p>
-        <p className="mt-0.5 text-2xl md:text-3xl font-black dark:text-white text-slate-900 tracking-tighter">{value}</p>
-        <p className="mt-0.5 text-[10px] font-medium dark:text-white/40 text-slate-500">{sub}</p>
+        <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] dark:text-white/30 text-slate-400 truncate">{label}</p>
+        <p className="mt-0.5 text-lg md:text-3xl font-black dark:text-white text-slate-900 tracking-tighter">{value}</p>
+        <p className="mt-0.5 text-[8px] md:text-[10px] font-medium dark:text-white/40 text-slate-500 truncate">{sub}</p>
         {progress !== undefined && (
-          <div className="mt-4 h-1 w-full overflow-hidden rounded-full dark:bg-white/5 bg-black/5">
+          <div className="mt-2 md:mt-4 h-1 w-full overflow-hidden rounded-full dark:bg-white/5 bg-black/5">
             <div
               className={cn("h-full rounded-full transition-all duration-1000", 
                 color === "blue" ? "bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.5)]" : 

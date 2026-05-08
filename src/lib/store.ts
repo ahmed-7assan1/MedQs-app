@@ -13,7 +13,7 @@ export const useThemeStore = create<ThemeStore>((set) => ({
   theme:
     (typeof window !== "undefined"
       ? (localStorage.getItem("medqs-theme") as ThemeStore["theme"] | null)
-      : null) ?? "light",
+      : null) ?? "dark",
   setTheme: (theme) => {
     set({ theme });
     if (typeof window !== "undefined") {

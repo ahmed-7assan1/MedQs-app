@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { syncFileToTelegram } from "@/lib/telegram-storage";
 
 const optionalSocialUrl = z
   .union([z.string(), z.null(), z.undefined()])
@@ -75,6 +76,13 @@ export async function PUT(req: NextRequest) {
     parsed.data.studentId === "" || parsed.data.studentId === null
       ? current?.studentId ?? await generateStudentId()
       : parsed.data.studentId;
+
+  if (parsed.data.coverImage && !parsed.data.coverImage.includes("/api/v1/files/telegram")) {
+    const tgSync = await syncFileToTelegram(parsed.data.coverImage, "cover.jpg", "image/jpeg");
+    if (tgSync?.fileId) {
+      parsed.data.coverImage = `/api/v1/files/telegram/cover?fileId=${tgSync.fileId}`;
+    }
+  }
 
   const user = await prisma.user.update({
     where: { id: session.user.id },

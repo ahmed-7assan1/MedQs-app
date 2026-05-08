@@ -122,7 +122,8 @@ async function callGemini(
   images: ChatImagePart[] = [],
   pdfs: ChatPdfPart[] = [],
   personalKey?: string,
-  strictPersonal = false
+  strictPersonal = false,
+  customModel?: string
 ): Promise<ProviderResult> {
   const textPart = `${systemPrompt}\n\nUser: ${message}`;
   const parts: Record<string, unknown>[] = [{ text: textPart }];
@@ -139,7 +140,7 @@ async function callGemini(
   if (keys.length === 0) throw new Error("No Gemini API keys configured");
   
   const body = JSON.stringify({ contents: [{ parts }] });
-  const chain = geminiModelChain();
+  const chain = customModel ? [customModel] : geminiModelChain();
   let lastErr = "All Gemini keys and models failed";
 
   for (let k = 0; k < keys.length; k++) {
@@ -370,6 +371,53 @@ async function callCustomOpenAI(message: string, systemPrompt: string, personalK
   return { provider: "custom-openai", text: data?.choices?.[0]?.message?.content || "" };
 }
 
+async function callAnthropic(message: string, systemPrompt: string, personalKey: string, customModel?: string): Promise<ProviderResult> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": personalKey,
+      "anthropic-version": "2023-06-01",
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: customModel || "claude-3-5-sonnet-20241022",
+      max_tokens: 8192,
+      system: systemPrompt,
+      messages: [{ role: "user", content: message }],
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Custom Anthropic call failed: ${err}`);
+  }
+  const data = await res.json();
+  const text = data?.content?.[0]?.text;
+  if (!text) throw new Error("Anthropic empty response");
+  return { provider: "custom-anthropic", text };
+}
+
+async function callDeepSeek(message: string, systemPrompt: string, personalKey: string, customModel?: string): Promise<ProviderResult> {
+  const res = await fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${personalKey}`,
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: customModel || "deepseek-chat",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`Custom DeepSeek call failed: ${res.statusText}`);
+  const data = await res.json();
+  return { provider: "custom-deepseek", text: data?.choices?.[0]?.message?.content || "" };
+}
+
 // ─── Main Router ──────────────────────────────────────────────────────────────
 
 export async function generateAIReplyWithFallback(
@@ -385,7 +433,7 @@ export async function generateAIReplyWithFallback(
     strict?: boolean;
     // For BYOK
     useCustomKey?: boolean;
-    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai";
+    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek";
   }
 ): Promise<ProviderResult & AIFallbackMeta> {
   
@@ -394,7 +442,9 @@ export async function generateAIReplyWithFallback(
     try {
       let result;
       if (options.customProvider === "openai") result = await callCustomOpenAI(message, systemPrompt, options.personalKey, options.customModel);
-      else if (options.customProvider === "gemini") result = await callGemini(message, systemPrompt, options.images, options.pdfs, options.personalKey, true);
+      else if (options.customProvider === "anthropic") result = await callAnthropic(message, systemPrompt, options.personalKey, options.customModel);
+      else if (options.customProvider === "deepseek") result = await callDeepSeek(message, systemPrompt, options.personalKey, options.customModel);
+      else if (options.customProvider === "gemini") result = await callGemini(message, systemPrompt, options.images, options.pdfs, options.personalKey, true, options.customModel);
       else if (options.customProvider === "groq") result = await callGroq(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "openrouter") result = await callOpenRouter(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "xai") result = await callXAI(message, systemPrompt, options.personalKey, options.customModel);
@@ -414,7 +464,15 @@ export async function generateAIReplyWithFallback(
     if (!options?.personalKey && !process.env.GEMINI_API_KEY?.trim()) {
       throw new AIConfigurationError("Images and PDFs require GEMINI_API_KEY on the server.");
     }
-    const row = await callGemini(message, systemPrompt, images, pdfs, options?.personalKey);
+    const row = await callGemini(
+      message, 
+      systemPrompt, 
+      images, 
+      pdfs, 
+      options?.personalKey, 
+      options?.customProvider === "gemini", 
+      options?.customProvider === "gemini" ? options?.customModel : undefined
+    );
     return { ...row, triedProviders: ["gemini"] };
   }
 
@@ -461,7 +519,7 @@ export async function generateJsonWithFallback<T>(
     preferredProvider?: AIProviderId | string;
     personalKey?: string;
     useCustomKey?: boolean;
-    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai";
+    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek";
     customModel?: string;
   }
 ): Promise<{ data: T } & AIFallbackMeta> {

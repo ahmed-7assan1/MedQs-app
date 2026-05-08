@@ -17,8 +17,8 @@ import { getCachedSiteData } from "@/lib/site-cache";
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  const valid: AIProviderId[] = ["proxy", "gemini", "groq", "xai", "duckduckgo", "custom"];
-  if (valid.includes(s as any)) return s as AIProviderId;
+  const valid: string[] = ["proxy", "gemini", "openai", "anthropic", "deepseek", "groq", "openrouter", "xai", "duckduckgo", "custom"];
+  if (valid.includes(s)) return s as AIProviderId;
   return undefined;
 }
 

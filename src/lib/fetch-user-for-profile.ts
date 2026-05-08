@@ -7,6 +7,7 @@ export type ProfileViewUser = {
   name: string;
   bio: string | null;
   image: string | null;
+  coverImage: string | null;
   phone: string | null;
   phoneVisible: boolean;
   createdAt: Date;
@@ -43,6 +44,7 @@ const FALLBACK: Pick<
   instagramUrl: null,
   facebookUrl: null,
   handle: null,
+  coverImage: null,
 };
 
 const SELECT_FULL = {
@@ -50,6 +52,7 @@ const SELECT_FULL = {
   name: true,
   bio: true,
   image: true,
+  coverImage: true,
   phone: true,
   phoneVisible: true,
   createdAt: true,
@@ -73,6 +76,7 @@ const SELECT_COMPAT = {
   name: true,
   bio: true,
   image: true,
+  coverImage: true,
   createdAt: true,
   points: true,
   studentId: true,
@@ -88,6 +92,7 @@ const SELECT_MIN = {
   name: true,
   bio: true,
   image: true,
+  coverImage: true,
   createdAt: true,
   points: true,
   studentId: true,
@@ -121,6 +126,7 @@ function asProfileView(
     name: row.name as string,
     bio: (row.bio as string | null) ?? null,
     image: (row.image as string | null) ?? null,
+    coverImage: (row.coverImage as string | null) ?? (filled.coverImage as string | null) ?? null,
     phone: (filled.phone ?? null) as string | null,
     phoneVisible: filled.phoneVisible ?? false,
     createdAt: row.createdAt as Date,

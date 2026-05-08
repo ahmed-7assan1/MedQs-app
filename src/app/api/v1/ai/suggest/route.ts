@@ -7,10 +7,10 @@ import { redisIncrWithExpire } from "@/lib/redis";
 
 const RATE_LIMIT = 20; // requests per hour per admin user
 
-function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | "groq" | "openrouter" | "xai" | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  if (["gemini", "openai", "anthropic", "deepseek", "groq", "openrouter", "xai"].includes(s)) return s as any;
   return undefined;
 }
 
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { body, preferredProvider } = await req.json();
+  const { body, preferredProvider, customApiKey, customModel } = await req.json();
   const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
   const effectiveProvider =
     normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
@@ -37,7 +37,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Question body required" }, { status: 400 });
 
   try {
-    const out = await suggestQuestionDetailsWithMeta(body, { preferredProvider: effectiveProvider });
+    const out = await suggestQuestionDetailsWithMeta(body, { 
+      preferredProvider: effectiveProvider,
+      customApiKey,
+      customModel,
+    });
     return NextResponse.json({
       ...out.data,
       provider: out.meta.provider,

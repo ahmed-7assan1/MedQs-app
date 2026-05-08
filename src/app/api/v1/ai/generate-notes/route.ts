@@ -10,10 +10,10 @@ export const maxDuration = 300; // 5 minutes max duration for Vercel
 
 const RATE_LIMIT = 5; // Extractions per hour per user
 
-function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | "groq" | "openrouter" | "xai" | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  if (["gemini", "openai", "anthropic", "deepseek", "groq", "openrouter", "xai"].includes(s)) return s as any;
   return undefined;
 }
 

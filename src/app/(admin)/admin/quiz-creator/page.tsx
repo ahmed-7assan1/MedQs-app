@@ -12,6 +12,7 @@ import { QuickDrawModal } from "@/components/draw/QuickDrawModal";
 import { uploadQuestionImageClient } from "@/lib/upload-question-image-client";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { QuestionCard } from "@/components/quiz/QuestionCard";
 
 interface Module   { id: string; name: string }
 interface Semester { id: string; name: string }
@@ -60,6 +61,33 @@ export default function AdminQuizCreatorPage() {
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [aiFileBusy, setAiFileBusy] = useState(false);
   const [aiQuestionMode, setAiQuestionMode] = useState<"mcq" | "essay" | "mixed">("mcq");
+  const [customApiKey, setCustomApiKey] = useState("");
+  const [customModel, setCustomModel] = useState("");
+  const [customAgent, setCustomAgent] = useState("openai");
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem("medqs_admin_ai_key");
+    const savedModel = localStorage.getItem("medqs_admin_ai_model");
+    const savedAgent = localStorage.getItem("medqs_admin_ai_agent");
+    if (savedKey) setCustomApiKey(savedKey);
+    if (savedModel) setCustomModel(savedModel);
+    if (savedAgent) setCustomAgent(savedAgent);
+  }, []);
+
+  useEffect(() => {
+    if (customApiKey !== "") localStorage.setItem("medqs_admin_ai_key", customApiKey);
+    else localStorage.removeItem("medqs_admin_ai_key");
+  }, [customApiKey]);
+
+  useEffect(() => {
+    if (customModel !== "") localStorage.setItem("medqs_admin_ai_model", customModel);
+    else localStorage.removeItem("medqs_admin_ai_model");
+  }, [customModel]);
+
+  useEffect(() => {
+    if (customAgent !== "") localStorage.setItem("medqs_admin_ai_agent", customAgent);
+  }, [customAgent]);
 
   useEffect(() => {
     Promise.all([
@@ -186,6 +214,9 @@ export default function AdminQuizCreatorPage() {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("questionMode", aiQuestionMode);
+      if (customApiKey) fd.append("customApiKey", customApiKey);
+      if (customModel) fd.append("customModel", customModel);
+      if (customAgent) fd.append("preferredProvider", customAgent);
       const res = await fetch("/api/v1/ai/extract", { method: "POST", body: fd });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return toast.error(data.error || "AI failed");
@@ -200,7 +231,11 @@ export default function AdminQuizCreatorPage() {
         explanation: q.explanation || "",
         difficulty: q.difficulty || "MEDIUM",
       }));
-      setQuestions(prev => [...prev.filter(q => q.body.trim()), ...mapped]);
+      setQuestions(prev => {
+        const p = prev.filter(q => q.body.trim() || q.imageUrl);
+        return [...p, ...mapped];
+      });
+      setPreviewOpen(true);
       toast.success(`Imported ${mapped.length} items`);
     } finally { setAiFileBusy(false); }
   }
@@ -337,17 +372,118 @@ export default function AdminQuizCreatorPage() {
                    <option value="essay">Extract Essays Only</option>
                    <option value="mixed">Mixed Extraction</option>
                 </MedqsSelect>
+
+                <div className="space-y-3 pt-2">
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">AI Agent Strategy</label>
+                      <MedqsSelect value={customAgent} onChange={e => setCustomAgent(e.target.value)} className="h-10 text-xs font-bold bg-background/50">
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic (Claude)</option>
+                        <option value="gemini">Google Gemini</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="groq">Groq LPU</option>
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="xai">xAI Grok</option>
+                      </MedqsSelect>
+                   </div>
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Custom API Key (BYOK)</label>
+                      <input 
+                        type="password"
+                        value={customApiKey}
+                        onChange={e => setCustomApiKey(e.target.value)}
+                        placeholder="sk-..."
+                        className="w-full h-10 rounded-xl border border-white/[0.05] bg-background/50 px-4 text-xs focus:ring-indigo-500/40 outline-none"
+                      />
+                   </div>
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Custom Model (Optional)</label>
+                      <input 
+                        type="text"
+                        list="suggested-models"
+                        value={customModel}
+                        onChange={e => setCustomModel(e.target.value)}
+                        placeholder={
+                          customAgent === "openai" ? "e.g. gpt-4o" :
+                          customAgent === "anthropic" ? "e.g. claude-3-5-sonnet-20241022" :
+                          customAgent === "gemini" ? "e.g. gemini-1.5-pro" :
+                          customAgent === "deepseek" ? "e.g. deepseek-chat" : "Model name"
+                        }
+                        className="w-full h-10 rounded-xl border border-white/[0.05] bg-background/50 px-4 text-xs focus:ring-indigo-500/40 outline-none"
+                      />
+                      <datalist id="suggested-models">
+                        {customAgent === "openai" && (
+                          <>
+                            <option value="gpt-4o" />
+                            <option value="gpt-4o-mini" />
+                            <option value="o1-mini" />
+                          </>
+                        )}
+                        {customAgent === "anthropic" && (
+                          <>
+                            <option value="claude-3-5-sonnet-20241022" />
+                            <option value="claude-3-haiku-20240307" />
+                          </>
+                        )}
+                        {customAgent === "gemini" && (
+                          <>
+                            <option value="gemini-1.5-pro" />
+                            <option value="gemini-1.5-flash" />
+                            <option value="gemini-2.0-flash-exp" />
+                          </>
+                        )}
+                        {customAgent === "deepseek" && (
+                          <>
+                            <option value="deepseek-chat" />
+                            <option value="deepseek-reasoner" />
+                          </>
+                        )}
+                        {customAgent === "groq" && (
+                          <>
+                            <option value="llama3-8b-8192" />
+                            <option value="llama3-70b-8192" />
+                            <option value="mixtral-8x7b-32768" />
+                          </>
+                        )}
+                        {customAgent === "openrouter" && (
+                          <>
+                            <option value="meta-llama/llama-3-70b-instruct" />
+                            <option value="anthropic/claude-3-opus" />
+                            <option value="google/gemini-pro-1.5" />
+                          </>
+                        )}
+                        {customAgent === "xai" && (
+                          <>
+                            <option value="grok-beta" />
+                            <option value="grok-vision-beta" />
+                          </>
+                        )}
+                      </datalist>
+                   </div>
+                </div>
+
                 <label className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 text-xs font-bold text-white shadow shadow-indigo-500/20 hover:opacity-90 transition-all">
                    {aiFileBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
                    {aiFileBusy ? "Decrypting Bundle…" : "Upload Bundle (PDF/DOCX)"}
-                   <input type="file" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) importQuestionsFromFile(f); }} />
+                   <input type="file" accept=".pdf,.docx,image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) importQuestionsFromFile(f); e.target.value = ''; }} />
                 </label>
              </div>
           </div>
         </div>
 
-        {/* Right Column: Question Nodes */}
         <div className="lg:col-span-2 space-y-4">
+           <div className="flex items-center justify-between bg-card rounded-2xl border border-white/[0.02] p-4 shadow-sm mb-6">
+              <div className="flex items-center gap-3">
+                 <LayoutList className="h-5 w-5 text-indigo-500" />
+                 <h2 className="font-display font-bold text-lg">Quiz Nodes</h2>
+              </div>
+              <div className="flex items-center gap-3">
+                 <button onClick={() => setPreviewOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/[0.05] bg-background text-xs font-bold hover:bg-muted transition-colors">
+                    <Eye className="h-4 w-4 text-violet-500" /> Preview Quiz
+                 </button>
+              </div>
+           </div>
+
            {questions.map((q, qi) => (
              <div key={qi} className={cn("group overflow-hidden rounded-2xl border transition-all duration-300", 
                expandedQ === qi ? "border-violet-500/40 bg-card shadow-xl ring-1 ring-violet-500/10" : "border-white/[0.02] bg-card/60 hover:border-border")}>
@@ -404,7 +540,7 @@ export default function AdminQuizCreatorPage() {
                                 <button onClick={() => setDrawForQi(qi)} className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-card border border-white/[0.02] text-[10px] font-bold uppercase hover:bg-muted"><Pencil className="h-3.5 w-3.5" /> Draw</button>
                                 <label className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-card border border-white/[0.02] text-[10px] font-bold uppercase hover:bg-muted cursor-pointer">
                                    <ImagePlus className="h-3.5 w-3.5" /> Attach
-                                   <input type="file" className="hidden" onChange={e => { const f=e.target.files?.[0]; if(f) uploadQuestionImage(qi, f); }} />
+                                   <input type="file" accept="image/*" className="hidden" onChange={e => { const f=e.target.files?.[0]; if(f) uploadQuestionImage(qi, f); e.target.value = ''; }} />
                                 </label>
                              </div>
                              {q.imageUrl && <div className="mt-2 relative group aspect-video rounded-xl border border-white/[0.02] overflow-hidden">
@@ -487,11 +623,53 @@ export default function AdminQuizCreatorPage() {
       <QuickDrawModal
         open={drawForQi !== null}
         onClose={() => setDrawForQi(null)}
-        onSaved={(url) => { if (drawForQi !== null) { updateQ(drawForQi, "imageUrl", url); setDrawForQi(null); } }}
+        onSaved={(url: string) => { if (drawForQi !== null) { updateQ(drawForQi, "imageUrl", url); setDrawForQi(null); } }}
         title="Diagnostic Drawing"
         exportBackground="#ffffff"
       />
+
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-md animate-in fade-in zoom-in-95">
+           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.05] bg-card/80">
+              <div className="flex items-center gap-3">
+                 <Eye className="h-5 w-5 text-violet-500" />
+                 <h2 className="text-lg font-bold font-display">Student Preview</h2>
+                 <span className="px-2 py-0.5 rounded-full bg-violet-500/10 text-[10px] font-bold text-violet-500 uppercase tracking-widest">{questions.length} Items</span>
+              </div>
+              <button onClick={() => setPreviewOpen(false)} className="p-2 rounded-lg hover:bg-muted text-muted-foreground transition-colors">
+                 <X className="h-5 w-5" />
+              </button>
+           </div>
+           <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-black/20">
+              <div className="max-w-3xl mx-auto space-y-8 pb-20">
+                 {questions.map((q, i) => {
+                    const pq = {
+                      id: q.id || `preview-${i}`,
+                      quizId: null,
+                      body: q.body,
+                      imageUrl: q.imageUrl || null,
+                      answer: q.answer,
+                      explanation: q.explanation,
+                      difficulty: q.difficulty,
+                      stemLayout: "STANDARD",
+                      questionType: q.questionType || "MCQ",
+                      choices: q.choices.map(c => ({ id: `choice-${i}-${c.key}`, questionId: q.id || `preview-${i}`, key: c.key, text: c.text }))
+                    };
+                    return (
+                       <QuestionCard 
+                          key={i}
+                          index={i}
+                          question={pq as any}
+                          showResult={true}
+                          selectedAnswer={q.answer}
+                          showAiPanel={false}
+                       />
+                    );
+                 })}
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }
-

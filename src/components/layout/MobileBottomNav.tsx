@@ -3,7 +3,8 @@
 import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpenText, Sparkles, BookCheck, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { House, Books, Clock, ClipboardText, Sparkle } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 
 const TABS: {
@@ -21,7 +22,7 @@ const TABS: {
   {
     href: "/modules",
     label: "Library",
-    icon: BookOpenText,
+    icon: Books,
     match: (p) => p.startsWith("/modules"),
   },
   {
@@ -31,15 +32,15 @@ const TABS: {
     match: (p) => p.startsWith("/taskat"),
   },
   {
-    href: "/quizzes",
+    href: "/past-papers",
     label: "Practice",
-    icon: BookCheck,
-    match: (p) => p.startsWith("/quizzes") || p.startsWith("/quiz"),
+    icon: ClipboardText,
+    match: (p) => p.startsWith("/past-papers") || p.startsWith("/quizzes") || p.startsWith("/quiz"),
   },
   {
     href: "/ai-chat",
     label: "Ask Dr.Q",
-    icon: Sparkles,
+    icon: Sparkle,
     match: (p) => p.startsWith("/ai-chat"),
   },
 ];
@@ -53,47 +54,55 @@ export function MobileBottomNav() {
     >
       <nav
         className={cn(
-          "pointer-events-auto mx-4 w-[92%] max-w-[420px]",
-          "rounded-[28px] border border-white/[0.1] dark:border-white/[0.05]",
-          "bg-white/80 dark:bg-black/80",
-          "shadow-[0_12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]",
-          "backdrop-blur-xl px-2 py-2"
+          "pointer-events-auto mx-auto w-[90%] max-w-[340px]",
+          "rounded-[20px] border border-black/5 dark:border-white/10",
+          "bg-white dark:bg-[#09080F]",
+          "shadow-lg shadow-black/5 dark:shadow-black/40",
+          "px-1 py-1 relative overflow-hidden"
         )}
         aria-label="Mobile Navigation Bar"
       >
-        <ul className="flex items-center justify-around">
+        <ul className="relative flex items-center justify-around">
           {TABS.map(({ href, label, icon: Icon, match }) => {
             const active = match(pathname);
             return (
-              <li key={href} className="flex-1">
+              <li key={href} className="flex-1 relative">
                 <Link
                   href={href}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1",
-                    "min-h-[48px] min-w-[48px] py-1 transition-all duration-300",
-                    "active:scale-90"
+                    "flex flex-col items-center justify-center gap-0.5",
+                    "min-h-[40px] py-1 transition-all duration-300 relative z-10",
+                    active ? "text-primary" : "text-muted-foreground/60"
                   )}
                 >
-                  <div className="relative flex items-center justify-center h-8 w-8">
-                    {active && (
-                      <span className="absolute inset-0 bg-primary/20 dark:bg-primary/30 blur-md rounded-full animate-pulse" />
-                    )}
+                  <div className="relative flex items-center justify-center h-6 w-6">
                     <Icon
+                      weight={active ? "duotone" : "bold"}
                       className={cn(
-                        "h-6 w-6 transition-all duration-300",
-                        active ? "text-primary scale-110 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" : "text-muted-foreground/60"
+                        "h-4 w-4 transition-all duration-300",
+                        active ? "scale-110" : "opacity-80"
                       )}
-                      strokeWidth={active ? 2.5 : 2}
                     />
                   </div>
+                  
                   <span
                     className={cn(
-                      "text-[10px] font-bold tracking-tight transition-colors duration-300",
-                      active ? "text-primary" : "text-muted-foreground/50"
+                      "text-[8px] font-bold tracking-tight transition-all duration-300",
+                      active ? "opacity-100" : "opacity-60"
                     )}
                   >
                     {label}
                   </span>
+
+                  {/* Liquid background pill */}
+                  {active && (
+                    <motion.div
+                      layoutId="activeTabPill"
+                      className="absolute inset-0 z-[-1] bg-primary/10 dark:bg-primary/20 rounded-xl"
+                      initial={false}
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                    />
+                  )}
                 </Link>
               </li>
             );
@@ -103,4 +112,3 @@ export function MobileBottomNav() {
     </div>
   );
 }
-

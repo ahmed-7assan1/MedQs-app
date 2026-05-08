@@ -40,7 +40,7 @@ export default async function MobileForumPage() {
 
   // Check if current user liked these posts
   const postIds = posts.map(p => p.id);
-  const myLikes = await prisma.postLike.findMany({
+  const myLikes = await prisma.like.findMany({
     where: {
       userId: session.user.id,
       postId: { in: postIds }
@@ -48,7 +48,7 @@ export default async function MobileForumPage() {
     select: { postId: true }
   });
 
-  const likedPostIds = new Set(myLikes.map(l => l.postId));
+  const likedPostIds = new Set(myLikes.map((l: { postId: string }) => l.postId));
   const processedPosts = posts.map(p => ({
     ...p,
     likedByMe: likedPostIds.has(p.id)

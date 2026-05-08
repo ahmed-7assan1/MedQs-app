@@ -80,8 +80,16 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
     <div className="min-h-screen dark:bg-[#07080f] bg-[#f8fafc] dark:text-white text-slate-900 pb-20">
       
       {/* Cover Photo */}
-      <div className="h-48 md:h-64 w-full bg-gradient-to-br dark:from-[#131220] dark:to-[#1a182b] from-blue-100 to-indigo-50 relative border-b dark:border-white/5 border-black/5">
-         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+      <div className="h-48 md:h-64 lg:h-80 w-full relative border-b dark:border-white/5 border-black/5 overflow-hidden">
+         {user.coverImage ? (
+           <img src={user.coverImage} className="absolute inset-0 w-full h-full object-cover" alt="Cover" />
+         ) : (
+           <div className="absolute inset-0 bg-gradient-to-br dark:from-[#131220] dark:to-[#1a182b] from-blue-100 to-indigo-50">
+             <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+           </div>
+         )}
+         {/* Seamless fade into background to ensure name readability */}
+         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#f8fafc] dark:from-[#07080f] to-transparent pointer-events-none" />
       </div>
 
       <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-16 md:-mt-20 mb-8">

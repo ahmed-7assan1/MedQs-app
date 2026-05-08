@@ -6,10 +6,10 @@ import { generateFlashcardsFromPastedTextWithMeta } from "@/lib/gemini";
 const MIN_CHARS = 80;
 const MAX_CHARS = 12_000;
 
-function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | "groq" | "openrouter" | "xai" | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  if (["gemini", "openai", "anthropic", "deepseek", "groq", "openrouter", "xai"].includes(s)) return s as any;
   return undefined;
 }
 

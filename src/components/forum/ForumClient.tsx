@@ -760,39 +760,6 @@ export function ForumClient({
         ) : (
           /* Standard Feed View */
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20">
-            {/* Instagram Stories Bar */}
-            <div className="flex overflow-x-auto gap-4 pb-4 px-2 no-scrollbar scroll-smooth">
-              <div className="flex flex-col items-center gap-2 shrink-0">
-                <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center p-1 cursor-pointer hover:bg-white/5 transition-all">
-                  <div className="h-full w-full rounded-full bg-white/5 flex items-center justify-center text-primary">
-                    <PlusCircle className="h-8 w-8" />
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-tighter">Your Story</span>
-              </div>
-              
-              {uniqueAuthors.map((author: any) => (
-                <Link 
-                  key={author.id} 
-                  href={`/profile/u/${author.id}`}
-                  className="flex flex-col items-center gap-2 shrink-0 group"
-                >
-                  <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-tr from-[#FFD600] via-[#FF0069] to-[#7638FA] p-[3px] shadow-lg group-hover:scale-105 transition-transform duration-300">
-                    <div className="h-full w-full rounded-full bg-black p-[2px]">
-                      <img 
-                        src={author.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(author.name || "User")}`} 
-                        className="h-full w-full rounded-full object-cover" 
-                        alt="" 
-                      />
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-tighter truncate w-16 text-center group-hover:text-white transition-colors">
-                    {author.name.split(' ')[0]}
-                  </span>
-                </Link>
-              ))}
-            </div>
-
             <PostComposerRedesigned 
               user={{ name: "Student Profile", image: null }} 
               onPost={async (c, img, opts) => submitPost(c, img, opts)}

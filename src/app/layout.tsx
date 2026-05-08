@@ -195,7 +195,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   `.trim();
 
   return (
-    <html lang="en" className={appFontVariableClassName} data-theme="light" suppressHydrationWarning>
+    <html lang="en" className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning>
       <head>
         {process.env.NODE_ENV === "development" ? (
           <script
@@ -214,7 +214,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   document.documentElement.classList.toggle('dark', isDark);
                 }
                 try {
-                  var theme = localStorage.getItem('medqs-theme') || 'light';
+                  var theme = localStorage.getItem('medqs-theme') || 'dark';
                   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   var isDark = theme === 'dark' || (theme === 'system' && prefersDark);
                   applyTheme(isDark);

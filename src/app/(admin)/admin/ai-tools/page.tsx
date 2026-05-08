@@ -18,6 +18,8 @@ type AIProviderChoice = "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
 
 export default function AIToolsPage() {
   const [providerChoice, setProviderChoice] = useState<AIProviderChoice>("auto");
+  const [customApiKey, setCustomApiKey] = useState("");
+  const [customModel, setCustomModel] = useState("");
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 space-y-8 pb-24">
@@ -47,29 +49,64 @@ export default function AIToolsPage() {
           </div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Global override for this session</p>
         </div>
-        <MedqsSelect
-          value={providerChoice}
-          onChange={(e) => setProviderChoice(e.target.value as AIProviderChoice)}
-          className="w-full h-12 rounded-xl border-white/[0.02] bg-background/50 text-sm font-semibold"
-        >
-          <option value="auto">Auto-Orchestration (Best Available)</option>
-          <option value="gemini">Google Gemini 1.5 Pro</option>
-          <option value="openai">OpenAI GPT-4o (Standard)</option>
-          <option value="anthropic">Anthropic Claude 3.5 Sonnet</option>
-          <option value="deepseek">DeepSeek AI (Specialist)</option>
-        </MedqsSelect>
-        <p className="mt-3 text-[11px] text-muted-foreground italic leading-relaxed">
-           Requests will automatically cascade to secondary providers if the primary choice is rate-limited or non-responsive.
-        </p>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-4">
+            <MedqsSelect
+              value={providerChoice}
+              onChange={(e) => setProviderChoice(e.target.value as AIProviderChoice)}
+              className="w-full h-12 rounded-xl border-white/[0.02] bg-background/50 text-sm font-semibold"
+            >
+              <option value="auto">Auto-Orchestration (Best Available)</option>
+              <option value="gemini">Google Gemini 1.5 Pro</option>
+              <option value="openai">OpenAI GPT-4o (Standard)</option>
+              <option value="anthropic">Anthropic Claude 3.5 Sonnet</option>
+              <option value="deepseek">DeepSeek AI (Specialist)</option>
+              <option value="groq">Groq LPU (Ultra-Fast)</option>
+              <option value="openrouter">OpenRouter (Aggregator)</option>
+              <option value="xai">xAI Grok</option>
+            </MedqsSelect>
+            <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+              Requests will automatically cascade to secondary providers if the primary choice is rate-limited or non-responsive.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+             <div className="flex gap-4">
+                <div className="flex-1 space-y-1.5">
+                   <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Custom API Key (BYOK)</label>
+                   <div className="relative">
+                      <Settings className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+                      <input 
+                        type="password"
+                        value={customApiKey}
+                        onChange={e => setCustomApiKey(e.target.value)}
+                        placeholder="sk-..."
+                        className="w-full h-12 rounded-xl border border-white/[0.02] bg-background/50 pl-10 pr-4 text-xs focus:ring-blue-500/40 outline-none"
+                      />
+                   </div>
+                </div>
+                <div className="flex-1 space-y-1.5">
+                   <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Custom Model (Optional)</label>
+                   <input 
+                     type="text"
+                     value={customModel}
+                     onChange={e => setCustomModel(e.target.value)}
+                     placeholder="e.g. gpt-4o-mini"
+                     className="w-full h-12 rounded-xl border border-white/[0.02] bg-background/50 px-4 text-xs focus:ring-blue-500/40 outline-none"
+                   />
+                </div>
+             </div>
+          </div>
+        </div>
       </div>
 
       <GeminiBanner />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <ManualAssistPanel providerChoice={providerChoice} />
-        <PDFExtractPanel providerChoice={providerChoice} />
-        <PDFNotesPanel providerChoice={providerChoice} />
-        <LectureEnhancePanel providerChoice={providerChoice} />
+        <ManualAssistPanel providerChoice={providerChoice} customApiKey={customApiKey} customModel={customModel} />
+        <PDFExtractPanel providerChoice={providerChoice} customApiKey={customApiKey} customModel={customModel} />
+        <PDFNotesPanel providerChoice={providerChoice} customApiKey={customApiKey} customModel={customModel} />
+        <LectureEnhancePanel providerChoice={providerChoice} customApiKey={customApiKey} customModel={customModel} />
       </div>
     </div>
   );
@@ -77,7 +114,7 @@ export default function AIToolsPage() {
 
 // ─── Manual Assist ─────────────────────────────────────────────────────────────
 
-function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
+function ManualAssistPanel({ providerChoice, customApiKey, customModel }: { providerChoice: AIProviderChoice; customApiKey: string; customModel: string }) {
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
@@ -99,7 +136,12 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
       const res = await fetch("/api/v1/ai/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body, preferredProvider: providerChoice === "auto" ? undefined : providerChoice }),
+        body: JSON.stringify({ 
+          body, 
+          preferredProvider: providerChoice === "auto" ? undefined : providerChoice,
+          customApiKey,
+          customModel
+        }),
       });
       const data = await res.json();
       if (!res.ok) return toast.error(data.error || "AI Generation failed");
@@ -227,7 +269,7 @@ function ManualAssistPanel({ providerChoice }: { providerChoice: AIProviderChoic
 
 // ─── PDF/DOCX Extractor ────────────────────────────────────────────────────────
 
-function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
+function PDFExtractPanel({ providerChoice, customApiKey, customModel }: { providerChoice: AIProviderChoice; customApiKey: string; customModel: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<ExtractedQuestion[]>([]);
@@ -246,6 +288,8 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
     const form = new FormData();
     form.append("file", file);
     if (providerChoice !== "auto") form.append("preferredProvider", providerChoice);
+    if (customApiKey) form.append("customApiKey", customApiKey);
+    if (customModel) form.append("customModel", customModel);
     try {
       const res = await fetch("/api/v1/ai/extract", { method: "POST", body: form });
       const data = await res.json();
@@ -253,6 +297,9 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
       setQuestions(data.questions ?? []);
       setIssues(data.issues ?? []);
       setQuizTitle(data.quizTitle ?? "");
+      if (data.questions && data.questions.length > 0) {
+        setExpanded(new Set(data.questions.map((_: any, i: number) => i)));
+      }
       toast.success(`Parsed ${data.questions?.length ?? 0} questions`);
       if (data.questions?.length > 0) {
         fetch("/api/v1/admin/questions/check-duplicates", {
@@ -298,7 +345,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
            {file ? <FileText className="h-8 w-8 text-violet-500 mb-1" /> : <Upload className="h-8 w-8 text-muted-foreground/30 mb-1" />}
            <p className="text-sm font-bold tracking-tight">{file ? file.name : "Drop document bundle"}</p>
            <p className="text-[10px] text-muted-foreground uppercase font-bold opacity-60">{file ? `${(file.size / 1024).toFixed(0)} KB` : "Click to browser (PDF/DOCX)"}</p>
-           <input type="file" accept=".pdf,.docx" className="hidden" onChange={e => setFile(e.target.files?.[0] ?? null)} />
+           <input type="file" accept=".pdf,.docx,image/*" className="hidden" onChange={e => { setFile(e.target.files?.[0] ?? null); e.target.value = ''; }} />
         </label>
 
         <button
@@ -342,6 +389,55 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
                            <ChevronDown className={cn("h-4 w-4 text-muted-foreground/40 transition-transform", expanded.has(i) && "rotate-180")} />
                         </div>
                      </div>
+                     {expanded.has(i) && (
+                        <div className="mt-3 pt-3 border-t border-white/[0.05] space-y-4 animate-in slide-in-from-top-2 cursor-default" onClick={e => e.stopPropagation()}>
+                           <p className="text-sm font-semibold leading-relaxed whitespace-pre-wrap">{q.body}</p>
+                           
+                           {q.questionType !== "ESSAY" && q.choices && q.choices.length > 0 && (
+                              <div className="space-y-2">
+                                 {q.choices.map(c => {
+                                    const isCorrect = q.answer === c.key;
+                                    return (
+                                       <div key={c.key} className={cn(
+                                          "flex items-center gap-3 rounded-xl border p-3 transition-colors",
+                                          isCorrect 
+                                             ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" 
+                                             : "border-white/[0.05] bg-background/50 text-muted-foreground"
+                                       )}>
+                                          <div className={cn(
+                                             "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[10px] font-bold",
+                                             isCorrect ? "border-emerald-500/50 bg-emerald-500/20" : "border-white/[0.1]"
+                                          )}>{c.key}</div>
+                                          <span className="text-sm">{c.text}</span>
+                                          {isCorrect && <Check className="h-4 w-4 ml-auto shrink-0" />}
+                                       </div>
+                                    );
+                                 })}
+                              </div>
+                           )}
+
+                           {q.explanation && (
+                              <div className="rounded-xl bg-blue-500/10 p-4 border border-blue-500/20">
+                                 <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">
+                                    <Sparkles className="h-3.5 w-3.5" /> AI Rationale
+                                 </p>
+                                 <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{q.explanation}</p>
+                              </div>
+                           )}
+                           
+                           <div className="flex items-center justify-between pt-2">
+                              <span className={cn(
+                                 "px-2 py-1 rounded text-[10px] font-bold uppercase",
+                                 q.difficulty === "HARD" ? "bg-red-500/10 text-red-500" :
+                                 q.difficulty === "EASY" ? "bg-emerald-500/10 text-emerald-500" :
+                                 "bg-amber-500/10 text-amber-500"
+                              )}>
+                                 {q.difficulty || "MEDIUM"}
+                              </span>
+                              <span className="text-[10px] font-bold uppercase text-muted-foreground/50">{q.questionType || "MCQ"}</span>
+                           </div>
+                        </div>
+                     )}
                   </div>
                 ))}
              </div>
@@ -362,7 +458,7 @@ function PDFExtractPanel({ providerChoice }: { providerChoice: AIProviderChoice 
 
 // ─── PDF/DOCX AI Notes Generator ──────────────────────────────────────────────
 
-function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
+function PDFNotesPanel({ providerChoice, customApiKey, customModel }: { providerChoice: AIProviderChoice; customApiKey: string; customModel: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [instructions, setInstructions] = useState("");
@@ -375,6 +471,8 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
     form.append("file", file);
     if (instructions) form.append("instructions", instructions);
     if (providerChoice !== "auto") form.append("preferredProvider", providerChoice);
+    if (customApiKey) form.append("customApiKey", customApiKey);
+    if (customModel) form.append("customModel", customModel);
     try {
       const res = await fetch("/api/v1/ai/generate-notes", { method: "POST", body: form });
       const data = await res.json();
@@ -407,7 +505,7 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
           )}>
              <BookOpen className="h-7 w-7 text-muted-foreground/30 mb-1" />
              <p className="text-xs font-bold tracking-tight">{file ? file.name : "Select Input File"}</p>
-             <input type="file" className="hidden" onChange={e => setFile(e.target.files?.[0] ?? null)} />
+             <input type="file" accept=".pdf,.docx,image/*" className="hidden" onChange={e => { setFile(e.target.files?.[0] ?? null); e.target.value = ''; }} />
           </label>
           <div className="space-y-1">
              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Synthesis Instructions</label>
@@ -448,7 +546,7 @@ function PDFNotesPanel({ providerChoice }: { providerChoice: AIProviderChoice })
 
 // ─── Lecture Enhance ─────────────────────────────────────────────────────────
 
-function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderChoice }) {
+function LectureEnhancePanel({ providerChoice, customApiKey, customModel }: { providerChoice: AIProviderChoice; customApiKey: string; customModel: string }) {
   const [lectureId, setLectureId] = useState("");
   const [instructions, setInstructions] = useState("");
   const [wantNotes, setWantNotes] = useState(true);
@@ -461,7 +559,15 @@ function LectureEnhancePanel({ providerChoice }: { providerChoice: AIProviderCho
     try {
       const res = await fetch("/api/v1/admin/ai/lecture-enhance", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lectureId, instructions, notes: wantNotes, flashcards: wantFlashcards, preferredProvider: providerChoice === "auto" ? undefined : providerChoice }),
+        body: JSON.stringify({ 
+          lectureId, 
+          instructions, 
+          notes: wantNotes, 
+          flashcards: wantFlashcards, 
+          preferredProvider: providerChoice === "auto" ? undefined : providerChoice,
+          customApiKey,
+          customModel
+        }),
       });
       const data = await res.json();
       if (!res.ok) return toast.error(data.error || "Enhancement failed");

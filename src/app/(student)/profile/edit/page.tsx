@@ -10,6 +10,7 @@ import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import { ImageUploadWithCrop } from "@/components/ui/ImageUploadWithCrop";
 import { signOut } from "next-auth/react";
+import { uploadFiles } from "@/lib/uploadthing-react";
 
 interface University { id: string; name: string }
 interface Faculty { id: string; name: string; universityId: string }
@@ -37,6 +38,8 @@ function EditProfileContent() {
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [telegramVerified, setTelegramVerified] = useState(false);
   const [telegramCode, setTelegramCode] = useState("");
   const [linking, setLinking] = useState(false);
@@ -128,18 +131,25 @@ function EditProfileContent() {
   );
   const filteredSems = semesters.filter((s) => s.academicYearId === selectedYear);
 
-  async function handleAvatarUpdate(url: string) {
+  async function handleAvatarUpdate(url: string, file?: File) {
     setAvatarUrl(url);
-    await fetch("/api/v1/auth/avatar-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
+    if (file) {
+      setAvatarFile(file);
+    } else if (url === "") {
+      // User removed the image
+      setAvatarFile(null);
+      await fetch("/api/v1/auth/avatar-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: "" }),
+      });
+    }
   }
 
-  async function handleCoverUpdate(url: string) {
+  async function handleCoverUpdate(url: string, file?: File) {
     setCoverUrl(url);
-    // Note: This API should be updated to handle coverImage
+    if (file) setCoverFile(file);
+    else if (url === "") setCoverFile(null);
   }
 
   async function handleLinkTelegram() {
@@ -169,6 +179,30 @@ function EditProfileContent() {
   async function handleSave() {
     setSaving(true);
     try {
+      let finalAvatarUrl = avatarUrl;
+      let finalCoverUrl = coverUrl;
+
+      // Upload avatar if changed
+      if (avatarFile) {
+        const res = await uploadFiles("avatar", { files: [avatarFile] });
+        if (res?.[0]?.url) {
+           finalAvatarUrl = res[0].url;
+           await fetch("/api/v1/auth/avatar-url", {
+             method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ url: finalAvatarUrl }),
+           });
+        }
+      }
+
+      // Upload cover if changed
+      if (coverFile) {
+        const res = await uploadFiles("avatar", { files: [coverFile] });
+        if (res?.[0]?.url) {
+           finalCoverUrl = res[0].url;
+        }
+      }
+
       const payload = {
         ...form,
         handle: form.handle.trim() || null,
@@ -179,7 +213,7 @@ function EditProfileContent() {
         universityId: selectedUni.trim() ? selectedUni : null,
         facultyId: selectedFaculty.trim() ? selectedFaculty : null,
         semesterId: selectedSem.trim() ? selectedSem : null,
-        coverImage: coverUrl,
+        coverImage: finalCoverUrl,
       };
       const res = await fetch("/api/v1/auth/profile", {
         method: "PUT",
@@ -352,7 +386,13 @@ function EditProfileContent() {
             <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
                {/* Cover Image Section */}
                <section className="relative overflow-hidden rounded-[3rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-4 shadow-xl">
-                  <div className="relative h-48 w-full rounded-[2rem] overflow-hidden bg-slate-100 dark:bg-white/5 group">
+                  <ImageUploadWithCrop
+                    value={coverUrl || ""}
+                    onChange={handleCoverUpdate}
+                    cropShape="rect"
+                    aspect={16/6}
+                    className="relative h-48 w-full rounded-[2rem] overflow-hidden bg-slate-100 dark:bg-white/5"
+                  >
                      {coverUrl ? (
                        <img src={coverUrl} alt="Cover" className="h-full w-full object-cover" />
                      ) : (
@@ -361,39 +401,28 @@ function EditProfileContent() {
                        </div>
                      )}
                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <ImageUploadWithCrop
-                          label=""
-                          value={coverUrl || ""}
-                          onChange={handleCoverUpdate}
-                          cropShape="rect"
-                          aspect={16/6}
-                          className="!absolute inset-0 opacity-0 cursor-pointer"
-                        />
                         <div className="flex flex-col items-center gap-2 pointer-events-none">
                            <Camera className="h-8 w-8 text-white" />
                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Update Cover Photo</span>
                         </div>
                      </div>
-                  </div>
+                  </ImageUploadWithCrop>
                   
                   {/* Avatar Overlay */}
                   <div className="relative -mt-16 ml-10 flex items-end gap-6">
-                    <div className="relative group">
+                    <ImageUploadWithCrop
+                      value={avatarUrl || ""}
+                      onChange={handleAvatarUpdate}
+                      cropShape="round"
+                      aspect={1}
+                    >
                        <div className="h-32 w-32 rounded-full border-4 dark:border-[#131220] border-white bg-slate-200 overflow-hidden shadow-2xl">
                           <img src={avatarUrl || "/placeholder-user.jpg"} alt="Avatar" className="h-full w-full object-cover" />
                        </div>
-                       <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                          <ImageUploadWithCrop
-                            label=""
-                            value={avatarUrl || ""}
-                            onChange={handleAvatarUpdate}
-                            cropShape="round"
-                            aspect={1}
-                            className="!absolute inset-0 opacity-0 cursor-pointer"
-                          />
+                       <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <Camera className="h-6 w-6 text-white" />
                        </div>
-                    </div>
+                    </ImageUploadWithCrop>
                     <div className="pb-4">
                        <h3 className="text-xl font-black dark:text-white text-slate-800">Visual Branding</h3>
                        <p className="text-[10px] font-black dark:text-white/40 text-slate-400 uppercase tracking-widest">Personalize your public aesthetic</p>

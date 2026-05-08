@@ -218,21 +218,21 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
       */}
 
       {/* ══════════════════════════════════════════════
-          MOBILE FULL-SCREEN SIDE PANEL (slides from right)
+          MOBILE FULL-SCREEN SIDE PANEL (slides from left)
       ══════════════════════════════════════════════ */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" style={{ isolation: "isolate" }}>
+        <div className="fixed inset-0 z-[150] lg:hidden" style={{ isolation: "isolate" }}>
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-[3px]"
+            className="absolute inset-0 bg-black/60 backdrop-blur-[6px]"
             onClick={setMobileClose}
             aria-hidden
           />
 
           {/* Panel */}
           <div
-            className="absolute right-0 top-0 bottom-0 w-72 max-w-[90vw] flex flex-col bg-card border-l border-white/[0.02] shadow-2xl"
-            style={{ animation: "slideInFromRight 200ms cubic-bezier(0.16,1,0.3,1)" }}
+            className="absolute left-0 top-0 bottom-0 w-72 max-w-[90vw] flex flex-col bg-card border-r border-white/10 shadow-2xl"
+            style={{ animation: "slideInFromLeft 300ms cubic-bezier(0.16,1,0.3,1)" }}
           >
             {/* Panel header */}
             <div className="flex h-14 items-center justify-between px-5">
@@ -414,8 +414,8 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
 
       {/* ── CSS Animations ── */}
       <style jsx global>{`
-        @keyframes slideInFromRight {
-          from { transform: translateX(100%); }
+        @keyframes slideInFromLeft {
+          from { transform: translateX(-100%); }
           to { transform: translateX(0); }
         }
         @keyframes slideInX {

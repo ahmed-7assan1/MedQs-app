@@ -99,11 +99,11 @@ export default async function ModulesPage() {
   const totalMastered = Object.values(correctByModule).reduce((acc, set) => acc + set.size, dbTotalMastered);
 
   return (
-    <div className="min-h-screen bg-[#07080f] pb-32 pt-0">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#07080f] pb-32 pt-0">
       {/* ── Immersive Hero ── */}
       <div className="relative h-[220px] md:h-[400px] w-full overflow-hidden flex items-end">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#534AB7]/20 via-transparent dark:to-[#07080f] to-white z-10" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-slate-50 dark:from-[#534AB7]/20 dark:to-[#07080f] z-10" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 dark:opacity-20" />
         
         <div className="relative z-20 container mx-auto px-6 pb-6 md:pb-12">
            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

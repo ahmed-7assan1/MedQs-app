@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -38,17 +37,17 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
       });
-      if (res.ok) toast.success("تم حفظ الإعدادات بنجاح");
-      else toast.error("فشل في حفظ الإعدادات");
+      if (res.ok) toast.success("Settings saved successfully");
+      else toast.error("Failed to save settings");
     } catch (err) {
-      toast.error("خطأ تقني");
+      toast.error("Technical error");
     } finally {
       setIsSaving(false);
     }
   };
 
   const startBroadcast = async () => {
-    if (!broadcastText.trim()) return toast.error("يرجى كتابة نص الرسالة");
+    if (!broadcastText.trim()) return toast.error("Please enter a message");
     
     setIsBroadcasting(true);
     try {
@@ -62,10 +61,10 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (res.ok) toast.success(broadcastTarget === "selected" ? "تم إرسال الرسالة الخاصة" : `تم الإرسال لـ ${data.successCount} طالب`);
-      else toast.error(data.error || "فشل الإرسال");
+      if (res.ok) toast.success(broadcastTarget === "selected" ? "Private message sent" : `Sent to ${data.successCount} students`);
+      else toast.error(data.error || "Broadcast failed");
     } catch (err) {
-      toast.error("خطأ في الاتصال");
+      toast.error("Connection error");
     } finally {
       setIsBroadcasting(false);
       setBroadcastText("");
@@ -89,7 +88,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
               <div className="p-2 bg-teal-500/20 rounded-lg text-teal-400">
                 <MessageSquare size={20} />
               </div>
-              <h2 className="text-xl font-semibold text-white">نظام المراسلة والبرودكاست</h2>
+              <h2 className="text-xl font-semibold text-white">Messaging & Broadcast</h2>
             </div>
             
             <div className="flex bg-zinc-950/50 p-1 rounded-xl border border-white/5">
@@ -97,16 +96,16 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
                 onClick={() => setBroadcastTarget("all")}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${broadcastTarget === 'all' ? 'bg-teal-600 text-white shadow-lg shadow-teal-900/20' : 'text-zinc-500 hover:text-zinc-300'}`}
                >
-                 الكل
+                 All
                </button>
                <button 
                 onClick={() => {
-                  if (!selectedUser) toast.error("اختر طالباً أولاً من القائمة");
+                  if (!selectedUser) toast.error("Select a student first from the list");
                   else setBroadcastTarget("selected");
                 }}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${broadcastTarget === 'selected' ? 'bg-teal-600 text-white shadow-lg shadow-teal-900/20' : 'text-zinc-500 hover:text-zinc-300'}`}
                >
-                 خاص
+                 Private
                </button>
             </div>
           </div>
@@ -114,11 +113,11 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
           <div className="relative group">
             {broadcastTarget === "selected" && selectedUser && (
               <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full border border-teal-500/20 text-[10px] font-bold">
-                إلى: {selectedUser.name} <X size={10} className="cursor-pointer" onClick={() => setBroadcastTarget("all")} />
+                To: {selectedUser.name} <X size={10} className="cursor-pointer" onClick={() => setBroadcastTarget("all")} />
               </div>
             )}
             <textarea 
-              placeholder={broadcastTarget === 'all' ? "اكتب رسالتك لجميع طلاب السيمستر..." : `اكتب رسالة خاصة لـ ${selectedUser?.name || 'الطالب'}...`}
+              placeholder={broadcastTarget === 'all' ? "Type your message to all students in your semester..." : `Type a private message to ${selectedUser?.name || 'Student'}...`}
               className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl p-4 min-h-[140px] mb-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all pt-10"
               value={broadcastText}
               onChange={(e) => setBroadcastText(e.target.value)}
@@ -131,10 +130,10 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
               disabled={isBroadcasting}
               className="w-full sm:w-auto bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-xl px-8 py-3 font-bold transition-all flex items-center justify-center gap-2"
             >
-              {isBroadcasting ? "جاري الإرسال..." : "إرسال الآن"} <Send size={16} />
+              {isBroadcasting ? "Sending..." : "Send Now"} <Send size={16} />
             </button>
             <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
-              {broadcastTarget === 'all' ? `سيصل لـ ${linkedUsers.length} طالب في سيمسترك` : `سيصل للطالب ${selectedUser?.name} بشكل خاص`}
+              {broadcastTarget === 'all' ? `Will reach ${linkedUsers.length} students in your semester` : `Will reach ${selectedUser?.name} privately`}
             </p>
           </div>
         </div>
@@ -144,12 +143,12 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
             <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
               <Settings size={20} />
             </div>
-            <h2 className="text-xl font-semibold text-white">إعدادات البوت العامة</h2>
+            <h2 className="text-xl font-semibold text-white">General Bot Settings</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="text-[10px] text-zinc-500 uppercase font-bold mb-2 block tracking-widest">المحرك الافتراضي</label>
+              <label className="text-[10px] text-zinc-500 uppercase font-bold mb-2 block tracking-widest">Default AI Engine</label>
               <select 
                 value={config.defaultProvider || "gemini"}
                 onChange={(e) => setConfig({...config, defaultProvider: e.target.value})}
@@ -163,22 +162,22 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
               </select>
             </div>
             <div>
-              <label className="text-[10px] text-zinc-500 uppercase font-bold mb-2 block tracking-widest">الحالة العامة للبوت</label>
+              <label className="text-[10px] text-zinc-500 uppercase font-bold mb-2 block tracking-widest">Bot Overall Status</label>
               <select 
                 value={config.botStatus || "ACTIVE"}
                 onChange={(e) => setConfig({...config, botStatus: e.target.value})}
                 className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none cursor-pointer"
               >
-                <option value="ACTIVE">نشط (Active)</option>
-                <option value="MAINTENANCE">صيانة (Maintenance)</option>
-                <option value="DISABLED">معطل (Disabled)</option>
+                <option value="ACTIVE">Active</option>
+                <option value="MAINTENANCE">Maintenance</option>
+                <option value="DISABLED">Disabled</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] text-zinc-500 uppercase font-bold mb-2 block tracking-widest">رسالة الترحيب</label>
+              <label className="text-[10px] text-zinc-500 uppercase font-bold mb-2 block tracking-widest">Welcome Message</label>
               <textarea 
                 value={config.welcomeMessage || ""}
                 onChange={(e) => setConfig({...config, welcomeMessage: e.target.value})}
@@ -190,7 +189,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
               disabled={isSaving}
               className="w-full sm:w-auto bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl border border-white/5 px-8 py-3 transition-all font-bold text-sm"
             >
-              {isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}
+              {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
@@ -204,7 +203,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
               <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400">
                 <Users size={20} />
               </div>
-              <h2 className="text-xl font-semibold text-white">الطلاب</h2>
+              <h2 className="text-xl font-semibold text-white">Students</h2>
             </div>
             <span className="text-[10px] bg-white/5 px-2 py-1 rounded-md text-zinc-500 font-mono">
               {filteredUsers.length}
@@ -215,7 +214,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
             <input 
               type="text" 
-              placeholder="ابحث بالاسم، الإيميل، أو الـ ID..."
+              placeholder="Search by name, email, or ID..."
               className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -255,7 +254,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
             {filteredUsers.length === 0 && (
               <div className="text-center py-20">
                 <AlertCircle size={40} className="mx-auto text-zinc-800 mb-4 opacity-50" />
-                <p className="text-zinc-600 text-sm">لا يوجد نتائج لهذا البحث.</p>
+                <p className="text-zinc-600 text-sm">No results found for this search.</p>
               </div>
             )}
           </div>
@@ -305,7 +304,7 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
                   <div className="p-6 bg-zinc-900/50 rounded-3xl border border-white/5">
                     <div className="flex items-center gap-2 mb-4">
                       <BarChart3 size={16} className="text-teal-400" />
-                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">إحصائيات البوت</h4>
+                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Bot Statistics</h4>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 bg-zinc-950 rounded-2xl border border-white/5">
@@ -328,10 +327,10 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
                   <div className="p-6 bg-zinc-900/50 rounded-3xl border border-white/5">
                     <div className="flex items-center gap-2 mb-4">
                       <Clock size={16} className="text-orange-400" />
-                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">تاريخ الانضمام</h4>
+                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Joined Date</h4>
                     </div>
                     <p className="text-sm text-white font-medium">
-                      {new Date(selectedUser.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {new Date(selectedUser.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                   </div>
                 </div>
@@ -341,13 +340,13 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
                   <div className="p-6 bg-zinc-900/50 rounded-3xl border border-white/5">
                     <div className="flex items-center gap-2 mb-6">
                       <Phone size={16} className="text-blue-400" />
-                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">معلومات التواصل</h4>
+                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Contact Information</h4>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-white">
                           <Phone size={14} className="text-zinc-600" />
-                          <span className="text-sm font-medium">{selectedUser.phone || "لا يوجد"}</span>
+                          <span className="text-sm font-medium">{selectedUser.phone || "None"}</span>
                         </div>
                         {selectedUser.phone && (
                           <a href={`https://wa.me/${selectedUser.phone}`} target="_blank" className="text-[10px] bg-teal-500/10 text-teal-400 px-3 py-1 rounded-lg font-bold">WhatsApp</a>
@@ -356,12 +355,12 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
                       
                       <div className="flex items-center gap-3 text-white">
                         <Facebook size={14} className={selectedUser.facebookUrl ? "text-blue-500" : "text-zinc-600"} />
-                        <span className="text-sm font-medium truncate max-w-[200px]">{selectedUser.facebookUrl ? "حساب الفيسبوك" : "غير مربوط"}</span>
+                        <span className="text-sm font-medium truncate max-w-[200px]">{selectedUser.facebookUrl ? "Facebook Account" : "Not Linked"}</span>
                       </div>
                       
                       <div className="flex items-center gap-3 text-white">
                         <Instagram size={14} className={selectedUser.instagramUrl ? "text-pink-500" : "text-zinc-600"} />
-                        <span className="text-sm font-medium truncate max-w-[200px]">{selectedUser.instagramUrl ? "حساب انستجرام" : "غير مربوط"}</span>
+                        <span className="text-sm font-medium truncate max-w-[200px]">{selectedUser.instagramUrl ? "Instagram Account" : "Not Linked"}</span>
                       </div>
                     </div>
                   </div>
@@ -372,17 +371,17 @@ export function TelegramAdminClient({ linkedUsers, initialConfig }: TelegramAdmi
                         setBroadcastTarget("selected");
                         setBroadcastText("");
                         setSelectedUser(null);
-                        toast.success("اكتب رسالتك الآن في لوحة المراسلة");
+                        toast.success("Write your message now in the messaging panel");
                       }}
                       className="w-full bg-teal-600 hover:bg-teal-500 text-white rounded-2xl py-4 font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-teal-900/20"
                     >
-                      إرسال رسالة خاصة <Send size={16} />
+                      Send Private Message <Send size={16} />
                     </button>
                     <button 
                       onClick={() => setSelectedUser(null)}
                       className="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400 rounded-2xl py-4 font-bold text-sm transition-all"
                     >
-                      إغلاق
+                      Close
                     </button>
                   </div>
                 </div>

@@ -6,14 +6,14 @@ import { extractQuestionsFromTextByModeWithMeta, validateQuestionsWithMeta } fro
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
 import { redisIncrWithExpire } from "@/lib/redis";
 
-export const maxDuration = 300; // 5 minutes max duration for Vercel
+export const maxDuration = 900; // 15 minutes max duration for Vercel Pro
 
-const RATE_LIMIT = 5; // PDF extractions per hour — each can be large
+const RATE_LIMIT = 5000; // PDF extractions per hour — effectively disabled for admin
 
-function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
+function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | "groq" | "openrouter" | "xai" | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  if (s === "gemini" || s === "openai" || s === "anthropic" || s === "deepseek") return s;
+  if (["gemini", "openai", "anthropic", "deepseek", "groq", "openrouter", "xai"].includes(s)) return s as any;
   return undefined;
 }
 
@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
   const questionModeRaw = String(formData.get("questionMode") ?? "mcq").trim().toLowerCase();
   const questionMode = questionModeRaw === "essay" || questionModeRaw === "mixed" ? questionModeRaw : "mcq";
   const preferredProvider = String(formData.get("preferredProvider") ?? "").trim() || undefined;
+  const customApiKey = String(formData.get("customApiKey") ?? "").trim() || undefined;
+  const customModel = String(formData.get("customModel") ?? "").trim() || undefined;
+
   const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
   const effectiveProvider =
     normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
@@ -48,57 +51,70 @@ export async function POST(req: NextRequest) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   let text = "";
+  let ocrSuccessful = false;
 
   const lcName = file.name.toLowerCase();
   const isImage = lcName.endsWith(".png") || lcName.endsWith(".jpg") || lcName.endsWith(".jpeg") || lcName.endsWith(".webp");
 
-  if (lcName.endsWith(".pdf")) {
-    const pdfParse = (await import("pdf-parse")).default;
-    const parsed = await pdfParse(buffer);
-    text = parsed.text;
-  } else if (lcName.endsWith(".docx")) {
-    text = buffer.toString("utf-8").replace(/[^\x20-\x7E\n\r]/g, " ");
-  } else if (isImage) {
-    text = "";
-  } else {
-    return NextResponse.json({ error: "Only PDF, DOCX, and images supported" }, { status: 400 });
-  }
-
-  // OCR assist via Gemini multimodal when scanned/noisy files produce little text.
-  // Skip OCR for very large files to avoid request timeout.
-  const shouldTryOcr = (!text.trim() || text.trim().length < 120) && file.size <= 12 * 1024 * 1024;
+  // 1. Primary Extraction: Gemini Multimodal OCR (Solves protected/scanned PDFs natively)
+  const shouldTryOcr = file.size <= 15 * 1024 * 1024;
   if (shouldTryOcr) {
     try {
       const ocrPrompt =
-        "Extract clean readable text from this medical study file. Return plain text only, keep line breaks.";
+        "Extract clean readable text from this medical study file. Return plain text only, keep line breaks. Ensure all questions and choices are clearly legible.";
+      const useOcrKey = effectiveProvider === "gemini" ? !!customApiKey : false;
+      const ocrKey = effectiveProvider === "gemini" ? customApiKey : undefined;
+      const ocrModel = effectiveProvider === "gemini" ? customModel : undefined;
+
       if (isImage) {
         const row = await generateAIReplyWithFallback(ocrPrompt, "OCR extraction for education content.", {
-          preferredProvider: effectiveProvider,
+          preferredProvider: "gemini",
           images: [{ mimeType: file.type || "image/png", data: buffer.toString("base64") }],
+          personalKey: ocrKey,
+          customModel: ocrModel,
+          useCustomKey: useOcrKey,
+          customProvider: useOcrKey ? "gemini" : undefined,
         });
-        text = `${text}\n${row.text}`.trim();
+        if (row.text && row.text.trim().length > 20) {
+           text = row.text.trim();
+           ocrSuccessful = true;
+        }
       } else if (lcName.endsWith(".pdf")) {
         const row = await generateAIReplyWithFallback(ocrPrompt, "OCR extraction for PDF content.", {
-          preferredProvider: effectiveProvider,
+          preferredProvider: "gemini",
           pdfs: [{ mimeType: "application/pdf", data: buffer.toString("base64") }],
+          personalKey: ocrKey,
+          customModel: ocrModel,
+          useCustomKey: useOcrKey,
+          customProvider: useOcrKey ? "gemini" : undefined,
         });
-        text = `${text}\n${row.text}`.trim();
+        if (row.text && row.text.trim().length > 20) {
+           text = row.text.trim();
+           ocrSuccessful = true;
+        }
       }
-    } catch {
-      // fallback to whatever extracted text we have
+    } catch (e) {
+      console.warn("[OCR fallback]", e);
     }
   }
 
-  // Local Tesseract fallback for images when cloud OCR / PDF text is still empty or tiny.
-  if ((!text.trim() || text.trim().length < 40) && isImage && file.size <= 15 * 1024 * 1024) {
-    try {
-      const { ocrImageBuffer } = await import("@/lib/ocr");
-      const local = await ocrImageBuffer(buffer);
-      if (local?.trim()) {
-        text = `${text}\n${local}`.trim();
-      }
-    } catch {
-      /* ignore */
+  // 2. Local Fallback: If OCR failed or file too large, use pdf-parse/docx parser
+  if (!ocrSuccessful) {
+    if (lcName.endsWith(".pdf")) {
+      const pdfParse = (await import("pdf-parse")).default;
+      const parsed = await pdfParse(buffer);
+      text = parsed.text;
+    } else if (lcName.endsWith(".docx")) {
+      text = buffer.toString("utf-8").replace(/[^\x20-\x7E\n\r]/g, " ");
+    } else if (isImage) {
+      // Local Tesseract fallback for images
+      try {
+        const { ocrImageBuffer } = await import("@/lib/ocr");
+        const local = await ocrImageBuffer(buffer);
+        if (local?.trim()) text = local.trim();
+      } catch {}
+    } else {
+      return NextResponse.json({ error: "Only PDF, DOCX, and images supported" }, { status: 400 });
     }
   }
 
@@ -107,6 +123,8 @@ export async function POST(req: NextRequest) {
   try {
     const extracted = await extractQuestionsFromTextByModeWithMeta(text, questionMode as any, {
       preferredProvider: effectiveProvider,
+      customApiKey,
+      customModel,
     });
     // Validation is a second AI pass; skip on large/slow requests to reduce timeout risk.
     const elapsed = Date.now() - startedAt;
@@ -114,7 +132,11 @@ export async function POST(req: NextRequest) {
     const reviewed = shouldValidate
       ? await validateQuestionsWithMeta(
           extracted.data.questions.map((q) => ({ body: q.body, answer: q.answer })),
-          { preferredProvider: effectiveProvider }
+          { 
+            preferredProvider: effectiveProvider,
+            customApiKey,
+            customModel,
+          }
         )
       : { data: [] as { index: number; issue: string }[] };
     return NextResponse.json({

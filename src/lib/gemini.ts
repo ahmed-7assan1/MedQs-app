@@ -27,7 +27,11 @@ export interface AISuggestion {
 
 // ─── Helper: safe JSON parse from Gemini response ─────────────────────────────
 
-export type AIRequestOptions = { preferredProvider?: AIProviderId | string };
+export type AIRequestOptions = { 
+  preferredProvider?: AIProviderId | string;
+  customApiKey?: string;
+  customModel?: string;
+};
 export type AIWithMeta<T> = { data: T; meta: AIFallbackMeta };
 
 // ─── 1. Student: explain a question ──────────────────────────────────────────
@@ -68,6 +72,10 @@ Use simple language suitable for a medical student. Use **bold** for key medical
 
   const row = await generateAIReplyWithFallback(prompt, "You are a medical education tutor.", {
     preferredProvider: options?.preferredProvider,
+    personalKey: options?.customApiKey,
+    customModel: options?.customModel,
+    useCustomKey: !!options?.customApiKey,
+    customProvider: options?.preferredProvider as any,
   });
   return {
     data: row.text || "Explanation unavailable.",
@@ -125,6 +133,10 @@ Rules:
   };
   const row = await generateJsonWithFallback<AISuggestion>(prompt, fallback, {
     preferredProvider: options?.preferredProvider,
+    personalKey: options?.customApiKey,
+    customModel: options?.customModel,
+    useCustomKey: !!options?.customApiKey,
+    customProvider: options?.preferredProvider as any,
   });
   return { data: row.data, meta: { provider: row.provider, fallbackFrom: row.fallbackFrom, triedProviders: row.triedProviders } };
 }
@@ -205,6 +217,10 @@ ${text.slice(0, 15000)}`;
 
   const row = await generateJsonWithFallback<{ quizTitle?: string; questions: ExtractedQuestion[] }>(prompt, { quizTitle: "", questions: [] }, {
     preferredProvider: options?.preferredProvider,
+    personalKey: options?.customApiKey,
+    customModel: options?.customModel,
+    useCustomKey: !!options?.customApiKey,
+    customProvider: options?.preferredProvider as any,
   });
   return {
     data: {
@@ -292,7 +308,13 @@ Rules:
     stagesMet?: number;
     stagesTotal?: number;
     stageNotes?: string[];
-  }>(prompt, fallback, { preferredProvider: options?.preferredProvider });
+  }>(prompt, fallback, { 
+    preferredProvider: options?.preferredProvider,
+    personalKey: options?.customApiKey,
+    customModel: options?.customModel,
+    useCustomKey: !!options?.customApiKey,
+    customProvider: options?.preferredProvider as any,
+  });
 
   const c = Number(row.data.confidence);
   const stagesTotal = Math.max(1, Math.min(8, Math.floor(Number(row.data.stagesTotal) || 4)));
@@ -369,6 +391,10 @@ If all questions are fine, return: {"issues": []}`;
 
   const row = await generateJsonWithFallback<{ issues: { index: number; issue: string }[] }>(prompt, { issues: [] }, {
     preferredProvider: options?.preferredProvider,
+    personalKey: options?.customApiKey,
+    customModel: options?.customModel,
+    useCustomKey: !!options?.customApiKey,
+    customProvider: options?.preferredProvider as any,
   });
   return {
     data: row.data.issues ?? [],
@@ -434,7 +460,13 @@ Rules:
   const row = await generateJsonWithFallback<{ notesMarkdown?: string; flashcards?: { front: string; back: string }[] }>(
     prompt,
     { notesMarkdown: "", flashcards: [] },
-    { preferredProvider: options?.preferredProvider }
+    { 
+      preferredProvider: options?.preferredProvider,
+      personalKey: options?.customApiKey,
+      customModel: options?.customModel,
+      useCustomKey: !!options?.customApiKey,
+      customProvider: options?.preferredProvider as any,
+    }
   );
   const parsed = row.data;
   const notes = wantNotes ? String(parsed.notesMarkdown ?? "").trim() : "";
@@ -521,7 +553,13 @@ Rules:
   const row = await generateJsonWithFallback<Partial<LectureExtras>>(
     prompt,
     { overviewCards: [], mnemonics: [], cases: [], mindMapsMarkdown: "", mindMapGraph: { nodes: [], edges: [] } },
-    { preferredProvider: options?.preferredProvider }
+    { 
+      preferredProvider: options?.preferredProvider,
+      personalKey: options?.customApiKey,
+      customModel: options?.customModel,
+      useCustomKey: !!options?.customApiKey,
+      customProvider: options?.preferredProvider as any,
+    }
   );
 
   const data: LectureExtras = {
@@ -657,7 +695,13 @@ Return ONLY valid JSON:
   const row = await generateJsonWithFallback<{ flashcards?: { front: string; back: string }[] }>(
     prompt,
     { flashcards: [] },
-    { preferredProvider: options?.preferredProvider }
+    { 
+      preferredProvider: options?.preferredProvider,
+      personalKey: options?.customApiKey,
+      customModel: options?.customModel,
+      useCustomKey: !!options?.customApiKey,
+      customProvider: options?.preferredProvider as any,
+    }
   );
   const cards = (row.data.flashcards ?? [])
     .filter((f) => f && String(f.front).trim() && String(f.back).trim())
@@ -735,6 +779,10 @@ ${schedule || "(empty — create a balanced generic medical-student week templat
   const fallback: WeeklyStudyPlanPayload = { days: [], weeklyGoals: [], balanceSummary: "" };
   const row = await generateJsonWithFallback<WeeklyStudyPlanPayload>(prompt, fallback, {
     preferredProvider: options?.preferredProvider,
+    personalKey: options?.customApiKey,
+    customModel: options?.customModel,
+    useCustomKey: !!options?.customApiKey,
+    customProvider: options?.preferredProvider as any,
   });
   const days = Array.isArray(row.data.days)
     ? row.data.days
@@ -790,7 +838,13 @@ Return ONLY JSON:
   const row = await generateJsonWithFallback<{ feedback: string; gaps: string[]; nextWeekFocus: string[] }>(
     prompt,
     { feedback: "", gaps: [], nextWeekFocus: [] },
-    { preferredProvider: options?.preferredProvider }
+    { 
+      preferredProvider: options?.preferredProvider,
+      personalKey: options?.customApiKey,
+      customModel: options?.customModel,
+      useCustomKey: !!options?.customApiKey,
+      customProvider: options?.preferredProvider as any,
+    }
   );
   return {
     data: {

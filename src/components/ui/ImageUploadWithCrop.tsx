@@ -9,11 +9,12 @@ import toast from "react-hot-toast";
 
 interface Props {
   value: string;
-  onChange: (url: string) => void;
+  onChange: (url: string, file?: File) => void;
   label?: string;
   aspect?: number;
   cropShape?: "round" | "rect";
   className?: string;
+  children?: React.ReactNode;
 }
 
 export function ImageUploadWithCrop({
@@ -22,7 +23,8 @@ export function ImageUploadWithCrop({
   label = "Upload Image",
   aspect = 1,
   cropShape = "round",
-  className
+  className,
+  children
 }: Props) {
   const [uploading, setUploading] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -47,37 +49,54 @@ export function ImageUploadWithCrop({
     e.target.value = "";
   }
 
-  // 2. Handle crop confirmation -> Upload to Uploadcare
+  // 2. Handle crop confirmation -> Local Preview Only
   async function handleCropConfirm(blob: Blob, name: string) {
     setCropSrc(null);
-    setUploading(true);
     
     try {
-      // Convert Blob to File for Uploadthing
+      // Convert Blob to File
       const file = new File([blob], name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
-      
-      const res = await uploadFiles("avatar", {
-        files: [file],
-      });
-
-      if (!res || res.length === 0) throw new Error("Upload failed");
-      
-      const fileUrl = res[0].url;
+      const localUrl = URL.createObjectURL(file);
       
       setImageError(false);
-      onChange(fileUrl);
-      toast.success("Image uploaded successfully!");
+      onChange(localUrl, file);
+      toast.success("Image cropped successfully! Don't forget to save.");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to upload image");
-    } finally {
-      setUploading(false);
+      toast.error("Failed to crop image");
     }
   }
 
   function handleCancel() {
     if (cropSrc) URL.revokeObjectURL(cropSrc);
     setCropSrc(null);
+  }
+
+  if (children) {
+    return (
+      <>
+        <div className={cn("relative cursor-pointer group", className)} onClick={() => fileInputRef.current?.click()}>
+          {children}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+        </div>
+        {cropSrc && (
+          <ImageCropModal
+            imageSrc={cropSrc}
+            cropShape={cropShape}
+            aspect={aspect}
+            onConfirm={handleCropConfirm}
+            onCancel={handleCancel}
+            fileName={fileName}
+          />
+        )}
+      </>
+    );
   }
 
   return (

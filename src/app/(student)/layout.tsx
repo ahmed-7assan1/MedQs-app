@@ -10,7 +10,9 @@ import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
-import { AdminFAB } from "@/components/admin/AdminFAB";
+import { MobileHeader } from "@/components/layout/MobileHeader";
+import { MobileSwipeLayout } from "@/components/layout/MobileSwipeLayout";
+import { PremiumNotificationPrompt } from "@/components/notifications/PremiumNotificationPrompt";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -22,7 +24,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const session = await auth();
   const isGuest = !session?.user?.id;
 
-  // Never throw the whole shell if the DB is down — avoids a blank white page.
   const user = isGuest
     ? null
     : await prisma.user
@@ -32,8 +33,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
       })
       .catch(() => null);
 
-  // ── Onboarding guard: redirect to /register if profile is incomplete ──────
-  // Exempt: guests, admins, and pages already under /register
   if (!isGuest && user) {
     const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
     if (!isAdmin && !user.semesterId) {
@@ -72,7 +71,12 @@ export default async function StudentLayout({ children }: { children: React.Reac
           Skip to main content
         </a>
         
-        {/* Top Island Navbar (Desktop Only Visibility handled internally) */}
+        <MobileHeader 
+          userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+          userName={isGuest ? undefined : displayName}
+          userId={isGuest ? "" : sessionUserId}
+        />
+
         <FloatingIslandNavbar 
            userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
            userName={isGuest ? undefined : displayName}
@@ -95,7 +99,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
           {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
           
           <main id="main-content" className="flex-1 flex flex-col outline-none w-full pb-20 md:pb-8">
-            {children}
+            <MobileSwipeLayout>
+              {children}
+            </MobileSwipeLayout>
           </main>
 
           <SiteFooter />
@@ -104,6 +110,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
           <PersistentAudioPlayer />
           <MobileBottomNav />
           {isAdmin && <AdminStudentBar />}
+          <PremiumNotificationPrompt />
         </div>
       </div>
     </SiteConfigProvider>
