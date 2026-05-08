@@ -1,0 +1,1 @@
+self.addEventListener("push",i=>{if(i.data){let t=i.data.json(),n={body:t.body,icon:t.icon||"/icons/icon-192.png",badge:"/icons/icon-192.png",vibrate:[100,50,100],data:{url:t.url||"/"}};i.waitUntil(self.registration.showNotification(t.title,n))}}),self.addEventListener("notificationclick",i=>{i.notification.close(),i.waitUntil(clients.openWindow(i.notification.data.url))});
