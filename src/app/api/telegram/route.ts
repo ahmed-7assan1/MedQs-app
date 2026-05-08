@@ -41,7 +41,7 @@ const MAIN_KEYBOARD = Markup.keyboard([
   [{ text: "🧠 Ask Dr. Q" }, { text: "📚 My Modules" }],
   [{ text: "📊 Dashboard" }, { text: "⚙️ Settings" }],
   [{ text: "👤 My Profile" }],
-  [Markup.button.webApp("📱 Open MedOneX App", `${BASE_URL}/dashboard-app`)]
+  [Markup.button.webApp("🚀 Open MedOneX TMA", `${BASE_URL}/tma`)]
 ]).resize();
 
 // ─── Bot Logic ───
@@ -57,11 +57,11 @@ bot.start(async (ctx) => {
       await ctx.reply(
         `Welcome to MedOneX! 🩺🌌\n\n` +
         `🚀 *Quick Login:* Just send me the *Email* you used to register on the site, and I'll link your account instantly!\n\n` +
-        `Or use the traditional methods:`, 
+        `Or use our new Mini App to explore:`, 
         { 
           parse_mode: 'Markdown',
           ...Markup.inlineKeyboard([
-            [Markup.button.webApp('📱 Open MedOneX App', `${BASE_URL}/dashboard-app`)],
+            [Markup.button.webApp('🚀 Open MedOneX TMA', `${BASE_URL}/tma`)],
             [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
             [Markup.button.callback('📝 Quick Register', 'auth_register')]
           ])
