@@ -48,24 +48,36 @@ export default async function ModulesPage() {
     ? await prisma.user.findUnique({ where: { id: userId }, select: { semesterId: true } })
     : null;
 
-  const modules = user?.semesterId
-    ? await prisma.module.findMany({
-      where: { semesterId: user.semesterId },
-      orderBy: { name: "asc" },
-      include: {
-        subjects: {
-          include: {
-            lectures: {
-              select: {
-                _count: { select: { questions: true } },
-                questions: { select: { difficulty: true } },
+  // Fetch with timeout to prevent blank screen hangs
+  const [modules, dbTotalMastered] = await Promise.race([
+    Promise.all([
+      prisma.module.findMany({
+        where: { semesterId: user?.semesterId ?? "__none__" },
+        orderBy: { name: "asc" },
+        include: {
+          subjects: {
+            include: {
+              lectures: {
+                select: {
+                  _count: { select: { questions: true } },
+                  questions: { select: { difficulty: true } },
+                },
               },
             },
           },
         },
-      },
-    })
-    : [];
+      }),
+      userId 
+        ? prisma.quizAttemptItem.count({ where: { attempt: { userId }, isCorrect: true } })
+        : Promise.resolve(0)
+    ]),
+    new Promise<[any[], number]>((_, reject) => 
+      setTimeout(() => reject(new Error("Database Timeout")), 5000)
+    )
+  ]).catch((err) => {
+    console.error("[ModulesPage] Error:", err);
+    return [[], 0] as [any[], number];
+  });
 
   const correctByModule: Record<string, Set<string>> = {};
   if (userId && modules.length > 0) {
@@ -84,47 +96,46 @@ export default async function ModulesPage() {
     }
   }
 
-  const totalMastered = Object.values(correctByModule).reduce((acc, set) => acc + set.size, 0);
+  const totalMastered = Object.values(correctByModule).reduce((acc, set) => acc + set.size, dbTotalMastered);
 
   return (
     <div className="min-h-screen bg-[#07080f] pb-32 pt-0">
       {/* ── Immersive Hero ── */}
-      <div className="relative h-[300px] md:h-[400px] w-full overflow-hidden flex items-end">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#534AB7]/20 via-transparent to-[#07080f] z-10" />
+      <div className="relative h-[220px] md:h-[400px] w-full overflow-hidden flex items-end">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#534AB7]/20 via-transparent dark:to-[#07080f] to-white z-10" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] opacity-20 animate-pulse" />
         
-        <div className="relative z-20 container mx-auto px-6 pb-12">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="relative z-20 container mx-auto px-6 pb-6 md:pb-12">
+           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
-                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-4">
+                 <div className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-4">
                     <BookOpen className="h-3.5 w-3.5" />
                     Knowledge Repository
                  </div>
-                 <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-2">
+                 <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-slate-900 dark:text-white mb-1">
                     Medical <span className="text-primary">Library.</span>
                  </h1>
-                 <p className="text-white/40 font-bold uppercase tracking-widest text-sm max-w-xl">
-                    Master your curriculum through structured clinical modules and expert lectures.
+                 <p className="text-slate-500 dark:text-white/40 font-bold uppercase tracking-widest text-[9px] md:text-sm max-w-xl">
+                    Master your curriculum through structured clinical modules.
                  </p>
               </div>
 
-              {/* Stats Box */}
+              {/* Stats Box (Mobile Optimized) */}
               {!isGuest && (
-                 <div className="flex items-center gap-8 bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[32px] p-6 md:p-8">
+                 <div className="flex items-center justify-around md:justify-start gap-4 md:gap-8 bg-slate-50 dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl md:rounded-[32px] p-4 md:p-8">
                     <div className="text-center">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-2">Modules</p>
-                       <p className="text-3xl font-black text-white">{modules.length}</p>
+                       <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20 mb-1">Modules</p>
+                       <p className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">{modules.length}</p>
                     </div>
-                    <div className="w-[1px] h-12 bg-white/5" />
+                    <div className="w-[1px] h-8 md:h-12 bg-slate-200 dark:bg-white/5" />
                     <div className="text-center">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-2">Mastered</p>
-                       <p className="text-3xl font-black text-primary">{totalMastered}</p>
+                       <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20 mb-1">Mastery</p>
+                       <p className="text-xl md:text-3xl font-black text-primary">{totalMastered}</p>
                     </div>
-                    <div className="w-[1px] h-12 bg-white/5" />
+                    <div className="w-[1px] h-8 md:h-12 bg-slate-200 dark:bg-white/5" />
                     <div className="text-center">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-2">Level</p>
-                       <p className="text-3xl font-black text-white">Lvl {Math.floor(totalMastered / 100) + 1}</p>
+                       <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20 mb-1">Level</p>
+                       <p className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">L{Math.floor(totalMastered / 100) + 1}</p>
                     </div>
                  </div>
               )}
@@ -182,37 +193,34 @@ export default async function ModulesPage() {
                   href={isGuest ? "/login" : `/modules/${mod.id}`}
                   className="group relative"
                 >
-                  <div className="relative h-full overflow-hidden rounded-[32px] border border-white/5 bg-[#131220] p-8 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20">
-                    <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.08] transition-opacity">
-                       <IconComp className="h-32 w-32" />
+                  <div className="relative h-full overflow-hidden rounded-3xl border dark:border-white/5 border-black/5 dark:bg-[#131220] bg-white p-6 md:p-8 transition-all active:scale-[0.98] shadow-lg">
+                    <div className="absolute top-0 right-0 p-6 opacity-[0.02] group-hover:opacity-[0.08]">
+                       <IconComp className="h-24 w-24 md:h-32 md:w-32" />
                     </div>
 
-                    <div className="flex flex-col h-full space-y-6">
+                    <div className="flex flex-col h-full space-y-4">
                       <div className="flex items-start justify-between">
                          <div className={cn(
-                           "flex h-14 w-14 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] group-hover:bg-primary/20 transition-colors",
+                           "flex h-12 w-12 items-center justify-center rounded-xl border dark:border-white/5 border-black/5 dark:bg-white/[0.03] bg-black/[0.02]",
                            accent.bg
                          )}>
                            <IconComp className="h-6 w-6 text-primary" aria-hidden />
                          </div>
-                         <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-primary group-hover:text-white transition-all">
-                            <ChevronRight className="h-4 w-4" />
-                         </div>
                       </div>
 
                       <div className="flex-1">
-                        <h2 className="text-xl font-black text-white leading-tight group-hover:text-primary transition-colors">{mod.name}</h2>
-                        <p className="mt-2 text-[11px] font-black text-white/20 uppercase tracking-[0.2em]">
+                        <h2 className="text-lg md:text-xl font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary transition-colors truncate">{mod.name}</h2>
+                        <p className="mt-1 text-[9px] md:text-[11px] font-black text-slate-400 dark:text-white/20 uppercase tracking-widest">
                            {mod.subjects.length} Subjects • {lecturesFlat.length} Lectures
                         </p>
                       </div>
 
-                      <div className="pt-4 border-t border-white/5 space-y-3">
+                      <div className="pt-4 border-t border-slate-100 dark:border-white/5 space-y-2">
                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Mastery Level</span>
-                            <span className="text-[10px] font-black text-primary uppercase tracking-widest">{modPct}%</span>
+                            <span className="text-[9px] font-black text-slate-400 dark:text-white/40 uppercase tracking-widest">Mastery</span>
+                            <span className="text-[9px] font-black text-primary uppercase tracking-widest">{modPct}%</span>
                          </div>
-                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                         <div className="h-1 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                             <div 
                                className="h-full bg-primary rounded-full transition-all duration-1000" 
                                style={{ width: `${modPct}%` }}

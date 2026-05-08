@@ -61,17 +61,20 @@ export function DrQChat() {
   };
 
   return (
-    <div className={`flex flex-col relative h-[calc(100vh-100px)] w-full mx-auto bg-transparent ${settings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+    <div className={`flex flex-col relative h-[calc(100dvh-70px)] md:h-[calc(100vh-100px)] w-full mx-auto bg-transparent ${settings.theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
       
       {/* Header */}
-      <div className="flex justify-between items-center py-4 px-6 border-b border-gray-200/20 backdrop-blur-md rounded-t-3xl bg-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/30">
+      <div className="flex justify-between items-center py-3 md:py-4 px-4 md:px-6 border-b border-gray-200/20 backdrop-blur-md md:rounded-t-3xl bg-white/5 sticky top-0 z-20">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg md:text-xl shadow-lg shadow-blue-500/30">
             Q
           </div>
-          <div>
-            <h2 className="text-xl font-semibold font-outfit">Dr. Q</h2>
-            <p className="text-xs text-gray-500 font-medium">Your Personal Medical AI Assistant</p>
+          <div className="min-w-0">
+            <h2 className="text-base md:text-xl font-black font-outfit truncate">Dr. Q Assistant</h2>
+            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1">
+              <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+              Online
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -270,15 +273,15 @@ export function DrQChat() {
       )}
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth pb-32">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8 scroll-smooth pb-40">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center opacity-50 space-y-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500/20 to-indigo-600/20 flex items-center justify-center">
-              <Zap className="w-10 h-10 text-blue-500" />
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-40 space-y-6 px-6">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500/10 to-indigo-600/10 flex items-center justify-center border border-white/5 shadow-2xl">
+              <Zap className="w-12 h-12 text-blue-500 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold">How can I help you study?</h3>
-              <p className="text-sm max-w-md mt-2">Upload a lecture slide, ask a complex medical question, or have me test your knowledge.</p>
+              <h3 className="text-2xl font-black tracking-tight text-white html[data-theme='light']:text-slate-900 italic">Clinical Intel Engaged</h3>
+              <p className="text-sm font-medium mt-3 leading-relaxed max-w-[280px]">Ask me any medical query, upload labs for analysis, or request a practice exam sequence.</p>
             </div>
           </div>
         ) : (
@@ -373,15 +376,15 @@ export function DrQChat() {
         <div ref={endRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-5xl px-4 md:px-8">
-        <div className="bg-white/10 dark:bg-black/40 backdrop-blur-2xl border border-gray-200/20 dark:border-white/10 rounded-3xl p-2 shadow-2xl shadow-black/10">
+      {/* Input Area (Mobile Optimized & Immersive) */}
+      <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 w-full max-w-5xl px-3 md:px-8">
+        <div className="bg-white/10 dark:bg-[#0f111a]/80 backdrop-blur-3xl border border-gray-200/20 dark:border-white/5 rounded-[28px] md:rounded-3xl p-1.5 md:p-2 shadow-2xl shadow-black/40">
           
           {/* Attached Files Preview */}
           {files.length > 0 && (
-            <div className="flex gap-2 p-2 mb-2 overflow-x-auto border-b border-white/5">
+            <div className="flex gap-2 p-2 mb-2 overflow-x-auto border-b border-white/5 no-scrollbar">
               {files.map((f, i) => (
-                <div key={i} className="relative group flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-black/30 border border-white/10 flex flex-col items-center justify-center">
+                <div key={i} className="relative group flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden bg-black/40 border border-white/10 flex flex-col items-center justify-center shadow-lg">
                   {f.mimeType.startsWith('image/') ? (
                     <img src={f.data} alt="preview" className="w-full h-full object-cover" />
                   ) : (
@@ -395,8 +398,8 @@ export function DrQChat() {
             </div>
           )}
 
-          <div className="flex items-end gap-2 px-2 pb-1">
-            <button onClick={() => fileInputRef.current?.click()} className="p-3 rounded-full hover:bg-gray-500/20 transition-colors text-gray-500 dark:text-gray-400 flex-shrink-0">
+          <div className="flex items-end gap-1 px-1 pb-1">
+            <button onClick={() => fileInputRef.current?.click()} className="p-3.5 rounded-2xl hover:bg-white/5 active:bg-white/10 transition-all text-gray-500 dark:text-gray-400 flex-shrink-0">
               <Paperclip className="w-5 h-5" />
             </button>
             <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf" onChange={handleFileChange} />
@@ -405,8 +408,8 @@ export function DrQChat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message Dr. Q..."
-              className="flex-1 max-h-32 bg-transparent border-none focus:ring-0 resize-none py-3 px-2 text-[15px] outline-none text-gray-900 dark:text-white placeholder-gray-500"
+              placeholder="Query Dr. Q..."
+              className="flex-1 max-h-32 bg-transparent border-none focus:ring-0 resize-none py-3.5 px-2 text-[15px] outline-none text-gray-900 dark:text-white placeholder-gray-500 font-medium"
               rows={1}
               style={{ minHeight: '44px' }}
             />
@@ -414,14 +417,11 @@ export function DrQChat() {
             <button 
               onClick={handleSend}
               disabled={loading || (!input.trim() && files.length === 0)}
-              className="p-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5"
+              className="p-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white transition-all flex-shrink-0 disabled:opacity-20 disabled:scale-95 mb-0.5 shadow-lg shadow-blue-600/20 active:scale-90"
             >
               <Send className="w-5 h-5" />
             </button>
           </div>
-        </div>
-        <div className="text-center mt-3 text-[10px] text-gray-400 font-medium tracking-wide">
-          Dr. Q can make mistakes. Verify important medical information.
         </div>
       </div>
     </div>

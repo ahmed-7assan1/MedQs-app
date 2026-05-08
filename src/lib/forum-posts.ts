@@ -6,6 +6,7 @@ export type ForumPostJson = {
   id: string;
   content: string;
   imageUrl: string | null;
+  attachments?: any;
   interactionsDisabled: boolean;
   authorId: string;
   forumId: string;
@@ -28,6 +29,7 @@ type PostRow = {
   id: string;
   content: string;
   imageUrl: string | null;
+  attachments?: any;
   interactionsDisabled: boolean;
   authorId: string;
   forumId: string;
@@ -127,7 +129,7 @@ export async function loadForumPostsForUser(options: {
           },
           _count: { select: { likes: true, comments: true } },
         },
-      })) as PostRow[];
+      }) as unknown as PostRow[]);
     } catch (inner) {
       console.error("[forum-posts] full query failed, retrying without rank", inner);
       try {
@@ -155,7 +157,7 @@ export async function loadForumPostsForUser(options: {
             },
             _count: { select: { likes: true, comments: true } },
           },
-        })) as PostRow[];
+        }) as unknown as PostRow[]);
       } catch (inner2) {
         console.error("[forum-posts] retry without rank failed, retrying without _count", inner2);
         const bare = await prisma.post.findMany({
@@ -180,10 +182,10 @@ export async function loadForumPostsForUser(options: {
             author: { select: { id: true, name: true, image: true, handle: true } },
           },
         });
-        posts = bare.map((p) => ({
+        posts = (bare.map((p) => ({
           ...p,
           _count: { likes: 0, comments: 0 },
-        })) as PostRow[];
+        })) as unknown as PostRow[]);
       }
     }
 
@@ -206,6 +208,7 @@ export async function loadForumPostsForUser(options: {
       id: p.id,
       content: p.content,
       imageUrl: p.imageUrl,
+      attachments: p.attachments,
       interactionsDisabled: p.interactionsDisabled,
       authorId: p.authorId,
       forumId: p.forumId,

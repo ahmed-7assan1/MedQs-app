@@ -8,7 +8,7 @@ export function normalizeImageUrl(src: string | null | undefined): string {
   if (!u) return "";
   if (u.startsWith("/") || u.startsWith("./")) return u;
   if (u.startsWith("//")) return `https:${u}`;
-  if (u.startsWith("http:")) return `https:${u.slice(5)}`;
+  if (u.startsWith("http:") && !u.includes("localhost")) return `https:${u.slice(5)}`;
   return u;
 }
 

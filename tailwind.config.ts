@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"; // Rebuild trigger
 
 const config: Config = {
   darkMode: ["class"],

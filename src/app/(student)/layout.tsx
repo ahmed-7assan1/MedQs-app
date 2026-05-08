@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
-import { BottomNav } from "@/components/layout/BottomNav";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { AdminFAB } from "@/components/admin/AdminFAB";
@@ -67,40 +67,45 @@ export default async function StudentLayout({ children }: { children: React.Reac
         logoUrl: siteConfig?.logoUrl ?? null,
       }}
     >
-      <>
-        <a href="#main-content" className="skip-link">
+      <div className={cn("app-shell min-h-screen flex flex-col dark:bg-[#09080F] bg-white")}>
+        <a href="#main-content" className="skip-link sr-only">
           Skip to main content
         </a>
-        <div className={cn("app-shell flex flex-col min-h-screen dark:bg-[#09080F] bg-slate-50")}>
-          <FloatingIslandNavbar 
-             userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
-             userName={isGuest ? undefined : displayName}
-             userId={isGuest ? "" : sessionUserId}
-          />
-          <Sidebar
-            userName={isGuest ? "Guest" : displayName}
-            userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
-            userId={isGuest ? "" : sessionUserId}
-            isAdmin={isAdmin}
-            siteName={siteConfig?.siteName ?? "MedOneX"}
-            logoUrl={siteConfig?.logoUrl ?? undefined}
-            isGuest={isGuest}
-            unreadCount={unreadCount}
-          />
-          <div className="main-content flex-1 flex flex-col min-w-0 transition-all duration-300">
-            {!isGuest && sessionUserId ? <NotificationsLoader userId={sessionUserId} /> : null}
-            {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
-            <main id="main-content" className="flex min-h-0 flex-1 flex-col pb-24 md:pb-8 outline-none w-full">
-              {children}
-            </main>
-            <SiteFooter />
-            {!isGuest && <OnboardingTutorial />}
-            <CookieConsentBanner />
-            <PersistentAudioPlayer />
-            {isAdmin && <AdminStudentBar />}
-          </div>
+        
+        {/* Top Island Navbar (Desktop Only Visibility handled internally) */}
+        <FloatingIslandNavbar 
+           userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+           userName={isGuest ? undefined : displayName}
+           userId={isGuest ? "" : sessionUserId}
+        />
+
+        <Sidebar
+          userName={isGuest ? "Guest" : displayName}
+          userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+          userId={isGuest ? "" : sessionUserId}
+          isAdmin={isAdmin}
+          siteName={siteConfig?.siteName ?? "MedOneX"}
+          logoUrl={siteConfig?.logoUrl ?? undefined}
+          isGuest={isGuest}
+          unreadCount={unreadCount}
+        />
+
+        <div className="main-content flex-1 flex flex-col min-w-0">
+          {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
+          {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
+          
+          <main id="main-content" className="flex-1 flex flex-col outline-none w-full pb-20 md:pb-8">
+            {children}
+          </main>
+
+          <SiteFooter />
+          {!isGuest && <OnboardingTutorial />}
+          <CookieConsentBanner />
+          <PersistentAudioPlayer />
+          <MobileBottomNav />
+          {isAdmin && <AdminStudentBar />}
         </div>
-      </>
+      </div>
     </SiteConfigProvider>
   );
 }

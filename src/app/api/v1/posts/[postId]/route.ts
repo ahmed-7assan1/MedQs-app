@@ -9,9 +9,18 @@ export async function DELETE(req: NextRequest, { params }: { params: { postId: s
   const post = await prisma.post.findUnique({ where: { id: params.postId } });
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const role = (session.user as any)?.role;
-  if (post.authorId !== session.user.id && role !== "ADMIN" && role !== "SUPER_ADMIN")
+  const user = session.user as any;
+  const isAuthor = post.authorId === user.id;
+  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isAdmin = user.role === "ADMIN";
+  
+  // A semester admin is an ADMIN who belongs to the same university as the post.
+  // Optionally, we could also check if user.semesterId === post.semesterId if posts were scoped to semesters.
+  const isSemesterAdmin = isAdmin && (user.universityId === post.universityId);
+
+  if (!isAuthor && !isSuperAdmin && !isSemesterAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   await prisma.post.delete({ where: { id: params.postId } });
   return NextResponse.json({ ok: true });

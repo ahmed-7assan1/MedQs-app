@@ -25,6 +25,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   return NextResponse.json(
     videos.map((v) => ({
       ...v,
+      url: v.telegramFileId ? `/api/v1/files/telegram/${v.id}` : v.url,
       likedByMe: userId ? (v.likes as { id: string }[]).length > 0 : false,
       likes: undefined,
     }))
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       sharingEnabled: body?.sharingEnabled !== false,
       telegramMessageId: tgSync?.messageId,
       telegramChatId: tgSync?.chatId,
+      telegramFileId: tgSync?.fileId,
     },
   });
 

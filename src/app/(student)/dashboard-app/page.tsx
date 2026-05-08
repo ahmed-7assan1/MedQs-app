@@ -57,7 +57,7 @@ export default async function DashboardPage() {
   const maxCount = Math.max(...activityArr.map((a: any) => a.count), 5);
 
   return (
-    <div className="min-h-screen bg-[#09080F] selection:bg-primary/30 relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09080F] selection:bg-primary/30 relative">
       {/* Dynamic Background Noise/Texture */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay" style={{ backgroundImage: `url('https://grainy-gradients.vercel.app/noise.svg')` }} />
 
@@ -71,45 +71,43 @@ export default async function DashboardPage() {
       <div className="relative mx-auto max-w-[1440px] px-4 pb-20 pt-28 md:px-8 lg:pt-32">
         
         {/* ══════════════ TOP COMMAND BAR ══════════════ */}
-        <div className="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+        <div className="mb-8 flex flex-col gap-6">
            <FadeIn delay={0.1}>
               <div className="flex items-center gap-3">
-                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-inner">
-                    <Activity className="h-6 w-6" />
+                 <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl md:rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-inner">
+                    <Activity className="h-5 w-5 md:h-6 md:w-6" />
                  </div>
                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">Clinical Performance Dashboard</p>
-                    <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-white">
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60">Clinical Performance</p>
+                    <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-slate-900 dark:text-white">
                        Salutations, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">Dr. {firstName}</span>
                     </h1>
                  </div>
               </div>
-              <p className="text-sm font-medium text-white/40 max-w-xl">
-                 Your academic trajectory is currently at <span className="text-white font-bold">{overallPct}% mastery</span>. 
-                 System diagnostics indicate peak focus levels.
+              <p className="mt-2 text-xs md:text-sm font-medium text-slate-500 dark:text-white/40 max-w-xl">
+                 Your academic trajectory is currently at <span className="text-slate-900 dark:text-white font-bold">{overallPct}% mastery</span>. 
               </p>
            </FadeIn>
 
            <FadeIn delay={0.3}>
               <div className="flex items-center gap-3">
-                 <div className="group relative flex items-center gap-4 rounded-3xl border border-white/5 bg-white/[0.03] p-4 backdrop-blur-xl transition-all hover:bg-white/[0.06]">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 shadow-inner">
-                       <Flame className={cn("h-6 w-6 transition-transform group-hover:scale-110", currentStreak > 0 ? "text-orange-500" : "text-white/20")} />
+                 <div className="group relative flex flex-1 items-center gap-3 rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/[0.03] p-3 md:p-4 backdrop-blur-xl transition-all shadow-sm">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 shadow-inner">
+                       <Flame className={cn("h-5 w-5", currentStreak > 0 ? "text-orange-500" : "text-slate-300 dark:text-white/20")} />
                     </div>
-                    <div className="pr-4">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Active Streak</p>
-                       <p className="text-xl font-black text-white">{currentStreak} <span className="text-xs text-white/40 font-bold uppercase">Days</span></p>
+                    <div>
+                       <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-white/30">Streak</p>
+                       <p className="text-lg font-black text-slate-900 dark:text-white">{currentStreak} <span className="text-[10px] text-slate-400 dark:text-white/40 font-bold uppercase">Days</span></p>
                     </div>
-                    {currentStreak > 0 && <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-orange-500 animate-ping" />}
                  </div>
 
-                 <div className="group flex items-center gap-4 rounded-3xl border border-white/5 bg-white/[0.03] p-4 backdrop-blur-xl transition-all hover:bg-white/[0.06]">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 shadow-inner">
-                       <Trophy className="h-6 w-6 text-amber-500 transition-transform group-hover:rotate-12" />
+                 <div className="group flex flex-1 items-center gap-3 rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/[0.03] p-3 md:p-4 backdrop-blur-xl transition-all shadow-sm">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 shadow-inner">
+                       <Trophy className="h-5 w-5 text-amber-500" />
                     </div>
-                    <div className="pr-4">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-white/30">{rankLabel}</p>
-                       <p className="text-xl font-black text-white">{(rankPoints || 0).toLocaleString()} <span className="text-xs text-white/40 font-bold uppercase">Pts</span></p>
+                    <div>
+                       <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-white/30">Points</p>
+                       <p className="text-lg font-black text-slate-900 dark:text-white">{(rankPoints || 0).toLocaleString()}</p>
                     </div>
                  </div>
               </div>
@@ -158,47 +156,39 @@ export default async function DashboardPage() {
             
             {/* ── SECTION: MISSION CONTINUATION ── */}
             {lastLectureActivity && (
-              <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-gradient-to-br from-white/[0.05] to-transparent p-8 shadow-2xl transition-all hover:border-primary/30">
-                <div className="absolute top-0 right-0 p-10 opacity-[0.03] transition-transform group-hover:scale-110 duration-700">
-                   <BookOpen className="h-48 w-48 text-primary" />
+              <div className="group relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border dark:border-white/5 border-black/5 bg-gradient-to-br dark:from-white/[0.05] from-black/[0.02] to-transparent p-6 md:p-8 shadow-xl transition-all">
+                <div className="absolute top-0 right-0 p-6 opacity-[0.03] md:opacity-[0.03]">
+                   <BookOpen className="h-32 w-32 md:h-48 md:w-48 text-primary" />
                 </div>
                 
                 <div className="relative">
-                  <div className="mb-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                       <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                       <p className="text-[11px] font-black uppercase tracking-[0.3em] text-primary">Mission Persistence</p>
-                    </div>
-                    <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-black text-white/40 uppercase tracking-widest">
-                       Last accessed {new Date(lastLectureActivity.updatedAt).toLocaleDateString()}
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Persistence Phase</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                    <div className="flex items-center gap-6">
-                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-primary/10 border border-primary/20 shadow-2xl shadow-primary/10">
-                        <PlayCircle className="h-10 w-10 text-primary" />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 md:h-20 md:w-20 shrink-0 items-center justify-center rounded-2xl md:rounded-3xl bg-primary/10 border border-primary/20">
+                        <PlayCircle className="h-7 w-7 md:h-10 md:w-10 text-primary" />
                       </div>
-                      <div>
-                        <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight capitalize group-hover:text-primary transition-colors">
+                      <div className="min-w-0">
+                        <h3 className="text-lg md:text-3xl font-black dark:text-white text-slate-900 tracking-tight truncate">
                           {lastLectureActivity.lecture.title}
                         </h3>
-                        <div className="mt-2 flex items-center gap-2">
-                           <span className="px-3 py-1 rounded-lg bg-white/5 text-[10px] font-black text-white/50 uppercase tracking-widest">
-                              {lastLectureActivity.lecture.subject.name}
-                           </span>
-                           <span className="h-1 w-1 rounded-full bg-white/20" />
-                           <span className="text-xs font-bold text-white/30">Module: {lastLectureActivity.lecture.subject.module?.name ?? "General"}</span>
-                        </div>
+                        <p className="text-[10px] font-bold dark:text-white/30 text-slate-400 uppercase tracking-widest mt-0.5 truncate">
+                          {lastLectureActivity.lecture.subject.name}
+                        </p>
                       </div>
                     </div>
                     
                     <Link
                       href={`/modules/${lastLectureActivity.lecture.subject.moduleId}/lectures/${lastLectureActivity.lecture.id}`}
-                      className="group/btn relative flex shrink-0 items-center gap-3 overflow-hidden rounded-2xl bg-primary px-10 py-5 text-sm font-black text-white shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      className="group/btn relative flex items-center justify-center gap-3 overflow-hidden rounded-xl md:rounded-2xl bg-primary px-6 py-4 md:px-10 md:py-5 text-xs md:text-sm font-black text-white shadow-lg shadow-primary/20 active:scale-95 transition-all"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
-                      CONTINUE PHASE <ArrowRight className="h-5 w-5" />
+                      CONTINUE <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
                 </div>
@@ -385,17 +375,16 @@ function KPICard({ label, value, sub, icon: Icon, color, progress }: {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-white/[0.03] p-6 transition-all hover:-translate-y-1 hover:bg-white/[0.06] hover:border-white/10 shadow-2xl">
-      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/[0.02] blur-2xl" />
+    <div className="group relative overflow-hidden rounded-3xl border dark:border-white/5 border-black/5 dark:bg-white/[0.03] bg-white p-5 md:p-6 transition-all active:scale-[0.98] shadow-lg">
       <div className="relative">
-        <div className={cn("mb-5 flex h-14 w-14 items-center justify-center rounded-[1.25rem] border backdrop-blur-xl transition-all group-hover:scale-110", colors[color])}>
-          <Icon className="h-7 w-7" />
+        <div className={cn("mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border backdrop-blur-xl transition-all", colors[color])}>
+          <Icon className="h-6 w-6" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">{label}</p>
-        <p className="mt-1 text-3xl font-black text-white tracking-tighter">{value}</p>
-        <p className="mt-1 text-xs font-medium text-white/40">{sub}</p>
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] dark:text-white/30 text-slate-400">{label}</p>
+        <p className="mt-0.5 text-2xl md:text-3xl font-black dark:text-white text-slate-900 tracking-tighter">{value}</p>
+        <p className="mt-0.5 text-[10px] font-medium dark:text-white/40 text-slate-500">{sub}</p>
         {progress !== undefined && (
-          <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+          <div className="mt-4 h-1 w-full overflow-hidden rounded-full dark:bg-white/5 bg-black/5">
             <div
               className={cn("h-full rounded-full transition-all duration-1000", 
                 color === "blue" ? "bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.5)]" : 

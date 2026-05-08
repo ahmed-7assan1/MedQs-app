@@ -466,6 +466,90 @@ bot.on('text', async (ctx) => {
   }
 });
 
+// ─── Media Publishing Handlers ───
+
+bot.on(['video', 'photo'], async (ctx) => {
+  const telegramId = ctx.from.id.toString();
+  const linkedUser = await getLinkedUser(telegramId);
+  
+  if (!linkedUser) {
+    return ctx.reply("⚠️ Your account is not linked. Please send me your registered Email first to enable publishing.");
+  }
+
+  const caption = (ctx.message as any).caption || "";
+  const universityId = linkedUser.universityId;
+  
+  if (!universityId) {
+    return ctx.reply("❌ Your profile is missing university info. Please update your profile on the site.");
+  }
+
+  // Find the Global forum for this university
+  const globalForum = await prisma.forum.findFirst({
+    where: { universityId, type: 'GLOBAL' }
+  });
+
+  if (!globalForum) {
+    return ctx.reply("❌ Global forum not found for your university. Please contact support.");
+  }
+
+  await ctx.reply("🔄 Processing your media for the forum... 🚀");
+
+  try {
+    let attachment: any = null;
+    
+    if ((ctx.message as any).video) {
+      const video = (ctx.message as any).video;
+      attachment = {
+        url: `${BASE_URL}/api/v1/files/telegram/preview?fileId=${video.file_id}&type=video`,
+        type: 'video',
+        fileId: video.file_id
+      };
+    } else if ((ctx.message as any).photo) {
+      const photo = (ctx.message as any).photo.pop(); // Get largest version
+      attachment = {
+        url: `${BASE_URL}/api/v1/files/telegram/preview?fileId=${photo.file_id}&type=image`,
+        type: 'image',
+        fileId: photo.file_id
+      };
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 10);
+
+    const post = await (prisma.post as any).create({
+      data: {
+        content: caption || (attachment.type === 'video' ? "Sent a video from Telegram" : "Sent a photo from Telegram"),
+        authorId: linkedUser.id,
+        forumId: globalForum.id,
+        universityId,
+        attachments: [attachment],
+        audience: 'UNIVERSITY',
+        expiresAt,
+        isForumPost: true
+      }
+    });
+
+    await ctx.reply(
+      `✅ **Published to MedQs Community!** 🚀\n\n` +
+      `📌 Topic: ${globalForum.name}\n` +
+      `🔗 [View your post here](${BASE_URL}/forum/post/${post.id})`,
+      { parse_mode: 'Markdown' }
+    );
+
+    // Forward to storage group for backup
+    if (STORAGE_GROUP_ID) {
+      await ctx.telegram.copyMessage(STORAGE_GROUP_ID, ctx.from.id, ctx.message.message_id, {
+        caption: `Published by Dr. ${linkedUser.name} (@${ctx.from.username || 'N/A'})\nPost ID: ${post.id}`,
+        message_thread_id: 1
+      }).catch(() => {});
+    }
+
+  } catch (err: any) {
+    console.error("[BOT-MEDIA] Publishing Error:", err);
+    ctx.reply(`❌ Failed to publish: ${err.message}`);
+  }
+});
+
 // Webhook
 export async function POST(req: Request) {
   try {

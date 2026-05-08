@@ -28,18 +28,24 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const buffer = Buffer.from(await file.arrayBuffer());
   const { url, key } = await uploadFile(buffer, file.name, file.type, "lecture");
 
-  // Sync to Telegram in background or wait?
-  // We'll wait to ensure we get the ID for the first time
+  // Sync to Telegram
   const tgSync = await syncFileToTelegram(url, file.name, file.type);
+
+  // If synced to Telegram successfully, we can delete from primary storage to save space
+  if (tgSync?.fileId) {
+    const { deleteFile } = await import("@/lib/storage");
+    await deleteFile(key).catch(err => console.error("[STORAGE] Cleanup failed:", err));
+  }
 
   const lectureFile = await prisma.lectureFile.create({
     data: {
       lectureId: id,
       name: file.name,
-      url,
+      url, // We keep the original URL in DB as fallback, but the API will prefer Telegram
       mimeType: file.type,
       telegramMessageId: tgSync?.messageId,
       telegramChatId: tgSync?.chatId,
+      telegramFileId: tgSync?.fileId,
     },
   });
 
@@ -58,5 +64,12 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     if (lErr) return lErr;
   }
   const files = await prisma.lectureFile.findMany({ where: { lectureId: id } });
-  return NextResponse.json(files);
+  
+  // Use Telegram proxy URL if available to save bandwidth/storage
+  const mappedFiles = files.map(f => ({
+    ...f,
+    url: f.telegramFileId ? `/api/v1/files/telegram/${f.id}` : f.url
+  }));
+
+  return NextResponse.json(mappedFiles);
 }

@@ -49,11 +49,15 @@ interface Forum {
 export function ForumClient({
   forums,
   currentUserId,
+  currentUserRole,
+  currentUserUniversityId,
   initialForumId = null,
   initialPosts = [],
 }: {
   forums: Forum[];
   currentUserId: string;
+  currentUserRole?: string;
+  currentUserUniversityId?: string;
   /** SSR-loaded posts for the first forum (same path as API — works if client fetch fails) */
   initialForumId?: string | null;
   initialPosts?: PostWithMeta[];
@@ -203,13 +207,13 @@ export function ForumClient({
   async function submitPost(
     content: string, 
     imageUrl: string, 
-    options?: { isForumPost?: boolean; isChatMessage?: boolean; forumId?: string }
+    options?: { isForumPost?: boolean; isChatMessage?: boolean; forumId?: string; attachments?: any[] }
   ): Promise<boolean> {
     const targetForumId = options?.forumId || activeForum?.id;
     if (!targetForumId) return false;
     const trimmed = content.trim();
     const img = imageUrl.trim();
-    if (!trimmed && !img) return false;
+    if (!trimmed && !img && (!options?.attachments || options.attachments.length === 0)) return false;
     if (activeForum?.status === "READ_ONLY") {
       toast.error("This forum is read-only");
       return false;
@@ -222,6 +226,7 @@ export function ForumClient({
         body: JSON.stringify({
           content: trimmed,
           imageUrl: img || undefined,
+          attachments: options?.attachments,
           audience: postAudience,
           isForumPost: options?.isForumPost,
           isChatMessage: options?.isChatMessage,
@@ -233,7 +238,8 @@ export function ForumClient({
         toast.success(tab === "discussions" ? "Sent" : "Post published!");
         return true;
       }
-      toast.error("Failed to post");
+      const errData = await res.json().catch(() => ({}));
+      toast.error(errData.error || "Failed to post");
       return false;
     } catch {
       toast.error("Network error — could not send");
@@ -427,13 +433,14 @@ export function ForumClient({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="inline-flex rounded-2xl border border-white/[0.02] bg-white/5 p-1.5 backdrop-blur-md">
+        <div className="flex items-center justify-center md:justify-start mb-6">
+          <div className="inline-flex rounded-2xl border border-white/[0.02] bg-white/5 p-1 backdrop-blur-md">
             <button
               onClick={() => setTab("feed")}
               className={cn(
-                "rounded-xl px-6 py-2 text-sm font-bold transition-all duration-300",
+                "rounded-xl px-8 py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-300",
                 tab === "feed" 
-                  ? "bg-[#534AB7] text-white shadow-lg shadow-[#534AB7]/40" 
+                  ? "bg-primary text-white shadow-lg shadow-primary/30" 
                   : "text-white/40 hover:text-white/70"
               )}
             >
@@ -442,15 +449,16 @@ export function ForumClient({
             <button
               onClick={() => setTab("discussions")}
               className={cn(
-                "rounded-xl px-6 py-2 text-sm font-bold transition-all duration-300",
+                "rounded-xl px-8 py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-300",
                 tab === "discussions" 
-                  ? "bg-[#534AB7] text-white shadow-lg shadow-[#534AB7]/40" 
+                  ? "bg-primary text-white shadow-lg shadow-primary/30" 
                   : "text-white/40 hover:text-white/70"
               )}
             >
               Chat
             </button>
           </div>
+        </div>
 
           <div className="flex items-center gap-3">
             {tab === "feed" ? (
@@ -733,19 +741,17 @@ export function ForumClient({
             <PostComposerRedesigned 
               user={{ name: "Student Profile", image: null }} 
               onPost={async (c, img, opts) => submitPost(c, img, opts)}
-              uploadImage={async (f) => {
-                const uploaded = await uploadFiles("forumImage", { files: [f] });
-                return fileUrlFromUt(uploaded[0]);
-              }}
               forums={forumList}
             />
             
             <div className="grid gap-6">
-              {posts.map((p) => (
+              {posts.map((post) => (
                 <PostCardRedesigned 
-                  key={p.id} 
-                  post={p} 
+                  key={post.id} 
+                  post={post} 
                   currentUserId={currentUserId} 
+                  currentUserRole={currentUserRole}
+                  currentUserUniversityId={currentUserUniversityId}
                 />
               ))}
             </div>
@@ -768,6 +774,19 @@ export function ForumClient({
       </div>
 
       {/* Styled Custom Scrollbar CSS */}
+      {/* Mobile Floating Action Button (FAB) */}
+      <div className="md:hidden fixed bottom-24 right-6 z-50">
+        <button
+          onClick={() => {
+            if (tab === "feed") setComposing(true);
+            else discussionInputRef.current?.focus();
+          }}
+          className="h-14 w-14 rounded-full bg-primary text-white shadow-2xl shadow-primary/40 flex items-center justify-center active:scale-90 transition-all border-4 border-background"
+        >
+          <PlusCircle className="h-7 w-7" />
+        </button>
+      </div>
+
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;

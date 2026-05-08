@@ -40,6 +40,8 @@ export default async function ForumPage() {
     <ForumClient 
       forums={forums as any} 
       currentUserId={userId} 
+      currentUserRole={role}
+      currentUserUniversityId={universityId}
     />
   );
 }

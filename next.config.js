@@ -44,6 +44,7 @@ const nextConfig = {
       { protocol: "https", hostname: "*.uploadthing.com" },
       { protocol: "https", hostname: "www.transparenttextures.com" },
       { protocol: "https", hostname: "image.pollinations.ai" },
+      { protocol: "https", hostname: "*.telegram.org" },
     ],
   },
 
@@ -79,6 +80,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["pdfjs-dist"],
     serverActions: {
+      bodySizeLimit: '100mb',
       allowedOrigins: [
         "localhost:3000",
         "localhost:3001",

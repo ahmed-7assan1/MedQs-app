@@ -25,17 +25,18 @@ const POST_SCHEMA = z
         },
         z.union([z.string().url("Invalid image URL"), z.literal("")]).optional()
       ),
+    attachments: z.array(z.any()).optional(),
     audience: z.enum(["UNIVERSITY", "FOLLOWERS"]).optional(),
     isForumPost: z.boolean().optional().default(true),
     isChatMessage: z.boolean().optional().default(false),
     chatForumId: z.string().optional(),
   })
-  .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()), {
+  .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()) || (v.attachments && v.attachments.length > 0), {
     message: "Post cannot be empty",
     path: ["content"],
   });
 
-const POST_RATE_LIMIT = 10; // posts per hour per user
+const POST_RATE_LIMIT = 1000; // Increased limit
 
 type ForumIdParams = { forumId: string };
 
@@ -81,7 +82,10 @@ export async function POST(
   context: { params: ForumIdParams | Promise<ForumIdParams> }
 ) {
   const session = await auth();
-  if (!session?.user?.id)
+  const userId = session?.user?.id;
+  const userRole = (session?.user as any)?.role;
+
+  if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const forumId = await forumIdFromContext(context.params);
@@ -96,7 +100,7 @@ export async function POST(
   if (!universityId) return NextResponse.json({ error: "Forum misconfigured (missing university)" }, { status: 500 });
   if (forum.type === "PRIVATE") {
     const member = await prisma.privateForumMember.findUnique({
-      where: { forumId_userId: { forumId, userId: session.user.id } },
+      where: { forumId_userId: { forumId, userId } },
       select: { id: true },
     });
     if (!member) return NextResponse.json({ error: "You are not a member of this private forum" }, { status: 403 });
@@ -104,61 +108,70 @@ export async function POST(
   if (forum.status === "CLOSED" || forum.status === "READ_ONLY")
     return NextResponse.json({ error: "Forum is not accepting posts" }, { status: 403 });
 
-  // Rate limit
-  const rlKey = `ratelimit:forum:post:${session.user.id}:${new Date().getHours()}`;
-  const count = await redisIncrWithExpire(rlKey, 3600);
-  if (count > POST_RATE_LIMIT) {
-    return NextResponse.json(
-      { error: `Slow down — max ${POST_RATE_LIMIT} posts per hour.` },
-      { status: 429 }
-    );
+  // Rate limit (Exempt Admins)
+  if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
+    const rlKey = `ratelimit:forum:post:${userId}:${new Date().getHours()}`;
+    const count = await redisIncrWithExpire(rlKey, 3600);
+    if (count > POST_RATE_LIMIT) {
+      return NextResponse.json(
+        { error: `Slow down — max ${POST_RATE_LIMIT} posts per hour.` },
+        { status: 429 }
+      );
+    }
   }
 
   // Validate body
-  const body = await req.json();
-  const parsed = POST_SCHEMA.safeParse(body);
-  if (!parsed.success) {
-    const message = parsed.error.errors[0]?.message ?? "Invalid input";
-    return NextResponse.json({ error: message }, { status: 400 });
-  }
+  try {
+    const body = await req.json();
+    const parsed = POST_SCHEMA.safeParse(body);
+    if (!parsed.success) {
+      console.error("[POST-API] Validation Failed:", parsed.error.format());
+      const message = parsed.error.errors[0]?.message ?? "Invalid input";
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
 
-  const { content, imageUrl } = parsed.data;
-  const audience = parsed.data.audience ?? "UNIVERSITY";
+    const { content, imageUrl, attachments } = parsed.data;
+    const audience = parsed.data.audience ?? "UNIVERSITY";
 
-  // Calculate expiry (10 days from now)
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 10);
+    // Calculate expiry (10 days from now)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 10);
 
-  const post = await prisma.post.create({
-    data: {
-      content,
-      imageUrl: imageUrl?.trim() || undefined,
-      authorId: session.user.id,
-      forumId: (parsed.data.isChatMessage && parsed.data.chatForumId) ? parsed.data.chatForumId : forumId,
-      universityId,
-      audience,
-      expiresAt,
-      isForumPost: parsed.data.isForumPost,
-      isChatMessage: parsed.data.isChatMessage,
-    },
-    include: {
-      author: {
-        select: {
-          id: true, name: true, image: true,
-          rank: { select: { label: true, badge: true } },
-        },
+    const post = await (prisma.post as any).create({
+      data: {
+        content,
+        imageUrl: imageUrl?.trim() || undefined,
+        attachments: attachments || undefined,
+        authorId: session.user.id,
+        forumId: (parsed.data.isChatMessage && parsed.data.chatForumId) ? parsed.data.chatForumId : forumId,
+        universityId,
+        audience,
+        expiresAt,
+        isForumPost: parsed.data.isForumPost,
+        isChatMessage: parsed.data.isChatMessage,
       },
-      _count: { select: { likes: true, comments: true } },
-    },
-  });
+      include: {
+        author: {
+          select: {
+            id: true, name: true, image: true,
+            rank: { select: { label: true, badge: true } },
+          },
+        },
+        _count: { select: { likes: true, comments: true } },
+      },
+    });
 
-  // Log engagement points (fire-and-forget)
-  prisma.engagementLog
-    .create({ data: { userId: session.user.id, action: "post", points: 5 } })
-    .catch(() => {});
-  prisma.user
-    .update({ where: { id: session.user.id }, data: { points: { increment: 5 } } })
-    .catch(() => {});
+    // Log engagement points (fire-and-forget)
+    prisma.engagementLog
+      .create({ data: { userId: session.user.id, action: "post", points: 5 } })
+      .catch(() => {});
+    prisma.user
+      .update({ where: { id: session.user.id }, data: { points: { increment: 5 } } })
+      .catch(() => {});
 
-  return NextResponse.json({ ...post, likedByMe: false }, { status: 201 });
+    return NextResponse.json({ ...post, likedByMe: false }, { status: 201 });
+  } catch (err: any) {
+    console.error("[POST-API] Server Error:", err.message);
+    return NextResponse.json({ error: "Server Error", details: err.message }, { status: 500 });
+  }
 }

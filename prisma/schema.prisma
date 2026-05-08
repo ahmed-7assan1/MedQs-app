@@ -207,6 +207,7 @@ model LectureFile {
   lectureId         String
   telegramMessageId Int?
   telegramChatId    String?
+  telegramFileId    String?
   lecture           Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
 }
 
@@ -226,6 +227,7 @@ model LectureVideo {
   lecture           Lecture               @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   telegramMessageId Int?
   telegramChatId    String?
+  telegramFileId    String?
   comments          LectureVideoComment[]
   likes          LectureVideoLike[]
 
@@ -583,6 +585,8 @@ model Post {
   id                   String       @id @default(uuid())
   content              String
   imageUrl             String?
+  telegramFileId       String?
+  attachments          Json?        // Array of { url: string, type: 'image' | 'file', fileId: string }
   interactionsDisabled Boolean      @default(false)
   authorId             String
   forumId              String

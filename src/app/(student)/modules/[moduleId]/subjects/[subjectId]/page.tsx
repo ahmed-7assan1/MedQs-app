@@ -78,67 +78,38 @@ export default async function SubjectLecturesPage({
   const IconComp = accent.icon;
 
   return (
-    <div className="min-h-screen bg-[#07080f] pb-32 pt-0">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#07080f] pb-32 pt-0">
       {/* ── Immersive Subject Hero ── */}
-      <div className="relative h-[380px] w-full overflow-hidden flex items-center">
-        {/* Dynamic Background Gradient */}
+      <div className="relative h-[240px] md:h-[380px] w-full overflow-hidden flex items-center">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#07080f] z-10" />
-        
-        {/* Texture & Glows */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
         
-        {/* Glow 1 (Top Right) */}
-        <div className={cn(
-          "absolute top-0 right-0 w-[60%] h-full blur-[140px] rounded-full -translate-y-1/2 translate-x-1/4 opacity-40 transition-colors duration-1000",
-          accent.bgColor.replace("/10", "/30")
-        )} />
-        
-        {/* Glow 2 (Bottom Left) */}
-        <div className={cn(
-          "absolute bottom-0 left-0 w-[40%] h-1/2 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 opacity-20 transition-colors duration-1000",
-          accent.bgColor.replace("/10", "/20")
-        )} />
-
-        <div className="container mx-auto px-6 relative z-20 pt-20">
-          <div className="flex flex-col gap-6">
-            {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-              <Link href="/modules" className="hover:text-white transition-colors">Hub</Link>
-              <ChevronRight className="h-3 w-3" />
-              <Link href={`/modules/${params.moduleId}`} className="hover:text-white transition-colors truncate max-w-[120px]">
+        <div className="container mx-auto px-6 relative z-20 pt-16 md:pt-20">
+          <div className="flex flex-col gap-4">
+            {/* Breadcrumbs (Scrollable on mobile) */}
+            <nav className="flex items-center gap-2 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/40 overflow-x-auto whitespace-nowrap no-scrollbar pb-1">
+              <Link href="/modules" className="hover:text-white">Hub</Link>
+              <ChevronRight className="h-2 w-2" />
+              <Link href={`/modules/${params.moduleId}`} className="hover:text-white">
                 {subject.module?.name}
               </Link>
-              <ChevronRight className="h-3 w-3" />
-              <span className="text-primary truncate max-w-[150px]">{subject.name}</span>
+              <ChevronRight className="h-2 w-2" />
+              <span className="text-primary">{subject.name}</span>
             </nav>
 
-            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center shadow-2xl", accent.bgColor)}>
-                    <IconComp className={cn("h-8 w-8", accent.iconColor)} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white">
-                      {subject.name}.
-                    </h1>
-                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
-                      {subject.lectures.length} Academic Lectures
-                    </p>
-                  </div>
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 md:gap-8">
+              <div className="flex items-center gap-4">
+                <div className={cn("h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl", accent.bgColor)}>
+                  <IconComp className={cn("h-6 w-6 md:h-8 md:w-8", accent.iconColor)} />
                 </div>
-              </div>
-
-              {/* Stats Circle */}
-              <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                 <div className="text-right">
-                    <p className="text-xs font-bold text-white/30 uppercase tracking-widest">Subject Focus</p>
-                    <p className="text-sm font-black text-white">Medical Sciences</p>
-                 </div>
-                 <div className="h-8 w-px bg-white/10" />
-                 <div className="h-10 w-10 rounded-full border-2 border-primary/20 flex items-center justify-center">
-                    <GraduationCap className="h-5 w-5 text-primary" />
-                 </div>
+                <div>
+                   <h1 className="text-2xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">
+                     {subject.name}.
+                   </h1>
+                   <p className="text-[10px] md:text-sm font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest mt-1">
+                     {subject.lectures.length} Lectures
+                   </p>
+                </div>
               </div>
             </div>
           </div>
@@ -161,67 +132,42 @@ export default async function SubjectLecturesPage({
             <div className="flex items-center gap-3">
               <div className="h-8 w-1.5 rounded-full bg-primary" />
               <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Lecture Series</h2>
-                <p className="text-xs font-bold text-white/20 uppercase tracking-widest">Step-by-step Learning</p>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Lecture Series</h2>
+                <p className="text-xs font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">Step-by-step Learning</p>
               </div>
             </div>
             
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-bold text-white/40 hover:text-white transition-all uppercase tracking-widest">
+            <button className="flex items-center gap-2 px-4 py-2 bg-slate-200/50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 text-[10px] font-bold text-slate-500 dark:text-white/40 hover:text-primary transition-all uppercase tracking-widest">
                <Clock className="h-4 w-4 text-primary" /> Latest Updates
             </button>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {subject.lectures.map((lecture: any, idx: number) => (
-              <Link
-                key={lecture.id}
-                href={`/modules/${params.moduleId}/lectures/${lecture.id}`}
-                className="group relative flex flex-col bg-[#131220] border border-white/5 rounded-[28px] p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 overflow-hidden"
-              >
-                {/* Index Badge */}
-                <div className="absolute top-4 right-4 text-[40px] font-black text-white/[0.02] group-hover:text-primary/10 transition-colors leading-none">
-                  {idx + 1}
-                </div>
-
-                <div className="flex-1 space-y-4">
-                  <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                    <PlayCircle className="h-6 w-6" />
+                  <Link
+                    key={lecture.id}
+                    href={`/modules/${params.moduleId}/lectures/${lecture.id}`}
+                    className="group relative flex flex-col dark:bg-[#131220] bg-white dark:border-white/5 border-black/5 rounded-2xl md:rounded-[28px] p-4 md:p-5 transition-all active:scale-[0.98] shadow-lg overflow-hidden"
+                  >
+                  <div className="flex-1 flex gap-4 md:gap-5">
+                    <div className="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl dark:bg-white/5 bg-black/5 flex items-center justify-center dark:text-white/40 text-slate-400 group-hover:text-primary transition-all">
+                      <PlayCircle className="h-5 w-5 md:h-6 md:w-6" />
+                    </div>
+                    
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <h3 className="text-[14px] md:text-[15px] font-black dark:text-white text-slate-900 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                        {lecture.title}
+                      </h3>
+                      <div className="flex items-center gap-3">
+                         <p className="text-[9px] font-bold dark:text-white/20 text-slate-400 uppercase tracking-widest">Step {idx + 1}</p>
+                         <div className="flex items-center gap-2">
+                           {lecture._count.questions > 0 && <HelpCircle className="h-2.5 w-2.5 text-primary/40" />}
+                           {lecture.files.length > 0 && <FileText className="h-2.5 w-2.5 text-blue-400/40" />}
+                         </div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="space-y-1">
-                    <h3 className="text-[15px] font-bold text-white group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-                      {lecture.title.toLowerCase()}
-                    </h3>
-                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Unit {idx + 1}</p>
-                  </div>
-                </div>
-
-                {/* Meta Row */}
-                <div className="mt-8 pt-4 border-t border-white/5 flex items-center gap-3">
-                   {lecture._count.questions > 0 && (
-                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/30" title="Quiz Items">
-                        <HelpCircle className="h-3 w-3" />
-                        {lecture._count.questions}
-                     </div>
-                   )}
-                   {lecture._count.flashcards > 0 && (
-                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/30" title="Flashcards">
-                        <Layers className="h-3 w-3" />
-                        {lecture._count.flashcards}
-                     </div>
-                   )}
-                   {lecture.files.length > 0 && (
-                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/30" title="Resources">
-                        <FileText className="h-3 w-3" />
-                        {lecture.files.length}
-                     </div>
-                   )}
-                   
-                   <div className="ml-auto h-7 w-7 rounded-lg bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-primary group-hover:text-white transition-all">
-                      <ChevronRight className="h-4 w-4" />
-                   </div>
-                </div>
-              </Link>
+                </Link>
             ))}
           </div>
 

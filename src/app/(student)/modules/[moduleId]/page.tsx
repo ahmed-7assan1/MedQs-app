@@ -125,64 +125,45 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
   return (
     <div className="min-h-screen bg-background pb-32 pt-0">
       {/* ── Immersive Hero Section ── */}
-      <div className="relative h-[400px] w-full overflow-hidden flex items-center">
+      <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden flex items-center">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-transparent to-background z-10" />
-        {/* Background Patterns */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4" />
         
-        <div className="container mx-auto px-6 relative z-20 pt-20">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+        <div className="container mx-auto px-6 relative z-20 pt-12 md:pt-20">
+          <div className="flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-8">
              {/* Large Module Icon */}
-             <div className="h-24 w-24 md:h-32 md:w-32 rounded-[32px] bg-gradient-to-br from-primary to-primary/40 p-[2px] shadow-2xl shadow-primary/20 rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="h-full w-full rounded-[30px] bg-card flex items-center justify-center">
+             <div className="h-20 w-20 md:h-32 md:w-32 rounded-[24px] md:rounded-[32px] bg-gradient-to-br from-primary to-primary/40 p-[2px] shadow-2xl rotate-3">
+                <div className="h-full w-full rounded-[22px] md:rounded-[30px] bg-card flex items-center justify-center">
                    <Brain className="h-10 w-10 md:h-14 md:w-14 text-primary" />
                 </div>
              </div>
 
-             <div className="flex-1 space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+             <div className="flex-1 text-center md:text-left space-y-3">
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <span className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black uppercase tracking-widest text-primary">
                     Academic Module
-                  </span>
-                  <div className="h-1 w-1 rounded-full bg-foreground/20" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    {mod.subjects.length} Disciplines
                   </span>
                 </div>
                 
-                <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground">
+                <h1 className="text-3xl md:text-7xl font-black tracking-tighter text-foreground leading-none">
                   {mod.name}.
                 </h1>
 
-                {/* Quick Stats Row */}
-                <div className="flex flex-wrap items-center gap-6 pt-2">
-                   <div className="space-y-1">
-                      <p className="text-xl font-black text-foreground">{totalLectures}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Lectures</p>
+                {/* Quick Stats Row (Mobile Optimized) */}
+                <div className="flex items-center justify-center md:justify-start gap-4 md:gap-6 pt-2">
+                   <div className="text-center md:text-left">
+                      <p className="text-lg md:text-xl font-black text-foreground">{totalLectures}</p>
+                      <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Lectures</p>
                    </div>
-                   <div className="h-8 w-px bg-border" />
-                   <div className="space-y-1">
-                      <p className="text-xl font-black text-foreground">{totalQ}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Practice Items</p>
+                   <div className="h-6 w-px bg-border" />
+                   <div className="text-center md:text-left">
+                      <p className="text-lg md:text-xl font-black text-foreground">{totalQ}</p>
+                      <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Questions</p>
                    </div>
-                   <div className="h-8 w-px bg-border" />
-                   <div className="flex items-center gap-4">
-                      <div className="space-y-1">
-                        <p className={cn(
-                          "text-xl font-black",
-                          modPct >= 70 ? "text-emerald-500" : modPct > 0 ? "text-amber-500" : "text-muted-foreground"
-                        )}>
-                          {modPct}%
-                        </p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Completion</p>
-                      </div>
-                      <div className="w-32 h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-primary to-blue-400 transition-all duration-1000"
-                          style={{ width: `${modPct}%` }}
-                        />
-                      </div>
+                   <div className="h-6 w-px bg-border" />
+                   <div className="text-center md:text-left">
+                      <p className={cn("text-lg md:text-xl font-black", modPct >= 70 ? "text-emerald-500" : modPct > 0 ? "text-amber-500" : "text-muted-foreground")}>{modPct}%</p>
+                      <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Mastery</p>
                    </div>
                 </div>
              </div>
@@ -229,21 +210,18 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                 <Link
                   key={subject.id}
                   href={`/modules/${mod.id}/subjects/${subject.id}`}
-                  className="group relative flex flex-col bg-card border border-border rounded-[32px] p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/20 overflow-hidden"
+                  className="group relative flex flex-col bg-card border border-border rounded-3xl p-5 md:p-6 transition-all active:scale-[0.98] shadow-lg overflow-hidden"
                 >
-                  {/* Subject Glow */}
-                  <div className={cn("absolute -top-12 -right-12 h-32 w-32 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity", accent.bgColor)} />
-
-                  <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-start justify-between mb-4 md:mb-6">
                     <div className={cn(
-                      "h-14 w-14 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-lg",
+                      "h-12 w-12 md:h-14 md:w-14 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg",
                       accent.bgColor
                     )}>
-                      <IconComp className={cn("h-7 w-7", accent.iconColor)} />
+                      <IconComp className={cn("h-6 w-6 md:h-7 md:w-7", accent.iconColor)} />
                     </div>
                     {subjQ > 0 && (
                       <div className={cn(
-                        "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border",
+                        "px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-black tracking-widest uppercase border",
                         subjPct >= 70 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
                         : subjPct > 0 ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                         : "bg-muted text-muted-foreground border-border"
@@ -253,25 +231,22 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                     )}
                   </div>
 
-                  <div className="flex-1 space-y-2">
-                    <h3 className="text-xl font-bold text-card-foreground group-hover:text-primary transition-colors line-clamp-1">{subject.name}</h3>
-                    <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  <div className="flex-1 space-y-1">
+                    <h3 className="text-lg md:text-xl font-black text-card-foreground truncate">{subject.name}</h3>
+                    <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                        <span className="flex items-center gap-1.5">
-                         <Layers className="h-3.5 w-3.5" />
-                         {subject.lectures.length}
+                         <Layers className="h-3 w-3" /> {subject.lectures.length}
                        </span>
                        <div className="h-1 w-1 rounded-full bg-border" />
                        <span className="flex items-center gap-1.5">
-                         <HelpCircle className="h-3.5 w-3.5" />
-                         {subjQ}
+                         <HelpCircle className="h-3 w-3" /> {subjQ}
                        </span>
                     </div>
                   </div>
 
-                  {/* Bottom Progress Bar */}
                   {subjQ > 0 && (
-                    <div className="mt-8 space-y-2">
-                       <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div className="mt-6 md:mt-8 space-y-2">
+                       <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                          <div 
                            className={cn("h-full transition-all duration-1000", accent.progressColor)}
                            style={{ width: `${subjPct}%` }}
@@ -279,10 +254,6 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                        </div>
                     </div>
                   )}
-
-                  <div className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                    Enter Subject <ChevronRight className="h-3 w-3" />
-                  </div>
                 </Link>
               );
             })}

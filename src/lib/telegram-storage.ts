@@ -17,21 +17,29 @@ export async function syncFileToTelegram(url: string, fileName: string, mimeType
   try {
     console.log(`[TELEGRAM-STORAGE] Syncing file to Telegram: ${fileName} (${url})`);
     
-    let message;
+    let message: any;
+    let fileId: string | undefined;
+
+    // Use sendDocument for images as well to ensure "Highest Quality" (no compression)
     if (mimeType.startsWith('image/')) {
-      message = await bot.telegram.sendPhoto(STORAGE_GROUP_ID, url, { caption: fileName });
+      message = await bot.telegram.sendDocument(STORAGE_GROUP_ID, url, { caption: fileName });
+      fileId = message.document.file_id;
     } else if (mimeType.startsWith('video/')) {
       message = await bot.telegram.sendVideo(STORAGE_GROUP_ID, url, { caption: fileName });
+      fileId = message.video.file_id;
     } else if (mimeType.startsWith('audio/')) {
       message = await bot.telegram.sendAudio(STORAGE_GROUP_ID, url, { caption: fileName });
+      fileId = message.audio.file_id;
     } else {
       // Default to document for PDFs and others
       message = await bot.telegram.sendDocument(STORAGE_GROUP_ID, url, { caption: fileName });
+      fileId = message.document.file_id;
     }
 
     return {
       messageId: message.message_id,
-      chatId: STORAGE_GROUP_ID
+      chatId: STORAGE_GROUP_ID,
+      fileId
     };
   } catch (err) {
     console.error('[TELEGRAM-STORAGE] Sync failed:', err);
@@ -49,9 +57,23 @@ export async function updateLectureFileWithTelegram(fileId: string, url: string,
       where: { id: fileId },
       data: {
         telegramMessageId: tgInfo.messageId,
-        telegramChatId: tgInfo.chatId
+        telegramChatId: tgInfo.chatId,
+        telegramFileId: tgInfo.fileId
       }
     });
   }
   return tgInfo;
+}
+
+/**
+ * Gets a temporary download link for a file from Telegram.
+ */
+export async function getFileLinkFromTelegram(fileId: string): Promise<string | null> {
+  try {
+    const link = await bot.telegram.getFileLink(fileId);
+    return link.toString();
+  } catch (err) {
+    console.error('[TELEGRAM-STORAGE] Failed to get file link:', err);
+    return null;
+  }
 }

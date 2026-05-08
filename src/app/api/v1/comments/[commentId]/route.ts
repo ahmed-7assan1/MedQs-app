@@ -12,14 +12,20 @@ export async function DELETE(
 
   const comment = await prisma.comment.findUnique({
     where: { id: params.commentId },
-    select: { authorId: true },
+    select: { authorId: true, universityId: true },
   });
 
   if (!comment) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const role = (session.user as any)?.role;
-  if (comment.authorId !== session.user.id && role !== "ADMIN" && role !== "SUPER_ADMIN")
+  const user = session.user as any;
+  const isAuthor = comment.authorId === user.id;
+  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isAdmin = user.role === "ADMIN";
+  const isSemesterAdmin = isAdmin && (user.universityId === comment.universityId);
+
+  if (!isAuthor && !isSuperAdmin && !isSemesterAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   await prisma.comment.delete({ where: { id: params.commentId } });
   return NextResponse.json({ ok: true });

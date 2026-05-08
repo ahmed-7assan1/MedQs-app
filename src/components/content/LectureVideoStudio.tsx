@@ -232,27 +232,26 @@ export function LectureVideoStudio({
   return (
     <div className="w-full flex flex-col gap-8 animate-in fade-in duration-700">
       {/* 1. INTERNAL SUB-HEADER (Breadcrumbs & Progress) */}
-      <div className="w-full py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-[64px] z-40 mb-4 transition-all duration-300">
+      <div className="w-full py-3 md:py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-0 z-40 mb-4">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             {hubUrl && (
-              <Link href={hubUrl} className="p-2 rounded-full bg-[#13142a] text-[#818cf8] hover:bg-[#4f46e5] hover:text-white transition-all group">
-                <ChevronLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+              <Link href={hubUrl} className="p-2 rounded-full bg-[#13142a] text-[#818cf8] active:scale-90 transition-all">
+                <ChevronLeft className="h-5 w-5" />
               </Link>
             )}
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-[2px] text-[#4a4b6a] font-bold">Lecture Studio</span>
-              <h2 className="text-[14px] font-[700] text-[#c7d2fe] line-clamp-1">{active?.title || "Loading..."}</h2>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[8px] md:text-[10px] uppercase tracking-[2px] text-[#4a4b6a] font-black">Studio</span>
+              <h2 className="text-[13px] md:text-[14px] font-black text-[#c7d2fe] line-clamp-1">{active?.title || "Loading..."}</h2>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-             <div className="hidden sm:flex flex-col items-end">
-                <span className="text-[10px] text-[#4a4b6a] font-bold">PLAYLIST PROGRESS</span>
-                <span className="text-[12px] font-black text-[#4f46e5]">{playlistProgress}%</span>
+          <div className="flex items-center gap-3">
+             <div className="flex flex-col items-end">
+                <span className="text-[9px] md:text-[10px] text-[#4a4b6a] font-black">PROGRESS</span>
+                <span className="text-[11px] md:text-[12px] font-black text-primary">{playlistProgress}%</span>
              </div>
-             <div className="h-[40px] w-[40px] rounded-full border-2 border-[#1a1b2e] p-[2px] relative">
-                <div className="h-full w-full rounded-full border-2 border-[#4f46e5] border-t-transparent animate-spin-slow" />
-                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-[#818cf8]">{playlistProgress}%</div>
+             <div className="h-9 w-9 md:h-10 md:w-10 rounded-full border-2 border-[#1a1b2e] p-[2px] relative">
+                <div className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-primary">{playlistProgress}%</div>
              </div>
           </div>
         </div>
@@ -262,17 +261,15 @@ export function LectureVideoStudio({
           
           {/* LEFT COLUMN: Video & Info */}
           <section className="min-w-0 flex flex-col gap-8">
-            {/* 2. THEATER VIDEO CONTAINER */}
-            <div className="relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-[#4f46e5]/20 to-[#06b6d4]/20 blur-[80px] opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-              
-              <div className="relative overflow-hidden rounded-[24px] bg-black aspect-[16/9] shadow-[0_50px_100px_rgba(0,0,0,0.9)] border border-white/5">
+            {/* 2. THEATER VIDEO CONTAINER (Full Width on Mobile) */}
+            <div className="relative group -mx-4 md:mx-0">
+              <div className="relative overflow-hidden md:rounded-[24px] bg-black aspect-[16/9] shadow-2xl border-y md:border border-white/5">
                 {active ? (
                   <CustomVideoPlayer key={activeId} url={active.url} title={active.title} />
                 ) : (
                   <div className="flex h-full flex-col items-center justify-center gap-4 bg-[#0c0d18] text-[#4a4b6a]">
-                    <Video className="h-24 w-24 opacity-10 animate-pulse" />
-                    <span className="text-[16px] font-bold tracking-widest uppercase">Initializing Studio...</span>
+                    <Video className="h-16 w-16 opacity-10 animate-pulse" />
+                    <span className="text-xs font-black tracking-widest uppercase">Initializing...</span>
                   </div>
                 )}
               </div>
@@ -281,76 +278,70 @@ export function LectureVideoStudio({
             {active && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* 3. LECTURE IDENTITY & ACTIONS */}
-                <div className="flex flex-col gap-6 p-1">
-                  <h1 className="text-[24px] lg:text-[28px] font-[800] text-white tracking-tight leading-[1.2] lg:max-w-[90%]">
+                <div className="flex flex-col gap-4 p-1">
+                  <h1 className="text-xl md:text-[28px] font-black text-white html[data-theme='light']:text-slate-900 tracking-tight leading-tight">
                     {active.title}
                   </h1>
 
-                  <div className="flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-[#1a1b2e]">
-                    <div className="flex items-center gap-4">
-                      <div className="h-[52px] w-[52px] rounded-2xl bg-gradient-to-br from-[#4f46e5] to-[#06b6d4] p-[2px] shadow-lg shadow-[#4f46e5]/20">
-                        <div className="h-full w-full rounded-2xl bg-[#07080f] flex items-center justify-center overflow-hidden">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4 border-b border-[#1a1b2e] html[data-theme='light']:border-black/5">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 md:h-[52px] md:w-[52px] rounded-xl bg-primary/20 shadow-lg">
+                        <div className="h-full w-full rounded-xl bg-[#07080f] flex items-center justify-center overflow-hidden">
                           {channelMetadata?.thumbnail ? (
                             <img src={channelMetadata.thumbnail} alt="Instructor" className="h-full w-full object-cover" />
                           ) : (
-                            <GraduationCap className="h-6 w-6 text-[#818cf8]" />
+                            <GraduationCap className="h-5 w-5 text-primary" />
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-[16px] font-[700] text-white tracking-tight">
-                            {channelMetadata?.name || "MedOneX Expert"}
-                          </h3>
-                          <div className="bg-[#4f46e5] rounded-full p-0.5"><Check className="h-3 w-3 text-white" /></div>
-                        </div>
-                        <span className="text-[12px] text-[#4a4b6a] font-bold uppercase tracking-wider">
-                          {channelMetadata?.subscriberCount || "250K"} Subscribers
+                      <div className="flex flex-col min-w-0">
+                        <h3 className="text-sm md:text-[16px] font-black text-white html[data-theme='light']:text-slate-900 truncate">
+                          {channelMetadata?.name || "MedOneX Expert"}
+                        </h3>
+                        <span className="text-[10px] text-white/40 html[data-theme='light']:text-slate-500 font-bold uppercase tracking-wider">
+                          Verified Instructor
                         </span>
                       </div>
                       <button 
                         onClick={toggleFollow}
                         className={cn(
-                          "ml-4 rounded-xl px-6 py-2.5 text-[14px] font-[700] transition-all active:scale-95",
+                          "ml-auto md:ml-4 rounded-xl px-4 py-2 text-[11px] md:text-[14px] font-black transition-all active:scale-95",
                           isFollowing 
-                            ? "bg-[#13142a] text-[#818cf8] border border-[#1a1b2e]" 
-                            : "bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600"
+                            ? "bg-[#13142a] text-[#818cf8]" 
+                            : "bg-red-500 text-white shadow-lg shadow-red-500/20"
                         )}
                       >
-                        {isFollowing ? "Following" : "Follow Channel"}
+                        {isFollowing ? "Following" : "Follow"}
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center rounded-2xl bg-[#0c0d18] p-1.5 border border-[#1a1b2e]">
-                        <button 
-                          onClick={toggleLike}
-                          className={cn(
-                            "flex items-center gap-2 px-5 py-2 rounded-xl text-[14px] font-[700] transition-all",
-                            active.likedByMe ? "bg-[#4f46e5] text-white" : "text-[#4a4b6a] hover:bg-[#13142a]"
-                          )}
-                        >
-                          <ThumbsUp className={cn("h-4 w-4", active.likedByMe && "fill-current")} />
-                          <span>{channelMetadata?.likeCount || active.likesCount}</span>
-                        </button>
-                        <div className="w-[1px] h-4 bg-[#1a1b2e] mx-1" />
-                        <button className="px-4 py-2 text-[#4a4b6a] hover:text-white transition-colors"><ThumbsDown className="h-4 w-4" /></button>
-                      </div>
+                    <div className="flex items-center justify-around md:justify-end gap-3 bg-[#0c0d18] html[data-theme='light']:bg-black/[0.03] p-2 rounded-2xl md:bg-transparent">
+                      <button 
+                        onClick={toggleLike}
+                        className={cn(
+                          "flex flex-col md:flex-row items-center gap-1 md:gap-2 px-4 py-2 rounded-xl text-[12px] font-black transition-all",
+                          active.likedByMe ? "bg-primary text-white" : "text-white/40 html[data-theme='light']:text-slate-500"
+                        )}
+                      >
+                        <ThumbsUp className={cn("h-4 w-4", active.likedByMe && "fill-current")} />
+                        <span>{channelMetadata?.likeCount || active.likesCount}</span>
+                      </button>
 
                       <button 
                         onClick={() => void generateSummary()}
                         disabled={isSummarizing}
-                        className="p-3 rounded-2xl bg-[#0c0d18] border border-[#1a1b2e] text-[#818cf8] hover:bg-[#4f46e5] hover:text-white transition-all active:scale-95 disabled:opacity-40"
-                        title="AI Insight"
+                        className="flex flex-col md:flex-row items-center gap-1 md:gap-2 px-4 py-2 rounded-xl text-white/40 html[data-theme='light']:text-slate-500 active:scale-90"
                       >
-                        {isSummarizing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                        {isSummarizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-primary" />}
+                        <span className="text-[10px] uppercase">AI Summary</span>
                       </button>
 
                       <button 
                         onClick={() => void shareVideo()}
-                        className="p-3 rounded-2xl bg-[#0c0d18] border border-[#1a1b2e] text-[#4a4b6a] hover:text-white transition-all active:scale-95"
+                        className="flex flex-col md:flex-row items-center gap-1 md:gap-2 px-4 py-2 rounded-xl text-white/40 html[data-theme='light']:text-slate-500 active:scale-90"
                       >
-                        <Share2 className="h-5 w-5" />
+                        <Share2 className="h-4 w-4" />
+                        <span className="text-[10px] uppercase">Share</span>
                       </button>
                     </div>
                   </div>
