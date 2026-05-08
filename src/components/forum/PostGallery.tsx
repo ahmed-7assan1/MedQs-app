@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Maximize2, Download, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,15 +21,19 @@ interface Props {
 export function PostGallery({ attachments, layout = 'grid' }: Props) {
   const [activeLayout, setActiveLayout] = useState<'grid' | 'carousel'>(layout);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
+  const [media, setMedia] = useState<Attachment[]>([]);
+
+  useEffect(() => {
+    if (attachments) {
+      const imgs = attachments.filter(a => a.type === 'image');
+      const vids = attachments.filter(a => a.type === 'video');
+      setMedia([...imgs, ...vids]);
+    }
+  }, [attachments]);
 
   if (!attachments || attachments.length === 0) return null;
 
-  const images = attachments.filter(a => a.type === 'image');
-  const videos = attachments.filter(a => a.type === 'video');
   const files = attachments.filter(a => a.type === 'file');
-  
-  // Combine images and videos for the visual gallery
-  const media = [...images, ...videos];
 
   const handleDownload = (url: string) => {
     const downloadUrl = `${url}${url.includes('?') ? '&' : '?'}download=true`;

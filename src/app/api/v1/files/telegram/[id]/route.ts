@@ -63,25 +63,33 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     return NextResponse.json({ error: "Failed to retrieve link from Telegram" }, { status: 502 });
   }
 
-  // 4. Handle Download vs View
-  if (isDownload) {
+  // 4. Handle View/Stream (Proxy the content to avoid CORS/Redirect issues)
+  try {
     const res = await fetch(telegramUrl);
-    const blob = await res.blob();
+    if (!res.ok) throw new Error("Failed to fetch from Telegram CDN");
     
-    // Try to extract filename from URL or use a default with correct extension
-    const urlParts = telegramUrl.split("/");
-    let fileName = urlParts[urlParts.length - 1] || "file";
-    if (!fileName.includes(".")) {
-      const ext = blob.type.split("/")[1] || "bin";
-      fileName = `${fileName}.${ext}`;
+    const blob = await res.blob();
+    const headers = new Headers();
+    
+    if (isDownload) {
+      // Try to extract filename from URL or use a default with correct extension
+      const urlParts = telegramUrl.split("/");
+      let fileName = urlParts[urlParts.length - 1] || "file";
+      if (!fileName.includes(".")) {
+        const ext = blob.type.split("/")[1] || "bin";
+        fileName = `${fileName}.${ext}`;
+      }
+      headers.set("Content-Disposition", `attachment; filename="${fileName}"`);
+    } else {
+      headers.set("Content-Disposition", "inline");
     }
 
-    const headers = new Headers();
-    headers.set("Content-Disposition", `attachment; filename="${fileName}"`);
     headers.set("Content-Type", blob.type);
+    headers.set("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+    
     return new NextResponse(blob, { headers });
+  } catch (err: any) {
+    console.error("[TG-PROXY] Fetch Error:", err);
+    return NextResponse.redirect(telegramUrl); // Fallback to redirect if proxy fails
   }
-
-  // Default: Redirect for viewing
-  return NextResponse.redirect(telegramUrl);
 }

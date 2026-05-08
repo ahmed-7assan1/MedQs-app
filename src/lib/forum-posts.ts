@@ -208,7 +208,7 @@ export async function loadForumPostsForUser(options: {
       id: p.id,
       content: p.content,
       imageUrl: p.imageUrl,
-      attachments: p.attachments,
+      attachments: (p as any).attachments, // Explicitly pass attachments field
       interactionsDisabled: p.interactionsDisabled,
       authorId: p.authorId,
       forumId: p.forumId,
