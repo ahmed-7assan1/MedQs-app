@@ -23,7 +23,13 @@ const POST_SCHEMA = z
           if (typeof v === "string") return v.trim();
           return undefined;
         },
-        z.union([z.string().url("Invalid image URL"), z.literal("")]).optional()
+        z.union([
+          z.string().refine(
+            (s) => s.startsWith("/") || s.startsWith("http://") || s.startsWith("https://") || s.startsWith("data:image/"),
+            { message: "Invalid image URL" }
+          ),
+          z.literal("")
+        ]).optional()
       ),
     attachments: z.array(z.any()).optional(),
     audience: z.enum(["UNIVERSITY", "FOLLOWERS"]).optional(),

@@ -7,7 +7,7 @@ import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
 
 /** Accepts http(s), local `/uploads/...` from USE_LOCAL_FILE_UPLOAD, and data URLs (fallback). */
 function isValidQuestionImageUrl(s: string): boolean {
-  if (s.startsWith("/uploads/")) return true;
+  if (s.startsWith("/")) return true;
   if (s.startsWith("data:image/")) return true;
   try {
     const u = new URL(s);
