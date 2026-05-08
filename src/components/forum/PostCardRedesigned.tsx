@@ -45,6 +45,7 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
   // Helper to fix legacy localhost URLs stored in DB
   const sanitizeUrl = (url: string) => {
     if (!url) return url;
+    if (typeof url !== 'string') return url;
     if (url.includes("localhost:3000")) {
       return url.split("localhost:3000")[1]; // Make it relative
     }
@@ -54,10 +55,21 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
   // Smart merge of legacy imageUrl and new attachments array
   const attachments = (() => {
     let list: any[] = [];
-    if (Array.isArray(post.attachments)) {
-      list = post.attachments.map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
-    } else if (post.attachments && typeof post.attachments === 'object') {
-      list = Object.values(post.attachments).map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
+    let rawAttachments = post.attachments;
+
+    // Handle stringified JSON from database
+    if (typeof rawAttachments === 'string') {
+      try {
+        rawAttachments = JSON.parse(rawAttachments);
+      } catch (e) {
+        rawAttachments = [];
+      }
+    }
+
+    if (Array.isArray(rawAttachments)) {
+      list = rawAttachments.map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
+    } else if (rawAttachments && typeof rawAttachments === 'object') {
+      list = Object.values(rawAttachments).map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
     }
 
     const imgUrl = sanitizeUrl(post.imageUrl);

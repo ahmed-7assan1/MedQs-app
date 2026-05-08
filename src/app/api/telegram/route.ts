@@ -520,6 +520,7 @@ bot.on(['video', 'photo'], async (ctx) => {
       data: {
         content: caption || (attachment.type === 'video' ? "Sent a video from Telegram" : "Sent a photo from Telegram"),
         authorId: linkedUser.id,
+        imageUrl: attachment.url, // Set for legacy support
         forumId: globalForum.id,
         universityId,
         attachments: [attachment],
