@@ -21,19 +21,13 @@ interface Props {
 export function PostGallery({ attachments, layout = 'grid' }: Props) {
   const [activeLayout, setActiveLayout] = useState<'grid' | 'carousel'>(layout);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
-  const [media, setMedia] = useState<Attachment[]>([]);
-
-  useEffect(() => {
-    if (attachments) {
-      const imgs = attachments.filter(a => a.type === 'image');
-      const vids = attachments.filter(a => a.type === 'video');
-      setMedia([...imgs, ...vids]);
-    }
-  }, [attachments]);
 
   if (!attachments || attachments.length === 0) return null;
 
+  const images = attachments.filter(a => a.type === 'image');
+  const videos = attachments.filter(a => a.type === 'video');
   const files = attachments.filter(a => a.type === 'file');
+  const media = [...images, ...videos];
 
   const handleDownload = (url: string) => {
     const downloadUrl = `${url}${url.includes('?') ? '&' : '?'}download=true`;
@@ -70,7 +64,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                   >
                     {item.type === 'video' ? (
                       <div className="relative w-full h-full bg-black">
-                         <ReactPlayer 
+                         <(ReactPlayer as any) 
                            url={item.url} 
                            width="100%" 
                            height="100%" 
@@ -182,7 +176,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
           <div className="flex-1 relative flex items-center justify-center p-4 overflow-hidden">
             {media[viewIndex].type === 'video' ? (
               <div className="w-full h-full max-w-5xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
-                <ReactPlayer 
+                <(ReactPlayer as any) 
                   url={media[viewIndex].url} 
                   controls 
                   playing

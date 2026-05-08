@@ -347,7 +347,11 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
             exit={{ height: 0, opacity: 0 }}
             className="border-t border-white/[0.05] bg-black/10"
           >
-            <CommentThread postId={post.id} currentUserId={currentUserId} />
+            <CommentThread 
+              postId={post.id} 
+              currentUserId={currentUserId} 
+              initialCount={post._count?.comments ?? 0}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -359,7 +363,7 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
         title="Purge Publication?"
         message="This will permanently remove this data stream from the forum grid."
         confirmText={deleting ? "Purging..." : "Confirm Purge"}
-        isDanger
+        variant="danger"
       />
     </motion.div>
   );
