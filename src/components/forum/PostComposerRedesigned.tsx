@@ -73,7 +73,7 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
         if (data.success) {
           const type = file.type.startsWith("image/") ? "image" : "file";
           const newAttachment = {
-            url: `${window.location.origin}/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`,
+            url: `/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`,
             type,
             fileId: data.fileId
           };

@@ -42,18 +42,28 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
     ? post.author.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
     : "??";
 
+  // Helper to fix legacy localhost URLs stored in DB
+  const sanitizeUrl = (url: string) => {
+    if (!url) return url;
+    if (url.includes("localhost:3000")) {
+      return url.split("localhost:3000")[1]; // Make it relative
+    }
+    return url;
+  };
+
   // Smart merge of legacy imageUrl and new attachments array
   const attachments = (() => {
     let list: any[] = [];
     if (Array.isArray(post.attachments)) {
-      list = [...post.attachments];
+      list = post.attachments.map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
     } else if (post.attachments && typeof post.attachments === 'object') {
-      list = Object.values(post.attachments);
+      list = Object.values(post.attachments).map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
     }
 
+    const imgUrl = sanitizeUrl(post.imageUrl);
     // If we have a legacy imageUrl that isn't in the attachments list, add it
-    if (post.imageUrl && !list.some(a => a.url === post.imageUrl)) {
-      list.unshift({ url: post.imageUrl, type: 'image' });
+    if (imgUrl && !list.some(a => a.url === imgUrl)) {
+      list.unshift({ url: imgUrl, type: 'image' });
     }
     return list;
   })();

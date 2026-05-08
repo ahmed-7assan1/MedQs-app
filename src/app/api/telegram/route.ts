@@ -500,14 +500,14 @@ bot.on(['video', 'photo'], async (ctx) => {
     if ((ctx.message as any).video) {
       const video = (ctx.message as any).video;
       attachment = {
-        url: `${BASE_URL}/api/v1/files/telegram/preview?fileId=${video.file_id}&type=video`,
+        url: `/api/v1/files/telegram/preview?fileId=${video.file_id}&type=video`,
         type: 'video',
         fileId: video.file_id
       };
     } else if ((ctx.message as any).photo) {
       const photo = (ctx.message as any).photo.pop(); // Get largest version
       attachment = {
-        url: `${BASE_URL}/api/v1/files/telegram/preview?fileId=${photo.file_id}&type=image`,
+        url: `/api/v1/files/telegram/preview?fileId=${photo.file_id}&type=image`,
         type: 'image',
         fileId: photo.file_id
       };
