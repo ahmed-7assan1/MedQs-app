@@ -416,13 +416,26 @@ export function ForumClient({
     }
   }
 
+  if (forumList.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <ChatCircle size={48} weight="bold" className="mb-3 text-muted-foreground opacity-30" />
-        <h2 className="font-display text-xl font-bold">No forums available</h2>
-        <p className="text-sm text-muted-foreground">Forums will appear here once created.</p>
+      <div className="flex flex-col items-center justify-center py-48 text-center animate-in fade-in zoom-in duration-700">
+        <div className="h-24 w-24 rounded-full bg-white/5 flex items-center justify-center mb-6 mx-auto border border-white/10 shadow-2xl">
+           <ChatCircle size={40} weight="bold" className="text-primary" />
+        </div>
+        <h2 className="font-display text-3xl font-black italic tracking-tighter uppercase mb-2">No Active Nodes</h2>
+        <p className="text-sm font-bold text-white/20 max-w-xs mx-auto">This sector is currently offline. No communication pools have been established for your university yet.</p>
+        
+        {(currentUserRole === 'ADMIN' || currentUserRole === 'SUPERADMIN') && (
+           <button 
+             onClick={() => setPrivateFormOpen(true)}
+             className="mt-8 px-8 py-3 bg-primary text-white rounded-2xl text-[12px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/30"
+           >
+             Initialize First Vector
+           </button>
+        )}
       </div>
     );
+  }
 
   return (
     <div
