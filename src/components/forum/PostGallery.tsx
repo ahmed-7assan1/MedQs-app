@@ -65,15 +65,19 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                     onClick={() => setViewIndex(i)}
                   >
                     {item.type === 'video' ? (
-                      <div className="relative w-full h-full">
-                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
-                            <div className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
-                               <Maximize2 className="h-6 w-6 text-white" />
-                            </div>
-                         </div>
-                         <div className="w-full h-full bg-slate-900 flex items-center justify-center">
-                            <video src={item.url} className="w-full h-full object-cover opacity-50" />
-                         </div>
+                      <div className="relative w-full h-full bg-black">
+                         <ReactPlayer 
+                           url={item.url} 
+                           width="100%" 
+                           height="100%" 
+                           light={true} // Shows thumbnail until clicked
+                           playIcon={
+                             <div className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:scale-110 transition-transform">
+                                <Maximize2 className="h-7 w-7 text-white" />
+                             </div>
+                           }
+                           onClickPreview={() => setViewIndex(i)}
+                         />
                       </div>
                     ) : (
                       <img src={item.url} className="w-full h-full object-cover" alt="" />
