@@ -160,57 +160,54 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
   const badge = getExpiryBadge(post.expiresAt, post.isPinned);
 
   return (
-    <article className="group relative mb-6 rounded-[32px] bg-[#161523]/40 border border-white/[0.03] overflow-hidden backdrop-blur-xl hover:bg-[#161523]/60 transition-all duration-500 shadow-2xl">
-      {/* Decorative Glow */}
-      <div className="absolute -top-24 -right-24 h-48 w-48 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
-      
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4">
-        <div className="flex items-center gap-4">
-          <Link href={`/profile/u/${post.author.id}`} className="shrink-0 relative group/avatar">
-            <div className="h-14 w-14 flex items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] overflow-hidden border border-white/10 shadow-xl transition-all duration-300 group-hover/avatar:scale-105 group-hover/avatar:rotate-3">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-4 sm:mb-8 bg-[#161523]/60 backdrop-blur-xl border-y sm:border border-white/[0.05] sm:rounded-[32px] overflow-hidden shadow-2xl"
+    >
+      {/* Header: Compact on Mobile */}
+      <div className="flex items-center justify-between p-3 sm:p-5">
+        <div className="flex items-center gap-3">
+          <Link href={`/profile/u/${post.author.id}`} className="relative h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-[#534AB7] to-[#AFA9EC] p-[2px]">
+             <div className="h-full w-full rounded-full bg-[#161523] p-[1px] overflow-hidden">
                <img 
-                 src={post.author.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author.name || "User")}&backgroundColor=c0aede,d1d4f9,b6e3f4`}
-                 alt={post.author.name}
-                 className="h-full w-full object-cover"
+                 src={post.author.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author.name || "User")}`} 
+                 className="h-full w-full rounded-full object-cover" 
+                 alt="" 
                />
-            </div>
-            <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-emerald-500 rounded-full border-4 border-[#161523] shadow-lg" title="Active Transceiver" />
+             </div>
+             <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-emerald-500 rounded-full border-2 border-[#161523]" />
           </Link>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <Link href={`/profile/u/${post.author.id}`} className="font-black text-[16px] text-white hover:text-primary transition-all tracking-tight leading-none">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <Link href={`/profile/u/${post.author.id}`} className="text-sm sm:text-[15px] font-black text-white hover:text-[#AFA9EC] transition-colors tracking-tight">
                 {post.author.name}
               </Link>
-              {post.author.rank?.badge && (
-                <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
+              {post.author.rank && (
+                <span className="px-1.5 py-0.5 rounded-md bg-[#534AB7]/20 text-[#AFA9EC] text-[8px] font-black uppercase tracking-widest border border-[#534AB7]/30">
                   {post.author.rank.label}
                 </span>
               )}
+              {post.isPinned && <Pin className="h-3 w-3 text-[#AFA9EC] fill-[#AFA9EC]" />}
             </div>
-            <div className="flex items-center gap-2 mt-1.5">
-              <p className="text-[10px] text-white/20 font-black uppercase tracking-widest">
-                {formatDistanceToNow(new Date(post.createdAt))}
-              </p>
-              <span className="h-1 w-1 rounded-full bg-white/10" />
-              <span className="text-[10px] text-primary font-black uppercase tracking-widest">Secure Link</span>
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/30 uppercase tracking-widest">
+              <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
             </div>
           </div>
         </div>
-
-        <div className="flex items-center gap-2 relative">
+        
+        <div className="flex items-center gap-1 relative">
           {badge && (
             <div className={cn(
-              "px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-[0.2em] shadow-sm backdrop-blur-md",
+              "hidden sm:block px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-wider",
               badge.color
             )}>
               {badge.label}
             </div>
           )}
-          
           <button 
             onClick={() => setShowOptions(!showOptions)}
-            className="p-2.5 rounded-xl bg-white/[0.02] text-white/20 hover:text-white hover:bg-white/5 transition-all"
+            className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-all"
           >
             <MoreHorizontal className="h-5 w-5" />
           </button>
@@ -248,121 +245,123 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
         </div>
       </div>
 
-      {/* Body */}
-      <div className="px-6 pb-6">
-        <div className="prose dark:prose-invert prose-sm max-w-none text-white/70 leading-relaxed font-medium mb-5">
-          <ReactMarkdown components={markdownComponentsWithImages}>
-            {enhancePlainImageUrls(post.content)}
-          </ReactMarkdown>
-        </div>
-        
+      {/* Media: Edge-to-Edge on Mobile */}
+      <div className="relative">
         <PostGallery attachments={attachments} />
       </div>
 
-      {/* Metrics Row */}
-      <div className="px-6 py-3 flex items-center justify-between border-y border-white/[0.02] bg-black/10">
-         <div className="flex items-center gap-4">
-            <div className="flex -space-x-2">
-               {[1,2,3].map(i => (
-                 <div key={i} className="h-6 w-6 rounded-full border-2 border-[#161523] bg-primary/20 flex items-center justify-center overflow-hidden">
-                    <div className="h-full w-full bg-primary/40 animate-pulse" />
-                 </div>
-               ))}
-            </div>
-            <p className="text-[11px] font-bold text-white/40">
-              <span className="text-white">{likeCount}</span> Engagements
-            </p>
-         </div>
-         <p className="text-[11px] font-bold text-white/40 hover:text-white/60 cursor-pointer transition-colors" onClick={() => setShowComments(!showComments)}>
-           {post._count?.comments || 0} Comments
-         </p>
-      </div>
-
-      {/* Actions */}
-      <div className="px-4 py-3 flex items-center justify-between gap-2">
-         <div className="flex-1 flex items-center gap-2 relative">
-            <AnimatePresence>
-               {showReacts && (
+      {/* Action Bar: Instagram Style */}
+      <div className="px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-5">
+            <div className="relative group/react">
+              <button 
+                onClick={() => handleReact('like')}
+                onContextMenu={(e) => { e.preventDefault(); setShowReacts(true); }}
+                className={cn(
+                  "transition-all active:scale-125",
+                  activeReaction ? "text-red-500" : "text-white hover:text-white/70"
+                )}
+              >
+                {activeReaction ? (
+                  activeReaction === 'like' ? <Heart className="h-7 w-7 fill-red-500" /> : getReactionIcon(activeReaction)
+                ) : (
+                  <Heart className="h-7 w-7" />
+                )}
+              </button>
+              
+              <AnimatePresence>
+                {showReacts && (
                   <motion.div 
-                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                     className="absolute bottom-full left-0 mb-4 bg-[#1f1d36]/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-2 flex items-center gap-1 z-50 ring-1 ring-white/5"
+                    initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                    animate={{ opacity: 1, y: -20, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                    className="absolute bottom-full mb-4 left-0 bg-[#161523] border border-white/10 rounded-2xl p-2 flex gap-2 shadow-2xl z-50 backdrop-blur-xl"
                   >
-                     {[
-                        { type: 'like', icon: <Heart className="h-6 w-6 fill-primary text-primary" /> },
-                        { type: 'love', icon: <Heart className="h-6 w-6 fill-red-500 text-red-500" /> },
-                        { type: 'haha', icon: <span className="text-2xl">😆</span> },
-                        { type: 'wow', icon: <span className="text-2xl">🔥</span> },
-                        { type: 'sad', icon: <span className="text-2xl">💡</span> },
-                        { type: 'angry', icon: <span className="text-2xl">🎯</span> }
-                     ].map(react => (
-                        <button
-                           key={react.type}
-                           onClick={(e) => { e.stopPropagation(); handleReact(react.type as ReactType); }}
-                           className="p-3 rounded-xl hover:bg-white/5 transition-all active:scale-90"
-                        >
-                           {react.icon}
-                        </button>
-                     ))}
+                    {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as ReactType[]).map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => handleReact(r)}
+                        className="h-10 w-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-all hover:scale-125"
+                      >
+                        {getReactionIcon(r)}
+                      </button>
+                    ))}
                   </motion.div>
-               )}
-            </AnimatePresence>
+                )}
+              </AnimatePresence>
+            </div>
 
             <button 
-               onClick={() => handleReact(activeReaction ? null : 'like')}
-               onContextMenu={(e) => { e.preventDefault(); setShowReacts(true); }}
-               disabled={liking}
-               className={cn(
-                  "flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-[18px] font-black text-[11px] uppercase tracking-widest transition-all active:scale-95",
-                  activeReaction ? "text-primary bg-primary/10 border border-primary/20 shadow-lg shadow-primary/10" : "text-white/30 hover:bg-white/5 border border-transparent"
-               )}
+              onClick={() => setShowComments(!showComments)}
+              className="text-white hover:text-white/70 transition-all active:scale-125"
             >
-               {activeReaction ? getReactionIcon(activeReaction) : <Heart className="h-5 w-5" />}
-               <span>{activeReaction ? "Reaction Active" : "Interact"}</span>
+              <MessageSquare className="h-7 w-7" />
             </button>
-
+            
             <button 
-               onClick={() => setShowComments(!showComments)}
-               className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-[18px] font-black text-[11px] uppercase tracking-widest text-white/30 hover:bg-white/5 transition-all active:scale-95"
+              onClick={handleShare}
+              className="text-white hover:text-white/70 transition-all active:scale-125"
             >
-               <MessageSquare className="h-5 w-5" />
-               <span>Broadcast</span>
+              <Share2 className="h-7 w-7" />
             </button>
+          </div>
+          
+          <button className="text-white hover:text-white/70 transition-all active:scale-125">
+             <Pin className="h-7 w-7" />
+          </button>
+        </div>
 
-            <button 
-               onClick={handleShare}
-               className="flex items-center justify-center p-4 rounded-[18px] text-white/30 hover:bg-white/5 hover:text-white transition-all active:scale-95"
-            >
-               <Share2 className="h-5 w-5" />
-            </button>
-         </div>
+        {/* Engagements Count */}
+        <div className="text-[13px] font-black text-white mb-2 tracking-tight">
+          {likeCount.toLocaleString()} Engagements
+        </div>
+
+        {/* Content (Caption) */}
+        <div className="text-sm leading-relaxed text-white/90 font-medium">
+          <span className="font-black mr-2 text-[14px]">{post.author.name}</span>
+          <div className="inline prose prose-invert prose-sm max-w-none">
+            <ReactMarkdown components={markdownComponentsWithImages}>
+              {enhancePlainImageUrls(post.content)}
+            </ReactMarkdown>
+          </div>
+        </div>
+
+        {/* Comments Link */}
+        {!showComments && post._count?.comments > 0 && (
+          <button 
+            onClick={() => setShowComments(true)}
+            className="mt-2 block text-[13px] font-bold text-white/30 hover:text-white/50 transition-colors"
+          >
+            View all {post._count.comments} comments
+          </button>
+        )}
       </div>
 
-      {/* Comments section */}
-      {showComments && (
-        <div className="px-6 pb-6 border-t border-white/[0.02] bg-black/10 animate-in slide-in-from-top-4 duration-500">
-          <CommentThread 
-            postId={post.id} 
-            currentUserId={currentUserId}
-            initialCount={post._count?.comments ?? 0}
-            variant="default"
-          />
-        </div>
-      )}
+      {/* Nested Comments */}
+      <AnimatePresence>
+        {showComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-t border-white/[0.05] bg-black/10"
+          >
+            <CommentThread postId={post.id} currentUserId={currentUserId} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDelete}
-        isLoading={deleting}
-        title="Destroy Record?"
-        message="This action will permanently purge this data from the forum grid. This cannot be undone."
-        confirmText="Confirm Purge"
-        cancelText="Abort"
-        variant="danger"
+        title="Purge Publication?"
+        message="This will permanently remove this data stream from the forum grid."
+        confirmText={deleting ? "Purging..." : "Confirm Purge"}
+        isDanger
       />
-    </article>
+    </motion.div>
   );
 }
 
