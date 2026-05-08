@@ -3,11 +3,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import webpush from "web-push";
 
-webpush.setVapidDetails(
-  "mailto:admin@medqs.app",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+// Initialize safely to avoid build errors on Vercel
+if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    "mailto:admin@medqs.app",
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 export async function POST(req: Request) {
   const session = await auth();
