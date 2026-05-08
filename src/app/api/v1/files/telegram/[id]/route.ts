@@ -63,7 +63,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     return NextResponse.json({ error: "Failed to retrieve link from Telegram" }, { status: 502 });
   }
 
-    // 4. Handle View/Stream (Proxy the content with streaming for performance)
+  // 4. Handle View/Stream (Proxy the content with streaming for performance)
+  try {
     const response = await fetch(telegramUrl);
     if (!response.ok) throw new Error("Failed to fetch from Telegram CDN");
 

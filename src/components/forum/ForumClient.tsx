@@ -705,7 +705,7 @@ export function ForumClient({
                         <div className="h-2 w-full" />
                       </div>
 
-                      {activeForum.status !== "READ_ONLY" && (
+                      {activeForum?.status !== "READ_ONLY" && (
                         <div className="p-5 border-t border-white/[0.02] bg-black/40">
                           <div className="flex items-end gap-3 rounded-2xl bg-white/5 p-2.5 border border-white/[0.02] focus-within:border-[#534AB7]/50 focus-within:ring-4 focus-within:ring-[#534AB7]/10 transition-all ease-out duration-300">
                             <textarea
@@ -800,7 +800,7 @@ export function ForumClient({
 
             {!loading && posts.length === 0 && (
               <div className="flex flex-col items-center justify-center py-40 text-center opacity-10">
-                <MessageSquare className="h-24 w-24 mb-6" />
+                <ChatCircle size={80} weight="bold" className="mb-6" />
                 <h4 className="text-3xl font-black tracking-tighter uppercase italic">No Signals Found</h4>
                 <p className="text-sm font-bold mt-2">Broadcast the first transmission to initialize this sector.</p>
               </div>
@@ -815,7 +815,6 @@ export function ForumClient({
         )}
       </div>
 
-      {/* Styled Custom Scrollbar CSS */}
       {/* Mobile Floating Action Button (FAB) */}
       <div className="md:hidden fixed bottom-24 right-6 z-50">
         <button
@@ -823,9 +822,9 @@ export function ForumClient({
             if (tab === "feed") setComposing(true);
             else discussionInputRef.current?.focus();
           }}
-          className="h-14 w-14 rounded-full bg-primary text-white shadow-2xl shadow-primary/40 flex items-center justify-center active:scale-90 transition-all border-4 border-background"
+          className="h-14 w-14 rounded-full bg-primary text-white shadow-2xl shadow-primary/40 flex items-center justify-center active:scale-90 transition-all border-4 border-[#0F0E16]"
         >
-          <PlusCircle className="h-7 w-7" />
+          <PlusCircle size={28} weight="bold" />
         </button>
       </div>
 
