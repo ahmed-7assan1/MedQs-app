@@ -28,10 +28,10 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
   const videos = attachments.filter(a => a.type === 'video');
   const files = attachments.filter(a => a.type === 'file');
   const media = [...images, ...videos];
+  const Player = ReactPlayer as any;
 
   const handleDownload = (url: string) => {
     const downloadUrl = `${url}${url.includes('?') ? '&' : '?'}download=true`;
-    // Create a hidden link and click it to trigger download without opening a new tab
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.setAttribute('download', '');
@@ -47,7 +47,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
           <div className="relative group">
             {activeLayout === 'grid' ? (
               <div className={cn(
-                "grid gap-1 overflow-hidden rounded-2xl border border-white/[0.05]",
+                "grid gap-0.5 overflow-hidden rounded-2xl border border-white/[0.05]",
                 media.length === 1 ? "grid-cols-1" : 
                 media.length === 2 ? "grid-cols-2 aspect-[16/9]" :
                 media.length === 3 ? "grid-cols-2 aspect-[4/3]" : "grid-cols-2 aspect-square"
@@ -58,20 +58,20 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                     className={cn(
                       "relative cursor-pointer overflow-hidden bg-white/5 hover:opacity-90 transition-opacity flex items-center justify-center",
                       media.length === 3 && i === 0 ? "row-span-2" : "",
-                      media.length > 4 && i === 3 ? "after:content-['+'+(media.length-4)] after:absolute after:inset-0 after:bg-black/60 after:flex after:items-center after:justify-center after:text-xl after:font-bold" : ""
+                      media.length > 4 && i === 3 ? "after:content-['+'+(media.length-4)] after:absolute after:inset-0 after:bg-black/60 after:flex after:items-center after:justify-center after:text-lg after:font-bold" : ""
                     )}
                     onClick={() => setViewIndex(i)}
                   >
                     {item.type === 'video' ? (
                       <div className="relative w-full h-full bg-black">
-                         <(ReactPlayer as any) 
+                         <Player 
                            url={item.url} 
                            width="100%" 
                            height="100%" 
-                           light={true} // Shows thumbnail until clicked
+                           light={true} 
                            playIcon={
-                             <div className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:scale-110 transition-transform">
-                                <Maximize2 className="h-7 w-7 text-white" />
+                             <div className="h-10 w-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/10 hover:bg-black/60 transition-all">
+                                <Maximize2 className="h-5 w-5 text-white/80" />
                              </div>
                            }
                            onClickPreview={() => setViewIndex(i)}
@@ -89,26 +89,26 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                   {media.map((item, i) => (
                     item.type === 'video' ? (
                       <div key={i} className="w-full h-full shrink-0 bg-black flex items-center justify-center">
-                        <ReactPlayer url={item.url} controls width="100%" height="100%" />
+                        <Player url={item.url} controls width="100%" height="100%" />
                       </div>
                     ) : (
                       <img key={i} src={item.url} className="w-full h-full object-contain shrink-0" alt="" />
                     )
                   ))}
                 </div>
-              {images.length > 1 && (
+              {media.length > 1 && (
                 <>
                   <button 
                     onClick={() => setViewIndex(prev => Math.max(0, (prev || 0) - 1))}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white backdrop-blur-md hover:bg-black/60 transition-all"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white/40 backdrop-blur-md hover:bg-black/40 hover:text-white transition-all"
                   >
-                    <ChevronLeft className="h-5 w-5" />
+                    <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button 
-                    onClick={() => setViewIndex(prev => Math.min(images.length - 1, (prev || 0) + 1))}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white backdrop-blur-md hover:bg-black/60 transition-all"
+                    onClick={() => setViewIndex(prev => Math.min(media.length - 1, (prev || 0) + 1))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white/40 backdrop-blur-md hover:bg-black/40 hover:text-white transition-all"
                   >
-                    <ChevronRight className="h-5 w-5" />
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 </>
               )}
@@ -119,9 +119,9 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button 
               onClick={() => setActiveLayout(activeLayout === 'grid' ? 'carousel' : 'grid')}
-              className="p-1.5 rounded-lg bg-black/40 text-white/70 backdrop-blur-md hover:text-white transition-all text-[10px] font-bold"
+              className="px-2 py-1 rounded-lg bg-black/40 text-white/50 backdrop-blur-md hover:text-white transition-all text-[9px] font-black uppercase tracking-widest border border-white/5"
             >
-              {activeLayout === 'grid' ? 'Switch to Slider' : 'Switch to Grid'}
+              {activeLayout === 'grid' ? 'Slide View' : 'Grid View'}
             </button>
           </div>
         </div>
@@ -131,21 +131,21 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
       {files.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {files.map((file, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] transition-all">
+            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-[#534AB7]/10 text-[#534AB7]">
-                  <Download className="h-5 w-5" />
+                <div className="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/10">
+                  <Download className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">Attachment {i + 1}</p>
-                  <p className="text-[10px] text-white/20 uppercase font-black">Document File</p>
+                  <p className="text-[11px] font-bold text-white/80 truncate">Asset_{i + 1}.file</p>
+                  <p className="text-[9px] text-white/20 uppercase font-black tracking-tighter">Secure Download</p>
                 </div>
               </div>
               <button 
                 onClick={() => handleDownload(file.url)}
-                className="p-2 text-white/40 hover:text-[#534AB7] transition-all"
+                className="p-2 text-white/20 hover:text-primary transition-all"
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}
@@ -154,29 +154,29 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
 
       {/* Lightbox / Overlay View */}
       {viewIndex !== null && (
-        <div className="fixed inset-0 z-[999] flex flex-col bg-black/95 backdrop-blur-3xl animate-in fade-in duration-500">
-          <header className="flex items-center justify-between p-6 text-white border-b border-white/5">
+        <div className="fixed inset-0 z-[999] flex flex-col bg-black/95 backdrop-blur-2xl animate-in fade-in duration-500">
+          <header className="flex items-center justify-between px-6 py-4 text-white border-b border-white/5 bg-black/20">
             <div className="flex flex-col">
-              <span className="text-sm font-black uppercase tracking-widest text-[#AFA9EC]">MedQs Previewer</span>
-              <span className="text-[10px] font-bold text-white/40">{viewIndex + 1} / {attachments.length} Assets</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">MedQs Intelligence</span>
+              <span className="text-[10px] font-bold text-white/20 uppercase">{viewIndex + 1} of {media.length} nodes</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <button 
-                onClick={() => handleDownload(attachments[viewIndex].url)} 
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-xs font-bold"
+                onClick={() => handleDownload(media[viewIndex].url)} 
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all text-[10px] font-black uppercase tracking-widest border border-white/5"
               >
-                <Download className="h-4 w-4" />
-                Download
+                <Download className="h-3 w-3" />
+                Get Asset
               </button>
-              <button onClick={() => setViewIndex(null)} className="p-2.5 hover:bg-red-500/20 hover:text-red-500 rounded-full transition-all">
-                <X className="h-6 w-6" />
+              <button onClick={() => setViewIndex(null)} className="h-8 w-8 flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all text-white/20">
+                <X className="h-5 w-5" />
               </button>
             </div>
           </header>
-          <div className="flex-1 relative flex items-center justify-center p-4 overflow-hidden">
+          <div className="flex-1 relative flex items-center justify-center p-4 sm:p-10 overflow-hidden">
             {media[viewIndex].type === 'video' ? (
-              <div className="w-full h-full max-w-5xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
-                <(ReactPlayer as any) 
+              <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-black">
+                <Player 
                   url={media[viewIndex].url} 
                   controls 
                   playing
@@ -188,11 +188,11 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
             ) : media[viewIndex].type === 'image' ? (
               <img 
                 src={media[viewIndex].url} 
-                className="max-w-full max-h-full object-contain shadow-2xl animate-in zoom-in-95 duration-300" 
+                className="max-w-full max-h-full object-contain shadow-2xl animate-in zoom-in-95 duration-300 rounded-lg" 
                 alt="" 
               />
             ) : (
-              <div className="w-full h-full max-w-5xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white">
+              <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-white">
                 <iframe 
                   src={attachments[viewIndex].url} 
                   className="w-full h-full border-none"
@@ -201,19 +201,19 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
               </div>
             )}
             
-            {attachments.length > 1 && (
+            {media.length > 1 && (
               <>
                 <button 
-                  onClick={() => setViewIndex(prev => prev! > 0 ? prev! - 1 : attachments.length - 1)}
-                  className="absolute left-6 p-5 rounded-full bg-white/5 hover:bg-white/10 transition-all backdrop-blur-md"
+                  onClick={() => setViewIndex(prev => prev! > 0 ? prev! - 1 : media.length - 1)}
+                  className="absolute left-4 sm:left-10 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/30 hover:text-white transition-all backdrop-blur-md border border-white/5"
                 >
-                  <ChevronLeft className="h-8 w-8" />
+                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
                 <button 
-                  onClick={() => setViewIndex(prev => prev! < attachments.length - 1 ? prev! + 1 : 0)}
-                  className="absolute right-6 p-5 rounded-full bg-white/5 hover:bg-white/10 transition-all backdrop-blur-md"
+                  onClick={() => setViewIndex(prev => prev! < media.length - 1 ? prev! + 1 : 0)}
+                  className="absolute right-4 sm:right-10 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/30 hover:text-white transition-all backdrop-blur-md border border-white/5"
                 >
-                  <ChevronRight className="h-8 w-8" />
+                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
               </>
             )}
