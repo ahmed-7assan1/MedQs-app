@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
+import toast from "react-hot-toast";
 
 interface NotifItem { id: string; title: string; body: string; read: boolean; createdAt: string; channel: string; }
 interface SidebarProps {

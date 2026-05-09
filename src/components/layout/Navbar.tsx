@@ -15,6 +15,7 @@ import { NotificationPanel } from "@/components/notifications/NotificationPanel"
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
+import toast from "react-hot-toast";
 
 const navLinks = [
   { href: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
@@ -57,8 +58,6 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedOn
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-
-import toast from "react-hot-toast";
 
   useEffect(() => {
     const handler = () => {
