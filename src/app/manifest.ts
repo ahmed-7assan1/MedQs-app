@@ -48,7 +48,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    orientation: "portrait-primary",
+    orientation: "any",
     background_color: DEFAULT_BG,
     theme_color: themeColor,
     icons: [
