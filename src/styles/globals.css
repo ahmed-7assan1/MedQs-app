@@ -534,6 +534,15 @@ html[data-theme="dark"] body,
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* ── No-Scrollbar Utility (used by chat interfaces) ── */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes landing-root-ambient-breathe {
 
   0%,

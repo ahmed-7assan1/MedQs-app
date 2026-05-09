@@ -7,7 +7,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { 
   House, Books, Question, Sparkle, MagnifyingGlass, X,
   Chats, Clock, Sun, Moon, Gear, UsersThree,
-  PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt
+  PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt,
+  Telegram
 } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/store";
@@ -20,7 +21,8 @@ const NAV_ITEMS = [
   { href: "/videos", label: "Videos", icon: PlayCircle },
   { href: "/podcasts", label: "Podcasts", icon: Microphone },
   { href: "/past-papers", label: "Quizzes", icon: Question },
-  { href: "/forum", label: "Community", icon: Chats },
+  { href: "/forum", label: "Forum", icon: Chats },
+  { href: "/community", label: "Discussion", icon: Telegram },
   { href: "/taskat", label: "Tasks", icon: Clock },
   { href: "/teams", label: "Teams", icon: UsersThree },
 ];

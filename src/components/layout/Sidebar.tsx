@@ -32,8 +32,9 @@ export const NAV = [
   { href: "/videos", label: "Videos", icon: Video },
   { href: "/podcasts", label: "Podcasts", icon: Mic2 },
   { href: "/forum", label: "Community", icon: MessageSquare },
+  { href: "/community", label: "Discussion", icon: Send, badge: "NEW" },
   { href: "/taskat", label: "Taskat", icon: Clock },
-  { href: "/profile/telegram", label: "Telegram Link", icon: Send, badge: "NEW" },
+  { href: "/profile/telegram", label: "Telegram Link", icon: Send },
 ];
 
 
@@ -342,7 +343,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
               <div>
                 <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 border-l-2 border-primary/50 pl-3">Community</p>
                 <div className="space-y-0.5">
-                  {[NAV[6]].map(({ href, label, icon: Icon }) => {
+                  {[NAV[6], NAV[7]].map(({ href, label, icon: Icon, badge }: any) => {
                     const active = isActive(href);
                     return (
                       <Link key={href} href={href} onClick={setMobileClose}
@@ -352,7 +353,8 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
                         )}>
                         <Icon className={cn("h-[18px] w-[18px] flex-shrink-0", active && "text-primary")} />
                         <span>{label}</span>
-                        {active && <span className="ml-auto h-2 w-2 rounded-full bg-primary" />}
+                        {badge && <span className="ml-auto text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/20 text-primary">{badge}</span>}
+                        {active && !badge && <span className="ml-auto h-2 w-2 rounded-full bg-primary" />}
                       </Link>
                     );
                   })}
