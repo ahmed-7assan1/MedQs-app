@@ -20,7 +20,8 @@ import {
   ArrowRight,
   DotsThreeVertical,
   BellSimple,
-  Fire
+  Fire,
+  X
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
