@@ -88,16 +88,38 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    const handler = () => {
+      const doc = document as any;
+      setIsFullscreen(!!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement));
+    };
     document.addEventListener("fullscreenchange", handler);
-    return () => document.removeEventListener("fullscreenchange", handler);
+    document.addEventListener("webkitfullscreenchange", handler);
+    document.addEventListener("mozfullscreenchange", handler);
+    document.addEventListener("MSFullscreenChange", handler);
+    return () => {
+      document.removeEventListener("fullscreenchange", handler);
+      document.removeEventListener("webkitfullscreenchange", handler);
+      document.removeEventListener("mozfullscreenchange", handler);
+      document.removeEventListener("MSFullscreenChange", handler);
+    };
   }, []);
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
+  const toggleFullscreen = async () => {
+    try {
+      const doc = document as any;
+      const docEl = doc.documentElement;
+      const requestFullScreen = docEl.requestFullScreen || docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+      const cancelFullScreen = doc.exitFullscreen || doc.cancelFullScreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+      const isFs = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+
+      if (!isFs) {
+        if (requestFullScreen) await requestFullScreen.call(docEl).catch(() => {});
+        else toast.error("Fullscreen not supported on this browser (e.g. iOS Safari). Add to Home Screen instead.");
+      } else {
+        if (cancelFullScreen) await cancelFullScreen.call(doc).catch(() => {});
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
