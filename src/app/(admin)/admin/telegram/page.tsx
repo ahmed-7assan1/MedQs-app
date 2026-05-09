@@ -8,19 +8,22 @@ export default async function TelegramAdminPage() {
   const user = session?.user as any;
   const userRole = user?.role;
 
-  if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
+  if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN" && userRole !== "LEADER") {
     redirect("/");
   }
 
-  // Get admin's semester to filter students
-  const adminSemesterId = user?.semesterId;
+  const isSuper = userRole === "SUPER_ADMIN";
+  const adminUniId = user?.universityId;
+  const adminSemId = user?.semesterId;
 
   const [linkedUsers, botConfig, stats] = await Promise.all([
     prisma.user.findMany({
       where: { 
         telegramId: { not: null },
-        // If it's a regular ADMIN, filter by their semester. SUPER_ADMIN sees everyone.
-        ...(userRole === "ADMIN" && adminSemesterId ? { semesterId: adminSemesterId } : {})
+        ...(!isSuper ? {
+          universityId: adminUniId,
+          ...(adminSemId ? { semesterId: adminSemId } : {})
+        } : {})
       },
       select: {
         id: true,
@@ -45,7 +48,10 @@ export default async function TelegramAdminPage() {
     prisma.user.count({ 
       where: { 
         telegramId: { not: null },
-        ...(userRole === "ADMIN" && adminSemesterId ? { semesterId: adminSemesterId } : {})
+        ...(!isSuper ? {
+          universityId: adminUniId,
+          ...(adminSemId ? { semesterId: adminSemId } : {})
+        } : {})
       } 
     })
   ]);

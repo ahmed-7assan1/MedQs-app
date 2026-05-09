@@ -16,6 +16,8 @@ import { PremiumNotificationPrompt } from "@/components/notifications/PremiumNot
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
+import { TelegramBlocker } from "@/components/system/TelegramBlocker";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -60,59 +62,63 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const sessionUserId = session?.user?.id ?? "";
 
   return (
-    <SiteConfigProvider
-      initial={{
-        siteName: siteConfig?.siteName ?? "MedQs",
-        logoUrl: siteConfig?.logoUrl ?? null,
-      }}
-    >
-      <div className={cn("app-shell min-h-screen flex flex-col dark:bg-[#09080F] bg-white")}>
-        <a href="#main-content" className="skip-link sr-only">
-          Skip to main content
-        </a>
-        
-        <MobileHeader 
-          userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
-          userName={isGuest ? undefined : displayName}
-          userId={isGuest ? "" : sessionUserId}
-        />
+    <NextAuthProvider session={session}>
+      <TelegramBlocker>
+        <SiteConfigProvider
+          initial={{
+            siteName: siteConfig?.siteName ?? "MedQs",
+            logoUrl: siteConfig?.logoUrl ?? null,
+          }}
+        >
+          <div className={cn("app-shell min-h-screen flex flex-col dark:bg-[#09080F] bg-white")}>
+            <a href="#main-content" className="skip-link sr-only">
+              Skip to main content
+            </a>
+            
+            <MobileHeader 
+              userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+              userName={isGuest ? undefined : displayName}
+              userId={isGuest ? "" : sessionUserId}
+            />
 
-        <FloatingIslandNavbar 
-           userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
-           userName={isGuest ? undefined : displayName}
-           userId={isGuest ? "" : sessionUserId}
-        />
+            <FloatingIslandNavbar 
+               userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+               userName={isGuest ? undefined : displayName}
+               userId={isGuest ? "" : sessionUserId}
+            />
 
-        <Sidebar
-          userName={isGuest ? "Guest" : displayName}
-          userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
-          userId={isGuest ? "" : sessionUserId}
-          isAdmin={isAdmin}
-          siteName={siteConfig?.siteName ?? "MedOneX"}
-          logoUrl={siteConfig?.logoUrl ?? undefined}
-          isGuest={isGuest}
-          unreadCount={unreadCount}
-        />
+            <Sidebar
+              userName={isGuest ? "Guest" : displayName}
+              userImage={isGuest ? undefined : (user?.image ?? session?.user?.image ?? undefined)}
+              userId={isGuest ? "" : sessionUserId}
+              isAdmin={isAdmin}
+              siteName={siteConfig?.siteName ?? "MedOneX"}
+              logoUrl={siteConfig?.logoUrl ?? undefined}
+              unreadCount={unreadCount}
+              isGuest={isGuest}
+            />
 
-        <div className="main-content flex-1 flex flex-col min-w-0">
-          {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
-          {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
-          
-          <main id="main-content" className="flex-1 flex flex-col outline-none w-full pb-20 md:pb-8">
-            <MobileSwipeLayout>
-              {children}
-            </MobileSwipeLayout>
-          </main>
+            <div className="main-content flex-1 flex flex-col min-w-0">
+              {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
+              {!isGuest && <AdBannerModal semesterId={user?.semesterId ?? undefined} />}
+              
+              <main id="main-content" className="flex-1 flex flex-col outline-none w-full pb-20 md:pb-8">
+                <MobileSwipeLayout>
+                  {children}
+                </MobileSwipeLayout>
+              </main>
 
-          <SiteFooter />
-          {!isGuest && <OnboardingTutorial />}
-          <CookieConsentBanner />
-          <PersistentAudioPlayer />
-          <MobileBottomNav />
-          {isAdmin && <AdminStudentBar />}
-          <PremiumNotificationPrompt />
-        </div>
-      </div>
-    </SiteConfigProvider>
+              <SiteFooter />
+              {!isGuest && <OnboardingTutorial />}
+              <CookieConsentBanner />
+              <PersistentAudioPlayer />
+              <MobileBottomNav />
+              {isAdmin && <AdminStudentBar />}
+              <PremiumNotificationPrompt />
+            </div>
+          </div>
+        </SiteConfigProvider>
+      </TelegramBlocker>
+    </NextAuthProvider>
   );
 }

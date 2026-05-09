@@ -55,6 +55,7 @@ model FeatureFlag {
 model University {
   id             String                   @id @default(uuid())
   name           String
+  abbr           String?
   logoUrl        String?
   idMinLength    Int                      @default(6)
   idMaxLength    Int                      @default(10)
@@ -431,6 +432,11 @@ model User {
   universityId          String?
   semesterId            String?
   rankId                String?
+  studentCode           String?                @unique
+  rolePermissions       Json?
+  telegramPhone         String?                @unique
+  isLeader              Boolean                @default(false)
+  leaderId              String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   facebookUrl           String?

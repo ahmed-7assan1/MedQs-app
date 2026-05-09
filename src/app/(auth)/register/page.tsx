@@ -2,9 +2,21 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Building2, Calendar, BookOpen, ChevronRight, Loader2, CheckCircle2,
-  User, Phone, FileText, ArrowLeft, Sparkles, GraduationCap,
-} from "lucide-react";
+  Buildings as Building2,
+  Calendar,
+  BookOpen,
+  CaretRight,
+  CircleNotch as Loader2,
+  CheckCircle as CheckCircle2,
+  User,
+  Phone,
+  FileText,
+  ArrowLeft,
+  Sparkle,
+  GraduationCap,
+  PaperPlaneTilt,
+  CaretLeft
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
 import toast from "react-hot-toast";
@@ -15,14 +27,15 @@ interface Faculty     { id: string; name: string; logoUrl?: string; universityId
 interface AcademicYear { id: string; yearNumber: number; universityId: string; facultyId?: string | null }
 interface Semester     { id: string; name: string; academicYearId: string }
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 const STEP_META = [
   { n: 1, label: "University" },
   { n: 2, label: "Faculty" },
   { n: 3, label: "Year & Semester" },
-  { n: 4, label: "Your Profile" },
-  { n: 5, label: "Done!" },
+  { n: 4, label: "Telegram Identity" },
+  { n: 5, label: "Your Profile" },
+  { n: 6, label: "Done!" },
 ];
 
 export default function RegisterPage() {
@@ -43,13 +56,68 @@ export default function RegisterPage() {
   const [selectedSem,     setSelectedSem]     = useState<Semester | null>(null);
 
   // Profile fields
-  const [nickname,  setNickname]  = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [bio,       setBio]       = useState("");
-  const [phone,     setPhone]     = useState("");
+  const [nickname,      setNickname]      = useState("");
+  const [studentId,     setStudentId]     = useState("");
+  const [bio,           setBio]           = useState("");
+  const [telegramPhone, setTelegramPhone] = useState("");
+  const [vCode,         setVCode]         = useState("");
+  const [vCodeSent,     setVCodeSent]     = useState(false);
+  const [vCodeVerified, setVCodeVerified] = useState(false);
+  const [retryTimer,    setRetryTimer]    = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
+
+  // ── Retry Timer Logic ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (retryTimer > 0) {
+      const t = setTimeout(() => setRetryTimer(retryTimer - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [retryTimer]);
+
+  // ── Telegram Code Logic ────────────────────────────────────────────────────
+  async function handleRequestCode() {
+    if (!telegramPhone || telegramPhone.length < 10) {
+      return toast.error("Please enter a valid Telegram phone number.");
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/v1/auth/telegram/request-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: telegramPhone }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setVCodeSent(true);
+        setRetryTimer(60);
+        toast.success("Verification code sent! Check your Telegram bot.");
+      } else {
+        toast.error(data.error || "Failed to send code. Make sure you started the bot.");
+      }
+    } finally { setSaving(false); }
+  }
+
+  async function handleVerifyCode() {
+    if (vCode.length !== 6) return toast.error("Enter the 6-digit code.");
+    setSaving(true);
+    try {
+      const res = await fetch("/api/v1/auth/telegram/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: telegramPhone, code: vCode }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setVCodeVerified(true);
+        toast.success("Telegram verified successfully!");
+        setStep(5);
+      } else {
+        toast.error(data.error || "Invalid code.");
+      }
+    } finally { setSaving(false); }
+  }
 
   // ── Load universities ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -120,13 +188,14 @@ export default function RegisterPage() {
           semesterId: selectedSem.id,
           nickname: nick,
           studentId: sid,
+          telegramPhone: telegramPhone.replace(/[^0-9]/g, ""),
+          verificationCode: vCode,
           ...(bio.trim()   ? { bio: bio.trim() }     : {}),
-          ...(phone.trim() ? { phone: phone.trim() } : {}),
         }),
       });
 
       if (res.ok) {
-        setStep(5);
+        setStep(6);
         setTimeout(() => { router.push("/dashboard"); router.refresh(); }, 2200);
       } else {
         const err = await res.json().catch(() => ({}));
@@ -199,7 +268,7 @@ export default function RegisterPage() {
                         }
                       </div>
                       <span className="flex-1 text-[14px] font-bold text-white/90">{uni.name}</span>
-                      <ChevronRight className="h-4 w-4 text-white/10" />
+                      <CaretRight className="h-4 w-4 text-white/10" />
                     </button>
                   ))}
                 </div>
@@ -234,7 +303,7 @@ export default function RegisterPage() {
                         }
                       </div>
                       <span className="flex-1 text-[14px] font-bold">{fac.name}</span>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
+                      <CaretRight className="h-4 w-4 text-muted-foreground/30" />
                     </button>
                   ))}
                 </div>
@@ -288,7 +357,7 @@ export default function RegisterPage() {
                   {selectedSem && (
                     <button onClick={() => setStep(4)}
                       className="mt-10 flex w-full items-center justify-center gap-2 rounded-2xl btn-gradient py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98]">
-                      Continue <ChevronRight className="h-4 w-4" />
+                      Continue <CaretRight className="h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -296,13 +365,77 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* ── STEP 4: Profile ── */}
+          {/* ── STEP 4: Telegram Identity ── */}
           {step === 4 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <button onClick={() => setStep(3)} className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
                 <ArrowLeft className="h-3 w-3" /> Back
               </button>
-              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Create Profile</h1>
+              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Telegram Identity</h1>
+              <p className="mb-8 text-[13px] text-white/35 font-medium">Verify your account via Telegram bot.</p>
+
+              <div className="space-y-6">
+                {!vCodeSent ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Telegram Phone Number</label>
+                      <input 
+                        value={telegramPhone} 
+                        onChange={e => setTelegramPhone(e.target.value)} 
+                        placeholder="+20 10 XXXX XXXX" 
+                        type="tel"
+                        className="w-full rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" 
+                      />
+                    </div>
+                    <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                      <p className="text-[11px] text-primary/80 leading-relaxed">
+                        💡 **Note:** You must first "Start" our bot and click **"Link via Phone"** to share your contact before requesting a code.
+                      </p>
+                      <a href="https://t.me/MedQsBot" target="_blank" className="mt-2 inline-block text-[11px] font-black text-primary underline">Open @MedQsBot</a>
+                    </div>
+                    <button onClick={handleRequestCode} disabled={saving}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl btn-gradient py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50">
+                      {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <PaperPlaneTilt className="h-5 w-5" />}
+                      {saving ? "Sending..." : "Send Verification Code"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Enter 6-Digit Code</label>
+                      <input 
+                        value={vCode} 
+                        onChange={e => setVCode(e.target.value)} 
+                        placeholder="000000" 
+                        maxLength={6}
+                        className="w-full text-center tracking-[0.5em] rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-xl font-black text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" 
+                      />
+                    </div>
+                    <button onClick={handleVerifyCode} disabled={saving}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50">
+                      {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
+                      {saving ? "Verifying..." : "Verify & Continue"}
+                    </button>
+                    <button 
+                      onClick={handleRequestCode} 
+                      disabled={saving || retryTimer > 0}
+                      className="w-full text-center text-[11px] font-bold text-white/20 hover:text-white transition-colors disabled:opacity-50"
+                    >
+                      {retryTimer > 0 ? `Resend in ${retryTimer}s` : "Didn't get a code? Send Again"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 5: Profile ── */}
+          {step === 5 && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <button onClick={() => setStep(4)} className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
+                <ArrowLeft className="h-3 w-3" /> Back
+              </button>
+              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Final Setup</h1>
               <p className="mb-8 text-[13px] text-white/35 font-medium">Complete your identity on the platform.</p>
 
               <div className="space-y-6">
@@ -319,22 +452,22 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Phone (Optional)</label>
-                  <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20 10 XXXX XXXX" maxLength={20} type="tel"
-                    className="w-full rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" />
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Short Bio (Optional)</label>
+                  <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="A bit about yourself..." maxLength={160}
+                    className="w-full rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10 resize-none h-24" />
                 </div>
 
                 <button onClick={handleFinish} disabled={saving}
                   className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl btn-gradient py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50">
-                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkle className="h-5 w-5" />}
                   {saving ? "Finalizing..." : "Join MedOneX"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* ── STEP 5: Success ── */}
-          {step === 5 && (
+          {/* ── STEP 6: Success ── */}
+          {step === 6 && (
             <div className="animate-in zoom-in-95 duration-700 flex flex-col items-center py-12 text-center">
               <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/10 text-primary shadow-inner">
                 <CheckCircle2 className="h-12 w-12" />

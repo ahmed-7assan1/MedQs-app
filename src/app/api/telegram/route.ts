@@ -63,6 +63,7 @@ bot.start(async (ctx) => {
           ...Markup.inlineKeyboard([
             [Markup.button.webApp('🚀 Open MedOneX TMA', `${BASE_URL}/tma`)],
             [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
+            [Markup.button.callback('📱 Link via Phone (Registration)', 'auth_phone')],
             [Markup.button.callback('📝 Quick Register', 'auth_register')]
           ])
         }
@@ -104,6 +105,32 @@ bot.action('auth_register', async (ctx) => {
     data: { tempData: { step: 'awaiting_name' } }
   });
   await ctx.editMessageText('📝 Let\'s get you started! What is your full name?');
+});
+
+bot.action('auth_phone', async (ctx) => {
+  await ctx.reply(
+    "📱 Please share your contact to verify your phone number on the platform:",
+    Markup.keyboard([
+      [Markup.button.contactRequest("📤 Share My Contact")]
+    ]).oneTime().resize()
+  );
+});
+
+bot.on('contact', async (ctx) => {
+  const contact = ctx.message.contact;
+  const telegramId = ctx.from.id.toString();
+  const phoneNumber = contact.phone_number.replace('+', '');
+
+  await (prisma as any).botUser.upsert({
+    where: { telegramId },
+    update: { phoneNumber },
+    create: { telegramId, phoneNumber }
+  });
+
+  await ctx.reply(
+    `✅ Phone number ${phoneNumber} is now linked to your Telegram account!\n\nYou can now go back to the registration page and request a verification code.`,
+    Markup.removeKeyboard()
+  );
 });
 
 // ─── Academic Navigation ───

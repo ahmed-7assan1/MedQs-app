@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const currentUser = session?.user as any;
   const userRole = currentUser?.role;
 
-  if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
+  if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN' && userRole !== 'LEADER') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -24,15 +24,18 @@ export async function POST(req: Request) {
     // Single user target
     targetUsers = [{ telegramId }];
   } else {
-    // Broadcast target - Filter by admin's semester if not SUPER_ADMIN
     const adminSemesterId = currentUser?.semesterId;
+    const isSuper = userRole === "SUPER_ADMIN";
     
     targetUsers = await prisma.user.findMany({
       where: { 
         telegramId: { not: null },
         telegramVerified: true,
-        // Filter by semester if it's a regular ADMIN
-        ...(userRole === "ADMIN" && adminSemesterId ? { semesterId: adminSemesterId } : {})
+        // Scoping: If not SUPER_ADMIN, filter by university AND semester if available
+        ...(!isSuper ? {
+          universityId: currentUser?.universityId,
+          ...(adminSemesterId ? { semesterId: adminSemesterId } : {})
+        } : {})
       },
       select: { telegramId: true }
     });

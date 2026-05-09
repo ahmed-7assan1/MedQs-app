@@ -11,23 +11,41 @@ export default async function AdminUsersPage({
 }) {
   const session = await auth();
   const scope = await getSessionScope(session);
-  const role = (session?.user as any)?.role as string | undefined;
-  if (!scope || (role !== "ADMIN" && role !== "SUPER_ADMIN")) redirect("/dashboard");
-  if (role === "ADMIN" && !scope.universityId) redirect("/admin/settings");
+  const user = session?.user as any;
+  const role = user?.role as string | undefined;
+  const isSuper = isSuperAdmin(role);
+  const isAdminOrLeader = role === "ADMIN" || role === "LEADER";
+
+  if (!scope || (!isAdminOrLeader && !isSuper)) redirect("/dashboard");
+  
+  // If not super admin, they must be scoped to at least a university
+  if (!isSuper && !scope.universityId) redirect("/admin/settings");
 
   const page = Number(searchParams.page ?? 1);
   const q = searchParams.q ?? "";
   const limit = 25;
 
-  const baseWhere =
-    role === "ADMIN"
-      ? { universityId: scope.universityId! }
-      : {};
+  // Scoping Logic
+  const baseWhere: any = {};
+  if (!isSuper) {
+    baseWhere.universityId = scope.universityId;
+    if (scope.semesterId) {
+      baseWhere.semesterId = scope.semesterId;
+    }
+  }
+
   const where = q
     ? {
         AND: [
           baseWhere,
-          { OR: [{ name: { contains: q, mode: "insensitive" as const } }, { email: { contains: q, mode: "insensitive" as const } }] },
+          { 
+            OR: [
+              { name: { contains: q, mode: "insensitive" as const } }, 
+              { nickname: { contains: q, mode: "insensitive" as const } },
+              { telegramPhone: { contains: q, mode: "insensitive" as const } },
+              { studentCode: { contains: q, mode: "insensitive" as const } }
+            ] 
+          },
         ],
       }
     : baseWhere;

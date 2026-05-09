@@ -7,6 +7,7 @@ export type SessionScope = {
   semesterId: string | null;
   universityId: string | null;
   facultyId: string | null;
+  isLeader: boolean;
 };
 
 export async function getSessionScope(session: Session | null): Promise<SessionScope | null> {
@@ -18,7 +19,7 @@ export async function getSessionScope(session: Session | null): Promise<SessionS
 
   // Prefer DB as source of truth (handles stale token fields).
   const db = await prisma.user
-    .findUnique({ where: { id: userId }, select: { universityId: true, semesterId: true, facultyId: true } })
+    .findUnique({ where: { id: userId }, select: { universityId: true, semesterId: true, facultyId: true, isLeader: true } })
     .catch(() => null);
 
   return {
@@ -27,19 +28,20 @@ export async function getSessionScope(session: Session | null): Promise<SessionS
     semesterId: db?.semesterId ?? (tokenSem ?? null),
     universityId: db?.universityId ?? (tokenUni ?? null),
     facultyId: db?.facultyId ?? null,
+    isLeader: db?.isLeader ?? false,
   };
 }
 
 export function isAdminRole(role: unknown): boolean {
-  return role === "ADMIN" || role === "SUPER_ADMIN";
+  return role === "ADMIN" || role === "SUPER_ADMIN" || role === "LEADER";
 }
 
 export function isSuperAdmin(role: unknown): boolean {
   return role === "SUPER_ADMIN";
 }
 
-/** Returns true if this is a scoped ADMIN (non-super) with a facultyId restriction */
+/** Returns true if this is a scoped ADMIN/LEADER (non-super) with a semester/faculty restriction */
 export function isScopedAdmin(scope: SessionScope): boolean {
-  return scope.role === "ADMIN" && !!scope.facultyId;
+  return (scope.role === "ADMIN" || scope.role === "LEADER") && !!scope.semesterId;
 }
 
