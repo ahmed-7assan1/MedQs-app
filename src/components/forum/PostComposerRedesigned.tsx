@@ -1,18 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Image as ImageIcon,
-  PaperPlaneTilt,
-  CircleNotch,
-  X,
+import { useState, useRef, useEffect } from "react";
+import { 
+  Image as ImageIcon, 
+  PaperPlaneTilt, 
+  CircleNotch, 
+  X, 
   Microphone,
-  DownloadSimple,
-  Video,
-  Smiley,
-  Textbox,
-  Globe,
-  Hash
+  VideoCamera,
+  CalendarBlank,
+  TextAlignLeft,
+  Plus
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { VoiceRecorder } from "./VoiceRecorder";
@@ -37,10 +35,9 @@ interface Props {
   ) => Promise<boolean>;
   forums?: { id: string; name: string }[];
   placeholder?: string;
-  compact?: boolean;
 }
 
-export function PostComposerRedesigned({ user, onPost, forums, placeholder, compact }: Props) {
+export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [content, setContent] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
@@ -52,13 +49,7 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder, comp
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const initials = user.name
-    ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-    : "?";
-
-  const avatarUrl =
-    user.image ||
-    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name || "user")}`;
+  const avatarUrl = user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name || "user")}`;
 
   const hasContent = content.trim().length > 0 || attachments.length > 0;
 
@@ -68,7 +59,6 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder, comp
     const firstImage = attachments.find((a) => a.type === "image")?.url || "";
     const ok = await onPost(content, firstImage, {
       isForumPost: true,
-      isChatMessage: false,
       forumId: selectedForumId || undefined,
       attachments,
     });
@@ -76,35 +66,19 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder, comp
       setContent("");
       setAttachments([]);
       setIsExpanded(false);
-      if (textareaRef.current) textareaRef.current.style.height = "auto";
     }
     setIsPosting(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handlePost();
-  };
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-    const el = e.target;
-    el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 180) + "px";
-  };
-
   const uploadToTelegram = async (file: File | Blob, name?: string) => {
     const fd = new FormData();
-    const fileName = name || (file instanceof File ? file.name : `file_${Date.now()}`);
-    fd.append("file", file, fileName);
-    const res = await fetch("/api/v1/debug/telegram-direct-upload", {
-      method: "POST",
-      body: fd,
-    });
+    fd.append("file", file, name || (file instanceof File ? file.name : "file"));
+    const res = await fetch("/api/v1/debug/telegram-direct-upload", { method: "POST", body: fd });
     const data = await res.json();
     if (!data.success) throw new Error("Upload failed");
     let type: "image" | "audio" | "file" = "file";
-    if ((file as File).type?.startsWith("image/")) type = "image";
-    else if ((file as File).type?.startsWith("audio/")) type = "audio";
+    if (file.type?.startsWith("image/")) type = "image";
+    else if (file.type?.startsWith("audio/")) type = "audio";
     return {
       url: `/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`,
       type,
@@ -115,307 +89,143 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder, comp
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    if (attachments.length + files.length > 10) {
-      toast.error("Max 10 attachments");
-      return;
-    }
     setIsUploading(true);
     try {
-      const results = await Promise.all(files.map((f) => uploadToTelegram(f)));
-      setAttachments((prev) => [...prev, ...results]);
+      const results = await Promise.all(files.map(f => uploadToTelegram(f)));
+      setAttachments(prev => [...prev, ...results]);
     } catch {
-      toast.error("Upload failed. Try again.");
+      toast.error("Upload failed");
     } finally {
       setIsUploading(false);
       e.target.value = "";
     }
   };
 
-  const handleVoiceStop = async (blob: Blob) => {
-    setIsRecordingMode(false);
-    setIsUploading(true);
-    try {
-      const att = await uploadToTelegram(blob, `voice_${Date.now()}.webm`);
-      setAttachments((prev) => [...prev, att]);
-    } catch {
-      toast.error("Upload failed");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const removeAttachment = (i: number) =>
-    setAttachments((prev) => prev.filter((_, idx) => idx !== i));
-
-  const images = attachments.filter((a) => a.type === "image");
-  const others = attachments.filter((a) => a.type !== "image");
+  const images = attachments.filter(a => a.type === "image");
+  const others = attachments.filter(a => a.type !== "image");
 
   return (
-    <div
-      className={cn(
-        "rounded-[24px] bg-[#18172A]/80 border border-white/[0.06] backdrop-blur-2xl transition-all duration-300 overflow-hidden",
-        isExpanded ? "shadow-2xl shadow-black/40 border-white/[0.1]" : "shadow-lg"
-      )}
-    >
-      {/* ── Collapsed pill ── */}
-      {!isExpanded && (
-        <button
-          onClick={() => setIsExpanded(true)}
-          className="w-full flex items-center gap-3 p-4"
-        >
-          <img
-            src={avatarUrl}
-            alt=""
-            className="h-10 w-10 rounded-2xl object-cover border border-white/10 flex-shrink-0"
-          />
-          <span className="flex-1 text-left text-[15px] text-white/20 font-medium">
-            {placeholder || "What's on your mind?"}
-          </span>
-          <div className="flex items-center gap-2 opacity-40">
-            <ImageIcon size={20} />
-            <Microphone size={20} />
+    <div className={cn(
+      "relative rounded-[28px] bg-[#1C1B22]/60 backdrop-blur-[30px] border border-white/[0.08] shadow-2xl transition-all duration-500 overflow-hidden",
+      isExpanded ? "ring-1 ring-white/10" : ""
+    )}>
+      {/* Mesh Glow Internal */}
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[60px] pointer-events-none" />
+
+      <div className="relative p-5">
+        <div className="flex gap-4">
+          <img src={avatarUrl} className="h-10 w-10 rounded-full border border-white/10 shrink-0" alt="" />
+          <div className="flex-1 min-w-0 pt-2">
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(e) => {
+                setContent(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
+              onFocus={() => setIsExpanded(true)}
+              placeholder={placeholder || `What's on your mind, ${user.name.split(" ")[0]}?`}
+              className="w-full bg-transparent border-none p-0 text-[16px] text-white/90 placeholder:text-white/20 resize-none focus:ring-0 font-medium leading-snug"
+              style={{ minHeight: "44px" }}
+            />
           </div>
-        </button>
-      )}
+        </div>
 
-      {/* ── Expanded state ── */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col"
-          >
-            {/* Header */}
-            <div className="flex items-center gap-3 p-4 pb-3 border-b border-white/[0.05]">
-              <img
-                src={avatarUrl}
-                alt=""
-                className="h-10 w-10 rounded-2xl object-cover border border-white/10 flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-black text-white">{user.name}</p>
-                {forums && forums.length > 1 && (
-                  <select
-                    value={selectedForumId}
-                    onChange={(e) => setSelectedForumId(e.target.value)}
-                    className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#AFA9EC] bg-transparent border-none focus:outline-none cursor-pointer"
-                  >
-                    {forums.map((f) => (
-                      <option key={f.id} value={f.id} className="bg-[#18172A] text-white">
-                        {f.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-              <button
-                onClick={() => {
-                  setIsExpanded(false);
-                  setContent("");
-                  setAttachments([]);
-                }}
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 text-white/30 hover:bg-white/10 transition-all"
-              >
-                <X size={16} weight="bold" />
-              </button>
-            </div>
-
-            {/* Recording Mode */}
-            {isRecordingMode ? (
-              <div className="p-4">
-                <VoiceRecorder
-                  onStop={handleVoiceStop}
-                  onCancel={() => setIsRecordingMode(false)}
-                />
-              </div>
-            ) : (
-              <>
-                {/* Textarea */}
-                <div className="px-4 pt-3 pb-2">
-                  <textarea
-                    ref={textareaRef}
-                    value={content}
-                    onChange={handleTextChange}
-                    onKeyDown={handleKeyDown}
-                    autoFocus
-                    placeholder="What's on your mind?"
-                    rows={3}
-                    className="w-full bg-transparent border-none p-0 text-[16px] text-white placeholder:text-white/15 resize-none focus:outline-none font-medium leading-relaxed min-h-[80px] max-h-[180px] overflow-y-auto"
-                  />
-                </div>
-
-                {/* Image Grid Preview */}
-                {images.length > 0 && (
-                  <div
-                    className={cn(
-                      "mx-4 mb-3 grid gap-1.5 rounded-2xl overflow-hidden",
-                      images.length === 1 ? "grid-cols-1" : images.length === 2 ? "grid-cols-2" : images.length >= 3 ? "grid-cols-3" : ""
-                    )}
-                  >
-                    {images.slice(0, 5).map((img, i) => (
-                      <div key={i} className="relative group aspect-square">
-                        <img
-                          src={img.url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                        {i === 4 && images.length > 5 && (
-                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <span className="text-2xl font-black text-white">+{images.length - 5}</span>
-                          </div>
-                        )}
-                        <button
-                          onClick={() => {
-                            const idx = attachments.findIndex((a) => a.url === img.url);
-                            if (idx !== -1) removeAttachment(idx);
-                          }}
-                          className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
-                        >
-                          <X size={12} weight="bold" className="text-white" />
-                        </button>
-                      </div>
-                    ))}
-                    {/* Add More */}
-                    {images.length < 10 && (
-                      <label className="aspect-square flex items-center justify-center bg-white/[0.03] border border-dashed border-white/10 rounded-xl cursor-pointer hover:bg-white/[0.06] transition-all group">
-                        <div className="flex flex-col items-center gap-1 text-white/20 group-hover:text-white/40 transition-colors">
-                          <span className="text-2xl font-thin">+</span>
-                          <span className="text-[9px] font-black uppercase tracking-widest">Add More</span>
-                        </div>
-                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileInput} />
-                      </label>
-                    )}
-                  </div>
-                )}
-
-                {/* Non-image attachments */}
-                {others.length > 0 && (
-                  <div className="mx-4 mb-3 flex flex-wrap gap-2">
-                    {others.map((att, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 group"
+        <AnimatePresence>
+          {(isExpanded || attachments.length > 0) && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              {/* Media Grid */}
+              {(images.length > 0 || isUploading) && (
+                <div className="flex flex-wrap gap-3 mt-5 px-1">
+                  {images.map((img, i) => (
+                    <div key={i} className="relative group h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden border border-white/10">
+                      <img src={img.url} className="h-full w-full object-cover" alt="" />
+                      <button 
+                        onClick={() => setAttachments(prev => prev.filter(a => a.url !== img.url))}
+                        className="absolute top-1 right-1 h-6 w-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
                       >
-                        {att.type === "audio" ? (
-                          <Microphone size={16} weight="fill" className="text-[#AFA9EC]" />
-                        ) : (
-                          <DownloadSimple size={16} weight="bold" className="text-[#AFA9EC]" />
-                        )}
-                        <span className="text-[11px] font-black text-white/50 uppercase tracking-widest">
-                          {att.type === "audio" ? "Voice Note" : "File"}
-                        </span>
-                        <button
-                          onClick={() => {
-                            const idx = attachments.findIndex((a) => a.url === att.url);
-                            if (idx !== -1) removeAttachment(idx);
-                          }}
-                          className="text-white/20 hover:text-red-400 transition-colors ml-1"
-                        >
-                          <X size={12} weight="bold" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Toolbar */}
-            <div className="flex items-center gap-2 px-4 py-3 border-t border-white/[0.05]">
-              {/* Left: action icons */}
-              <div className="flex items-center gap-0.5 flex-1">
-                <label
-                  className={cn(
-                    "h-9 w-9 flex items-center justify-center rounded-xl transition-all cursor-pointer",
-                    "text-white/30 hover:text-[#AFA9EC] hover:bg-[#534AB7]/10"
+                        <X size={12} weight="bold" className="text-white" />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {isUploading && (
+                    <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl bg-white/5 border border-dashed border-white/10 flex items-center justify-center">
+                      <CircleNotch size={24} className="animate-spin text-white/20" />
+                    </div>
                   )}
-                  title="Add Photo"
-                >
-                  <ImageIcon size={20} weight="bold" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileInput}
-                    disabled={isUploading}
-                  />
-                </label>
 
-                <label
-                  className="h-9 w-9 flex items-center justify-center rounded-xl text-white/30 hover:text-[#AFA9EC] hover:bg-[#534AB7]/10 transition-all cursor-pointer"
-                  title="Add File"
-                >
-                  <Textbox size={20} weight="bold" />
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileInput}
-                    disabled={isUploading}
-                  />
-                </label>
-
-                <button
-                  onClick={() => setIsRecordingMode(!isRecordingMode)}
-                  disabled={isUploading}
-                  className={cn(
-                    "h-9 w-9 flex items-center justify-center rounded-xl transition-all",
-                    isRecordingMode
-                      ? "bg-red-500/10 text-red-400"
-                      : "text-white/30 hover:text-[#AFA9EC] hover:bg-[#534AB7]/10"
-                  )}
-                  title="Voice Note"
-                >
-                  <Microphone size={20} weight={isRecordingMode ? "fill" : "bold"} />
-                </button>
-
-                {isUploading && (
-                  <div className="flex items-center gap-1.5 ml-2">
-                    <CircleNotch size={14} className="animate-spin text-[#AFA9EC]" />
-                    <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">
-                      Uploading...
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Char count */}
-              {content.length > 3000 && (
-                <span
-                  className={cn(
-                    "text-[10px] font-black",
-                    content.length > 4800 ? "text-red-400" : "text-white/20"
-                  )}
-                >
-                  {5000 - content.length}
-                </span>
+                  <label className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-white/10 transition-all group">
+                    <Plus size={20} className="text-white/20 group-hover:text-white/40" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/15 group-hover:text-white/30">Add More</span>
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileInput} />
+                  </label>
+                </div>
               )}
 
-              {/* Post Button */}
-              <button
-                onClick={handlePost}
-                disabled={isPosting || !hasContent}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all",
-                  hasContent
-                    ? "bg-[#534AB7] text-white shadow-lg shadow-[#534AB7]/40 hover:bg-[#6056CD] hover:scale-[1.02] active:scale-[0.98]"
-                    : "bg-white/[0.04] text-white/20 border border-white/[0.04] cursor-not-allowed"
-                )}
-              >
-                {isPosting ? (
-                  <CircleNotch size={16} className="animate-spin" />
-                ) : (
-                  <PaperPlaneTilt size={16} weight="fill" />
-                )}
-                Post
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {/* Bottom Action Bar */}
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/[0.05]">
+                <div className="flex items-center gap-1">
+                  <button className="h-10 w-10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <TextAlignLeft size={20} weight="bold" />
+                  </button>
+                  <label className="h-10 px-3 flex items-center gap-2 text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer">
+                    <ImageIcon size={20} weight="fill" />
+                    <span className="text-[11px] font-black uppercase tracking-widest">Gallery</span>
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileInput} />
+                  </label>
+                  <button className="h-10 w-10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <VideoCamera size={20} weight="bold" />
+                  </button>
+                  <button className="h-10 w-10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <CalendarBlank size={20} weight="bold" />
+                  </button>
+                  <button 
+                    onClick={() => setIsRecordingMode(!isRecordingMode)}
+                    className={cn("h-10 w-10 flex items-center justify-center rounded-xl transition-all", isRecordingMode ? "text-primary bg-primary/10" : "text-white/30 hover:text-white hover:bg-white/5")}
+                  >
+                    <Microphone size={20} weight="bold" />
+                  </button>
+                </div>
+
+                <button
+                  onClick={handlePost}
+                  disabled={!hasContent || isPosting}
+                  className={cn(
+                    "px-8 py-2.5 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all shadow-xl",
+                    hasContent 
+                      ? "bg-[#1D74FF] text-white shadow-[#1D74FF]/30 hover:bg-[#3483FF] hover:scale-105 active:scale-95" 
+                      : "bg-white/5 text-white/10 cursor-not-allowed"
+                  )}
+                >
+                  {isPosting ? <CircleNotch size={18} className="animate-spin" /> : "Post"}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {isRecordingMode && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="mt-4">
+              <VoiceRecorder 
+                onStop={async (blob) => {
+                  const att = await uploadToTelegram(blob, `voice_${Date.now()}.webm`);
+                  setAttachments(prev => [...prev, att]);
+                  setIsRecordingMode(false);
+                }}
+                onCancel={() => setIsRecordingMode(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
