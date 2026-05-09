@@ -1,24 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
-import { 
-  Heart, 
-  ChatCircle, 
-  ShareNetwork, 
-  DotsThreeOutline, 
-  PushPin, 
-  Lock, 
-  Trash, 
-  CaretLeft, 
-  CaretRight, 
-  XCircle,
-  PaperPlaneTilt,
-  CheckCircle
+import {
+  Heart,
+  ChatCircle,
+  ShareNetwork,
+  DotsThreeOutline,
+  PushPin,
+  Trash,
+  BookmarkSimple,
 } from "@phosphor-icons/react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
-import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
+import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { CommentThread } from "./CommentThread";
 import toast from "react-hot-toast";
@@ -26,76 +21,107 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PostGallery } from "./PostGallery";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
-type ReactType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry' | null;
-
 interface Props {
   post: any;
   currentUserId?: string;
   currentUserRole?: string;
   currentUserUniversityId?: string;
-  isInitialPinned?: boolean;
 }
 
-export function PostCardRedesigned({ post, currentUserId, currentUserRole, currentUserUniversityId }: Props) {
+function parseAttachments(raw: any): any[] {
+  if (!raw) return [];
+  if (typeof raw === "string") {
+    try { return JSON.parse(raw); } catch { return []; }
+  }
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "object") return Object.values(raw);
+  return [];
+}
+
+function sanitizeUrl(url: string) {
+  if (!url || typeof url !== "string") return url;
+  if (url.includes("localhost:3000")) return url.split("localhost:3000")[1];
+  return url;
+}
+
+function getTimeAgo(date: string) {
+  try {
+    return formatDistanceToNow(new Date(date)) + " ago";
+  } catch {
+    return "";
+  }
+}
+
+// Highlight #hashtags in content
+function renderContent(text: string) {
+  const parts = text.split(/(#\w+)/g);
+  return parts.map((part, i) =>
+    part.startsWith("#") ? (
+      <span key={i} className="text-[#534AB7] font-bold">{part}</span>
+    ) : (
+      part
+    )
+  );
+}
+
+export function PostCardRedesigned({
+  post,
+  currentUserId,
+  currentUserRole,
+  currentUserUniversityId,
+}: Props) {
   const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
+  const [isLiked, setIsLiked] = useState(post.likedByMe ?? false);
   const [liking, setLiking] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
-  const [activeReaction, setActiveReaction] = useState<ReactType>(post.likedByMe ? 'like' : null);
-  const [showReacts, setShowReacts] = useState(false);
-  const reactTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   if (isDeleted) return null;
 
-  const initials = post.author.name
-    ? post.author.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
-    : "??";
+  const avatarUrl =
+    post.author?.image ||
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author?.name || "user")}`;
 
-  // Helper to fix legacy localhost URLs stored in DB
-  const sanitizeUrl = (url: string) => {
-    if (!url) return url;
-    if (typeof url !== 'string') return url;
-    if (url.includes("localhost:3000")) {
-      return url.split("localhost:3000")[1]; // Make it relative
-    }
-    return url;
-  };
-
-  // Smart merge of legacy imageUrl and new attachments array
+  // Merge legacy imageUrl + new attachments array
   const attachments = (() => {
-    let list: any[] = [];
-    let rawAttachments = post.attachments;
-
-    // Handle stringified JSON from database
-    if (typeof rawAttachments === 'string') {
-      try {
-        rawAttachments = JSON.parse(rawAttachments);
-      } catch (e) {
-        rawAttachments = [];
-      }
-    }
-
-    if (Array.isArray(rawAttachments)) {
-      list = rawAttachments.map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
-    } else if (rawAttachments && typeof rawAttachments === 'object') {
-      list = Object.values(rawAttachments).map((a: any) => ({ ...a, url: sanitizeUrl(a.url) }));
-    }
-
-    const imgUrl = sanitizeUrl(post.imageUrl);
-    // If we have a legacy imageUrl that isn't in the attachments list, add it
-    if (imgUrl && !list.some(a => a.url === imgUrl)) {
-      list.unshift({ url: imgUrl, type: 'image' });
+    const list = parseAttachments(post.attachments).map((a: any) => ({
+      ...a,
+      url: sanitizeUrl(a.url),
+    }));
+    const img = sanitizeUrl(post.imageUrl);
+    if (img && !list.some((a: any) => a.url === img)) {
+      list.unshift({ url: img, type: "image" });
     }
     return list;
   })();
 
-  const canDelete = post.authorId === currentUserId || 
-                    currentUserRole === "SUPER_ADMIN" || 
-                    (currentUserRole === "ADMIN" && currentUserUniversityId === post.universityId);
+  const canDelete =
+    post.authorId === currentUserId ||
+    currentUserRole === "SUPER_ADMIN" ||
+    (currentUserRole === "ADMIN" && currentUserUniversityId === post.universityId);
+
+  const handleLike = async () => {
+    if (!currentUserId) return toast.error("Sign in to like");
+    setLiking(true);
+    const prev = isLiked;
+    setIsLiked(!isLiked);
+    setLikeCount((c: number) => c + (isLiked ? -1 : 1));
+    try {
+      await fetch(`/api/v1/posts/${post.id}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: isLiked ? null : "like" }),
+      });
+    } catch {
+      setIsLiked(prev);
+      setLikeCount((c: number) => c + (isLiked ? 1 : -1));
+    } finally {
+      setLiking(false);
+    }
+  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -116,141 +142,89 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
     }
   };
 
-  const getReactionIcon = (r: ReactType) => {
-    switch (r) {
-      case 'love': return <Heart size={24} weight="fill" className="text-red-500" />;
-      case 'haha': return <span className="text-xl animate-bounce">😆</span>;
-      case 'wow': return <span className="text-xl animate-pulse">🔥</span>;
-      case 'sad': return <span className="text-xl">💡</span>;
-      case 'angry': return <span className="text-xl rotate-12">🎯</span>;
-      default: return <Heart size={24} weight="fill" className="text-primary" />;
-    }
-  };
-
-  const handleReact = async (type: ReactType) => {
-    if (!currentUserId) return toast.error("Sign in to like");
-    if (reactTimeoutRef.current) clearTimeout(reactTimeoutRef.current);
-    setShowReacts(false);
-
-    if (activeReaction === type) type = null;
-
-    setLiking(true);
-    const wasLiked = activeReaction !== null;
-    const isLiked = type !== null;
-
-    const prevReaction = activeReaction;
-    setActiveReaction(type);
-    
-    if (wasLiked !== isLiked) {
-       setLikeCount((c: number) => c + (isLiked ? 1 : -1));
-    }
-
-    try {
-      await fetch(`/api/v1/posts/${post.id}/like`, { 
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type })
-      });
-    } catch {
-      setActiveReaction(prevReaction);
-      if (wasLiked !== isLiked) {
-         setLikeCount((c: number) => c + (isLiked ? -1 : 1));
-      }
-    } finally {
-      setLiking(false);
-    }
-  };
-
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/forum/post/${post.id}`);
-      toast.success("Connection link copied to clipboard!");
+      toast.success("Link copied!");
     } catch {
-      toast.error("Handshake failed — could not copy link");
+      toast.error("Could not copy link");
     }
   };
 
-  const badge = getExpiryBadge(post.expiresAt, post.isPinned);
+  const hasHashtags = post.content?.includes("#");
+  const commentCount = post._count?.comments ?? 0;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-4 sm:mb-8 bg-[#161523]/60 backdrop-blur-xl border-y sm:border border-white/[0.05] sm:rounded-[32px] overflow-hidden shadow-2xl"
+      transition={{ duration: 0.3 }}
+      className="rounded-[20px] sm:rounded-[24px] bg-[#16152A]/70 border border-white/[0.06] backdrop-blur-xl overflow-hidden shadow-xl hover:border-white/[0.1] transition-colors duration-300"
     >
-      {/* Header: Compact on Mobile */}
-      <div className="flex items-center justify-between p-3 sm:p-5">
-        <div className="flex items-center gap-3">
-          <Link href={`/profile/u/${post.author.id}`} className="relative h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-[#534AB7] to-[#AFA9EC] p-[2px]">
-             <div className="h-full w-full rounded-full bg-[#161523] p-[1px] overflow-hidden">
-               <img 
-                 src={post.author.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author.name || "User")}`} 
-                 className="h-full w-full rounded-full object-cover" 
-                 alt="" 
-               />
-             </div>
-             <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-emerald-500 rounded-full border-2 border-[#161523]" />
-          </Link>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <Link href={`/profile/u/${post.author.id}`} className="text-sm sm:text-[15px] font-black text-white hover:text-[#AFA9EC] transition-colors tracking-tight">
-                {post.author.name}
-              </Link>
-              {post.author.rank && (
-                <span className="px-1.5 py-0.5 rounded-md bg-[#534AB7]/20 text-[#AFA9EC] text-[8px] font-black uppercase tracking-widest border border-[#534AB7]/30">
-                  {post.author.rank.label}
-                </span>
-              )}
-              {post.isPinned && <PushPin size={16} weight="fill" className="text-[#AFA9EC]" />}
-            </div>
-            <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/30 uppercase tracking-widest">
-              <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
-            </div>
+      {/* ── Header ── */}
+      <div className="flex items-center gap-3 p-4 pb-0">
+        <Link href={`/profile/u/${post.author?.id}`} className="relative flex-shrink-0">
+          <img
+            src={avatarUrl}
+            alt=""
+            className="h-11 w-11 rounded-2xl object-cover border border-white/10"
+          />
+          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 rounded-full border-2 border-[#16152A]" />
+        </Link>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Link
+              href={`/profile/u/${post.author?.id}`}
+              className="text-[14px] font-black text-white hover:text-[#AFA9EC] transition-colors leading-tight"
+            >
+              {post.author?.name}
+            </Link>
+            {post.author?.rank && (
+              <span className="px-1.5 py-0.5 rounded-md bg-[#534AB7]/20 text-[#AFA9EC] text-[8px] font-black uppercase tracking-widest border border-[#534AB7]/20">
+                {post.author.rank.label}
+              </span>
+            )}
+            {post.isPinned && (
+              <PushPin size={12} weight="fill" className="text-amber-400" />
+            )}
           </div>
+          <p className="text-[11px] text-white/25 font-bold uppercase tracking-widest mt-0.5">
+            {getTimeAgo(post.createdAt)}
+          </p>
         </div>
-        
-        <div className="flex items-center gap-1 relative">
-          {badge && (
-            <div className={cn(
-              "hidden sm:block px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-wider",
-              badge.color
-            )}>
-              {badge.label}
-            </div>
-          )}
-          <button 
+        <div className="relative">
+          <button
             onClick={() => setShowOptions(!showOptions)}
-            className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-all"
+            className="h-8 w-8 flex items-center justify-center rounded-full text-white/25 hover:text-white hover:bg-white/5 transition-all"
           >
-            <DotsThreeOutline size={20} weight="fill" />
+            <DotsThreeOutline size={18} weight="fill" />
           </button>
-
           <AnimatePresence>
             {showOptions && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowOptions(false)} />
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: -8 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                  className="absolute right-0 top-full mt-2 w-48 bg-[#1f1d36] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                  exit={{ opacity: 0, scale: 0.9, y: -8 }}
+                  className="absolute right-0 top-full mt-1 w-44 bg-[#1f1e36] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden py-1"
                 >
+                  <button
+                    onClick={() => { setShowOptions(false); handleShare(); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-white/50 hover:bg-white/5 hover:text-white transition-all text-[12px] font-bold"
+                  >
+                    <ShareNetwork size={16} weight="bold" />
+                    Copy link
+                  </button>
                   {canDelete && (
-                    <button 
+                    <button
                       onClick={() => { setShowOptions(false); setShowDeleteConfirm(true); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 transition-all text-xs font-black uppercase tracking-widest"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-all text-[12px] font-bold"
                     >
-                      <Trash size={18} weight="bold" />
-                      Delete Asset
+                      <Trash size={16} weight="bold" />
+                      Delete post
                     </button>
                   )}
-                  <button 
-                    onClick={() => { setShowOptions(false); handleShare(); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-white/40 hover:bg-white/5 transition-all text-xs font-black uppercase tracking-widest"
-                  >
-                    <ShareNetwork size={18} weight="bold" />
-                    Copy Signal
-                  </button>
                 </motion.div>
               </>
             )}
@@ -258,112 +232,96 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
         </div>
       </div>
 
-      {/* Media: Edge-to-Edge on Mobile */}
-      <div className="relative">
-        <PostGallery attachments={attachments} />
-      </div>
-
-      {/* Action Bar: Instagram Style */}
-      <div className="px-4 py-3">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-5">
-            <div className="relative group/react">
-              <button 
-                onClick={() => handleReact('like')}
-                onContextMenu={(e) => { e.preventDefault(); setShowReacts(true); }}
-                className={cn(
-                  "transition-all active:scale-125",
-                  activeReaction ? "text-red-500" : "text-white hover:text-white/70"
-                )}
-              >
-                {activeReaction ? (
-                  activeReaction === 'like' ? <Heart size={28} weight="fill" className="text-red-500" /> : getReactionIcon(activeReaction)
-                ) : (
-                  <Heart size={28} weight="bold" />
-                )}
-              </button>
-              
-              <AnimatePresence>
-                {showReacts && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10, scale: 0.9 }}
-                    animate={{ opacity: 1, y: -20, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                    className="absolute bottom-full mb-4 left-0 bg-[#161523] border border-white/10 rounded-2xl p-2 flex gap-2 shadow-2xl z-50 backdrop-blur-xl"
-                  >
-                    {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as ReactType[]).map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => handleReact(r)}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-all hover:scale-125"
-                      >
-                        {getReactionIcon(r)}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+      {/* ── Content ── */}
+      {post.content?.trim() && (
+        <div className="px-4 pt-3 pb-1 text-[14px] leading-relaxed text-white/85 font-medium">
+          {hasHashtags ? (
+            <p className="whitespace-pre-wrap break-words">
+              {renderContent(post.content)}
+            </p>
+          ) : (
+            <div className="prose prose-invert prose-sm max-w-none prose-p:my-0.5">
+              <ReactMarkdown components={markdownComponentsWithImages}>
+                {enhancePlainImageUrls(post.content)}
+              </ReactMarkdown>
             </div>
-
-            <button 
-              onClick={() => setShowComments(!showComments)}
-              className="text-white hover:text-white/70 transition-all active:scale-125"
-            >
-              <ChatCircle size={28} weight="bold" />
-            </button>
-            
-            <button 
-              onClick={handleShare}
-              className="text-white hover:text-white/70 transition-all active:scale-125"
-            >
-              <ShareNetwork size={28} weight="bold" />
-            </button>
-          </div>
-          
-          <button className="text-white hover:text-white/70 transition-all active:scale-125">
-             <PushPin size={28} weight="bold" />
-          </button>
+          )}
         </div>
+      )}
 
-        {/* Engagements Count */}
-        <div className="text-[13px] font-black text-white mb-2 tracking-tight">
-          {likeCount.toLocaleString()} Engagements
+      {/* ── Media Gallery ── */}
+      {attachments.length > 0 && (
+        <div className="mt-2 mx-4 mb-1 rounded-2xl overflow-hidden">
+          <PostGallery attachments={attachments} />
         </div>
+      )}
 
-        {/* Content (Caption) */}
-        <div className="text-sm leading-relaxed text-white/90 font-medium">
-          <span className="font-black mr-2 text-[14px]">{post.author.name}</span>
-          <div className="inline prose prose-invert prose-sm max-w-none">
-            <ReactMarkdown components={markdownComponentsWithImages}>
-              {enhancePlainImageUrls(post.content)}
-            </ReactMarkdown>
-          </div>
-        </div>
+      {/* ── Action Bar ── */}
+      <div className="flex items-center gap-1 px-3 py-3">
+        {/* Like */}
+        <button
+          onClick={handleLike}
+          disabled={liking}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.96]",
+            isLiked
+              ? "text-red-400 bg-red-500/10"
+              : "text-white/40 hover:bg-white/5 hover:text-white"
+          )}
+        >
+          <Heart size={20} weight={isLiked ? "fill" : "bold"} />
+          <span className="text-[12px] font-black">
+            {likeCount > 0 ? likeCount.toLocaleString() : "Like"}
+          </span>
+        </button>
 
-        {/* Comments Link */}
-        {!showComments && post._count?.comments > 0 && (
-          <button 
-            onClick={() => setShowComments(true)}
-            className="mt-2 block text-[13px] font-bold text-white/30 hover:text-white/50 transition-colors"
-          >
-            View all {post._count.comments} comments
-          </button>
-        )}
+        {/* Comment */}
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.96]",
+            showComments
+              ? "text-[#AFA9EC] bg-[#534AB7]/10"
+              : "text-white/40 hover:bg-white/5 hover:text-white"
+          )}
+        >
+          <ChatCircle size={20} weight={showComments ? "fill" : "bold"} />
+          <span className="text-[12px] font-black">
+            {commentCount > 0 ? commentCount.toLocaleString() : "Comment"}
+          </span>
+        </button>
+
+        {/* Share */}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-white/40 hover:bg-white/5 hover:text-white transition-all hover:scale-[1.02] active:scale-[0.96]"
+        >
+          <ShareNetwork size={20} weight="bold" />
+          <span className="text-[12px] font-black">Share</span>
+        </button>
+
+        <div className="flex-1" />
+
+        {/* Bookmark */}
+        <button className="h-8 w-8 flex items-center justify-center rounded-full text-white/25 hover:text-white hover:bg-white/5 transition-all">
+          <BookmarkSimple size={18} weight="bold" />
+        </button>
       </div>
 
-      {/* Nested Comments */}
+      {/* ── Comments ── */}
       <AnimatePresence>
         {showComments && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-white/[0.05] bg-black/10"
+            transition={{ duration: 0.25 }}
+            className="border-t border-white/[0.05] bg-black/10 overflow-hidden"
           >
-            <CommentThread 
-              postId={post.id} 
-              currentUserId={currentUserId} 
-              initialCount={post._count?.comments ?? 0}
+            <CommentThread
+              postId={post.id}
+              currentUserId={currentUserId}
+              initialCount={commentCount}
             />
           </motion.div>
         )}
@@ -373,28 +331,11 @@ export function PostCardRedesigned({ post, currentUserId, currentUserRole, curre
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDelete}
-        title="Purge Publication?"
-        message="This will permanently remove this data stream from the forum grid."
-        confirmText={deleting ? "Purging..." : "Confirm Purge"}
+        title="Delete Post?"
+        message="This post will be permanently deleted."
+        confirmText={deleting ? "Deleting..." : "Delete"}
         variant="danger"
       />
     </motion.div>
   );
 }
-
-function getExpiryBadge(expiresAt: string | null, isPinned: boolean) {
-  if (isPinned) return { label: "Pinned", color: "bg-amber-500/10 text-amber-500 border-amber-500/20", icon: true };
-  if (!expiresAt) return null;
-  const target = new Date(expiresAt).getTime();
-  const now = Date.now();
-  const diffHours = (target - now) / (1000 * 60 * 60);
-  const diffDays = Math.ceil(diffHours / 24);
-
-  if (diffHours <= 0) return { label: "expired", color: "bg-red-500/10 text-red-500 border-red-500/20" };
-  if (diffHours <= 24) return { label: "expires today", color: "bg-red-500/10 text-red-500 border-red-500/20" };
-  if (diffDays <= 1) return { label: "expires tomorrow", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
-  if (diffDays <= 2) return { label: "expires in 2d", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
-  if (diffDays <= 6) return { label: `expires in ${diffDays}d`, color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" };
-  return { label: `expires in ${diffDays}d`, color: "bg-green-500/10 text-green-500 border-green-500/20" };
-}
-
