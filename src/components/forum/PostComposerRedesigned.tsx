@@ -9,10 +9,12 @@ import {
   CircleNotch, 
   X, 
   ChatCircleDots, 
-  DownloadSimple 
+  DownloadSimple,
+  Microphone
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
+import { VoiceRecorder } from "./VoiceRecorder";
 
 interface Props {
   user: {
@@ -31,6 +33,7 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const [threadTo, setThreadTo] = useState<string>("");
   const [isThreadEnabled, setIsThreadEnabled] = useState(false);
+  const [isRecordingMode, setIsRecordingMode] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const initials = user.name
@@ -74,27 +77,46 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
         continue;
       }
 
-      try {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/v1/debug/telegram-direct-upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (data.success) {
-          const type = file.type.startsWith("image/") ? "image" : "file";
-          const newAttachment = {
-            url: `/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`,
-            type,
-            fileId: data.fileId
-          };
-          setAttachments(prev => [...prev, newAttachment]);
-        }
-      } catch (err) {
-        console.error("Upload failed", err);
-      }
+      await uploadFileToTelegram(file);
     }
     
     setIsUploading(false);
     e.target.value = "";
+  };
+
+  const uploadFileToTelegram = async (file: File | Blob, customName?: string) => {
+    try {
+      const fd = new FormData();
+      const fileName = customName || (file instanceof File ? file.name : `voice-note-${Date.now()}.webm`);
+      fd.append("file", file, fileName);
+      
+      const res = await fetch("/api/v1/debug/telegram-direct-upload", { method: "POST", body: fd });
+      const data = await res.json();
+      
+      if (data.success) {
+        let type: 'image' | 'file' | 'audio' = 'file';
+        if (file.type.startsWith("image/")) type = 'image';
+        else if (file.type.startsWith("audio/")) type = 'audio';
+
+        const newAttachment = {
+          url: `/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`,
+          type,
+          fileId: data.fileId
+        };
+        setAttachments(prev => [...prev, newAttachment]);
+        return true;
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+    }
+    return false;
+  };
+
+  const handleVoiceStop = async (blob: Blob, duration: number) => {
+    setIsRecordingMode(false);
+    setIsUploading(true);
+    await uploadFileToTelegram(blob, `voice_note_${Date.now()}.webm`);
+    setIsUploading(false);
   };
 
   const removeAttachment = (index: number) => {
@@ -142,14 +164,21 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
             </button>
           ) : (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-              <textarea
-                ref={textareaRef}
-                autoFocus
-                placeholder="What's on your mind?"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-[17px] text-white placeholder:text-white/10 resize-none min-h-[120px] leading-relaxed font-medium"
-              />
+              {isRecordingMode ? (
+                <VoiceRecorder 
+                  onStop={handleVoiceStop} 
+                  onCancel={() => setIsRecordingMode(false)} 
+                />
+              ) : (
+                <textarea
+                  ref={textareaRef}
+                  autoFocus
+                  placeholder="What's on your mind?"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[17px] text-white placeholder:text-white/10 resize-none min-h-[120px] leading-relaxed font-medium"
+                />
+              )}
 
               {attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
@@ -157,6 +186,11 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
                     <div key={i} className="relative group rounded-xl overflow-hidden border border-white/10 shadow-xl bg-black/20">
                       {at.type === 'image' ? (
                         <img src={at.url} className="h-24 w-24 object-cover" alt="" />
+                      ) : at.type === 'audio' ? (
+                        <div className="h-24 w-24 flex flex-col items-center justify-center p-2 text-center bg-[#534AB7]/20">
+                           <Microphone size={24} weight="fill" className="text-[#AFA9EC] mb-1" />
+                           <span className="text-[8px] font-black uppercase text-white/60">Voice Note</span>
+                        </div>
                       ) : (
                         <div className="h-24 w-24 flex flex-col items-center justify-center p-2 text-center bg-white/5">
                            <DownloadSimple size={24} weight="bold" className="text-[#AFA9EC] mb-1" />
@@ -195,10 +229,22 @@ export function PostComposerRedesigned({ user, onPost, forums }: Props) {
                   >
                     <TextItalic size={18} weight="bold" />
                   </button>
+                  
                   <label className="p-2.5 text-white/30 hover:text-[#AFA9EC] hover:bg-[#534AB7]/10 rounded-xl transition-all cursor-pointer group">
                     {isUploading ? <CircleNotch size={20} weight="bold" className="animate-spin" /> : <ImageIcon size={20} weight="bold" />}
                     <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={isUploading} />
                   </label>
+
+                  <button
+                    onClick={() => setIsRecordingMode(!isRecordingMode)}
+                    disabled={isUploading}
+                    className={cn(
+                      "p-2.5 rounded-xl transition-all",
+                      isRecordingMode ? "bg-red-500/10 text-red-500" : "text-white/30 hover:text-[#AFA9EC] hover:bg-[#534AB7]/10"
+                    )}
+                  >
+                    <Microphone size={20} weight="bold" />
+                  </button>
                   
                   {forums && forums.length > 0 && (
                     <div className="flex items-center gap-2 ml-2 pl-3 border-l border-white/5">

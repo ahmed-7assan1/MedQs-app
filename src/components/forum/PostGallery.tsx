@@ -7,16 +7,18 @@ import {
   ArrowsOut, 
   DownloadSimple, 
   X,
-  Play
+  Play,
+  Microphone
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { TelegramAudioPlayer } from "./TelegramAudioPlayer";
 
 import dynamic from "next/dynamic";
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 interface Attachment {
   url: string;
-  type: 'image' | 'file' | 'video';
+  type: 'image' | 'file' | 'video' | 'audio';
   fileId?: string;
 }
 
@@ -34,6 +36,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
   const images = attachments.filter(a => a.type === 'image');
   const videos = attachments.filter(a => a.type === 'video');
   const files = attachments.filter(a => a.type === 'file');
+  const audio = attachments.filter(a => a.type === 'audio');
   const media = [...images, ...videos];
   const Player = ReactPlayer as any;
 
@@ -49,6 +52,15 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Audio Section */}
+      {audio.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {audio.map((item, i) => (
+            <TelegramAudioPlayer key={i} url={item.url} />
+          ))}
+        </div>
+      )}
+
       {/* Images Section */}
         {media.length > 0 && (
           <div className="relative group">
