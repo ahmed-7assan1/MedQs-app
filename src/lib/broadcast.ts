@@ -16,9 +16,9 @@ export async function broadcastToTeamTelegram(item: {
       }
     });
 
-    if (!lecture?.team?.telegramGroupId) return;
+    const team = lecture.team as any;
+    if (!team?.telegramGroupId) return;
 
-    const team = lecture.team;
     const subject = lecture.subject;
     const template = team.telegramTemplate || "🎓 *New Material Added*\n\n📚 *Subject:* {{subject}}\n📖 *Lecture:* {{lecture}}\n📝 *Title:* {{title}}\n\n🔗 [Access on Site]({{link}})";
 
