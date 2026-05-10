@@ -188,8 +188,8 @@ export default function RegisterPage() {
           semesterId: selectedSem.id,
           nickname: nick,
           studentId: sid,
-          telegramPhone: telegramPhone.replace(/[^0-9]/g, ""),
-          verificationCode: vCode,
+          ...(telegramPhone.trim() ? { telegramPhone: telegramPhone.replace(/[^0-9]/g, "") } : {}),
+          ...(vCode.trim() ? { verificationCode: vCode } : {}),
           ...(bio.trim()   ? { bio: bio.trim() }     : {}),
         }),
       });

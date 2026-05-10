@@ -23,13 +23,9 @@ const ProfileSchema = z.object({
     const t = String(v).trim();
     return t === "" ? undefined : t;
   }, z.string().min(2, "Name must be at least 2 characters").max(80).optional()),
-  nickname:    z
-    .string()
-    .max(30)
-    .trim()
-    .regex(/^[a-zA-Z0-9._-]+$/, "Username may include letters, numbers, dot, underscore, dash")
-    .nullable()
-    .optional(),
+  nickname:    z.preprocess((v) => (v === "" || v === null ? undefined : v), 
+    z.string().max(30).trim().regex(/^[a-zA-Z0-9._-]+$/, "Username may include letters, numbers, dot, underscore, dash").optional()
+  ),
   bio:         z.string().max(500).trim().nullable().optional(),
   phone:       z.string().max(20).trim().nullable().optional(),
   phoneVisible: z.boolean().optional(),
@@ -40,10 +36,10 @@ const ProfileSchema = z.object({
   universityId: z.string().nullable().optional(),
   facultyId:   z.string().nullable().optional(),
   semesterId:  z.string().nullable().optional(),
-  studentId: z.string().min(4).max(16).nullable().optional(),
+  studentId: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.string().min(4).max(24).optional()),
   coverImage: z.string().nullable().optional(),
-  telegramPhone: z.string().min(10).optional(),
-  verificationCode: z.string().length(6).optional(),
+  telegramPhone: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.string().min(10).optional()),
+  verificationCode: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.string().length(6).optional()),
 });
 
 async function generateStudentId(): Promise<string> {
