@@ -13,6 +13,7 @@ import {
   MessageSquareWarning,
   Sparkles,
 } from "lucide-react";
+import { ShareNetwork } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { QuestionWithChoices } from "@/types";
 import ReactMarkdown from "react-markdown";
@@ -210,6 +211,19 @@ export function QuestionCard({
                 <MessageSquareWarning className="h-4 w-4" aria-hidden />
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => {
+                const { id, body, choices, answer, lectureId } = question;
+                // Import this at top or use window access if needed, but better to use the store
+                // Assuming useCommunityShareStore is available
+                window.location.href = `/social?shareQuestion=${id}`;
+              }}
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              title="Share to community"
+            >
+              <ShareNetwork size={18} weight="bold" />
+            </button>
           </div>
         </div>
       </div>

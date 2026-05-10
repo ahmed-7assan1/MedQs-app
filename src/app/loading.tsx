@@ -15,7 +15,7 @@ const LOADING_CONFIG: Record<string, { icon: any; text: string; color: string }>
   "/modules": { icon: BookOpen, text: "Loading curriculum", color: "text-indigo-500" },
   "/videos": { icon: Video, text: "Opening Video Hub", color: "text-red-500" },
   "/podcasts": { icon: Mic2, text: "Tuning into Audio Hub", color: "text-green-500" },
-  "/forum": { icon: MessageSquare, text: "Joining the community", color: "text-pink-500" },
+  "/social": { icon: MessageSquare, text: "Joining the community", color: "text-pink-500" },
   "/ai-chat": { icon: Sparkles, text: "Connecting to Dr. Q", color: "text-amber-500" },
   "/past-papers": { icon: HelpCircle, text: "Fetching questions", color: "text-purple-500" },
   "/settings": { icon: Settings, text: "Loading preferences", color: "text-slate-500" },

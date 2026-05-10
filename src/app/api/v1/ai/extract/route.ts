@@ -6,7 +6,7 @@ import { extractQuestionsFromTextByModeWithMeta, validateQuestionsWithMeta } fro
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
 import { redisIncrWithExpire } from "@/lib/redis";
 
-export const maxDuration = 300; // 5 minutes max duration for Vercel Hobby
+export const maxDuration = 60; // 60 seconds max duration for Vercel Hobby
 
 const RATE_LIMIT = 5000; // PDF extractions per hour — effectively disabled for admin
 

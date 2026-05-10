@@ -31,8 +31,7 @@ export const NAV = [
   { href: "/past-papers", label: "Quizzes", icon: HelpCircle },
   { href: "/videos", label: "Videos", icon: Video },
   { href: "/podcasts", label: "Podcasts", icon: Mic2 },
-  { href: "/forum", label: "Community", icon: MessageSquare },
-  { href: "/community", label: "Discussion", icon: Send, badge: "NEW" },
+  { href: "/social", label: "Community", icon: MessageSquare },
   { href: "/taskat", label: "Taskat", icon: Clock },
   { href: "/profile/telegram", label: "Telegram Link", icon: Send },
 ];

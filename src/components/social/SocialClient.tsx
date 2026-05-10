@@ -1,0 +1,532 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { PostCard } from "./PostCard";
+import { PostComposer, FloatingPostIsland } from "./PostComposer";
+import { CreateRoomModal } from "./CreateRoomModal";
+import { JoinRoomModal } from "./JoinRoomModal";
+import {
+  ChatCircle, Globe, Users, MagnifyingGlass, Plus, ArrowRight,
+  List, X, Hash, Lock, CalendarBlank, Fire, 
+  Gear, Crown, Clock, CaretRight
+} from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
+import { ForumPostListSkeleton } from "@/components/ui/skeleton";
+import { motion, AnimatePresence } from "framer-motion";
+
+import { useSearchParams } from "next/navigation";
+import { useCommunityShareStore } from "@/lib/store";
+
+interface SocialCircle { id: string; name: string; type: string; status: string; _count: { posts: number } }
+interface Room {
+  id: string; name: string; isPublic: boolean; inviteCode: string;
+  memberLimit: number; image?: string; _count: { members: number; posts: number };
+  members?: any[]; isMember?: boolean; ownerId?: string;
+}
+
+const GLASS = "bg-white/70 dark:bg-[#161523]/70 backdrop-blur-[40px] border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500";
+
+export function SocialClient({
+  circles, rooms: initialRooms, currentUserId, currentUserName, currentUserImage,
+  currentUserRole, currentUserUniversityId,
+}: {
+  circles: SocialCircle[];
+  rooms: Room[];
+  currentUserId: string;
+  currentUserName?: string;
+  currentUserImage?: string;
+  currentUserRole?: string;
+  currentUserUniversityId?: string;
+}) {
+  const searchParams = useSearchParams();
+  const setSharedQuestion = useCommunityShareStore((s) => s.setSharedQuestion);
+  const [activeCircle, setActiveCircle] = useState<SocialCircle | null>(circles[0] ?? null);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [trendingTags, setTrendingTags] = useState<any[]>([]);
+  const [threadQuery, setThreadQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "top">("recent");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const [showJoinRoom, setShowJoinRoom] = useState(false);
+  const [myRooms, setMyRooms] = useState<Room[]>(initialRooms);
+
+  const filteredCircles = useMemo(() => {
+    const q = threadQuery.trim().toLowerCase();
+    return q ? circles.filter((c: SocialCircle) => c.name.toLowerCase().includes(q)) : circles;
+  }, [circles, threadQuery]);
+
+  const myJoinedRooms = myRooms.filter((r) => r.isMember || r.ownerId === currentUserId);
+
+  const loadPosts = async (circleId: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/v1/forums/${circleId}/posts`, { cache: "no-store" });
+      const data = await res.json();
+      setPosts(Array.isArray(data) ? data : []);
+    } catch { toast.error("Failed to load posts"); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { if (activeCircle) loadPosts(activeCircle.id); }, [activeCircle?.id]);
+
+  useEffect(() => {
+    if (!activeCircle) return;
+    const { subscribeToForumsRealtime } = require("@/lib/firebase/realtime-service");
+    const unsubscribe = subscribeToForumsRealtime(activeCircle.id, (realtimePosts: any[]) => {
+      setPosts(currentPosts => {
+        let hasChanges = false;
+        const merged = [...currentPosts];
+        
+        realtimePosts.forEach(rp => {
+          const idx = merged.findIndex(p => p.id === rp.id);
+          if (idx === -1) {
+            merged.unshift(rp);
+            hasChanges = true;
+          }
+        });
+        
+        if (hasChanges) {
+          return merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+        return currentPosts;
+      });
+    });
+    return () => unsubscribe();
+  }, [activeCircle?.id]);
+
+  useEffect(() => {
+    fetch("/api/v1/social/trending")
+      .then(r => r.json())
+      .then(d => setTrendingTags(Array.isArray(d) ? d : []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const qid = searchParams.get("shareQuestion");
+    if (qid) {
+      fetch(`/api/v1/questions/${qid}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.id) {
+            setSharedQuestion({
+              id: data.id,
+              body: data.body,
+              choices: data.choices,
+              correctAnswer: data.answer,
+              userAnswer: null,
+              isCorrect: null,
+              lectureId: data.lectureId
+            });
+            toast.success("Question ready to share!");
+          }
+        })
+        .catch(() => {});
+    }
+  }, [searchParams, setSharedQuestion]);
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  const dateStr = now.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' });
+
+  const handlePost = async (content: string, imageUrl: string, options?: any): Promise<boolean> => {
+    const destId = options.forumId || options.roomId;
+    if (!destId) return false;
+    
+    try {
+      const endpoint = options.roomId ? `/api/v1/rooms/${options.roomId}/posts` : `/api/v1/forums/${options.forumId}/posts`;
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, imageUrl, ...options }),
+      });
+      if (!res.ok) throw new Error();
+      const newPost = await res.json();
+      
+      // Broadcast via P2P/Failover channel as well
+      const { broadcastPost } = require("@/lib/firebase/realtime-service");
+      if (options.forumId) broadcastPost(options.forumId, newPost);
+
+      // If we posted to the currently active forum, add it to the feed
+      if (!options.roomId && options.forumId === activeCircle?.id) {
+        setPosts((p) => [newPost, ...p]);
+      } else if (options.roomId) {
+        toast.success("Posted to your Room feed!");
+      } else {
+        toast.success("Posted successfully!");
+      }
+      return true;
+    } catch { toast.error("Failed to post"); return false; }
+  };
+
+  const handleRoomCreated = (room: Room) => {
+    setMyRooms((r) => [{ ...room, isMember: true }, ...r]);
+    toast.success("Room created successfully!");
+  };
+
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white transition-colors duration-500">
+      {/* Dynamic Background Blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div animate={{ x: [0, 50, 0], y: [0, 30, 0] }} transition={{ duration: 20, repeat: Infinity }} className="absolute top-[-15%] right-[-10%] w-[700px] h-[700px] bg-primary/10 dark:bg-primary/15 blur-[160px] rounded-full" />
+        <motion.div animate={{ x: [0, -40, 0], y: [0, 50, 0] }} transition={{ duration: 25, repeat: Infinity }} className="absolute bottom-[-15%] left-[-10%] w-[600px] h-[600px] bg-blue-500/10 blur-[140px] rounded-full" />
+        <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 blur-[120px] rounded-full" />
+      </div>
+
+      <div className="relative max-w-[1400px] mx-auto px-6 pt-24 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
+
+          {/* ── LEFT SIDEBAR ── */}
+          <aside className="hidden lg:flex flex-col gap-5 sticky top-24 h-[calc(100vh-120px)]">
+            <div className={cn(GLASS, "rounded-[32px] overflow-hidden flex flex-col h-full")}>
+              {/* Sidebar Search */}
+              <div className="p-6 border-b border-slate-100 dark:border-white/[0.05]">
+                <div className="relative group">
+                  <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
+                  <input
+                    value={threadQuery}
+                    onChange={(e) => setThreadQuery(e.target.value)}
+                    placeholder="Search rooms..."
+                    className="w-full bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold focus:outline-none focus:border-primary/50 focus:ring-4 ring-primary/5 transition-all text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-white/20"
+                  />
+                </div>
+              </div>
+
+              {/* Destinations List */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                {/* General Forums */}
+                <div className="mb-6">
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-white/20 px-3 mb-3">Social Circles</p>
+                  <div className="space-y-1.5">
+                    {filteredCircles.filter((c: SocialCircle) => c.type === "GLOBAL").map((c: SocialCircle) => (
+                      <CircleItem key={c.id} circle={c} active={activeCircle?.id === c.id} onClick={() => setActiveCircle(c)} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Private / Semester Forums */}
+                {filteredCircles.filter((c: SocialCircle) => c.type !== "GLOBAL").length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-white/20 px-3 mb-3">Academic Circles</p>
+                    <div className="space-y-1.5">
+                      {filteredCircles.filter((c: SocialCircle) => c.type !== "GLOBAL").map((c: SocialCircle) => (
+                        <CircleItem key={c.id} circle={c} active={activeCircle?.id === c.id} onClick={() => setActiveCircle(c)} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="p-4 border-t border-slate-100 dark:border-white/[0.05] space-y-3">
+                <button
+                  onClick={() => setShowJoinRoom(true)}
+                  className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 dark:text-white/40 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-800 dark:hover:text-white transition-all shadow-sm"
+                >
+                  <Hash size={16} weight="bold" />
+                  Join Room
+                </button>
+                <button
+                  onClick={() => setShowCreateRoom(true)}
+                  className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-primary/10 border border-primary/20 text-[11px] font-black uppercase tracking-[0.15em] text-primary hover:bg-primary/20 transition-all shadow-lg shadow-primary/5"
+                >
+                  <Plus size={16} weight="bold" />
+                  Create Room
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          {/* ── CENTER FEED ── */}
+          <main className="flex flex-col gap-6 min-w-0 relative">
+            {/* Mobile Navigation Bar */}
+            <div className={cn(GLASS, "lg:hidden flex items-center justify-between rounded-2xl p-4 mb-2 shadow-lg")}>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-primary/15 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+                  <List size={22} weight="bold" />
+                </div>
+                <p className="text-[15px] font-black text-slate-800 dark:text-white">{activeCircle?.name ?? "Social"}</p>
+              </div>
+              <button onClick={() => setMobileSidebarOpen(true)} className="bg-primary/10 text-primary px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border border-primary/10 shadow-sm">
+                Explore Rooms
+              </button>
+            </div>
+
+            {/* Premium Post Composer */}
+            <PostComposer
+              user={{ name: currentUserName ?? "Student", id: currentUserId, image: currentUserImage }}
+              onPost={handlePost}
+              circles={circles}
+              rooms={myJoinedRooms}
+            />
+
+            {/* Activity Feed */}
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between px-2">
+                <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/30 flex items-center gap-2">
+                  <Fire size={14} className="text-orange-500" weight="fill" />
+                  {activeCircle?.name || "Social Feed"} Activity
+                </h2>
+                
+                <div className="flex bg-slate-100 dark:bg-white/5 rounded-xl p-1 ml-4 shadow-inner">
+                  <button onClick={() => setSortBy("recent")} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", sortBy === "recent" ? "bg-white dark:bg-white/10 text-slate-800 dark:text-white shadow-sm" : "text-slate-400 dark:text-white/30 hover:text-slate-600 dark:hover:text-white/60")}>Recent</button>
+                  <button onClick={() => setSortBy("top")} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", sortBy === "top" ? "bg-white dark:bg-white/10 text-slate-800 dark:text-white shadow-sm" : "text-slate-400 dark:text-white/30 hover:text-slate-600 dark:hover:text-white/60")}>Top</button>
+                </div>
+              </div>
+
+              {loading ? (
+                <ForumPostListSkeleton count={4} />
+              ) : posts.length > 0 ? (
+                <AnimatePresence mode="popLayout">
+                  {[...posts].sort((a, b) => {
+                     if (sortBy === "top") {
+                       const scoreA = (a._count?.likes || 0) * 2 + (a._count?.comments || 0);
+                       const scoreB = (b._count?.likes || 0) * 2 + (b._count?.comments || 0);
+                       return scoreB - scoreA;
+                     }
+                     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  }).map((post) => (
+                    <PostCard
+                      key={post.id}
+
+                      post={post}
+                      currentUserId={currentUserId}
+                      currentUserRole={currentUserRole}
+                      currentUserUniversityId={currentUserUniversityId}
+                    />
+                  ))}
+                </AnimatePresence>
+              ) : (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn(GLASS, "rounded-[40px] py-24 flex flex-col items-center justify-center text-center")}>
+                  <div className="h-20 w-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                    <ChatCircle size={40} className="text-slate-300 dark:text-white/10" />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-700 dark:text-white/40">No conversations yet</h3>
+                  <p className="text-sm text-slate-400 dark:text-white/20 mt-2 max-w-[240px]">Be the first to spark a discussion in {activeCircle?.name}!</p>
+                </motion.div>
+              )}
+            </div>
+            
+            <FloatingPostIsland
+              user={{ name: currentUserName ?? "Student", id: currentUserId, image: currentUserImage }}
+              onPost={handlePost}
+              circles={circles}
+              rooms={myJoinedRooms}
+            />
+          </main>
+
+          {/* ── RIGHT SIDEBAR ── */}
+          <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar">
+            {/* Elegant Time/Status Widget */}
+            <div className={cn(GLASS, "rounded-[32px] p-6 group")}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight">{timeStr}</p>
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Active</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-white/30 font-black uppercase tracking-widest">{dateStr}</p>
+                </div>
+                <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ repeat: Infinity, duration: 4 }} className="text-4xl filter drop-shadow-lg">☀️</motion.div>
+              </div>
+            </div>
+            {/* Trending Hashtags Widget */}
+            <div className={cn(GLASS, "rounded-[32px] p-6")}>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="h-8 w-8 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500">
+                  <Fire size={18} weight="fill" />
+                </div>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/40">Trending Now</p>
+              </div>
+              <div className="space-y-4">
+                {trendingTags.length === 0 ? (
+                  <div className="py-8 text-center space-y-2">
+                     <Hash size={24} className="mx-auto text-slate-300 dark:text-white/10" />
+                     <p className="text-[10px] font-black text-slate-400 dark:text-white/20 uppercase tracking-widest">No trends yet</p>
+                  </div>
+                ) : trendingTags.map((tag) => (
+                  <button key={tag.id} className="w-full group flex items-center justify-between hover:translate-x-1 transition-transform">
+                    <div className="flex flex-col items-start">
+                      <p className="text-[14px] font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors">#{tag.name}</p>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">{tag.count} discussions</p>
+                    </div>
+                    <div className="h-7 w-7 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                      <CaretRight size={14} className="text-slate-400 group-hover:text-primary" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Study Groups Widget */}
+            <div className={cn(GLASS, "rounded-[32px] p-6 flex flex-col gap-5 shadow-inner")}>
+              <div className="flex items-center justify-between px-1">
+                <div>
+                  <h3 className="text-sm font-black text-slate-800 dark:text-white flex items-center gap-2">
+                    <Users size={18} className="text-primary" weight="fill" />
+                    My Study Rooms
+                  </h3>
+                  <p className="text-[10px] text-slate-500 dark:text-white/30 font-bold uppercase tracking-widest mt-1">{myJoinedRooms.length} Active Rooms</p>
+                </div>
+                <button
+                  onClick={() => setShowCreateRoom(true)}
+                  className="h-9 w-9 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-white/40 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all shadow-sm"
+                >
+                  <Plus size={18} weight="bold" />
+                </button>
+              </div>
+
+              {myJoinedRooms.length > 0 ? (
+                <div className="space-y-3.5">
+                  {myJoinedRooms.map((room) => (
+                    <RoomItemSmall key={room.id} room={room} currentUserId={currentUserId} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="h-14 w-14 bg-slate-100 dark:bg-white/5 rounded-[20px] flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <Users size={24} className="text-slate-300 dark:text-white/10" />
+                  </div>
+                  <p className="text-[11px] font-black text-slate-400 dark:text-white/20 uppercase tracking-widest">No joined rooms</p>
+                  <button onClick={() => setShowJoinRoom(true)} className="mt-3 text-[12px] text-primary font-black hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                    Join one now <ArrowRight size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Daily Schedule Widget */}
+            <div className={cn(GLASS, "rounded-[32px] p-6")}>
+              <div className="flex items-center justify-between mb-5 px-1">
+                <h3 className="text-sm font-black text-slate-800 dark:text-white flex items-center gap-2">
+                  <CalendarBlank size={18} className="text-primary" weight="fill" />
+                  Daily Schedule
+                </h3>
+                <Clock size={16} className="text-slate-400 dark:text-white/20" />
+              </div>
+              <div className="space-y-3">
+                {[
+                  { title: "Anatomy Lecture", time: "09:00 AM", type: "academic", active: true },
+                  { title: "Study Session", time: "11:30 AM", type: "room" },
+                  { title: "Pathology Review", time: "02:00 PM", type: "exam" },
+                ].map((item, i) => (
+                  <div key={i} className={cn("p-4 rounded-2xl border transition-all shadow-sm", item.active ? "bg-primary/5 dark:bg-primary/10 border-primary/20 ring-1 ring-primary/10" : "bg-white dark:bg-white/[0.02] border-slate-100 dark:border-white/5")}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-[13px] font-black text-slate-800 dark:text-white">{item.title}</p>
+                      {item.active && <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />}
+                    </div>
+                    <p className="text-[10px] text-slate-400 dark:text-white/30 font-bold flex items-center gap-1.5">
+                      <Clock size={12} />
+                      {item.time}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <button className="w-full mt-4 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20 hover:border-primary/40 hover:text-primary transition-all">
+                Full Schedule
+              </button>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      {/* Modals & Navigation */}
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileSidebarOpen(false)} className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-xl lg:hidden" />
+            <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }} className="fixed top-0 left-0 bottom-0 w-[85%] max-w-[320px] z-[210] bg-white dark:bg-[#0F0E16] border-r border-slate-200 dark:border-white/10 lg:hidden flex flex-col overflow-hidden">
+              <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
+                <h3 className="font-black text-slate-800 dark:text-white flex items-center gap-2"><Users size={20} className="text-primary" /> Community</h3>
+                <button onClick={() => setMobileSidebarOpen(false)} className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/5"><X size={20} className="text-slate-400" /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-4 px-2">Rooms & Circles</p>
+                  <div className="space-y-1.5">
+                    {circles.map((c: SocialCircle) => <CircleItem key={c.id} circle={c} active={activeCircle?.id === c.id} onClick={() => { setActiveCircle(c); setMobileSidebarOpen(false); }} />)}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <CreateRoomModal isOpen={showCreateRoom} onClose={() => setShowCreateRoom(false)} onSuccess={handleRoomCreated} />
+      <JoinRoomModal isOpen={showJoinRoom} onClose={() => setShowJoinRoom(false)} />
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+    </div>
+  );
+}
+
+function CircleItem({ circle, active, onClick }: { circle: SocialCircle; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "w-full flex items-center gap-3.5 p-3.5 rounded-2xl transition-all group border",
+        active ? "bg-primary/10 border-primary/20 shadow-inner" : "hover:bg-slate-100 dark:hover:bg-white/5 border-transparent"
+      )}
+    >
+      <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all shadow-sm", active ? "bg-primary text-white shadow-primary/30" : "bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-white/20 group-hover:bg-slate-300 dark:group-hover:bg-white/10")}>
+        {circle.type === "GLOBAL" ? <Globe size={18} weight="fill" /> : <Users size={18} weight="fill" />}
+      </div>
+      <div className="flex-1 text-left overflow-hidden">
+        <p className={cn("text-[13px] font-black truncate transition-colors", active ? "text-primary" : "text-slate-700 dark:text-white/60 group-hover:text-slate-900 dark:group-hover:text-white/90")}>{circle.name}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+           <span className="text-[9px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest">{circle._count.posts} posts</span>
+           <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-white/10" />
+           <span className="text-[9px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest">{circle.type.toLowerCase()}</span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function RoomItemSmall({ room, currentUserId }: { room: Room; currentUserId: string }) {
+  const isOwner = room.ownerId === currentUserId;
+  return (
+    <Link href={`/rooms/${room.id}`} className="block group">
+      <div className="flex items-center gap-3.5 p-3.5 rounded-[22px] bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.05] hover:border-primary/40 hover:bg-primary/[0.02] transition-all shadow-sm group-hover:shadow-md">
+        <div className="h-11 w-11 rounded-[16px] overflow-hidden bg-primary/10 flex items-center justify-center flex-shrink-0 shadow-inner border border-white/10 relative">
+          {room.image ? (
+            <img src={room.image} className="w-full h-full object-cover" alt="" />
+          ) : (
+            room.isPublic ? <Globe size={20} className="text-primary" weight="fill" /> : <Lock size={20} className="text-amber-500" weight="fill" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <p className="text-[13px] font-black text-slate-800 dark:text-white/90 truncate group-hover:text-primary transition-colors">{room.name}</p>
+            {isOwner && <Crown size={12} className="text-amber-400 flex-shrink-0" weight="fill" />}
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[9px] text-slate-400 dark:text-white/30 font-black uppercase tracking-widest flex items-center gap-1">
+              <Users size={10} /> {room._count.members} Members
+            </span>
+          </div>
+        </div>
+        <div className="h-8 w-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-white/20 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+           <ArrowRight size={14} weight="bold" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+

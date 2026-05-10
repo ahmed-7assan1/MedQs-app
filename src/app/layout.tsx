@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { appFontVariableClassName } from "@/lib/app-fonts";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
+import { FirebaseProvider } from "@/components/providers/FirebaseProvider";
 import "../styles/globals.css";
 
 // Fetch site config server-side — cached per request by Next.js
@@ -268,9 +269,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <DevServiceWorkerCleanup />
         <ChunkLoadRecovery />
-        <ConfirmProvider>
-          {children}
-        </ConfirmProvider>
+        <FirebaseProvider>
+          <ConfirmProvider>
+            {children}
+          </ConfirmProvider>
+        </FirebaseProvider>
         <Toaster
           position="top-center"
           containerStyle={{

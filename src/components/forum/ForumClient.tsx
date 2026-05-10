@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { PostCardRedesigned } from "./PostCardRedesigned";
 import { PostComposerRedesigned } from "./PostComposerRedesigned";
+import { TeamCreateModal } from "@/components/teams/TeamCreateModal";
 import {
   ChatCircle,
   PaperPlaneTilt,
@@ -40,6 +41,7 @@ interface Forum {
 
 export function ForumClient({
   forums,
+  teams = [],
   currentUserId,
   currentUserRole,
   currentUserUniversityId,
@@ -47,6 +49,7 @@ export function ForumClient({
   initialPosts = [],
 }: {
   forums: Forum[];
+  teams?: any[];
   currentUserId: string;
   currentUserRole?: string;
   currentUserUniversityId?: string;
@@ -65,6 +68,7 @@ export function ForumClient({
   const [threadQuery, setThreadQuery] = useState("");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<any[]>([]);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
@@ -170,7 +174,7 @@ export function ForumClient({
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] text-white selection:bg-primary/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white selection:bg-primary/30 transition-colors duration-300">
       {/* ── Background Elements ── */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full" />
@@ -184,7 +188,7 @@ export function ForumClient({
           <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)]">
             <div className="bg-[#161523]/60 backdrop-blur-xl border border-white/[0.05] rounded-[32px] overflow-hidden flex flex-col h-full">
               <div className="p-6 border-b border-white/[0.05]">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/30 mb-4">Network Nodes</h3>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/30 mb-4">Public Rooms</h3>
                 <div className="relative">
                   <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                   <input 
@@ -203,7 +207,7 @@ export function ForumClient({
               <div className="p-4 border-t border-white/[0.05] bg-white/[0.02]">
                 <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 border border-white/5 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 hover:text-white transition-all">
                   <Plus size={16} weight="bold" />
-                  Request Channel
+                  Join New Classroom
                 </button>
               </div>
             </div>
@@ -288,11 +292,11 @@ export function ForumClient({
           {/* ── Right Column: Widgets ── */}
           <aside className="hidden lg:flex flex-col gap-8 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar">
             {/* Widget: Schedule (Mock) */}
-            <div className="bg-[#161523]/60 backdrop-blur-xl border border-white/[0.05] rounded-[32px] p-6">
+            <div className="bg-white/70 dark:bg-[#161523]/60 backdrop-blur-xl border border-slate-200 dark:border-white/[0.05] rounded-[32px] p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-sm font-black text-white">Academic Pulse</h3>
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Sunday, 25 June</p>
+                  <h3 className="text-sm font-black text-slate-800 dark:text-white">Academic Pulse</h3>
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-white/30 uppercase tracking-widest">Sunday, 25 June</p>
                 </div>
                 <CalendarBlank size={24} className="text-primary" />
               </div>
@@ -304,62 +308,65 @@ export function ForumClient({
                 ].map((item, i) => (
                   <div key={i} className={cn(
                     "p-4 rounded-2xl border transition-all",
-                    item.active ? "bg-primary/10 border-primary/20 shadow-lg shadow-primary/5" : "bg-white/[0.02] border-white/[0.05]"
+                    item.active ? "bg-primary/5 dark:bg-primary/10 border-primary/20 shadow-lg shadow-primary/5" : "bg-slate-50 dark:bg-white/[0.02] border-slate-100 dark:border-white/[0.05]"
                   )}>
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="text-xs font-black text-white">{item.title}</h4>
+                      <h4 className="text-xs font-black text-slate-800 dark:text-white">{item.title}</h4>
                       {item.active && <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />}
                     </div>
-                    <p className="text-[10px] font-bold text-white/40">{item.time}</p>
-                    <p className="text-[9px] font-black text-primary/60 uppercase tracking-widest mt-2">Room {item.room}</p>
+                    <p className="text-[10px] font-bold text-slate-500 dark:text-white/40">{item.time}</p>
+                    <p className="text-[9px] font-black text-primary/80 dark:text-primary/60 uppercase tracking-widest mt-2">Room {item.room}</p>
                   </div>
                 ))}
               </div>
-              <button className="w-full mt-6 py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase tracking-widest text-white/30 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2">
+              <button className="w-full mt-6 py-3 rounded-xl bg-slate-100 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/30 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all flex items-center justify-center gap-2">
                 Full Schedule <ArrowRight size={14} />
               </button>
             </div>
 
-            {/* Widget: Trending Topics */}
-            <div className="bg-[#161523]/60 backdrop-blur-xl border border-white/[0.05] rounded-[32px] p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <Fire size={20} weight="fill" className="text-orange-500" />
-                <h3 className="text-sm font-black text-white uppercase tracking-tight">Trending Signals</h3>
-              </div>
-              <div className="space-y-5">
-                {[
-                  { tag: "#USMLE_Step1", posts: "1.2k broadcasts", color: "text-blue-400" },
-                  { tag: "#ResidencyMatch", posts: "850 broadcasts", color: "text-emerald-400" },
-                  { tag: "#Anatomy_Atlas", posts: "420 broadcasts", color: "text-purple-400" }
-                ].map((t, i) => (
-                  <div key={i} className="group cursor-pointer">
-                    <p className={cn("text-[13px] font-black transition-all group-hover:translate-x-1", t.color)}>{t.tag}</p>
-                    <p className="text-[10px] font-bold text-white/20 mt-0.5">{t.posts}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Widget: Online Peers */}
-            <div className="bg-[#161523]/60 backdrop-blur-xl border border-white/[0.05] rounded-[32px] p-6">
+            {/* Widget: Study Groups */}
+            <div className="bg-white/70 dark:bg-[#161523]/60 backdrop-blur-xl border border-slate-200 dark:border-white/[0.05] rounded-[32px] p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-black text-white">Peer Network</h3>
-                <span className="bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">24 Online</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                  <div key={i} className="relative group cursor-pointer">
-                    <img 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=user${i}`} 
-                      className="h-9 w-9 rounded-xl border border-white/10 group-hover:scale-110 transition-all"
-                      alt=""
-                    />
-                    <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 bg-emerald-500 rounded-full border-2 border-[#161523]" />
-                  </div>
-                ))}
-                <div className="h-9 w-9 rounded-xl bg-white/5 border border-dashed border-white/20 flex items-center justify-center text-[10px] font-black text-white/30 cursor-pointer hover:bg-white/10">
-                  +16
+                <div>
+                  <h3 className="text-sm font-black text-slate-800 dark:text-white">Study Groups</h3>
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-white/30 uppercase tracking-widest">{teams.length} Groups</p>
                 </div>
+                <button 
+                  onClick={() => setIsTeamModalOpen(true)}
+                  className="h-8 w-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white/40 hover:bg-slate-200 dark:hover:bg-white/10 transition-all hover:scale-110"
+                >
+                  <Plus size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                {teams.length > 0 ? (
+                  teams.map((team, i) => (
+                    <Link href={`/teams/${team.id}`} key={i} className="block group cursor-pointer">
+                      <div className="flex flex-col gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.05] hover:border-primary/30 dark:hover:border-primary/30 transition-all">
+                        <div className="flex -space-x-2">
+                          {team.members.map((m: any, idx: number) => (
+                            <img 
+                              key={idx}
+                              src={m.user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.user.name}`} 
+                              className="h-8 w-8 rounded-full border-2 border-white dark:border-[#161523] z-10 relative object-cover"
+                              alt=""
+                            />
+                          ))}
+                          {team._count.members > 4 && (
+                            <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/10 border-2 border-white dark:border-[#161523] flex items-center justify-center text-[9px] font-black z-0 relative text-slate-700 dark:text-white">
+                              +{team._count.members - 4}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-[11px] font-black text-slate-700 dark:text-white/80 group-hover:text-primary transition-colors line-clamp-1">{team.name}</p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="text-center py-4 opacity-50">
+                    <p className="text-xs font-bold text-slate-600 dark:text-white">No groups joined yet.</p>
+                  </div>
+                )}
               </div>
             </div>
           </aside>
@@ -420,6 +427,16 @@ export function ForumClient({
           scrollbar-width: none;
         }
       `}</style>
+
+      <TeamCreateModal 
+        isOpen={isTeamModalOpen} 
+        onClose={() => setIsTeamModalOpen(false)}
+        universityId={currentUserUniversityId || ""}
+        onSuccess={(newTeam) => {
+          setIsTeamModalOpen(false);
+          // In a real app we might mutate the teams array or router.refresh(), but the toast suffices
+        }}
+      />
     </div>
   );
 }

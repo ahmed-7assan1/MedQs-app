@@ -23,7 +23,7 @@ const navLinks = [
   { href: "/past-papers",  label: "Papers",      icon: FileText },
   { href: "/videos",       label: "Videos",      icon: Video },
   { href: "/podcasts",     label: "Podcasts",    icon: Mic2 },
-  { href: "/forum",        label: "Forum",       icon: MessageSquare },
+  { href: "/social",        label: "Forum",       icon: MessageSquare },
   { href: "/leaderboard",  label: "Leaderboard", icon: Trophy },
   { href: "/taskat",       label: "Taskat",      icon: Clock },
 ];

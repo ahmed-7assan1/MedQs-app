@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { subjectId: s
   const lectures = await prisma.lecture.findMany({
     where: { subjectId: params.subjectId },
     orderBy: { order: "asc" },
-    select: { id: true, title: true, videoUrl: true, subjectId: true, order: true },
+    select: { id: true, title: true, videoUrl: true, subjectId: true, order: true, type: true, checklist: { include: { items: true } } },
   });
   return NextResponse.json(lectures);
 }
@@ -34,7 +34,7 @@ export async function POST(
   const boundary = await assertSubject(w.scope, subjectId);
   if (boundary) return boundary;
 
-  const { title, videoUrl, flashcards } = await req.json();
+  const { title, videoUrl, flashcards, type, checklist } = await req.json();
   if (!title?.trim()) return NextResponse.json({ error: "Title required" }, { status: 400 });
 
   // Count existing lectures for order
@@ -46,11 +46,23 @@ export async function POST(
       videoUrl: videoUrl || undefined,
       subjectId,
       order: count + 1,
+      type: type || "LECTURE",
+      checklist: (type === "PRACTICAL" && checklist) ? {
+        create: {
+          title: checklist.title,
+          items: {
+            create: checklist.items.map((i: any) => ({
+              content: i.content,
+              points: i.points
+            }))
+          }
+        }
+      } : undefined,
       flashcards: flashcards?.length
         ? { create: flashcards.map((f: { front: string; back: string }) => ({ front: f.front, back: f.back })) }
         : undefined,
     },
-    include: { flashcards: true },
+    include: { flashcards: true, checklist: { include: { items: true } } },
   });
 
   return NextResponse.json(lecture, { status: 201 });

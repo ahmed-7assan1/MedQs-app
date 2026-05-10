@@ -204,6 +204,16 @@ export async function loadForumPostsForUser(options: {
       console.error("[forum-posts] like.findMany failed", le);
     }
 
+    // Affinity Algorithm: Sort by User Interaction (Likes given to author)
+    const authorIds = [...new Set(posts.map(p => p.authorId))];
+    const affinityData = authorIds.length > 0 ? await Promise.all(authorIds.map(async aid => {
+      const count = await prisma.like.count({
+        where: { userId, post: { authorId: aid } }
+      });
+      return { authorId: aid, score: count };
+    })) : [];
+    const affinityMap = new Map(affinityData.map(d => [d.authorId, d.score]));
+
     const formatted: ForumPostJson[] = posts.map((p) => ({
       id: p.id,
       content: p.content,
@@ -226,6 +236,15 @@ export async function loadForumPostsForUser(options: {
       _count: p._count,
       likedByMe: likedSet.has(p.id),
     }));
+
+    // Perform final sort: Pinned > Affinity > Date
+    formatted.sort((a, b) => {
+      if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+      const scoreA = affinityMap.get(a.authorId) || 0;
+      const scoreB = affinityMap.get(b.authorId) || 0;
+      if (scoreA !== scoreB) return scoreB - scoreA;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
     return { ok: true, posts: formatted };
   } catch (e) {

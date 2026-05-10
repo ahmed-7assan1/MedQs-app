@@ -249,6 +249,59 @@ export function PostCardRedesigned({
         </div>
       )}
 
+      {/* ── Poll ── */}
+      {post.poll && (
+        <div className="mx-4 mt-2 mb-2 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+          <p className="text-sm font-bold text-white mb-3">{post.poll.question}</p>
+          <div className="space-y-2">
+            {post.poll.options?.map((opt: any) => {
+               const totalVotes = post.poll.options.reduce((acc: number, o: any) => acc + (o._count?.votes || 0), 0);
+               const percent = totalVotes === 0 ? 0 : Math.round(((opt._count?.votes || 0) / totalVotes) * 100);
+               return (
+                 <button key={opt.id} className="relative w-full text-left p-3 rounded-xl bg-black/20 border border-white/10 hover:border-emerald-500/50 transition-all overflow-hidden group">
+                   <div className="absolute top-0 left-0 bottom-0 bg-emerald-500/20 transition-all duration-500" style={{ width: `${percent}%` }} />
+                   <div className="relative flex justify-between items-center z-10">
+                     <span className="text-xs font-bold text-white/90 group-hover:text-emerald-400">{opt.text}</span>
+                     <span className="text-[10px] font-black text-white/40">{percent}%</span>
+                   </div>
+                 </button>
+               );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Shared Question ── */}
+      {post.sharedQuestionData && (
+        <div className="mx-4 mt-2 mb-2 p-5 rounded-2xl bg-[#534AB7]/10 border border-[#534AB7]/30">
+          <div className="flex items-center gap-2 mb-3">
+             <span className="px-2 py-0.5 rounded-md bg-[#534AB7]/30 text-[#AFA9EC] text-[9px] font-black uppercase tracking-widest">Question Discussion</span>
+          </div>
+          <p className="text-sm font-medium text-white mb-4 leading-relaxed">{post.sharedQuestionData.body}</p>
+          <div className="space-y-2">
+            {post.sharedQuestionData.choices?.map((c: any) => {
+               const isCorrect = c.key === post.sharedQuestionData.correctAnswer;
+               const isUserChoice = c.key === post.sharedQuestionData.userAnswer;
+               return (
+                 <div key={c.key} className={cn(
+                   "flex items-center gap-3 p-3 rounded-xl border text-sm",
+                   isCorrect ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400" :
+                   isUserChoice ? "border-red-500/50 bg-red-500/10 text-red-400" :
+                   "border-white/5 bg-black/20 text-white/60"
+                 )}>
+                   <span className={cn("h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black border", 
+                     isCorrect ? "border-emerald-500 bg-emerald-500/20" : 
+                     isUserChoice ? "border-red-500 bg-red-500/20" : 
+                     "border-white/10 bg-white/5"
+                   )}>{c.key}</span>
+                   <span className="flex-1 min-w-0 font-medium">{c.text}</span>
+                 </div>
+               );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── Media Gallery ── */}
       {attachments.length > 0 && (
         <div className="mt-2 mx-4 mb-1 rounded-2xl overflow-hidden">

@@ -39,19 +39,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email:     { label: "Email",      type: "email" },
         studentId: { label: "Student ID", type: "text" },
         password:  { label: "Password",   type: "password" },
+        idToken:   { label: "Firebase ID Token", type: "text" }
       },
       async authorize(rawCreds) {
+        // 1. Firebase Auth Bypass
+        if (rawCreds?.idToken) {
+          try {
+            const { adminAuth } = await import("@/lib/firebase/admin");
+            const decoded = await adminAuth.verifyIdToken(rawCreds.idToken as string);
+            const email = decoded.email || decoded.phone_number;
+            
+            if (!email) return null;
+            
+            let user = await prisma.user.findFirst({ where: { email } });
+            if (!user) {
+              user = await prisma.user.create({
+                data: {
+                  email,
+                  name: decoded.name || "New Student",
+                }
+              });
+            }
+            return user;
+          } catch (e) {
+            console.error("Firebase token verification failed:", e);
+            return null;
+          }
+        }
+
+        // 2. Legacy Email/Password Auth
         const parsed = CredentialsSchema.safeParse(rawCreds);
         if (!parsed.success) return null;
         const { email, studentId, password } = parsed.data;
 
-        // Find user by email OR studentId
         const user = await prisma.user.findFirst({
-          where: email
-            ? { email }
-            : studentId
-            ? { studentId }
-            : undefined,
+          where: email ? { email } : studentId ? { studentId } : undefined,
         });
 
         if (!user || !user.password) return null;

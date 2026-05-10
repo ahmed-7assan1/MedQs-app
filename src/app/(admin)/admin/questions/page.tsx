@@ -28,6 +28,8 @@ interface Question {
   lectureId: string;
   lecture?: { title: string };
   choices: { key: string; text: string }[];
+  questionType: "MCQ" | "ESSAY";
+  essayReference?: string | null;
 }
 
 interface ModuleT { id: string; name: string }
@@ -69,6 +71,8 @@ export default function AdminQuestionsPage() {
   const [stemLayout, setStemLayout] = useState<"STANDARD" | "IMAGE_OVERLAY">("STANDARD");
   const [drawOpen, setDrawOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [questionType, setQuestionType] = useState<"MCQ" | "ESSAY">("MCQ");
+  const [essayReference, setEssayReference] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -162,6 +166,8 @@ export default function AdminQuestionsPage() {
       explanation: current.explanation ?? "",
       lectureId: current.lectureId,
       choices: current.choices,
+      questionType: current.questionType,
+      essayReference: current.essayReference,
     };
     const res = await fetch(`/api/v1/questions/${id}`, {
       method: "PUT",
@@ -173,13 +179,18 @@ export default function AdminQuestionsPage() {
   }
 
   async function addManualQuestion() {
-    const validChoices = choices.filter((c) => c.text.trim());
-    if (validChoices.length < 2) return toast.error("Fill at least two answer choices");
+    if (questionType === "MCQ") {
+      const validChoices = choices.filter((c) => c.text.trim());
+      if (validChoices.length < 2) return toast.error("Fill at least two answer choices");
+      if (!validChoices.some((c) => c.key === answer)) return toast.error("Correct answer must match one of the choice keys");
+    } else {
+      if (!essayReference.trim()) return toast.error("Please provide a model answer for essay grading");
+    }
+
     if (!pickLecture) return toast.error("Select module → subject → lecture");
     if (!body.trim() && !imageUrl.trim()) return toast.error("Add question text and/or an image");
     if (stemLayout === "IMAGE_OVERLAY" && !imageUrl.trim())
       return toast.error("Overlay layout requires an image");
-    if (!validChoices.some((c) => c.key === answer)) return toast.error("Correct answer must match one of the choice keys");
 
     setSaving(true);
     try {
@@ -190,11 +201,13 @@ export default function AdminQuestionsPage() {
           lectureId: pickLecture,
           body: body.trim(),
           imageUrl: imageUrl.trim() || null,
-          choices: validChoices.map((c) => ({ key: c.key, text: c.text.trim() })),
-          answer,
+          choices: questionType === "MCQ" ? choices.filter(c => c.text.trim()).map((c) => ({ key: c.key, text: c.text.trim() })) : [],
+          answer: questionType === "MCQ" ? answer : "ESSAY",
           explanation: explanation.trim() || undefined,
           difficulty,
           stemLayout,
+          questionType,
+          essayReference: questionType === "ESSAY" ? essayReference : undefined,
         }),
       });
       if (!res.ok) {
@@ -213,6 +226,8 @@ export default function AdminQuestionsPage() {
       ]);
       setAnswer("A");
       setStemLayout("STANDARD");
+      setQuestionType("MCQ");
+      setEssayReference("");
       setAddOpen(false);
     } finally {
       setSaving(false);
@@ -310,6 +325,22 @@ export default function AdminQuestionsPage() {
               <h2 className="font-display text-lg font-bold tracking-tight">New Manual Question</h2>
               <p className="text-xs text-muted-foreground">Fill in the details below to add a custom item to the bank.</p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2 mb-2">
+            {(["MCQ", "ESSAY"] as const).map(t => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setQuestionType(t)}
+                className={cn(
+                  "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                  questionType === t ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20" : "bg-black/20 border-white/5 text-white/40 hover:border-white/20"
+                )}
+              >
+                {t === "MCQ" ? "Multiple Choice" : "Clinical Essay"}
+              </button>
+            ))}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -457,39 +488,52 @@ export default function AdminQuestionsPage() {
                </div>
             </div>
 
-            <div className="space-y-4">
-              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Proffered Choices</label>
-              <div className="grid gap-2.5">
-                {choices.map((c, i) => (
-                  <div key={c.key} className={cn(
-                    "relative flex items-center gap-3 rounded-xl border p-2.5 transition-all",
-                    answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-white/[0.02] bg-background/30"
-                  )}>
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/40 text-[10px] font-bold font-mono">
-                      {c.key}
-                    </span>
-                    <input
-                      value={c.text}
-                      onChange={(e) =>
-                        setChoices((prev) => prev.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))
-                      }
-                      className="min-w-0 flex-1 border-none bg-transparent p-0 text-sm focus:ring-0"
-                      placeholder={`Possible Answer ${c.key}…`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setAnswer(c.key)}
-                      className={cn(
-                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all",
-                        answer === c.key ? "bg-emerald-500 text-white shadow shadow-emerald-500/30" : "bg-muted/40 text-muted-foreground hover:bg-muted"
-                      )}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
+            {questionType === "MCQ" ? (
+              <div className="space-y-4">
+                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Proffered Choices</label>
+                <div className="grid gap-2.5">
+                  {choices.map((c, i) => (
+                    <div key={c.key} className={cn(
+                      "relative flex items-center gap-3 rounded-xl border p-2.5 transition-all",
+                      answer === c.key ? "border-emerald-500/30 bg-emerald-500/5 ring-1 ring-emerald-500/20" : "border-white/[0.02] bg-background/30"
+                    )}>
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/40 text-[10px] font-bold font-mono">
+                        {c.key}
+                      </span>
+                      <input
+                        value={c.text}
+                        onChange={(e) =>
+                          setChoices((prev) => prev.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))
+                        }
+                        className="min-w-0 flex-1 border-none bg-transparent p-0 text-sm focus:ring-0"
+                        placeholder={`Possible Answer ${c.key}…`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setAnswer(c.key)}
+                        className={cn(
+                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all",
+                          answer === c.key ? "bg-emerald-500 text-white shadow shadow-emerald-500/30" : "bg-muted/40 text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Essay Model Answer (AI Reference)</label>
+                <textarea
+                  value={essayReference}
+                  onChange={(e) => setEssayReference(e.target.value)}
+                  rows={6}
+                  placeholder="Paste the perfect answer here. The AI will use this as a rubric to grade student submissions…"
+                  className="w-full rounded-2xl border border-white/[0.02] bg-background/50 px-4 py-4 text-sm focus:ring-blue-500/40 focus:outline-none min-h-[200px]"
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

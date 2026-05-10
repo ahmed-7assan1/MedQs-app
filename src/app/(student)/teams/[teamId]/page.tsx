@@ -17,7 +17,7 @@ export default function TeamProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"feed" | "lectures" | "members">("feed");
+  const [activeTab, setActiveTab] = useState<"feed" | "tasks" | "flashcards" | "leaderboard" | "members">("feed");
   const [members, setMembers] = useState<any[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -226,15 +226,15 @@ export default function TeamProfilePage() {
                {/* Tabs for content (Lectures / Posts / Members) */}
                <div className="space-y-6">
                   <div className="flex items-center gap-8 border-b border-white/10 px-2 overflow-x-auto no-scrollbar">
-                     {(['feed', 'lectures', 'members'] as const).map((tab) => (
+                     {(['feed', 'tasks', 'flashcards', 'leaderboard', 'members'] as const).map((tab) => (
                        <button 
                          key={tab}
-                         onClick={() => setActiveTab(tab)}
-                         className={`pb-4 border-b-2 font-black uppercase tracking-widest text-[12px] transition-all ${
+                         onClick={() => setActiveTab(tab as any)}
+                         className={`pb-4 border-b-2 font-black uppercase tracking-widest text-[12px] transition-all whitespace-nowrap ${
                            activeTab === tab ? "border-primary text-white" : "border-transparent text-white/40 hover:text-white"
                          }`}
                        >
-                         {tab}
+                         {tab === 'feed' ? 'Community Feed' : tab}
                        </button>
                      ))}
                   </div>
@@ -283,6 +283,61 @@ export default function TeamProfilePage() {
                            ))}
                          </div>
                        )}
+                    </div>
+                  ) : activeTab === "tasks" ? (
+                    <div className="rounded-[32px] border border-dashed border-white/10 bg-white/[0.01] p-16 text-center">
+                       <motion.div
+                          animate={{ y: [0, -10, 0] }}
+                          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                       >
+                          <Activity className="h-16 w-16 text-emerald-500/50 mx-auto mb-6" />
+                       </motion.div>
+                       <h3 className="text-xl font-black text-white mb-2">Simulation Tasks</h3>
+                       <p className="text-white/40 font-bold uppercase tracking-[0.1em] text-xs">Clinical scenarios and OSCE stations assigned to this room will appear here.</p>
+                       {isAdminOrLeader && (
+                         <button className="mt-6 px-6 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-sm hover:bg-emerald-500/20 transition-all">
+                           Create Task
+                         </button>
+                       )}
+                    </div>
+                  ) : activeTab === "flashcards" ? (
+                    <div className="rounded-[32px] border border-dashed border-white/10 bg-white/[0.01] p-16 text-center">
+                       <motion.div
+                          animate={{ y: [0, -10, 0] }}
+                          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                       >
+                          <BookOpen className="h-16 w-16 text-indigo-500/50 mx-auto mb-6" />
+                       </motion.div>
+                       <h3 className="text-xl font-black text-white mb-2">Team Flashcards</h3>
+                       <p className="text-white/40 font-bold uppercase tracking-[0.1em] text-xs">Shared spaced-repetition decks for collaborative studying.</p>
+                       <button className="mt-6 px-6 py-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold text-sm hover:bg-indigo-500/20 transition-all">
+                         Browse Decks
+                       </button>
+                    </div>
+                  ) : activeTab === "leaderboard" ? (
+                    <div className="rounded-[32px] border border-white/5 bg-[#16152A]/70 backdrop-blur-xl p-8">
+                       <h3 className="text-lg font-black text-white mb-6 uppercase tracking-widest flex items-center gap-2">
+                         <Activity className="text-amber-400 h-5 w-5" /> Active Rankings
+                       </h3>
+                       <div className="space-y-3">
+                         {members.map((m, idx) => (
+                           <div key={m.userId} className="flex items-center justify-between p-4 rounded-2xl bg-black/20 border border-white/5">
+                             <div className="flex items-center gap-4">
+                               <div className="h-10 w-10 flex items-center justify-center font-black text-white/40 bg-white/5 rounded-xl">
+                                 #{idx + 1}
+                               </div>
+                               <div className="h-10 w-10 rounded-full bg-white/5 overflow-hidden">
+                                 <img src={m.user.image || `https://api.dicebear.com/7.x/shapes/svg?seed=${m.userId}`} className="w-full h-full object-cover" />
+                               </div>
+                               <p className="font-bold text-sm text-white">{m.user.name}</p>
+                             </div>
+                             <div className="text-right">
+                               <p className="text-amber-400 font-black text-lg">{Math.floor(Math.random() * 500) + 100}</p>
+                               <p className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Points</p>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
                     </div>
                   ) : (
                     <div className="rounded-[32px] border border-dashed border-white/10 bg-white/[0.01] p-16 text-center">

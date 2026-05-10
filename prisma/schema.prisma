@@ -71,6 +71,7 @@ model University {
   yearIdFormats  UniversityYearIdFormat[]
   users          User[]
   medicalTeams   MedicalTeam[]
+  studyRooms     StudyRoom[]
 }
 
 /// Faculty (كليه) — optional sub-division of a University.
@@ -190,6 +191,30 @@ model Lecture {
   notes         Note[]
   teamId        String?
   team          MedicalTeam?          @relation(fields: [teamId], references: [id])
+  type          LectureType           @default(LECTURE)
+  checklist     Checklist?
+}
+
+enum LectureType {
+  LECTURE
+  PRACTICAL
+}
+
+model Checklist {
+  id        String          @id @default(uuid())
+  title     String
+  lectureId String          @unique
+  lecture   Lecture         @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  items     ChecklistItem[]
+}
+
+model ChecklistItem {
+  id          String    @id @default(uuid())
+  content     String
+  points      Int       @default(1)
+  isCritical  Boolean   @default(false)
+  checklistId String
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
 }
 
 model Flashcard {
@@ -299,8 +324,20 @@ model Question {
   reports        QuestionReport[]
   attemptItems   QuizAttemptItem[]
   savedBy        SavedQuestion[]
+  sharedInPosts  Post[]
   telegramMessageId String?
   telegramChatId    String?
+  videoUrl       String?
+  videoSource    MediaSource        @default(YOUTUBE)
+  stationTime    Int?               // Time in seconds for OSCE mode
+  studyRoomPosts StudyRoomPost[]
+}
+
+enum MediaSource {
+  YOUTUBE
+  DRIVE
+  TELEGRAM
+  EXTERNAL
 }
 
 model PastPaper {
@@ -490,6 +527,14 @@ model User {
   telegramVerified     Boolean                @default(false)
   coverImage           String?
   pushSubscriptions    PushSubscription[]
+  pollVotes            PollVote[]
+  ownedStudyRoom       StudyRoom?             @relation("RoomOwner")
+  studyRoomMembers     StudyRoomMember[]
+  studyRoomPosts       StudyRoomPost[]
+  studyRoomComments    StudyRoomComment[]
+  studyRoomPostLikes   StudyRoomPostLike[]
+  savedPosts           SavedPost[]
+  taskCompletions      StudyRoomTaskCompletion[]
 }
 
 model TelegramConfig {
@@ -618,6 +663,13 @@ model Post {
   university           University   @relation(fields: [universityId], references: [id])
   teamId               String?
   team                 MedicalTeam? @relation(fields: [teamId], references: [id])
+  pollId               String?      @unique
+  poll                 Poll?        @relation(fields: [pollId], references: [id])
+  sharedQuestionId     String?
+  sharedQuestion       Question?    @relation(fields: [sharedQuestionId], references: [id])
+  sharedQuestionData   Json?
+  hashtags             PostHashtag[]
+  savedBy              SavedPost[]
 
   @@index([universityId, createdAt])
   @@index([forumId, createdAt])
@@ -627,6 +679,7 @@ model Post {
 model Comment {
   id           String        @id @default(uuid())
   content      String
+  attachments  Json?
   authorId     String
   postId       String
   parentId     String?
@@ -906,6 +959,7 @@ enum QuestionStemLayout {
 enum PastPaperKind {
   MODULE_QUESTION_BANK
   ADMIN_AUTHORED_QUIZ
+  OSCE
 }
 
 enum FacultyCategory {
@@ -970,6 +1024,9 @@ model MedicalTeam {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   followersCount Int            @default(0)
+  inviteCode     String?        @unique
+  isPublic       Boolean        @default(true)
+  memberLimit    Int?
 
   telegramGroupId  String?
   telegramTemplate String?       @db.Text
@@ -982,6 +1039,7 @@ model MedicalTeam {
   followers      TeamFollower[]
   lectures       Lecture[]
   posts          Post[]
+  teamTasks      TeamTask[]
 
   @@index([facultyId])
   @@index([universityId])
@@ -1045,4 +1103,204 @@ model PushSubscription {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model Poll {
+  id        String       @id @default(uuid())
+  question  String
+  expiresAt DateTime?
+  createdAt DateTime     @default(now())
+  options   PollOption[]
+  post      Post?
+}
+
+model PollOption {
+  id        String     @id @default(uuid())
+  text      String
+  pollId    String
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes     PollVote[]
+}
+
+model PollVote {
+  id           String     @id @default(uuid())
+  pollOptionId String
+  userId       String
+  createdAt    DateTime   @default(now())
+  pollOption   PollOption @relation(fields: [pollOptionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollOptionId, userId])
+}
+
+model TeamTask {
+  id          String      @id @default(uuid())
+  title       String
+  description String?     @db.Text
+  deadline    DateTime
+  teamId      String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  team        MedicalTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId, deadline])
+}
+
+// ── Student-Owned Study Rooms (separate from admin MedicalTeam) ──────────────
+
+model StudyRoom {
+  id           String            @id @default(uuid())
+  name         String
+  description  String?           @db.Text
+  inviteCode   String            @unique
+  isPublic     Boolean           @default(true)
+  memberLimit  Int               @default(10)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  ownerId      String            @unique
+  universityId String
+  image        String?           @db.Text
+  spotifyUrl   String?           @db.Text
+  customAiConfig Json?           // { apiKey, provider, model, studentAnalysisPrompt }
+  isChatOpen   Boolean           @default(true)
+  lastChatCleanup DateTime?
+  schedule     StudyRoomSchedule?
+
+  owner        User              @relation("RoomOwner", fields: [ownerId], references: [id])
+  university   University        @relation(fields: [universityId], references: [id])
+  members      StudyRoomMember[]
+  posts        StudyRoomPost[]
+  tasks        StudyRoomTask[]
+
+  @@index([universityId])
+  @@index([inviteCode])
+}
+
+model StudyRoomMember {
+  id       String    @id @default(uuid())
+  roomId   String
+  userId   String
+  role     String    @default("MEMBER") // OWNER, MODERATOR, MEMBER
+  permissions Json?     // { canKick, canPostNotice, canManageTasks }
+  joinedAt DateTime  @default(now())
+  room     StudyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId])
+}
+
+model StudyRoomPost {
+  id        String    @id @default(uuid())
+  content   String    @db.Text
+  roomId    String
+  authorId  String
+  createdAt DateTime  @default(now())
+  room      StudyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id])
+  
+  imageUrl           String?   @db.Text
+  attachments        Json?     // Array of { url: string, type: string, name: string }
+  sharedQuestionId   String?
+  sharedQuestionData Json?
+  sharedQuestion     Question? @relation(fields: [sharedQuestionId], references: [id])
+  
+  likes    StudyRoomPostLike[]
+  comments StudyRoomComment[]
+
+  @@index([roomId, createdAt])
+  @@index([authorId])
+}
+
+model StudyRoomTask {
+  id          String    @id @default(uuid())
+  title       String
+  description String?   @db.Text
+  deadline    DateTime?
+  completed   Boolean   @default(false)
+  completions StudyRoomTaskCompletion[]
+  roomId      String
+  createdAt   DateTime  @default(now())
+  room        StudyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, deadline])
+}
+
+model StudyRoomTaskCompletion {
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  completedAt DateTime @default(now())
+  
+  task      StudyRoomTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+}
+
+model SavedPost {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model Hashtag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  posts     PostHashtag[]
+}
+
+model PostHashtag {
+  id        String   @id @default(uuid())
+  postId    String
+  hashtagId String
+  
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  hashtag   Hashtag  @relation(fields: [hashtagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, hashtagId])
+}
+
+model StudyRoomComment {
+  id           String        @id @default(uuid())
+  content      String        @db.Text
+  attachments  Json?         // Support voice records, images, etc.
+  authorId     String
+  postId       String
+  parentId     String?
+  createdAt    DateTime      @default(now())
+  
+  author       User              @relation(fields: [authorId], references: [id])
+  post         StudyRoomPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent       StudyRoomComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      StudyRoomComment[] @relation("CommentReplies")
+
+  @@index([postId, createdAt])
+  @@index([authorId])
+}
+
+model StudyRoomSchedule {
+  id        String    @id @default(uuid())
+  roomId    String    @unique
+  events    Json      // Array of { id, title, start, end, type, location }
+  updatedAt DateTime  @updatedAt
+  room      StudyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model StudyRoomPostLike {
+  id        String        @id @default(uuid())
+  postId    String
+  userId    String
+  post      StudyRoomPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
 }

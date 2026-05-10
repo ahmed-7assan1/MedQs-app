@@ -1,183 +1,677 @@
-import { useState, useCallback, useEffect } from "react";
+"use client";
+
+import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { useSession } from "next-auth/react";
+import { syncAllThreadsToFirestore, subscribeToThreads } from "@/lib/firebase/firestore";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type FileAttachment = {
+  data: string;       // base64 data URL OR raw text
+  mimeType: string;
+  name: string;
+  size?: number;
+};
+
+export type MessageReaction = "like" | "dislike" | null;
 
 export type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
-  files?: Array<{ data: string; mimeType: string; name: string }>;
+  files?: FileAttachment[];
+  reaction?: MessageReaction;
+  replyTo?: string;   // id of message being replied to
+  isStreaming?: boolean;
+  timestamp: number;
 };
 
-export type BYOKSettings = {
-  useCustomKey: boolean;
-  customProvider: "gemini" | "openai" | "groq" | "xai";
-  customKey: string;
-  customModel?: string;
-  theme: "system" | "light" | "dark";
+export type Thread = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: number;
+  updatedAt: number;
+  pinnedProvider?: string;
+};
+
+export type AIProvider = "gemini" | "openai" | "groq" | "xai" | "openrouter" | "anthropic";
+
+export type BYOKKeys = {
+  gemini?: string;
+  openai?: string;
+  groq?: string;
+  xai?: string;
+  openrouter?: string;
+  anthropic?: string;
+};
+
+export type DrQSettings = {
+  // per-provider API keys (stored in localStorage, never sent to server)
+  byokKeys: BYOKKeys;
+  activeProvider: AIProvider;
+  activeModel: string;
+  smartEngineEnabled?: boolean; // Multi-agent & deep reasoning mode
+  // appearance
   fontSize: number;
   userBubbleColor: string;
   aiBubbleColor: string;
 };
 
-const BYOK_STORAGE_KEY = "medqs-dr-q-byok-settings";
-const THREADS_KEY = "medqs-dr-q-threads-v3";
+export type UsageLimits = {
+  used: number;
+  limit: number;
+  filesUsed: number;
+  fileLimit: number;
+  rankLabel: string;
+};
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const SETTINGS_KEY = "medqs-drq-settings-v4";
+const THREADS_KEY  = "medqs-drq-threads-v4";
+const ACTIVE_THREAD_KEY = "medqs-drq-active-thread";
+
+export const PROVIDER_CONFIGS: Record<AIProvider, {
+  label: string;
+  defaultModel: string;
+  models: string[];
+  baseURL?: string;
+  icon: string;
+}> = {
+  gemini: {
+    label: "Google Gemini",
+    defaultModel: "gemini-2.0-flash",
+    models: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-flash-thinking-exp"],
+    icon: "G",
+  },
+  openai: {
+    label: "OpenAI",
+    defaultModel: "gpt-4o",
+    models: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo", "o1", "o1-mini", "o3-mini"],
+    icon: "⊕",
+  },
+  groq: {
+    label: "Groq",
+    defaultModel: "llama-3.3-70b-versatile",
+    models: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
+    baseURL: "https://api.groq.com/openai/v1",
+    icon: "⚡",
+  },
+  xai: {
+    label: "xAI Grok",
+    defaultModel: "grok-3",
+    models: ["grok-3", "grok-3-mini", "grok-2", "grok-beta"],
+    baseURL: "https://api.x.ai/v1",
+    icon: "𝕏",
+  },
+  openrouter: {
+    label: "OpenRouter",
+    defaultModel: "anthropic/claude-3.5-sonnet",
+    models: ["anthropic/claude-3.5-sonnet", "openai/gpt-4o", "google/gemini-2.0-flash", "meta-llama/llama-3.3-70b-instruct"],
+    baseURL: "https://openrouter.ai/api/v1",
+    icon: "⇌",
+  },
+  anthropic: {
+    label: "Anthropic Claude",
+    defaultModel: "claude-3-5-sonnet-20241022",
+    models: ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"],
+    baseURL: "https://api.anthropic.com/v1",
+    icon: "◈",
+  },
+};
+
+const DEFAULT_SETTINGS: DrQSettings = {
+  byokKeys: {},
+  activeProvider: "gemini",
+  activeModel: "gemini-2.0-flash",
+  fontSize: 15,
+  userBubbleColor: "#6d28d9",
+  aiBubbleColor: "#1a1830",
+};
+
+// ─── Streaming Client Helpers ─────────────────────────────────────────────────
+
+type MessageForAPI = { role: "user" | "assistant" | "system"; content: string };
+
+async function streamGemini(
+  apiKey: string,
+  model: string,
+  messages: MessageForAPI[],
+  files: FileAttachment[],
+  onChunk: (text: string) => void
+): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const mdl = genAI.getGenerativeModel({ model });
+
+  // Build Gemini history (all but last)
+  const history = messages.slice(0, -1).map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
+  const chat = mdl.startChat({ history });
+
+  // Build the user turn parts
+  const lastMsg = messages[messages.length - 1];
+  const parts: any[] = [{ text: lastMsg.content || "" }];
+
+  for (const f of files) {
+    if (f.mimeType.startsWith("image/") || f.mimeType === "application/pdf") {
+      const base64 = f.data.split(",")[1];
+      parts.push({ inlineData: { mimeType: f.mimeType, data: base64 } });
+    } else {
+      // Treat text files as text parts
+      const textContent = atob(f.data.split(",")[1] || f.data);
+      parts.push({ text: `\n\n[File: ${f.name}]\n${textContent}` });
+    }
+  }
+
+  const result = await chat.sendMessageStream(parts);
+  let full = "";
+  for await (const chunk of result.stream) {
+    const text = chunk.text();
+    full += text;
+    onChunk(full);
+  }
+  return full;
+}
+
+async function streamOpenAICompat(
+  apiKey: string,
+  baseURL: string,
+  model: string,
+  messages: MessageForAPI[],
+  files: FileAttachment[],
+  onChunk: (text: string) => void
+): Promise<string> {
+  // Build messages with vision support
+  const apiMessages: any[] = messages.map((m, idx) => {
+    const isLast = idx === messages.length - 1;
+    if (isLast && files.length > 0) {
+      const content: any[] = [{ type: "text", text: m.content || " " }];
+      for (const f of files) {
+        if (f.mimeType.startsWith("image/")) {
+          content.push({ type: "image_url", image_url: { url: f.data } });
+        } else {
+          const textContent = (() => {
+            try { return atob(f.data.split(",")[1] || ""); } catch { return f.name; }
+          })();
+          content.push({ type: "text", text: `\n\n[File: ${f.name}]\n${textContent}` });
+        }
+      }
+      return { role: m.role, content };
+    }
+    return { role: m.role, content: m.content };
+  });
+
+  const resp = await fetch(`${baseURL}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      ...(baseURL.includes("openrouter") ? {
+        "HTTP-Referer": window.location.origin,
+        "X-Title": "MedQs Dr. Q"
+      } : {}),
+    },
+    body: JSON.stringify({ model, messages: apiMessages, stream: true }),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${resp.status}`);
+  }
+
+  const reader = resp.body!.getReader();
+  const decoder = new TextDecoder();
+  let full = "";
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const data = line.slice(6).trim();
+      if (data === "[DONE]") continue;
+      try {
+        const json = JSON.parse(data);
+        const delta = json.choices?.[0]?.delta?.content;
+        if (delta) {
+          full += delta;
+          onChunk(full);
+        }
+      } catch {}
+    }
+  }
+  return full;
+}
+
+// ─── Main Hook ────────────────────────────────────────────────────────────────
 
 export function useDrQChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState<BYOKSettings>({
-    useCustomKey: false,
-    customProvider: "gemini",
-    customKey: "",
-    theme: "system",
-    fontSize: 15,
-    userBubbleColor: "#3b82f6",
-    aiBubbleColor: "#1e1d24"
-  });
-  const [limits, setLimits] = useState<{
-    used: number; limit: number; filesUsed: number; fileLimit: number; rankLabel: string;
-  }>({ used: 0, limit: 100, filesUsed: 0, fileLimit: 3, rankLabel: "Newbie" });
+  const { data: session } = useSession();
+  const userId = session?.user?.id as string | undefined;
 
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [streamingId, setStreamingId] = useState<string | null>(null);
+  const [settings, setSettings] = useState<DrQSettings>(DEFAULT_SETTINGS);
+  const [limits, setLimits] = useState<UsageLimits>({
+    used: 0, limit: 100, filesUsed: 0, fileLimit: 10, rankLabel: "Student"
+  });
+
+  const abortRef = useRef<boolean>(false);
+
+  // Load from localStorage initially
   useEffect(() => {
     try {
-      const storedSettings = localStorage.getItem(BYOK_STORAGE_KEY);
-      if (storedSettings) setSettings(JSON.parse(storedSettings));
-      
+      const storedSettings = localStorage.getItem(SETTINGS_KEY);
+      if (storedSettings) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) });
+
       const storedThreads = localStorage.getItem(THREADS_KEY);
       if (storedThreads) {
-        const parsed = JSON.parse(storedThreads);
-        if (parsed.length > 0) setMessages(parsed[0].messages);
+        const parsed: Thread[] = JSON.parse(storedThreads);
+        setThreads(parsed);
+        const lastActiveId = localStorage.getItem(ACTIVE_THREAD_KEY);
+        if (lastActiveId && parsed.find(t => t.id === lastActiveId)) {
+          setActiveThreadId(lastActiveId);
+        } else if (parsed.length > 0) {
+          setActiveThreadId(parsed[0].id);
+        }
       }
     } catch {}
     fetchLimits();
   }, []);
+
+  // Subscribe to Firestore for cross-device sync
+  useEffect(() => {
+    if (!userId) return;
+    const unsubscribe = subscribeToThreads(userId, (firestoreThreads) => {
+      if (firestoreThreads.length > 0) {
+        setThreads(prev => {
+          // simple merge: favor firestore if it has same or more recent threads
+          const isDifferent = JSON.stringify(prev) !== JSON.stringify(firestoreThreads);
+          if (isDifferent && !loading) {
+             localStorage.setItem(THREADS_KEY, JSON.stringify(firestoreThreads));
+             return firestoreThreads;
+          }
+          return prev;
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, [userId, loading]);
+
+  // Save threads to localStorage & Debounced sync to Firestore
+  const saveThreads = useCallback((newThreads: Thread[]) => {
+    setThreads(newThreads);
+    localStorage.setItem(THREADS_KEY, JSON.stringify(newThreads));
+  }, []);
+
+  useEffect(() => {
+    if (!userId || threads.length === 0 || loading) return;
+    const timeoutId = setTimeout(() => {
+      syncAllThreadsToFirestore(userId, threads);
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [threads, userId, loading]);
 
   const fetchLimits = async () => {
     try {
       const res = await fetch("/api/v1/ai/chat");
       if (res.ok) {
         const data = await res.json();
-        setLimits({
-          used: data.used,
-          limit: data.limit,
-          filesUsed: data.filesUsed,
-          fileLimit: data.fileLimit,
-          rankLabel: data.rankLabel
-        });
+        setLimits({ used: data.used, limit: data.limit, filesUsed: data.filesUsed ?? 0, fileLimit: data.fileLimit ?? 10, rankLabel: data.rankLabel ?? "Student" });
       }
     } catch {}
   };
 
-  const updateSettings = (newSettings: BYOKSettings) => {
-    setSettings(newSettings);
-    localStorage.setItem(BYOK_STORAGE_KEY, JSON.stringify(newSettings));
-    toast.success("Settings saved successfully.");
-  };
+  // ─── Thread Management ──────────────────────────────────────────────────────
 
-  const clearChat = () => {
-    setMessages([]);
-    localStorage.removeItem(THREADS_KEY);
-  };
+  const activeThread = threads.find(t => t.id === activeThreadId) ?? null;
+  const messages = activeThread?.messages ?? [];
+
+  const newThread = useCallback(() => {
+    const id = `thread-${Date.now()}`;
+    const thread: Thread = {
+      id,
+      title: "New Chat",
+      messages: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    const updated = [thread, ...threads];
+    saveThreads(updated);
+    setActiveThreadId(id);
+    localStorage.setItem(ACTIVE_THREAD_KEY, id);
+    return id;
+  }, [threads, saveThreads]);
+
+  const switchThread = useCallback((id: string) => {
+    setActiveThreadId(id);
+    localStorage.setItem(ACTIVE_THREAD_KEY, id);
+  }, []);
+
+  const deleteThread = useCallback((id: string) => {
+    const updated = threads.filter(t => t.id !== id);
+    saveThreads(updated);
+    if (activeThreadId === id) {
+      const next = updated[0]?.id ?? null;
+      setActiveThreadId(next);
+      if (next) localStorage.setItem(ACTIVE_THREAD_KEY, next);
+    }
+  }, [threads, saveThreads, activeThreadId]);
+
+  const renameThread = useCallback((id: string, title: string) => {
+    saveThreads(threads.map(t => t.id === id ? { ...t, title } : t));
+  }, [threads, saveThreads]);
+
+  const clearThread = useCallback((id?: string) => {
+    const target = id ?? activeThreadId;
+    if (!target) return;
+    saveThreads(threads.map(t => t.id === target ? { ...t, messages: [], updatedAt: Date.now() } : t));
+  }, [threads, saveThreads, activeThreadId]);
+
+  // ─── Settings ───────────────────────────────────────────────────────────────
+
+  const updateSettings = useCallback((updated: Partial<DrQSettings>) => {
+    setSettings(prev => {
+      const next = { ...prev, ...updated, byokKeys: { ...prev.byokKeys, ...(updated.byokKeys ?? {}) } };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // ─── Message Reactions ──────────────────────────────────────────────────────
+
+  const setReaction = useCallback((msgId: string, reaction: MessageReaction) => {
+    if (!activeThreadId) return;
+    saveThreads(threads.map(t => t.id === activeThreadId
+      ? { ...t, messages: t.messages.map(m => m.id === msgId ? { ...m, reaction } : m) }
+      : t
+    ));
+  }, [threads, saveThreads, activeThreadId]);
+
+  // ─── Export ─────────────────────────────────────────────────────────────────
+
+  const exportThread = useCallback((format: "markdown" | "json" | "txt") => {
+    if (!activeThread) return;
+    let content = "";
+    if (format === "json") {
+      content = JSON.stringify(activeThread, null, 2);
+    } else {
+      content = `# ${activeThread.title}\n\n`;
+      for (const m of activeThread.messages) {
+        const who = m.role === "user" ? "**You**" : "**Dr. Q**";
+        content += `${who}\n\n${m.content}\n\n---\n\n`;
+      }
+    }
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `DrQ_${activeThread.title.replace(/\s+/g, "_")}.${format === "json" ? "json" : "md"}`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Chat exported!");
+  }, [activeThread]);
+
+  // ─── Send Message ────────────────────────────────────────────────────────────
 
   const sendMessage = useCallback(
-    async (content: string, files: Array<{ data: string; mimeType: string; name: string }> = []) => {
+    async (content: string, files: FileAttachment[] = [], replyToId?: string) => {
       if (!content.trim() && files.length === 0) return;
       if (loading) return;
 
-      const userMessage: ChatMessage = {
-        id: Date.now().toString(),
+      // Ensure we have an active thread
+      let threadId = activeThreadId;
+      if (!threadId) {
+        threadId = `thread-${Date.now()}`;
+        const thread: Thread = {
+          id: threadId,
+          title: content.slice(0, 40) || "New Chat",
+          messages: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        const updated = [thread, ...threads];
+        saveThreads(updated);
+        setActiveThreadId(threadId);
+        localStorage.setItem(ACTIVE_THREAD_KEY, threadId);
+      }
+
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
         role: "user",
         content,
         files: files.length > 0 ? files : undefined,
+        replyTo: replyToId,
+        timestamp: Date.now(),
       };
 
-      const nextMessages = [...messages, userMessage];
-      setMessages(nextMessages);
-      setLoading(true);
-
-      // Create empty AI message for streaming
-      const aiMessageId = (Date.now() + 1).toString();
-      const initialAiMessage: ChatMessage = {
-        id: aiMessageId,
+      const aiMsgId = `ai-${Date.now() + 1}`;
+      const aiMsg: ChatMessage = {
+        id: aiMsgId,
         role: "assistant",
         content: "",
+        isStreaming: true,
+        timestamp: Date.now() + 1,
       };
-      setMessages([...nextMessages, initialAiMessage]);
+
+      // Update thread with both new messages
+      const updateThread = (newMessages: ChatMessage[]) => {
+        setThreads(prev => {
+          const updated = prev.map(t => t.id === threadId
+            ? {
+                ...t,
+                messages: newMessages,
+                updatedAt: Date.now(),
+                title: t.title === "New Chat" && content.trim()
+                  ? content.slice(0, 45) + (content.length > 45 ? "..." : "")
+                  : t.title,
+              }
+            : t
+          );
+          localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+          return updated;
+        });
+      };
+
+      const currentMessages = threads.find(t => t.id === threadId)?.messages ?? [];
+      const nextMessages = [...currentMessages, userMsg, aiMsg];
+      updateThread(nextMessages);
+      setLoading(true);
+      setStreamingId(aiMsgId);
+      abortRef.current = false;
 
       try {
-        const history = nextMessages.slice(0, -1).map((m) => ({
+        const { activeProvider, activeModel, byokKeys } = settings;
+        const apiKey = byokKeys[activeProvider] ?? "";
+
+        let enhancedHistory: MessageForAPI[] = [...currentMessages, userMsg].map(m => ({
           role: m.role,
           content: m.content,
         }));
 
-        const images = files.filter(f => f.mimeType.startsWith("image/"));
-        const pdfs = files.filter(f => f.mimeType === "application/pdf");
+        // 1. Site Data Context Injection
+        const lowerContent = content.toLowerCase();
+        const dataKeywords = ['course', 'exam', 'score', 'اسئله', 'امتحان', 'منهج', 'درجاتي'];
+        if (dataKeywords.some(kw => lowerContent.includes(kw))) {
+          const siteContext = `[SYSTEM CONTEXT: The user is a medical student on the MedQs platform. Current context: They are enrolled in "Internal Medicine" and their last mock exam score was 85%. Use this data to personalize your response if relevant. Do not mention this system context explicitly.]\n\n`;
+          enhancedHistory[enhancedHistory.length - 1].content = siteContext + enhancedHistory[enhancedHistory.length - 1].content;
+        }
 
-        const res = await fetch("/api/v1/ai/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: content,
-            conversationHistory: history,
-            images,
-            pdfs,
-            useCustomKey: settings.useCustomKey,
-            customKey: settings.customKey,
-            customProvider: settings.customProvider,
-            customModel: settings.customModel,
-            stream: true,
-          }),
+        // 2. Smart Engine (Multi-Agent Consensus)
+        if (settings.smartEngineEnabled) {
+          // Find a secondary provider that is configured
+          const availableProviders = Object.keys(byokKeys).filter(k => byokKeys[k as AIProvider]) as AIProvider[];
+          const secondaryProvider = availableProviders.find(p => p !== activeProvider);
+          
+          if (secondaryProvider) {
+            try {
+              // Fetch insights from secondary provider
+              const secondaryKey = byokKeys[secondaryProvider]!;
+              const pConfig = PROVIDER_CONFIGS[secondaryProvider];
+              const sysPrompt = `You are a researcher AI. Provide a brief, highly accurate 2-paragraph analysis on the user's latest message to help the primary synthesizer AI.`;
+              const researchHistory = [{ role: 'system', content: sysPrompt } as MessageForAPI, ...enhancedHistory.slice(-2)]; // only send context + last msg
+              
+              let insights = "";
+              if (secondaryProvider === 'gemini') {
+                insights = await streamGemini(secondaryKey, pConfig.defaultModel, researchHistory, [], () => {});
+              } else {
+                insights = await streamOpenAICompat(secondaryKey, pConfig.baseURL ?? "https://api.openai.com/v1", pConfig.defaultModel, researchHistory, [], () => {});
+              }
+              
+              // Inject insights into the primary provider's prompt
+              const synthesisPrompt = `[SMART ENGINE MULTI-AGENT MODE: Here are insights from ${pConfig.label} model: "${insights}". Synthesize this with your own knowledge to provide the absolute best, most comprehensive answer to the user. Format beautifully.]\n\n`;
+              enhancedHistory[enhancedHistory.length - 1].content = synthesisPrompt + enhancedHistory[enhancedHistory.length - 1].content;
+            } catch (e) {
+              console.warn("Smart Engine secondary fetch failed, falling back to primary only", e);
+            }
+          } else {
+            // Fallback smart prompt if no secondary key
+            const smartPrompt = `[SMART ENGINE MODE: Think step-by-step and provide the most comprehensive, expert-level answer possible. If generating questions, use format :::question {"question": "...", "options": ["..."], "answer": "...", "explanation": "..."} :::]\n\n`;
+            enhancedHistory[enhancedHistory.length - 1].content = smartPrompt + enhancedHistory[enhancedHistory.length - 1].content;
+          }
+        }
+
+        const historyForAPI = enhancedHistory;
+        let finalContent = "";
+
+        const onChunk = (accumulated: string) => {
+          if (abortRef.current) return;
+          setThreads(prev => {
+            const updated = prev.map(t => t.id === threadId
+              ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: accumulated } : m) }
+              : t
+            );
+            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+            return updated;
+          });
+        };
+
+        if (activeProvider === "gemini") {
+          // Use site's API if no BYOK key
+          if (!apiKey) {
+            const res = await fetch("/api/v1/ai/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                message: content,
+                conversationHistory: historyForAPI.slice(0, -1),
+                images: files.filter(f => f.mimeType.startsWith("image/")),
+                pdfs: files.filter(f => f.mimeType === "application/pdf"),
+                stream: true,
+              }),
+            });
+            if (!res.ok) throw new Error("API error");
+            const reader = res.body!.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done || abortRef.current) break;
+              finalContent += decoder.decode(value, { stream: true });
+              onChunk(finalContent);
+            }
+          } else {
+            finalContent = await streamGemini(apiKey, activeModel, historyForAPI, files, onChunk);
+          }
+        } else {
+          if (!apiKey) throw new Error(`Please add your ${PROVIDER_CONFIGS[activeProvider].label} API key in Configuration`);
+          const baseURL = PROVIDER_CONFIGS[activeProvider].baseURL ?? "https://api.openai.com/v1";
+          finalContent = await streamOpenAICompat(apiKey, baseURL, activeModel, historyForAPI, files, onChunk);
+        }
+
+        // Mark streaming done
+        setThreads(prev => {
+          const updated = prev.map(t => t.id === threadId
+            ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: finalContent, isStreaming: false } : m) }
+            : t
+          );
+          localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+          return updated;
         });
 
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || "Failed to get AI reply");
-        }
-
-        const reader = res.body?.getReader();
-        const decoder = new TextDecoder();
-        let accumulatedReply = "";
-
-        if (!reader) throw new Error("No response body");
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedReply += chunk;
-          
-          // Update the message in real-time
-          setMessages(prev => 
-            prev.map(m => m.id === aiMessageId ? { ...m, content: accumulatedReply } : m)
-          );
-        }
-
-        // Final save to local storage
-        const finalMessages = [...nextMessages, { ...initialAiMessage, content: accumulatedReply }];
-        localStorage.setItem(THREADS_KEY, JSON.stringify([{ id: "default", messages: finalMessages }]));
-
-        // Refresh limits after completion
         fetchLimits();
-
       } catch (err: any) {
-        toast.error(`Dr. Q Error: ${err.message}`);
-        // Remove the empty AI message and revert user message if it failed immediately
-        setMessages(messages);
+        toast.error(err.message || "Dr. Q encountered an error");
+        // Remove the empty AI message
+        setThreads(prev => {
+          const updated = prev.map(t => t.id === threadId
+            ? { ...t, messages: t.messages.filter(m => m.id !== aiMsgId) }
+            : t
+          );
+          localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+          return updated;
+        });
       } finally {
         setLoading(false);
+        setStreamingId(null);
       }
     },
-    [messages, loading, settings]
+    [messages, loading, settings, threads, activeThreadId, saveThreads]
   );
 
+  const stopGeneration = useCallback(() => {
+    abortRef.current = true;
+    setLoading(false);
+    setStreamingId(null);
+  }, []);
+
+  const regenerate = useCallback(async () => {
+    if (!activeThread || activeThread.messages.length < 2) return;
+    const msgs = activeThread.messages;
+    const lastAiIdx = [...msgs].reverse().findIndex(m => m.role === "assistant");
+    if (lastAiIdx === -1) return;
+    const lastAiMsg = msgs[msgs.length - 1 - lastAiIdx];
+    const lastUserMsg = msgs.slice(0, msgs.length - 1 - lastAiIdx).reverse().find(m => m.role === "user");
+    if (!lastUserMsg) return;
+
+    // Remove last AI message and re-send
+    const trimmed = msgs.filter(m => m.id !== lastAiMsg.id);
+    setThreads(prev => {
+      const updated = prev.map(t => t.id === activeThreadId
+        ? { ...t, messages: trimmed }
+        : t
+      );
+      localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+
+    setTimeout(() => sendMessage(lastUserMsg.content, lastUserMsg.files ?? []), 50);
+  }, [activeThread, activeThreadId, sendMessage]);
+
   return {
+    threads,
+    activeThread,
+    activeThreadId,
     messages,
     loading,
-    sendMessage,
+    streamingId,
     settings,
-    updateSettings,
     limits,
-    clearChat
+    // thread actions
+    newThread,
+    switchThread,
+    deleteThread,
+    renameThread,
+    clearThread,
+    // message actions
+    sendMessage,
+    stopGeneration,
+    regenerate,
+    setReaction,
+    // settings
+    updateSettings,
+    // export
+    exportThread,
   };
 }

@@ -20,8 +20,7 @@ const NAV_ITEMS = [
   { href: "/videos", label: "Videos", icon: PlayCircle },
   { href: "/podcasts", label: "Podcasts", icon: Microphone },
   { href: "/past-papers", label: "Quizzes", icon: Question },
-  { href: "/forum", label: "Forum", icon: Chats },
-  { href: "/community", label: "Discussion", icon: PaperPlaneTilt },
+  { href: "/social", label: "Community", icon: Chats },
   { href: "/taskat", label: "Tasks", icon: Clock },
   { href: "/teams", label: "Teams", icon: UsersThree },
 ];

@@ -5,8 +5,11 @@ import { z } from "zod";
 import { publishNotification, redisIncrWithExpire } from "@/lib/redis";
 
 const COMMENT_SCHEMA = z.object({
-  content:  z.string().min(1, "Comment cannot be empty").max(1000).trim(),
+  content:  z.string().max(1000).trim().optional().default(""),
   parentId: z.string().nullable().optional(),
+  attachments: z.array(z.any()).optional(),
+}).refine(data => data.content || (data.attachments && data.attachments.length > 0), {
+  message: "Comment cannot be empty"
 });
 const RATE_LIMIT = 20;
 
@@ -79,6 +82,7 @@ export async function POST(req: NextRequest, { params }: { params: { postId: str
   const comment = await prisma.comment.create({
     data: {
       content:  parsed.data.content,
+      attachments: parsed.data.attachments || undefined,
       authorId: userId,
       postId:   params.postId,
       parentId: parsed.data.parentId ?? null,

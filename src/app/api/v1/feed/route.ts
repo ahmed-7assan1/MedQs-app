@@ -86,7 +86,14 @@ export async function GET(req: NextRequest) {
       author: (p as any).author,
       _count: (p as any)._count,
       likedByMe: likedSet.has(p.id),
-    }))
+    })),
+    {
+      headers: {
+        // Serve stale data for 30s, revalidate in background for 60s.
+        // Firebase WebSockets will push any new posts in real-time.
+        "Cache-Control": "s-maxage=30, stale-while-revalidate=60",
+      },
+    }
   );
 }
 

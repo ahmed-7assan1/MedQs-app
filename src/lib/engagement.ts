@@ -6,6 +6,8 @@ export const POINT_VALUES: Record<string, number> = {
   comment: 2,
   like:    1,
   share:   3,
+  task_completion: 10,
+  task_speed_bonus: 25,
 };
 
 export const RANK_TIERS = [
@@ -18,7 +20,7 @@ export const RANK_TIERS = [
 
 export async function logEngagement(
   userId: string,
-  action: "post" | "comment" | "like" | "share"
+  action: "post" | "comment" | "like" | "share" | "task_completion" | "task_speed_bonus"
 ): Promise<{ ok: boolean; newPoints?: number; rankUp?: string }> {
   const allowed = await checkRateLimit(userId, action);
   if (!allowed) return { ok: false };

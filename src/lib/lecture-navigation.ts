@@ -50,16 +50,6 @@ export async function getLectureInModule(moduleId: string, lectureId: string) {
       flashcards: { orderBy: { id: "asc" } },
       questions: {
         orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          body: true,
-          imageUrl: true,
-          choices: true,
-          answer: true,
-          explanation: true,
-          difficulty: true,
-          lectureId: true,
-        },
       },
       files: true,
       videos: {

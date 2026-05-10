@@ -6,7 +6,7 @@ import { generateAIReplyWithFallback } from "@/lib/ai-router";
 import { redisIncrWithExpire } from "@/lib/redis";
 import { prisma } from "@/lib/prisma";
 
-export const maxDuration = 300; // 5 minutes max duration for Vercel
+export const maxDuration = 60; // 60 seconds max duration for Vercel Hobby
 
 const RATE_LIMIT = 5; // Extractions per hour per user
 

@@ -445,7 +445,7 @@ export default async function LandingPage() {
 
             <div>
               <p className="mb-4 text-xs font-bold uppercase tracking-[0.1em] text-foreground">Platform</p>
-              {[["Curriculum", "/modules"], ["Flashcards", "/study-tools"], ["Leaderboard", "/leaderboard"], ["Study Space", "/space"], ["Forums", "/forum"]].map(([l, h]) => (
+              {[["Curriculum", "/modules"], ["Flashcards", "/study-tools"], ["Leaderboard", "/leaderboard"], ["Study Space", "/space"], ["Forums", "/social"]].map(([l, h]) => (
                 <Link key={l} href={h} className="mb-2.5 block text-sm text-muted-foreground decoration-transparent transition-colors hover:text-blue-500">{l}</Link>
               ))}
             </div>

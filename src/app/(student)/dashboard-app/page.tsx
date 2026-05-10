@@ -247,7 +247,8 @@ export default async function DashboardPage() {
               {[
                 { href: "/videos",      label: "Video Hub",    icon: PlayCircle, color: "text-red-400",    bg: "bg-red-500/10"    },
                 { href: "/past-papers", label: "Mock Exams",   icon: Zap,        color: "text-emerald-400", bg: "bg-emerald-500/10" },
-                { href: "/forum",       label: "Collaborate",  icon: Users,      color: "text-blue-400",    bg: "bg-blue-500/10"    },
+                { href: "/social",       label: "Collaborate",  icon: Users,      color: "text-blue-400",    bg: "bg-blue-500/10"    },
+                { href: "/study-tools/flashcards-from-text", label: "Flashcards", icon: Brain, color: "text-purple-400", bg: "bg-purple-500/10" },
                 { href: "/podcasts",    label: "Audio Lab",    icon: Mic,        color: "text-amber-400",   bg: "bg-amber-500/10"   },
               ].map((item) => (
                 <Link

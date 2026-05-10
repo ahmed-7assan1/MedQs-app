@@ -6,7 +6,7 @@ import {
   FileText, Layers, HelpCircle, Video, Sparkles, PlayCircle,
   ArrowLeft, CheckCircle2, BookOpen, Brain, Zap, Star,
   AlignLeft, ChevronRight, Music2, Mic2, Radio, ExternalLink,
-  Youtube, Play, Download, FileImage, FolderArchive,
+  Youtube, Play, Download, FileImage, FolderArchive, Microscope, ShieldCheck, ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
@@ -14,6 +14,7 @@ import ReactMarkdown from "react-markdown";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 import { AIAssistantPanel } from "@/components/ai/AIAssistant";
+import { PremiumVideoPlayer } from "@/components/content/PremiumVideoPlayer";
 
 type TabId = "overview" | "video" | "materials" | "recordings" | "flashcards" | "questions" | "notes" | "drq";
 
@@ -25,6 +26,7 @@ const TAB_META: Record<string, { icon: any; color: string }> = {
   flashcards: { icon: Brain,        color: "text-amber-500"   },
   questions:  { icon: CheckCircle2, color: "text-emerald-500" },
   notes:      { icon: AlignLeft,    color: "text-rose-400"    },
+  checklist:  { icon: ListChecks,   color: "text-indigo-400"  },
   drq:        { icon: Sparkles,     color: "text-primary"     },
 };
 
@@ -186,6 +188,11 @@ export function LectureExperienceClient({
     { id: "questions",  label: "Quiz"       },
     { id: "notes",      label: "Notes"      },
   ];
+
+  if (lecture.checklist) {
+    tabs.splice(tabs.length - 1, 0, { id: "checklist", label: "Checklist" });
+  }
+
   if (isAdmin) tabs.push({ id: "drq", label: "Dr. Q" });
 
   const base   = `/modules/${moduleId}/lectures/${lecture.id}`;
@@ -216,8 +223,8 @@ export function LectureExperienceClient({
             <div className="flex-1 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary ring-1 ring-primary/20">
-                  <BookOpen className="h-3 w-3" />
-                  {lecture?.subject?.name || "Academic Lecture"}
+                  {lecture.type === "PRACTICAL" ? <Microscope className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
+                  {lecture.type === "PRACTICAL" ? "Practical Session" : (lecture?.subject?.name || "Academic Lecture")}
                 </span>
                 {lecture?.order != null && (
                   <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -349,22 +356,63 @@ export function LectureExperienceClient({
 
           {/* Video */}
           {active === "video" && (
-            <div className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-xl">
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-48 w-48 rounded-full bg-sky-500/10 blur-3xl" />
-              </div>
-              <div className="relative flex flex-col items-center justify-center py-20 text-center px-6">
-                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[28px] bg-sky-500/10 ring-1 ring-sky-500/20 shadow-xl shadow-sky-500/10">
-                  <PlayCircle className="h-10 w-10 text-sky-500" />
-                </div>
-                <h3 className="text-2xl font-black text-card-foreground">Lecture Video Studio</h3>
-                <p className="mt-3 max-w-sm text-sm text-muted-foreground leading-relaxed">
-                  Access the full interactive player with timestamps, shared notes, and speed controls.
-                </p>
-                <Link href={`${base}/video`} className="btn-gradient mt-8 inline-flex items-center gap-2 rounded-2xl px-8 py-3.5 text-sm font-bold shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-shadow">
-                  <PlayCircle className="h-4 w-4" /> Open Player
-                </Link>
-              </div>
+            <div className="space-y-6">
+               <PremiumVideoPlayer 
+                 primaryUrl={lecture.videoUrl} 
+                 extraVideos={lecture.videos} 
+                 title={lecture.title}
+               />
+               
+               <div className="flex flex-wrap items-center gap-4 p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+                  <div className="flex items-center gap-2">
+                     <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                        <PlayCircle className="h-4 w-4 text-sky-500" />
+                     </div>
+                     <span className="text-xs font-bold text-white/60">Source Tracking Active</span>
+                  </div>
+                  {lecture.videos.length > 0 && (
+                     <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                           <Layers className="h-4 w-4 text-indigo-500" />
+                        </div>
+                        <span className="text-xs font-bold text-white/60">{lecture.videos.length} Alternative Streams</span>
+                     </div>
+                  )}
+               </div>
+            </div>
+          )}
+
+          {/* Checklist */}
+          {active === "checklist" && lecture.checklist && (
+            <div className="space-y-6 max-w-3xl mx-auto">
+               <div className="flex items-center gap-3 mb-8">
+                  <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                     <ShieldCheck className="h-6 w-6 text-indigo-500" />
+                  </div>
+                  <div>
+                     <h2 className="text-xl font-black text-white">Procedure Checklist</h2>
+                     <p className="text-xs text-white/40 font-bold uppercase tracking-widest mt-1">Self-Validation for Practical Skills</p>
+                  </div>
+               </div>
+
+               <div className="grid gap-4">
+                  {lecture.checklist.items.map((item: any, i: number) => (
+                    <div key={item.id} className="group flex items-start gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 hover:bg-indigo-500/[0.02] transition-all">
+                       <div className="h-6 w-6 rounded-full border-2 border-white/10 flex items-center justify-center shrink-0 mt-1 group-hover:border-indigo-500 transition-colors">
+                          <span className="text-[10px] font-black text-white/30 group-hover:text-indigo-500">{i + 1}</span>
+                       </div>
+                       <div className="flex-1">
+                          <p className="text-sm font-bold text-white/80 group-hover:text-white transition-colors">{item.content}</p>
+                          {item.isCritical && (
+                            <span className="mt-2 inline-block px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 uppercase tracking-widest">Critical Step</span>
+                          )}
+                       </div>
+                       <div className="text-[10px] font-black text-white/20 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg">
+                          +{item.points} pts
+                       </div>
+                    </div>
+                  ))}
+               </div>
             </div>
           )}
 
@@ -449,7 +497,7 @@ export function LectureExperienceClient({
           {active === "questions" && (
             <div className="min-h-[400px]">
               {questionCount > 0 ? (
-                <LectureClient flashcards={[]} questions={lecture.questions} mode="questions" />
+                <LectureClient flashcards={[]} questions={lecture.questions} mode={lecture.type === "PRACTICAL" ? "osce" : "questions"} />
               ) : (
                 <EmptyState icon={CheckCircle2} title="No Quiz Items Yet" desc="MCQ questions for this lecture will appear here once added." color="emerald" />
               )}

@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { subDays } from "date-fns";
 
 export async function GET() {
   try {
@@ -15,7 +14,8 @@ export async function GET() {
 
     for (const team of teams) {
       const days = team.summaryFrequency === "DAILY" ? 1 : team.summaryFrequency === "WEEKLY" ? 7 : 30;
-      const startDate = subDays(new Date(), days);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
 
       // Fetch all content created for this team's lectures in the period
       const lectures = await prisma.lecture.findMany({

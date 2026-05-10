@@ -10,8 +10,11 @@ import {
   VideoCamera,
   CalendarBlank,
   TextAlignLeft,
-  Plus
+  Plus,
+  ChartBar,
+  Trash
 } from "@phosphor-icons/react";
+import { useCommunityShareStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { VoiceRecorder } from "./VoiceRecorder";
 import toast from "react-hot-toast";
@@ -31,6 +34,8 @@ interface Props {
       isChatMessage?: boolean;
       forumId?: string;
       attachments?: any[];
+      sharedQuestion?: any;
+      poll?: any;
     }
   ) => Promise<boolean>;
   forums?: { id: string; name: string }[];
@@ -45,6 +50,22 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
   const [isUploading, setIsUploading] = useState(false);
   const [isRecordingMode, setIsRecordingMode] = useState(false);
   const [selectedForumId, setSelectedForumId] = useState<string>(forums?.[0]?.id || "");
+  const [pollOptions, setPollOptions] = useState<{ text: string }[]>([]);
+  const [isPollMode, setIsPollMode] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState("");
+
+  const sharedQuestion = useCommunityShareStore((s) => s.sharedQuestion);
+  const setSharedQuestion = useCommunityShareStore((s) => s.setSharedQuestion);
+
+  useEffect(() => {
+    if (sharedQuestion) {
+      setIsExpanded(true);
+      // Automatically set some context text if content is empty
+      if (!content) {
+        setContent("Can anyone help me understand this question better?");
+      }
+    }
+  }, [sharedQuestion]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -61,11 +82,20 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
       isForumPost: true,
       forumId: selectedForumId || undefined,
       attachments,
+      sharedQuestion,
+      poll: isPollMode && pollQuestion && pollOptions.filter(o => o.text.trim()).length > 1 ? {
+        question: pollQuestion,
+        options: pollOptions.filter(o => o.text.trim()).map(o => o.text)
+      } : undefined
     });
     if (ok) {
       setContent("");
       setAttachments([]);
       setIsExpanded(false);
+      setSharedQuestion(null);
+      setIsPollMode(false);
+      setPollOptions([]);
+      setPollQuestion("");
     }
     setIsPosting(false);
   };
@@ -140,6 +170,67 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
+              {/* Shared Question Preview */}
+              {sharedQuestion && (
+                <div className="mx-5 mb-4 p-4 rounded-xl border border-indigo-500/30 bg-indigo-500/10 relative group">
+                  <button 
+                    onClick={() => setSharedQuestion(null)}
+                    className="absolute top-2 right-2 p-1 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-all text-white/60 hover:text-white"
+                  >
+                    <X size={14} weight="bold" />
+                  </button>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Attached Question</p>
+                  <p className="text-sm font-medium text-white line-clamp-2">{sharedQuestion.body}</p>
+                </div>
+              )}
+
+              {/* Poll Creation UI */}
+              {isPollMode && (
+                <div className="mx-5 mb-4 p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Create Poll</p>
+                    <button onClick={() => setIsPollMode(false)} className="text-white/40 hover:text-white">
+                      <X size={14} weight="bold" />
+                    </button>
+                  </div>
+                  <input
+                    value={pollQuestion}
+                    onChange={(e) => setPollQuestion(e.target.value)}
+                    placeholder="Ask a question..."
+                    className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary/50 mb-3"
+                  />
+                  <div className="space-y-2">
+                    {pollOptions.map((opt, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input
+                          value={opt.text}
+                          onChange={(e) => {
+                            const newOpts = [...pollOptions];
+                            newOpts[idx].text = e.target.value;
+                            setPollOptions(newOpts);
+                          }}
+                          placeholder={`Option ${idx + 1}`}
+                          className="flex-1 bg-black/20 border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-primary/50"
+                        />
+                        {pollOptions.length > 2 && (
+                          <button onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== idx))} className="p-2 text-red-400 hover:bg-red-400/10 rounded-xl">
+                            <Trash size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {pollOptions.length < 5 && (
+                    <button 
+                      onClick={() => setPollOptions([...pollOptions, { text: "" }])}
+                      className="mt-3 text-[11px] font-black uppercase text-emerald-400 flex items-center gap-1 hover:text-emerald-300"
+                    >
+                      <Plus size={12} weight="bold" /> Add Option
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* Media Grid */}
               {(images.length > 0 || isUploading) && (
                 <div className="flex flex-wrap gap-3 mt-5 px-1">
@@ -183,8 +274,14 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                   <button className="h-10 w-10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all">
                     <VideoCamera size={20} weight="bold" />
                   </button>
-                  <button className="h-10 w-10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                    <CalendarBlank size={20} weight="bold" />
+                  <button 
+                    onClick={() => {
+                      setIsPollMode(true);
+                      if (pollOptions.length === 0) setPollOptions([{text:""}, {text:""}]);
+                    }}
+                    className={cn("h-10 w-10 flex items-center justify-center rounded-xl transition-all", isPollMode ? "text-emerald-400 bg-emerald-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}
+                  >
+                    <ChartBar size={20} weight="bold" />
                   </button>
                   <button 
                     onClick={() => setIsRecordingMode(!isRecordingMode)}

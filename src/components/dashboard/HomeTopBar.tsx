@@ -82,7 +82,7 @@ export function HomeTopBar({ userName, userImage, location = "Medical Platform",
     { id: "podcasts", name: "Podcasts", href: "/podcasts", icon: Mic2, color: "text-green-400" },
     { id: "ai", name: "Dr. Q", href: "/ai-chat", icon: Sparkles, color: "text-amber-400" },
     { id: "quizzes", name: "Quizzes", href: "/past-papers", icon: HelpCircle, color: "text-purple-400" },
-    { id: "community", name: "Community", href: "/forum", icon: MessageSquare, color: "text-pink-400" },
+    { id: "community", name: "Community", href: "/social", icon: MessageSquare, color: "text-pink-400" },
   ];
 
   return (

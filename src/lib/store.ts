@@ -142,3 +142,25 @@ export const useAudioStore = create<AudioStore>((set) => ({
   clearSeek: () => set({ seekTo: null }),
   stop: () => set({ currentTrack: null, isPlaying: false, currentTime: 0, duration: 0, seekTo: null }),
 }));
+
+// ─── Community Share store ───────────────────────────────────────────────────────
+
+export interface SharedQuestionContext {
+  id: string;
+  body: string;
+  choices: any[];
+  correctAnswer: string;
+  userAnswer: string | null;
+  isCorrect: boolean | null;
+  lectureId: string;
+}
+
+interface CommunityShareStore {
+  sharedQuestion: SharedQuestionContext | null;
+  setSharedQuestion: (q: SharedQuestionContext | null) => void;
+}
+
+export const useCommunityShareStore = create<CommunityShareStore>((set) => ({
+  sharedQuestion: null,
+  setSharedQuestion: (sharedQuestion) => set({ sharedQuestion }),
+}));

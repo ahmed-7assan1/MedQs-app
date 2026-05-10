@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+// Leaderboard refreshes every 5 minutes — no need to hit DB per student.
+// Real-time changes will appear after at most 5 minutes.
+export const revalidate = 300;
 
 export async function GET(req: NextRequest) {
   // Check if leaderboard is enabled

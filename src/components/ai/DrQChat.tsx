@@ -1,486 +1,348 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useDrQChat, BYOKSettings } from "@/hooks/useDrQChat";
-import { Send, Settings, Paperclip, X, Image as ImageIcon, FileText, Trash2, Shield, Zap, Check, AlertCircle } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { useDrQChat, PROVIDER_CONFIGS, FileAttachment } from "@/hooks/useDrQChat";
+import { 
+  Plus, 
+  Sparkle, 
+  ShieldCheck, 
+  Lightning, 
+  DotsThreeVertical,
+  Trash,
+  Export,
+  Gear,
+  ChatCircle,
+  X,
+  List,
+  ShareNetwork,
+  CaretDown,
+  Image as ImageIcon,
+  FileText
+} from "@phosphor-icons/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { DrQSidebar } from "./DrQSidebar";
+import { DrQConfigPanel } from "./DrQConfigPanel";
+import { DrQComposer } from "./DrQComposer";
+import { DrQMessage } from "./DrQMessage";
+import toast from "react-hot-toast";
+
+const GLASS = "bg-white/[0.03] dark:bg-[#11101d]/60 backdrop-blur-3xl border border-white/10";
 
 export function DrQChat() {
-  const { messages, loading, sendMessage, settings, updateSettings, limits, clearChat } = useDrQChat();
+  const {
+    threads,
+    activeThread,
+    activeThreadId,
+    messages,
+    loading,
+    streamingId,
+    settings,
+    limits,
+    newThread,
+    switchThread,
+    deleteThread,
+    renameThread,
+    clearThread,
+    sendMessage,
+    stopGeneration,
+    regenerate,
+    setReaction,
+    updateSettings,
+    exportThread
+  } = useDrQChat();
+
   const [input, setInput] = useState("");
-  const [files, setFiles] = useState<Array<{ data: string; mimeType: string; name: string }>>([]);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showProviders, setShowProviders] = useState(false);
+  const [files, setFiles] = useState<FileAttachment[]>([]);
+  const [showConfig, setShowConfig] = useState(false);
+  const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   
   const endRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Auto-scroll on new messages or streaming
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, streamingId]);
 
-  const handleSend = () => {
-    if (!input.trim() && files.length === 0) return;
-    sendMessage(input, files);
-    setInput("");
-    setFiles([]);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files;
-    if (!selected) return;
-
-    if (files.length + selected.length > 3) {
-      alert("You can only attach a maximum of 3 files at a time.");
-      return;
-    }
-
-    Array.from(selected).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const data = ev.target?.result as string;
-        setFiles(prev => [...prev, { data, mimeType: file.type, name: file.name }]);
-      };
-      reader.readAsDataURL(file);
-    });
-    
-    // Reset input
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+  const handleShareToForum = (text: string) => {
+    // Implement sharing logic - maybe copy to composer of social feed
+    navigator.clipboard.writeText(text);
+    toast.success("Content copied! You can now paste it in the Discuss Forum.");
   };
 
   return (
-    <div className={`flex flex-col relative h-[calc(100dvh-70px)] md:h-[calc(100vh-100px)] w-full mx-auto bg-transparent ${settings.theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+    <div className="flex h-[calc(100vh-80px)] w-full overflow-hidden bg-[#0a0910] text-white">
       
-      {/* Header */}
-      <div className="flex justify-between items-center py-3 md:py-4 px-4 md:px-6 border-b border-gray-200/20 backdrop-blur-md md:rounded-t-3xl bg-white/5 sticky top-0 z-20">
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg md:text-xl shadow-lg shadow-blue-500/30">
-            Q
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-base md:text-xl font-black font-outfit truncate">Dr. Q Assistant</h2>
-            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1">
-              <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-              Online
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {settings.useCustomKey && (
-            <div className="hidden sm:flex items-center gap-1.5 mr-2 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-medium">
-              <Shield className="w-3.5 h-3.5" />
-              BYOK Active
-            </div>
-          )}
-          
-          {/* Quota Dashboard Icon */}
-          <div className="relative group">
-            <button className="p-2.5 rounded-full hover:bg-gray-500/10 transition-colors text-gray-400">
-              <Zap className="w-5 h-5" />
-            </button>
-            <div className="absolute right-0 top-full mt-2 w-48 p-4 bg-[#1e1d24] border border-white/10 rounded-2xl shadow-2xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all z-50">
-              <h4 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-widest">Usage Stats</h4>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-[10px] text-gray-400 mb-1">
-                    <span>MESSAGES</span>
-                    <span>{limits.used} / {limits.limit === -1 ? '∞' : limits.limit}</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500" style={{ width: `${limits.limit === -1 ? 0 : (limits.used/limits.limit)*100}%` }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[10px] text-gray-400 mb-1">
-                    <span>FILES</span>
-                    <span>{limits.filesUsed} / {limits.fileLimit === -1 ? '∞' : limits.fileLimit}</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500" style={{ width: `${limits.fileLimit === -1 ? 0 : (limits.filesUsed/limits.fileLimit)*100}%` }}></div>
-                  </div>
-                </div>
-              </div>
-              <p className="mt-4 text-[9px] text-gray-600 text-center italic">Resets daily at 00:00 UTC</p>
-            </div>
-          </div>
-
-          <button onClick={() => setShowSettings(!showSettings)} className="p-2.5 rounded-full hover:bg-gray-500/10 transition-colors text-gray-400 hover:text-blue-500">
-            <Settings className="w-5 h-5" />
-          </button>
-        </div>
+      {/* ── SIDEBAR ── */}
+      <div className="hidden md:block h-full">
+        <DrQSidebar 
+          threads={threads}
+          activeThreadId={activeThreadId}
+          onNewThread={newThread}
+          onSwitchThread={switchThread}
+          onDeleteThread={deleteThread}
+          onRenameThread={renameThread}
+          onShowConfig={() => setShowConfig(true)}
+          onExport={exportThread}
+        />
       </div>
 
-      {/* Settings Panel */}
-      {showSettings && (
-        <div className="p-6 bg-white/10 backdrop-blur-xl border-b border-gray-200/20 shadow-inner z-10">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold font-outfit flex items-center gap-2">
-              <Settings className="w-5 h-5 text-blue-500" />
-              AI Preferences
-            </h3>
-            <button onClick={clearChat} className="text-xs flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors bg-red-400/10 px-3 py-1.5 rounded-full font-medium">
-              <Trash2 className="w-3.5 h-3.5" /> Clear Chat
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
-                <div>
-                  <div className="text-sm font-medium flex items-center gap-1.5">
-                    <Shield className="w-4 h-4 text-emerald-400" />
-                    Bring Your Own Key (BYOK)
-                  </div>
-                  <div className="text-xs text-gray-400 mt-0.5">Use your own API key to bypass site limits.</div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" checked={settings.useCustomKey} onChange={(e) => updateSettings({ ...settings, useCustomKey: e.target.checked })} />
-                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-
-              {settings.useCustomKey && (
-                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="relative">
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Provider</label>
-                    <div 
-                      onClick={() => setShowProviders(!showProviders)}
-                      className="w-full flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm cursor-pointer hover:bg-black/40 transition-all text-white"
-                    >
-                      <span>
-                        {settings.customProvider === 'gemini' ? 'Google Gemini' : 
-                         settings.customProvider === 'openai' ? 'OpenAI (ChatGPT)' : 'Groq (Llama/Grok)'}
-                      </span>
-                      <svg className={`w-4 h-4 transition-transform ${showProviders ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                    
-                    {showProviders && (
-                      <div className="absolute z-50 w-full mt-2 bg-[#1e1d24] border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-2">
-                        {[
-                          { id: 'gemini', name: 'Google Gemini' },
-                          { id: 'openai', name: 'OpenAI (ChatGPT)' },
-                          { id: 'groq', name: 'Groq (Llama/Grok)' },
-                          { id: 'xai', name: 'xAI Grok' }
-                        ].map(provider => (
-                          <div 
-                            key={provider.id}
-                            onClick={() => {
-                              updateSettings({ ...settings, customProvider: provider.id as any });
-                              setShowProviders(false);
-                            }}
-                            className={`px-4 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between
-                              ${settings.customProvider === provider.id ? 'bg-blue-500/20 text-blue-400' : 'text-gray-300 hover:bg-white/5'}
-                            `}
-                          >
-                            {provider.name}
-                            {settings.customProvider === provider.id && <Zap className="w-3.5 h-3.5" />}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">API Key (Stored locally)</label>
-                    <input 
-                      type="password" 
-                      value={settings.customKey}
-                      onChange={(e) => updateSettings({ ...settings, customKey: e.target.value })}
-                      placeholder="sk-..."
-                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Model ID (Optional)</label>
-                    <input 
-                      type="text" 
-                      value={settings.customModel || ""}
-                      onChange={(e) => updateSettings({ ...settings, customModel: e.target.value })}
-                      placeholder={settings.customProvider === 'groq' ? "e.g. llama-3.3-70b-versatile" : "e.g. gpt-4o"}
-                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-widest">Font Size</label>
-                <div className="flex items-center gap-4">
-                  <input 
-                    type="range" min="12" max="24" 
-                    value={settings.fontSize}
-                    onChange={(e) => updateSettings({ ...settings, fontSize: parseInt(e.target.value) })}
-                    className="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                  />
-                  <span className="text-xs text-blue-400 w-8">{settings.fontSize}px</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-widest">User Bubble Color</label>
-                <div className="flex flex-wrap gap-2">
-                  {['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#64748b'].map(color => (
-                    <button 
-                      key={color}
-                      onClick={() => updateSettings({ ...settings, userBubbleColor: color })}
-                      className={`w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 ${settings.userBubbleColor === color ? 'border-white scale-110' : 'border-transparent'}`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                  <div className="relative group/color">
-                    <input 
-                      type="color" 
-                      value={settings.userBubbleColor}
-                      onChange={(e) => updateSettings({ ...settings, userBubbleColor: e.target.value })}
-                      className="opacity-0 absolute inset-0 w-7 h-7 cursor-pointer z-10"
-                    />
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-gray-700 to-gray-500 border border-white/20 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-widest">AI Bubble Color</label>
-                <div className="flex flex-wrap gap-2">
-                  {['#1e1d24', '#2d2b36', '#1a365d', '#1c4532', '#451a03', '#1e293b'].map(color => (
-                    <button 
-                      key={color}
-                      onClick={() => updateSettings({ ...settings, aiBubbleColor: color })}
-                      className={`w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 ${settings.aiBubbleColor === color ? 'border-white scale-110' : 'border-transparent'}`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* ── MAIN CHAT AREA ── */}
+      <main className="flex-1 flex flex-col relative min-w-0 bg-[#0f0e1a]">
+        
+        {/* Deep Purple Gradient Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(88,28,135,0.15)_0%,rgba(10,9,16,0)_70%)]" />
+           <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] animate-pulse" />
+           <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
         </div>
-      )}
 
-      {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8 scroll-smooth pb-40">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center opacity-40 space-y-6 px-6">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500/10 to-indigo-600/10 flex items-center justify-center border border-white/5 shadow-2xl">
-              <Zap className="w-12 h-12 text-blue-500 animate-pulse" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-black tracking-tight text-white html[data-theme='light']:text-slate-900 italic">Clinical Intel Engaged</h3>
-              <p className="text-sm font-medium mt-3 leading-relaxed max-w-[280px]">Ask me any medical query, upload labs for analysis, or request a practice exam sequence.</p>
-            </div>
-          </div>
-        ) : (
-          messages.map((m) => (
-            <div key={m.id} className={`flex group ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] relative ${m.role === 'user' ? 'px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md' : 'rounded-2xl'}`}>
-                
-                {/* Message Actions */}
-                <div className={`absolute top-0 ${m.role === 'user' ? 'right-full mr-2' : 'left-full ml-2'} invisible group-hover:visible flex gap-1 opacity-0 group-hover:opacity-100 transition-all`}>
-                  <button 
-                    onClick={() => navigator.clipboard.writeText(m.content)}
-                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-500 hover:text-blue-400 transition-all"
-                    title="Copy"
-                  >
-                    <Paperclip className="w-3.5 h-3.5" />
-                  </button>
-                  <button 
-                    onClick={() => setInput(`> ${m.content.slice(0, 50)}...\n\n`)}
-                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-500 hover:text-blue-400 transition-all"
-                    title="Reply"
-                  >
-                    <Send className="w-3.5 h-3.5 rotate-180" />
-                  </button>
-                </div>
-
-                <div 
-                  className={`p-4 rounded-2xl ${m.role === 'user' ? '' : 'border border-white/5 shadow-sm'}`}
-                  style={{ 
-                    backgroundColor: m.role === 'user' ? settings.userBubbleColor : settings.aiBubbleColor,
-                    fontSize: `${settings.fontSize}px`,
-                    color: m.role === 'user' ? '#fff' : undefined
-                  }}
-                >
-                  {m.files && m.files.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {m.files.map((f, i) => (
-                        <div key={i} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/20 text-[10px] font-medium border border-white/10">
-                          {f.mimeType.startsWith("image/") ? <ImageIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
-                          {f.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/30 prose-pre:border prose-pre:border-white/5 prose-table:border prose-table:border-white/10 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2"
-                    components={{
-                      p: ({ children }) => {
-                        const content = React.Children.toArray(children).join("");
-                        if (content.includes(":::question")) {
-                          try {
-                            const jsonStr = content.split(":::question")[1].split(":::")[0].trim();
-                            const q = JSON.parse(jsonStr);
-                            return <QuestionCard q={q} />;
-                          } catch (e) {
-                            return <p className="mb-2 last:mb-0">{children}</p>;
-                          }
-                        }
-                        return <p className="mb-2 last:mb-0">{children}</p>;
-                      },
-                      code: ({ node, className, children, ...props }) => {
-                        const content = String(children);
-                        if (content.includes(':::question')) {
-                           try {
-                            const jsonStr = content.split(":::question")[1].split(":::")[0].trim();
-                            const q = JSON.parse(jsonStr);
-                            return <QuestionCard q={q} />;
-                          } catch (e) {
-                            return <code className={className} {...props}>{children}</code>;
-                          }
-                        }
-                        return <code className={className} {...props}>{children}</code>;
-                      }
-                    }}
-                  >
-                    {m.content}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="text-gray-500 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-          </div>
-        )}
-        <div ref={endRef} />
-      </div>
-
-      {/* Input Area (Mobile Optimized & Immersive) */}
-      <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 w-full max-w-5xl px-3 md:px-8">
-        <div className="bg-white/10 dark:bg-[#0f111a]/80 backdrop-blur-3xl border border-gray-200/20 dark:border-white/5 rounded-[28px] md:rounded-3xl p-1.5 md:p-2 shadow-2xl shadow-black/40">
-          
-          {/* Attached Files Preview */}
-          {files.length > 0 && (
-            <div className="flex gap-2 p-2 mb-2 overflow-x-auto border-b border-white/5 no-scrollbar">
-              {files.map((f, i) => (
-                <div key={i} className="relative group flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden bg-black/40 border border-white/10 flex flex-col items-center justify-center shadow-lg">
-                  {f.mimeType.startsWith('image/') ? (
-                    <img src={f.data} alt="preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <FileText className="w-6 h-6 text-blue-400" />
-                  )}
-                  <button onClick={() => removeFile(i)} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <X className="w-5 h-5 text-white" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-end gap-1 px-1 pb-1">
-            <button onClick={() => fileInputRef.current?.click()} className="p-3.5 rounded-2xl hover:bg-white/5 active:bg-white/10 transition-all text-gray-500 dark:text-gray-400 flex-shrink-0">
-              <Paperclip className="w-5 h-5" />
-            </button>
-            <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf" onChange={handleFileChange} />
-            
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Query Dr. Q..."
-              className="flex-1 max-h-32 bg-transparent border-none focus:ring-0 resize-none py-3.5 px-2 text-[15px] outline-none text-gray-900 dark:text-white placeholder-gray-500 font-medium"
-              rows={1}
-              style={{ minHeight: '44px' }}
-            />
-            
+        {/* Top Navigation / Header */}
+        <header className="h-20 flex items-center justify-between px-8 relative z-20">
+          <div className="flex items-center gap-6">
             <button 
-              onClick={handleSend}
-              disabled={loading || (!input.trim() && files.length === 0)}
-              className="p-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white transition-all flex-shrink-0 disabled:opacity-20 disabled:scale-95 mb-0.5 shadow-lg shadow-blue-600/20 active:scale-90"
+              onClick={() => setMobileSidebarOpen(true)}
+              className="md:hidden p-2 hover:bg-white/5 rounded-xl text-white/50"
             >
-              <Send className="w-5 h-5" />
+              <List size={24} weight="bold" />
             </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Sub-Components ──────────────────────────────────────────────────────────
-
-function QuestionCard({ q }: { q: { question: string, options: string[], answer: string, explanation?: string } }) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
-
-  const isCorrect = selected === q.answer;
-
-  return (
-    <div className="my-6 p-5 rounded-2xl bg-white/5 border border-white/10 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-          <Zap className="w-4 h-4 text-blue-500" />
-        </div>
-        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Practice Question</span>
-      </div>
-      
-      <h3 className="text-base font-semibold mb-6 leading-snug">{q.question}</h3>
-      
-      <div className="space-y-3">
-        {q.options.map((opt, i) => (
-          <button
-            key={i}
-            disabled={selected !== null}
-            onClick={() => setSelected(opt)}
-            className={`w-full text-left px-4 py-3 rounded-xl border transition-all flex items-center justify-between group
-              ${selected === null ? 'bg-black/20 border-white/5 hover:border-blue-500/50 hover:bg-blue-500/5' : 
-                opt === q.answer ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' :
-                selected === opt ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-black/10 border-white/5 opacity-50'}
-            `}
-          >
-            <span className="text-sm">{opt}</span>
-            {selected !== null && opt === q.answer && <Check className="w-4 h-4" />}
-            {selected === opt && opt !== q.answer && <AlertCircle className="w-4 h-4" />}
-          </button>
-        ))}
-      </div>
-
-      {selected !== null && (
-        <div className="mt-6 animate-in slide-in-from-top-2">
-          <div className={`p-4 rounded-xl border ${isCorrect ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
-            <div className="flex items-center gap-2 mb-2">
-              {isCorrect ? <Check className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-red-500" />}
-              <span className={`text-sm font-bold ${isCorrect ? 'text-emerald-500' : 'text-red-500'}`}>
-                {isCorrect ? 'Correct Answer!' : 'Incorrect'}
-              </span>
+            
+            {/* Provider Pill (Style from image) */}
+            <div className="flex items-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2 gap-3 transition-all cursor-pointer group">
+              <span className="text-[13px] font-bold text-white/80 group-hover:text-white">{PROVIDER_CONFIGS[settings.activeProvider].label} v4.0</span>
+              <CaretDown size={14} weight="bold" className="text-white/30" />
             </div>
-            {q.explanation && (
-              <p className="text-xs text-gray-400 leading-relaxed">{q.explanation}</p>
-            )}
           </div>
+
+          <div className="flex items-center gap-3">
+             <button 
+               onClick={() => setShowConfig(true)}
+               className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10 flex items-center gap-2 text-[12px] font-black uppercase tracking-widest"
+             >
+               <Gear size={18} weight="bold" />
+               Configuration
+             </button>
+             
+             <button 
+               onClick={() => exportThread("markdown")}
+               className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10 flex items-center gap-2 text-[12px] font-black uppercase tracking-widest"
+             >
+               <Export size={18} weight="bold" />
+               Export
+             </button>
+          </div>
+        </header>
+
+        {/* Message Stream */}
+        <div className="flex-1 overflow-y-auto no-scrollbar relative z-10">
+          {messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center max-w-4xl mx-auto">
+              <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="relative mb-12"
+              >
+                {/* The Orb from image */}
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 via-pink-500 to-indigo-600 blur-[2px] shadow-[0_0_50px_rgba(168,85,247,0.5)] animate-bounce duration-[3000ms]" />
+                <div className="absolute inset-0 w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm border border-white/30" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white/80 rounded-full blur-[4px]" />
+              </motion.div>
+
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-white/90">
+                Ready to Create Something New?
+              </h2>
+              
+              {/* Feature Chips */}
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
+                 <button className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center gap-2">
+                    <ImageIcon size={18} />
+                    Create Image
+                 </button>
+                 <button className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center gap-2">
+                    <Lightning size={18} />
+                    Brainstorm
+                 </button>
+                 <button className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center gap-2">
+                    <FileText size={18} />
+                    Make a plan
+                 </button>
+              </div>
+
+              {/* Bottom Cards from image */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full mt-auto">
+                 <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4 md:mb-6">
+                       <ImageIcon size={18} weight="fill" className="md:w-5 md:h-5" />
+                    </div>
+                    <h3 className="text-[13px] md:text-[15px] font-bold mb-1 md:mb-2">Image Generator</h3>
+                    <p className="text-[11px] md:text-[12px] text-white/40 leading-relaxed line-clamp-2 md:line-clamp-none">Create high-quality images instantly from text.</p>
+                 </div>
+                 <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 md:mb-6">
+                       <FileText size={18} weight="fill" className="md:w-5 md:h-5" />
+                    </div>
+                    <h3 className="text-[13px] md:text-[15px] font-bold mb-1 md:mb-2">AI Presentation</h3>
+                    <p className="text-[11px] md:text-[12px] text-white/40 leading-relaxed line-clamp-2 md:line-clamp-none">Turn ideas into engaging, professional presentations.</p>
+                 </div>
+                 <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all hidden md:block">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-6">
+                       <Lightning size={20} weight="fill" />
+                    </div>
+                    <h3 className="text-[15px] font-bold mb-2">Dev Assistant</h3>
+                    <p className="text-[12px] text-white/40 leading-relaxed">Generate clean, production-ready code in seconds.</p>
+                 </div>
+                 {/* 4th card for mobile 2x2 grid */}
+                 <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all md:hidden">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4">
+                       <ShieldCheck size={18} weight="fill" />
+                    </div>
+                    <h3 className="text-[13px] font-bold mb-1">Study Planner</h3>
+                    <p className="text-[11px] text-white/40 leading-relaxed line-clamp-2">Plan your weekend study schedule like a pro.</p>
+                 </div>
+              </div>
+            </div>
+          ) : (
+            <div className="max-w-4xl mx-auto px-4 md:px-6 py-10 space-y-10">
+              {messages.map((m) => (
+                <DrQMessage 
+                  key={m.id}
+                  message={m}
+                  fontSize={settings.fontSize}
+                  userBubbleColor={settings.userBubbleColor}
+                  aiBubbleColor={settings.aiBubbleColor}
+                  onReaction={setReaction}
+                  onRegenerate={m.role === 'assistant' ? regenerate : undefined}
+                  onReply={(id, text) => setReplyContext({ id, text })}
+                  onShare={handleShareToForum}
+                />
+              ))}
+              <div ref={endRef} className="h-32" />
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Composer Bar */}
+        <div className="relative z-20 pb-4">
+           <DrQComposer 
+             input={input}
+             setInput={setInput}
+             files={files}
+             setFiles={setFiles}
+             onSend={sendMessage}
+             onStop={stopGeneration}
+             loading={loading}
+             activeProvider={settings.activeProvider}
+             onProviderChange={(p) => updateSettings({ activeProvider: p, activeModel: PROVIDER_CONFIGS[p].defaultModel })}
+             replyContext={replyContext}
+             onClearReply={() => setReplyContext(null)}
+             smartEngineEnabled={settings.smartEngineEnabled}
+             onToggleSmartEngine={() => updateSettings({ smartEngineEnabled: !settings.smartEngineEnabled })}
+           />
+        </div>
+      </main>
+
+      {/* ── CONFIG PANEL (DRAWER) ── */}
+      <DrQConfigPanel 
+        isOpen={showConfig}
+        onClose={() => setShowConfig(false)}
+        settings={settings}
+        onUpdate={updateSettings}
+      />
+
+      {/* ── MOBILE SIDEBAR DRAWER (Image 4 Match) ── */}
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileSidebarOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden"
+            />
+            <motion.div 
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 w-full max-w-[320px] bg-[#161523] border-r border-white/5 shadow-2xl z-[101] flex flex-col md:hidden"
+            >
+              <div className="p-4 flex items-center justify-between border-b border-white/5 mt-4">
+                <span className="text-[16px] font-bold text-white tracking-tight">All conversations</span>
+                <button onClick={() => setMobileSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-xl text-white/50">
+                  <X size={20} weight="bold" />
+                </button>
+              </div>
+              
+              <div className="p-4">
+                <div className="relative">
+                  <input type="text" placeholder="Search..." className="w-full bg-black/40 border border-white/5 rounded-xl px-10 py-3 text-[14px] text-white placeholder:text-white/30 outline-none focus:border-purple-500/50" />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-white/30 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-white/30 rounded-full" /></div>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6">
+                
+                {/* Custom AI Assistants (Providers) */}
+                <div>
+                   <h4 className="text-[11px] font-bold text-white/40 mb-3 pl-1">Custom AI Assistants</h4>
+                   <div className="space-y-1">
+                      {Object.entries(PROVIDER_CONFIGS).map(([key, config]) => (
+                        <button key={key} onClick={() => { updateSettings({ activeProvider: key as any }); setMobileSidebarOpen(false); }} className="w-full flex items-center gap-4 p-2 rounded-2xl hover:bg-white/5 transition-all text-left group">
+                          <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/70 group-hover:scale-110 group-hover:bg-purple-500 group-hover:text-white transition-all shadow-sm">
+                             {config.icon}
+                          </div>
+                          <div className="flex flex-col flex-1">
+                             <div className="flex items-center gap-1.5">
+                               <span className="text-[15px] font-bold text-white">{config.label}</span>
+                               <CheckCircle size={14} weight="fill" className="text-emerald-500" />
+                             </div>
+                             <span className="text-[12px] text-white/40 truncate">Connect to ecosystem</span>
+                          </div>
+                        </button>
+                      ))}
+                   </div>
+                </div>
+
+                {/* Previous 7 Days */}
+                <div>
+                   <h4 className="text-[11px] font-bold text-white/40 mb-3 pl-1">Previous 7 Days</h4>
+                   <div className="space-y-1">
+                      {threads.map(t => (
+                        <button key={t.id} onClick={() => { switchThread(t.id); setMobileSidebarOpen(false); }} className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-white/5 transition-all text-left group">
+                          <div className="flex items-center gap-3 min-w-0">
+                             <ChatCircle size={20} className="text-white/30 flex-shrink-0 group-hover:text-purple-400" />
+                             <span className="text-[15px] font-medium text-white/70 group-hover:text-white truncate">{t.title}</span>
+                          </div>
+                          <span className="text-[12px] text-white/20 whitespace-nowrap ml-2">Shared &gt;</span>
+                        </button>
+                      ))}
+                   </div>
+                </div>
+              </div>
+
+              {/* Bottom Profile Area */}
+              <div className="p-4 border-t border-white/5 flex items-center justify-between bg-black/20 pb-8">
+                 <div className="flex items-center gap-3">
+                    <div className="relative">
+                       <img src="/avatars/default.png" alt="User" className="w-10 h-10 rounded-full border-2 border-white/10" onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=User&background=random"; }} />
+                       <div className="absolute -top-1 -right-2 bg-white text-black text-[9px] font-black px-1.5 py-0.5 rounded-full border border-[#161523]">Pro</div>
+                    </div>
+                    <div className="flex flex-col ml-1">
+                       <span className="text-[14px] font-bold text-white">Student</span>
+                       <span className="text-[11px] text-white/40">Premium Account</span>
+                    </div>
+                 </div>
+                 <button onClick={() => { newThread(); setMobileSidebarOpen(false); }} className="flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full font-bold text-[14px] hover:scale-105 active:scale-95 transition-all">
+                    <Plus size={16} weight="bold" />
+                    New chat
+                 </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -16,8 +16,10 @@ interface Flashcard { id: string; front: string; back: string }
 interface LectureFile { id: string; name: string; url: string; mimeType: string }
 interface Lecture  {
   id: string; title: string; videoUrl?: string; subjectId: string; order: number;
+  type: "LECTURE" | "PRACTICAL";
   flashcards?: Flashcard[];
   files?: LectureFile[];
+  checklist?: { id: string; items: { id: string; content: string; points: number }[] };
 }
 
 export default function AdminLecturesPage() {
@@ -33,6 +35,8 @@ export default function AdminLecturesPage() {
   // New lecture form
   const [title,    setTitle]    = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [lectureType, setLectureType] = useState<"LECTURE" | "PRACTICAL">("LECTURE");
+  const [checklistItems, setChecklistItems] = useState([{ content: "", points: 1 }]);
   const [newCards, setNewCards] = useState([{ front: "", back: "" }]);
   const [saving,   setSaving]   = useState(false);
 
@@ -93,6 +97,11 @@ export default function AdminLecturesPage() {
         body: JSON.stringify({
           title,
           videoUrl: videoUrl || undefined,
+          type: lectureType,
+          checklist: lectureType === "PRACTICAL" ? {
+            title: `${title} Checklist`,
+            items: checklistItems.filter(i => i.content.trim())
+          } : undefined,
           flashcards: newCards.filter(c => c.front.trim() && c.back.trim()),
         }),
       });
@@ -211,28 +220,79 @@ export default function AdminLecturesPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Lecture Title *</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Clinical Approach to Shock"
-                className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 px-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Video Resource (Embed Link)</label>
-              <div className="relative">
-                <Video className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Lecture Title *</label>
                 <input
                   type="text"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://youtube.com/watch?v=…"
-                  className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 pl-10 pr-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Clinical Approach to Shock"
+                  className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 px-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
                 />
               </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Video Resource (Embed Link)</label>
+                <div className="relative">
+                  <Video className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                  <input
+                    type="text"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=…"
+                    className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 pl-10 pr-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Session Type</label>
+                <div className="flex gap-2">
+                  {(["LECTURE", "PRACTICAL"] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setLectureType(t)}
+                      className={cn(
+                        "flex-1 h-11 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all",
+                        lectureType === t ? "bg-[#534AB7] border-[#534AB7] text-white" : "bg-black/40 border-white/5 text-white/40 hover:border-white/20"
+                      )}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {lectureType === "PRACTICAL" && (
+                <div className="space-y-2">
+                   <div className="flex items-center justify-between">
+                     <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Procedure Checklist</label>
+                     <button type="button" onClick={() => setChecklistItems([...checklistItems, { content: "", points: 1 }])} className="text-[10px] font-bold text-primary uppercase">+ Add Step</button>
+                   </div>
+                   <div className="space-y-2 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+                      {checklistItems.map((item, i) => (
+                        <div key={i} className="flex gap-2">
+                          <input 
+                            placeholder="Step description…" 
+                            className="flex-1 h-10 rounded-lg bg-black/40 border border-white/5 px-3 text-xs text-white"
+                            value={item.content}
+                            onChange={(e) => setChecklistItems(prev => prev.map((x, j) => j === i ? { ...x, content: e.target.value } : x))}
+                          />
+                          <input 
+                            type="number"
+                            className="w-16 h-10 rounded-lg bg-black/40 border border-white/5 px-2 text-xs text-center text-white"
+                            value={item.points}
+                            onChange={(e) => setChecklistItems(prev => prev.map((x, j) => j === i ? { ...x, points: parseInt(e.target.value) || 1 } : x))}
+                          />
+                          <button onClick={() => setChecklistItems(prev => prev.filter((_, j) => j !== i))} className="h-10 w-10 shrink-0 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center"><X className="h-3 w-3"/></button>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -501,19 +561,21 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
 
       {expanded && (
         <div className="border-t border-white/[0.02] p-6 space-y-8 animate-in fade-in slide-in-from-top-2 duration-400">
-           {/* Session Config */}
-           <div className="rounded-2xl border border-white/[0.02] bg-black/20 p-5 space-y-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Session Configuration</p>
-              <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto]">
-                  <div className="space-y-1">
+            {/* Session Config */}
+            <div className="rounded-2xl border border-white/[0.02] bg-black/20 p-5 space-y-4">
+               <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Session Configuration</p>
+               <div className="grid gap-4 sm:grid-cols-2 items-end">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 ml-1">Display Title</label>
                     <input
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      placeholder="Session Title"
+                      placeholder="Lecture Title"
                       className="w-full h-12 rounded-xl border border-white/[0.02] bg-black/40 px-4 text-sm text-white focus:ring-[#534AB7]/40 focus:outline-none"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 ml-1">Video Asset</label>
                     <input
                       value={editVideo}
                       onChange={(e) => setEditVideo(e.target.value)}
@@ -524,13 +586,13 @@ function LectureRow({ lecture, index, expanded, onExpand, onDelete, onFlashcards
                   <button
                     onClick={saveLectureMeta}
                     disabled={savingLecture}
-                    className="flex items-center gap-2 rounded-xl bg-[#534AB7] px-6 h-12 text-xs font-bold text-white shadow-lg shadow-[#534AB7]/30 hover:-translate-y-0.5 disabled:opacity-60 transition-all uppercase tracking-widest"
+                    className="flex items-center gap-2 rounded-xl bg-[#534AB7] px-6 h-12 text-xs font-bold text-white shadow-lg shadow-[#534AB7]/30 hover:-translate-y-0.5 disabled:opacity-60 transition-all uppercase tracking-widest sm:col-span-2"
                   >
                     {savingLecture ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    Save
+                    Save Session Settings
                   </button>
-              </div>
-           </div>
+               </div>
+            </div>
 
            {/* Attachments */}
            <div className="space-y-3">

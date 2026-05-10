@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
 
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 60; // 60 seconds max duration for Vercel Hobby
 
 /** Fetches a URL and returns its content as a base64 string + mimeType */
 async function fetchFileAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {

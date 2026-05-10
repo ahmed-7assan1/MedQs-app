@@ -4,9 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { redisIncrWithExpire } from "@/lib/redis";
 import { loadForumPostsForUser } from "@/lib/forum-posts";
+import { unstable_cache } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// ─── Cached historical posts loader ──────────────────────────────────────────
+// Each forumId+page combo is cached for 30s in Vercel Data Cache.
+// Real-time NEW posts come instantly via Firestore WebSockets (no DB needed).
+const getCachedPosts = (forumId: string, userId: string, page: number) =>
+  unstable_cache(
+    () => loadForumPostsForUser({ forumId, userId, page, limit: 20 }),
+    [`forum-posts-${forumId}-${page}`],
+    { revalidate: 30, tags: [`forum-${forumId}`] }
+  )();
 
 const POST_SCHEMA = z
   .object({
@@ -36,8 +47,14 @@ const POST_SCHEMA = z
     isForumPost: z.boolean().optional().default(true),
     isChatMessage: z.boolean().optional().default(false),
     chatForumId: z.string().optional(),
+    sharedQuestion: z.any().optional(),
+    poll: z.object({
+      question: z.string(),
+      options: z.array(z.string())
+    }).optional(),
+    hashtags: z.array(z.string()).optional()
   })
-  .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()) || (v.attachments && v.attachments.length > 0), {
+  .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()) || (v.attachments && v.attachments.length > 0) || Boolean(v.sharedQuestion) || Boolean(v.poll), {
     message: "Post cannot be empty",
     path: ["content"],
   });
@@ -67,12 +84,8 @@ export async function GET(
   const page = Math.max(1, Number(searchParams.get("page") ?? 1));
   const limit = 20;
 
-  const result = await loadForumPostsForUser({
-    forumId,
-    userId: session.user.id,
-    page,
-    limit,
-  });
+  // Use cached loader for historical posts. Firebase handles real-time updates.
+  const result = await getCachedPosts(forumId, session.user.id, page);
 
   if (!result.ok) {
     return NextResponse.json(
@@ -80,7 +93,13 @@ export async function GET(
       { status: result.status }
     );
   }
-  return NextResponse.json(result.posts);
+
+  return NextResponse.json(result.posts, {
+    headers: {
+      // Vercel Edge & browser: serve cache for 30s, allow stale for 60s while revalidating
+      "Cache-Control": "s-maxage=30, stale-while-revalidate=60",
+    },
+  });
 }
 
 export async function POST(
@@ -136,7 +155,7 @@ export async function POST(
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    const { content, imageUrl, attachments } = parsed.data;
+    const { content, imageUrl, attachments, hashtags } = parsed.data;
     const audience = parsed.data.audience ?? "UNIVERSITY";
 
     // Calculate expiry (10 days from now)
@@ -148,13 +167,27 @@ export async function POST(
         content,
         imageUrl: imageUrl?.trim() || undefined,
         attachments: attachments || undefined,
-        authorId: session.user.id,
+        authorId: userId,
         forumId: (parsed.data.isChatMessage && parsed.data.chatForumId) ? parsed.data.chatForumId : forumId,
         universityId,
         audience,
         expiresAt,
         isForumPost: parsed.data.isForumPost,
         isChatMessage: parsed.data.isChatMessage,
+        ...(parsed.data.sharedQuestion ? {
+          sharedQuestionId: parsed.data.sharedQuestion.id,
+          sharedQuestionData: parsed.data.sharedQuestion
+        } : {}),
+        ...(parsed.data.poll ? {
+          poll: {
+            create: {
+              question: parsed.data.poll.question,
+              options: {
+                create: parsed.data.poll.options.map(text => ({ text }))
+              }
+            }
+          }
+        } : {})
       },
       include: {
         author: {
@@ -164,18 +197,54 @@ export async function POST(
           },
         },
         _count: { select: { likes: true, comments: true } },
+        poll: { include: { options: { include: { _count: { select: { votes: true } } } } } },
+        sharedQuestion: { select: { id: true, body: true, choices: true, answer: true, difficulty: true } }
       },
     });
 
+    // Handle Hashtags Persistence
+    if (hashtags && hashtags.length > 0) {
+      try {
+        for (const tag of hashtags) {
+          const name = tag.startsWith('#') ? tag.slice(1).toLowerCase() : tag.toLowerCase();
+          if (!name) continue;
+          
+          const hashtagRecord = await prisma.hashtag.upsert({
+            where: { name },
+            create: { name, count: 1 },
+            update: { count: { increment: 1 } }
+          });
+
+          await prisma.postHashtag.create({
+            data: { postId: post.id, hashtagId: hashtagRecord.id }
+          });
+        }
+      } catch (hError) {
+        console.error("[POST-API] Hashtag processing failed:", hError);
+      }
+    }
+
     // Log engagement points (fire-and-forget)
     prisma.engagementLog
-      .create({ data: { userId: session.user.id, action: "post", points: 5 } })
+      .create({ data: { userId, action: "post", points: 5 } })
       .catch(() => {});
     prisma.user
-      .update({ where: { id: session.user.id }, data: { points: { increment: 5 } } })
+      .update({ where: { id: userId }, data: { points: { increment: 5 } } })
       .catch(() => {});
 
-    return NextResponse.json({ ...post, likedByMe: false }, { status: 201 });
+    const returnPost = { ...post, likedByMe: false };
+
+    // --- Firebase Real-time Mirroring ---
+    try {
+      const { adminDb } = await import("@/lib/firebase/admin");
+      // Clean up dates for Firestore JSON compatibility
+      const firestorePost = JSON.parse(JSON.stringify(returnPost));
+      await adminDb.doc(`forums/${forumId}/posts/${post.id}`).set(firestorePost);
+    } catch (firebaseErr) {
+      console.error("[POST-API] Firestore sync failed:", firebaseErr);
+    }
+
+    return NextResponse.json(returnPost, { status: 201 });
   } catch (err: any) {
     console.error("[POST-API] Server Error:", err.message);
     return NextResponse.json({ error: "Server Error", details: err.message }, { status: 500 });

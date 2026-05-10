@@ -42,9 +42,12 @@ function getSubjectAccent(name: string): {
 
 export default async function SubjectLecturesPage({
   params,
+  searchParams,
 }: {
   params: { moduleId: string; subjectId: string };
+  searchParams: { tab?: string };
 }) {
+  const activeTab = searchParams.tab || "lectures";
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const role = (session.user as { role?: string } | undefined)?.role;
@@ -68,12 +71,17 @@ export default async function SubjectLecturesPage({
         include: {
           _count: { select: { questions: true, flashcards: true } },
           files: { select: { id: true } },
+          checklist: { include: { items: true } },
         },
       },
     },
   });
 
   if (!subject) notFound();
+  
+  const theoreticalLectures = subject.lectures.filter(l => l.type === "LECTURE");
+  const practicalLectures = subject.lectures.filter(l => l.type === "PRACTICAL");
+  const currentLectures = activeTab === "practical" ? practicalLectures : theoreticalLectures;
   const accent = getSubjectAccent(subject.name);
   const IconComp = accent.icon;
 
@@ -127,31 +135,64 @@ export default async function SubjectLecturesPage({
         )}
 
         {/* ── Lectures Grid ── */}
+        {/* ── Tabs & Filter ── */}
+        <div className="mb-8">
+           <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl w-fit">
+              <Link 
+                href={`?tab=lectures`}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                  activeTab === "lectures" ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-white/40 hover:text-white"
+                )}
+              >
+                <BookOpen className="h-4 w-4" /> Lectures
+              </Link>
+              {practicalLectures.length > 0 && (
+                <Link 
+                  href={`?tab=practical`}
+                  className={cn(
+                    "flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                    activeTab === "practical" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-white/40 hover:text-white"
+                  )}
+                >
+                  <Microscope className="h-4 w-4" /> Practical
+                </Link>
+              )}
+           </div>
+        </div>
+
         <div className="space-y-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-1.5 rounded-full bg-primary" />
+              <div className={cn("h-8 w-1.5 rounded-full", activeTab === "practical" ? "bg-indigo-500" : "bg-primary")} />
               <div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Lecture Series</h2>
-                <p className="text-xs font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">Step-by-step Learning</p>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {activeTab === "practical" ? "Clinical Sessions" : "Lecture Series"}
+                </h2>
+                <p className="text-xs font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">
+                  {activeTab === "practical" ? "Procedure & Skill Training" : "Step-by-step Learning"}
+                </p>
               </div>
             </div>
             
             <button className="flex items-center gap-2 px-4 py-2 bg-slate-200/50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 text-[10px] font-bold text-slate-500 dark:text-white/40 hover:text-primary transition-all uppercase tracking-widest">
-               <Clock className="h-4 w-4 text-primary" /> Latest Updates
+               <Clock className="h-4 w-4 text-primary" /> {currentLectures.length} Items
             </button>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {subject.lectures.map((lecture: any, idx: number) => (
+            {currentLectures.map((lecture: any, idx: number) => (
                   <Link
                     key={lecture.id}
                     href={`/modules/${params.moduleId}/lectures/${lecture.id}`}
                     className="group relative flex flex-col dark:bg-[#131220] bg-white dark:border-white/5 border-black/5 rounded-2xl md:rounded-[28px] p-4 md:p-5 transition-all active:scale-[0.98] shadow-lg overflow-hidden"
                   >
                   <div className="flex-1 flex gap-4 md:gap-5">
-                    <div className="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl dark:bg-white/5 bg-black/5 flex items-center justify-center dark:text-white/40 text-slate-400 group-hover:text-primary transition-all">
-                      <PlayCircle className="h-5 w-5 md:h-6 md:w-6" />
+                    <div className={cn(
+                      "h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl flex items-center justify-center transition-all",
+                      activeTab === "practical" ? "bg-indigo-500/10 text-indigo-500" : "bg-black/5 dark:bg-white/5 text-slate-400 dark:text-white/40 group-hover:text-primary"
+                    )}>
+                      {activeTab === "practical" ? <Microscope className="h-5 w-5 md:h-6 md:w-6" /> : <PlayCircle className="h-5 w-5 md:h-6 md:w-6" />}
                     </div>
                     
                     <div className="min-w-0 flex-1 space-y-1">
@@ -159,10 +200,13 @@ export default async function SubjectLecturesPage({
                         {lecture.title}
                       </h3>
                       <div className="flex items-center gap-3">
-                         <p className="text-[9px] font-bold dark:text-white/20 text-slate-400 uppercase tracking-widest">Step {idx + 1}</p>
+                         <p className="text-[9px] font-bold dark:text-white/20 text-slate-400 uppercase tracking-widest">
+                           {activeTab === "practical" ? "Skill" : "Step"} {idx + 1}
+                         </p>
                          <div className="flex items-center gap-2">
                            {lecture._count.questions > 0 && <HelpCircle className="h-2.5 w-2.5 text-primary/40" />}
                            {lecture.files.length > 0 && <FileText className="h-2.5 w-2.5 text-blue-400/40" />}
+                           {lecture.checklist && <Shield className="h-2.5 w-2.5 text-emerald-400/40" />}
                          </div>
                       </div>
                     </div>
