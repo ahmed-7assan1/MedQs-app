@@ -16,6 +16,8 @@ export async function broadcastToTeamTelegram(item: {
       }
     });
 
+    if (!lecture) return;
+
     const team = lecture.team as any;
     if (!team?.telegramGroupId) return;
 
