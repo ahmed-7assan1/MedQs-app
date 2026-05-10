@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { TeamEditModal } from "@/components/teams/TeamEditModal";
+import toast from "react-hot-toast";
+import { UserPlus, UserMinus, ShieldAlert, Mail } from "lucide-react";
 
 export default function TeamProfilePage() {
   const router = useRouter();
@@ -15,8 +17,11 @@ export default function TeamProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"feed" | "lectures" | "members">("feed");
+  const [members, setMembers] = useState<any[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+
   useEffect(() => {
     fetch(`/api/v1/teams/${params.teamId}`)
       .then(res => res.json())
@@ -50,6 +55,53 @@ export default function TeamProfilePage() {
       setFollowLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === "members") {
+      setMembersLoading(true);
+      fetch(`/api/v1/teams/${params.teamId}/members`)
+        .then(res => res.json())
+        .then(data => {
+          setMembers(data);
+          setMembersLoading(false);
+        })
+        .catch(() => setMembersLoading(false));
+    }
+  }, [activeTab, params.teamId]);
+
+  const handleAddMember = async () => {
+    const email = prompt("Enter the student's email to add:");
+    if (!email) return;
+    try {
+      const res = await fetch(`/api/v1/teams/${params.teamId}/members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, role: "MEMBER" })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Member added successfully!");
+        setMembers(prev => [...prev, data]);
+      } else {
+        toast.error(data.error || "Failed to add member");
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    }
+  };
+
+  const removeMember = async (userId: string) => {
+    if (!confirm("Remove this member?")) return;
+    try {
+      await fetch(`/api/v1/teams/${params.teamId}/members/${userId}`, { method: "DELETE" });
+      setMembers(prev => prev.filter(m => m.userId !== userId));
+      toast.success("Member removed");
+    } catch (err) {
+      toast.error("Failed to remove member");
+    }
+  };
+
+  // ... rest of the component logic ...
 
   if (loading) return (
     <div className="min-h-screen bg-[#07080f] flex items-center justify-center">
@@ -171,24 +223,78 @@ export default function TeamProfilePage() {
                   </p>
                </div>
 
-               {/* Tabs placeholder for content (Lectures / Posts) */}
+               {/* Tabs for content (Lectures / Posts / Members) */}
                <div className="space-y-6">
                   <div className="flex items-center gap-8 border-b border-white/10 px-2 overflow-x-auto no-scrollbar">
-                     <button className="pb-4 border-b-2 border-primary text-white font-black uppercase tracking-widest text-[12px]">Feed</button>
-                     <button className="pb-4 border-b-2 border-transparent text-white/40 font-black uppercase tracking-widest text-[12px] hover:text-white transition-colors">Lectures</button>
-                     <button className="pb-4 border-b-2 border-transparent text-white/40 font-black uppercase tracking-widest text-[12px] hover:text-white transition-colors">Members</button>
+                     {(['feed', 'lectures', 'members'] as const).map((tab) => (
+                       <button 
+                         key={tab}
+                         onClick={() => setActiveTab(tab)}
+                         className={`pb-4 border-b-2 font-black uppercase tracking-widest text-[12px] transition-all ${
+                           activeTab === tab ? "border-primary text-white" : "border-transparent text-white/40 hover:text-white"
+                         }`}
+                       >
+                         {tab}
+                       </button>
+                     ))}
                   </div>
                   
-                  {/* Empty state for demo */}
-                  <div className="rounded-[32px] border border-dashed border-white/10 bg-white/[0.01] p-16 text-center">
-                     <motion.div
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                     >
-                        <MessageSquare className="h-16 w-16 text-white/5 mx-auto mb-6" />
-                     </motion.div>
-                     <p className="text-white/20 font-black uppercase tracking-[0.2em] text-sm">No activity found yet</p>
-                  </div>
+                  {activeTab === "members" ? (
+                    <div className="space-y-4">
+                       {isAdminOrLeader && (
+                         <button 
+                           onClick={handleAddMember}
+                           className="w-full py-4 rounded-2xl bg-white/5 border border-dashed border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                         >
+                           <Plus className="h-4 w-4" /> Add New Member
+                         </button>
+                       )}
+
+                       {membersLoading ? (
+                         <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>
+                       ) : (
+                         <div className="grid grid-cols-1 gap-3">
+                           {members.map((m) => (
+                             <div key={m.userId} className="p-4 rounded-2xl bg-[#131220] border border-white/5 flex items-center justify-between group">
+                               <div className="flex items-center gap-4">
+                                 <div className="h-12 w-12 rounded-xl bg-white/5 overflow-hidden">
+                                   <img src={m.user.image || `https://api.dicebear.com/7.x/shapes/svg?seed=${m.userId}`} alt="" className="h-full w-full object-cover" />
+                                 </div>
+                                 <div>
+                                   <p className="font-bold text-white text-sm">{m.user.name}</p>
+                                   <div className="flex items-center gap-2 mt-1">
+                                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                                       m.role === 'LEADER' ? 'bg-primary/20 text-primary' : 'bg-white/5 text-white/40'
+                                     }`}>
+                                       {m.role}
+                                     </span>
+                                   </div>
+                                 </div>
+                               </div>
+                               {isAdminOrLeader && m.role !== 'LEADER' && (
+                                 <button 
+                                   onClick={() => removeMember(m.userId)}
+                                   className="p-2 rounded-xl bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/20"
+                                 >
+                                   <UserMinus className="h-4 w-4" />
+                                 </button>
+                               )}
+                             </div>
+                           ))}
+                         </div>
+                       )}
+                    </div>
+                  ) : (
+                    <div className="rounded-[32px] border border-dashed border-white/10 bg-white/[0.01] p-16 text-center">
+                       <motion.div
+                          animate={{ y: [0, -10, 0] }}
+                          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                       >
+                          <MessageSquare className="h-16 w-16 text-white/5 mx-auto mb-6" />
+                       </motion.div>
+                       <p className="text-white/20 font-black uppercase tracking-[0.2em] text-sm">No {activeTab} activity found yet</p>
+                    </div>
+                  )}
                </div>
             </div>
 
