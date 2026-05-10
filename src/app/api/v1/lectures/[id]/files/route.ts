@@ -41,12 +41,21 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     data: {
       lectureId: id,
       name: file.name,
-      url, // We keep the original URL in DB as fallback, but the API will prefer Telegram
+      url, 
       mimeType: file.type,
       telegramMessageId: tgSync?.messageId,
       telegramChatId: tgSync?.chatId,
       telegramFileId: tgSync?.fileId,
     },
+  });
+
+  // Trigger Broadcast to Team Group
+  const { broadcastToTeamTelegram } = await import("@/lib/broadcast");
+  await broadcastToTeamTelegram({
+    type: 'file',
+    id: lectureFile.id,
+    title: file.name,
+    lectureId: id
   });
 
   return NextResponse.json(lectureFile, { status: 201 });

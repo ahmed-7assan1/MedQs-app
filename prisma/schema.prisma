@@ -209,6 +209,8 @@ model LectureFile {
   telegramMessageId Int?
   telegramChatId    String?
   telegramFileId    String?
+  shouldBroadcast   Boolean @default(true)
+  isBroadcasted     Boolean @default(false)
   lecture           Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
 }
 
@@ -229,6 +231,8 @@ model LectureVideo {
   telegramMessageId Int?
   telegramChatId    String?
   telegramFileId    String?
+  shouldBroadcast   Boolean @default(true)
+  isBroadcasted     Boolean @default(false)
   comments          LectureVideoComment[]
   likes          LectureVideoLike[]
 
@@ -295,6 +299,8 @@ model Question {
   reports        QuestionReport[]
   attemptItems   QuizAttemptItem[]
   savedBy        SavedQuestion[]
+  telegramMessageId String?
+  telegramChatId    String?
 }
 
 model PastPaper {
@@ -799,7 +805,9 @@ model SourceBook {
   analysisJson     Json?
   facultyId        String
   semesterId       String?
-  createdAt        DateTime          @default(now())
+  telegramMessageId String?
+  telegramChatId    String?
+  createdAt         DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   libraryResources LibraryResource[]
   faculty          Faculty           @relation(fields: [facultyId], references: [id], onDelete: Cascade)
@@ -923,8 +931,10 @@ model YoutubeUploadTask {
   newVideoUrl      String? // The URL of the video after upload
   logs             String? // JSON array of log lines from Colab
   colabLastPoll    DateTime? // Last time Colab checked in (to detect if worker is alive)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  telegramMessageId String?
+  telegramChatId    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model TelegramMigrationTask {
@@ -960,6 +970,12 @@ model MedicalTeam {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   followersCount Int            @default(0)
+
+  telegramGroupId  String?
+  telegramTemplate String?       @db.Text
+  summaryFrequency String        @default("NONE") // NONE, DAILY, WEEKLY, MONTHLY
+  lastSummaryAt    DateTime?
+
   faculty        Faculty        @relation(fields: [facultyId], references: [id])
   university     University     @relation(fields: [universityId], references: [id])
   members        TeamMember[]
@@ -1010,6 +1026,7 @@ model PlatformMember {
 model BotUser {
   id                    String   @id @default(cuid())
   telegramId            String   @unique
+  phoneNumber           String?  @unique
   preferredProvider     String?  @default("gemini")
   personalKey           String?  @db.Text
   waitingForKeyProvider String?  

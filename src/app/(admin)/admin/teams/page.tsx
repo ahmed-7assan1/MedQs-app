@@ -42,9 +42,15 @@ export default function AdminTeamsPage() {
     setShowForm(true);
   }
 
-  function openEdit(t: Team) {
+  function openEdit(t: any) {
     setEditing(t);
-    setForm({ name: t.name, description: t.description ?? "", imageUrl: t.imageUrl ?? "" });
+    const leaderEmail = t.members?.[0]?.user?.email || "";
+    setForm({ 
+      name: t.name, 
+      description: t.description || "", 
+      imageUrl: t.imageUrl || "",
+      leaderEmail 
+    } as any);
     setShowForm(true);
   }
 
@@ -120,6 +126,15 @@ export default function AdminTeamsPage() {
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Cardio Excellence"
+                  className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Leader Email</label>
+                <input
+                  value={(form as any).leaderEmail || ""}
+                  onChange={e => setForm(f => ({ ...f, leaderEmail: e.target.value } as any))}
+                  placeholder="student@example.com"
                   className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>

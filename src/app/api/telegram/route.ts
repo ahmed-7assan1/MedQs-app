@@ -15,10 +15,37 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || '8730612796:AAEgChDIg
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function getLinkedUser(telegramId: string) {
-  return await (prisma.user as any).findFirst({
+  // 1. Check direct link via telegramId
+  const directLink = await (prisma.user as any).findFirst({
     where: { telegramId: telegramId.toString() },
     include: { university: true, semester: true }
   });
+  if (directLink) return directLink;
+
+  // 2. Check if we have a phone number for this bot user
+  const botUser = await (prisma as any).botUser.findUnique({
+    where: { telegramId: telegramId.toString() },
+    select: { phoneNumber: true }
+  });
+
+  if (botUser?.phoneNumber) {
+    // 3. Check if any user in MedQs has this telegramPhone
+    const userByPhone = await (prisma.user as any).findFirst({
+      where: { telegramPhone: botUser.phoneNumber },
+      include: { university: true, semester: true }
+    });
+
+    if (userByPhone) {
+      // 4. AUTO-LINK: Save the telegramId to this user for future direct links
+      await (prisma.user as any).update({
+        where: { id: userByPhone.id },
+        data: { telegramId: telegramId.toString(), telegramVerified: true }
+      });
+      return userByPhone;
+    }
+  }
+
+  return null;
 }
 
 async function getBotUser(telegramId: string) {
@@ -52,7 +79,16 @@ bot.start(async (ctx) => {
     const linkedUser = await getLinkedUser(telegramId);
     
     if (linkedUser) {
-      await ctx.reply(`Welcome back, Dr. ${linkedUser.name}! 🩺🌌\nHow can I help you today?`, MAIN_KEYBOARD);
+      const universityName = linkedUser.university?.name || "MedQs University";
+      const semesterName = linkedUser.semester?.name || "Global Semester";
+      
+      await ctx.reply(
+        `Welcome back, Dr. ${linkedUser.name}! 🩺🌌\n\n` +
+        `🏫 *University:* ${universityName}\n` +
+        `📚 *Current Semester:* ${semesterName}\n\n` +
+        `How can I help you with your studies today?`, 
+        { parse_mode: 'Markdown', ...MAIN_KEYBOARD }
+      );
     } else {
       await ctx.reply(
         `Welcome to MedOneX! 🩺🌌\n\n` +
@@ -582,20 +618,26 @@ bot.on(['video', 'photo'], async (ctx) => {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log(`[TELEGRAM] Incoming update: ${body.update_id} (${Object.keys(body)[1]})`);
     
-    // Explicitly handle update to ensure it doesn't hang
-    // We use a timeout to prevent the edge function from hanging too long
-    await Promise.race([
-      bot.handleUpdate(body),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-    ]);
+    // ⚡ Early Exit Optimization: Ignore updates that aren't messages or actions
+    // This saves "Function Invocations" and "CPU Time" on Vercel
+    if (!body.message && !body.callback_query && !body.inline_query) {
+      return NextResponse.json({ ok: true, skipped: true });
+    }
+
+    // Ignore edited messages to save processing
+    if (body.edited_message) {
+      return NextResponse.json({ ok: true, skipped: true });
+    }
+
+    console.log(`[TELEGRAM] Processing update: ${body.update_id}`);
+    
+    // Use a faster response pattern
+    await bot.handleUpdate(body);
     
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     console.error("[TELEGRAM] Webhook Error:", e);
-    // Return 200 even on error to prevent Telegram from retrying endlessly if the error is persistent
-    // but log it so we can see it in Vercel
     return NextResponse.json({ ok: false, error: e?.message }, { status: 200 });
   }
 }

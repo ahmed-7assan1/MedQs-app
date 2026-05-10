@@ -97,17 +97,42 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { name, description, imageUrl, coverUrl } = body;
+    const { 
+      name, 
+      description, 
+      imageUrl, 
+      coverUrl,
+      telegramGroupId,
+      telegramTemplate,
+      summaryFrequency,
+      leaderEmail
+    } = body;
 
-    const updatedTeam = await prisma.medicalTeam.update({
+    const updatedTeam = await (prisma.medicalTeam as any).update({
       where: { id: params.id },
       data: {
         name,
         description,
         imageUrl,
         coverUrl,
+        telegramGroupId,
+        telegramTemplate,
+        summaryFrequency
       }
     });
+
+    // Handle Leader Update/Addition
+    if (leaderEmail) {
+      const leaderUser = await prisma.user.findUnique({ where: { email: leaderEmail } });
+      if (leaderUser) {
+        // Upsert leader role (ensure they are leader)
+        await prisma.teamMember.upsert({
+          where: { teamId_userId: { teamId: params.id, userId: leaderUser.id } },
+          update: { role: "LEADER" },
+          create: { teamId: params.id, userId: leaderUser.id, role: "LEADER" }
+        });
+      }
+    }
 
     return NextResponse.json(updatedTeam);
   } catch (error) {

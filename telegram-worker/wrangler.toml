@@ -1,0 +1,10 @@
+name = "medqs-bot-worker"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = [ "nodejs_compat" ]
+
+[vars]
+# We will set these via wrangler secrets or in the dashboard
+# TELEGRAM_BOT_TOKEN = "..."
+# DATABASE_URL = "..."
+# NEXTAUTH_URL = "https://medonex.vercel.app"

@@ -64,6 +64,15 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     },
   });
 
+  // Trigger Broadcast to Team Group
+  const { broadcastToTeamTelegram } = await import("@/lib/broadcast");
+  await broadcastToTeamTelegram({
+    type: 'video',
+    id: row.id,
+    title,
+    lectureId: id
+  });
+
   // If it's YouTube, create a background migration task for Colab
   if (isYoutube) {
     try {

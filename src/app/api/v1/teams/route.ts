@@ -7,6 +7,11 @@ export async function GET() {
     const teams = await prisma.medicalTeam.findMany({
       include: {
         faculty: { select: { name: true } },
+        members: {
+          where: { role: "LEADER" },
+          include: { user: { select: { email: true } } },
+          take: 1
+        },
         _count: {
           select: { followers: true, posts: true, lectures: true }
         }
@@ -27,27 +32,20 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, description, imageUrl, facultyId, universityId } = body;
+    const { name, description, imageUrl, facultyId, universityId, leaderEmail } = body;
 
-    // Fallbacks if not provided (MedicalTeam requires these)
+    // ... existing uni/fac fallback logic ...
     let finalUniId = universityId;
     let finalFacId = facultyId;
-
     if (!finalUniId || !finalFacId) {
-      const firstUni = await prisma.university.findFirst({
-        include: { faculties: true }
-      });
+      const firstUni = await prisma.university.findFirst({ include: { faculties: true } });
       if (firstUni) {
         finalUniId = finalUniId || firstUni.id;
         finalFacId = finalFacId || firstUni.faculties[0]?.id;
       }
     }
 
-    if (!finalUniId || !finalFacId) {
-      return NextResponse.json({ error: "University and Faculty are required" }, { status: 400 });
-    }
-
-    const team = await prisma.medicalTeam.create({
+    const team = await (prisma.medicalTeam as any).create({
       data: {
         name,
         description,
@@ -56,6 +54,20 @@ export async function POST(req: Request) {
         facultyId: finalFacId,
       }
     });
+
+    // Handle Leader Assignment
+    if (leaderEmail) {
+      const leaderUser = await prisma.user.findUnique({ where: { email: leaderEmail } });
+      if (leaderUser) {
+        await prisma.teamMember.create({
+          data: {
+            teamId: team.id,
+            userId: leaderUser.id,
+            role: "LEADER"
+          }
+        });
+      }
+    }
 
     return NextResponse.json(team);
   } catch (error) {

@@ -371,60 +371,50 @@ export default function RegisterPage() {
               <button onClick={() => setStep(3)} className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
                 <ArrowLeft className="h-3 w-3" /> Back
               </button>
-              <h1 className="mb-1 font-display text-2xl font-black tracking-tight text-white">Telegram Identity</h1>
-              <p className="mb-8 text-[13px] text-white/35 font-medium">Verify your account via Telegram bot.</p>
 
               <div className="space-y-6">
-                {!vCodeSent ? (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Telegram Phone Number</label>
-                      <input 
-                        value={telegramPhone} 
-                        onChange={e => setTelegramPhone(e.target.value)} 
-                        placeholder="+20 10 XXXX XXXX" 
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <PaperPlaneTilt size={32} className="text-blue-500" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white mb-2">Telegram Identity</h2>
+                  <p className="text-zinc-400">Link your account to our Telegram bot for personalized study help.</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-zinc-400 mb-1.5 block">Telegram Phone Number</label>
+                    <div className="relative group">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors group-focus-within:text-blue-500" size={20} />
+                      <input
                         type="tel"
-                        className="w-full rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-sm font-bold text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" 
+                        value={telegramPhone}
+                        onChange={(e) => setTelegramPhone(e.target.value)}
+                        placeholder="+2010..."
+                        className="w-full bg-zinc-900/50 border border-zinc-800 text-white rounded-xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-600"
                       />
                     </div>
-                    <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                      <p className="text-[11px] text-primary/80 leading-relaxed">
-                        💡 **Note:** You must first "Start" our bot and click **"Link via Phone"** to share your contact before requesting a code.
-                      </p>
-                      <a href="https://t.me/MedQsBot" target="_blank" className="mt-2 inline-block text-[11px] font-black text-primary underline">Open @MedQsBot</a>
-                    </div>
-                    <button onClick={handleRequestCode} disabled={saving}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl btn-gradient py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50">
-                      {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <PaperPlaneTilt className="h-5 w-5" />}
-                      {saving ? "Sending..." : "Send Verification Code"}
-                    </button>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Enter 6-Digit Code</label>
-                      <input 
-                        value={vCode} 
-                        onChange={e => setVCode(e.target.value)} 
-                        placeholder="000000" 
-                        maxLength={6}
-                        className="w-full text-center tracking-[0.5em] rounded-2xl border border-white/[0.07] bg-[#131220] px-5 py-4 text-xl font-black text-white outline-none transition-all focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-white/10" 
-                      />
+
+                  <div className="flex flex-col items-center gap-4 py-4 border-y border-white/5">
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black">Verify with Telegram</p>
+                    <div className="min-h-[40px] flex items-center justify-center overflow-hidden rounded-xl">
+                      <div id="telegram-login-container"></div>
+                      <TelegramWidgetWrapper onAuth={(user) => {
+                        setTelegramPhone(user.username || user.first_name);
+                        setVCodeVerified(true);
+                        setStep(5);
+                      }} />
                     </div>
-                    <button onClick={handleVerifyCode} disabled={saving}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-5 text-sm font-black uppercase tracking-wider text-white shadow-2xl shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50">
-                      {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
-                      {saving ? "Verifying..." : "Verify & Continue"}
-                    </button>
-                    <button 
-                      onClick={handleRequestCode} 
-                      disabled={saving || retryTimer > 0}
-                      className="w-full text-center text-[11px] font-bold text-white/20 hover:text-white transition-colors disabled:opacity-50"
-                    >
-                      {retryTimer > 0 ? `Resend in ${retryTimer}s` : "Didn't get a code? Send Again"}
-                    </button>
                   </div>
-                )}
+
+                  <button
+                    onClick={() => setStep(5)}
+                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-white/5 border border-white/5 py-5 text-sm font-black uppercase tracking-wider text-white transition-all hover:bg-white/10 active:scale-[0.98]"
+                  >
+                    Skip for Now <CaretRight className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -495,5 +485,35 @@ export default function RegisterPage() {
       `}</style>
     </div>
   );
+}
+
+function TelegramWidgetWrapper({ onAuth }: { onAuth: (user: any) => void }) {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.setAttribute('data-telegram-login', 'MedQsBot');
+    script.setAttribute('data-size', 'large');
+    script.setAttribute('data-request-access', 'write');
+    script.setAttribute('data-userpic', 'false');
+    script.async = true;
+
+    // Callback function in window
+    (window as any).onTelegramAuth = (user: any) => {
+      onAuth(user);
+    };
+    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+
+    const container = document.getElementById('telegram-login-container');
+    if (container) container.appendChild(script);
+
+    return () => {
+      if (container) {
+        container.innerHTML = '';
+      }
+      delete (window as any).onTelegramAuth;
+    };
+  }, [onAuth]);
+
+  return null;
 }
 
