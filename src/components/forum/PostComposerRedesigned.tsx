@@ -51,6 +51,8 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
   const [attachments, setAttachments] = useState<any[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState<string | null>(null);
   const [isRecordingMode, setIsRecordingMode] = useState(false);
   const [selectedForumId, setSelectedForumId] = useState<string>(forums?.[0]?.id || "");
   const [pollOptions, setPollOptions] = useState<{ text: string }[]>([]);
@@ -76,6 +78,7 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const avatarUrl = user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name || "user")}`;
 
@@ -153,8 +156,43 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
     }
   };
 
+  const handleVideoInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024 * 1024) {
+      toast.error("Video must be under 2GB");
+      return;
+    }
+    setIsUploadingVideo(true);
+    setVideoUploadProgress("Uploading to Telegram...");
+    setIsExpanded(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file, file.name);
+      const res = await fetch("/api/v1/debug/telegram-direct-upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!data.success) throw new Error("Upload failed");
+      setAttachments(prev => [...prev, {
+        url: `/api/v1/telegram/video/${data.chatId}/${data.messageId}?fileId=${data.fileId}`,
+        type: "video",
+        fileId: data.fileId,
+        chatId: data.chatId,
+        messageId: data.messageId,
+        name: file.name,
+      }]);
+      toast.success("Video uploaded to Telegram!");
+    } catch {
+      toast.error("Video upload failed");
+    } finally {
+      setIsUploadingVideo(false);
+      setVideoUploadProgress(null);
+      e.target.value = "";
+    }
+  };
+
+  const videos = attachments.filter(a => a.type === "video");
   const images = attachments.filter(a => a.type === "image");
-  const others = attachments.filter(a => a.type !== "image");
+  const others = attachments.filter(a => a.type !== "image" && a.type !== "video");
 
   return (
     <div className={cn(
@@ -299,6 +337,41 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                 </div>
               )}
 
+              {/* Video Preview */}
+              {(videos.length > 0 || isUploadingVideo) && (
+                <div className="mt-5 space-y-2">
+                  {videos.map((v, i) => (
+                    <div key={i} className="relative group rounded-2xl overflow-hidden border border-indigo-500/30 bg-black">
+                      <video
+                        src={v.url}
+                        controls
+                        className="w-full max-h-64 object-contain"
+                        preload="metadata"
+                      />
+                      <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1">
+                        <VideoCamera size={12} className="text-indigo-400" />
+                        <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Telegram</span>
+                      </div>
+                      <button
+                        onClick={() => setAttachments(prev => prev.filter(a => a.url !== v.url))}
+                        className="absolute top-2 right-2 h-7 w-7 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <X size={12} weight="bold" className="text-white" />
+                      </button>
+                    </div>
+                  ))}
+                  {isUploadingVideo && (
+                    <div className="flex items-center gap-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 px-5 py-4">
+                      <CircleNotch size={20} className="animate-spin text-indigo-400 shrink-0" />
+                      <div>
+                        <p className="text-[12px] font-black text-indigo-300">{videoUploadProgress || "Uploading..."}</p>
+                        <p className="text-[10px] text-indigo-400/60">Storing securely on Telegram</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Media Grid */}
               {(images.length > 0 || isUploading) && (
                 <div className="flex flex-wrap gap-3 mt-5 px-1">
@@ -339,9 +412,11 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                     <span className="text-[11px] font-black uppercase tracking-widest">Gallery</span>
                     <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileInput} />
                   </label>
-                  <button className="h-10 w-10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                  <label className={cn("h-10 px-3 flex items-center gap-2 rounded-xl transition-all cursor-pointer", videos.length > 0 || isUploadingVideo ? "text-indigo-400 bg-indigo-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}>
                     <VideoCamera size={20} weight="bold" />
-                  </button>
+                    <span className="text-[11px] font-black uppercase tracking-widest">Video</span>
+                    <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoInput} />
+                  </label>
                   <button 
                     onClick={() => {
                       setIsPollMode(true);

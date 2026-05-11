@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 interface Attachment {
   url: string;
-  type: "image" | "audio" | "file";
+  type: "image" | "audio" | "file" | "video";
   fileId?: string;
 }
 
@@ -56,7 +56,16 @@ export function MessageBubble({ message, isMine }: Props) {
   const attachments = parseAttachments(message.attachments);
   const images = attachments.filter((a) => a.type === "image");
   const audio = attachments.filter((a) => a.type === "audio");
-  const files = attachments.filter((a) => a.type === "file");
+  const videos = attachments.filter((a) => 
+    a.type === "video" || 
+    a.url.toLowerCase().split('?')[0].endsWith('.mp4') ||
+    a.url.toLowerCase().split('?')[0].endsWith('.mov') ||
+    a.url.toLowerCase().split('?')[0].endsWith('.webm')
+  );
+  const files = attachments.filter((a) => 
+    a.type === "file" && 
+    !videos.some(v => v.url === a.url)
+  );
   const hasContent = message.content?.trim();
 
   const avatarUrl =
@@ -115,6 +124,22 @@ export function MessageBubble({ message, isMine }: Props) {
             </div>
           )}
 
+          {/* Videos */}
+          {videos.map((v, i) => (
+            <div key={i} className="relative group w-full max-w-[320px] bg-black">
+              <video 
+                src={v.url} 
+                className="w-full max-h-[400px] object-contain" 
+                controls 
+                playsInline
+                preload="metadata"
+              />
+              <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-2.5 py-1 pointer-events-none">
+                <span className="text-[9px] font-black text-indigo-300 uppercase tracking-widest">🛡️ Telegram Video</span>
+              </div>
+            </div>
+          ))}
+
           {/* Audio */}
           {audio.map((a, i) => (
             <div key={i} className="p-2 min-w-[240px]">
@@ -129,15 +154,15 @@ export function MessageBubble({ message, isMine }: Props) {
               href={`${f.url}&download=true`}
               className={cn(
                 "flex items-center gap-3 p-3 hover:bg-white/5 transition-all",
-                !hasContent && !images.length && !audio.length ? "" : "border-t border-white/5"
+                !hasContent && !images.length && !audio.length && !videos.length ? "" : "border-t border-white/5"
               )}
             >
               <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-white/10 shrink-0">
                 <FileText size={22} weight="bold" className="text-white/70" />
               </div>
               <div className="min-w-0">
-                <p className="text-[12px] font-bold text-white truncate">Document</p>
-                <p className="text-[10px] text-white/40 font-bold">Tap to download</p>
+                <p className="text-[12px] font-bold text-white truncate">Attachment</p>
+                <p className="text-[10px] text-white/40 font-bold uppercase tracking-tight">Tap to download</p>
               </div>
               <DownloadSimple size={18} className="text-white/40 ml-auto shrink-0" />
             </a>

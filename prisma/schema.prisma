@@ -644,6 +644,8 @@ model Post {
   content              String
   imageUrl             String?
   telegramFileId       String?
+  telegramChatId       String?
+  telegramMessageId    String?
   attachments          Json?        // Array of { url: string, type: 'image' | 'file', fileId: string }
   interactionsDisabled Boolean      @default(false)
   authorId             String

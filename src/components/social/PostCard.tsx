@@ -71,7 +71,20 @@ export const PostCard = React.memo(({
 
   const allImages = attachments.filter((a: any) => a.type === 'image');
   const allAudios = attachments.filter((a: any) => a.type === 'audio' || a.type === 'telegram_audio');
-  const allFiles = attachments.filter((a: any) => a.type !== 'image' && a.type !== 'audio' && a.type !== 'telegram_audio');
+  const allVideos = attachments.filter((a: any) => 
+    a.type === 'video' || 
+    (typeof a.url === 'string' && (
+      a.url.toLowerCase().split('?')[0].endsWith('.mp4') ||
+      a.url.toLowerCase().split('?')[0].endsWith('.mov') ||
+      a.url.toLowerCase().split('?')[0].endsWith('.webm')
+    ))
+  );
+  const allFiles = attachments.filter((a: any) => 
+    a.type !== 'image' && 
+    a.type !== 'audio' && 
+    a.type !== 'telegram_audio' &&
+    !allVideos.some((v: any) => v.url === a.url)
+  );
 
   const canDelete =
     post.authorId === currentUserId ||
@@ -332,11 +345,26 @@ export const PostCard = React.memo(({
             })}
           </div>
 
-          {/* Non-Image Attachments (Voice, Files) */}
+          {/* Non-Image Attachments (Videos, Voice, Files) */}
           <div className="p-1 space-y-1">
-            {attachments.filter((a: any) => a.type !== 'image').map((att: any, i: number) => (
+            {allVideos.map((v: any, i: number) => (
+              <div key={i} className="relative group w-full bg-black rounded-2xl overflow-hidden mb-1 border border-white/[0.05]">
+                <video 
+                  src={v.url} 
+                  className="w-full max-h-[450px] object-contain" 
+                  controls 
+                  playsInline
+                  preload="metadata"
+                />
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 pointer-events-none border border-white/10 shadow-xl">
+                  <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em]">🛡️ Telegram Video</span>
+                </div>
+              </div>
+            ))}
+
+            {attachments.filter((a: any) => a.type !== 'image' && !allVideos.some((v: any) => v.url === a.url)).map((att: any, i: number) => (
               <div key={i} className="p-3 bg-white/50 dark:bg-black/20 rounded-xl flex items-center gap-4 group transition-colors hover:bg-white/80 dark:hover:bg-white/5">
-                 {att.type === 'audio' ? (
+                 {att.type === 'audio' || att.type === 'telegram_audio' ? (
                     <InteractiveAudioPlayer url={att.url} duration={att.duration} />
                  ) : (
                   <a href={att.url} target="_blank" className="flex-1 flex items-center gap-3">

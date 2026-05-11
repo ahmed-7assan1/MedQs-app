@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+
 import Link from "next/link";
 import { Heart, Share2, MoreHorizontal, Lock, Bookmark, BookmarkCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,90 @@ interface Props {
   /** Thread-style bubbles for Discussions (chat) tab. */
   variant?: "card" | "chat";
 }
+
+// ─── Premium Telegram Video Block ───────────────────────────────────────────
+function TelegramVideoBlock({ src, name }: { src: string; name?: string }) {
+  const [playing, setPlaying] = useState(false);
+  const [ready, setReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggle = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else { v.pause(); setPlaying(false); }
+  };
+
+  return (
+    <div className="mt-3 group relative rounded-2xl overflow-hidden bg-black border border-white/[0.06] shadow-2xl shadow-black/50">
+      {/* Video Element */}
+      <video
+        ref={videoRef}
+        src={src}
+        playsInline
+        preload="metadata"
+        onCanPlay={() => setReady(true)}
+        onEnded={() => setPlaying(false)}
+        onClick={toggle}
+        className="w-full max-h-[460px] object-contain cursor-pointer block"
+      />
+
+      {/* Gradient Overlay – bottom */}
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+
+      {/* Play / Pause Overlay (center) */}
+      {ready && (
+        <button
+          onClick={toggle}
+          className={cn(
+            "absolute inset-0 flex items-center justify-center transition-all duration-300",
+            playing
+              ? "opacity-0 group-hover:opacity-100"
+              : "opacity-100"
+          )}
+          aria-label={playing ? "Pause" : "Play"}
+        >
+          <div className={cn(
+            "h-16 w-16 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200 shadow-xl",
+            playing
+              ? "bg-black/40 border border-white/20 scale-90"
+              : "bg-indigo-600/90 border border-indigo-400/40 scale-100 group-hover:scale-110"
+          )}>
+            {playing ? (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                <rect x="6" y="4" width="4" height="16" rx="1"/>
+                <rect x="14" y="4" width="4" height="16" rx="1"/>
+              </svg>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            )}
+          </div>
+        </button>
+      )}
+
+      {/* Bottom bar */}
+      <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-3 py-2 pointer-events-none">
+        {name && (
+          <span className="text-[11px] font-bold text-white/70 truncate max-w-[60%]">{name}</span>
+        )}
+        <div className="flex items-center gap-1.5 bg-indigo-600/80 backdrop-blur-sm rounded-full px-2.5 py-1 ml-auto">
+          <span className="text-[9px] font-black text-indigo-100 uppercase tracking-widest">🛡️ Telegram</span>
+        </div>
+      </div>
+
+      {/* Loading shimmer */}
+      {!ready && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+          <div className="h-12 w-12 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Rank colors ─────────────────────────────────────────────────────────────
 
 const RANK_COLORS: Record<string, string> = {
   Newbie:       "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
@@ -229,7 +314,6 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
               postId={post.id}
               currentUserId={currentUserId}
               initialCount={post._count?.comments ?? 0}
-              variant="chat"
             />
           )}
         </div>
@@ -316,6 +400,14 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
             referrerPolicy="no-referrer"
           />
         ) : null}
+
+        {/* Telegram Video Attachments — Premium Player */}
+        {Array.isArray((post as any).attachments) &&
+          (post as any).attachments
+            .filter((a: any) => a.type === "video")
+            .map((v: any, i: number) => (
+              <TelegramVideoBlock key={i} src={v.url} name={v.name} />
+            ))}
       </div>
 
       {/* Interactions disabled */}
@@ -357,7 +449,6 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
           postId={post.id}
           currentUserId={currentUserId}
           initialCount={post._count?.comments ?? 0}
-          variant="default"
         />
       )}
     </article>

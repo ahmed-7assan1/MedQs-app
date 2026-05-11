@@ -10,7 +10,8 @@ import {
   Trash,
   X,
   Plus,
-  FileText
+  FileText,
+  Play
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { VoiceRecorder } from "./VoiceRecorder";
@@ -63,9 +64,10 @@ export function CommentSection({ postId, isRoomPost, roomId, currentUserId, init
     const res = await fetch("/api/v1/debug/telegram-direct-upload", { method: "POST", body: fd });
     const data = await res.json();
     if (!data.success) throw new Error("Upload failed");
-    let type: "image" | "audio" | "file" = "file";
+    let type: "image" | "audio" | "file" | "video" = "file";
     if (file.type?.startsWith("image/")) type = "image";
     else if (file.type?.startsWith("audio/")) type = "audio";
+    else if (file.type?.startsWith("video/")) type = "video";
     return {
       url: `/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`,
       type,
@@ -152,8 +154,8 @@ export function CommentSection({ postId, isRoomPost, roomId, currentUserId, init
           <div className="mt-3 flex flex-wrap gap-2 px-1 pb-1">
             {attachments.map((att, i) => (
               <div key={i} className="px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/10 text-primary text-[10px] font-black uppercase flex items-center gap-2">
-                {att.type === 'audio' ? <Microphone size={12} weight="fill" /> : att.type === 'image' ? <ImageIcon size={12} weight="fill" /> : <FileText size={12} weight="fill" />}
-                {att.type === 'audio' ? "Voice Note" : att.type === 'image' ? "Image" : "Document"}
+                {att.type === 'audio' ? <Microphone size={12} weight="fill" /> : att.type === 'image' ? <ImageIcon size={12} weight="fill" /> : att.type === 'video' ? <Play size={12} weight="fill" /> : <FileText size={12} weight="fill" />}
+                {att.type === 'audio' ? "Voice Note" : att.type === 'image' ? "Image" : att.type === 'video' ? "Video" : "Document"}
                 <button onClick={() => setAttachments(p => p.filter((_, idx) => idx !== i))} className="text-primary hover:text-red-500"><X size={12} weight="bold" /></button>
               </div>
             ))}
@@ -205,6 +207,10 @@ function CommentItem({ comment, isRoomPost, roomId, postId, currentUserId, onRep
                   </div>
                 ) : att.type === 'image' ? (
                   <img src={att.url} className="mt-2 rounded-2xl max-h-60 object-cover border border-slate-200 dark:border-white/10" alt="" />
+                ) : att.type === 'video' || att.url.toLowerCase().includes('.mp4') ? (
+                  <div className="mt-2 rounded-2xl overflow-hidden bg-black border border-slate-200 dark:border-white/10">
+                    <video src={att.url} controls className="w-full max-h-80 object-contain" playsInline />
+                  </div>
                 ) : (
                   <a href={att.url} target="_blank" className="mt-2 p-3 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center gap-3 hover:border-primary/40 transition-all">
                      <div className="h-8 w-8 bg-slate-200 dark:bg-white/10 rounded-xl flex items-center justify-center text-slate-500"><FileText size={18} weight="bold" /></div>

@@ -103,7 +103,8 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
   const isEmbed = isSharePoint || url.includes("/embed/");
 
   const driveStreamUrl = driveId ? getDriveStreamUrl(driveId) : null;
-  const isHtml5 = (!ytId && !driveId && /\.(mp4|webm|ogg)$/i.test(url)) || (driveId && useNativeForDrive);
+  const isTelegram = url.includes("/api/v1/telegram/video/");
+  const isHtml5 = (!ytId && !driveId && (/\.(mp4|webm|ogg)$/i.test(url) || isTelegram)) || (driveId && useNativeForDrive);
 
 
   useEffect(() => {

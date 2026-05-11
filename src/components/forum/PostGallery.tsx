@@ -81,20 +81,23 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                     )}
                     onClick={() => setViewIndex(i)}
                   >
-                    {item.type === 'video' ? (
-                      <div className="relative w-full h-full bg-black">
+                    {item.type === 'video' || item.url.toLowerCase().endsWith('.mp4') ? (
+                      <div className="relative w-full h-full bg-black flex items-center justify-center">
                          <Player 
                            url={item.url} 
                            width="100%" 
                            height="100%" 
                            light={true} 
                            playIcon={
-                             <div className="h-10 w-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/10 hover:bg-black/60 transition-all">
-                                <Play size={20} weight="fill" className="text-white/80" />
+                             <div className="h-12 w-12 rounded-full bg-indigo-600/90 backdrop-blur-md flex items-center justify-center border border-indigo-400/30 shadow-2xl hover:scale-110 transition-all">
+                                <Play size={24} weight="fill" className="text-white ml-0.5" />
                              </div>
                            }
                            onClickPreview={() => setViewIndex(i)}
                          />
+                         <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 backdrop-blur-md rounded-full px-2 py-0.5 pointer-events-none">
+                           <span className="text-[8px] font-black text-indigo-300 uppercase tracking-widest">🛡️ Telegram</span>
+                         </div>
                       </div>
                     ) : (
                       <img src={item.url} className="w-full h-full object-cover" alt="" />

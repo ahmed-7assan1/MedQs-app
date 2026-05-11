@@ -55,13 +55,36 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     });
     if (!inScope) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  // 🛰️ Transform Telegram IDs into Proxy URLs
+  const transformedVideos = lecture.videos.map((v: any) => {
+    if (v.telegramMessageId && v.telegramChatId) {
+      // Include fileId as query param to skip the expensive forward step in the proxy
+      const fileIdParam = v.telegramFileId ? `?fileId=${encodeURIComponent(v.telegramFileId)}` : "";
+      return {
+        ...v,
+        url: `/api/v1/telegram/video/${v.telegramChatId}/${v.telegramMessageId}${fileIdParam}`,
+        isTelegram: true
+      };
+    }
+    return v;
+  });
+
+
   const rows = await prisma
     .$queryRaw<Array<{ uiConfig: any; extras: any }>>(
       Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${id} LIMIT 1`
     )
     .catch(() => []);
-  return NextResponse.json({ ...(lecture as any), uiConfig: rows?.[0]?.uiConfig ?? null, extras: rows?.[0]?.extras ?? null });
+
+  return NextResponse.json({ 
+    ...lecture, 
+    videos: transformedVideos,
+    uiConfig: rows?.[0]?.uiConfig ?? null, 
+    extras: rows?.[0]?.extras ?? null 
+  });
 }
+
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
   const session = await auth();

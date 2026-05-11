@@ -310,7 +310,7 @@ export function CommentThread({ postId, currentUserId, initialCount }: CommentTh
               }}
               placeholder={replyTo ? "Compose reply..." : "Broadcast your thoughts..."}
               rows={1}
-              className="w-full bg-transparent border-none p-2 text-[14px] text-white placeholder:text-white/15 focus:ring-0 resize-none min-h-[40px] max-h-[120px] custom-scrollbar"
+              className="w-full bg-transparent border-none p-2 text-[14px] text-white placeholder:text-white/15 focus:ring-0 focus:outline-none resize-none min-h-[40px] max-h-[120px] custom-scrollbar"
             />
             
             <div className="flex items-center justify-between px-2 pb-1">
