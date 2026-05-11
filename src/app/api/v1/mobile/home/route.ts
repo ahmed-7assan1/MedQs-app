@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getToken } from "next-auth/jwt";
+import { decode } from "next-auth/jwt";
+import { NextRequest } from "next/server";
 
-export async function GET(req: Request) {
+export const dynamic = "force-dynamic";
+
+export async function GET(req: NextRequest) {
   try {
     // 1. Authenticate the request via Bearer token
     const authHeader = req.headers.get("authorization");
@@ -11,12 +14,10 @@ export async function GET(req: Request) {
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
       const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "";
-      // NextAuth token decoding
       try {
-        const { decode } = require("next-auth/jwt");
         const decoded = await decode({ token, secret, salt: "authjs.session-token" });
         if (decoded?.id) {
-          userId = decoded.id;
+          userId = decoded.id as string;
         }
       } catch (e) {
         console.error("Token decode error:", e);

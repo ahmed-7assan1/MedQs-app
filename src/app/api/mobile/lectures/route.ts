@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
 
+export const dynamic = "force-dynamic";
+
 // GET /api/mobile/lectures?semesterId=...&subjectId=...&moduleId=...
 export async function GET(req: NextRequest) {
   try {

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { decode } from "next-auth/jwt";
+import { NextRequest } from "next/server";
 
-export async function GET(req: Request) {
+export const dynamic = "force-dynamic";
+
+export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
     let userId = null;
@@ -11,11 +15,10 @@ export async function GET(req: Request) {
       const token = authHeader.substring(7);
       const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "";
       try {
-        const { decode } = require("next-auth/jwt");
         const decoded = await decode({ token, secret, salt: "authjs.session-token" });
         if (decoded?.id) {
-          userId = decoded.id;
-          semesterId = decoded.semesterId;
+          userId = decoded.id as string;
+          semesterId = decoded.semesterId as string | null;
         }
       } catch (e) {
         console.error("Token decode error:", e);

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 
+export const dynamic = "force-dynamic";
+
 // GET /api/mobile/site-config — returns primary color, feature flags, logo etc.
 export async function GET(req: NextRequest) {
   try {

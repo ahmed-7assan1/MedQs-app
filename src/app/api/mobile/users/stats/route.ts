@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
 
+export const dynamic = "force-dynamic";
+
 // GET /api/mobile/users/stats
 // Returns: totalAttempts, avgScore, completedLectures, points, rank
 export async function GET(req: NextRequest) {

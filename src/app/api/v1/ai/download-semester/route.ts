@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, HeadingLevel, AlignmentType, BorderStyle, TextRun } from "docx";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
