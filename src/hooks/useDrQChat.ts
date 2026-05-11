@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useSession } from "next-auth/react";
 import { syncAllThreadsToFirestore, subscribeToThreads } from "@/lib/firebase/firestore";
+import { getAIEndpoint } from "@/lib/api-config";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -328,7 +329,7 @@ export function useDrQChat() {
 
   const fetchLimits = async () => {
     try {
-      const res = await fetch("/api/v1/ai/chat");
+      const res = await fetch(getAIEndpoint("/api/v1/ai/chat"));
       if (res.ok) {
         const data = await res.json();
         setLimits({ used: data.used, limit: data.limit, filesUsed: data.filesUsed ?? 0, fileLimit: data.fileLimit ?? 10, rankLabel: data.rankLabel ?? "Student" });
@@ -581,7 +582,7 @@ export function useDrQChat() {
         if (activeProvider === "gemini") {
           // Use site's API if no BYOK key
           if (!apiKey) {
-            const res = await fetch("/api/v1/ai/chat", {
+            const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({

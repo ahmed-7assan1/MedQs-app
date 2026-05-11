@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
+import { getAIEndpoint } from "@/lib/api-config";
 
 interface UsageInfo {
   used: number;
@@ -371,7 +372,7 @@ export function AIAssistantPanel({
 
   useEffect(() => {
     if (open && usage === null) {
-      fetch("/api/v1/ai/chat")
+      fetch(getAIEndpoint("/api/v1/ai/chat"))
         .then((r) => r.json())
         .then(setUsage)
         .catch(() => {});
@@ -413,7 +414,7 @@ export function AIAssistantPanel({
       currentModel?: string,
       currentPuterModel?: string
     ) => {
-      const res = await fetch("/api/v1/ai/chat", {
+      const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

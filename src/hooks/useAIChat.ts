@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
+import { getAIEndpoint } from "@/lib/api-config";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -230,7 +231,7 @@ export function useAIChat() {
         .filter(m => m.type !== "image")
         .map(m => ({ role: m.role, content: m.content }));
 
-      const res = await fetch("/api/v1/ai/chat", {
+      const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
