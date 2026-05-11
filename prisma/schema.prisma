@@ -745,6 +745,9 @@ model Notification {
   userId    String
   createdAt DateTime     @default(now())
   user      User         @relation(fields: [userId], references: [id])
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
 }
 
 model NotificationMute {

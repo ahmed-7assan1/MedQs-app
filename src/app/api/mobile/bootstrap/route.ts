@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
+import { redis } from '@/lib/redis';
+
+export const dynamic = "force-dynamic";
 
 // GET /api/mobile/bootstrap — everything the app needs at startup in ONE call
 export async function GET(req: NextRequest) {
@@ -11,9 +14,7 @@ export async function GET(req: NextRequest) {
     
     // 1. Get Site Config (can be public or scoped to user's uni)
     const universityId = req.nextUrl.searchParams.get('universityId');
-    const config = await prisma.siteConfig.findFirst({
-      where: universityId ? { universityId } : { isDefault: true },
-    });
+    const config = await prisma.siteConfig.findFirst();
 
     if (!userId) {
       // Unauthenticated bootstrap (only config)
@@ -38,6 +39,22 @@ export async function GET(req: NextRequest) {
     }
 
     // 3. Get Home Data (Dashboard)
+    // ─── Caching Strategy (Ads & Leaderboard) ───
+    const adsKey = `mobile:ads:${user.universityId || 'default'}`;
+    const topUsersKey = `mobile:topusers:${user.universityId || 'default'}`;
+
+    let adBanners: any[] = [];
+    let topUsers: any[] = [];
+
+    try {
+      const [cachedAds, cachedTop] = await Promise.all([
+        redis.get(adsKey),
+        redis.get(topUsersKey),
+      ]);
+      if (cachedAds) adBanners = JSON.parse(cachedAds);
+      if (cachedTop) topUsers = JSON.parse(cachedTop);
+    } catch (e) {}
+
     const [
       attemptStats,
       completedLectures,
@@ -45,8 +62,8 @@ export async function GET(req: NextRequest) {
       suggestedPapers,
       todayTasks,
       unreadNotifs,
-      adBanners,
-      topUsers,
+      dbAdBanners,
+      dbTopUsers,
     ] = await Promise.all([
       prisma.quizAttempt.aggregate({ where: { userId }, _avg: { score: true }, _count: true }),
       prisma.userLectureActivity.count({ where: { userId, isCompleted: true } }),
@@ -74,18 +91,27 @@ export async function GET(req: NextRequest) {
         orderBy: { time: 'asc' },
       }),
       prisma.notification.count({ where: { userId, read: false } }),
-      user.universityId ? prisma.adBanner.findMany({
+      adBanners.length === 0 && user.universityId ? prisma.adBanner.findMany({
         where: { universityId: user.universityId, active: true },
         take: 5,
         select: { id: true, imageUrl: true, linkUrl: true },
-      }) : Promise.resolve([]),
-      user.universityId ? prisma.user.findMany({
+      }) : Promise.resolve(null),
+      topUsers.length === 0 && user.universityId ? prisma.user.findMany({
         where: { universityId: user.universityId, points: { gt: 0 }, hideRank: false },
         orderBy: { points: 'desc' },
         take: 3,
         select: { id: true, name: true, image: true, points: true, rank: { select: { badge: true, label: true } } },
-      }) : Promise.resolve([]),
+      }) : Promise.resolve(null),
     ]);
+
+    if (dbAdBanners) {
+      adBanners = dbAdBanners;
+      redis.setex(adsKey, 24 * 60 * 60, JSON.stringify(adBanners)).catch(() => {});
+    }
+    if (dbTopUsers) {
+      topUsers = dbTopUsers;
+      redis.setex(topUsersKey, 5 * 60 * 60, JSON.stringify(topUsers)).catch(() => {});
+    }
 
     const home = {
       stats: { 
