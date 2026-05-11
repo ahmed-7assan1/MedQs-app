@@ -1112,6 +1112,7 @@ model Poll {
   createdAt DateTime     @default(now())
   options   PollOption[]
   post      Post?
+  studyRoomPost StudyRoomPost?
 }
 
 model PollOption {
@@ -1207,6 +1208,9 @@ model StudyRoomPost {
   
   likes    StudyRoomPostLike[]
   comments StudyRoomComment[]
+
+  pollId   String?      @unique
+  poll     Poll?        @relation(fields: [pollId], references: [id])
 
   @@index([roomId, createdAt])
   @@index([authorId])

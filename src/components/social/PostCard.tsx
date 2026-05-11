@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Crown,
   FileText,
+  ChartBar,
   Microphone,
   Play,
   Pause,
@@ -54,6 +55,7 @@ export function PostCard({
   const [isDeleted, setIsDeleted] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [selectedQaIdx, setSelectedQaIdx] = useState<number | null>(null);
 
   if (isDeleted) return null;
 
@@ -68,6 +70,8 @@ export function PostCard({
   })();
 
   const allImages = attachments.filter((a: any) => a.type === 'image');
+  const allAudios = attachments.filter((a: any) => a.type === 'audio' || a.type === 'telegram_audio');
+  const allFiles = attachments.filter((a: any) => a.type !== 'image' && a.type !== 'audio' && a.type !== 'telegram_audio');
 
   const canDelete =
     post.authorId === currentUserId ||
@@ -170,28 +174,115 @@ export function PostCard({
           </div>
         </div>
       )}
+      {/* ── INTERACTIVE CONTENT (POLLS, Q&A, SHARED QUESTIONS) ── */}
+      <div className="px-6 pb-2">
+         {/* 1. Shared Lecture Question */}
+         {post.sharedQuestion && (
+            <div className="mt-2 p-6 rounded-[32px] bg-primary/[0.03] border border-primary/10 shadow-sm relative overflow-hidden group">
+               <div className="absolute -top-12 -left-12 w-24 h-24 bg-primary/10 blur-3xl rounded-full" />
+               <div className="flex items-center gap-3 mb-4">
+                  <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                     <FileText size={18} weight="fill" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Shared Lecture Question</p>
+                    <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest mt-0.5">Difficulty: {post.sharedQuestion.difficulty || "Standard"}</p>
+                  </div>
+               </div>
+               <p className="text-[15px] font-bold text-slate-800 dark:text-white leading-relaxed mb-6">{post.sharedQuestion.body}</p>
+               <div className="grid grid-cols-1 gap-2.5">
+                  {(Array.isArray(post.sharedQuestion.choices) ? post.sharedQuestion.choices : []).map((choice: string, idx: number) => (
+                    <div key={idx} className="w-full p-4 rounded-2xl bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 text-[13px] font-bold text-slate-700 dark:text-white/80">
+                       {choice}
+                    </div>
+                  ))}
+               </div>
+               <p className="mt-4 text-[10px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest text-center">Open lecture to view correct answer</p>
+            </div>
+         )}
 
-      {/* Poll */}
-      {post.poll && (
-        <div className="mx-6 mt-3 mb-2 p-5 rounded-[24px] bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 shadow-inner">
-          <p className="text-sm font-black text-slate-800 dark:text-white mb-4">{post.poll.question}</p>
-          <div className="space-y-2.5">
-            {post.poll.options?.map((opt: any) => {
-               const totalVotes = post.poll.options.reduce((acc: number, o: any) => acc + (o._count?.votes || 0), 0);
-               const percent = totalVotes === 0 ? 0 : Math.round(((opt._count?.votes || 0) / totalVotes) * 100);
-               return (
-                 <button key={opt.id} className="relative w-full text-left p-4 rounded-2xl bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 hover:border-primary/50 transition-all overflow-hidden group shadow-sm">
-                   <div className="absolute top-0 left-0 bottom-0 bg-primary/10 transition-all duration-700 ease-out" style={{ width: `${percent}%` }} />
-                   <div className="relative flex justify-between items-center z-10">
-                     <span className="text-sm font-bold text-slate-700 dark:text-white/90 group-hover:text-primary transition-colors">{opt.text}</span>
-                     <span className="text-[11px] font-black text-slate-400 dark:text-white/40">{percent}%</span>
+         {/* 2. Unified Poll & Custom Q&A Logic */}
+         {(() => {
+            const data = post.poll || post.sharedQuestionData?.poll || (post.sharedQuestionData?.type === 'qa' ? post.sharedQuestionData : null);
+            if (!data) return null;
+            
+            const isQa = data.type === 'qa' || !!post.sharedQuestionData?.type;
+            const question = data.question || data.body;
+            const options = data.options || data.choices || [];
+            
+            if (isQa) {
+              return (
+                <div className="mt-2 p-6 rounded-[32px] bg-amber-500/[0.03] border border-amber-500/10 shadow-sm relative overflow-hidden group">
+                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-amber-500/10 blur-3xl rounded-full" />
+                  <div className="flex items-center gap-3 mb-5">
+                     <div className="h-8 w-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                        <ShieldCheck size={18} weight="fill" />
+                     </div>
+                     <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">Interactive Signal Quiz</p>
+                  </div>
+                  <p className="text-[15px] font-black text-slate-800 dark:text-white leading-relaxed mb-6">{question}</p>
+                  <div className="space-y-2.5">
+                    {options.map((opt: string, idx: number) => {
+                       const isSelected = selectedQaIdx === idx;
+                       const isCorrect = opt === data.correctAnswer;
+                       const showResult = selectedQaIdx !== null;
+                       return (
+                         <button 
+                           key={idx}
+                           disabled={showResult}
+                           onClick={() => setSelectedQaIdx(idx)}
+                           className={cn(
+                             "w-full text-left p-4 rounded-2xl border transition-all relative overflow-hidden",
+                             !showResult ? "bg-white dark:bg-black/20 border-slate-200 dark:border-white/10 hover:border-amber-400/50" :
+                             isCorrect ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-500" :
+                             isSelected ? "bg-red-500/10 border-red-500/50 text-red-500" :
+                             "bg-white dark:bg-black/20 border-slate-200 dark:border-white/10 opacity-50"
+                           )}
+                         >
+                           <span className="text-[13px] font-bold relative z-10">{opt}</span>
+                         </button>
+                       );
+                    })}
+                  </div>
+                  {selectedQaIdx !== null && (
+                    <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-[10px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest mt-5 text-center">
+                      {options[selectedQaIdx] === data.correctAnswer ? "✨ Signal Verified - Correct!" : "📡 Signal Jammed - Incorrect"}
+                    </motion.p>
+                  )}
+                </div>
+              );
+            }
+
+            // Regular Poll
+            return (
+              <div className="mt-2 p-6 rounded-[32px] bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 shadow-inner">
+                <div className="flex items-center gap-3 mb-5">
+                   <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                      <ChartBar size={18} weight="fill" />
                    </div>
-                 </button>
-               );
-            })}
-          </div>
-        </div>
-      )}
+                   <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Community Pulse Poll</p>
+                </div>
+                <p className="text-[15px] font-black text-slate-800 dark:text-white mb-6">{data.question}</p>
+                <div className="space-y-3">
+                  {data.options?.map((opt: any, idx: number) => {
+                     const votes = opt._count?.votes || 0;
+                     const total = data.options.reduce((acc: number, o: any) => acc + (o._count?.votes || 0), 0);
+                     const percent = total === 0 ? 0 : Math.round((votes / total) * 100);
+                     return (
+                       <button key={opt.id || idx} className="relative w-full text-left p-4 rounded-2xl bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 hover:border-primary/50 transition-all overflow-hidden group">
+                         <div className="absolute top-0 left-0 bottom-0 bg-primary/10 transition-all duration-1000" style={{ width: `${percent}%` }} />
+                         <div className="relative flex justify-between items-center z-10">
+                           <span className="text-sm font-bold text-slate-700 dark:text-white/90">{opt.text || opt}</span>
+                           <span className="text-[11px] font-black text-slate-400">{percent}%</span>
+                         </div>
+                       </button>
+                     );
+                  })}
+                </div>
+              </div>
+            );
+         })()}
+      </div>
 
       {/* Attachments (Gallery) */}
       {attachments.length > 0 && (

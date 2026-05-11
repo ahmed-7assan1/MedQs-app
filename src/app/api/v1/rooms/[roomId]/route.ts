@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (!room) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (room.ownerId !== userId) return NextResponse.json({ error: "Only the room owner can edit" }, { status: 403 });
 
-  const { name, description, isPublic, memberLimit } = await req.json();
+  const { name, description, isPublic, memberLimit, spotifyUrl, telegramMediaUrl } = await req.json();
   const updated = await prisma.studyRoom.update({
     where: { id: roomId },
     data: {
@@ -65,6 +65,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       description: description?.trim() ?? room.description,
       isPublic: isPublic !== undefined ? isPublic : room.isPublic,
       memberLimit: memberLimit ? Math.min(Math.max(Number(memberLimit), 2), 50) : room.memberLimit,
+      ...(spotifyUrl !== undefined ? { spotifyUrl: spotifyUrl?.trim() || null } : {}),
+      ...((telegramMediaUrl !== undefined) ? { customAiConfig: { ...(room.customAiConfig as any || {}), telegramMediaUrl: telegramMediaUrl?.trim() || null } } : {}),
     },
   });
 

@@ -53,6 +53,7 @@ export type DrQSettings = {
   byokKeys: BYOKKeys;
   activeProvider: AIProvider;
   activeModel: string;
+  activePersona: string; // "quiz", "explainer", etc.
   smartEngineEnabled?: boolean; // Multi-agent & deep reasoning mode
   // appearance
   fontSize: number;
@@ -127,6 +128,7 @@ const DEFAULT_SETTINGS: DrQSettings = {
   byokKeys: {},
   activeProvider: "gemini",
   activeModel: "gemini-2.0-flash",
+  activePersona: "explainer",
   fontSize: 15,
   userBubbleColor: "#6d28d9",
   aiBubbleColor: "#1a1830",
@@ -493,15 +495,33 @@ export function useDrQChat() {
       abortRef.current = false;
 
       try {
-        const { activeProvider, activeModel, byokKeys } = settings;
+        const { activeProvider, activeModel, byokKeys, activePersona } = settings;
         const apiKey = byokKeys[activeProvider] ?? "";
 
-        let enhancedHistory: MessageForAPI[] = [...currentMessages, userMsg].map(m => ({
-          role: m.role,
-          content: m.content,
-        }));
+        // 0. Persona & Context Injection
+        let systemPrompt = "";
+        try {
+          const { DRQ_PERSONAS } = require("@/components/ai/DrQPersonas");
+          const persona = DRQ_PERSONAS[activePersona] || DRQ_PERSONAS.explainer;
+          systemPrompt = persona.systemPrompt;
+          
+          // User Context
+          const userName = session?.user?.name || "Student";
+          const userUni = (session?.user as any)?.university?.name || "Medical University";
+          const userFaculty = (session?.user as any)?.faculty?.name || "Faculty of Medicine";
+          
+          systemPrompt += `\n\nUSER CONTEXT: You are talking to ${userName}, a student at ${userUni}, ${userFaculty}. Use this to personalize the conversation if it feels natural. Always use the user's name at the start of the chat.`;
+        } catch (e) {
+          systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
+        }
 
-        // 1. Site Data Context Injection
+        let enhancedHistory: MessageForAPI[] = [
+          { role: 'system', content: systemPrompt },
+          ...currentMessages.map(m => ({ role: m.role, content: m.content })),
+          { role: 'user', content: content }
+        ];
+
+        // 1. Site Data Context Injection (Dynamic)
         const lowerContent = content.toLowerCase();
         const dataKeywords = ['course', 'exam', 'score', 'اسئله', 'امتحان', 'منهج', 'درجاتي'];
         if (dataKeywords.some(kw => lowerContent.includes(kw))) {

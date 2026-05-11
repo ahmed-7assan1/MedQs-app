@@ -1,9 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { X, Users, Lock, Globe, Hash } from "@phosphor-icons/react";
+import { 
+  X, 
+  Users, 
+  Lock, 
+  Globe, 
+  Hash, 
+  Plus, 
+  CaretRight,
+  SpotifyLogo,
+  TelegramLogo,
+  Image as ImageIcon
+} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 interface CreateRoomModalProps {
   isOpen: boolean;
@@ -16,28 +28,46 @@ export function CreateRoomModal({ isOpen, onClose, onSuccess }: CreateRoomModalP
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [memberLimit, setMemberLimit] = useState(10);
+  const [spotifyUrl, setSpotifyUrl] = useState("");
+  const [telegramMediaUrl, setTelegramMediaUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState(1);
 
   const handleCreate = async () => {
-    if (!name.trim()) return toast.error("اسم الروم مطلوب");
+    if (!name.trim()) return toast.error("Room name is required");
     setSaving(true);
     try {
       const res = await fetch("/api/v1/rooms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, isPublic, memberLimit }),
+        body: JSON.stringify({ 
+          name, 
+          description, 
+          isPublic, 
+          memberLimit,
+          spotifyUrl: spotifyUrl.trim() || undefined,
+          telegramMediaUrl: telegramMediaUrl.trim() || undefined
+        }),
       });
       const data = await res.json();
-      if (!res.ok) return toast.error(data.error || "فشل إنشاء الروم");
-      toast.success("تم إنشاء الروم بنجاح! 🎉");
+      if (!res.ok) return toast.error(data.error || "Failed to create room");
+      toast.success("Room created successfully! 🎉");
       onSuccess(data);
       onClose();
-      setName(""); setDescription("");
+      reset();
     } catch {
-      toast.error("حدث خطأ ما");
+      toast.error("An error occurred during handoff");
     } finally {
       setSaving(false);
     }
+  };
+
+  const reset = () => {
+    setName(""); 
+    setDescription(""); 
+    setStep(1); 
+    setSpotifyUrl(""); 
+    setTelegramMediaUrl("");
   };
 
   return (
@@ -46,104 +76,164 @@ export function CreateRoomModal({ isOpen, onClose, onSuccess }: CreateRoomModalP
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="fixed inset-0 z-[500] flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)" }}
+          style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(16px)" }}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl"
-            style={{
-              background: "rgba(22, 21, 35, 0.95)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              backdropFilter: "blur(20px)",
-            }}
+            exit={{ scale: 0.9, opacity: 0, y: 30 }}
+            className="w-full max-w-lg rounded-[40px] overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.5)] border border-white/10 relative"
+            style={{ background: "linear-gradient(135deg, #161523 0%, #0d0c16 100%)" }}
           >
+            {/* Background Glows */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[80px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 blur-[80px] pointer-events-none" />
+
             {/* Header */}
-            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center">
-                  <Users size={20} weight="fill" />
+            <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shadow-inner">
+                  <Users size={24} weight="fill" />
                 </div>
                 <div>
-                  <h3 className="font-black text-white text-sm">إنشاء روم جديدة</h3>
-                  <p className="text-[11px] text-white/30">ابدأ مجموعة مذاكرة خاصة بيك</p>
+                  <h3 className="font-black text-white text-lg tracking-tight">Create Study Circle</h3>
+                  <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">Signal Hub Initialization</p>
                 </div>
               </div>
-              <button onClick={onClose} className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
-                <X size={16} />
+              <button onClick={() => { onClose(); reset(); }} className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
+                <X size={20} weight="bold" />
               </button>
             </div>
 
             {/* Body */}
-            <div className="p-6 space-y-5">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/30">اسم الروم *</label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="مثال: مذاكرة Anatomy Year 2"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-primary/50 transition-colors text-sm"
-                />
-              </div>
+            <div className="p-8 relative z-10 min-h-[400px] flex flex-col">
+              
+              <AnimatePresence mode="wait">
+                {step === 1 ? (
+                  <motion.div 
+                    key="step1"
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: 20, opacity: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Circle Identity</label>
+                      <input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. Pathology Peer Review"
+                        className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white placeholder-white/10 focus:outline-none focus:border-primary/50 transition-all text-[15px] font-medium"
+                      />
+                    </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/30">وصف (اختياري)</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="اكتب وصف مختصر للروم..."
-                  rows={2}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-primary/50 transition-colors text-sm resize-none"
-                />
-              </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Circle Objective</label>
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Define the goals of this group..."
+                        rows={3}
+                        className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white placeholder-white/10 focus:outline-none focus:border-primary/50 transition-all text-[15px] font-medium resize-none"
+                      />
+                    </div>
 
-              {/* Member limit */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/30">
-                  حد الأعضاء: <span className="text-primary">{memberLimit}</span> طالب
-                </label>
-                <input
-                  type="range" min={2} max={50} value={memberLimit}
-                  onChange={(e) => setMemberLimit(Number(e.target.value))}
-                  className="w-full accent-primary"
-                />
-                <div className="flex justify-between text-[10px] text-white/20">
-                  <span>2</span><span>50</span>
-                </div>
-              </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Member Limit</label>
+                        <div className="relative">
+                           <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
+                           <input
+                             type="number" min={2} max={50} value={memberLimit}
+                             onChange={(e) => setMemberLimit(Number(e.target.value))}
+                             className="w-full px-12 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white focus:outline-none focus:border-primary/50 transition-all text-[14px] font-bold"
+                           />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Privacy Mode</label>
+                        <button
+                          onClick={() => setIsPublic(!isPublic)}
+                          className={cn(
+                            "w-full flex items-center justify-between px-5 py-3.5 rounded-2xl border transition-all",
+                            isPublic ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400" : "bg-amber-500/5 border-amber-500/20 text-amber-400"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            {isPublic ? <Globe size={18} weight="fill" /> : <Lock size={18} weight="fill" />}
+                            <span className="text-[13px] font-black uppercase tracking-widest">{isPublic ? "Public" : "Private"}</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="step2"
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -20, opacity: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="p-5 rounded-3xl bg-blue-500/5 border border-blue-500/10 mb-6">
+                       <p className="text-[12px] font-medium text-blue-400 leading-relaxed italic">
+                         "Optimize your study environment with integrated media signal sync."
+                       </p>
+                    </div>
 
-              {/* Public / Private toggle */}
-              <button
-                onClick={() => setIsPublic(!isPublic)}
-                className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl hover:border-primary/30 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  {isPublic ? <Globe size={18} className="text-emerald-400" /> : <Lock size={18} className="text-amber-400" />}
-                  <div className="text-left">
-                    <p className="text-sm font-bold text-white">{isPublic ? "روم عامة" : "روم خاصة"}</p>
-                    <p className="text-[10px] text-white/30">{isPublic ? "أي طالب في جامعتك يقدر يشوفها وينضم" : "بس عن طريق الكود السري"}</p>
-                  </div>
-                </div>
-                <div className={`w-11 h-6 rounded-full flex items-center px-1 transition-colors ${isPublic ? "bg-emerald-500" : "bg-amber-500"}`}>
-                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${isPublic ? "translate-x-5" : "translate-x-0"}`} />
-                </div>
-              </button>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1 flex items-center gap-2">
+                        <SpotifyLogo size={14} className="text-emerald-500" weight="fill" /> Spotify Integration
+                      </label>
+                      <input
+                        value={spotifyUrl}
+                        onChange={(e) => setSpotifyUrl(e.target.value)}
+                        placeholder="https://open.spotify.com/playlist/..."
+                        className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white placeholder-white/10 focus:outline-none focus:border-emerald-500/50 transition-all text-[14px] font-medium"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1 flex items-center gap-2">
+                        <TelegramLogo size={14} className="text-[#229ED9]" weight="fill" /> Telegram Media Signal
+                      </label>
+                      <input
+                        value={telegramMediaUrl}
+                        onChange={(e) => setTelegramMediaUrl(e.target.value)}
+                        placeholder="Telegram voice message link..."
+                        className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white placeholder-white/10 focus:outline-none focus:border-[#229ED9]/50 transition-all text-[14px] font-medium"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Action Area */}
+              <div className="mt-auto pt-10 flex flex-col gap-4">
+                 <div className="flex gap-4">
+                   {step === 2 && (
+                     <button 
+                       onClick={() => setStep(1)} 
+                       className="flex-1 py-4 text-sm font-black uppercase tracking-widest text-white/30 hover:text-white transition-all rounded-2xl bg-white/5 border border-white/5"
+                     >
+                        Back
+                     </button>
+                   )}
+                   <button
+                     onClick={() => {
+                        if (step === 1) setStep(2);
+                        else handleCreate();
+                     }}
+                     disabled={saving}
+                     className="flex-[2] py-4 bg-primary text-white text-sm font-black uppercase tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                   >
+                     {saving ? "Initializing Signal..." : (step === 1 ? "Next Step" : "Finalize Room")}
+                     {step === 1 && <CaretRight size={18} weight="bold" />}
+                   </button>
+                 </div>
+              </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-white/5 flex gap-3">
-              <button onClick={onClose} className="flex-1 py-3 text-sm font-bold text-white/40 hover:text-white transition-colors rounded-xl hover:bg-white/5">
-                إلغاء
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={saving}
-                className="flex-[2] py-3 bg-primary text-white text-sm font-black rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-all disabled:opacity-50"
-              >
-                {saving ? "جارٍ الإنشاء..." : "إنشاء الروم 🚀"}
-              </button>
-            </div>
           </motion.div>
         </motion.div>
       )}

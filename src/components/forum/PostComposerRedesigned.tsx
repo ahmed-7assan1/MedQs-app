@@ -12,7 +12,8 @@ import {
   TextAlignLeft,
   Plus,
   ChartBar,
-  Trash
+  Trash,
+  Check
 } from "@phosphor-icons/react";
 import { useCommunityShareStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -33,9 +34,11 @@ interface Props {
       isForumPost?: boolean;
       isChatMessage?: boolean;
       forumId?: string;
-      attachments?: any[];
       sharedQuestion?: any;
       poll?: any;
+      postType?: string;
+      qaAnswer?: string;
+      attachments?: any[];
     }
   ) => Promise<boolean>;
   forums?: { id: string; name: string }[];
@@ -53,6 +56,10 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
   const [pollOptions, setPollOptions] = useState<{ text: string }[]>([]);
   const [isPollMode, setIsPollMode] = useState(false);
   const [pollQuestion, setPollQuestion] = useState("");
+  const [isQaMode, setIsQaMode] = useState(false);
+  const [qaQuestion, setQaQuestion] = useState("");
+  const [qaOptions, setQaOptions] = useState<{ text: string }[]>([{ text: "" }, { text: "" }, { text: "" }, { text: "" }]);
+  const [qaCorrectIdx, setQaCorrectIdx] = useState<number | null>(null);
 
   const sharedQuestion = useCommunityShareStore((s) => s.sharedQuestion);
   const setSharedQuestion = useCommunityShareStore((s) => s.setSharedQuestion);
@@ -72,21 +79,32 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
 
   const avatarUrl = user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name || "user")}`;
 
-  const hasContent = content.trim().length > 0 || attachments.length > 0;
+  const hasContent = content.trim().length > 0 || attachments.length > 0 || isPollMode || isQaMode;
 
   const handlePost = async () => {
     if (!hasContent) return;
     setIsPosting(true);
     const firstImage = attachments.find((a) => a.type === "image")?.url || "";
+    
+    // Build poll data
+    const pollData = isPollMode && pollQuestion && pollOptions.filter(o => o.text.trim()).length > 1
+      ? { question: pollQuestion, options: pollOptions.filter(o => o.text.trim()).map(o => o.text) }
+      : undefined;
+    
+    // Build Q&A data  
+    const qaData = isQaMode && qaQuestion && qaOptions.filter(o => o.text.trim()).length >= 2
+      ? { question: qaQuestion, options: qaOptions.filter(o => o.text.trim()).map(o => o.text) }
+      : undefined;
+    const qaAnswer = isQaMode && qaCorrectIdx !== null ? qaOptions[qaCorrectIdx]?.text : undefined;
+
     const ok = await onPost(content, firstImage, {
       isForumPost: true,
       forumId: selectedForumId || undefined,
       attachments,
       sharedQuestion,
-      poll: isPollMode && pollQuestion && pollOptions.filter(o => o.text.trim()).length > 1 ? {
-        question: pollQuestion,
-        options: pollOptions.filter(o => o.text.trim()).map(o => o.text)
-      } : undefined
+      postType: isQaMode ? 'qa' : isPollMode ? 'poll' : 'post',
+      poll: pollData || qaData,
+      qaAnswer,
     });
     if (ok) {
       setContent("");
@@ -94,8 +112,12 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
       setIsExpanded(false);
       setSharedQuestion(null);
       setIsPollMode(false);
+      setIsQaMode(false);
       setPollOptions([]);
       setPollQuestion("");
+      setQaQuestion("");
+      setQaOptions([{ text: "" }, { text: "" }, { text: "" }, { text: "" }]);
+      setQaCorrectIdx(null);
     }
     setIsPosting(false);
   };
@@ -181,6 +203,52 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                   </button>
                   <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Attached Question</p>
                   <p className="text-sm font-medium text-white line-clamp-2">{sharedQuestion.body}</p>
+                </div>
+              )}
+
+              {/* Q&A Creation UI */}
+              {isQaMode && (
+                <div className="mx-5 mb-4 p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Create Q&A Question</p>
+                    <button onClick={() => setIsQaMode(false)} className="text-white/40 hover:text-white">
+                      <X size={14} weight="bold" />
+                    </button>
+                  </div>
+                  <input
+                    value={qaQuestion}
+                    onChange={(e) => setQaQuestion(e.target.value)}
+                    placeholder="Write the question..."
+                    className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400/50 mb-3"
+                  />
+                  <p className="text-[10px] text-white/30 font-bold mb-2">Answer choices — click ✓ to mark correct answer:</p>
+                  <div className="space-y-2">
+                    {qaOptions.map((opt, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <button
+                          onClick={() => setQaCorrectIdx(qaCorrectIdx === idx ? null : idx)}
+                          className={cn("h-7 w-7 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all",
+                            qaCorrectIdx === idx ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/20 text-white/20 hover:border-emerald-400"
+                          )}
+                        >
+                          {qaCorrectIdx === idx ? <Check size={14} weight="bold" /> : <span className="text-[10px] font-black">{idx + 1}</span>}
+                        </button>
+                        <input
+                          value={opt.text}
+                          onChange={(e) => {
+                            const n = [...qaOptions];
+                            n[idx].text = e.target.value;
+                            setQaOptions(n);
+                          }}
+                          placeholder={`Choice ${idx + 1}${qaCorrectIdx === idx ? ' ✓ Correct' : ''}`}
+                          className={cn("flex-1 bg-black/20 border rounded-xl p-2.5 text-sm text-white focus:outline-none transition-all",
+                            qaCorrectIdx === idx ? "border-emerald-500/40 focus:border-emerald-500" : "border-white/10 focus:border-primary/50"
+                          )}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-white/20 mt-3">Students will see the question and choices but not the correct answer until they answer.</p>
                 </div>
               )}
 
@@ -277,11 +345,22 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                   <button 
                     onClick={() => {
                       setIsPollMode(true);
+                      setIsQaMode(false);
                       if (pollOptions.length === 0) setPollOptions([{text:""}, {text:""}]);
                     }}
                     className={cn("h-10 w-10 flex items-center justify-center rounded-xl transition-all", isPollMode ? "text-emerald-400 bg-emerald-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}
                   >
                     <ChartBar size={20} weight="bold" />
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setIsQaMode(true);
+                      setIsPollMode(false);
+                    }}
+                    title="Create Q&A Question"
+                    className={cn("h-10 px-2 flex items-center gap-1 rounded-xl transition-all text-[11px] font-black", isQaMode ? "text-amber-400 bg-amber-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}
+                  >
+                    <span>Q&A</span>
                   </button>
                   <button 
                     onClick={() => setIsRecordingMode(!isRecordingMode)}

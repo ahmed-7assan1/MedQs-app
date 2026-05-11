@@ -24,6 +24,7 @@ import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChatMessage, MessageReaction } from "@/hooks/useDrQChat";
+import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import toast from "react-hot-toast";
 
 interface MessageProps {
@@ -35,6 +36,7 @@ interface MessageProps {
   onRegenerate?: () => void;
   onReply?: (id: string, text: string) => void;
   onShare?: (text: string) => void;
+  activePersona?: string;
 }
 
 export function DrQMessage({
@@ -45,7 +47,8 @@ export function DrQMessage({
   onReaction,
   onRegenerate,
   onReply,
-  onShare
+  onShare,
+  activePersona = "explainer"
 }: MessageProps) {
   const isAI = message.role === "assistant";
   const [copying, setCopying] = useState(false);
@@ -106,10 +109,26 @@ export function DrQMessage({
         
         {/* Reply-to header */}
         {message.replyTo && (
-           <div className="flex items-center gap-2 px-4 text-[11px] text-white/30 font-bold uppercase tracking-widest">
+           <div className="flex items-center gap-2 px-4 text-[10px] text-white/30 font-black uppercase tracking-[0.2em] mb-1">
               <ArrowBendUpLeft size={12} weight="bold" />
               Replying to quote
            </div>
+        )}
+
+        {/* Persona Header for AI (Image 2 Match) */}
+        {isAI && (
+          <div className="flex items-center gap-3 px-1 mb-1">
+             <div className={cn(
+               "w-8 h-8 rounded-xl flex items-center justify-center shadow-lg",
+               `bg-gradient-to-br ${(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).gradient}`
+             )}>
+                {React.cloneElement((DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement, { size: 16, weight: "fill", className: "text-white" })}
+             </div>
+             <div className="flex flex-col">
+                <span className="text-[12px] font-black text-white tracking-tight">{(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}</span>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Medical Assistant</span>
+             </div>
+          </div>
         )}
 
         {message.isStreaming && !message.content ? (
@@ -182,9 +201,9 @@ export function DrQMessage({
                       }
                       return <p className="mb-2 last:mb-0">{children}</p>;
                     },
-                    code: ({ node, inline, className, children, ...props }) => {
+                    code: ({ node, className, children, ...props }: any) => {
                       const match = /language-(\w+)/.exec(className || '');
-                      if (!inline && match) {
+                      if (match) {
                          return (
                            <div className="relative group/code my-4 overflow-hidden rounded-2xl border border-white/5">
                               <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
@@ -205,9 +224,12 @@ export function DrQMessage({
                 </ReactMarkdown>
               </div>
 
-              {/* Streaming Indicator appended to text (Image 2 Match) */}
-              {message.isStreaming && message.content && (
-                <div className="inline-block ml-2 w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
+              {/* Streaming Indicator (Live Typing Orb) */}
+              {message.isStreaming && (
+                <div className="flex items-center gap-2 mt-4 px-2 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 w-fit">
+                   <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+                   <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Dr. Q is thinking...</span>
+                </div>
               )}
             </motion.div>
 

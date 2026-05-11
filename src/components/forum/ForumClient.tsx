@@ -109,6 +109,20 @@ export function ForumClient({
       .catch(() => {});
   }, []);
 
+  // ── Auto-refresh Polling (Real-time Feel) ──
+  useEffect(() => {
+    if (!activeForum) return;
+    
+    const pollInterval = setInterval(() => {
+      // Only poll if tab is visible to save battery/bandwidth
+      if (document.visibilityState === 'visible' && !loading && !posting) {
+        loadPosts(activeForum.id);
+      }
+    }, 15000); // 15s polling
+
+    return () => clearInterval(pollInterval);
+  }, [activeForum?.id, loading, posting]);
+
   const handlePost = async (content: string, imageUrl: string, options?: any) => {
     const targetForumId = options?.forumId || activeForum?.id;
     if (!targetForumId) return false;
@@ -166,7 +180,7 @@ export function ForumClient({
             {forum.name}
           </p>
           <p className="text-[10px] font-black uppercase tracking-widest text-white/20">
-            {forum._count.posts} Active Signals
+            {forum._count.posts} Active Transmissions
           </p>
         </div>
       </button>
@@ -194,7 +208,7 @@ export function ForumClient({
                   <input 
                     value={threadQuery}
                     onChange={(e) => setThreadQuery(e.target.value)}
-                    placeholder="Search Pools..." 
+                    placeholder="Search Channels..." 
                     className="w-full bg-white/5 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-xs font-medium focus:outline-none focus:border-primary/50 transition-all"
                   />
                 </div>

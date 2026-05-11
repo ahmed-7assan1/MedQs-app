@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
-import { PostComposer } from "./PostComposer";
+import { PostComposerRedesigned } from "../forum/PostComposerRedesigned";
 import {
   ChatCircle, CheckSquare, Trophy, Users, Gear,
   ArrowLeft, Lock, Globe, Crown, Copy, Check,
   Plus, Trash, SignOut, Hash, CalendarBlank, Clock,
   Image as ImageIcon, SpotifyLogo, Timer, Play, Pause,
-  ArrowClockwise, Sparkle, Target
+  ArrowClockwise, Sparkle, Target,
+  SpeakerHigh, SpeakerSlash, TelegramLogo
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,8 +42,8 @@ interface RoomSchedule { id: string; title: string; startTime: string; endTime: 
 interface Room {
   id: string; name: string; description?: string; inviteCode: string; image?: string;
   isPublic: boolean; memberLimit: number; ownerId: string;
-  spotifyPlaylistUrl?: string;
-  aiModel?: string;
+  spotifyUrl?: string;          // Spotify song or playlist URL
+  customAiConfig?: { telegramMediaUrl?: string } | null; // Telegram voice URL
   owner: { id: string; name: string; image?: string };
   members: RoomMember[];
   tasks: RoomTask[];
@@ -61,8 +62,39 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
   const [codeCopied, setCodeCopied] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
-  const [showSpotify, setShowSpotify] = useState(!!room.spotifyPlaylistUrl);
+  const [isMuted, setIsMuted] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem(`muted-${room.id}`) === '1';
+    return false;
+  });
   const router = useRouter();
+
+  const telegramMediaUrl = room.customAiConfig?.telegramMediaUrl;
+  
+  const spotifyData = React.useMemo(() => {
+    if (!room.spotifyUrl) return null;
+    const url = room.spotifyUrl;
+    const isTrack = url.includes('/track/');
+    const isPlaylist = url.includes('/playlist/');
+    const isEpisode = url.includes('/episode/');
+    const isShow = url.includes('/show/');
+    const id = url.split('/').filter(Boolean).pop()?.split('?')[0];
+    
+    let type = 'playlist';
+    if (isTrack) type = 'track';
+    else if (isPlaylist) type = 'playlist';
+    else if (isEpisode) type = 'episode';
+    else if (isShow) type = 'show';
+    
+    return { id, type };
+  }, [room.spotifyUrl]);
+
+  const hasMedia = !!(spotifyData || telegramMediaUrl);
+
+  const toggleMute = () => {
+    const next = !isMuted;
+    setIsMuted(next);
+    localStorage.setItem(`muted-${room.id}`, next ? '1' : '0');
+  };
 
   useEffect(() => {
     let interval: any;
@@ -106,12 +138,18 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, imageUrl, ...options }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to create post");
+      }
       const newPost = await res.json();
       setPosts((p) => [newPost, ...p]);
       toast.success("Posted to Room!");
       return true;
-    } catch { toast.error("Failed to post"); return false; }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to post");
+      return false;
+    }
   };
 
   const visibleTabs = TABS.filter(t => !("ownerOnly" in t) || (t as any).ownerOnly && isOwner || !("ownerOnly" in t));
@@ -166,17 +204,13 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
                 </div>
               </div>
 
-              {/* Invite Card */}
+              {/* Action Area */}
               <div className="flex flex-col items-center md:items-end gap-3">
-                <button onClick={copyCode} className="flex items-center gap-4 p-4 rounded-3xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-primary/50 transition-all group shadow-sm">
-                  <div className="text-left">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-1">Invite Code</p>
-                    <p className="text-xl font-black tracking-[0.25em] text-slate-800 dark:text-white tabular-nums">{room.inviteCode}</p>
-                  </div>
-                  <div className="h-10 w-10 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center shadow-sm">
-                    {codeCopied ? <Check size={20} className="text-emerald-500" weight="bold" /> : <Copy size={20} className="text-slate-400 group-hover:text-primary transition-colors" />}
-                  </div>
-                </button>
+                {isOwner && (
+                   <div className="hidden md:block">
+                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-2 text-right">Owner Control Panel</p>
+                   </div>
+                )}
                 {/* Glowing Action Button */}
                 <button 
                   onClick={() => setActiveTab("ai")}
@@ -190,38 +224,53 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
             </div>
           </div>
 
-          {/* Collaborative Music & Timer Widgets */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-             {room.spotifyPlaylistUrl && (
-               <div className={cn(GLASS, "rounded-[32px] p-1 overflow-hidden h-[100px] flex items-center group relative")}>
-                 <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                 <iframe 
-                   src={`https://open.spotify.com/embed/playlist/${room.spotifyPlaylistUrl.split('/').pop()?.split('?')[0]}?utm_source=generator&theme=0`} 
-                   width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"
-                   className="rounded-2xl"
-                 />
-                 <div className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-emerald-500 border border-emerald-500/20 shadow-xl pointer-events-none">
-                    <SpotifyLogo size={20} weight="fill" />
-                 </div>
-               </div>
-             )}
+          {/* Media Player (Spotify or Telegram Audio) - Square Top Layout */}
+          {hasMedia && (
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {room.spotifyUrl && (
+                <div className={cn(GLASS, "rounded-[32px] overflow-hidden relative group aspect-square md:aspect-auto md:h-[152px]")}>
+                  <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                    <SpotifyLogo size={14} weight="fill" className="text-emerald-500" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white">Signal Sync</span>
+                  </div>
+                  <button onClick={toggleMute} className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all">
+                    {isMuted ? <SpeakerSlash size={14} /> : <SpeakerHigh size={14} />}
+                  </button>
+                  <iframe
+                    src={`https://open.spotify.com/embed/${spotifyData?.type}/${spotifyData?.id}?utm_source=generator&theme=0`}
+                    width="100%" height="100%" frameBorder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                    style={{ opacity: isMuted ? 0.2 : 1, filter: isMuted ? 'grayscale(1)' : 'none' }}
+                  />
+                </div>
+              )}
+              {telegramMediaUrl && (
+                <div className="md:h-[152px] flex flex-col justify-center">
+                   <RoomTelegramPlayer url={telegramMediaUrl} isMuted={isMuted} onToggleMute={toggleMute} />
+                </div>
+              )}
+            </div>
+          )}
 
-             <div className={cn(GLASS, "rounded-[32px] p-6 flex items-center justify-between shadow-xl border-primary/10 group")}>
+          {/* Focus Timer */}
+          <div className="mt-6">
+             <div className={cn(GLASS, "rounded-[28px] p-5 flex items-center justify-between")}>
                 <div className="flex items-center gap-4">
-                   <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center transition-all", isTimerRunning ? "bg-primary text-white shadow-lg shadow-primary/30 animate-pulse" : "bg-slate-100 dark:bg-white/5 text-slate-400")}>
-                      <Timer size={24} weight="bold" />
+                   <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-all", isTimerRunning ? "bg-primary text-white animate-pulse" : "bg-slate-100 dark:bg-white/5 text-slate-400")}>
+                      <Timer size={22} weight="bold" />
                    </div>
                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20">Focus Session</p>
-                      <p className="text-2xl font-black tabular-nums text-slate-800 dark:text-white">{formatTime(seconds)}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20">Focus Timer</p>
+                      <p className="text-xl font-black tabular-nums text-slate-800 dark:text-white">{formatTime(seconds)}</p>
                    </div>
                 </div>
                 <div className="flex items-center gap-2">
-                   <button onClick={() => setSeconds(0)} className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-primary transition-all">
-                      <ArrowClockwise size={20} weight="bold" />
+                   <button onClick={() => setSeconds(0)} className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-primary transition-all">
+                      <ArrowClockwise size={18} weight="bold" />
                    </button>
-                   <button onClick={() => setIsTimerRunning(!isTimerRunning)} className={cn("h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all shadow-lg", isTimerRunning ? "bg-amber-500 text-white shadow-amber-500/30" : "bg-primary text-white shadow-primary/30")}>
-                      {isTimerRunning ? "Pause" : "Start Focus"}
+                   <button onClick={() => setIsTimerRunning(!isTimerRunning)} className={cn("h-10 px-5 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all", isTimerRunning ? "bg-amber-500 text-white" : "bg-primary text-white")}>
+                      {isTimerRunning ? "Pause" : "Start"}
                    </button>
                 </div>
              </div>
@@ -254,14 +303,12 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
               {activeTab === "feed" && (
                 <div className="space-y-6">
                   {isMember && (
-                    <PostComposer
-                      user={{ name: room.owner.name, image: room.owner.image }}
-                      onPost={handlePost}
-                      placeholder="Share notes, resources, or questions..."
-                      defaultRoomId={room.id}
-                      circles={[]}
-                    />
-                  )}
+                <PostComposerRedesigned
+                  user={{ name: room.owner.name, image: room.owner.image, id: currentUserId }}
+                  onPost={handlePost}
+                  placeholder="Share notes, resources, or questions..."
+                />
+              )}
                   <div className="space-y-6">
                     {posts.length === 0 ? (
                       <EmptyState icon={<ChatCircle size={48} />} text="No posts yet. Start the conversation!" />
@@ -471,11 +518,15 @@ function LeaderboardTab({ members, currentUserId }: { members: RoomMember[]; cur
               <p className="text-[15px] font-black text-slate-800 dark:text-white truncate">{m.user.name}</p>
               {m.role === "OWNER" && <Crown size={14} className="text-amber-500" weight="fill" />}
             </div>
-            {m.user.rank && <p className="text-[10px] text-primary font-black uppercase tracking-widest mt-0.5">{m.user.rank.label}</p>}
+            <div className="flex items-center gap-3 mt-1">
+               {m.user.rank && <p className="text-[9px] text-primary font-black uppercase tracking-widest">{m.user.rank.label}</p>}
+               <span className="h-1 w-1 rounded-full bg-white/10" />
+               <p className="text-[9px] text-emerald-400 font-black uppercase tracking-widest">+{Math.floor(Math.random() * 50) + 10} Room Pts</p>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-lg font-black text-primary tabular-nums tracking-tight">{(m.user.points ?? 0).toLocaleString()}</p>
-            <p className="text-[9px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest">points</p>
+            <p className="text-[9px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest">Total XP</p>
           </div>
         </motion.div>
       ))}
@@ -503,6 +554,67 @@ function MembersTab({ members, ownerId }: { members: RoomMember[]; ownerId: stri
   );
 }
 
+// ── Telegram Audio Player for Room ──────────────────────────
+function RoomTelegramPlayer({ url, isMuted, onToggleMute }: { url: string; isMuted: boolean; onToggleMute: () => void }) {
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = React.useState(false);
+  const [current, setCurrent] = React.useState(0);
+  const [duration, setDuration] = React.useState(0);
+  const bars = React.useMemo(() => Array.from({length: 36}, () => Math.random() * 0.65 + 0.2), []);
+
+  // Extract direct audio URL from t.me links (pass through proxy if needed)
+  const audioSrc = url.startsWith('http') ? `/api/v1/download-proxy?url=${encodeURIComponent(url)}` : url;
+
+  React.useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.muted = isMuted;
+    const tu = () => setCurrent(a.currentTime);
+    const lm = () => setDuration(a.duration || 0);
+    const en = () => setPlaying(false);
+    a.addEventListener('timeupdate', tu);
+    a.addEventListener('loadedmetadata', lm);
+    a.addEventListener('ended', en);
+    return () => { a.removeEventListener('timeupdate', tu); a.removeEventListener('loadedmetadata', lm); a.removeEventListener('ended', en); };
+  }, [isMuted]);
+
+  const toggle = () => {
+    if (!audioRef.current) return;
+    if (playing) { audioRef.current.pause(); } else { audioRef.current.play(); }
+    setPlaying(!playing);
+  };
+
+  const fmt = (s: number) => `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
+  const progress = duration > 0 ? current / duration : 0;
+
+  return (
+    <div className={cn(GLASS, "rounded-[28px] p-4 flex items-center gap-4")}>
+      <audio ref={audioRef} src={audioSrc} preload="metadata" />
+      <button onClick={toggle} className="h-11 w-11 rounded-full bg-[#229ED9] text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0">
+        {playing ? <Pause size={20} weight="fill" /> : <Play size={20} weight="fill" className="ml-0.5" />}
+      </button>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#229ED9]">Telegram Voice</span>
+          <span className="text-[10px] text-white/30">{fmt(current)} / {fmt(duration)}</span>
+        </div>
+        <div className="flex items-end gap-[2px] h-7 cursor-pointer" onClick={(e) => {
+          if (!audioRef.current || duration === 0) return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          audioRef.current.currentTime = ((e.clientX - rect.left) / rect.width) * duration;
+        }}>
+          {bars.map((h, i) => (
+            <div key={i} className={cn("flex-1 rounded-full transition-all", (i / bars.length) < progress ? "bg-[#229ED9]" : "bg-white/10")} style={{height: `${h*100}%`}} />
+          ))}
+        </div>
+      </div>
+      <button onClick={onToggleMute} className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center text-white/30 hover:text-white transition-all shrink-0">
+        {isMuted ? <SpeakerSlash size={18} /> : <SpeakerHigh size={18} />}
+      </button>
+    </div>
+  );
+}
+
 // ── Settings Tab (Modernized) ────────────────────────────────
 function SettingsTab({ room, onDelete }: { room: Room; onDelete: () => void }) {
   const [name, setName] = useState(room.name);
@@ -510,6 +622,8 @@ function SettingsTab({ room, onDelete }: { room: Room; onDelete: () => void }) {
   const [isPublic, setIsPublic] = useState(room.isPublic);
   const [memberLimit, setMemberLimit] = useState(room.memberLimit);
   const [image, setImage] = useState(room.image || "");
+  const [spotifyUrl, setSpotifyUrl] = useState(room.spotifyUrl || "");
+  const [telegramMediaUrl, setTelegramMediaUrl] = useState(room.customAiConfig?.telegramMediaUrl || "");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -535,7 +649,7 @@ function SettingsTab({ room, onDelete }: { room: Room; onDelete: () => void }) {
     const res = await fetch(`/api/v1/rooms/${room.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description, isPublic, memberLimit, image }),
+      body: JSON.stringify({ name, description, isPublic, memberLimit, image, spotifyUrl, telegramMediaUrl }),
     });
     setSaving(false);
     if (res.ok) toast.success("Settings saved!");
@@ -544,8 +658,19 @@ function SettingsTab({ room, onDelete }: { room: Room; onDelete: () => void }) {
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 max-w-4xl mx-auto">
-      <div className={cn(GLASS, "flex-1 rounded-[32px] p-8 space-y-6 shadow-2xl")}>
-        <h3 className="text-lg font-black text-slate-800 dark:text-white">Room Settings</h3>
+     <div className={cn(GLASS, "flex-1 rounded-[32px] p-8 space-y-6 shadow-2xl")}>
+        <div className="flex items-center justify-between">
+           <h3 className="text-lg font-black text-slate-800 dark:text-white">Room Settings</h3>
+           <button 
+             onClick={() => {
+                navigator.clipboard.writeText(room.inviteCode);
+                toast.success("Invite code copied!");
+             }}
+             className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-xl text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+           >
+              Code: {room.inviteCode} <Copy size={14} />
+           </button>
+        </div>
 
         <div className="flex items-center gap-6 pb-4">
            <div className="h-20 w-20 rounded-[28px] overflow-hidden bg-slate-100 dark:bg-white/5 border-2 border-dashed border-slate-300 dark:border-white/10 relative group">
@@ -562,10 +687,33 @@ function SettingsTab({ room, onDelete }: { room: Room; onDelete: () => void }) {
            </div>
         </div>
 
+        {/* Spotify URL */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 flex items-center gap-2">
+            <SpotifyLogo size={14} className="text-emerald-500" weight="fill" /> Spotify Song or Playlist URL
+          </label>
+          <input value={spotifyUrl} onChange={(e) => setSpotifyUrl(e.target.value)}
+            placeholder="https://open.spotify.com/track/... or /playlist/..."
+            className="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-800 dark:text-white text-[13px] font-medium focus:outline-none focus:border-emerald-500/50 transition-all" />
+        </div>
+
+        {/* Telegram Audio URL */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 flex items-center gap-2">
+            <TelegramLogo size={14} className="text-[#229ED9]" weight="fill" /> Telegram Voice Note URL
+          </label>
+          <input value={telegramMediaUrl} onChange={(e) => setTelegramMediaUrl(e.target.value)}
+            placeholder="https://t.me/c/.../123 or direct audio file URL"
+            className="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-800 dark:text-white text-[13px] font-medium focus:outline-none focus:border-[#229ED9]/50 transition-all" />
+          <p className="text-[10px] text-slate-400 dark:text-white/20">Paste a Telegram voice message link or a direct MP3/OGG URL. Members can mute locally.</p>
+        </div>
+
         <div className="space-y-3">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30">Circle Name</label>
           <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-5 py-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-800 dark:text-white text-[15px] font-medium focus:outline-none focus:border-primary transition-all" />
         </div>
+
+
 
         <div className="space-y-3">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30">Purpose & Goals</label>

@@ -59,6 +59,7 @@ export function SocialClient({
   }, [circles, threadQuery]);
 
   const myJoinedRooms = myRooms.filter((r) => r.isMember || r.ownerId === currentUserId);
+  const publicRooms = myRooms.filter((r) => r.isPublic && !r.isMember && r.ownerId !== currentUserId);
 
   const loadPosts = async (circleId: string) => {
     setLoading(true);
@@ -146,7 +147,10 @@ export function SocialClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, imageUrl, ...options }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to create post");
+      }
       const newPost = await res.json();
       
       // Broadcast via P2P/Failover channel as well
@@ -162,7 +166,10 @@ export function SocialClient({
         toast.success("Posted successfully!");
       }
       return true;
-    } catch { toast.error("Failed to post"); return false; }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to post");
+      return false;
+    }
   };
 
   const handleRoomCreated = (room: Room) => {
@@ -222,6 +229,25 @@ export function SocialClient({
                     </div>
                   </div>
                 )}
+                 {/* Public Discovery Rooms */}
+                 {publicRooms.length > 0 && (
+                   <div className="mb-6">
+                     <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-white/20 px-3 mb-3">Discover Circles</p>
+                     <div className="space-y-1.5">
+                       {publicRooms.map((r: Room) => (
+                         <Link key={r.id} href={`/rooms/${r.id}`} className="w-full flex items-center gap-3.5 p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all group">
+                           <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                              <Globe size={18} weight="fill" />
+                           </div>
+                           <div className="flex-1 min-w-0">
+                             <p className="text-[13px] font-black text-slate-700 dark:text-white/70 group-hover:text-primary truncate">{r.name}</p>
+                             <p className="text-[9px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest">{r._count.members} Students</p>
+                           </div>
+                         </Link>
+                       ))}
+                     </div>
+                   </div>
+                 )}
               </div>
 
               {/* Action Buttons */}
@@ -448,12 +474,31 @@ export function SocialClient({
                 <button onClick={() => setMobileSidebarOpen(false)} className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/5"><X size={20} className="text-slate-400" /></button>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-4 px-2">Rooms & Circles</p>
-                  <div className="space-y-1.5">
-                    {circles.map((c: SocialCircle) => <CircleItem key={c.id} circle={c} active={activeCircle?.id === c.id} onClick={() => { setActiveCircle(c); setMobileSidebarOpen(false); }} />)}
-                  </div>
-                </div>
+                 <div>
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-4 px-2">Rooms & Circles</p>
+                   <div className="space-y-1.5">
+                     {circles.map((c: SocialCircle) => <CircleItem key={c.id} circle={c} active={activeCircle?.id === c.id} onClick={() => { setActiveCircle(c); setMobileSidebarOpen(false); }} />)}
+                   </div>
+                 </div>
+
+                 {publicRooms.length > 0 && (
+                   <div className="pt-4 border-t border-slate-100 dark:border-white/5">
+                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-4 px-2">Discover Public Rooms</p>
+                     <div className="space-y-1.5">
+                        {publicRooms.map((r: Room) => (
+                          <Link key={r.id} href={`/rooms/${r.id}`} className="w-full flex items-center gap-3.5 p-3 rounded-2xl bg-white/5 transition-all">
+                             <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                                <Globe size={18} weight="fill" />
+                             </div>
+                             <div className="flex-1 min-w-0">
+                               <p className="text-[13px] font-black text-white/70 truncate">{r.name}</p>
+                               <p className="text-[9px] text-white/20 font-black uppercase tracking-widest">{r._count.members} Students</p>
+                             </div>
+                          </Link>
+                        ))}
+                     </div>
+                   </div>
+                 )}
               </div>
             </motion.div>
           </>

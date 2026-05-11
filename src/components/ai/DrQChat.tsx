@@ -17,7 +17,8 @@ import {
   ShareNetwork,
   CaretDown,
   Image as ImageIcon,
-  FileText
+  FileText,
+  CheckCircle
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ import { DrQSidebar } from "./DrQSidebar";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DrQComposer } from "./DrQComposer";
 import { DrQMessage } from "./DrQMessage";
+import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import toast from "react-hot-toast";
 
 const GLASS = "bg-white/[0.03] dark:bg-[#11101d]/60 backdrop-blur-3xl border border-white/10";
@@ -91,45 +93,58 @@ export function DrQChat() {
       {/* ── MAIN CHAT AREA ── */}
       <main className="flex-1 flex flex-col relative min-w-0 bg-[#0f0e1a]">
         
-        {/* Deep Purple Gradient Background */}
+        {/* Softened Deep Purple Gradient Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(88,28,135,0.15)_0%,rgba(10,9,16,0)_70%)]" />
-           <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] animate-pulse" />
-           <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(88,28,135,0.08)_0%,rgba(10,9,16,0)_70%)]" />
+           <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-purple-600/05 rounded-full blur-[120px] animate-pulse" />
+           <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-blue-600/03 rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
         </div>
 
         {/* Top Navigation / Header */}
-        <header className="h-20 flex items-center justify-between px-8 relative z-20">
-          <div className="flex items-center gap-6">
+        <header className="h-20 flex items-center justify-between px-8 relative z-30">
+          <div className="flex items-center gap-6 overflow-x-auto no-scrollbar max-w-[70%]">
             <button 
               onClick={() => setMobileSidebarOpen(true)}
-              className="md:hidden p-2 hover:bg-white/5 rounded-xl text-white/50"
+              className="md:hidden p-2 hover:bg-white/5 rounded-xl text-white/50 flex-shrink-0"
             >
               <List size={24} weight="bold" />
             </button>
             
-            {/* Provider Pill (Style from image) */}
-            <div className="flex items-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2 gap-3 transition-all cursor-pointer group">
-              <span className="text-[13px] font-bold text-white/80 group-hover:text-white">{PROVIDER_CONFIGS[settings.activeProvider].label} v4.0</span>
-              <CaretDown size={14} weight="bold" className="text-white/30" />
+            {/* Persona Selector (Image 1/2 Match) */}
+            <div className="flex items-center gap-2 p-1.5 rounded-full bg-white/[0.03] border border-white/5 backdrop-blur-xl">
+               {(Object.values(DRQ_PERSONAS)).map((p) => (
+                 <button
+                   key={p.id}
+                   onClick={() => updateSettings({ activePersona: p.id })}
+                   className={cn(
+                     "px-4 py-2 rounded-full text-[12px] font-black uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap",
+                     settings.activePersona === p.id 
+                       ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105" 
+                       : "text-white/40 hover:text-white/60"
+                   )}
+                 >
+                   <span className={cn(settings.activePersona === p.id ? "text-black" : "text-white/30")}>
+                      {React.cloneElement(p.icon as React.ReactElement, { size: 16 })}
+                   </span>
+                   {p.shortName}
+                 </button>
+               ))}
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-             <button 
-               onClick={() => setShowConfig(true)}
-               className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10 flex items-center gap-2 text-[12px] font-black uppercase tracking-widest"
-             >
-               <Gear size={18} weight="bold" />
-               Configuration
-             </button>
+             {/* Provider & Configuration */}
+             <div className="hidden lg:flex items-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2.5 gap-3 transition-all cursor-pointer group" onClick={() => setShowConfig(true)}>
+                <span className="text-[12px] font-black uppercase tracking-widest text-white/40 group-hover:text-white">{PROVIDER_CONFIGS[settings.activeProvider].label}</span>
+                <Gear size={16} weight="bold" className="text-white/20" />
+             </div>
              
              <button 
                onClick={() => exportThread("markdown")}
-               className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10 flex items-center gap-2 text-[12px] font-black uppercase tracking-widest"
+               className="h-11 w-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10"
+               title="Export Chat"
              >
-               <Export size={18} weight="bold" />
-               Export
+               <Export size={20} weight="bold" />
              </button>
           </div>
         </header>
@@ -149,57 +164,49 @@ export function DrQChat() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white/80 rounded-full blur-[4px]" />
               </motion.div>
 
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-white/90">
-                Ready to Create Something New?
+              <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 text-white">
+                Experience Dr. Q Overhaul
               </h2>
+              <p className="text-white/40 text-[15px] font-medium mb-12 max-w-lg">
+                 Choose a specialized AI persona to help you master your medical journey.
+              </p>
               
-              {/* Feature Chips */}
-              <div className="flex flex-wrap justify-center gap-3 mb-12">
-                 <button className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center gap-2">
-                    <ImageIcon size={18} />
-                    Create Image
-                 </button>
-                 <button className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center gap-2">
-                    <Lightning size={18} />
-                    Brainstorm
-                 </button>
-                 <button className="px-6 py-3 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center gap-2">
-                    <FileText size={18} />
-                    Make a plan
-                 </button>
+              {/* Persona Grid (Image 1 Match) */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full max-w-4xl mx-auto">
+                 {(Object.values(DRQ_PERSONAS)).map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        updateSettings({ activePersona: p.id });
+                        // Optionally trigger a suggested prompt or just show selection
+                        toast.success(`${p.name} activated`);
+                      }}
+                      className={cn(
+                        "p-6 rounded-[32px] bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.08] transition-all relative overflow-hidden",
+                        settings.activePersona === p.id && "bg-white/[0.08] border-white/20 ring-2 ring-primary/30"
+                      )}
+                    >
+                       <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 blur-[40px] -translate-y-1/2 translate-x-1/2" />
+                       <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6 shadow-lg", `bg-gradient-to-br ${p.gradient}`)}>
+                          {React.cloneElement(p.icon as React.ReactElement, { size: 24, weight: "fill", className: "text-white" })}
+                       </div>
+                       <h3 className="text-[17px] font-black mb-2 text-white">{p.name}</h3>
+                       <p className="text-[12px] text-white/40 leading-relaxed font-medium">{p.description}</p>
+                    </button>
+                 ))}
               </div>
 
-              {/* Bottom Cards from image */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full mt-auto">
-                 <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4 md:mb-6">
-                       <ImageIcon size={18} weight="fill" className="md:w-5 md:h-5" />
-                    </div>
-                    <h3 className="text-[13px] md:text-[15px] font-bold mb-1 md:mb-2">Image Generator</h3>
-                    <p className="text-[11px] md:text-[12px] text-white/40 leading-relaxed line-clamp-2 md:line-clamp-none">Create high-quality images instantly from text.</p>
-                 </div>
-                 <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 md:mb-6">
-                       <FileText size={18} weight="fill" className="md:w-5 md:h-5" />
-                    </div>
-                    <h3 className="text-[13px] md:text-[15px] font-bold mb-1 md:mb-2">AI Presentation</h3>
-                    <p className="text-[11px] md:text-[12px] text-white/40 leading-relaxed line-clamp-2 md:line-clamp-none">Turn ideas into engaging, professional presentations.</p>
-                 </div>
-                 <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all hidden md:block">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-6">
-                       <Lightning size={20} weight="fill" />
-                    </div>
-                    <h3 className="text-[15px] font-bold mb-2">Dev Assistant</h3>
-                    <p className="text-[12px] text-white/40 leading-relaxed">Generate clean, production-ready code in seconds.</p>
-                 </div>
-                 {/* 4th card for mobile 2x2 grid */}
-                 <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-left group hover:bg-white/[0.05] transition-all md:hidden">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4">
-                       <ShieldCheck size={18} weight="fill" />
-                    </div>
-                    <h3 className="text-[13px] font-bold mb-1">Study Planner</h3>
-                    <p className="text-[11px] text-white/40 leading-relaxed line-clamp-2">Plan your weekend study schedule like a pro.</p>
-                 </div>
+              {/* Bottom Suggestions */}
+              <div className="mt-12 flex flex-wrap justify-center gap-2">
+                 {DRQ_PERSONAS[settings.activePersona as DrQPersonaId]?.suggestedPrompts.map((txt, i) => (
+                    <button 
+                      key={i}
+                      onClick={() => sendMessage(txt)}
+                      className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-[12px] font-bold text-white/50 hover:bg-white/10 hover:text-white transition-all"
+                    >
+                       {txt}
+                    </button>
+                 ))}
               </div>
             </div>
           ) : (
@@ -215,6 +222,7 @@ export function DrQChat() {
                   onRegenerate={m.role === 'assistant' ? regenerate : undefined}
                   onReply={(id, text) => setReplyContext({ id, text })}
                   onShare={handleShareToForum}
+                  activePersona={settings.activePersona}
                 />
               ))}
               <div ref={endRef} className="h-32" />

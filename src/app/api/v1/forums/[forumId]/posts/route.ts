@@ -52,9 +52,11 @@ const POST_SCHEMA = z
       question: z.string(),
       options: z.array(z.string())
     }).optional(),
+    postType: z.string().optional(),
+    qaAnswer: z.string().optional(),
     hashtags: z.array(z.string()).optional()
   })
-  .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()) || (v.attachments && v.attachments.length > 0) || Boolean(v.sharedQuestion) || Boolean(v.poll), {
+  .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()) || (v.attachments && v.attachments.length > 0) || Boolean(v.sharedQuestion) || Boolean(v.poll) || (v.postType === 'qa' && v.poll), {
     message: "Post cannot be empty",
     path: ["content"],
   });
@@ -159,6 +161,20 @@ export async function POST(
     const audience = parsed.data.audience ?? "UNIVERSITY";
 
     // Calculate expiry (10 days from now)
+    // Handle Poll creation separately to avoid nested create issues
+    let createdPollId: string | undefined = undefined;
+    if (parsed.data.poll && parsed.data.postType !== 'qa') {
+      const newPoll = await prisma.poll.create({
+        data: {
+          question: parsed.data.poll.question,
+          options: {
+            create: parsed.data.poll.options.map(text => ({ text }))
+          }
+        }
+      });
+      createdPollId = newPoll.id;
+    }
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 10);
 
@@ -178,16 +194,15 @@ export async function POST(
           sharedQuestionId: parsed.data.sharedQuestion.id,
           sharedQuestionData: parsed.data.sharedQuestion
         } : {}),
-        ...(parsed.data.poll ? {
-          poll: {
-            create: {
-              question: parsed.data.poll.question,
-              options: {
-                create: parsed.data.poll.options.map(text => ({ text }))
-              }
-            }
+        ...(parsed.data.postType === 'qa' && parsed.data.poll ? {
+          sharedQuestionData: {
+            question: parsed.data.poll.question,
+            options: parsed.data.poll.options,
+            type: 'qa',
+            correctAnswer: parsed.data.qaAnswer || null
           }
-        } : {})
+        } : {}),
+        pollId: createdPollId,
       },
       include: {
         author: {
@@ -247,6 +262,6 @@ export async function POST(
     return NextResponse.json(returnPost, { status: 201 });
   } catch (err: any) {
     console.error("[POST-API] Server Error:", err.message);
-    return NextResponse.json({ error: "Server Error", details: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message || "Server Error", details: err.message }, { status: 500 });
   }
 }
