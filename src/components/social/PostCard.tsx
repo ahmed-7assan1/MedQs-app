@@ -20,7 +20,7 @@ import {
   ArrowRight,
   X as XIcon
 } from "@phosphor-icons/react";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
@@ -38,13 +38,13 @@ interface Props {
   isRoomPost?: boolean;
 }
 
-export function PostCard({
+export const PostCard = React.memo(({
   post,
   currentUserId,
   currentUserRole,
   currentUserUniversityId,
   isRoomPost
-}: Props) {
+}: Props) => {
   const [isLiked, setIsLiked] = useState(post.likedByMe ?? false);
   const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
   const [liking, setLiking] = useState(false);
@@ -128,7 +128,13 @@ export function PostCard({
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }} className="rounded-[32px] bg-white/70 dark:bg-[#161523]/70 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-3xl overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300">
+    <motion.div 
+      initial={{ opacity: 0, y: 16 }} 
+      whileInView={{ opacity: 1, y: 0 }} 
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, ease: "easeOut" }} 
+      className="rounded-[32px] bg-white/70 dark:bg-[#161523]/70 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-3xl overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300"
+    >
       
       {/* Header */}
       <div className="flex items-center gap-4 p-5 pb-0">
@@ -396,7 +402,7 @@ export function PostCard({
       )}
     </motion.div>
   );
-}
+});
 
 function InteractiveAudioPlayer({ url, duration }: { url: string; duration?: number }) {
   const [playing, setPlaying] = useState(false);
@@ -436,6 +442,10 @@ function InteractiveAudioPlayer({ url, duration }: { url: string; duration?: num
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const bars = useMemo(() => {
+    return [...Array(24)].map(() => 20 + Math.random() * 80);
+  }, []);
+
   return (
     <div className="flex-1 p-2 bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/50 dark:border-white/[0.05] rounded-2xl flex items-center gap-4 relative overflow-hidden group/audio">
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
@@ -444,11 +454,11 @@ function InteractiveAudioPlayer({ url, duration }: { url: string; duration?: num
       </button>
       <div className="flex-1 flex flex-col justify-center min-w-0 z-10">
          <div className="flex items-center gap-1.5 h-6 opacity-60">
-            {[...Array(24)].map((_, j) => (
+            {bars.map((height, j) => (
               <div 
                 key={j} 
                 className={cn("flex-1 rounded-full transition-all duration-300", progress > (j / 24) * 100 ? "bg-primary" : "bg-primary/30")} 
-                style={{ height: `${20 + Math.random() * 80}%` }} 
+                style={{ height: `${height}%` }} 
               />
             ))}
          </div>

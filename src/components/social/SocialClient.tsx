@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
 import { PostComposer, FloatingPostIsland } from "./PostComposer";
@@ -48,15 +48,16 @@ export function SocialClient({
   const [trendingTags, setTrendingTags] = useState<any[]>([]);
   const [threadQuery, setThreadQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "top">("recent");
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [showCreateRoom, setShowCreateRoom] = useState(false);
-  const [showJoinRoom, setShowJoinRoom] = useState(false);
-  const [myRooms, setMyRooms] = useState<Room[]>(initialRooms);
 
   const filteredCircles = useMemo(() => {
     const q = threadQuery.trim().toLowerCase();
     return q ? circles.filter((c: SocialCircle) => c.name.toLowerCase().includes(q)) : circles;
   }, [circles, threadQuery]);
+
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const [showJoinRoom, setShowJoinRoom] = useState(false);
+  const [myRooms, setMyRooms] = useState<Room[]>(initialRooms);
 
   const myJoinedRooms = myRooms.filter((r) => r.isMember || r.ownerId === currentUserId);
   const publicRooms = myRooms.filter((r) => r.isPublic && !r.isMember && r.ownerId !== currentUserId);
@@ -127,14 +128,6 @@ export function SocialClient({
         .catch(() => {});
     }
   }, [searchParams, setSharedQuestion]);
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-  const dateStr = now.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' });
 
   const handlePost = async (content: string, imageUrl: string, options?: any): Promise<boolean> => {
     const destId = options.forumId || options.roomId;
@@ -351,18 +344,7 @@ export function SocialClient({
           {/* ── RIGHT SIDEBAR ── */}
           <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar">
             {/* Elegant Time/Status Widget */}
-            <div className={cn(GLASS, "rounded-[32px] p-6 group")}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight">{timeStr}</p>
-                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Active</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-white/30 font-black uppercase tracking-widest">{dateStr}</p>
-                </div>
-                <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ repeat: Infinity, duration: 4 }} className="text-4xl filter drop-shadow-lg">☀️</motion.div>
-              </div>
-            </div>
+            <TimeWidget />
             {/* Trending Hashtags Widget */}
             <div className={cn(GLASS, "rounded-[32px] p-6")}>
               <div className="flex items-center gap-2 mb-6">
@@ -520,7 +502,7 @@ export function SocialClient({
   );
 }
 
-function CircleItem({ circle, active, onClick }: { circle: SocialCircle; active: boolean; onClick: () => void }) {
+const CircleItem = memo(({ circle, active, onClick }: { circle: SocialCircle; active: boolean; onClick: () => void }) => {
   return (
     <button
       onClick={onClick}
@@ -542,9 +524,9 @@ function CircleItem({ circle, active, onClick }: { circle: SocialCircle; active:
       </div>
     </button>
   );
-}
+});
 
-function RoomItemSmall({ room, currentUserId }: { room: Room; currentUserId: string }) {
+const RoomItemSmall = memo(({ room, currentUserId }: { room: Room; currentUserId: string }) => {
   const isOwner = room.ownerId === currentUserId;
   return (
     <Link href={`/rooms/${room.id}`} className="block group">
@@ -573,5 +555,31 @@ function RoomItemSmall({ room, currentUserId }: { room: Room; currentUserId: str
       </div>
     </Link>
   );
-}
+});
 
+
+function TimeWidget() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  const dateStr = now.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' });
+
+  return (
+    <div className={cn(GLASS, "rounded-[32px] p-6 group")}>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight">{timeStr}</p>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Active</span>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-white/30 font-black uppercase tracking-widest">{dateStr}</p>
+        </div>
+        <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ repeat: Infinity, duration: 4 }} className="text-4xl filter drop-shadow-lg">☀️</motion.div>
+      </div>
+    </div>
+  );
+}
