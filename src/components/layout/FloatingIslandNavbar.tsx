@@ -88,7 +88,7 @@ export function FloatingIslandNavbar({
 
   // DESKTOP ONLY: hidden on mobile via Tailwind
   return (
-    <div className="fixed inset-x-0 top-0 z-[200] hidden md:flex justify-center items-start p-3 pointer-events-none">
+    <div id="desktop-nav-island" className="fixed inset-x-0 top-0 z-[200] hidden md:flex justify-center items-start p-3 pointer-events-none">
       <div
         ref={islandRef}
         className={cn(

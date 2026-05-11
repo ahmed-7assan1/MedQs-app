@@ -11,6 +11,7 @@ import {
   Microphone
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 import { TelegramAudioPlayer } from "./TelegramAudioPlayer";
 
 import dynamic from "next/dynamic";
@@ -82,22 +83,8 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                     onClick={() => setViewIndex(i)}
                   >
                     {item.type === 'video' || item.url.toLowerCase().endsWith('.mp4') ? (
-                      <div className="relative w-full h-full bg-black flex items-center justify-center">
-                         <Player 
-                           url={item.url} 
-                           width="100%" 
-                           height="100%" 
-                           light={true} 
-                           playIcon={
-                             <div className="h-12 w-12 rounded-full bg-indigo-600/90 backdrop-blur-md flex items-center justify-center border border-indigo-400/30 shadow-2xl hover:scale-110 transition-all">
-                                <Play size={24} weight="fill" className="text-white ml-0.5" />
-                             </div>
-                           }
-                           onClickPreview={() => setViewIndex(i)}
-                         />
-                         <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 backdrop-blur-md rounded-full px-2 py-0.5 pointer-events-none">
-                           <span className="text-[8px] font-black text-indigo-300 uppercase tracking-widest">🛡️ Telegram</span>
-                         </div>
+                      <div className="relative w-full h-full">
+                         <ProfessionalVideoPlayer src={item.url} className="w-full h-full" />
                       </div>
                     ) : (
                       <img src={item.url} className="w-full h-full object-cover" alt="" />
@@ -110,8 +97,8 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                 <div className="flex h-full transition-transform duration-500 ease-out" style={{ transform: `translateX(-${(viewIndex || 0) * 100}%)` }}>
                   {media.map((item, i) => (
                     item.type === 'video' ? (
-                      <div key={i} className="w-full h-full shrink-0 bg-black flex items-center justify-center">
-                        <Player url={item.url} controls width="100%" height="100%" />
+                      <div key={i} className="w-full h-full shrink-0">
+                        <ProfessionalVideoPlayer src={item.url} className="w-full h-full" />
                       </div>
                     ) : (
                       <img key={i} src={item.url} className="w-full h-full object-contain shrink-0" alt="" />
@@ -198,22 +185,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
           <div className="flex-1 relative flex items-center justify-center p-4 sm:p-10 overflow-hidden">
             {media[viewIndex].type === 'video' ? (
               <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-black">
-                <Player 
-                  url={media[viewIndex].url} 
-                  controls 
-                  playing
-                  width="100%" 
-                  height="100%" 
-                  config={{ 
-                    file: { 
-                      forceVideo: true,
-                      attributes: { 
-                        controlsList: 'nodownload',
-                        playsInline: true
-                      } 
-                    } 
-                  } as any}
-                />
+                <ProfessionalVideoPlayer src={media[viewIndex].url} className="w-full h-full" />
               </div>
             ) : media[viewIndex].type === 'image' ? (
               <img 

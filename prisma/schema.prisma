@@ -259,7 +259,10 @@ model LectureVideo {
   shouldBroadcast   Boolean @default(true)
   isBroadcasted     Boolean @default(false)
   comments          LectureVideoComment[]
-  likes          LectureVideoLike[]
+  likes             LectureVideoLike[]
+  startTime         Int?
+  endTime           Int?
+  isReel            Boolean @default(false)
 
   @@index([lectureId, sortOrder])
 }
@@ -672,6 +675,9 @@ model Post {
   sharedQuestionData   Json?
   hashtags             PostHashtag[]
   savedBy              SavedPost[]
+  isReel               Boolean @default(false)
+  videoStartTime       Int?
+  videoEndTime         Int?
 
   @@index([universityId, createdAt])
   @@index([forumId, createdAt])

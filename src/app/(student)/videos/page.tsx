@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { 
   Search, Play, Loader2, X, Clapperboard,
-  Video, Clock, ArrowRight, Star, Home, ShieldCheck
+  Video, Clock, ArrowRight, Star, Home, ShieldCheck, Youtube
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -250,9 +250,7 @@ export default function VideosHubPage() {
                 }
 
                 const video = item.data;
-                const href = (video.lectureId && video.moduleId)
-                  ? `/modules/${video.moduleId}/lectures/${video.lectureId}/video`
-                  : `https://youtube.com/watch?v=${video.videoId}`;
+                const href = `/videos/reels?v=${video.id}`;
 
                 return <VideoCard key={video.id} video={video} href={href} />;
               })}
@@ -339,15 +337,20 @@ function VideoCard({ video, href }: { video: VideoResult, href: string }) {
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t dark:border-white/[0.04] border-slate-100 flex items-center justify-between px-2">
-        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] dark:text-white/20 text-slate-400">
-          <Clock className="h-3.5 w-3.5" /> 45 MINS
+        <div className="flex items-center gap-2">
+          <Link 
+            href={href}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+          >
+             <Play className="h-3.5 w-3.5" /> Watch Now
+          </Link>
+          <Link 
+            href={`/videos/reels?v=${video.id}`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+          >
+             <Youtube className="h-3.5 w-3.5" /> Watch as Reel
+          </Link>
         </div>
-        <div className="flex items-center gap-1 text-red-500">
-           <span className="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">Watch Now</span>
-           <ArrowRight className="h-4 w-4" />
-        </div>
-      </div>
     </motion.div>
   );
 }

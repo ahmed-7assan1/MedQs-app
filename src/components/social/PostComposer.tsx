@@ -155,9 +155,10 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
     const res = await fetch("/api/v1/debug/telegram-direct-upload", { method: "POST", body: fd });
     const data = await res.json();
     if (!data.success) throw new Error("Upload failed");
-    let type: "image" | "audio" | "file" = "file";
+    let type: "image" | "audio" | "video" | "file" = "file";
     if (file.type?.startsWith("image/")) type = "image";
     else if (file.type?.startsWith("audio/")) type = "audio";
+    else if (file.type?.startsWith("video/")) type = "video";
     return {
       url: `/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`,
       type,
@@ -179,7 +180,8 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
 
   const images = attachments.filter((a: any) => a.type === "image");
   const audios = attachments.filter((a: any) => a.type === "audio");
-  const documents = attachments.filter((a: any) => a.type !== "image" && a.type !== "audio");
+  const videos = attachments.filter((a: any) => a.type === "video");
+  const documents = attachments.filter((a: any) => a.type !== "image" && a.type !== "audio" && a.type !== "video");
 
   return (
     <div className={cn(
@@ -282,6 +284,15 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                           <button onClick={() => setAttachments(prev => prev.filter(a => a.fileId !== att.fileId))} className="absolute top-1.5 right-1.5 h-6 w-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-white"><X size={12} weight="bold" /></button>
                         </div>
                       ))}
+                      {videos.map((vid: any, i: number) => (
+                        <div key={i} className="relative group h-28 w-28 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-md">
+                          <video src={vid.url} className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                            <VideoCamera size={24} weight="fill" className="text-white" />
+                          </div>
+                          <button onClick={() => setAttachments(prev => prev.filter(a => a.url !== vid.url))} className="absolute top-1.5 right-1.5 h-7 w-7 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-white"><X size={14} weight="bold" /></button>
+                        </div>
+                      ))}
                       {isUploading && <div className="h-28 w-28 rounded-2xl bg-slate-100 dark:bg-white/5 border border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center"><CircleNotch size={28} className="animate-spin text-primary" /></div>}
                     </div>
                   )}
@@ -306,6 +317,11 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                     <ImageIcon size={22} weight="fill" className="group-hover:scale-110 transition-transform" />
                     <span className="text-[12px] font-black uppercase tracking-widest hidden sm:inline">Photo</span>
                     <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileInput} />
+                  </label>
+                  <label className="h-11 px-4 flex items-center gap-2.5 text-slate-500 dark:text-white/30 hover:text-primary hover:bg-primary/5 rounded-2xl transition-all cursor-pointer group">
+                    <VideoCamera size={22} weight="fill" className="group-hover:scale-110 transition-transform" />
+                    <span className="text-[12px] font-black uppercase tracking-widest hidden sm:inline">Video</span>
+                    <input type="file" accept="video/*" className="hidden" onChange={handleFileInput} />
                   </label>
                   <button onClick={() => { setIsPollMode(true); if (pollOptions.length === 0) setPollOptions([{text:""}, {text:""}]); }} className={cn("h-11 w-11 flex items-center justify-center rounded-2xl transition-all", isPollMode ? "text-emerald-500 bg-emerald-500/10 shadow-inner shadow-emerald-500/10" : "text-slate-500 dark:text-white/30 hover:text-emerald-500 hover:bg-emerald-500/5")}>
                     <ChartBar size={22} weight="bold" />

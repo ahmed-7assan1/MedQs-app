@@ -1,24 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Heart,
-  ChatCircle,
-  ShareNetwork,
-  DotsThreeOutline,
-  PushPin,
-  Trash,
-  BookmarkSimple,
-  ShieldCheck,
-  Crown,
-  FileText,
-  ChartBar,
-  Microphone,
-  Play,
-  Pause,
-  ArrowLeft,
-  ArrowRight,
-  X as XIcon
+import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
+import { 
+  Heart, 
+  ChatCircle, 
+  ShareNetwork, 
+  DotsThreeOutline, 
+  PushPin, 
+  Trash, 
+  BookmarkSimple, 
+  ShieldCheck, 
+  Crown, 
+  FileText, 
+  ChartBar, 
+  Microphone, 
+  Play, 
+  Pause, 
+  ArrowLeft, 
+  ArrowRight, 
+  X as XIcon,
+  Video as VideoIcon
 } from "@phosphor-icons/react";
 import React, { useState, useRef, useMemo } from "react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
@@ -348,17 +350,8 @@ export const PostCard = React.memo(({
           {/* Non-Image Attachments (Videos, Voice, Files) */}
           <div className="p-1 space-y-1">
             {allVideos.map((v: any, i: number) => (
-              <div key={i} className="relative group w-full bg-black rounded-2xl overflow-hidden mb-1 border border-white/[0.05]">
-                <video 
-                  src={v.url} 
-                  className="w-full max-h-[450px] object-contain" 
-                  controls 
-                  playsInline
-                  preload="metadata"
-                />
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 pointer-events-none border border-white/10 shadow-xl">
-                  <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em]">🛡️ Telegram Video</span>
-                </div>
+              <div key={i} className="relative group w-full mb-1">
+                <ProfessionalVideoPlayer src={v.url} className="w-full max-h-[450px]" />
               </div>
             ))}
 

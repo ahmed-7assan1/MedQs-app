@@ -9,7 +9,7 @@ import { JoinRoomModal } from "./JoinRoomModal";
 import {
   ChatCircle, Globe, Users, MagnifyingGlass, Plus, ArrowRight,
   List, X, Hash, Lock, CalendarBlank, Fire, 
-  Gear, Crown, Clock, CaretRight
+  Gear, Crown, Clock, CaretRight, YoutubeLogo, Play
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -342,9 +342,40 @@ export function SocialClient({
           </main>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar">
+          <aside className="hidden lg:flex flex-col gap-8 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-10">
             {/* Elegant Time/Status Widget */}
             <TimeWidget />
+
+            {/* Reels Entry Widget - Enhanced Visibility */}
+            <div className={cn(GLASS, "rounded-[32px] p-1.5 overflow-hidden group/reels shadow-[0_25px_60px_rgba(0,0,0,0.4)] border-white/10")}>
+              <Link href="/videos/reels" className="relative block aspect-[4/5] rounded-[28px] overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000" 
+                  className="w-full h-full object-cover group-hover/reels:scale-105 transition-transform duration-1000" 
+                  alt="Reels"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-8">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center shadow-2xl shadow-red-500/50 group-hover/reels:rotate-12 transition-transform">
+                      <YoutubeLogo size={32} weight="fill" />
+                    </div>
+                    <div>
+                      <p className="text-white font-black text-2xl tracking-tighter leading-none mb-1">OneX Studio</p>
+                      <p className="text-white/60 text-[11px] font-black uppercase tracking-[0.2em]">Live Reels</p>
+                    </div>
+                  </div>
+                  <button className="w-full py-4.5 rounded-2xl bg-white text-black text-[13px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-white/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    Explore Reels
+                    <Play size={18} weight="fill" />
+                  </button>
+                </div>
+                {/* Status Badge */}
+                <div className="absolute top-6 right-6 px-4 py-2 rounded-full bg-red-600 text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-2xl border border-white/20 backdrop-blur-md">
+                  <div className="h-2.5 w-2.5 rounded-full bg-white animate-pulse" />
+                  Trending
+                </div>
+              </Link>
+            </div>
             {/* Trending Hashtags Widget */}
             <div className={cn(GLASS, "rounded-[32px] p-6")}>
               <div className="flex items-center gap-2 mb-6">

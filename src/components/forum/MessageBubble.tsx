@@ -10,6 +10,7 @@ import {
   CheckCircle,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 
 interface Attachment {
   url: string;
@@ -124,19 +125,9 @@ export function MessageBubble({ message, isMine }: Props) {
             </div>
           )}
 
-          {/* Videos */}
           {videos.map((v, i) => (
-            <div key={i} className="relative group w-full max-w-[320px] bg-black">
-              <video 
-                src={v.url} 
-                className="w-full max-h-[400px] object-contain" 
-                controls 
-                playsInline
-                preload="metadata"
-              />
-              <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-2.5 py-1 pointer-events-none">
-                <span className="text-[9px] font-black text-indigo-300 uppercase tracking-widest">🛡️ Telegram Video</span>
-              </div>
+            <div key={i} className="relative group w-full max-w-[320px]">
+              <ProfessionalVideoPlayer src={v.url} className="w-full max-h-[400px]" />
             </div>
           ))}
 
