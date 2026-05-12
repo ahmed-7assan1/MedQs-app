@@ -4,6 +4,8 @@ import Link from "next/link";
 import { BookOpen, Lock, ChevronRight, Clock, Signal, Search, Brain, Heart, Dna, FlaskConical, Layers, Atom } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+export const revalidate = 60;
+
 function moduleDifficultyLabel(
   questions: { difficulty: string }[]
 ): { label: string; tone: string; bg: string } | null {

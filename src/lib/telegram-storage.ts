@@ -66,6 +66,58 @@ export async function updateLectureFileWithTelegram(fileId: string, url: string,
 }
 
 /**
+ * Extracts file info from a Telegram message link (t.me/c/XXX/YYY or t.me/XXX/YYY)
+ */
+export async function extractTelegramFileInfo(link: string) {
+  if (!STORAGE_GROUP_ID) return null;
+
+  try {
+    // Improved regex to handle:
+    // 1. t.me/c/CHAT_ID/MSG_ID
+    // 2. t.me/c/CHAT_ID/TOPIC_ID/MSG_ID
+    // 3. t.me/USERNAME/MSG_ID
+    const parts = link.split('/').filter(p => p.length > 0);
+    if (parts.length < 2) return null;
+
+    const messageId = parseInt(parts[parts.length - 1]);
+    if (isNaN(messageId)) return null;
+
+    let chatId: string = "";
+    const isPrivate = link.includes('/c/');
+
+    if (isPrivate) {
+      // For /c/ links, the chat ID is the one right after 'c'
+      const cIndex = parts.indexOf('c');
+      chatId = parts[cIndex + 1];
+      chatId = `-100${chatId}`;
+    } else {
+      // For public links, it's the one before the message ID
+      chatId = `@${parts[parts.length - 2]}`;
+    }
+
+    console.log(`[TG-EXTRACT] Extracting from ${chatId} msg ${messageId}`);
+    
+    // Forward the message to storage group to get a permanent fileId our bot owns
+    const forwarded = await bot.telegram.forwardMessage(STORAGE_GROUP_ID, chatId, messageId);
+    
+    let fileId: string | undefined;
+    const msg = forwarded as any;
+    if (msg.video) fileId = msg.video.file_id;
+    else if (msg.document) fileId = msg.document.file_id;
+    else if (msg.audio) fileId = msg.audio.file_id;
+    
+    return {
+      messageId: forwarded.message_id,
+      chatId: STORAGE_GROUP_ID,
+      fileId
+    };
+  } catch (err) {
+    console.error('[TG-EXTRACT] Failed to extract from link:', err);
+    return null;
+  }
+}
+
+/**
  * Gets a temporary download link for a file from Telegram.
  */
 export async function getFileLinkFromTelegram(fileId: string): Promise<string | null> {

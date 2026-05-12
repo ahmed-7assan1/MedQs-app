@@ -7,6 +7,8 @@ import { LectureContentInlineManager } from "@/components/admin-inline/LectureCo
 import { AdminToolsDrawer } from "@/components/admin-inline/AdminToolsDrawer";
 import { LectureExperienceClient } from "@/components/content/LectureExperienceClient";
 
+export const revalidate = 60;
+
 export default async function LectureHubPage({
   params,
 }: {

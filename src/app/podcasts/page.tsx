@@ -10,30 +10,36 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function PodcastsPage() {
-  const records = await prisma.lectureRecord.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      lecture: {
-        include: {
-          subject: {
-            include: {
-              module: true
+  // Initial fetch for Page 1 only (Server-side for SEO and fast first paint)
+  const limit = 12;
+  const [records, total] = await Promise.all([
+    prisma.lectureRecord.findMany({
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      include: {
+        lecture: {
+          include: {
+            subject: {
+              include: {
+                module: true
+              }
             }
           }
         }
       }
-    }
-  });
+    }),
+    prisma.lectureRecord.count()
+  ]);
 
-  // Transform for the client component and fetch metadata if needed
   const formattedRecords = await Promise.all(records.map(async (r: any) => {
     const isSpotify = r.url.includes("spotify.com");
     let spotifyData = null;
 
     if (isSpotify) {
-      // Import on demand to avoid client-side bundling issues in server component if any
-      const { getSpotifyMetadata } = await import("@/lib/spotify");
-      spotifyData = await getSpotifyMetadata(r.url);
+      try {
+        const { getSpotifyMetadata } = await import("@/lib/spotify");
+        spotifyData = await getSpotifyMetadata(r.url);
+      } catch (e) {}
     }
 
     return {
@@ -57,5 +63,10 @@ export default async function PodcastsPage() {
     };
   }));
 
-  return <PodcastsClient records={formattedRecords} />;
+  return (
+    <PodcastsClient 
+      initialRecords={formattedRecords} 
+      initialHasMore={records.length < total}
+    />
+  );
 }

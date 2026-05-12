@@ -11,6 +11,8 @@ import {
   FlaskConical, Dna, Atom
 } from "lucide-react";
 
+export const revalidate = 60;
+
 // Map subject names to discipline icons + colors (Synchronized with Module page)
 function getSubjectAccent(name: string): {
   icon: any; iconColor: string; bgColor: string; borderColor: string; progressColor: string;

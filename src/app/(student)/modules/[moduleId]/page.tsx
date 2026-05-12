@@ -12,6 +12,8 @@ import {
 import { cn } from "@/lib/utils";
 import { SubjectInlineManager } from "@/components/admin-inline/SubjectInlineManager";
 
+export const revalidate = 60;
+
 // Map subject names to discipline icons + colors
 const ICON_MAP: Record<string, any> = {
   Brain, Bone, HeartPulse, Activity, Microscope, Pill, FlaskConical, 

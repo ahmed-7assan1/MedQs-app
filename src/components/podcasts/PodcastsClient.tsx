@@ -4,13 +4,14 @@ import { useState, useMemo } from "react";
 import { 
   Headphones, Play, Search, X,
   Mic2, LayoutGrid, List as ListIcon,
-  ChevronRight, ArrowRight, Sparkles, Clock, Calendar, ShieldCheck
+  ChevronRight, ArrowRight, Sparkles, Clock, Calendar, ShieldCheck,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { CustomAudioPlayer } from "@/components/content/CustomAudioPlayer";
 import Link from "next/link";
-import { Home } from "lucide-react";
+import { InfiniteScrollContainer } from "@/components/ui/InfiniteScrollContainer";
 
 type RecordItem = {
   id: string;
@@ -30,12 +31,43 @@ type RecordItem = {
   createdAt: string;
 };
 
-export function PodcastsClient({ records }: { records: RecordItem[] }) {
+export function PodcastsClient({ 
+  initialRecords, 
+  initialHasMore 
+}: { 
+  initialRecords: RecordItem[],
+  initialHasMore: boolean 
+}) {
+  const [records, setRecords] = useState<RecordItem[]>(initialRecords);
   const [search, setSearch] = useState("");
   const [activeRecord, setActiveRecord] = useState<RecordItem | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Instant local filter — no debounce needed since it's all in-memory
+  const loadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    const nextPage = page + 1;
+    try {
+      const res = await fetch(`/api/v1/podcasts?page=${nextPage}&limit=12`);
+      const data = await res.json();
+      if (data?.items) {
+        setRecords(prev => [...prev, ...data.items]);
+        setHasMore(data.hasMore);
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error("Failed to load more podcasts:", err);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  // Instant local filter
   const filtered = useMemo(() => {
     if (!search.trim()) return records;
     const q = search.toLowerCase();
@@ -185,29 +217,41 @@ export function PodcastsClient({ records }: { records: RecordItem[] }) {
                 <Headphones className="h-16 w-16" />
                 <p className="font-bold text-sm">No audio lectures found</p>
               </div>
-            ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                {filtered.map((r) => (
-                  <RecordCard 
-                    key={r.id} 
-                    record={r} 
-                    onClick={() => setActiveRecord(r)} 
-                    isActive={activeRecord?.id === r.id}
-                  />
-                ))}
-              </div>
             ) : (
-              <div className="space-y-1.5">
+              <InfiniteScrollContainer
+                onLoadMore={loadMore}
+                hasMore={hasMore}
+                isLoading={isLoadingMore}
+                className={cn(
+                  viewMode === "grid" 
+                    ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5" 
+                    : "space-y-1.5"
+                )}
+                endComponent={
+                  <div className="col-span-full py-10 text-center opacity-30">
+                     <p className="text-[10px] font-black uppercase tracking-[0.3em]">End of audio library</p>
+                  </div>
+                }
+              >
                 {filtered.map((r, i) => (
-                  <RecordListRow 
-                    key={r.id} 
-                    record={r} 
-                    index={i} 
-                    onClick={() => setActiveRecord(r)}
-                    isActive={activeRecord?.id === r.id}
-                  />
+                  viewMode === "grid" ? (
+                    <RecordCard 
+                      key={r.id} 
+                      record={r} 
+                      onClick={() => setActiveRecord(r)} 
+                      isActive={activeRecord?.id === r.id}
+                    />
+                  ) : (
+                    <RecordListRow 
+                      key={r.id} 
+                      record={r} 
+                      index={i} 
+                      onClick={() => setActiveRecord(r)}
+                      isActive={activeRecord?.id === r.id}
+                    />
+                  )
                 ))}
-              </div>
+              </InfiniteScrollContainer>
             )}
           </section>
         </div>

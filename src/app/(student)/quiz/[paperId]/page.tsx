@@ -10,27 +10,45 @@ const QuizClient = dynamic(
   { loading: () => <QuizSkeleton />, ssr: false }
 );
 
+import { unstable_cache } from "next/cache";
+
+const getCachedPaper = (paperId: string) => 
+  unstable_cache(
+    () => prisma.pastPaper.findUnique({
+      where: { id: paperId },
+      select: {
+        id: true,
+        title: true,
+        timeLimitMin: true,
+        aiExplanationEnabled: true,
+        allowAiDuringQuiz: true,
+        secureExamMode: true,
+        restrictCopyPaste: true,
+        trackFocusLoss: true,
+        // @ts-ignore
+        isPrivate: true,
+        // @ts-ignore
+        randomizeQuestions: true,
+      },
+    }),
+    [`paper-meta-${paperId}`],
+    { revalidate: 3600 }
+  )();
+
+const getCachedSiteConfig = unstable_cache(
+  () => prisma.siteConfig.findFirst({ select: { enableAI: true } }),
+  ["site-config-quiz"],
+  { revalidate: 3600 }
+);
+
 export default async function QuizPage({ params }: { params: { paperId: string } }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const paper = await prisma.pastPaper.findUnique({
-    where: { id: params.paperId },
-    select: {
-      id: true,
-      title: true,
-      timeLimitMin: true,
-      aiExplanationEnabled: true,
-      allowAiDuringQuiz: true,
-      secureExamMode: true,
-      restrictCopyPaste: true,
-      trackFocusLoss: true,
-      // @ts-ignore
-      isPrivate: true,
-      // @ts-ignore
-      randomizeQuestions: true,
-    },
-  });
+  const [paper, siteConfig] = await Promise.all([
+    getCachedPaper(params.paperId),
+    getCachedSiteConfig()
+  ]);
 
   if (!paper) notFound();
   // @ts-ignore
@@ -38,9 +56,6 @@ export default async function QuizPage({ params }: { params: { paperId: string }
     notFound();
   }
 
-  const siteConfig = await prisma.siteConfig
-    .findFirst({ select: { enableAI: true } })
-    .catch(() => null);
   const siteAiEnabled = siteConfig?.enableAI !== false;
 
   const questions = await loadQuestionsForPastPaper(paper.id);
@@ -59,6 +74,7 @@ export default async function QuizPage({ params }: { params: { paperId: string }
       secureExamMode={paper.secureExamMode === true}
       restrictCopyPaste={paper.restrictCopyPaste === true}
       trackFocusLoss={paper.trackFocusLoss === true}
+      currentUserId={session.user.id}
     />
   );
 }

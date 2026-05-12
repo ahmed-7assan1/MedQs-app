@@ -379,6 +379,7 @@ export function LectureVideoStudio({
                 <AnimatePresence>
                   {aiSummary && (
                     <motion.div 
+                      key="ai-summary"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="rounded-[12px] border border-[#4f46e5]/30 bg-[#1e1b4b]/40 p-5 space-y-3 relative overflow-hidden shadow-2xl backdrop-blur-md"

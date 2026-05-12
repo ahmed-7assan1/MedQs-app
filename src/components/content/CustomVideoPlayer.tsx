@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play, Pause, Volume2, VolumeX, Maximize, Minimize,
   Settings, Check, Gauge, RotateCcw, Languages, ChevronRight, ArrowLeft, CheckCircle2,
-  VideoOff, SkipBack, SkipForward, Info, Loader2
+  VideoOff, SkipBack, SkipForward, Info, Loader2, Monitor
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,7 +55,8 @@ function mapYouTubeQuality(q: string): string {
     medium: "360p",
     small: "240p",
     tiny: "144p",
-    auto: "Auto"
+    auto: "Auto",
+    auto_tg: "HD (Telegram)"
   };
   return map[q] || q;
 }
@@ -103,9 +104,28 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
   const isEmbed = isSharePoint || url.includes("/embed/");
 
   const driveStreamUrl = driveId ? getDriveStreamUrl(driveId) : null;
-  const isTelegram = url.includes("/api/v1/telegram/video/");
-  const isHtml5 = (!ytId && !driveId && (/\.(mp4|webm|ogg)$/i.test(url) || isTelegram)) || (driveId && useNativeForDrive);
+  const isTelegram = url?.includes("/api/v1/telegram/video/") || url?.includes("/api/v1/files/telegram/");
+  const isHtml5 = (!ytId && !driveId && (/\.(mp4|webm|ogg)$/i.test(url || "") || isTelegram)) || (driveId && useNativeForDrive);
 
+  // For HTML5/Telegram videos, set default playback rates since they don't come from the YT API
+  useEffect(() => {
+    if (isHtml5 && availableRates.length === 0) {
+      setAvailableRates([0.5, 0.75, 1, 1.25, 1.5, 2]);
+    }
+    if (isHtml5 && availableQualities.length === 0) {
+      setAvailableQualities(["auto_tg"]);
+      setSelectedQuality("auto_tg");
+    }
+  }, [isHtml5]);
+
+  // Sync volume and rate to videoRef when it is ready
+  useEffect(() => {
+    if (videoRef.current && isHtml5) {
+      videoRef.current.volume = volume;
+      videoRef.current.muted = muted;
+      videoRef.current.playbackRate = playbackRate;
+    }
+  }, [videoReady, isHtml5]);
 
   useEffect(() => {
     setMounted(true);
@@ -329,6 +349,9 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         if (ytPlayerRef.current?.unMute) ytPlayerRef.current.unMute();
       }
     }
+    if (videoRef.current) {
+      videoRef.current.muted = next;
+    }
   };
 
   const toggleFullscreen = (e?: React.MouseEvent) => {
@@ -336,6 +359,20 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
     if (!wrapperRef.current) return;
     if (document.fullscreenElement) document.exitFullscreen();
     else wrapperRef.current.requestFullscreen();
+  };
+
+  const togglePip = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!videoRef.current) return;
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else {
+        await videoRef.current.requestPictureInPicture();
+      }
+    } catch (err) {
+      console.error("PiP error:", err);
+    }
   };
 
   const [hoverPosition, setHoverPosition] = useState<number | null>(null);
@@ -360,6 +397,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         <AnimatePresence>
           {(showControls || buffering || !videoReady) && (
             <motion.div 
+              key="security-masks"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -388,46 +426,52 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         onClick={(ytId || isHtml5) ? handleContainerClick : undefined}
       >
 
-        {!videoReady && ytId && (
+        {((ytId || isHtml5) && !videoReady) && (
           <div className="absolute inset-0 z-10 bg-black">
-            <img 
-              src={`https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`} 
-              className="h-full w-full object-cover opacity-60 blur-[1px]" 
-              alt=""
-            />
+            {ytId ? (
+              <img 
+                src={`https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`} 
+                className="h-full w-full object-cover opacity-60 blur-[1px]" 
+                alt=""
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[#0A0A0B] flex items-center justify-center">
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-transparent animate-pulse" />
+                </div>
+              </div>
+            )}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+               {isTelegram && (
+                 <div className="mb-2 flex flex-col items-center gap-2">
+                    <div className="rounded-full bg-indigo-500/20 px-4 py-1.5 border border-indigo-500/30 backdrop-blur-md animate-bounce">
+                       <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Secured Telegram Stream</span>
+                    </div>
+                 </div>
+               )}
+
               <button 
                 onClick={togglePlayPause}
-                className="group/play relative flex h-20 w-20 items-center justify-center rounded-full bg-red-600 text-white shadow-[0_0_50px_rgba(220,38,38,0.4)] transition-all hover:scale-110 hover:bg-red-500"
+                className={cn(
+                  "group/play relative flex h-24 w-24 items-center justify-center rounded-full text-white shadow-2xl transition-all hover:scale-110",
+                  isTelegram ? "bg-indigo-600 shadow-indigo-500/40 hover:bg-indigo-500" : "bg-red-600 shadow-red-500/40 hover:bg-red-500"
+                )}
               >
-                {playing ? (
+                {playing || buffering ? (
                   <Loader2 className="h-10 w-10 animate-spin" />
                 ) : (
-                  <Play className="ml-1.5 h-10 w-10 fill-current" />
+                  <Play className={cn("h-10 w-10 fill-current", isTelegram ? "" : "ml-1.5")} />
                 )}
               </button>
-              {!playing && <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Click to start lecture</p>}
+              {(!playing && !buffering) && (
+                <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
+                  Click to start lecture
+                </p>
+              )}
             </div>
           </div>
         )}
 
-        {!videoReady && driveId && (
-          <div className="absolute inset-0 z-10 bg-[#07080f] flex flex-col items-center justify-center gap-6">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-red-600/20 blur-2xl animate-pulse" />
-              <button 
-                onClick={togglePlayPause}
-                className="group/play relative flex h-24 w-24 items-center justify-center rounded-full bg-red-600 text-white shadow-2xl transition-all hover:scale-110 hover:bg-red-500"
-              >
-                <Play className="ml-1.5 h-10 w-10 fill-current" />
-              </button>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-white text-lg font-bold tracking-tight">Ready to start your session?</p>
-              <p className="text-white/40 text-sm uppercase tracking-[0.2em] font-medium">Click to launch MedOneX Studio</p>
-            </div>
-          </div>
-        )}
         {ytId && (
           <div
             ref={iframeRef}
@@ -477,10 +521,15 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
               setDuration(e.currentTarget.duration);
               setVideoReady(true);
             }}
+            onCanPlay={() => {
+              setVideoReady(true);
+              setBuffering(false);
+            }}
             onWaiting={() => setBuffering(true)}
             onPlaying={() => {
               setBuffering(false);
               setPlaying(true);
+              setVideoReady(true);
             }}
             onPause={() => setPlaying(false)}
             onEnded={() => setPlaying(false)}
@@ -512,6 +561,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         <AnimatePresence>
           {showControls && !driveId && (
             <motion.div 
+              key="center-controls"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -584,10 +634,8 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
       {/* PREMIUM CONTROLS OVERLAY */}
       <AnimatePresence>
         {showControls && (ytId || isHtml5) && !driveId && (
-
-
-
           <motion.div
+            key="bottom-controls"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
@@ -658,6 +706,12 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
                           const v = parseFloat(e.target.value);
                           setVolume(v);
                           if (ytPlayerRef.current?.setVolume) ytPlayerRef.current.setVolume(v * 100);
+                          if (videoRef.current) {
+                            videoRef.current.volume = v;
+                            videoRef.current.muted = v === 0;
+                          }
+                          if (v === 0) setMuted(true);
+                          else if (muted) setMuted(false);
                         }}
                         className="h-1 w-full accent-red-600"
                       />
@@ -681,6 +735,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
                       const next = rates[idx];
                       setPlaybackRate(next);
                       if (ytPlayerRef.current?.setPlaybackRate) ytPlayerRef.current.setPlaybackRate(next);
+                      if (videoRef.current) videoRef.current.playbackRate = next;
                     }}
                     className="flex h-8 min-w-[50px] items-center justify-center rounded-lg bg-white/5 px-2.5 text-[11px] font-black tracking-widest text-white transition-all hover:bg-white/10 hover:text-red-500"
                   >
@@ -694,6 +749,13 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
                   >
                     <Settings className="h-6 w-6" />
                   </button>
+
+                  {/* Picture in Picture (Only for HTML5) */}
+                  {isHtml5 && (
+                    <button onClick={togglePip} className="text-white hover:text-red-500 transition-colors" title="Picture in Picture">
+                      <Monitor className="h-6 w-6" />
+                    </button>
+                  )}
 
                   {/* Fullscreen */}
                   <button onClick={toggleFullscreen} className="text-white hover:text-red-500 transition-colors">
@@ -719,6 +781,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
             <AnimatePresence>
               {showSettings && (
                 <motion.div
+                  key="settings-popup"
                   initial={{ opacity: 0, scale: 0.9, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 10 }}
@@ -757,7 +820,12 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
                           </button>
                         ))}
                         {settingsView === "speed" && availableRates.map(r => (
-                          <button key={r} onClick={() => { setPlaybackRate(r); if (ytPlayerRef.current?.setPlaybackRate) ytPlayerRef.current.setPlaybackRate(r); setSettingsView("main"); }} className="flex w-full items-center justify-between px-4 py-2.5 text-sm hover:bg-white/5">
+                          <button key={r} onClick={() => {
+                            setPlaybackRate(r);
+                            if (ytPlayerRef.current?.setPlaybackRate) ytPlayerRef.current.setPlaybackRate(r);
+                            if (videoRef.current) videoRef.current.playbackRate = r;
+                            setSettingsView("main");
+                          }} className="flex w-full items-center justify-between px-4 py-2.5 text-sm hover:bg-white/5">
                             <span>{r}x</span>
                             {playbackRate === r && <Check className="h-4 w-4 text-red-500" />}
                           </button>

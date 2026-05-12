@@ -48,8 +48,9 @@ FILTER_SEMESTER_ID = ""  # اتركه فارغاً للكل
 # الحد الأقصى لعدد الفيديوهات (0 = بلا حد)
 MAX_VIDEOS = 0
 
-# تأخير بين كل فيديو (ثوانٍ) — لتجنب حظر Telegram
-DELAY_BETWEEN_UPLOADS = 5
+# ─── إعدادات ملف الكوكيز (لحل مشكلة حظر YouTube) ─────────────────
+# قم بتصدير ملف cookies.txt من متصفحك وضعه في المجلد الرئيسي
+COOKIES_FILE = "cookies.txt"  # اتركه فارغاً إذا لم تكن تحتاجه
 
 print("✅ تم تحميل الإعدادات")
 
@@ -269,6 +270,11 @@ def download_youtube_video(url: str, video_id: str) -> str | None:
             'preferedformat': 'mp4',
         }],
     }
+
+    # إضافة ملف الكوكيز إذا وجد لحل مشكلة الحظر
+    if COOKIES_FILE and os.path.exists(COOKIES_FILE):
+        ydl_opts['cookiefile'] = COOKIES_FILE
+        # print("      🍪 تم استخدام ملف الكوكيز لتجاوز الحظر")
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:

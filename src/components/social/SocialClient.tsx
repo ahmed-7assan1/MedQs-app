@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useSearchParams } from "next/navigation";
 import { useCommunityShareStore } from "@/lib/store";
+import { InfiniteScrollContainer } from "@/components/ui/InfiniteScrollContainer";
 
 interface SocialCircle { id: string; name: string; type: string; status: string; _count: { posts: number } }
 interface Room {
@@ -45,6 +46,9 @@ export function SocialClient({
   const [activeCircle, setActiveCircle] = useState<SocialCircle | null>(circles[0] ?? null);
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [trendingTags, setTrendingTags] = useState<any[]>([]);
   const [threadQuery, setThreadQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "top">("recent");
@@ -62,14 +66,35 @@ export function SocialClient({
   const myJoinedRooms = myRooms.filter((r) => r.isMember || r.ownerId === currentUserId);
   const publicRooms = myRooms.filter((r) => r.isPublic && !r.isMember && r.ownerId !== currentUserId);
 
-  const loadPosts = async (circleId: string) => {
-    setLoading(true);
+  const loadPosts = async (circleId: string, isLoadMore = false) => {
+    if (isLoadMore) setIsLoadingMore(true);
+    else {
+      setLoading(true);
+      setPage(1);
+      setHasMore(true);
+    }
+    
+    const nextPage = isLoadMore ? page + 1 : 1;
+    
     try {
-      const res = await fetch(`/api/v1/forums/${circleId}/posts`, { cache: "no-store" });
+      const res = await fetch(`/api/v1/forums/${circleId}/posts?page=${nextPage}`, { cache: "no-store" });
       const data = await res.json();
-      setPosts(Array.isArray(data) ? data : []);
-    } catch { toast.error("Failed to load posts"); }
-    finally { setLoading(false); }
+      
+      const newPosts = Array.isArray(data) ? data : [];
+      
+      setPosts(prev => isLoadMore ? [...prev, ...newPosts] : newPosts);
+      setHasMore(newPosts.length === 20); // API limit is 20
+      if (isLoadMore) setPage(nextPage);
+    } catch { 
+      toast.error("Failed to load posts"); 
+    } finally { 
+      setLoading(false); 
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (activeCircle) loadPosts(activeCircle.id, true);
   };
 
   useEffect(() => { if (activeCircle) loadPosts(activeCircle.id); }, [activeCircle?.id]);
@@ -303,25 +328,37 @@ export function SocialClient({
               {loading ? (
                 <ForumPostListSkeleton count={4} />
               ) : posts.length > 0 ? (
-                <AnimatePresence mode="popLayout">
-                  {[...posts].sort((a, b) => {
-                     if (sortBy === "top") {
-                       const scoreA = (a._count?.likes || 0) * 2 + (a._count?.comments || 0);
-                       const scoreB = (b._count?.likes || 0) * 2 + (b._count?.comments || 0);
-                       return scoreB - scoreA;
-                     }
-                     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                  }).map((post) => (
-                    <PostCard
-                      key={post.id}
-
-                      post={post}
-                      currentUserId={currentUserId}
-                      currentUserRole={currentUserRole}
-                      currentUserUniversityId={currentUserUniversityId}
-                    />
-                  ))}
-                </AnimatePresence>
+                <InfiniteScrollContainer
+                  onLoadMore={loadMore}
+                  hasMore={hasMore}
+                  isLoading={isLoadingMore}
+                  className="flex flex-col gap-6"
+                  endComponent={
+                    <div className="py-12 flex flex-col items-center justify-center opacity-30 text-center">
+                       <ChatCircle size={32} className="mb-3" />
+                       <p className="text-[10px] font-black uppercase tracking-[0.3em]">Welcome to the beginning of {activeCircle?.name}</p>
+                    </div>
+                  }
+                >
+                  <AnimatePresence mode="popLayout">
+                    {[...posts].sort((a, b) => {
+                       if (sortBy === "top") {
+                         const scoreA = (a._count?.likes || 0) * 2 + (a._count?.comments || 0);
+                         const scoreB = (b._count?.likes || 0) * 2 + (b._count?.comments || 0);
+                         return scoreB - scoreA;
+                       }
+                       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                    }).map((post) => (
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        currentUserId={currentUserId}
+                        currentUserRole={currentUserRole}
+                        currentUserUniversityId={currentUserUniversityId}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </InfiniteScrollContainer>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn(GLASS, "rounded-[40px] py-24 flex flex-col items-center justify-center text-center")}>
                   <div className="h-20 w-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner">

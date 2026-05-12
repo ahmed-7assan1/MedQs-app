@@ -11,33 +11,45 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Please complete onboarding to see curriculum videos." }, { status: 400 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const page = Math.max(1, Number(searchParams.get("page") ?? 1));
+  const limit = Math.min(50, Math.max(4, Number(searchParams.get("limit") ?? 12)));
+  const skip = (page - 1) * limit;
+
   try {
-    const videos = await (prisma as any).lectureVideo.findMany({
-      where: {
-        lecture: {
-          subject: {
-            module: {
-              semesterId: semesterId
-            }
+    const where = {
+      lecture: {
+        subject: {
+          module: {
+            semesterId: semesterId
           }
         }
-      },
-      include: {
-        lecture: {
-          select: {
-            id: true,
-            title: true,
-            subject: {
-              select: { 
-                name: true,
-                moduleId: true
+      }
+    };
+
+    const [videos, total] = await Promise.all([
+      (prisma as any).lectureVideo.findMany({
+        where,
+        include: {
+          lecture: {
+            select: {
+              id: true,
+              title: true,
+              subject: {
+                select: { 
+                  name: true,
+                  moduleId: true
+                }
               }
             }
           }
-        }
-      },
-      orderBy: { createdAt: "desc" }
-    });
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit
+      }),
+      (prisma as any).lectureVideo.count({ where })
+    ]);
 
     const vIdList: string[] = [];
     const formattedRaw = videos.map((v: any) => {
@@ -61,7 +73,7 @@ export async function GET(req: NextRequest) {
        };
     });
 
-    // Resolve Channel Avatars & Titles from YouTube
+    // Resolve Channel Avatars & Titles from YouTube (Only for this page's videos)
     let channelMetadata: any = {};
     if (apiKey && vIdList.length > 0) {
        const idsStr = [...new Set(vIdList)].join(",");
@@ -90,7 +102,12 @@ export async function GET(req: NextRequest) {
        channelThumbnail: channelMetadata[v.videoId]?.thumbnail || null
     }));
 
-    return NextResponse.json(final, {
+    return NextResponse.json({
+      items: final,
+      total,
+      page,
+      hasMore: skip + videos.length < total
+    }, {
       headers: {
         "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
       },

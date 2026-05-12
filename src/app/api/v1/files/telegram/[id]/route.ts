@@ -63,34 +63,15 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     return NextResponse.json({ error: "Failed to retrieve link from Telegram" }, { status: 502 });
   }
 
-  // 4. Handle View/Stream (Proxy the content with streaming for performance)
   try {
-    const response = await fetch(telegramUrl);
-    if (!response.ok) throw new Error("Failed to fetch from Telegram CDN");
-
-    const { readable, writable } = new TransformStream();
-    response.body?.pipeTo(writable);
-
-    const headers = new Headers();
-    if (isDownload) {
-      const urlParts = telegramUrl.split("/");
-      let fileName = urlParts[urlParts.length - 1] || "file";
-      const contentType = response.headers.get("Content-Type") || "application/octet-stream";
-      if (!fileName.includes(".")) {
-        const ext = contentType.split("/")[1] || "bin";
-        fileName = `${fileName}.${ext}`;
-      }
-      headers.set("Content-Disposition", `attachment; filename="${fileName}"`);
-    } else {
-      headers.set("Content-Disposition", "inline");
-    }
-
-    headers.set("Content-Type", response.headers.get("Content-Type") || "application/octet-stream");
-    headers.set("Cache-Control", "public, max-age=3600");
+    // Redirect to the proven preview route to ensure consistency with the Forum
+    const previewUrl = new URL(`/api/v1/files/telegram/preview`, req.url);
+    previewUrl.searchParams.set("fileId", telegramFileId);
+    if (isDownload) previewUrl.searchParams.set("download", "true");
     
-    return new NextResponse(readable, { headers });
+    return NextResponse.redirect(previewUrl);
   } catch (err: any) {
-    console.error("[TG-PROXY] Streaming Error:", err);
+    console.error("[TG-PROXY] Error redirecting:", err.message);
     return NextResponse.redirect(telegramUrl);
   }
 }

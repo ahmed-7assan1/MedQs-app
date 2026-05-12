@@ -52,6 +52,7 @@ interface QuizClientProps {
   trackFocusLoss?: boolean;
   /** No login: submit via guest API and open result under /guest/attempt/... */
   guestQuiz?: boolean;
+  currentUserId?: string;
 }
 
 function metaStorageKey(paperId: string) {
@@ -74,6 +75,7 @@ export function QuizClient({
   restrictCopyPaste = false,
   trackFocusLoss = false,
   guestQuiz = false,
+  currentUserId,
 }: QuizClientProps) {
   const router = useRouter();
   const focusLossRef = useRef(0);
@@ -148,9 +150,16 @@ export function QuizClient({
     try {
       const raw = localStorage.getItem(metaStorageKey(paperId));
       if (!raw) return;
-      const j = JSON.parse(raw) as { flagged?: string[]; bookmarked?: string[] };
+      const j = JSON.parse(raw) as { 
+        flagged?: string[]; 
+        bookmarked?: string[];
+        answers?: Record<string, string>;
+        revealed?: Record<string, boolean>;
+      };
       if (Array.isArray(j.flagged)) setFlagged(new Set(j.flagged));
       if (Array.isArray(j.bookmarked)) setBookmarked(new Set(j.bookmarked));
+      if (j.answers) setAnswers(j.answers);
+      if (j.revealed) setRevealed(j.revealed);
     } catch {
       /* ignore */
     }
@@ -160,12 +169,17 @@ export function QuizClient({
     try {
       localStorage.setItem(
         metaStorageKey(paperId),
-        JSON.stringify({ flagged: [...flagged], bookmarked: [...bookmarked] })
+        JSON.stringify({ 
+          flagged: [...flagged], 
+          bookmarked: [...bookmarked],
+          answers,
+          revealed
+        })
       );
     } catch {
       /* ignore */
     }
-  }, [flagged, bookmarked, paperId]);
+  }, [flagged, bookmarked, answers, revealed, paperId]);
 
   useEffect(() => {
     setQuestionSeconds(0);
@@ -193,6 +207,8 @@ export function QuizClient({
       if (!res.ok) throw new Error("Submit failed");
       const data = await res.json();
       setSubmitted(true);
+      // Clear progress cache after successful submit
+      localStorage.removeItem(metaStorageKey(paperId));
       router.push(guestQuiz ? `/guest/attempt/${data.attemptId}` : `/quiz/attempt/${data.attemptId}`);
     } catch {
       toast.error("Submission failed. Please try again.");
@@ -216,6 +232,50 @@ export function QuizClient({
   const mins = timeLeft !== null ? String(Math.floor(timeLeft / 60)).padStart(2, "0") : null;
   const secs = timeLeft !== null ? String(timeLeft % 60).padStart(2, "0") : null;
   const timerWarn = timeLeft !== null && timeLeft < 120;
+
+  // --- Firebase Background Sync ---
+  // We sync to Firestore every 5 answers to avoid hitting Postgres during the session
+  const lastSyncedCount = useRef(0);
+  useEffect(() => {
+    const currentCount = Object.keys(answers).length;
+    if (currentCount > 0 && currentCount % 5 === 0 && currentCount !== lastSyncedCount.current) {
+      lastSyncedCount.current = currentCount;
+      if (!guestQuiz && currentUserId) {
+        // Dynamic import to keep component bundle lean
+        import("@/lib/firebase/config").then(({ db }) => {
+          const { doc, setDoc } = require("firebase/firestore");
+          const progressRef = doc(db, `users/${currentUserId}/quizProgress/${paperId}`);
+          setDoc(progressRef, { 
+            answers, 
+            revealed, 
+            updatedAt: new Date().toISOString(),
+            paperTitle 
+          }, { merge: true }).catch(() => {});
+        });
+      }
+    }
+  }, [answers, revealed, paperId, guestQuiz, currentUserId, paperTitle]);
+
+  useEffect(() => {
+    if (guestQuiz || !currentUserId) return;
+    // On mount, try to recover from Firestore if localStorage is missing/empty
+    const recover = async () => {
+      try {
+        const { db } = await import("@/lib/firebase/config");
+        const { doc, getDoc } = await import("firebase/firestore");
+        const progressRef = doc(db, `users/${currentUserId}/quizProgress/${paperId}`);
+        const snap = await getDoc(progressRef);
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.answers && Object.keys(answers).length === 0) {
+             setAnswers(data.answers);
+             if (data.revealed) setRevealed(data.revealed);
+          }
+        }
+      } catch (e) {}
+    };
+    recover();
+  }, [paperId, guestQuiz, currentUserId]);
 
   const onSelectAnswer = useCallback(
     (key: string) => {

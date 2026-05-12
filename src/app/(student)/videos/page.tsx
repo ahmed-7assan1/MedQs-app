@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { 
   Search, Play, Loader2, X, Clapperboard,
   Video, Clock, ArrowRight, Star, Home, ShieldCheck, Youtube
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { PostCardRedesigned } from "@/components/forum/PostCardRedesigned";
+import { InfiniteScrollContainer } from "@/components/ui/InfiniteScrollContainer";
 
 interface Instructor {
   id: string;
@@ -36,28 +37,67 @@ export default function VideosHubPage() {
   const [searchResults, setSearchResults] = useState<VideoResult[]>([]);
   const [curriculumVideos, setCurriculumVideos] = useState<VideoResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [activeSubject, setActiveSubject] = useState("All");
   const [posts, setPosts] = useState<any[]>([]);
   const [modules, setModules] = useState<string[]>([]);
 
+  // Initial Fetch (Static data and Page 1)
   useEffect(() => {
-    Promise.all([
-      fetch("/api/v1/videos/instructors").then(r => r.json()),
-      fetch("/api/v1/videos/curriculum").then(r => r.json()),
-      fetch("/api/v1/feed?limit=10").then(r => r.json()),
-      fetch("/api/v1/modules-all").then(r => r.json()),
-    ]).then(([instData, currData, postData, modData]) => {
-      setInstructors(Array.isArray(instData) ? instData : []);
-      setCurriculumVideos(Array.isArray(currData) ? currData : []);
-      setPosts(Array.isArray(postData) ? postData : []);
-      if (Array.isArray(modData)) {
-        const uniqueNames = Array.from(new Set(modData.map((m: any) => m.name)));
-        setModules(["All", ...uniqueNames.slice(0, 8)]);
+    const init = async () => {
+      try {
+        const [instRes, currRes, postRes, modRes] = await Promise.all([
+          fetch("/api/v1/videos/instructors"),
+          fetch("/api/v1/videos/curriculum?page=1&limit=12"),
+          fetch("/api/v1/feed?limit=10"),
+          fetch("/api/v1/modules-all")
+        ]);
+
+        const instData = await instRes.json();
+        const currData = await currRes.json();
+        const postData = await postRes.json();
+        const modData = await modRes.json();
+
+        setInstructors(Array.isArray(instData) ? instData : []);
+        setCurriculumVideos(currData?.items || []);
+        setHasMore(currData?.hasMore ?? false);
+        setPosts(Array.isArray(postData) ? postData : []);
+        
+        if (Array.isArray(modData)) {
+          const uniqueNames = Array.from(new Set(modData.map((m: any) => m.name)));
+          setModules(["All", ...uniqueNames.slice(0, 8)]);
+        }
+      } catch (err) {
+        console.error("Failed to load videos:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    };
+    init();
   }, []);
+
+  // Load More function
+  const loadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    const nextPage = page + 1;
+    try {
+      const res = await fetch(`/api/v1/videos/curriculum?page=${nextPage}&limit=12`);
+      const data = await res.json();
+      if (data?.items) {
+        setCurriculumVideos(prev => [...prev, ...data.items]);
+        setHasMore(data.hasMore);
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error("Failed to load more videos:", err);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   // ── Instant search (no debounce — filters locally + fires API simultaneously)
   const localFiltered = useMemo(() => {
@@ -230,7 +270,17 @@ export default function VideosHubPage() {
               <p className="text-xl font-black uppercase tracking-widest">No signals found</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <InfiniteScrollContainer
+              onLoadMore={loadMore}
+              hasMore={hasMore}
+              isLoading={isLoadingMore}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              endComponent={
+                <div className="col-span-full py-10 text-center opacity-30">
+                   <p className="text-[10px] font-black uppercase tracking-[0.3em]">End of clinical curriculum</p>
+                </div>
+              }
+            >
               {feedItems.map((item, idx) => {
                 if (item.type === "post") {
                   return (
@@ -254,7 +304,7 @@ export default function VideosHubPage() {
 
                 return <VideoCard key={video.id} video={video} href={href} />;
               })}
-            </div>
+            </InfiniteScrollContainer>
           )}
         </section>
       </div>

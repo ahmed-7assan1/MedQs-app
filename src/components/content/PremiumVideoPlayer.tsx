@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Youtube, PlayCircle, MonitorPlay, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
+import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 
 interface VideoSource {
   id: string;
@@ -11,6 +12,7 @@ interface VideoSource {
   url: string;
   sourceType?: string;
   isTelegram?: boolean;
+  telegramFileId?: string;
 }
 
 interface PremiumVideoPlayerProps {
@@ -20,10 +22,18 @@ interface PremiumVideoPlayerProps {
 }
 
 export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: PremiumVideoPlayerProps) {
-  const firstUrl = primaryUrl || (extraVideos.length > 0 ? extraVideos[0].url : "");
+  // Logic to determine the real source URL (Forum-style for Telegram)
+  const getEffectiveUrl = (url: string, video?: VideoSource) => {
+    if (video?.telegramFileId) {
+      return `/api/v1/files/telegram/preview?fileId=${video.telegramFileId}`;
+    }
+    return url;
+  };
+
+  const initialUrl = getEffectiveUrl(primaryUrl || (extraVideos.length > 0 ? extraVideos[0].url : ""), extraVideos.find(v => v.url === primaryUrl) || extraVideos[0]);
   const firstTitle = primaryUrl ? title : (extraVideos.length > 0 ? extraVideos[0].title : title);
 
-  const [activeUrl, setActiveUrl] = useState(firstUrl);
+  const [activeUrl, setActiveUrl] = useState(initialUrl);
   const [activeTitle, setActiveTitle] = useState(firstTitle);
 
   if (!activeUrl && extraVideos.length === 0) {
@@ -35,8 +45,8 @@ export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: Prem
     );
   }
 
-  const isTelegramProxy = (url: string) => url.includes("/api/v1/telegram/video/");
-  const isYouTube = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
+  const isTelegramProxy = (url: string) => url?.includes("/api/v1/telegram/video/") || url?.includes("/api/v1/files/telegram/");
+  const isYouTube = (url: string) => url?.includes("youtube.com") || url?.includes("youtu.be");
 
   const getSourceIcon = (url: string) => {
     if (isTelegramProxy(url)) return Send;
@@ -73,7 +83,20 @@ export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: Prem
 
       {/* ── Video Stage ── */}
       <div className="relative w-full">
-        <CustomVideoPlayer url={activeUrl} title={activeTitle} />
+        {isYouTube(activeUrl) ? (
+          <CustomVideoPlayer 
+            key={activeUrl} 
+            url={activeUrl} 
+            title={activeTitle} 
+          />
+        ) : (
+          <ProfessionalVideoPlayer 
+            key={activeUrl} 
+            src={activeUrl} 
+            className="w-full"
+            minimal={true}
+          />
+        )}
       </div>
 
       {/* ── Source Switcher (If multiple videos) ── */}
@@ -83,8 +106,12 @@ export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: Prem
           <div className="flex gap-2 overflow-x-auto no-scrollbar">
             {primaryUrl && (
               <SourceButton
-                active={activeUrl === primaryUrl}
-                onClick={() => { setActiveUrl(primaryUrl); setActiveTitle(title); }}
+                active={activeUrl === getEffectiveUrl(primaryUrl, extraVideos.find(v => v.url === primaryUrl))}
+                onClick={() => { 
+                  const eff = getEffectiveUrl(primaryUrl, extraVideos.find(v => v.url === primaryUrl));
+                  setActiveUrl(eff); 
+                  setActiveTitle(title || ""); 
+                }}
                 label="Main"
                 icon={MonitorPlay}
               />
@@ -92,8 +119,12 @@ export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: Prem
             {extraVideos.map((v) => (
               <SourceButton
                 key={v.id}
-                active={activeUrl === v.url}
-                onClick={() => { setActiveUrl(v.url); setActiveTitle(v.title); }}
+                active={activeUrl === getEffectiveUrl(v.url, v)}
+                onClick={() => { 
+                  const eff = getEffectiveUrl(v.url, v);
+                  setActiveUrl(eff); 
+                  setActiveTitle(v.title || ""); 
+                }}
                 label={getSourceLabel(v)}
                 icon={getSourceIcon(v.url)}
                 isTelegram={v.isTelegram || isTelegramProxy(v.url)}

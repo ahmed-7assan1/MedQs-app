@@ -185,9 +185,10 @@ export function ProfessionalVideoPlayer({
     <div 
       ref={containerRef}
       className={cn(
-        "relative group bg-black rounded-[24px] overflow-hidden shadow-2xl border border-white/10 select-none",
+        "relative group bg-black rounded-[24px] overflow-hidden shadow-2xl border border-white/10 select-none w-full",
         className
       )}
+      style={{ aspectRatio: "16/9" }}
       onMouseMove={() => setShowControls(true)}
       onClick={() => setShowControls(true)}
     >
@@ -204,21 +205,25 @@ export function ProfessionalVideoPlayer({
           <div className="absolute inset-0 z-10 bg-transparent cursor-pointer" onClick={togglePlay} />
         </div>
       ) : (
-        <video
-          ref={videoRef}
-          src={src}
-          poster={poster}
-          className="w-full h-full object-contain cursor-pointer"
-          onTimeUpdate={handleTimeUpdate}
-          onWaiting={() => setIsLoading(true)}
-          onCanPlay={() => {
-            setIsLoading(false);
-            setDuration(videoRef.current?.duration || 0);
-          }}
-          onEnded={() => setIsPlaying(false)}
-          onClick={togglePlay}
-          playsInline
-        />
+          <video
+            ref={videoRef}
+            src={src}
+            poster={poster}
+            className="w-full h-full object-contain cursor-pointer absolute inset-0"
+            onTimeUpdate={handleTimeUpdate}
+            onWaiting={() => setIsLoading(true)}
+            onCanPlay={() => {
+              setIsLoading(false);
+              setDuration(videoRef.current?.duration || 0);
+            }}
+            onError={(e) => {
+              console.error("Video playback error:", e);
+              setIsLoading(false);
+            }}
+            onEnded={() => setIsPlaying(false)}
+            onClick={togglePlay}
+            playsInline
+          />
       )}
 
       {/* Loading Spinner */}

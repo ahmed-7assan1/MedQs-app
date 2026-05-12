@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
-import { syncFileToTelegram } from "@/lib/telegram-storage";
+import { syncFileToTelegram, extractTelegramFileInfo } from "@/lib/telegram-storage";
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
   const session = await auth();
@@ -47,9 +47,16 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   const sortOrder = await prisma.lectureVideo.count({ where: { lectureId: id } });
   
-  // Optional: Sync to Telegram if it's a direct link
+  // Logic to handle different URL types
   const isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
-  const tgSync = !isYoutube ? await syncFileToTelegram(url, title, "video/mp4") : null;
+  const isTgLink = url.includes('t.me/');
+  
+  let tgSync: any = null;
+  if (isTgLink) {
+    tgSync = await extractTelegramFileInfo(url);
+  } else if (!isYoutube) {
+    tgSync = await syncFileToTelegram(url, title, "video/mp4");
+  }
 
   const row = await prisma.lectureVideo.create({
     data: {
@@ -90,6 +97,10 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     }
   }
 
-  return NextResponse.json({ ...row, likedByMe: false }, { status: 201 });
+  return NextResponse.json({ 
+    ...row, 
+    url: row.telegramFileId ? `/api/v1/files/telegram/${row.id}` : row.url,
+    likedByMe: false 
+  }, { status: 201 });
 }
 
