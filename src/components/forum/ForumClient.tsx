@@ -109,19 +109,35 @@ export function ForumClient({
       .catch(() => {});
   }, []);
 
-  // ── Auto-refresh Polling (Real-time Feel) ──
+  // ── Real-time Feed via Puter.js Event Broker (Zero DB Load) ──
   useEffect(() => {
     if (!activeForum) return;
-    
-    const pollInterval = setInterval(() => {
-      // Only poll if tab is visible to save battery/bandwidth
-      if (document.visibilityState === 'visible' && !loading && !posting) {
-        loadPosts(activeForum.id);
-      }
-    }, 15000); // 15s polling
+    let puterUnsubscribe: (() => void) | null = null;
+    const channel = `forum-${activeForum.id}`;
 
-    return () => clearInterval(pollInterval);
-  }, [activeForum?.id, loading, posting]);
+    const setupRealtime = async () => {
+      if (typeof window !== "undefined" && (window as any).puter) {
+        try {
+          puterUnsubscribe = await (window as any).puter.broker.subscribe(channel, (data: any) => {
+            if (data && data.id && data.author) {
+              setPosts((prev) => {
+                if (prev.some((p) => p.id === data.id)) return prev;
+                return [data, ...prev];
+              });
+            }
+          });
+        } catch (e) {
+          console.error("Puter realtime setup failed:", e);
+        }
+      }
+    };
+
+    setupRealtime();
+
+    return () => {
+      if (puterUnsubscribe) puterUnsubscribe();
+    };
+  }, [activeForum?.id]);
 
   const handlePost = async (content: string, imageUrl: string, options?: any) => {
     const targetForumId = options?.forumId || activeForum?.id;
@@ -143,6 +159,13 @@ export function ForumClient({
         const newPost = await res.json();
         setPosts(prev => [newPost, ...prev]);
         toast.success("Post broadcasted!");
+        
+        // Broadcast to peers
+        if (typeof window !== "undefined" && (window as any).puter) {
+          const channel = `forum-${targetForumId}`;
+          (window as any).puter.broker.publish(channel, newPost);
+        }
+        
         return true;
       }
       return false;

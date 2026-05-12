@@ -12,16 +12,9 @@ export function NotificationsLoader({ userId }: { userId: string }) {
       .then(setNotifications)
       .catch(() => {});
 
-    // Poll every 30s as lightweight alternative to full WebSocket
-    // (WebSocket server would need a separate Node server or Pusher/Ably)
-    const interval = setInterval(() => {
-      fetch("/api/v1/notifications")
-        .then((r) => r.json())
-        .then(setNotifications)
-        .catch(() => {});
-    }, 30_000);
-
-    return () => clearInterval(interval);
+    // Notifications are loaded once on mount.
+    // Real-time updates are handled via Firebase Cloud Messaging (FCM) in FirebaseProvider.tsx
+    // to prevent hammering the database with 30-second polling intervals across 5000+ users.
   }, [userId, setNotifications, addNotification]);
 
   return null;

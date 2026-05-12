@@ -89,34 +89,39 @@ export function CommunityChatClient({
   };
 
   // ──────────────────────────────────────────────────────────────────
-  // Polling for new messages every 4s
+  // Real-time Messages via Puter.js Event Broker (Zero DB Load)
   // ──────────────────────────────────────────────────────────────────
-  const fetchNewMessages = useCallback(async () => {
-    try {
-      const res = await fetch("/api/v1/community/messages?limit=20");
-      if (!res.ok) return;
-      const data = await res.json();
-      const incoming: Message[] = data.messages || [];
-      if (!incoming.length) return;
-
-      setMessages((prev) => {
-        const existingIds = new Set(prev.map((m) => m.id));
-        const fresh = incoming.filter((m) => !existingIds.has(m.id));
-        if (!fresh.length) return prev;
-        const updated = [...prev, ...fresh];
-        latestIdRef.current = updated[updated.length - 1].id;
-        return updated;
-      });
-
-      // Auto-scroll if we were at bottom
-      if (isAtBottom) setTimeout(() => scrollToBottom(), 50);
-    } catch {}
-  }, [isAtBottom, scrollToBottom]);
-
   useEffect(() => {
-    pollingRef.current = setInterval(fetchNewMessages, 4000);
-    return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
-  }, [fetchNewMessages]);
+    let puterUnsubscribe: (() => void) | null = null;
+    const channel = `community-chat-${universityName || "global"}`;
+
+    const setupRealtime = async () => {
+      if (typeof window !== "undefined" && (window as any).puter) {
+        try {
+          puterUnsubscribe = await (window as any).puter.broker.subscribe(channel, (data: any) => {
+            if (data && data.id && data.author) {
+              // Only add if we don't already have it (from our own send)
+              setMessages((prev) => {
+                if (prev.some((m) => m.id === data.id)) return prev;
+                const updated = [...prev, data];
+                latestIdRef.current = data.id;
+                setTimeout(() => scrollToBottom(), 50);
+                return updated;
+              });
+            }
+          });
+        } catch (e) {
+          console.error("Puter realtime setup failed:", e);
+        }
+      }
+    };
+
+    setupRealtime();
+
+    return () => {
+      if (puterUnsubscribe) puterUnsubscribe();
+    };
+  }, [universityName, scrollToBottom]);
 
   // ──────────────────────────────────────────────────────────────────
   // Send message
@@ -138,6 +143,12 @@ export function CommunityChatClient({
         setAttachments([]);
         if (textareaRef.current) textareaRef.current.style.height = "auto";
         setTimeout(() => scrollToBottom(), 50);
+
+        // Broadcast to peers
+        if (typeof window !== "undefined" && (window as any).puter) {
+          const channel = `community-chat-${universityName || "global"}`;
+          (window as any).puter.broker.publish(channel, data.message);
+        }
       }
     } catch {
       toast.error("Failed to send message");
@@ -206,6 +217,12 @@ export function CommunityChatClient({
       if (data.message) {
         setMessages((prev) => [...prev, data.message]);
         setTimeout(() => scrollToBottom(), 50);
+
+        // Broadcast to peers
+        if (typeof window !== "undefined" && (window as any).puter) {
+          const channel = `community-chat-${universityName || "global"}`;
+          (window as any).puter.broker.publish(channel, data.message);
+        }
       }
     } catch {
       toast.error("Failed to send voice note");
