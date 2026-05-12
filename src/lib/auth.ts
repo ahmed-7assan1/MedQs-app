@@ -108,8 +108,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (session.nickname !== undefined) token.nickname = session.nickname;
         if (session.hideRank !== undefined) token.hideRank = session.hideRank;
       }
-      // Re-fetch role/semesterId from DB on every request (handles role changes)
-      if (token.id) {
+      // Optimized: Only re-fetch from DB if specifically requested (update) 
+      // or during initial sign-in. This saves 1 DB query per request per user.
+      if (token.id && (trigger === "update" || !token.role)) {
         const dbUser = await (prisma as any).user.findUnique({
           where: { id: token.id as string },
           select: {
@@ -118,14 +119,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             faculty: { select: { category: true } }
           },
         }).catch(() => null);
+
         if (dbUser) {
-          token.role       = dbUser.role;
+          token.role = dbUser.role;
           token.semesterId = dbUser.semesterId;
           token.universityId = dbUser.universityId;
-          token.facultyId  = dbUser.facultyId;
+          token.facultyId = dbUser.facultyId;
           token.facultyCategory = dbUser.faculty?.category;
-          token.nickname   = dbUser.nickname;
-          token.hideRank   = dbUser.hideRank;
+          token.nickname = dbUser.nickname;
+          token.hideRank = dbUser.hideRank;
           if (dbUser.name) token.name = dbUser.name;
           token.picture = dbUser.image ?? undefined;
         }
