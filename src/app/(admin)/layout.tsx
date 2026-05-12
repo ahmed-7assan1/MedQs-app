@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -9,13 +9,13 @@ import { AdminMobileNav } from "../../components/admin/AdminMobileNav";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import { LayoutDashboard, ArrowLeft } from "lucide-react";
 
-import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
-  const role = (session?.user as any)?.role;
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const role = user?.user_metadata?.role;
+  
   if (role !== "ADMIN" && role !== "SUPER_ADMIN") redirect("/dashboard");
-
+  
   const hubBadge = role === "SUPER_ADMIN" ? "Platform" : "Doctor";
 
   const siteConfig = await prisma.siteConfig
@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const siteName = siteConfig?.siteName ?? "MedQs";
 
   return (
-    <NextAuthProvider session={session}>
+    <>
       <SiteConfigProvider initial={{ siteName, logoUrl: siteConfig?.logoUrl ?? null }}>
         <div className="flex min-h-screen bg-background">
 
@@ -70,6 +70,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         </div>
       </SiteConfigProvider>
-    </NextAuthProvider>
+    </>
   );
 }

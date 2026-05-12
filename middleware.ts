@@ -1,5 +1,7 @@
-import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 const GUEST_QUIZ_COOKIE = "medq_guest_quiz_uid";
 
@@ -12,39 +14,47 @@ const API_PUBLIC_PREFIXES = [
   "/api/v1/leaderboard",
 ];
 
-/** Logged-out users may open these (no account). Quiz list uses `/guest/past-papers`. */
 const GUEST_BROWSABLE = ["/", "/modules", "/leaderboard", "/forum", "/profile"];
-
 const AUTH_REQUIRED = ["/profile/edit", "/notifications", "/quiz", "/register"];
 
-export default auth((req) => {
-  const { pathname } = req.nextUrl;
-  
-  // Mobile Support: Map Bearer token to NextAuth Cookies
-  const authHeader = req.headers.get("authorization");
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.split(" ")[1];
-    // Set both to cover local dev and production over HTTPS
-    req.cookies.set("authjs.session-token", token);
-    req.cookies.set("__Secure-authjs.session-token", token);
-  }
+export async function middleware(req: NextRequest) {
+  // Update Supabase session cookies
+  let response = await updateSession(req);
 
-  const session = req.auth;
-  const role = (session?.user as { role?: string } | undefined)?.role;
-  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
-  const isLoggedIn = !!session?.user;
+  const { pathname } = req.nextUrl;
+
+  // Create a minimal client to check session
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {},
+        remove(name: string, options: CookieOptions) {},
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
+  // For role-based checks, we might need a profile table fetch or user metadata
+  const isAdmin = user?.user_metadata?.role === "ADMIN" || user?.user_metadata?.role === "SUPER_ADMIN";
   const guestQuizId = req.cookies.get(GUEST_QUIZ_COOKIE)?.value?.trim();
 
   if (pathname.startsWith("/login") || pathname.startsWith("/api/auth")) {
-    return NextResponse.next();
+    return response;
   }
 
   if (pathname.startsWith("/guest") || pathname.startsWith("/api/v1/guest-quiz")) {
-    return NextResponse.next();
+    return response;
   }
 
   if (API_PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
+    return response;
   }
 
   if (!isLoggedIn && pathname === "/dashboard") {
@@ -77,16 +87,11 @@ export default auth((req) => {
   const needsAuth = AUTH_REQUIRED.some((p) => pathname.startsWith(p));
 
   if (!isLoggedIn) {
-    if (isGuestBrowsable && !needsAuth) return NextResponse.next();
+    if (isGuestBrowsable && !needsAuth) return response;
     if (!pathname.startsWith("/api")) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const semesterId = (session!.user as { semesterId?: string | null }).semesterId;
-  if (!semesterId && !isAdmin && !pathname.startsWith("/api") && pathname !== "/register") {
-    return NextResponse.redirect(new URL("/register", req.url));
   }
 
   if (pathname.startsWith("/admin") && pathname.includes("_")) {
@@ -98,8 +103,8 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  return NextResponse.next();
-});
+  return response;
+}
 
 export const config = {
   matcher: [

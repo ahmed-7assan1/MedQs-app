@@ -70,11 +70,6 @@ export default async function SocialPage() {
 
   const { universityId, semesterId, userId, role } = scope;
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { name: true, image: true },
-  });
-
   const [forums, rooms] = await Promise.all([
     getCachedForums(universityId, semesterId ?? null, userId, isAdminRole(role)),
     getCachedRooms(universityId, userId),
@@ -92,8 +87,8 @@ export default async function SocialPage() {
       circles={forums as any}
       rooms={roomsWithMeta as any}
       currentUserId={userId}
-      currentUserName={user?.name ?? undefined}
-      currentUserImage={user?.image ?? undefined}
+      currentUserName={session.user.name ?? undefined}
+      currentUserImage={session.user.image ?? undefined}
       currentUserRole={role}
       currentUserUniversityId={universityId}
     />

@@ -42,63 +42,58 @@ function getModuleAccent(name: string): { bg: string; icon: any; border: string;
 export default async function ModulesPage() {
   const session = await auth();
   const isGuest = !session?.user?.id;
-  const userId = session?.user?.id;
-  const role = (session?.user as { role?: string } | undefined)?.role;
+  const user = session?.user;
+  const userId = user?.id;
+  const semesterId = (user as any)?.semesterId;
+  const role = (user as any)?.role;
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
-  const user = userId
-    ? await prisma.user.findUnique({ where: { id: userId }, select: { semesterId: true } })
-    : null;
-
-  // Fetch with timeout to prevent blank screen hangs
-  const [modules, dbTotalMastered] = await Promise.race([
-    Promise.all([
-      prisma.module.findMany({
-        where: { semesterId: user?.semesterId ?? "__none__" },
-        orderBy: { name: "asc" },
+  // Fetch modules for the user's semester
+  const modules = await prisma.module.findMany({
+    where: { semesterId: semesterId ?? "__none__" },
+    orderBy: { name: "asc" },
+    include: {
+      subjects: {
         include: {
-          subjects: {
-            include: {
-              lectures: {
-                select: {
-                  _count: { select: { questions: true } },
-                  questions: { select: { difficulty: true } },
-                },
-              },
+          lectures: {
+            select: {
+              _count: { select: { questions: true } },
+              questions: { select: { difficulty: true } },
             },
           },
         },
-      }),
-      userId 
-        ? prisma.quizAttemptItem.count({ where: { attempt: { userId }, isCorrect: true } })
-        : Promise.resolve(0)
-    ]),
-    new Promise<[any[], number]>((_, reject) => 
-      setTimeout(() => reject(new Error("Database Timeout")), 5000)
-    )
-  ]).catch((err) => {
-    console.error("[ModulesPage] Error:", err);
-    return [[], 0] as [any[], number];
-  });
-
-  const correctByModule: Record<string, Set<string>> = {};
-  if (userId && modules.length > 0) {
-    const items = await prisma.quizAttemptItem.findMany({
-      where: { attempt: { userId }, isCorrect: true },
-      select: {
-        questionId: true,
-        question: { select: { lecture: { select: { subject: { select: { moduleId: true } } } } } },
       },
-    });
+    },
+  }).catch(() => []);
+
+  // Fetch mastery counts efficiently
+  let totalMastered = 0;
+  const correctByModule: Record<string, Set<string>> = {};
+
+  if (userId && modules.length > 0) {
+    // Single query to get all correct questions for this user
+    const [dbTotalMastered, items] = await Promise.all([
+      prisma.quizAttemptItem.count({ where: { attempt: { userId }, isCorrect: true } }).catch(() => 0),
+      prisma.quizAttemptItem.findMany({
+        where: { attempt: { userId }, isCorrect: true },
+        select: {
+          questionId: true,
+          question: { select: { lecture: { select: { subject: { select: { moduleId: true } } } } } },
+        },
+      }).catch(() => []),
+    ]);
+
+    totalMastered = dbTotalMastered;
     for (const item of items) {
       const moduleId = item.question.lecture.subject.moduleId;
       if (!moduleId) continue;
       if (!correctByModule[moduleId]) correctByModule[moduleId] = new Set();
       correctByModule[moduleId].add(item.questionId);
     }
-  }
 
-  const totalMastered = Object.values(correctByModule).reduce((acc, set) => acc + set.size, dbTotalMastered);
+    // Add unique set sizes to total
+    totalMastered = Object.values(correctByModule).reduce((acc, set) => acc + set.size, totalMastered);
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#07080f] pb-32 pt-0">

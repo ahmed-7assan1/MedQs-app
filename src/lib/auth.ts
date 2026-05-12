@@ -1,159 +1,45 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import Facebook from "next-auth/providers/facebook";
-import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import type { PrismaClient } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
 
-const CredentialsSchema = z.object({
-  email:     z.string().email().optional(),
-  studentId: z.string().min(1).optional(),
-  password:  z.string().min(6),
-});
+export const auth = async () => {
+  const supabase = createClient();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  // Use the incoming Host when building OAuth redirect_uri (needed on Vercel etc. if URL env drifts).
-  trustHost: true,
-  adapter: PrismaAdapter(prisma as unknown as PrismaClient),
-  session: { strategy: "jwt" },
-  providers: [
-    Google({
-      clientId:     process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "openid email profile"
-        }
-      }
-    }),
-    Facebook({
-      clientId:     process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-    }),
-    Credentials({
-      name: "credentials",
-      credentials: {
-        email:     { label: "Email",      type: "email" },
-        studentId: { label: "Student ID", type: "text" },
-        password:  { label: "Password",   type: "password" },
-        idToken:   { label: "Firebase ID Token", type: "text" }
+    // Return a session object compatible with NextAuth
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.name,
+        image: user.user_metadata?.avatar_url || user.user_metadata?.image,
+        role: user.user_metadata?.role,
+        semesterId: user.user_metadata?.semesterId,
+        facultyId: user.user_metadata?.facultyId,
+        universityId: user.user_metadata?.universityId,
+        studentId: user.user_metadata?.studentId,
+        nickname: user.user_metadata?.nickname,
+        facultyCategory: user.user_metadata?.facultyCategory,
       },
-      async authorize(rawCreds) {
-        // 1. Firebase Auth Bypass
-        if (rawCreds?.idToken) {
-          try {
-            const { adminAuth } = await import("@/lib/firebase/admin");
-            const decoded = await adminAuth.verifyIdToken(rawCreds.idToken as string);
-            const email = decoded.email || decoded.phone_number;
-            
-            if (!email) return null;
-            
-            let user = await prisma.user.findFirst({ where: { email } });
-            if (!user) {
-              user = await prisma.user.create({
-                data: {
-                  email,
-                  name: decoded.name || "New Student",
-                }
-              });
-            }
-            return user;
-          } catch (e) {
-            console.error("Firebase token verification failed:", e);
-            return null;
-          }
-        }
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    };
+  } catch (e) {
+    return null;
+  }
+};
 
-        // 2. Legacy Email/Password Auth
-        const parsed = CredentialsSchema.safeParse(rawCreds);
-        if (!parsed.success) return null;
-        const { email, studentId, password } = parsed.data;
+export const signIn = async (provider?: string, options?: any) => {
+  // Mock signIn for redirect logic or legacy calls
+  // In Supabase, signIn is handled by the client
+  return { url: "/login" }; 
+};
 
-        const user = await prisma.user.findFirst({
-          where: email ? { email } : studentId ? { studentId } : undefined,
-        });
+export const signOut = async () => {
+  const supabase = createClient();
+  await supabase.auth.signOut();
+};
 
-        if (!user || !user.password) return null;
-        const valid = await bcrypt.compare(password, user.password);
-        if (!valid) return null;
-        return user;
-      },
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user, account, trigger, session }) {
-      if (user) {
-        token.id         = user.id;
-        token.role       = (user as any).role;
-        token.semesterId = (user as any).semesterId;
-        token.universityId = (user as any).universityId;
-        token.facultyId  = (user as any).facultyId;
-        token.studentId  = (user as any).studentId;
-        token.nickname   = (user as any).nickname;
-        token.hideRank   = (user as any).hideRank;
-      }
-      if (account) {
-        token.accessToken = account.access_token;
-      }
-      // Legacy / edge: some JWTs only had `sub` (still the DB user id with Prisma adapter)
-      if (!token.id && token.sub) {
-        token.id = token.sub as string;
-      }
-      if (trigger === "update" && session) {
-        if (session.semesterId) token.semesterId = session.semesterId;
-        if ((session as any).universityId) token.universityId = (session as any).universityId;
-        if (session.nickname !== undefined) token.nickname = session.nickname;
-        if (session.hideRank !== undefined) token.hideRank = session.hideRank;
-      }
-      // Optimized: Only re-fetch from DB if specifically requested (update) 
-      // or during initial sign-in. This saves 1 DB query per request per user.
-      if (token.id && (trigger === "update" || !token.role)) {
-        const dbUser = await (prisma as any).user.findUnique({
-          where: { id: token.id as string },
-          select: {
-            role: true, semesterId: true, universityId: true, facultyId: true, nickname: true, hideRank: true,
-            name: true, image: true,
-            faculty: { select: { category: true } }
-          },
-        }).catch(() => null);
-
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.semesterId = dbUser.semesterId;
-          token.universityId = dbUser.universityId;
-          token.facultyId = dbUser.facultyId;
-          token.facultyCategory = dbUser.faculty?.category;
-          token.nickname = dbUser.nickname;
-          token.hideRank = dbUser.hideRank;
-          if (dbUser.name) token.name = dbUser.name;
-          token.picture = dbUser.image ?? undefined;
-        }
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        const uid = (token.id as string | undefined) || (token.sub as string | undefined);
-        if (uid) session.user.id = uid;
-        (session.user as any).role            = token.role;
-        (session.user as any).semesterId      = token.semesterId;
-        (session.user as any).universityId    = (token as any).universityId;
-        (session.user as any).facultyId       = (token as any).facultyId;
-        (session.user as any).facultyCategory = (token as any).facultyCategory;
-        (session.user as any).studentId       = token.studentId;
-        (session.user as any).nickname        = token.nickname;
-        (session.user as any).hideRank        = token.hideRank;
-        if (typeof token.name === "string") session.user.name = token.name;
-        if (token.picture) session.user.image = token.picture as string;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-    error:  "/login",
-  },
-});
+export const handlers = {
+  GET: () => new Response("Supabase Auth Active", { status: 200 }),
+  POST: () => new Response("Supabase Auth Active", { status: 200 }),
+};

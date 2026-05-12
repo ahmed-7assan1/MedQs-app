@@ -51,6 +51,8 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@uploadthing/react": "^7.3.3",
     "assemblyai": "^4.32.1",

@@ -8,9 +8,10 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    // "query" removed from dev logs — it floods the terminal and slows hot reload.
-    // Re-add temporarily if you need to debug a specific slow query.
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
+
+// Set connection timeouts at the client level if supported, 
+// but most are handled via the connection string params.
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

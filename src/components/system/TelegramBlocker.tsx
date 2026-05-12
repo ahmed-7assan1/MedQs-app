@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { 
   TelegramLogo, 
   ArrowRight, 
@@ -15,21 +15,20 @@ import toast from "react-hot-toast";
 // TelegramBlocker is now NON-BLOCKING — it wraps children always.
 // Telegram linking is optional. The banner only shows as a dismissable notice.
 export function TelegramBlocker({ children }: { children: React.ReactNode }) {
-  const { data: session, status, update } = useSession();
-  const user = session?.user as any;
+  const { user, loading: authLoading } = useAuth();
   
   const [showBanner, setShowBanner] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     // Only show the gentle banner if unverified and not yet dismissed this session
-    if (status === "authenticated" && user && !user.telegramVerified && user.role === "STUDENT") {
+    if (!authLoading && user && !(user as any).telegramVerified && (user as any).user_metadata?.role === "STUDENT") {
       const wasDismissed = sessionStorage.getItem("tg-banner-dismissed");
       if (!wasDismissed) setShowBanner(true);
     } else {
       setShowBanner(false);
     }
-  }, [status, user]);
+  }, [authLoading, user]);
 
   const handleDismiss = () => {
     sessionStorage.setItem("tg-banner-dismissed", "1");
@@ -42,13 +41,13 @@ export function TelegramBlocker({ children }: { children: React.ReactNode }) {
     <>
       {children}
       {showBanner && !dismissed && (
-        <TelegramOptionalBanner onDismiss={handleDismiss} onUpdate={update} />
+        <TelegramOptionalBanner onDismiss={handleDismiss} />
       )}
     </>
   );
 }
 
-function TelegramOptionalBanner({ onDismiss, onUpdate }: { onDismiss: () => void; onUpdate: () => Promise<any> }) {
+function TelegramOptionalBanner({ onDismiss }: { onDismiss: () => void }) {
   const [loading, setLoading] = useState(false);
 
   // Load Telegram Widget
@@ -63,7 +62,6 @@ function TelegramOptionalBanner({ onDismiss, onUpdate }: { onDismiss: () => void
         });
         if (res.ok) {
           toast.success("Telegram linked successfully!");
-          await onUpdate();
           onDismiss();
         } else {
           toast.error("Linking failed. Try again.");

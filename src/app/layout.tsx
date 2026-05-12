@@ -10,6 +10,7 @@ import { appFontVariableClassName } from "@/lib/app-fonts";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
 import { FirebaseProvider } from "@/components/providers/FirebaseProvider";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
+import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import "../styles/globals.css";
 
 import { unstable_cache } from "next/cache";
@@ -282,9 +283,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ChunkLoadRecovery />
         <FirebaseProvider>
           <ConfirmProvider>
-            <PageTransitionProvider>
+            <SupabaseAuthProvider>
               {children}
-            </PageTransitionProvider>
+            </SupabaseAuthProvider>
           </ConfirmProvider>
         </FirebaseProvider>
         <Toaster

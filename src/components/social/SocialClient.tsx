@@ -77,16 +77,30 @@ export function SocialClient({
     const nextPage = isLoadMore ? page + 1 : 1;
     
     try {
-      const res = await fetch(`/api/v1/forums/${circleId}/posts?page=${nextPage}`, { cache: "no-store" });
-      const data = await res.json();
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
       
-      const newPosts = Array.isArray(data) ? data : [];
+      const { data, error } = await supabase.rpc('get_forum_posts', {
+        p_forum_id: circleId,
+        p_user_id: currentUserId,
+        p_page: nextPage,
+        p_limit: 20
+      });
+
+      if (error) throw error;
+      
+      // Map Supabase result to match the expected format
+      const newPosts = (data as any[]).map(p => ({
+        ...p,
+        _count: { likes: p.likes_count, comments: p.comments_count }
+      }));
       
       setPosts(prev => isLoadMore ? [...prev, ...newPosts] : newPosts);
-      setHasMore(newPosts.length === 20); // API limit is 20
+      setHasMore(newPosts.length === 20); 
       if (isLoadMore) setPage(nextPage);
-    } catch { 
-      toast.error("Failed to load posts"); 
+    } catch (err: any) { 
+      console.error(err);
+      toast.error("Failed to load posts from cloud"); 
     } finally { 
       setLoading(false); 
       setIsLoadingMore(false);
@@ -125,10 +139,15 @@ export function SocialClient({
   }, [activeCircle?.id]);
 
   useEffect(() => {
-    fetch("/api/v1/social/trending")
-      .then(r => r.json())
-      .then(d => setTrendingTags(Array.isArray(d) ? d : []))
-      .catch(() => {});
+    const fetchTrends = async () => {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data } = await supabase.rpc('get_trending_tags');
+        setTrendingTags(Array.isArray(data) ? data : []);
+      } catch (e) {}
+    };
+    fetchTrends();
   }, []);
 
   useEffect(() => {

@@ -10,14 +10,14 @@ import {
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { FACULTY_CATEGORY_LABELS, type FacultyCategory } from "@/lib/faculty-categories";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { ResourcePreviewModal } from "@/components/admin/ResourcePreviewModal";
 import { SourceBookUploadModal } from "@/components/admin/SourceBookUploadModal";
 import { SyllabusModal } from "@/components/admin/SyllabusModal";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
 export default function MedicalLibraryPage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"library" | "source-books">("library");
   const [resourceType, setResourceType] = useState<string>("ALL");
   const [category, setCategory] = useState<FacultyCategory>("HUMAN_MEDICINE");
@@ -30,9 +30,9 @@ export default function MedicalLibraryPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [viewingSyllabus, setViewingSyllabus] = useState<any | null>(null);
 
-  const isAdmin = (session?.user as any)?.role === "ADMIN";
-  const facultyCategory = (session?.user as any)?.facultyCategory;
-  const facultyId = (session?.user as any)?.facultyId;
+  const isAdmin = (user as any)?.user_metadata?.role === "ADMIN" || (user as any)?.user_metadata?.role === "SUPER_ADMIN";
+  const facultyCategory = (user as any)?.user_metadata?.facultyCategory;
+  const facultyId = (user as any)?.user_metadata?.facultyId;
 
   // Auto-set category based on user session
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function MedicalLibraryPage() {
           resourceId: res.id,
           resourceType: res.originType,
           // Placeholder targets - in real usage, these would come from a selection modal
-          targetSemesterId: (session?.user as any)?.semesterId, 
+          targetSemesterId: (user as any)?.user_metadata?.semesterId, 
           targetSubjectId: "choose-target-subject-id" 
         })
       }),

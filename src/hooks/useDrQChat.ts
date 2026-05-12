@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { syncAllThreadsToFirestore, subscribeToThreads } from "@/lib/firebase/firestore";
 import { getAIEndpoint } from "@/lib/api-config";
 
@@ -259,8 +259,8 @@ async function streamOpenAICompat(
 // ─── Main Hook ────────────────────────────────────────────────────────────────
 
 export function useDrQChat() {
-  const { data: session } = useSession();
-  const userId = session?.user?.id as string | undefined;
+  const { user: authUser } = useAuth();
+  const userId = authUser?.id;
 
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
@@ -507,9 +507,9 @@ export function useDrQChat() {
           systemPrompt = persona.systemPrompt;
           
           // User Context
-          const userName = session?.user?.name || "Student";
-          const userUni = (session?.user as any)?.university?.name || "Medical University";
-          const userFaculty = (session?.user as any)?.faculty?.name || "Faculty of Medicine";
+          const userName = (authUser as any)?.user_metadata?.name || "Student";
+          const userUni = (authUser as any)?.user_metadata?.universityName || "Medical University";
+          const userFaculty = (authUser as any)?.user_metadata?.facultyName || "Faculty of Medicine";
           
           systemPrompt += `\n\nUSER CONTEXT: You are talking to ${userName}, a student at ${userUni}, ${userFaculty}. Use this to personalize the conversation if it feels natural. Always use the user's name at the start of the chat.`;
         } catch (e) {

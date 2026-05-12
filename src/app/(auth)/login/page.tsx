@@ -6,11 +6,11 @@ import { PLATFORM_COPY } from "@/lib/platform-copy";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Users, BookOpen } from "lucide-react";
 
-import { FirebaseLoginForm } from "@/components/auth/FirebaseLoginForm";
+import { SupabaseLoginForm } from "@/components/auth/SupabaseLoginForm";
 
 export default async function LoginPage() {
-  const session = await auth();
-  if (session?.user) redirect("/dashboard");
+  // const session = await auth();
+  // if (session?.user) redirect("/dashboard");
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#09080F]">
@@ -27,7 +27,7 @@ export default async function LoginPage() {
         </div>
 
         <div className="w-full space-y-8">
-          <FirebaseLoginForm />
+          <SupabaseLoginForm />
 
           <div className="flex flex-col gap-4 pt-6">
             <Link href="/guest/past-papers" className="text-center text-[11px] font-bold text-white/20 hover:text-primary transition-colors uppercase tracking-[0.2em]">

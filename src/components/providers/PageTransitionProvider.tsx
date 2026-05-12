@@ -7,17 +7,17 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
+        exit={{ opacity: 0 }}
         transition={{
-          duration: 0.3,
-          ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for a premium feel
+          duration: 0.18,
+          ease: "easeOut",
         }}
-        className="w-full h-full"
+        className="w-full flex-1 flex flex-col"
       >
         {children}
       </motion.div>
