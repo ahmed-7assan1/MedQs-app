@@ -64,6 +64,8 @@ function renderContent(text: string) {
   );
 }
 
+import Image from "next/image";
+
 export function PostCardRedesigned({
   post,
   currentUserId,
@@ -164,9 +166,11 @@ export function PostCardRedesigned({
       {/* ── Header ── */}
       <div className="flex items-center gap-3 p-4 pb-0">
         <Link href={`/profile/u/${post.author?.id}`} className="relative flex-shrink-0">
-          <img
+          <Image
             src={avatarUrl}
             alt=""
+            width={44}
+            height={44}
             className="h-11 w-11 rounded-2xl object-cover border border-white/10"
           />
           <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 rounded-full border-2 border-[#16152A]" />

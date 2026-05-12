@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 import { TelegramAudioPlayer } from "./TelegramAudioPlayer";
+import Image from "next/image";
 
 import dynamic from "next/dynamic";
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
@@ -87,7 +88,9 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                          <ProfessionalVideoPlayer src={item.url} className="w-full h-full" />
                       </div>
                     ) : (
-                      <img src={item.url} className="w-full h-full object-cover" alt="" />
+                      <div className="relative w-full h-full">
+                        <Image src={item.url} fill className="object-cover" alt="" unoptimized={item.url.includes("data:")} />
+                      </div>
                     )}
                   </div>
                 ))}
@@ -101,7 +104,9 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                         <ProfessionalVideoPlayer src={item.url} className="w-full h-full" />
                       </div>
                     ) : (
-                      <img key={i} src={item.url} className="w-full h-full object-contain shrink-0" alt="" />
+                      <div key={i} className="relative w-full h-full shrink-0">
+                        <Image src={item.url} fill className="object-contain" alt="" unoptimized={item.url.includes("data:")} />
+                      </div>
                     )
                   ))}
                 </div>
@@ -188,11 +193,15 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                 <ProfessionalVideoPlayer src={media[viewIndex].url} className="w-full h-full" />
               </div>
             ) : media[viewIndex].type === 'image' ? (
-              <img 
-                src={media[viewIndex].url} 
-                className="max-w-full max-h-full object-contain shadow-2xl animate-in zoom-in-95 duration-300 rounded-lg" 
-                alt="" 
-              />
+              <div className="relative w-full h-full">
+                <Image 
+                  src={media[viewIndex].url} 
+                  fill
+                  className="object-contain shadow-2xl animate-in zoom-in-95 duration-300 rounded-lg" 
+                  alt="" 
+                  unoptimized={media[viewIndex].url.includes("data:")}
+                />
+              </div>
             ) : (
               <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-white">
                 <iframe 

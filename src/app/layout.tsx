@@ -11,33 +11,43 @@ import { ConfirmProvider } from "@/contexts/ConfirmContext";
 import { FirebaseProvider } from "@/components/providers/FirebaseProvider";
 import "../styles/globals.css";
 
+import { unstable_cache } from "next/cache";
+
+const getCachedSiteConfig = unstable_cache(
+  async () => {
+    const fallback = {
+      siteName: "MedOneX",
+      logoUrl: null,
+      pwaIconUrl: null,
+      faviconUrl: null,
+      primaryColor: "#0d9488",
+      enableAI: true,
+      enableForum: true,
+      enableAds: true,
+      enableNotifs: true,
+      fontSans: "Plus Jakarta Sans",
+      fontArabic: "Tajawal",
+    };
+
+    try {
+      // Add a timeout to prevent the entire app from hanging on Prisma/DB issues
+      const config = await Promise.race([
+        prisma.siteConfig.findFirst(),
+        new Promise<null>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000))
+      ]);
+      return config ?? fallback;
+    } catch (err) {
+      console.error("[Layout] SiteConfig fetch failed or timed out:", err);
+      return fallback;
+    }
+  },
+  ["global-site-config"],
+  { revalidate: 3600, tags: ["site-config"] }
+);
+
 // Fetch site config server-side — cached per request by Next.js
 async function getSiteConfig() {
-  const fallback = {
-    siteName: "MedOneX",
-    logoUrl: null,
-    pwaIconUrl: null,
-    faviconUrl: null,
-    primaryColor: "#0d9488",
-    enableAI: true,
-    enableForum: true,
-    enableAds: true,
-    enableNotifs: true,
-    fontSans: "Plus Jakarta Sans",
-    fontArabic: "Tajawal",
-  };
-
-  try {
-    // Add a timeout to prevent the entire app from hanging on Prisma/DB issues
-    const config = await Promise.race([
-      prisma.siteConfig.findFirst(),
-      new Promise<null>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000))
-    ]);
-    return config ?? fallback;
-  } catch (err) {
-    console.error("[Layout] SiteConfig fetch failed or timed out:", err);
-    return fallback;
-  }
+  return getCachedSiteConfig();
 }
 
 const DEFAULT_PRIMARY_HEX = "#0ea5e9";
