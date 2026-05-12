@@ -61,30 +61,47 @@
     }
   }
 
-  /* ✨ PREMIUM GLASSMORPHISM 2.0 */
+  /* ✨ PREMIUM GLASSMORPHISM 2.0 (Patholytica Inspired) */
   .premium-glass {
-    @apply backdrop-blur-2xl;
+    @apply backdrop-blur-3xl;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.05) 100%
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.03) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 
-      0 8px 32px 0 rgba(0, 0, 0, 0.1),
+      0 8px 32px 0 rgba(0, 0, 0, 0.08),
       inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dark .premium-glass {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.03) 0%,
-      rgba(255, 255, 255, 0.01) 100%
+      rgba(255, 255, 255, 0.02) 0%,
+      rgba(255, 255, 255, 0.005) 100%
     );
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 
-      0 12px 40px 0 rgba(0, 0, 0, 0.4),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+      0 12px 40px 0 rgba(0, 0, 0, 0.3),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+  }
+
+  /* 🍃 SPRING ANIMATIONS (Make it feel alive) */
+  .spring-hover {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .spring-hover:hover {
+    transform: translateY(-4px) scale(1.02);
+  }
+  .spring-hover:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  .tap-spring:active {
+    transform: scale(0.96);
+    transition: transform 0.1s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* 🌈 MESH GRADIENT BACKGROUNDS */
@@ -96,11 +113,12 @@
       radial-gradient(at 100% 0%, hsla(320, 80%, 50%, 0.15) 0, transparent 50%);
   }
 
-  /* 🦴 SKELETON LOADERS: Premium feel */
+  /* 🦴 SKELETON LOADERS: Ultra-smooth pulse */
   .skeleton-box {
     overflow: hidden;
-    background: hsl(var(--muted) / 0.5);
+    background: hsl(var(--muted) / 0.4);
     position: relative;
+    border-radius: inherit;
   }
   .skeleton-box::after {
     content: "";
@@ -110,10 +128,10 @@
     background: linear-gradient(
       90deg,
       transparent 0,
-      hsl(var(--muted) / 0.8) 50%,
+      hsl(var(--muted) / 0.6) 50%,
       transparent 100%
     );
-    animation: shimmer 2s infinite;
+    animation: shimmer 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   @keyframes shimmer {

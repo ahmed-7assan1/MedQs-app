@@ -81,17 +81,17 @@ export default async function LandingPage() {
           {/* CTA */}
           <div className="animate-fade-up flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4" style={{ animationDelay: ".14s" }}>
             <Link href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-semibold text-white shadow-[0_12px_40px_-8px_rgba(37,99,235,0.55),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(37,99,235,0.65)]">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-semibold text-white shadow-[0_12px_40px_-8px_rgba(37,99,235,0.55),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-300 spring-hover tap-spring">
               Start for Free
               <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
             <Link href="/modules"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.03] bg-background/40 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-foreground backdrop-blur-xl transition-colors hover:bg-muted/20">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.03] bg-background/40 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-foreground backdrop-blur-xl transition-all duration-300 hover:bg-muted/20 spring-hover tap-spring">
               <Play className="h-4 w-4 fill-current" />
               Preview Curriculum
             </Link>
             <Link href="/guest/past-papers"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.02] bg-background/20 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-muted-foreground backdrop-blur-xl transition-all hover:bg-muted/10 hover:text-foreground">
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.02] bg-background/20 px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-medium text-muted-foreground backdrop-blur-xl transition-all duration-300 hover:bg-muted/10 hover:text-foreground spring-hover tap-spring">
               Browse as Guest
             </Link>
           </div>
@@ -101,7 +101,7 @@ export default async function LandingPage() {
             <p className="mb-5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Your Dashboard — at a glance</p>
             <div className="mx-auto grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
               {/* Streak card */}
-              <div className="relative overflow-hidden rounded-2xl border border-orange-500/25 bg-card p-4 text-left dark:bg-slate-900/60"
+              <div className="relative overflow-hidden rounded-2xl border border-orange-500/25 bg-card p-4 text-left dark:bg-slate-900/60 transition-all duration-300 spring-hover tap-spring"
                 style={{ background: "linear-gradient(135deg,rgba(249,115,22,.07) 0%,transparent 70%)", borderLeft: "3px solid #f97316" }}>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Streak</p>
                 <p className="mt-1 font-display text-3xl font-extrabold tabular-nums text-foreground">12d</p>
@@ -111,7 +111,7 @@ export default async function LandingPage() {
                 </div>
               </div>
               {/* Questions card */}
-              <div className="relative overflow-hidden rounded-2xl border border-teal-500/25 bg-card p-4 text-left dark:bg-slate-900/60"
+              <div className="relative overflow-hidden rounded-2xl border border-teal-500/25 bg-card p-4 text-left dark:bg-slate-900/60 transition-all duration-300 spring-hover tap-spring"
                 style={{ background: "linear-gradient(135deg,rgba(6,182,212,.07) 0%,transparent 70%)", borderLeft: "3px solid #06b6d4" }}>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Questions</p>
                 <p className="mt-1 font-display text-3xl font-extrabold tabular-nums text-foreground">48</p>
@@ -121,7 +121,7 @@ export default async function LandingPage() {
                 </div>
               </div>
               {/* Mastery card */}
-              <div className="relative overflow-hidden rounded-2xl border border-purple-500/25 bg-card p-4 text-left dark:bg-slate-900/60"
+              <div className="relative overflow-hidden rounded-2xl border border-purple-500/25 bg-card p-4 text-left dark:bg-slate-900/60 transition-all duration-300 spring-hover tap-spring"
                 style={{ background: "linear-gradient(135deg,rgba(139,92,246,.07) 0%,transparent 70%)", borderLeft: "3px solid #8b5cf6" }}>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Mastery</p>
                 <p className="mt-1 font-display text-3xl font-extrabold tabular-nums text-foreground">78%</p>
@@ -131,7 +131,7 @@ export default async function LandingPage() {
                 </div>
               </div>
               {/* Points card */}
-              <div className="relative overflow-hidden rounded-2xl border border-amber-500/25 bg-card p-4 text-left dark:bg-slate-900/60"
+              <div className="relative overflow-hidden rounded-2xl border border-amber-500/25 bg-card p-4 text-left dark:bg-slate-900/60 transition-all duration-300 spring-hover tap-spring"
                 style={{ background: "linear-gradient(135deg,rgba(234,179,8,.07) 0%,transparent 70%)", borderLeft: "3px solid #eab308" }}>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Points</p>
                 <p className="mt-1 font-display text-3xl font-extrabold tabular-nums text-foreground">2.4k</p>
@@ -196,7 +196,7 @@ export default async function LandingPage() {
               },
             ].map(({ step, icon: Icon, color, bg, border, title, desc }) => (
               <div key={step}
-                className="group relative overflow-hidden rounded-2xl border bg-card p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-slate-900/50"
+                className="group relative overflow-hidden rounded-2xl border bg-card p-7 transition-all duration-300 spring-hover tap-spring dark:bg-slate-900/50"
                 style={{ borderColor: border, background: `linear-gradient(135deg, ${bg} 0%, transparent 70%)`, borderLeft: `4px solid ${color}` }}>
                 <div className="mb-4 flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl text-white text-sm font-bold shadow-lg"
@@ -242,7 +242,7 @@ export default async function LandingPage() {
               { icon: Clock, color: "#0ea5e9", bg: "rgba(14,165,233,.08)", border: "rgba(14,165,233,.25)", title: "Study Workspace", desc: "Pomodoro timer, task list, and a digital canvas for diagrams — all in one focus room.", tag: "Focus" },
             ] as const).map(({ icon: Icon, color, bg, border, title, desc, tag }) => (
               <div key={title}
-                className="group relative overflow-hidden rounded-2xl border bg-card p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-slate-900/50"
+                className="group relative overflow-hidden rounded-2xl border bg-card p-7 transition-all duration-300 spring-hover tap-spring dark:bg-slate-900/50"
                 style={{ borderColor: border, borderLeft: `4px solid ${color}`, background: `linear-gradient(135deg, ${bg} 0%, transparent 70%)` }}>
                 <div className="mb-1 flex items-center justify-between">
                   <div className="rounded-xl p-2.5" style={{ background: bg }}>

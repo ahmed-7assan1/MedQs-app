@@ -13,8 +13,18 @@ import { LectureClient } from "@/components/content/LectureClient";
 import ReactMarkdown from "react-markdown";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
-import { AIAssistantPanel } from "@/components/ai/AIAssistant";
-import { PremiumVideoPlayer } from "@/components/content/PremiumVideoPlayer";
+import dynamic from "next/dynamic";
+
+// Dynamically import heavy components to reduce initial bundle size
+const AIAssistantPanel = dynamic(() => import("@/components/ai/AIAssistant").then(m => m.AIAssistantPanel), {
+  loading: () => <div className="h-96 w-full animate-pulse bg-white/5 rounded-3xl" />,
+  ssr: false
+});
+
+const PremiumVideoPlayer = dynamic(() => import("@/components/content/PremiumVideoPlayer").then(m => m.PremiumVideoPlayer), {
+  loading: () => <div className="aspect-video w-full animate-pulse bg-white/5 rounded-3xl" />,
+  ssr: false
+});
 
 type TabId = "overview" | "video" | "materials" | "recordings" | "flashcards" | "questions" | "notes" | "drq";
 
