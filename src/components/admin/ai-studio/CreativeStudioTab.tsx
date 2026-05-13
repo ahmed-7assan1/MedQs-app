@@ -32,7 +32,7 @@ const ART_STYLES = [
   { id: "oil-painting", name: "Oil Painting", prompt: "oil painting style, thick brush strokes, canvas texture, classical art" },
 ];
 
-export default function CreativeStudioPage() {
+export function CreativeStudioTab() {
   const [activeTab, setActiveTab] = useState<Tab>("image");
   const [loading, setLoading] = useState(true);
   const [studioEnabled, setStudioEnabled] = useState(false);

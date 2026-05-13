@@ -21,7 +21,7 @@ type DuplicateGroup = {
   }[];
 };
 
-export default function AdminDuplicatesPage() {
+export function DuplicatesTab() {
   const [groups, setGroups] = useState<DuplicateGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);

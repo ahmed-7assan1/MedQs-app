@@ -14,7 +14,6 @@ export function SupabaseLoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,23 +21,14 @@ export function SupabaseLoginForm() {
     setLoading(true);
     
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        toast.success("Account created! Check your email to verify.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        toast.success("Welcome back!");
-        router.push("/dashboard");
-        router.refresh();
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      toast.success("Welcome back!");
+      router.push("/dashboard");
+      router.refresh();
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "An error occurred");
@@ -53,7 +43,7 @@ export function SupabaseLoginForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       if (error) throw error;
@@ -110,18 +100,16 @@ export function SupabaseLoginForm() {
           disabled={loading}
           className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
         >
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (isSignUp ? "Create Account" : "Continue with Email")}
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Continue with Email"}
         </button>
         
         <div className="flex justify-between items-center px-1">
-           <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-[12px] text-white/40 hover:text-white transition-colors">
-              {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
-           </button>
-           {!isSignUp && (
-             <Link href="/forgot-password" className="text-[12px] text-primary/80 hover:text-primary transition-colors">
-               Forgot password?
-             </Link>
-           )}
+           <Link href="/register" className="text-[12px] text-white/40 hover:text-white transition-colors">
+              Don't have an account? Sign Up
+           </Link>
+           <Link href="/forgot-password" className="text-[12px] text-primary/80 hover:text-primary transition-colors">
+             Forgot password?
+           </Link>
         </div>
       </form>
 

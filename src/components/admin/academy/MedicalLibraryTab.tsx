@@ -16,7 +16,7 @@ import { SourceBookUploadModal } from "@/components/admin/SourceBookUploadModal"
 import { SyllabusModal } from "@/components/admin/SyllabusModal";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 
-export default function MedicalLibraryPage() {
+export function MedicalLibraryTab() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"library" | "source-books">("library");
   const [resourceType, setResourceType] = useState<string>("ALL");

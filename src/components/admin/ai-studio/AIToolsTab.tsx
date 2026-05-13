@@ -16,7 +16,7 @@ const WordExportModal = dynamic(() => import("@/components/admin/WordExportModal
 
 type AIProviderChoice = "auto" | "gemini" | "openai" | "anthropic" | "deepseek";
 
-export default function AIToolsPage() {
+export function AIToolsTab() {
   const [providerChoice, setProviderChoice] = useState<AIProviderChoice>("auto");
   const [customApiKey, setCustomApiKey] = useState("");
   const [customModel, setCustomModel] = useState("");

@@ -13,7 +13,7 @@ export async function redirectIncompleteStudentToRegister(session: Session | nul
       where: { id },
       select: { universityId: true, semesterId: true },
     });
-    if (!u?.universityId || !u?.semesterId) redirect("/register");
+    if (!u?.universityId || !u?.semesterId) redirect("/complete-profile");
   } catch (err) {
     // Avoid a full app crash when DB is temporarily unreachable.
     // Keep user on current route; other pages can retry once DB is back.

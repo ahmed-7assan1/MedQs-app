@@ -123,7 +123,7 @@ function JobCard({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
   );
 }
 
-export default function ColabTransferPage() {
+export function ColabTransferTab() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [workerAlive, setWorkerAlive] = useState(false);
   const [loading, setLoading] = useState(true);

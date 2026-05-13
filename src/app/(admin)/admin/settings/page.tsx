@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload, Settings, Globe, Layers, Plus } from "lucide-react";
+import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload, Settings, Globe, Layers, Plus, Cpu } from "lucide-react";
 import { ExportPanel } from "@/components/admin/ExportPanel";
 import { PersonalAIKeyCard } from "@/components/admin/PersonalAIKeyCard";
 import { ExternalAPIKeysCard } from "@/components/admin/ExternalAPIKeysCard";
@@ -49,7 +49,7 @@ const DEFAULTS: SiteConfig = {
 };
 
 export default function AdminSettingsPage() {
-  const [tab, setTab] = useState<"branding"|"social"|"features"|"export">("branding");
+  const [tab, setTab] = useState<"branding"|"social"|"features"|"export"|"developer">("branding");
   const [config, setConfig] = useState<SiteConfig>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -285,6 +285,7 @@ export default function AdminSettingsPage() {
     { id: "social",   label: "Social",        icon: Globe },
     { id: "features", label: "Features",      icon: ToggleRight },
     { id: "export",   label: "Export & Notif", icon: Megaphone },
+    { id: "developer",label: "Developer",     icon: Cpu },
   ];
 
   const toggles: { key: keyof SiteConfig; label: string; desc: string; superAdminOnly?: boolean }[] = [
@@ -552,32 +553,37 @@ export default function AdminSettingsPage() {
                     })}
                  </div>
               </div>
-
-              <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm">
-                 <ExternalAPIKeysCard />
-              </div>
-
-              <div className="rounded-2xl border border-white/[0.02] bg-card p-6 space-y-4 shadow-sm border-l-4 border-l-blue-500">
-                 <div>
-                    <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">Intelligence Hub</span>
-                    <h3 className="font-display text-lg font-bold">Preferred AI Provider</h3>
-                 </div>
-                 <MedqsSelect
-                   value={config.aiPreferredProvider}
-                   onChange={(e) => setConfig(c => ({ ...c, aiPreferredProvider: e.target.value as any }))}
-                   className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50 font-semibold"
-                 >
-                    <option value="auto">Auto-Select (Optimized)</option>
-                    <option value="gemini">Google Gemini Pro</option>
-                    <option value="openai">OpenAI GPT-4o</option>
-                    <option value="anthropic">Anthropic Claude</option>
-                    <option value="deepseek">DeepSeek AI</option>
-                 </MedqsSelect>
-                 <p className="text-[11px] text-muted-foreground italic leading-relaxed">
-                    System will automatically fallback if the primary provider is rate-limited or unavailable.
-                 </p>
-              </div>
            </div>
+        )}
+
+        {/* ── Developer Tab ── */}
+        {tab === "developer" && (
+            <div className="space-y-6">
+               <div className="rounded-2xl border border-white/[0.02] bg-card p-6 shadow-sm">
+                  <ExternalAPIKeysCard />
+               </div>
+
+               <div className="rounded-2xl border border-white/[0.02] bg-card p-6 space-y-4 shadow-sm border-l-4 border-l-blue-500">
+                  <div>
+                     <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">Intelligence Hub</span>
+                     <h3 className="font-display text-lg font-bold">Preferred AI Provider</h3>
+                  </div>
+                  <MedqsSelect
+                    value={config.aiPreferredProvider}
+                    onChange={(e) => setConfig(c => ({ ...c, aiPreferredProvider: e.target.value as any }))}
+                    className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50 font-semibold"
+                  >
+                     <option value="auto">Auto-Select (Optimized)</option>
+                     <option value="gemini">Google Gemini Pro</option>
+                     <option value="openai">OpenAI GPT-4o</option>
+                     <option value="anthropic">Anthropic Claude</option>
+                     <option value="deepseek">DeepSeek AI</option>
+                  </MedqsSelect>
+                  <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+                     System will automatically fallback if the primary provider is rate-limited or unavailable.
+                  </p>
+               </div>
+            </div>
         )}
 
         {/* ── Export Tab ── */}

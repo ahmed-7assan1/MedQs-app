@@ -22,7 +22,7 @@ interface Lecture  {
   checklist?: { id: string; items: { id: string; content: string; points: number }[] };
 }
 
-export default function AdminLecturesPage() {
+export function LecturesTab() {
   const [modules,  setModules]  = useState<Module[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [lectures, setLectures] = useState<Lecture[]>([]);

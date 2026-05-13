@@ -538,6 +538,7 @@ model User {
   studyRoomPostLikes   StudyRoomPostLike[]
   savedPosts           SavedPost[]
   taskCompletions      StudyRoomTaskCompletion[]
+  auditLogs            AuditLog[]
 }
 
 model TelegramConfig {
@@ -1051,6 +1052,7 @@ model MedicalTeam {
   lectures       Lecture[]
   posts          Post[]
   teamTasks      TeamTask[]
+  auditLogs      AuditLog[]
 
   @@index([facultyId])
   @@index([universityId])
@@ -1318,4 +1320,21 @@ model StudyRoomPostLike {
   user      User          @relation(fields: [userId], references: [id])
 
   @@unique([postId, userId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  entity    String   // e.g., "USER", "QUESTION", "SETTING"
+  entityId  String?
+  details   Json?
+  userId    String
+  teamId    String?  // If action was related to a team or by a team leader
+  createdAt DateTime @default(now())
+
+  user      User         @relation(fields: [userId], references: [id])
+  team      MedicalTeam? @relation(fields: [teamId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([teamId, createdAt])
 }

@@ -29,7 +29,7 @@ interface PastPaper {
   googleSheetsSyncEnabled?: boolean;
 }
 
-export default function AdminPastPapersPage() {
+export function PastPapersTab() {
   const confirm = useConfirm();
   const [papers, setPapers]     = useState<PastPaper[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);

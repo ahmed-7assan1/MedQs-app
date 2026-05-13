@@ -6,9 +6,10 @@ import { MEDICAL_TUTOR_SYSTEM_PREFIX } from '@/lib/medical-ai-prompts';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 const STORAGE_GROUP_ID = process.env.TELEGRAM_STORAGE_GROUP_ID;
-const BASE_URL = process.env.NEXTAUTH_URL || 'https://medonex.vercel.app';
+const BASE_URL = process.env.NEXTAUTH_URL || 'https://medqs0.vercel.app';
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || '8730612796:AAEgChDIg9OU7-uSTffYeb_sjsE5kXGg9eY');
 
@@ -21,29 +22,6 @@ async function getLinkedUser(telegramId: string) {
     include: { university: true, semester: true }
   });
   if (directLink) return directLink;
-
-  // 2. Check if we have a phone number for this bot user
-  const botUser = await (prisma as any).botUser.findUnique({
-    where: { telegramId: telegramId.toString() },
-    select: { phoneNumber: true }
-  });
-
-  if (botUser?.phoneNumber) {
-    // 3. Check if any user in MedQs has this telegramPhone
-    const userByPhone = await (prisma.user as any).findFirst({
-      where: { telegramPhone: botUser.phoneNumber },
-      include: { university: true, semester: true }
-    });
-
-    if (userByPhone) {
-      // 4. AUTO-LINK: Save the telegramId to this user for future direct links
-      await (prisma.user as any).update({
-        where: { id: userByPhone.id },
-        data: { telegramId: telegramId.toString(), telegramVerified: true }
-      });
-      return userByPhone;
-    }
-  }
 
   return null;
 }
@@ -92,15 +70,15 @@ bot.start(async (ctx) => {
     } else {
       await ctx.reply(
         `Welcome to MedOneX! 🩺🌌\n\n` +
-        `🚀 *Quick Login:* Just send me the *Email* you used to register on the site, and I'll link your account instantly!\n\n` +
-        `Or use our new Mini App to explore:`, 
+        `🔐 *Secure Login:* You can now link your account directly using your registered Email and Password.\n\n` +
+        `Click the button below to start:`, 
         { 
           parse_mode: 'Markdown',
           ...Markup.inlineKeyboard([
+            [Markup.button.callback('🔐 Login with Email/Pass', 'auth_login_start')],
             [Markup.button.webApp('🚀 Open MedOneX TMA', `${BASE_URL}/tma`)],
-            [Markup.button.callback('🔐 Login with Web Code', 'auth_login')],
-            [Markup.button.callback('📱 Link via Phone (Registration)', 'auth_phone')],
-            [Markup.button.callback('📝 Quick Register', 'auth_register')]
+            [Markup.button.callback('📱 Link via Phone', 'auth_phone')],
+            [Markup.button.callback('📝 Register Account', 'auth_register')]
           ])
         }
       );
@@ -113,25 +91,13 @@ bot.start(async (ctx) => {
 
 // ─── Authentication Handlers ───
 
-bot.action('auth_login', async (ctx) => {
+bot.action('auth_login_start', async (ctx) => {
   const telegramId = ctx.from!.id.toString();
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-
-  await (prisma as any).botAuth.upsert({
+  await (prisma as any).botUser.update({
     where: { telegramId },
-    update: { code, expiresAt },
-    create: { telegramId, code, expiresAt }
+    data: { tempData: { step: 'login_email' } }
   });
-
-  await ctx.editMessageText(
-    `🔑 Your Login Code: \`${code}\`\n\n` +
-    `1. Go to the MedOneX Dashboard.\n` +
-    `2. Open your Profile Settings.\n` +
-    `3. Click 'Link Telegram' and enter this code.\n\n` +
-    `_This code expires in 10 minutes._`,
-    { parse_mode: 'Markdown' }
-  );
+  await ctx.editMessageText('📧 Please send your registered **Email**:');
 });
 
 bot.action('auth_register', async (ctx) => {
@@ -420,38 +386,60 @@ bot.on('text', async (ctx) => {
     if (!isMentioned && !isMedonex && !isReplyToBot) return; // Ignore if not summoned
   }
 
-  // Handle Email-based Login Linking
-  if (!linkedUser) {
-    const emailMatch = text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
-    if (emailMatch) {
-      const email = emailMatch[0].toLowerCase();
-      const userToLink = await (prisma.user as any).findUnique({ where: { email } });
-      
-      if (userToLink) {
-        // Unlink old telegram if any
-        await (prisma.user as any).updateMany({
-           where: { telegramId },
-           data: { telegramId: null, telegramVerified: false }
-        });
-
-        await (prisma.user as any).update({
-          where: { id: userToLink.id },
-          data: { 
-            telegramId: telegramId,
-            telegramVerified: true 
-          }
-        });
-        return ctx.reply(`✅ Account successfully linked!\n\nWelcome Dr. ${userToLink.name}! 🩺🌌\nYou can now access all your lectures and clinical tools here.`, MAIN_KEYBOARD);
-      } else {
-        return ctx.reply(`❌ We couldn't find an account with the email: ${email}\n\nPlease make sure you are registered on the MedOneX platform.`);
-      }
-    }
-  }
-
   // Handle multi-step tempData flows
   if (botUser.tempData) {
-    const step = botUser.tempData.step;
+    const step = (botUser.tempData as any).step;
     
+    // LOGIN FLOW: Step 1 (Email)
+    if (step === 'login_email') {
+      const email = text.trim().toLowerCase();
+      const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
+      if (!emailRegex.test(email)) {
+        return ctx.reply("❌ Invalid email format. Please try again:");
+      }
+
+      await (prisma as any).botUser.update({
+        where: { telegramId },
+        data: { tempData: { step: 'login_password', email } }
+      });
+      return ctx.reply(`📧 Email received: \`${email}\`\n\nNow, please send your **Password**:`, { parse_mode: 'Markdown' });
+    }
+
+    // LOGIN FLOW: Step 2 (Password)
+    if (step === 'login_password') {
+      const email = (botUser.tempData as any).email;
+      const password = text.trim();
+
+      // SECURITY: Delete the password message immediately
+      try { await ctx.deleteMessage(); } catch (e) {}
+
+      const userToLink = await (prisma.user as any).findUnique({ where: { email } });
+      
+      if (!userToLink || !userToLink.password) {
+        await (prisma as any).botUser.update({ where: { telegramId }, data: { tempData: null } });
+        return ctx.reply("❌ Authentication failed: User not found or no password set.");
+      }
+
+      // Verify Password
+      const isValid = await bcrypt.compare(password, userToLink.password);
+      if (!isValid) {
+        return ctx.reply("❌ Incorrect password. Please start over with /start");
+      }
+
+      // Link Account
+      await (prisma.user as any).update({
+        where: { id: userToLink.id },
+        data: { telegramId, telegramVerified: true }
+      });
+
+      await (prisma as any).botUser.update({
+        where: { telegramId },
+        data: { tempData: null }
+      });
+
+      return ctx.reply(`✅ Authentication Successful!\n\nWelcome back, Dr. ${userToLink.name}! 🩺🌌`, MAIN_KEYBOARD);
+    }
+
     if (step === 'awaiting_name') {
       await (prisma as any).botUser.update({
         where: { telegramId },
@@ -461,17 +449,15 @@ bot.on('text', async (ctx) => {
     }
 
     if (step === 'awaiting_email') {
-      const name = botUser.tempData.name;
+      const name = (botUser.tempData as any).name;
       await (prisma as any).botUser.update({
         where: { telegramId },
         data: { tempData: null }
       });
-      // In a real app, we'd create the user here or send a confirmation link.
-      // For now, we'll guide them to the web with their info pre-filled (simulated).
       return ctx.reply(
         `✅ Information received, ${name}!\n\n` +
         `To complete registration, please use this link:\n` +
-        `[Register on MedOneX](https://medonex.com/auth/register?email=${encodeURIComponent(text.trim())}&name=${encodeURIComponent(name)})`,
+        `[Register on MedOneX](${BASE_URL}/register?email=${encodeURIComponent(text.trim())}&name=${encodeURIComponent(name)})`,
         { parse_mode: 'Markdown' }
       );
     }

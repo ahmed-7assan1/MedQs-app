@@ -16,7 +16,10 @@ import { redirect } from "next/navigation";
 
 export default async function LandingPage() {
   const session = await auth();
-  if (session?.user) redirect("/dashboard");
+  if (session?.user) {
+    if (!(session.user as any).universityId) redirect("/complete-profile");
+    redirect("/dashboard");
+  }
 
   const [userCount, questionCount, moduleCount] = await Promise.all([
     prisma.user.count().catch(() => 0),

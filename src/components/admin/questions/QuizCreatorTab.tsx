@@ -30,7 +30,7 @@ interface QuizQuestion {
 
 const CHOICE_KEYS = ["A", "B", "C", "D", "E"];
 
-export default function AdminQuizCreatorPage() {
+export function QuizCreatorTab() {
   const search = useSearchParams();
   const editingPaperId = (search?.get("paperId") ?? "").trim() || null;
   const [semesters, setSemesters] = useState<Semester[]>([]);

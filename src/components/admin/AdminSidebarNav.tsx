@@ -15,44 +15,43 @@ const NAV_GROUPS: {
   items: { href: string; label: string; icon: ElementType; badge?: string }[];
 }[] = [
   {
-    label: "Curriculum",
+    label: "Overview",
     items: [
-      { href: "/admin/dashboard",  label: "Overview",     icon: LayoutDashboard },
-      { href: "/admin/content",    label: "Courses",      icon: BookOpen },
-      { href: "/admin/lectures",   label: "Lectures",     icon: Video },
-      { href: "/admin/channels",   label: "Channels",     icon: Youtube },
-      { href: "/admin/past-papers",label: "Past Papers",  icon: FileText },
-      { href: "/admin/medical-library", label: "Medical Library", icon: Library },
-      { href: "/admin/colab-transfer", label: "Colab Transfer", icon: Sparkles, badge: "NEW" },
+      { href: "/admin/dashboard",  label: "Dashboard",     icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "Academy Hub",
+    items: [
+      { href: "/admin/content",    label: "Curriculum",    icon: BookOpen },
+      { href: "/admin/channels",   label: "Channels",      icon: Youtube },
     ],
   },
   {
     label: "Assessment",
     items: [
-      { href: "/admin/questions",    label: "Questions",    icon: HelpCircle },
-      { href: "/admin/duplicates",   label: "Duplicates",   icon: Copy },
-      { href: "/admin/quiz-creator", label: "Quiz Creator", icon: Layers },
+      { href: "/admin/questions",    label: "Evaluation",    icon: HelpCircle },
       { href: "/admin/quiz-manager", label: "Quiz Manager", icon: ArrowRightLeft },
-      { href: "/admin/pdf-tools",    label: "PDF Tools",    icon: FileText, badge: "NEW" },
-      { href: "/admin/ai-tools",     label: "AI Tools",     icon: Zap, badge: "AI" },
-      { href: "/admin/creative-studio", label: "Creative Studio", icon: Wand2, badge: "NEW" },
     ],
   },
   {
-    label: "Community",
+    label: "AI Studio",
     items: [
-      { href: "/admin/forum",    label: "Community",  icon: MessageSquare },
-      { href: "/admin/teams",    label: "Teams",      icon: Users, badge: "NEW" },
-      { href: "/admin/founders", label: "Founders",   icon: GraduationCap, badge: "NEW" },
-      { href: "/admin/users",    label: "Users",      icon: Users },
-      { href: "/admin/ads",      label: "Ads",        icon: Megaphone },
+      { href: "/admin/ai-studio",    label: "AI Studio",     icon: Zap, badge: "NEW" },
+      { href: "/admin/pdf-tools",    label: "PDF Tools",    icon: FileText },
     ],
   },
   {
-    label: "Platform",
+    label: "Operations",
     items: [
-      { href: "/admin/telegram", label: "Telegram Bot", icon: MessageSquare, badge: "NEW" },
-      { href: "/admin/settings", label: "Settings", icon: Settings },
+      { href: "/admin/users",      label: "Users",      icon: Users },
+      { href: "/admin/teams",      label: "Teams",      icon: Users },
+      { href: "/admin/founders",   label: "Founders",   icon: GraduationCap },
+      { href: "/admin/forum",      label: "Community",  icon: MessageSquare },
+      { href: "/admin/ads",        label: "Ads",        icon: Megaphone },
+      { href: "/admin/settings",   label: "Settings", icon: Settings },
+      { href: "/admin/audit-logs", label: "Audit Logs", icon: Copy, badge: "SEC" },
+      { href: "/admin/telegram",   label: "Telegram Bot", icon: MessageSquare },
     ],
   },
 ];
