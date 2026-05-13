@@ -23,6 +23,9 @@ export type ForumPostJson = {
   };
   _count: { likes: number; comments: number };
   likedByMe: boolean;
+  sharedQuestionId?: string | null;
+  sharedQuestion?: any | null;
+  sharedQuestionData?: any | null;
 };
 
 type PostRow = {
@@ -128,6 +131,7 @@ export async function loadForumPostsForUser(options: {
             },
           },
           _count: { select: { likes: true, comments: true } },
+          sharedQuestion: { select: { id: true, body: true, choices: true, answer: true, difficulty: true, imageUrl: true, questionType: true, explanation: true } },
         },
       }) as unknown as PostRow[]);
     } catch (inner) {
@@ -235,6 +239,9 @@ export async function loadForumPostsForUser(options: {
       },
       _count: p._count,
       likedByMe: likedSet.has(p.id),
+      sharedQuestionId: (p as any).sharedQuestionId,
+      sharedQuestion: (p as any).sharedQuestion,
+      sharedQuestionData: (p as any).sharedQuestionData,
     }));
 
     // Perform final sort: Pinned > Affinity > Date

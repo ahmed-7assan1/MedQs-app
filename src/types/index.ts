@@ -52,6 +52,8 @@ export interface PostWithMeta {
   };
   _count?: { likes: number; comments: number };
   likedByMe?: boolean;
+  sharedQuestionId?: string | null;
+  sharedQuestion?: QuestionWithChoices | null;
 }
 
 export interface NotificationItem {

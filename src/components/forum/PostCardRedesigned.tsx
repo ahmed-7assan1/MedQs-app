@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { PostGallery } from "./PostGallery";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { SharedQuestionBlock } from "../quiz/SharedQuestionBlock";
 
 interface Props {
   post: any;
@@ -46,7 +47,11 @@ function sanitizeUrl(url: string) {
 
 function getTimeAgo(date: string) {
   try {
-    return formatDistanceToNow(new Date(date)) + " ago";
+    const d = new Date(date);
+    let str = formatDistanceToNow(d).toLowerCase();
+    // Remove redundant ' ago' if it exists to prevent double 'AGO' after uppercase CSS
+    str = str.replace(" ago", "");
+    return str + " ago";
   } catch {
     return "";
   }
@@ -98,6 +103,18 @@ export function PostCardRedesigned({
       list.unshift({ url: img, type: "image" });
     }
     return list;
+  })();
+
+  // Robust shared question parsing
+  const sharedQuestion = (() => {
+    if (post.sharedQuestion) return post.sharedQuestion;
+    if (post.sharedQuestionData) {
+      if (typeof post.sharedQuestionData === "string") {
+        try { return JSON.parse(post.sharedQuestionData); } catch { return null; }
+      }
+      return post.sharedQuestionData;
+    }
+    return null;
   })();
 
   const canDelete =
@@ -276,33 +293,15 @@ export function PostCardRedesigned({
       )}
 
       {/* ── Shared Question ── */}
-      {post.sharedQuestionData && (
-        <div className="mx-4 mt-2 mb-2 p-5 rounded-2xl bg-[#534AB7]/10 border border-[#534AB7]/30">
-          <div className="flex items-center gap-2 mb-3">
-             <span className="px-2 py-0.5 rounded-md bg-[#534AB7]/30 text-[#AFA9EC] text-[9px] font-black uppercase tracking-widest">Question Discussion</span>
+      {sharedQuestion && (
+        <div className="mx-4 mt-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 ml-1">
+             <span className="px-2 py-0.5 rounded-md bg-[#534AB7]/20 text-[#AFA9EC] text-[9px] font-black uppercase tracking-widest border border-[#534AB7]/20">Question Discussion</span>
           </div>
-          <p className="text-sm font-medium text-white mb-4 leading-relaxed">{post.sharedQuestionData.body}</p>
-          <div className="space-y-2">
-            {post.sharedQuestionData.choices?.map((c: any) => {
-               const isCorrect = c.key === post.sharedQuestionData.correctAnswer;
-               const isUserChoice = c.key === post.sharedQuestionData.userAnswer;
-               return (
-                 <div key={c.key} className={cn(
-                   "flex items-center gap-3 p-3 rounded-xl border text-sm",
-                   isCorrect ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400" :
-                   isUserChoice ? "border-red-500/50 bg-red-500/10 text-red-400" :
-                   "border-white/5 bg-black/20 text-white/60"
-                 )}>
-                   <span className={cn("h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black border", 
-                     isCorrect ? "border-emerald-500 bg-emerald-500/20" : 
-                     isUserChoice ? "border-red-500 bg-red-500/20" : 
-                     "border-white/10 bg-white/5"
-                   )}>{c.key}</span>
-                   <span className="flex-1 min-w-0 font-medium">{c.text}</span>
-                 </div>
-               );
-            })}
-          </div>
+          <SharedQuestionBlock 
+            question={sharedQuestion} 
+            className="bg-[#534AB7]/5 border-[#534AB7]/20"
+          />
         </div>
       )}
 

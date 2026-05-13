@@ -185,8 +185,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
 
   return (
     <div className={cn(
-      "relative rounded-[32px] bg-white/70 dark:bg-[#161523]/70 backdrop-blur-3xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500 overflow-hidden",
-      isExpanded ? "ring-2 ring-primary/20" : ""
+      "relative rounded-[32px] bg-white/70 dark:bg-[#161523]/70 backdrop-blur-3xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500 overflow-hidden"
     )}>
       {/* Visual Accents */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[40px] pointer-events-none" />
@@ -355,7 +354,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                   )}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  {isPosting ? <CircleNotch size={20} className="animate-spin" /> : "Share Post"}
+                  {isPosting ? <CircleNotch size={20} className="animate-spin" /> : "Post"}
                 </button>
               </div>
 

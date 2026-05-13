@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Network, Video, FileText, Library } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { ContentTreeTab } from "@/components/admin/academy/ContentTreeTab";
 import { LecturesTab } from "@/components/admin/academy/LecturesTab";
 import { PastPapersTab } from "@/components/admin/academy/PastPapersTab";
@@ -10,7 +11,9 @@ import { MedicalLibraryTab } from "@/components/admin/academy/MedicalLibraryTab"
 type AcademyTab = "tree" | "lectures" | "papers" | "library";
 
 export default function AcademyHubPage() {
-  const [activeTab, setActiveTab] = useState<AcademyTab>("tree");
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as AcademyTab) || "tree";
+  const [activeTab, setActiveTab] = useState<AcademyTab>(initialTab);
 
   const TABS: { id: AcademyTab; label: string; icon: any }[] = [
     { id: "tree", label: "Curriculum Tree", icon: Network },

@@ -20,6 +20,8 @@ import ReactMarkdown from "react-markdown";
 import { MarkdownBody } from "@/components/ui/MarkdownBody";
 import { normalizeImageUrl } from "@/lib/markdown-helpers";
 import type { EssayGradeStored } from "@/lib/essay-grade";
+import { QuickShareModal } from "./QuickShareModal";
+import toast from "react-hot-toast";
 
 interface Props {
   question: QuestionWithChoices;
@@ -69,6 +71,9 @@ export function QuestionCard({
   const [explanation, setExplanation] = useState<string | null>(null);
   const [loadingExplain, setLoadingExplain] = useState(false);
   const [explainOpen, setExplainOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [forums, setForums] = useState<{ id: string; name: string; type: string }[]>([]);
+  const [loadingForums, setLoadingForums] = useState(false);
   const choiceRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const stemId = `q-stem-${question.id}`;
 
@@ -118,6 +123,23 @@ export function QuestionCard({
       setExplainOpen(true);
     } finally {
       setLoadingExplain(false);
+    }
+  }
+
+  async function handleOpenShare() {
+    setShareModalOpen(true);
+    if (forums.length > 0) return;
+    setLoadingForums(true);
+    try {
+      const res = await fetch("/api/v1/forums");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setForums(data.filter(f => f.status === "OPEN" || f.status === "RESTRICTED"));
+      }
+    } catch {
+      toast.error("Could not load communities");
+    } finally {
+      setLoadingForums(false);
     }
   }
 
@@ -213,12 +235,7 @@ export function QuestionCard({
             )}
             <button
               type="button"
-              onClick={() => {
-                const { id, body, choices, answer, lectureId } = question;
-                // Import this at top or use window access if needed, but better to use the store
-                // Assuming useCommunityShareStore is available
-                window.location.href = `/social?shareQuestion=${id}`;
-              }}
+              onClick={handleOpenShare}
               className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               title="Share to community"
             >
@@ -438,6 +455,14 @@ export function QuestionCard({
           </div>
         )}
       </div>
+
+      <QuickShareModal 
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        question={question}
+        forums={forums}
+        currentUserId={"" /* Handled by API */}
+      />
     </article>
   );
 }

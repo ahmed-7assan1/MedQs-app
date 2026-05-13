@@ -23,15 +23,14 @@ const NAV_GROUPS: {
   {
     label: "Academy Hub",
     items: [
-      { href: "/admin/content",    label: "Curriculum",    icon: BookOpen },
-      { href: "/admin/channels",   label: "Channels",      icon: Youtube },
+      { href: "/admin/content",    label: "Academy Hub",    icon: BookOpen },
+      { href: "/admin/channels",   label: "Channels Hub",      icon: Youtube },
     ],
   },
   {
     label: "Assessment",
     items: [
-      { href: "/admin/questions",    label: "Evaluation",    icon: HelpCircle },
-      { href: "/admin/quiz-manager", label: "Quiz Manager", icon: ArrowRightLeft },
+      { href: "/admin/questions",    label: "Assessment Hub",    icon: HelpCircle },
     ],
   },
   {

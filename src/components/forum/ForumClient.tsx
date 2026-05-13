@@ -152,6 +152,10 @@ export function ForumClient({
           content,
           imageUrl: imageUrl || undefined,
           attachments: options?.attachments,
+          sharedQuestion: options?.sharedQuestion,
+          poll: options?.poll,
+          postType: options?.postType,
+          qaAnswer: options?.qaAnswer,
           isForumPost: true,
         }),
       });

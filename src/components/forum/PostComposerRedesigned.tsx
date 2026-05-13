@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { VoiceRecorder } from "./VoiceRecorder";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { SharedQuestionBlock } from "../quiz/SharedQuestionBlock";
 
 interface Props {
   user: {
@@ -232,15 +233,15 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
             >
               {/* Shared Question Preview */}
               {sharedQuestion && (
-                <div className="mx-5 mb-4 p-4 rounded-xl border border-indigo-500/30 bg-indigo-500/10 relative group">
+                <div className="mx-5 mb-4 relative group">
                   <button 
                     onClick={() => setSharedQuestion(null)}
-                    className="absolute top-2 right-2 p-1 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-all text-white/60 hover:text-white"
+                    className="absolute -top-2 -right-2 z-10 p-1.5 bg-red-500 rounded-full shadow-lg text-white hover:bg-red-600 transition-all"
                   >
                     <X size={14} weight="bold" />
                   </button>
-                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Attached Question</p>
-                  <p className="text-sm font-medium text-white line-clamp-2">{sharedQuestion.body}</p>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1">Attached Question</p>
+                  <SharedQuestionBlock question={sharedQuestion as any} className="bg-indigo-500/5 border-indigo-500/20" />
                 </div>
               )}
 

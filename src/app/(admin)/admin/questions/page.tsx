@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { HelpCircle, Layers, Copy } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { QuestionsBankTab } from "@/components/admin/questions/QuestionsBankTab";
 import { QuizCreatorTab } from "@/components/admin/questions/QuizCreatorTab";
 import { DuplicatesTab } from "@/components/admin/questions/DuplicatesTab";
@@ -9,7 +10,9 @@ import { DuplicatesTab } from "@/components/admin/questions/DuplicatesTab";
 type AssessmentTab = "bank" | "creator" | "duplicates";
 
 export default function UnifiedAssessmentPage() {
-  const [activeTab, setActiveTab] = useState<AssessmentTab>("bank");
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as AssessmentTab) || "bank";
+  const [activeTab, setActiveTab] = useState<AssessmentTab>(initialTab);
 
   const TABS: { id: AssessmentTab; label: string; icon: any }[] = [
     { id: "bank", label: "Question Bank", icon: HelpCircle },
