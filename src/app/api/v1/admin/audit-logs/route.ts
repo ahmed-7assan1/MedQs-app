@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const session = await auth();
@@ -47,7 +49,7 @@ export async function GET(req: Request) {
       }
     }
 
-    const logs = await prisma.auditLog.findMany({
+    const logs = await (prisma as any).auditLog.findMany({
       where: whereClause,
       include: {
         user: { select: { name: true, email: true, image: true } },
@@ -57,7 +59,7 @@ export async function GET(req: Request) {
       skip,
     });
 
-    const total = await prisma.auditLog.count({ where: whereClause });
+    const total = await (prisma as any).auditLog.count({ where: whereClause });
 
     return NextResponse.json({ logs, total });
   } catch (error: any) {
