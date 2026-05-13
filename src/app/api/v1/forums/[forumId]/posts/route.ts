@@ -13,11 +13,14 @@ export const dynamic = "force-dynamic";
 // Each forumId+page combo is cached for 30s in Vercel Data Cache.
 // Real-time NEW posts come instantly via Firestore WebSockets (no DB needed).
 const getCachedPosts = (forumId: string, userId: string, page: number) =>
+  loadForumPostsForUser({ forumId, userId, page, limit: 20 });
+/*
   unstable_cache(
     () => loadForumPostsForUser({ forumId, userId, page, limit: 20 }),
     [`forum-posts-${forumId}-${page}`],
     { revalidate: 30, tags: [`forum-${forumId}`] }
   )();
+*/
 
 const POST_SCHEMA = z
   .object({

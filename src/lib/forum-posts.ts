@@ -32,7 +32,7 @@ type PostRow = {
   id: string;
   content: string;
   imageUrl: string | null;
-  attachments?: any;
+  attachments: any;
   interactionsDisabled: boolean;
   authorId: string;
   forumId: string;
@@ -48,6 +48,9 @@ type PostRow = {
     rank?: { label: string; badge: string | null } | null;
   };
   _count: { likes: number; comments: number };
+  sharedQuestion?: any;
+  sharedQuestionData?: any;
+  likedByMe?: boolean;
 };
 
 export async function loadForumPostsForUser(options: {
@@ -160,6 +163,7 @@ export async function loadForumPostsForUser(options: {
               select: { id: true, name: true, image: true, handle: true },
             },
             _count: { select: { likes: true, comments: true } },
+            sharedQuestion: { select: { id: true, body: true, choices: true, answer: true, difficulty: true, imageUrl: true, questionType: true, explanation: true } },
           },
         }) as unknown as PostRow[]);
       } catch (inner2) {

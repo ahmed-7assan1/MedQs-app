@@ -48,10 +48,11 @@ function sanitizeUrl(url: string) {
 function getTimeAgo(date: string) {
   try {
     const d = new Date(date);
-    let str = formatDistanceToNow(d).toLowerCase();
-    // Remove redundant ' ago' if it exists to prevent double 'AGO' after uppercase CSS
-    str = str.replace(" ago", "");
-    return str + " ago";
+    const str = formatDistanceToNow(d).toLowerCase();
+    // Get only the first two parts (e.g., '3h' or 'just' 'now')
+    const parts = str.split(" ");
+    if (parts[0] === "just") return "Just now";
+    return parts[0] + " ago";
   } catch {
     return "";
   }
@@ -293,7 +294,7 @@ export function PostCardRedesigned({
       )}
 
       {/* ── Shared Question ── */}
-      {sharedQuestion && (
+      {sharedQuestion ? (
         <div className="mx-4 mt-2 mb-2">
           <div className="flex items-center gap-2 mb-2 ml-1">
              <span className="px-2 py-0.5 rounded-md bg-[#534AB7]/20 text-[#AFA9EC] text-[9px] font-black uppercase tracking-widest border border-[#534AB7]/20">Question Discussion</span>
@@ -303,6 +304,9 @@ export function PostCardRedesigned({
             className="bg-[#534AB7]/5 border-[#534AB7]/20"
           />
         </div>
+      ) : (
+        /* Hidden Debug for me */
+        <span className="hidden">No SQ Data</span>
       )}
 
       {/* ── Media Gallery ── */}
