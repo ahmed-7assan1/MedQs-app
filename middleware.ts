@@ -1,7 +1,5 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 const GUEST_QUIZ_COOKIE = "medq_guest_quiz_uid";
 
@@ -17,131 +15,99 @@ const API_PUBLIC_PREFIXES = [
 const GUEST_BROWSABLE = ["/", "/modules", "/leaderboard", "/forum", "/profile"];
 const AUTH_REQUIRED = ["/profile/edit", "/notifications", "/quiz", "/register"];
 
-export async function middleware(req: NextRequest) {
-  // 1. Update session and get the base response with cookies
-  const res = await updateSession(req);
-  const { pathname } = req.nextUrl;
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request,
+  });
 
-  // 2. Create client using the request and response to ensure cookie sync
+  const { pathname } = request.nextUrl;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) { return req.cookies.get(name)?.value },
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
         set(name: string, value: string, options: CookieOptions) {
-          req.cookies.set({ name, value, ...options });
-          res.cookies.set({ name, value, ...options });
+          request.cookies.set({ name, value, ...options })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
-          req.cookies.set({ name, value: '', ...options });
-          res.cookies.set({ name, value: '', ...options });
+          request.cookies.set({ name, value: '', ...options })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({ name, value: '', ...options })
         },
       },
     }
-  );
+  )
 
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
   const isAdmin = user?.user_metadata?.role === "ADMIN" || user?.user_metadata?.role === "SUPER_ADMIN";
-  const guestQuizId = req.cookies.get(GUEST_QUIZ_COOKIE)?.value?.trim();
+  const guestQuizId = request.cookies.get(GUEST_QUIZ_COOKIE)?.value?.trim();
 
-  // Helper for redirects that preserves cookies
-  const redirectWithCookies = (path: string) => {
-    const redirectRes = NextResponse.redirect(new URL(path, req.url));
-    // Copy cookies from 'res' (the one updated by updateSession/setters) to the new redirect response
-    res.cookies.getAll().forEach(cookie => {
-      redirectRes.cookies.set(cookie.name, cookie.value, {
-        domain: cookie.domain,
-        path: cookie.path,
-        expires: cookie.expires,
-        httpOnly: cookie.httpOnly,
-        secure: cookie.secure,
-        sameSite: cookie.sameSite,
-      });
-    });
-    return redirectRes;
-  };
-
-  if (pathname === "/login") return redirectWithCookies("/auth?mode=login");
-  if (pathname === "/register") return redirectWithCookies("/auth?mode=register");
-  if (pathname === "/complete-profile") return redirectWithCookies("/auth?mode=onboarding");
-
-  if (pathname.startsWith("/auth") || pathname.startsWith("/api/auth")) {
-    if (pathname === "/auth" && isLoggedIn) {
-      const mode = req.nextUrl.searchParams.get("mode");
-      if (mode !== "onboarding") {
-        return redirectWithCookies("/dashboard");
-      }
-    }
-    return res;
-  }
-
-  if (pathname.startsWith("/guest") || pathname.startsWith("/api/v1/guest-quiz")) {
-    return res;
-  }
-
-  if (API_PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
-    return res;
+  // 1. Core Authentication Redirection (Breaks Loops)
+  if (isLoggedIn && (pathname === "/login" || pathname === "/register" || (pathname === "/auth" && request.nextUrl.searchParams.get("mode") !== "onboarding"))) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   if (!isLoggedIn && pathname === "/dashboard") {
-    return redirectWithCookies("/auth?mode=login");
+    return NextResponse.redirect(new URL("/auth?mode=login", request.url));
+  }
+
+  // 2. Legacy / Admin / Guest Logic
+  if (pathname.startsWith("/guest") || pathname.startsWith("/api/v1/guest-quiz")) {
+    return response;
+  }
+
+  if (API_PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
+    return response;
   }
 
   if (!isLoggedIn) {
     if (pathname.startsWith("/quiz/attempt/")) {
       const id = pathname.replace("/quiz/attempt/", "").split("/")[0];
-      if (id) return NextResponse.redirect(new URL(`/guest/attempt/${id}`, req.url));
+      if (id) return NextResponse.redirect(new URL(`/guest/attempt/${id}`, request.url));
     } else if (pathname.startsWith("/quiz/")) {
       const id = pathname.replace(/^\/quiz\//, "").split("/")[0];
-      if (id && !id.includes("..")) {
-        return NextResponse.redirect(new URL(`/guest/quiz/${id}`, req.url));
-      }
+      if (id && !id.includes("..")) return NextResponse.redirect(new URL(`/guest/quiz/${id}`, request.url));
     }
     if (pathname === "/past-papers" || pathname.startsWith("/past-papers/")) {
-      return NextResponse.redirect(new URL("/guest/past-papers", req.url));
+      return NextResponse.redirect(new URL("/guest/past-papers", request.url));
     }
-  }
-
-  if (!isLoggedIn && guestQuizId) {
-    if (pathname.startsWith("/api")) {
-      return NextResponse.json({ error: "Guests can only use quiz pages under /guest." }, { status: 403 });
-    }
-    return NextResponse.redirect(new URL("/guest/past-papers", req.url));
   }
 
   const isGuestBrowsable = GUEST_BROWSABLE.some((p) => pathname.startsWith(p));
   const needsAuth = AUTH_REQUIRED.some((p) => pathname.startsWith(p));
 
   if (!isLoggedIn) {
-    if (isGuestBrowsable && !needsAuth) return res;
+    if (isGuestBrowsable && !needsAuth) return response;
     if (!pathname.startsWith("/api")) {
-      // Redirect directly to /auth to avoid /login -> /auth loop
-      return redirectWithCookies("/auth?mode=login");
+      return NextResponse.redirect(new URL("/auth?mode=login", request.url));
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (pathname.startsWith("/admin") && pathname.includes("_")) {
-    const fixedPath = pathname.replace(/_/g, "-");
-    return redirectWithCookies(fixedPath);
-  }
-
   if (pathname.startsWith("/admin") && !isAdmin) {
-    return redirectWithCookies("/dashboard");
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  return res;
+  return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Skip all of `/_next/*` (chunks, CSS, HMR, RSC payloads, fonts, etc.).
-     * Matching only `_next/static` let other `/_next/...` requests hit auth middleware
-     * and could break styles/scripts — the UI then renders as unstyled HTML.
-     */
     "/((?!_next/|favicon\\.ico|icons/|manifest\\.webmanifest|sw\\.js|workbox-|swe-worker-|fallback-).*)",
   ],
 };

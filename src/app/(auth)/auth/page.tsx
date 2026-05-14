@@ -111,9 +111,13 @@ function AuthContent() {
     // If the user is already logged in, the middleware should have caught them.
     // This is a second layer of defense to ensure they don't see the auth page if a session exists.
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session && mode !== "onboarding") {
-        router.push("/dashboard");
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && mode !== "onboarding") {
+          router.replace("/dashboard");
+        }
+      } catch (err) {
+        console.warn("Session check failed:", err);
       }
     };
     checkSession();
@@ -149,9 +153,10 @@ function AuthContent() {
 
   // Initial Universities Fetch
   useEffect(() => {
-    fetch("/api/v1/universities").then(r => r.json()).then(d => {
-      setUniversities(unwrapApiList(d));
-    });
+    fetch("/api/v1/universities")
+      .then(r => r.ok ? r.json() : { data: [] })
+      .then(d => setUniversities(unwrapApiList(d)))
+      .catch(err => console.error("Failed to fetch universities:", err));
   }, []);
 
   // Cascade Logic: University -> Faculties
