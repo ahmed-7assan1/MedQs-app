@@ -32,7 +32,7 @@ import { MobileDashboardWrapper } from "@/components/dashboard/MobileDashboardWr
 export default async function DashboardPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth?mode=login");
+  // if (!user) redirect("/auth?mode=login");
 
   // Fetch full user profile to check for missing academic info
   let fullProfile = await prisma.user.findUnique({
