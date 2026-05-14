@@ -300,13 +300,16 @@ function AuthContent() {
               <motion.form key="register" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} onSubmit={handleEmailAuth} className="space-y-8">
                 
                 {/* 1. Academic Scoped Selection */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                     <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500"><Buildings weight="fill" size={20}/></div>
-                     <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white">Academic Clearance</h3>
+                <div className="space-y-8 pb-4">
+                  <div className="flex items-center gap-4">
+                     <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 shadow-sm"><Buildings weight="fill" size={24}/></div>
+                     <div>
+                        <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white">Academic Clearance</h3>
+                        <p className="text-[10px] text-slate-500 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">Identity & Institution</p>
+                     </div>
                   </div>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <CustomDropdown 
                       label="University Hub" 
                       options={universities} 
@@ -330,7 +333,7 @@ function AuthContent() {
                     )}
 
                     {selectedFaculty && (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-5">
                         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
                           <CustomDropdown 
                             label="Academic Year" 
@@ -358,10 +361,13 @@ function AuthContent() {
 
                 {/* 2. Personal Credentials */}
                 {selectedSem && (
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 border-t border-slate-200 dark:border-white/5 pt-8">
-                    <div className="flex items-center gap-3">
-                       <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500"><User weight="fill" size={20}/></div>
-                       <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white">Account Protocols</h3>
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 border-t border-slate-200 dark:border-white/5 pt-10">
+                    <div className="flex items-center gap-4">
+                       <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 shadow-sm"><User weight="fill" size={24}/></div>
+                       <div>
+                          <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white">Account Protocols</h3>
+                          <p className="text-[10px] text-slate-500 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">Secure Credentials</p>
+                       </div>
                     </div>
                     
                     <div className="space-y-5">

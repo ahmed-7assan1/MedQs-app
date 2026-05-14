@@ -2,8 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
-  Flame, Trophy, BarChart2
+  Flame, Trophy, BarChart2, AlertCircle, ArrowRightIcon
 } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import { getUserRankInfo } from "@/lib/engagement";
 import { cn } from "@/lib/utils";
 import { last7DayKeys } from "@/lib/dashboard-stats";
@@ -32,6 +33,14 @@ export default async function DashboardPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth?mode=login");
+
+  // Fetch full user profile to check for missing academic info
+  const fullProfile = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { universityId: true, facultyId: true, semesterId: true }
+  });
+
+  const isProfileIncomplete = !fullProfile?.universityId || !fullProfile?.semesterId;
 
   const userId = user.id;
   const chartDays = last7DayKeys();
@@ -161,6 +170,19 @@ export default async function DashboardPage() {
 
       {/* 🖥️ DESKTOP VIEW */}
       <div className="hidden md:block min-h-screen bg-background text-foreground transition-colors duration-500 selection:bg-primary/30 relative">
+        {/* Incomplete Profile Alert Banner */}
+        {isProfileIncomplete && (
+          <div className="fixed top-0 left-0 right-0 z-[100] bg-blue-600 text-white py-3 px-6 flex items-center justify-between shadow-2xl animate-fade-in">
+             <div className="flex items-center gap-3">
+                <AlertCircle size={18} />
+                <span className="text-xs font-black uppercase tracking-widest">Incomplete Profile detected. Please finalize your academic details to unlock full platform features.</span>
+             </div>
+             <Link href="/profile/edit" className="flex items-center gap-2 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all">
+                Complete Now <ArrowRightIcon size={12} />
+             </Link>
+          </div>
+        )}
+
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
           <div className="absolute top-0 left-0 w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full" />
           <div className="absolute bottom-0 right-0 w-[40%] h-[40%] bg-accent/5 blur-[100px] rounded-full" />
