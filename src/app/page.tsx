@@ -20,12 +20,7 @@ export default async function LandingPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
-    // Check if profile is complete in DB
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { universityId: true }
-    }).catch(() => null);
-    if (!dbUser?.universityId) redirect("/auth?mode=onboarding");
+    // If logged in, go straight to dashboard as requested - no obstacles
     redirect("/dashboard");
   }
 

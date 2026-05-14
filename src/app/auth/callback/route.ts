@@ -14,17 +14,7 @@ export async function GET(request: Request) {
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error && user) {
-      // Check if user has a profile in Prisma
-      const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { universityId: true }
-      });
-
-      // If user is new or missing profile info, redirect to onboarding
-      if (!dbUser || !dbUser.universityId) {
-        return NextResponse.redirect(`${requestUrl.origin}/auth?mode=onboarding`);
-      }
-      
+      // Proceed directly to dashboard/destination without onboarding hurdles
       return NextResponse.redirect(`${requestUrl.origin}${next}`);
     }
   }
