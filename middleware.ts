@@ -38,18 +38,19 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
-  const pathname = request.nextUrl.pathname
+  // FIREWALL DISABLED TEMPORARILY
+  // const { data: { user } } = await supabase.auth.getUser()
+  // const pathname = request.nextUrl.pathname
 
   // 1. If logged in, don't allow auth pages (except onboarding)
-  if (user && (pathname === '/login' || pathname === '/register' || (pathname === '/auth' && request.nextUrl.searchParams.get('mode') !== 'onboarding'))) {
-    return NextResponse.redirect(new URL('/dashboard-app', request.url))
-  }
+  // if (user && (pathname === '/login' || pathname === '/register' || (pathname === '/auth' && request.nextUrl.searchParams.get('mode') !== 'onboarding'))) {
+  //   return NextResponse.redirect(new URL('/dashboard-app', request.url))
+  // }
 
   // 2. If trying to access dashboard, ensure logged in
-  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/dashboard-app'))) {
-    return NextResponse.redirect(new URL('/auth?mode=login', request.url))
-  }
+  // if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/dashboard-app'))) {
+  //   return NextResponse.redirect(new URL('/auth?mode=login', request.url))
+  // }
 
   return response
 }
