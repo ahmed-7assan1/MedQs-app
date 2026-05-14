@@ -41,6 +41,15 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
+  // SUPER_ADMIN BYPASS: Always allow access for super admins
+  const userRole = user?.user_metadata?.role
+  const isSuperAdmin = userRole === 'SUPER_ADMIN' || user?.email === 'medqs.support@gmail.com'
+
+  if (isSuperAdmin) {
+    // If super admin is on auth pages, they can stay or go to dashboard, no forced redirects
+    return response
+  }
+
   // 1. If logged in, don't allow auth pages (except onboarding)
   if (user && (pathname === '/login' || pathname === '/register' || (pathname === '/auth' && request.nextUrl.searchParams.get('mode') !== 'onboarding'))) {
     return NextResponse.redirect(new URL('/dashboard-app', request.url))
