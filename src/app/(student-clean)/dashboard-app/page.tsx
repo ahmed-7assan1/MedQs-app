@@ -35,13 +35,13 @@ export default async function DashboardPage() {
   // if (!user) redirect("/auth?mode=login");
 
   // Fetch full user profile to check for missing academic info
-  let fullProfile = await prisma.user.findUnique({
+  let fullProfile = user ? await prisma.user.findUnique({
     where: { id: user.id },
     select: { id: true, universityId: true, facultyId: true, semesterId: true }
-  });
+  }) : null;
 
   // Sync logic: If Prisma is missing data but metadata has it, sync now
-  if (!fullProfile || !fullProfile.universityId) {
+  if (user && (!fullProfile || !fullProfile.universityId)) {
     const meta = user.user_metadata;
     if (meta?.universityId) {
        fullProfile = await prisma.user.upsert({
@@ -63,7 +63,17 @@ export default async function DashboardPage() {
     }
   }
 
-  const isProfileIncomplete = !fullProfile?.universityId || !fullProfile?.semesterId;
+  const isProfileIncomplete = user && (!fullProfile?.universityId || !fullProfile?.semesterId);
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#05070f] text-white p-6">
+        <h1 className="text-2xl font-bold mb-4">Access Restricted</h1>
+        <p className="text-slate-400 mb-8 text-center">Please sign in to access your personalized medical dashboard.</p>
+        <Link href="/auth?mode=login" className="px-8 py-3 bg-blue-600 rounded-2xl font-bold hover:bg-blue-700 transition-all">Sign In</Link>
+      </div>
+    );
+  }
 
   const userId = user.id;
   const chartDays = last7DayKeys();
