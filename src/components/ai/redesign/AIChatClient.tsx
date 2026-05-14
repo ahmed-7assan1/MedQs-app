@@ -7,8 +7,11 @@ import { LeftSidebar, RightSidebar } from "@/components/ai/redesign/AIChatSideba
 import { AIChatMobileHeader } from "@/components/ai/redesign/AIChatMobileHeader";
 import { SuggestionPills } from "@/components/ai/redesign/SuggestionPills";
 import { useEffect, useRef, useState } from "react";
-import { X, Search, Download, MoreVertical, RefreshCw, Check, Image, Cpu } from "lucide-react";
+import { X, Search, Download, MoreVertical, RefreshCw, Check, Image, Cpu, Lock, UserPlus, GraduationCap, Layout, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
+import Link from "next/link";
 
 interface AIChatClientProps {
   user: {
@@ -19,6 +22,7 @@ interface AIChatClientProps {
 }
 
 export function AIChatClient({ user }: AIChatClientProps) {
+  const { data: session, status } = useSession();
   const { 
     messages, loading, threads, activeThreadId, sendMessage, generateImage, selectThread, newTopic,
     bgImage, userBubbleColor, puterModel, setBgImage, setUserBubbleColor, setPuterModel,
@@ -32,6 +36,38 @@ export function AIChatClient({ user }: AIChatClientProps) {
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
   const isAdmin = user.role === "ADMIN";
+
+  // ─ NEW: Professional Registration UI for Guests
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#07080f] p-6">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <div className="relative inline-block">
+             <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+             <div className="relative w-20 h-20 mx-auto rounded-[24px] bg-gradient-to-br from-primary to-[#7b5fff] flex items-center justify-center shadow-2xl">
+                <Lock className="text-white w-10 h-10" />
+             </div>
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-black text-white tracking-tight">Identity Required</h1>
+            <p className="text-drq-secondary text-sm leading-relaxed">
+              Dr. Q is an exclusive AI resource for MedOneX members. 
+              Please register or login to unlock medical intelligence.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+             <Link href="/register" className="w-full h-14 rounded-2xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                <UserPlus size={18} /> Join MedOneX Now
+             </Link>
+             <Link href="/login" className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white font-bold flex items-center justify-center hover:bg-white/10 transition-all">
+                Login to your account
+             </Link>
+          </div>
+          <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest pt-4">© 2026 MedOneX Platform</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -130,6 +166,62 @@ export function AIChatClient({ user }: AIChatClientProps) {
                       </button>
                     </div>
 
+                    {/* API Key Manager */}
+                    <div className="mb-5 p-4 rounded-xl bg-drq-surface border border-drq-border">
+                      <h4 className="text-[10px] font-black text-drq-primary uppercase tracking-widest mb-3">BioC API Connectivity</h4>
+                      <p className="text-[11px] text-drq-secondary mb-3">Connect directly to AI providers for maximum speed.</p>
+                      <div className="space-y-2">
+                        {["OpenAI", "Google", "Groq"].map(prov => (
+                          <div key={prov} className="flex items-center justify-between">
+                            <span className="text-xs text-white">{prov} API</span>
+                            <button 
+                              onClick={() => {
+                                const key = prompt(`Enter your ${prov} API Key:`);
+                                if (key) {
+                                  localStorage.setItem(`medonex-api-key-${prov.toLowerCase()}`, key);
+                                  toast.success(`${prov} Key saved!`);
+                                }
+                              }}
+                              className="text-[10px] font-bold text-drq-primary hover:underline"
+                            >
+                              {localStorage.getItem(`medonex-api-key-${prov.toLowerCase()}`) ? "Update Key" : "Set Key"}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <a href="https://platform.openai.com/api-keys" target="_blank" className="mt-4 block text-[10px] text-center font-bold text-drq-secondary hover:text-white transition-colors">
+                        Get API Keys →
+                      </a>
+                    </div>
+
+                    {/* API Key Manager */}
+                    <div className="mb-5 p-4 rounded-xl bg-drq-surface border border-drq-border">
+                      <h4 className="text-[10px] font-black text-drq-primary uppercase tracking-widest mb-3">BioC API Connectivity</h4>
+                      <p className="text-[11px] text-drq-secondary mb-3">Connect directly to AI providers for maximum speed.</p>
+                      <div className="space-y-2">
+                        {["OpenAI", "Google", "Groq"].map(prov => (
+                          <div key={prov} className="flex items-center justify-between">
+                            <span className="text-xs text-white">{prov} API</span>
+                            <button 
+                              onClick={() => {
+                                const key = prompt(`Enter your ${prov} API Key:`);
+                                if (key) {
+                                  localStorage.setItem(`medonex-api-key-${prov.toLowerCase()}`, key);
+                                  toast.success(`${prov} Key saved!`);
+                                }
+                              }}
+                              className="text-[10px] font-bold text-drq-primary hover:underline"
+                            >
+                              {localStorage.getItem(`medonex-api-key-${prov.toLowerCase()}`) ? "Update Key" : "Set Key"}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <a href="https://platform.openai.com/api-keys" target="_blank" className="mt-4 block text-[10px] text-center font-bold text-drq-secondary hover:text-white transition-colors">
+                        Get API Keys →
+                      </a>
+                    </div>
+
                     <div className="mb-6 space-y-4">
                       <div>
                         <label className="block text-[10px] font-black text-drq-secondary uppercase tracking-widest mb-2">Background Blur</label>
@@ -200,6 +292,28 @@ export function AIChatClient({ user }: AIChatClientProps) {
 
           {/* Fixed Input Bar */}
           <div className="px-8 pb-8">
+            {/* Quick Action Dock */}
+            <div className="flex items-center gap-2 mb-4 overflow-x-auto no-scrollbar pb-2">
+              <button 
+                onClick={() => sendMessage("Give me the structure of my semester lectures")}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-drq-surface border border-drq-border text-[11px] font-bold text-drq-secondary hover:text-white hover:border-drq-primary transition-all active:scale-95 whitespace-nowrap"
+              >
+                <Layout size={14} className="text-drq-primary" /> Lectures Structure
+              </button>
+              <button 
+                onClick={() => sendMessage("Show me my data for this semester")}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-drq-surface border border-drq-border text-[11px] font-bold text-drq-secondary hover:text-white hover:border-drq-primary transition-all active:scale-95 whitespace-nowrap"
+              >
+                <GraduationCap size={14} className="text-emerald-500" /> Semester Data
+              </button>
+              <button 
+                onClick={() => sendMessage("Tell me about the founder of MedOneX")}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-drq-surface border border-drq-border text-[11px] font-bold text-drq-secondary hover:text-white hover:border-drq-primary transition-all active:scale-95 whitespace-nowrap"
+              >
+                <Sparkles size={14} className="text-amber-500" /> MedOneX Founder
+              </button>
+            </div>
+
             <AIChatInput 
               onSend={sendMessage}
               onGenerateImage={generateImage}

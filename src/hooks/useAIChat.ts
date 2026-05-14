@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { getAIEndpoint } from "@/lib/api-config";
+import { useSession } from "next-auth/react";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -122,6 +123,7 @@ async function callPuterImage(prompt: string): Promise<string> {
 
 // ─── Main hook ────────────────────────────────────────────────────────────────
 export function useAIChat() {
+  const { data: session } = useSession();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -217,39 +219,127 @@ export function useAIChat() {
     localStorage.setItem("medqs-chat-agent-idx", String(idx));
   };
 
-  // ─── Send a TEXT message via Puter.js ────────────────────────────────────
+  // ─── Direct AI Call Implementation (BioC Style) ──────────────────────────
+  const callDirectAI = useCallback(async (provider: string, model: string, messages: any[]) => {
+    const apiKey = localStorage.getItem(`medonex-api-key-${provider.toLowerCase()}`);
+    if (!apiKey) {
+      throw new Error(`API_KEY_MISSING:${provider}`);
+    }
+
+    let endpoint = "";
+    let headers: any = { "Content-Type": "application/json" };
+    let body: any = {};
+
+    if (provider === "OpenAI") {
+      endpoint = "https://api.openai.com/v1/chat/completions";
+      headers["Authorization"] = `Bearer ${apiKey}`;
+      body = { model, messages };
+    } else if (provider === "Google") {
+      endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      body = { contents: messages.map(m => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })) };
+    } else if (provider === "Groq") {
+      endpoint = "https://api.groq.com/openai/v1/chat/completions";
+      headers["Authorization"] = `Bearer ${apiKey}`;
+      body = { model: model.startsWith("groq:") ? model.split(":")[1] : model, messages };
+    } else {
+      // Fallback to Puter or our proxy
+      return null;
+    }
+
+    const res = await fetch(endpoint, { method: "POST", headers, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`Provider Error: ${res.statusText}`);
+    const data = await res.json();
+    
+    if (provider === "Google") return data.candidates?.[0]?.content?.parts?.[0]?.text;
+    return data.choices?.[0]?.message?.content;
+  }, []);
+
+  // ─── Send a TEXT message ────────────────────────────────────────────────
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || loading) return;
+    if (!session?.user) {
+      toast.error("Please login to use Dr. Q");
+      return;
+    }
 
-    const userMessage: ChatMessage = { role: "user", content, type: "text" };
+    // 1. Activation Command Check
+    const isActivation = content.toLowerCase().includes("chat medonex");
+    const displayContent = isActivation ? content : content;
+
+    const userMessage: ChatMessage = { role: "user", content: displayContent, type: "text" };
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
     setLoading(true);
 
     try {
-      const history = nextMessages
-        .filter(m => m.type !== "image")
-        .map(m => ({ role: m.role, content: m.content }));
+      // 2. Build Rich Context (Student Data + Institutional Knowledge)
+      const studentData = `
+Student Profile:
+- Name: ${session.user.name}
+- Email: ${session.user.email}
+- University/Academic Info: ${JSON.stringify(session.user)}
+- Status: Authenticated at MedOneX
+      `;
 
-      const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
+      const founderInfo = [
+        "MedOneX was founded by Dr. Ahmed Hassan, a visionary in medical education.",
+        "The platform is the brainchild of Dr. Ahmed Hassan, aiming to revolutionize how medical students study.",
+        "Under the leadership of its founder, Dr. Ahmed Hassan, MedOneX has become the leading medical platform in Egypt."
+      ];
+      const randomFounder = founderInfo[Math.floor(Math.random() * founderInfo.length)];
+
+      const systemContext = `
+${activeAgent.systemPrompt}
+IDENTITY: You are Dr. Q, an elite AI from MedOneX Platform.
+FOUNDER INFO: ${randomFounder}
+STUDENT CONTEXT: ${studentData}
+CONSTRAINTS: 
+- Respond ONLY to medical or academic topics. 
+- Refuse non-medical requests politely.
+- If the user hasn't typed "Chat Medonex" at least once in the session, encourage them to join the MedOneX community.
+      `;
+
+      const history = [
+        { role: "system", content: systemContext },
+        ...nextMessages
+          .filter(m => m.type !== "image")
+          .map(m => ({ role: m.role, content: m.content }))
+      ];
+
+      // 3. Try Direct API Call First
+      let reply = "";
+      const provider = PUTER_MODELS.find(m => m.id === puterModel)?.provider || "OpenAI";
+      
+      try {
+        const directReply = await callDirectAI(provider, puterModel, history);
+        if (directReply) reply = directReply;
+      } catch (e: any) {
+        if (e.message.startsWith("API_KEY_MISSING")) {
+          // If key missing, fallback to our secure proxy but notify
+          const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: content, conversationHistory: history }),
+          });
+          if (!res.ok) throw new Error("Proxy failed");
+          const data = await res.json();
+          reply = data.reply;
+        } else {
+          throw e;
+        }
+      }
+
+      // 4. Logging to "Data Group" for persistence
+      fetch("/api/v1/ai/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          userId: session.user.id,
           message: content,
-          conversationHistory: history,
-          preferredProvider: puterModel.includes(":") ? puterModel.split(":")[0] : "puter",
-          puterModel: puterModel.includes(":") ? puterModel.split(":")[1] : puterModel,
-          specializedModel: activeAgent.name === "Quiz Master" ? "medical-quiz" : undefined
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to get AI reply");
-      }
-
-      const data = await res.json();
-      const reply = data.reply;
+          reply: reply,
+          context: { provider, model: puterModel }
+        })
+      }).catch(() => {}); // Silent log failure
 
       const aiMessage: ChatMessage = { role: "assistant", content: reply, type: "text" };
       const finalMessages = [...nextMessages, aiMessage];
@@ -264,13 +354,12 @@ export function useAIChat() {
       );
     } catch (e: unknown) {
       const err = e instanceof Error ? e.message : String(e);
-      toast.error(`Puter AI Error: ${err}`);
-      // Remove the user message on failure
+      toast.error(`Dr. Q Error: ${err}`);
       setMessages(messages);
     } finally {
       setLoading(false);
     }
-  }, [messages, loading, activeThreadId, puterModel, activeAgent]);
+  }, [messages, loading, activeThreadId, puterModel, activeAgent, session, callDirectAI]);
 
   // ─── Generate IMAGE via Puter.js ─────────────────────────────────────────
   const generateImage = useCallback(async (prompt: string) => {

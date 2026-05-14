@@ -13,7 +13,12 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlyrVideoPlayer } from "./PlyrVideoPlayer";
+import dynamic from 'next/dynamic';
+
+const PlyrVideoPlayer = dynamic(
+  () => import('./PlyrVideoPlayer').then((mod) => mod.PlyrVideoPlayer),
+  { ssr: false }
+);
 
 interface VideoPlayerProps {
   src: string;
