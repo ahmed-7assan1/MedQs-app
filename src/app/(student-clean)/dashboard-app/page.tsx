@@ -32,7 +32,17 @@ import { MobileDashboardWrapper } from "@/components/dashboard/MobileDashboardWr
 export default async function DashboardPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth?mode=login");
+  // if (!user) redirect("/auth?mode=login");
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#05070f] text-white p-6">
+        <h1 className="text-2xl font-bold mb-4">Welcome, Guest</h1>
+        <p className="text-slate-400 mb-8 text-center">Please sign in to access your personalized medical dashboard.</p>
+        <Link href="/auth?mode=login" className="px-8 py-3 bg-blue-600 rounded-2xl font-bold hover:bg-blue-700 transition-all">Sign In Now</Link>
+      </div>
+    );
+  }
 
   // Fetch full user profile to check for missing academic info
   let fullProfile = await prisma.user.findUnique({
