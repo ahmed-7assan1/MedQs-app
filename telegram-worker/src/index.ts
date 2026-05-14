@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { Telegraf, Markup } from 'telegraf';
+import { Telegraf, Markup, Context } from 'telegraf';
 import { neon } from '@neondatabase/serverless';
 
 type Bindings = {
@@ -17,6 +17,39 @@ const getBot = (env: Bindings) => {
   const bot = new Telegraf(env.TELEGRAM_BOT_TOKEN);
   const sql = neon(env.DATABASE_URL);
   const BASE_URL = env.NEXTAUTH_URL || 'https://medonex.vercel.app';
+  const STORAGE_GROUP_ID = env.TELEGRAM_STORAGE_GROUP_ID || "-1003146628517";
+
+  // Init Bot State Table (Runs silently)
+  const initDb = async () => {
+    try {
+      await sql`
+        CREATE TABLE IF NOT EXISTS "TelegramBotState" (
+          "telegramId" TEXT PRIMARY KEY,
+          "provider" TEXT DEFAULT 'gemini',
+          "apiKey" TEXT,
+          "chatState" TEXT DEFAULT 'IDLE'
+        );
+      `;
+    } catch (e) {
+      console.error("DB Init error:", e);
+    }
+  };
+
+  const getBotState = async (telegramId: string) => {
+    const [state] = await sql`SELECT * FROM "TelegramBotState" WHERE "telegramId" = ${telegramId}`;
+    if (!state) {
+      await sql`INSERT INTO "TelegramBotState" ("telegramId") VALUES (${telegramId})`;
+      return { provider: 'gemini', apiKey: null, chatState: 'IDLE' };
+    }
+    return state;
+  };
+
+  const updateBotState = async (telegramId: string, updates: Record<string, string|null>) => {
+    const setQuery = Object.entries(updates)
+      .map(([k, v]) => `"${k}" = '${v || ''}'`)
+      .join(', ');
+    await sql(`UPDATE "TelegramBotState" SET ${setQuery} WHERE "telegramId" = '${telegramId}'`);
+  };
 
   // Helpers
   const getLinkedUser = async (telegramId: string) => {
@@ -32,14 +65,16 @@ const getBot = (env: Bindings) => {
     if (user) return user;
 
     // Check phone link
-    const [botUser] = await sql`SELECT "phoneNumber" FROM "BotUser" WHERE "telegramId" = ${telegramId.toString()} LIMIT 1`;
-    if (botUser?.phoneNumber) {
-      const [uByPhone] = await sql`SELECT id FROM "User" WHERE "telegramPhone" = ${botUser.phoneNumber} LIMIT 1`;
-      if (uByPhone) {
-        await sql`UPDATE "User" SET "telegramId" = ${telegramId.toString()}, "telegramVerified" = true WHERE id = ${uByPhone.id}`;
-        return getLinkedUser(telegramId);
+    try {
+      const [botUser] = await sql`SELECT "phoneNumber" FROM "BotUser" WHERE "telegramId" = ${telegramId.toString()} LIMIT 1`;
+      if (botUser?.phoneNumber) {
+        const [uByPhone] = await sql`SELECT id FROM "User" WHERE "telegramPhone" = ${botUser.phoneNumber} LIMIT 1`;
+        if (uByPhone) {
+          await sql`UPDATE "User" SET "telegramId" = ${telegramId.toString()}, "telegramVerified" = true WHERE id = ${uByPhone.id}`;
+          return getLinkedUser(telegramId);
+        }
       }
-    }
+    } catch (e) { } // Ignore if BotUser table is missing
     return null;
   };
 
@@ -51,6 +86,7 @@ const getBot = (env: Bindings) => {
   ]).resize();
 
   bot.start(async (ctx) => {
+    await initDb();
     const user = await getLinkedUser(ctx.from.id.toString());
     if (user) {
       await ctx.reply(
@@ -75,8 +111,13 @@ const getBot = (env: Bindings) => {
 
   bot.on('contact', async (ctx) => {
     const phone = ctx.message.contact.phone_number.replace('+', '');
-    await sql`INSERT INTO "BotUser" ("telegramId", "phoneNumber") VALUES (${ctx.from.id.toString()}, ${phone}) ON CONFLICT ("telegramId") DO UPDATE SET "phoneNumber" = ${phone}`;
-    await ctx.reply("✅ Phone linked! Try /start now.", Markup.removeKeyboard());
+    try {
+      await sql`CREATE TABLE IF NOT EXISTS "BotUser" ("telegramId" TEXT UNIQUE, "phoneNumber" TEXT)`;
+      await sql`INSERT INTO "BotUser" ("telegramId", "phoneNumber") VALUES (${ctx.from.id.toString()}, ${phone}) ON CONFLICT ("telegramId") DO UPDATE SET "phoneNumber" = ${phone}`;
+      await ctx.reply("✅ Phone linked! Try /start now.", Markup.removeKeyboard());
+    } catch (e) {
+      await ctx.reply("Error linking phone. Please try again.");
+    }
   });
 
   // ─── Command Handlers ───
@@ -115,23 +156,74 @@ const getBot = (env: Bindings) => {
   });
 
   bot.hears("⚙️ Settings", async (ctx) => {
-    await ctx.reply("⚙️ *Bot Settings*\n\nChoose an option to customize your experience:", {
+    await initDb();
+    const state = await getBotState(ctx.from.id.toString());
+    const aiProv = state.provider.toUpperCase();
+    const hasKey = state.apiKey ? "✅ Configured" : "❌ Not Configured";
+
+    await ctx.reply(`⚙️ *Bot Settings*\n\n🤖 *Current AI:* ${aiProv}\n🔑 *API Key:* ${hasKey}\n\nChoose an option to customize:`, {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
-        [Markup.button.callback("🔔 Notifications", "set_notif")],
-        [Markup.button.callback("🤖 AI Model", "set_ai")]
+        [Markup.button.callback("🤖 Change AI Model", "set_ai")],
+        [Markup.button.callback("🔑 Manage API Key", "manage_key")]
       ])
+    });
+  });
+
+  // ─── AI BYOK Settings ───
+  bot.action("set_ai", async (ctx) => {
+    await ctx.editMessageText("🤖 *Select your preferred AI Brain (BioC):*", {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback("✨ Google Gemini", "ai_gemini")],
+        [Markup.button.callback("⚡ Groq (LLaMA-3)", "ai_groq")],
+        [Markup.button.callback("🧠 OpenAI (ChatGPT)", "ai_openai")],
+        [Markup.button.callback("🟣 Anthropic (Claude)", "ai_anthropic")]
+      ])
+    });
+  });
+
+  const setupAiProvider = async (ctx: Context, provider: string, keyUrl: string) => {
+    await updateBotState(ctx.from!.id.toString(), { provider, chatState: `AWAITING_KEY_${provider.toUpperCase()}` });
+    await ctx.editMessageText(
+      `You selected *${provider.toUpperCase()}*.\n\n` +
+      `To use this model at ultra-fast speeds bypassing Vercel limits, please provide your own API key.\n\n` +
+      `🔗 [Get your API Key Here](${keyUrl})\n\n` +
+      `*Reply to this message* with your API key to save it securely.`,
+      { parse_mode: 'Markdown' }
+    );
+  };
+
+  bot.action("ai_gemini", async (ctx) => setupAiProvider(ctx, 'gemini', 'https://aistudio.google.com/app/apikey'));
+  bot.action("ai_groq", async (ctx) => setupAiProvider(ctx, 'groq', 'https://console.groq.com/keys'));
+  bot.action("ai_openai", async (ctx) => setupAiProvider(ctx, 'openai', 'https://platform.openai.com/api-keys'));
+  bot.action("ai_anthropic", async (ctx) => setupAiProvider(ctx, 'anthropic', 'https://console.anthropic.com/settings/keys'));
+
+  bot.action("manage_key", async (ctx) => {
+    await updateBotState(ctx.from!.id.toString(), { apiKey: null });
+    await ctx.editMessageText("🗑️ *API Key cleared.*\n\nPlease select an AI Model again to set a new key.", {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([[Markup.button.callback("🤖 Change AI Model", "set_ai")]])
     });
   });
 
   // ─── Action Handlers (Inline Buttons) ───
   bot.action(/^mod_(.+)$/, async (ctx) => {
     const moduleId = ctx.match[1];
+    if (moduleId === 'back') {
+      const user = await getLinkedUser(ctx.from!.id.toString());
+      if (!user) return;
+      const modules = await sql`SELECT * FROM "Module" WHERE "semesterId" = ${user.semesterId} LIMIT 10`;
+      const buttons = modules.map(m => [Markup.button.callback(`📖 ${m.name}`, `mod_${m.id}`)]);
+      await ctx.editMessageText("🎯 Your Current Modules:", Markup.inlineKeyboard(buttons));
+      return;
+    }
     const subjects = await sql`SELECT * FROM "Subject" WHERE "moduleId" = ${moduleId} LIMIT 10`;
     
     if (subjects.length === 0) return ctx.answerCbQuery("No subjects found in this module.");
     
     const buttons = subjects.map(s => [Markup.button.callback(`📁 ${s.name}`, `sub_${s.id}`)]);
+    buttons.push([Markup.button.callback("⬅️ Back to Modules", "mod_back")]);
     await ctx.editMessageText("📂 Select a Subject:", Markup.inlineKeyboard(buttons));
     await ctx.answerCbQuery();
   });
@@ -143,6 +235,7 @@ const getBot = (env: Bindings) => {
     if (lectures.length === 0) return ctx.answerCbQuery("No lectures found.");
     
     const buttons = lectures.map(l => [Markup.button.callback(`📖 ${l.title}`, `lec_${l.id}`)]);
+    buttons.push([Markup.button.callback("⬅️ Back to Modules", "mod_back")]);
     await ctx.editMessageText("📄 Choose a Lecture:", Markup.inlineKeyboard(buttons));
     await ctx.answerCbQuery();
   });
@@ -150,11 +243,12 @@ const getBot = (env: Bindings) => {
   bot.action(/^lec_(.+)$/, async (ctx) => {
     const lecId = ctx.match[1];
     const lec = (await sql`SELECT * FROM "Lecture" WHERE "id" = ${lecId}`)[0];
+    if(!lec) return;
     
     const buttons = [
       [Markup.button.callback("🎥 Videos", `vids_${lecId}`), Markup.button.callback("📁 Files", `files_${lecId}`)],
       [Markup.button.callback("📝 Quiz", `quiz_${lecId}`)],
-      [Markup.button.callback("⬅️ Back to Subjects", "mod_back")] // Simplified back logic
+      [Markup.button.callback("⬅️ Back to Subjects", "mod_back")]
     ];
     
     await ctx.editMessageText(`🎓 *Lecture: ${lec.title}*\n\nWhat would you like to access?`, {
@@ -171,29 +265,21 @@ const getBot = (env: Bindings) => {
     const vids = await sql`SELECT * FROM "LectureVideo" WHERE "lectureId" = ${lecId} LIMIT 5`;
     if (vids.length === 0) return ctx.answerCbQuery("No videos found.");
     
-    const storageId = env.TELEGRAM_STORAGE_GROUP_ID || "-1003146628517";
-    
     for (const v of vids) {
       let msgId = v.telegramMessageId;
-      
       if (!msgId) {
-        // First time: Send to storage group ONLY
         try {
-          const cacheMsg = await ctx.telegram.sendMessage(storageId, `🎥 *VIDEO CACHE*\n📝 ${v.title}\n🔗 ${v.url}`, { parse_mode: 'Markdown' });
+          const cacheMsg = await ctx.telegram.sendMessage(STORAGE_GROUP_ID, `🎥 *VIDEO CACHE*\n📝 ${v.title}\n🔗 ${v.url}`, { parse_mode: 'Markdown' });
           msgId = cacheMsg.message_id.toString();
-          // Save to DB for next time
-          await sql`UPDATE "LectureVideo" SET "telegramMessageId" = ${msgId}, "telegramChatId" = ${storageId} WHERE "id" = ${v.id}`;
+          await sql`UPDATE "LectureVideo" SET "telegramMessageId" = ${msgId}, "telegramChatId" = ${STORAGE_GROUP_ID} WHERE "id" = ${v.id}`;
           await delay(1000);
         } catch (e) {
-          // Fallback if caching fails
           await ctx.reply(`🎥 *${v.title}*\n🔗 [Watch](${v.url})`, { parse_mode: 'Markdown' });
           continue;
         }
       }
-      
-      // Always Copy from storage
       try {
-        await ctx.telegram.copyMessage(ctx.chat!.id, storageId, parseInt(msgId));
+        await ctx.telegram.copyMessage(ctx.chat!.id, STORAGE_GROUP_ID, parseInt(msgId));
         await delay(1000);
       } catch (e) {}
     }
@@ -205,25 +291,21 @@ const getBot = (env: Bindings) => {
     const files = await sql`SELECT * FROM "LectureFile" WHERE "lectureId" = ${lecId} LIMIT 5`;
     if (files.length === 0) return ctx.answerCbQuery("No files found.");
     
-    const storageId = env.TELEGRAM_STORAGE_GROUP_ID || "-1003146628517";
-
     for (const f of files) {
       let msgId = f.telegramMessageId;
-
       if (!msgId) {
         try {
-          const cacheMsg = await ctx.telegram.sendMessage(storageId, `📄 *FILE CACHE*\n📝 ${f.name}\n🔗 ${f.url}`, { parse_mode: 'Markdown' });
+          const cacheMsg = await ctx.telegram.sendMessage(STORAGE_GROUP_ID, `📄 *FILE CACHE*\n📝 ${f.name}\n🔗 ${f.url}`, { parse_mode: 'Markdown' });
           msgId = cacheMsg.message_id.toString();
-          await sql`UPDATE "LectureFile" SET "telegramMessageId" = ${msgId}, "telegramChatId" = ${storageId} WHERE "id" = ${f.id}`;
+          await sql`UPDATE "LectureFile" SET "telegramMessageId" = ${msgId}, "telegramChatId" = ${STORAGE_GROUP_ID} WHERE "id" = ${f.id}`;
           await delay(1000);
         } catch (e) {
           await ctx.reply(`📄 *${f.name}*\n🔗 [Download](${f.url})`, { parse_mode: 'Markdown' });
           continue;
         }
       }
-      
       try {
-        await ctx.telegram.copyMessage(ctx.chat!.id, storageId, parseInt(msgId));
+        await ctx.telegram.copyMessage(ctx.chat!.id, STORAGE_GROUP_ID, parseInt(msgId));
         await delay(1000);
       } catch (e) {}
     }
@@ -237,21 +319,16 @@ const getBot = (env: Bindings) => {
     
     await ctx.reply(`📝 *Starting Quiz* (Top 5 Questions)\n\nAnswer directly below:`, { parse_mode: 'Markdown' });
     
-    const storageId = env.TELEGRAM_STORAGE_GROUP_ID || "-1003146628517";
-
     for (const q of questions) {
       try {
         await delay(2000); 
-
-        // 🛡️ 1. Check Cache
         if (q.telegramMessageId) {
           try {
-            await ctx.telegram.copyMessage(ctx.chat!.id, storageId, parseInt(q.telegramMessageId));
+            await ctx.telegram.copyMessage(ctx.chat!.id, STORAGE_GROUP_ID, parseInt(q.telegramMessageId));
             continue;
           } catch (e) { }
         }
 
-        // 🛡️ 2. Parse Choices (Supports both string array and object array)
         let choices = q.choices;
         if (typeof choices === 'string') choices = JSON.parse(choices);
         
@@ -259,13 +336,11 @@ const getBot = (env: Bindings) => {
         let correctIdx = 0;
 
         if (Array.isArray(choices)) {
-          // If it's an array of objects {key, text}
           if (choices[0] && typeof choices[0] === 'object' && 'text' in choices[0]) {
             options = choices.map((c: any) => c.text);
             const dbAnswer = q.answer.trim().toUpperCase();
             correctIdx = choices.findIndex((c: any) => c.key === dbAnswer || c.text === q.answer);
           } else {
-            // Standard string array
             options = choices;
             correctIdx = options.findIndex(opt => opt === q.answer);
           }
@@ -274,23 +349,19 @@ const getBot = (env: Bindings) => {
         if (options.length === 0) continue;
         if (correctIdx === -1) correctIdx = 0;
 
-        // 🛡️ 3. Validate Content
         const safeBody = q.body.length > 250 ? q.body.substring(0, 250) + "..." : q.body;
-        const safeOptions = options.map(opt => opt.length > 100 ? opt.substring(0, 97) + "..." : opt);
+        const safeOptions = options.map((opt: string) => opt.length > 100 ? opt.substring(0, 97) + "..." : opt);
         const safeExpl = (q.explanation || q.aiExplanation || "").substring(0, 195);
 
-        // 🛡️ 4. Send to Storage & Copy
-        const cacheMsg = await ctx.telegram.sendPoll(storageId, safeBody, safeOptions, {
+        const cacheMsg = await ctx.telegram.sendPoll(STORAGE_GROUP_ID, safeBody, safeOptions, {
           type: 'quiz',
           correct_option_id: correctIdx,
           explanation: safeExpl,
           explanation_parse_mode: 'Markdown'
         } as any);
 
-        await ctx.telegram.copyMessage(ctx.chat!.id, storageId, cacheMsg.message_id);
-
-        // 🛡️ 5. Save to DB
-        await sql`UPDATE "Question" SET "telegramMessageId" = ${cacheMsg.message_id.toString()}, "telegramChatId" = ${storageId} WHERE "id" = ${q.id}`;
+        await ctx.telegram.copyMessage(ctx.chat!.id, STORAGE_GROUP_ID, cacheMsg.message_id);
+        await sql`UPDATE "Question" SET "telegramMessageId" = ${cacheMsg.message_id.toString()}, "telegramChatId" = ${STORAGE_GROUP_ID} WHERE "id" = ${q.id}`;
         
       } catch (err) {
         console.error("Quiz Error:", err);
@@ -299,27 +370,86 @@ const getBot = (env: Bindings) => {
     await ctx.answerCbQuery();
   });
 
-  // Simple AI Reply & Fallback
+  // ─── AI Interaction & Fallback ───
   bot.on('text', async (ctx) => {
-    const user = await getLinkedUser(ctx.from.id.toString());
-    if (!user) return ctx.reply("Please link your account first.");
-    
     const text = ctx.message.text;
+    const tid = ctx.from.id.toString();
+
+    await initDb();
+    const state = await getBotState(tid);
+
+    // 1. Check if user is inputting an API Key
+    if (state.chatState.startsWith("AWAITING_KEY_")) {
+      await updateBotState(tid, { apiKey: text.trim(), chatState: 'IDLE' });
+      await ctx.reply(`✅ *API Key Saved successfully!* \n\nYour provider is set to *${state.provider.toUpperCase()}*.\nYou can now ask Dr. Q any questions.`, { parse_mode: 'Markdown' });
+      return;
+    }
+
+    const user = await getLinkedUser(tid);
+    if (!user) {
+      if (text === "🧠 Ask Dr. Q") return ctx.reply("Please link your account first to use Dr. Q.");
+      return ctx.reply("Please link your account first.");
+    }
+    
     if (text === "🧠 Ask Dr. Q") {
       return ctx.reply("🩺 *I am Dr. Q, your medical assistant.*\n\nHow can I help you today? Send me any medical question!", { parse_mode: 'Markdown' });
     }
     
-    // Call Gemini directly via fetch
+    // Process AI Chat
+    const promptContext = `
+      System: You are Dr. Q, an elite AI medical tutor for MedOneX. 
+      Student Context:
+      - Name: ${user.name}
+      - University: ${user.university_name || 'Unknown'}
+      - Semester: ${user.semester_name || 'Unknown'}
+      Respond concisely and professionally in Telegram Markdown.
+      User Query: ${text}
+    `;
+
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${env.GEMINI_API_KEY}`, {
-        method: 'POST',
-        body: JSON.stringify({ contents: [{ parts: [{ text: `You are Dr. Q, a professional medical tutor. User says: ${text}` }] }] })
-      });
-      const data: any = await res.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I'm not sure how to help with that.";
+      let reply = "I'm not sure how to respond to that.";
+      const apiKey = state.apiKey || env.GEMINI_API_KEY; // Fallback to system gemini key if BYOK is missing
+      const provider = state.provider;
+
+      if (provider === 'groq') {
+        if(!state.apiKey) throw new Error("MISSING_KEY");
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'llama3-70b-8192', messages: [{ role: 'user', content: promptContext }] })
+        });
+        const data: any = await res.json();
+        reply = data?.choices?.[0]?.message?.content || "Groq Error.";
+      } 
+      else if (provider === 'openai') {
+        if(!state.apiKey) throw new Error("MISSING_KEY");
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'user', content: promptContext }] })
+        });
+        const data: any = await res.json();
+        reply = data?.choices?.[0]?.message?.content || "OpenAI Error.";
+      }
+      else {
+        // Gemini (Default or fallback)
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: promptContext }] }] })
+        });
+        const data: any = await res.json();
+        reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini Error.";
+      }
+
       await ctx.reply(reply, { parse_mode: 'Markdown' });
-    } catch {
-      await ctx.reply("Dr. Q is currently resting. 😴");
+
+    } catch (e: any) {
+      if (e.message === "MISSING_KEY") {
+        await ctx.reply(`⚠️ *API Key Required*\n\nYou selected *${state.provider.toUpperCase()}* but haven't provided an API key.\n\nPlease go to *⚙️ Settings -> 🤖 Change AI Model* to set it up.`, { parse_mode: 'Markdown' });
+      } else {
+        await ctx.reply("Dr. Q is currently resting or the API key is invalid. 😴");
+      }
     }
   });
 
@@ -334,3 +464,4 @@ app.post('/api/telegram', async (c) => {
 });
 
 export default app;
+
