@@ -47,9 +47,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
   // Redirect guests without semester via metadata check (fast, no DB)
   if (!isGuest && authUser) {
     const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
-    // if (!isAdmin && !userSemesterId) {
-    //   redirect("/register");
-    // }
+    if (!isAdmin && !userSemesterId) {
+      redirect("/register");
+    }
   }
 
   // These two can run in parallel
@@ -74,7 +74,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
             logoUrl: siteConfig?.logoUrl ?? null,
           }}
         >
-          <div className={cn("app-shell min-h-screen flex flex-col lg:flex-row dark:bg-[#09080F] bg-white")}>
+          <div className={cn("app-shell min-h-screen flex flex-col dark:bg-[#09080F] bg-white")}>
             <a href="#main-content" className="skip-link sr-only">
               Skip to main content
             </a>
@@ -86,11 +86,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
               userId={isGuest ? "" : sessionUserId}
             />
 
-            {/* <MobileHeader
+            <MobileHeader
               userImage={userImage}
               userName={isGuest ? undefined : displayName}
               userId={isGuest ? "" : sessionUserId}
-            /> */}
+            />
 
             <Sidebar
               userName={isGuest ? "Guest" : displayName}
@@ -119,7 +119,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               {!isGuest && <OnboardingTutorial />}
               <CookieConsentBanner />
               <PersistentAudioPlayer />
-              {/* <MobileBottomNav /> */}
+              <MobileBottomNav />
               {isAdmin && <AdminStudentBar />}
               <PremiumNotificationPrompt />
             </div>

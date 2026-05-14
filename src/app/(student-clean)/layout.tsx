@@ -28,9 +28,9 @@ export default async function CleanStudentLayout({ children }: { children: React
 
   if (!isGuest && authUser) {
     const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
-    // if (!isAdmin && !userSemesterId) {
-    //   redirect("/register");
-    // }
+    if (!isAdmin && !userSemesterId) {
+      redirect("/register");
+    }
   }
 
   const siteConfig = await getCachedSiteConfig();
