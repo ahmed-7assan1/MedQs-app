@@ -201,7 +201,7 @@ function AuthContent() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Identity Verified. Access Granted.");
-        router.push("/dashboard-app");
+        window.location.href = "/dashboard-app";
       } else {
         if (!selectedUni || !selectedSem || !password || !name) {
           throw new Error("Please finalize all academic and account details.");
@@ -225,7 +225,7 @@ function AuthContent() {
         
         if (data.session) {
           toast.success("Professional Profile Established.");
-          router.push("/dashboard-app");
+          window.location.href = "/dashboard-app";
         } else {
           toast.success("Credentials Created. Verification Required via Email.");
           setActiveTab("login");
