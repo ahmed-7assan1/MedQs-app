@@ -44,11 +44,16 @@ const getBot = (env: Bindings) => {
     return state;
   };
 
-  const updateBotState = async (telegramId: string, updates: Record<string, string|null>) => {
-    const setQuery = Object.entries(updates)
-      .map(([k, v]) => `"${k}" = '${v || ''}'`)
-      .join(', ');
-    await sql(`UPDATE "TelegramBotState" SET ${setQuery} WHERE "telegramId" = '${telegramId}'`);
+  const updateBotState = async (telegramId: string, updates: { provider?: string|null, apiKey?: string|null, chatState?: string|null }) => {
+    if (updates.provider !== undefined) {
+      await sql`UPDATE "TelegramBotState" SET "provider" = ${updates.provider} WHERE "telegramId" = ${telegramId}`;
+    }
+    if (updates.apiKey !== undefined) {
+      await sql`UPDATE "TelegramBotState" SET "apiKey" = ${updates.apiKey} WHERE "telegramId" = ${telegramId}`;
+    }
+    if (updates.chatState !== undefined) {
+      await sql`UPDATE "TelegramBotState" SET "chatState" = ${updates.chatState} WHERE "telegramId" = ${telegramId}`;
+    }
   };
 
   // Helpers
