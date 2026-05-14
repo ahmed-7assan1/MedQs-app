@@ -45,7 +45,17 @@ export async function middleware(req: NextRequest) {
   const isAdmin = user?.user_metadata?.role === "ADMIN" || user?.user_metadata?.role === "SUPER_ADMIN";
   const guestQuizId = req.cookies.get(GUEST_QUIZ_COOKIE)?.value?.trim();
 
-  if (pathname.startsWith("/login") || pathname.startsWith("/api/auth")) {
+  if (pathname === "/login") {
+    return NextResponse.redirect(new URL("/auth?mode=login", req.url));
+  }
+  if (pathname === "/register") {
+    return NextResponse.redirect(new URL("/auth?mode=register", req.url));
+  }
+  if (pathname === "/complete-profile") {
+    return NextResponse.redirect(new URL("/auth?mode=onboarding", req.url));
+  }
+
+  if (pathname.startsWith("/auth") || pathname.startsWith("/api/auth")) {
     return response;
   }
 
@@ -58,7 +68,7 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!isLoggedIn && pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/auth?mode=login", req.url));
   }
 
   if (!isLoggedIn) {
