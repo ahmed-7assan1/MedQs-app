@@ -7,17 +7,15 @@ import { fail, ok } from "@/platform/api/envelope";
 export async function GET(req: Request) {
   const session = await auth();
   const scope = await getSessionScope(session);
-  if (!scope) return fail({ error: "Unauthorized", status: 401 });
-
   const { searchParams } = new URL(req.url);
   const academicYearId = searchParams.get("academicYearId");
 
-  // If a specific year is requested (onboarding), allow it if authenticated.
-  // Otherwise, fallback to the user's session scope.
+  // If a specific year is requested (onboarding), allow it.
+  // Otherwise, fallback to the user's session scope if authenticated.
   let where: Record<string, unknown> | undefined = undefined;
   if (academicYearId) {
     where = { academicYearId };
-  } else if (!isSuperAdmin(scope.role)) {
+  } else if (scope && !isSuperAdmin(scope.role)) {
     if (scope.facultyId) {
       // Scoped admin: only semesters from their faculty
       where = {
@@ -38,7 +36,7 @@ export async function GET(req: Request) {
 
   return ok({
     result: semesters,
-    tenantKey: scope.universityId || "GLOBAL",
-    actor: { id: scope.userId, role: scope.role ?? "STUDENT" },
+    tenantKey: scope?.universityId || "GLOBAL",
+    actor: { id: scope?.userId || "anonymous", role: scope?.role ?? "STUDENT" },
   });
 }

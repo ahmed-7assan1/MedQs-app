@@ -71,25 +71,39 @@ function AuthContent() {
 
   // Initial Data Fetch
   useEffect(() => {
-    fetch("/api/v1/universities").then(r => r.json()).then(d => setUniversities(Array.isArray(d) ? d : []));
+    fetch("/api/v1/universities").then(r => r.json()).then(d => {
+      setUniversities(unwrapApiList(d));
+    });
   }, []);
 
   useEffect(() => {
     if (selectedUni) {
       setHasFaculties(null);
-      fetch(`/api/v1/faculties?universityId=${selectedUni.id}`).then(r => r.json()).then(d => {
-        const list = Array.isArray(d) ? d : [];
-        setFaculties(list);
-        setHasFaculties(list.length > 0);
-        if (list.length === 0) setStep(3); // Skip faculty
+      setFaculties([]);
+      setYears([]);
+      
+      Promise.all([
+        fetch(`/api/v1/faculties?universityId=${selectedUni.id}`).then(r => r.json()),
+        fetch(`/api/v1/academic-years?universityId=${selectedUni.id}`).then(r => r.json())
+      ]).then(([facData, yearData]) => {
+        const facList = unwrapApiList(facData);
+        const yearList = unwrapApiList(yearData);
+        
+        setFaculties(facList);
+        setHasFaculties(facList.length > 0);
+        setYears(yearList);
+      }).catch(err => {
+        console.error("Error fetching uni data:", err);
+        setHasFaculties(false);
       });
-      fetch(`/api/v1/academic-years?universityId=${selectedUni.id}`).then(r => r.json()).then(d => setYears(unwrapApiList(d)));
     }
   }, [selectedUni]);
 
   useEffect(() => {
     if (selectedYear) {
-      fetch(`/api/v1/semesters?academicYearId=${selectedYear.id}`).then(r => r.json()).then(d => setSemesters(unwrapApiList(d)));
+      fetch(`/api/v1/semesters?academicYearId=${selectedYear.id}`).then(r => r.json()).then(d => {
+        setSemesters(unwrapApiList(d));
+      });
     }
   }, [selectedYear]);
 
@@ -288,46 +302,60 @@ function AuthContent() {
                     <h3 className="text-white font-bold flex items-center gap-2"><GraduationCap size={20} className="text-violet-400"/> Current Stage</h3>
                   </div>
 
-                  {hasFaculties && faculties.length > 0 && !selectedFaculty && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-white/40 uppercase tracking-widest font-bold mb-2 ml-1">Select Faculty</p>
-                      {faculties.map(fac => (
-                        <button key={fac.id} onClick={() => setSelectedFaculty(fac)}
-                          className="w-full flex items-center p-4 rounded-2xl border bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] transition-all text-sm font-bold text-white/90 text-left">
-                          {fac.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {(!hasFaculties || selectedFaculty) && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-3 gap-2">
-                        {years.filter(y => !selectedFaculty || y.facultyId === selectedFaculty.id).map(year => (
-                          <button key={year.id} onClick={() => { setSelectedYear(year); setSelectedSem(null); }}
-                            className={cn("p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-1", selectedYear?.id === year.id ? "bg-violet-500/10 border-violet-500/50 text-violet-300" : "bg-white/[0.02] border-white/[0.05] text-white/50 hover:bg-white/[0.05]")}>
-                            <Calendar size={16} />
-                            <span className="text-xs font-bold">Year {year.yearNumber}</span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {selectedYear && (
-                        <div className="space-y-2 mt-4 animate-in slide-in-from-top-2">
-                          {semesters.map(sem => (
-                            <button key={sem.id} onClick={() => setSelectedSem(sem)}
-                              className={cn("w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-sm font-bold text-left", selectedSem?.id === sem.id ? "bg-violet-500/10 border-violet-500/50 text-white" : "bg-white/[0.02] border-white/[0.05] text-white/70 hover:bg-white/[0.05]")}>
-                              <div className="flex items-center gap-3"><BookOpen size={18} className={selectedSem?.id === sem.id ? "text-violet-400" : "text-white/20"}/> {sem.name}</div>
-                              {selectedSem?.id === sem.id && <CheckCircle size={18} className="text-violet-400" weight="fill" />}
+                  {hasFaculties === null ? (
+                    <div className="py-8 flex justify-center"><CircleNotch className="animate-spin text-violet-400" size={24} /></div>
+                  ) : (
+                    <>
+                      {hasFaculties && faculties.length > 0 && !selectedFaculty && (
+                        <div className="space-y-2 animate-in slide-in-from-top-2">
+                          <p className="text-xs text-white/40 uppercase tracking-widest font-bold mb-2 ml-1">Select Faculty</p>
+                          {faculties.map(fac => (
+                            <button key={fac.id} onClick={() => setSelectedFaculty(fac)}
+                              className="w-full flex items-center p-4 rounded-2xl border bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] transition-all text-sm font-bold text-white/90 text-left">
+                              {fac.name}
                             </button>
                           ))}
                         </div>
                       )}
 
-                      <button disabled={!selectedSem} onClick={() => setStep(3)} className="w-full mt-4 py-4 rounded-2xl bg-violet-600 text-white font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity">
-                        Continue <CaretRight />
-                      </button>
-                    </div>
+                      {(hasFaculties === false || selectedFaculty) && (
+                        <div className="space-y-4 animate-in slide-in-from-top-2">
+                          {years.length === 0 ? (
+                            <div className="text-center text-xs text-white/30 py-4">No academic years found.</div>
+                          ) : (
+                            <div className="grid grid-cols-3 gap-2">
+                              {years.filter(y => !selectedFaculty || y.facultyId === selectedFaculty.id).map(year => (
+                                <button key={year.id} onClick={() => { setSelectedYear(year); setSelectedSem(null); }}
+                                  className={cn("p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-1", selectedYear?.id === year.id ? "bg-violet-500/10 border-violet-500/50 text-violet-300" : "bg-white/[0.02] border-white/[0.05] text-white/50 hover:bg-white/[0.05]")}>
+                                  <Calendar size={16} />
+                                  <span className="text-xs font-bold">Year {year.yearNumber}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {selectedYear && (
+                            <div className="space-y-2 mt-4 animate-in slide-in-from-top-2">
+                              {semesters.length === 0 ? (
+                                <div className="text-center text-xs text-white/30 py-4">Loading semesters...</div>
+                              ) : (
+                                semesters.map(sem => (
+                                  <button key={sem.id} onClick={() => setSelectedSem(sem)}
+                                    className={cn("w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-sm font-bold text-left", selectedSem?.id === sem.id ? "bg-violet-500/10 border-violet-500/50 text-white" : "bg-white/[0.02] border-white/[0.05] text-white/70 hover:bg-white/[0.05]")}>
+                                    <div className="flex items-center gap-3"><BookOpen size={18} className={selectedSem?.id === sem.id ? "text-violet-400" : "text-white/20"}/> {sem.name}</div>
+                                    {selectedSem?.id === sem.id && <CheckCircle size={18} className="text-violet-400" weight="fill" />}
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          )}
+
+                          <button disabled={!selectedSem} onClick={() => setStep(3)} className="w-full mt-4 py-4 rounded-2xl bg-violet-600 text-white font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity">
+                            Continue <CaretRight />
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
