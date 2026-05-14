@@ -155,15 +155,6 @@ export default async function MobileDashboardPage() {
       {/* 8. BOTTOM NAVIGATION */}
       <MobileBottomNav />
 
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 }

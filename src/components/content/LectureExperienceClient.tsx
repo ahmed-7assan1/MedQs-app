@@ -26,7 +26,7 @@ const PremiumVideoPlayer = dynamic(() => import("@/components/content/PremiumVid
   ssr: false
 });
 
-type TabId = "overview" | "video" | "materials" | "recordings" | "flashcards" | "questions" | "notes" | "drq";
+type TabId = "overview" | "video" | "materials" | "recordings" | "flashcards" | "questions" | "notes" | "drq" | "checklist";
 
 const TAB_META: Record<string, { icon: any; color: string }> = {
   overview:   { icon: Layers,       color: "text-violet-500"  },
@@ -340,7 +340,7 @@ export function LectureExperienceClient({
 
       {/* ══════════════ CONTENT ══════════════ */}
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">
-        <div key={active} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="animate-in fade-in slide-in-from-bottom-1 duration-150">
 
           {/* Overview */}
           {active === "overview" && (

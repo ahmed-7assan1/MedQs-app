@@ -61,7 +61,7 @@ export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: Prem
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl transition-all hover:border-white/20">
+    <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl transition-shadow hover:border-white/20">
 
       {/* ── Top Bar ── */}
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-4 px-6 bg-gradient-to-b from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
