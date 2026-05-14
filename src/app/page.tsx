@@ -21,7 +21,7 @@ export default async function LandingPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
     // If logged in, go straight to dashboard as requested - no obstacles
-    redirect("/dashboard");
+    redirect("/dashboard-app");
   }
 
   const [userCount, questionCount, moduleCount] = await Promise.all([

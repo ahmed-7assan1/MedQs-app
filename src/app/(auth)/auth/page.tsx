@@ -106,22 +106,7 @@ function AuthContent() {
     const mode = searchParams.get("mode");
     if (mode === "register" || mode === "onboarding") setActiveTab("register");
     else setActiveTab("login");
-
-    // 2. Client-side Session Failsafe
-    // If the user is already logged in, the middleware should have caught them.
-    // This is a second layer of defense to ensure they don't see the auth page if a session exists.
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session && mode !== "onboarding") {
-          router.replace("/dashboard");
-        }
-      } catch (err) {
-        console.warn("Session check failed:", err);
-      }
-    };
-    checkSession();
-  }, [searchParams, supabase, router]);
+  }, [searchParams]);
 
   const initialMode = (searchParams.get("mode") as AuthMode) || "login";
   
