@@ -56,9 +56,14 @@ export async function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith("/auth") || pathname.startsWith("/api/auth")) {
-    // If user is already logged in and tries to visit /auth, send them to dashboard
-    if (pathname.startsWith("/auth") && isLoggedIn) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+    // Redirect already-logged-in users away from auth pages
+    // BUT allow onboarding mode so users with incomplete profiles can finish setup
+    // AND allow reset-password since users arrive from an email link without a session
+    if (pathname === "/auth" && isLoggedIn) {
+      const mode = req.nextUrl.searchParams.get("mode");
+      if (mode !== "onboarding") {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
     }
     return response;
   }

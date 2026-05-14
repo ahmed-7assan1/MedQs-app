@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Play } from "@phosphor-icons/react";
 
-const EXCLUDED_PATHS = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/complete-profile"];
+const EXCLUDED_PATHS = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/complete-profile", "/auth"];
 
 export function SessionPersistence() {
   const pathname = usePathname();

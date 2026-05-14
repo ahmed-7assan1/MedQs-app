@@ -9,7 +9,7 @@ import {
   EnvelopeSimple, LockKey, User, Phone, 
   Buildings, GraduationCap, Calendar, BookOpen, 
   CaretRight, CaretLeft, CircleNotch, CheckCircle, 
-  ShieldCheck, Brain
+  ShieldCheck, Brain, ArrowLeft, PaperPlaneTilt
 } from "@phosphor-icons/react";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { CinematicBackground } from "@/components/landing/CinematicBackground";
@@ -30,16 +30,8 @@ function AuthContent() {
   
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-
-  // If user is already signed in, redirect to dashboard immediately
-  useEffect(() => {
-    if (isOnboarding) return; // Let onboarding users stay
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        router.replace("/dashboard");
-      }
-    });
-  }, []);
+  const [showForgot, setShowForgot] = useState(initialMode === "forgot-password");
+  const [forgotSent, setForgotSent] = useState(false);
 
   // Form State
   const [email, setEmail] = useState("");
@@ -140,6 +132,18 @@ function AuthContent() {
     cancel_on_tap_outside: false,
   });
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return toast.error("Please enter your email address.");
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    setForgotSent(true);
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return toast.error("Please fill in all fields.");
@@ -216,7 +220,7 @@ function AuthContent() {
           <AnimatePresence mode="wait">
             
             {/* LOGIN FLOW */}
-            {activeTab === "login" && (
+            {activeTab === "login" && !showForgot && (
               <motion.form key="login" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} onSubmit={handleEmailAuth} className="space-y-5">
                 <div className="space-y-4">
                   <div className="relative group">
@@ -232,7 +236,7 @@ function AuthContent() {
                 </div>
 
                 <div className="flex justify-end">
-                  <button type="button" className="text-xs font-bold text-slate-500 dark:text-white/40 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Forgot Password?</button>
+                  <button type="button" onClick={() => { setShowForgot(true); setForgotSent(false); }} className="text-xs font-bold text-slate-500 dark:text-white/40 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Forgot Password?</button>
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full group overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-px shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">
@@ -252,6 +256,63 @@ function AuthContent() {
                   Continue with Google
                 </button>
               </motion.form>
+            )}
+
+            {/* FORGOT PASSWORD FLOW */}
+            {activeTab === "login" && showForgot && (
+              <motion.div key="forgot" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                {!forgotSent ? (
+                  <>
+                    <div className="flex items-center gap-3 mb-2">
+                      <button onClick={() => setShowForgot(false)} className="p-2 bg-slate-100 dark:bg-white/[0.05] hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl text-slate-500 dark:text-white/60 transition-colors">
+                        <ArrowLeft size={16}/>
+                      </button>
+                      <div>
+                        <h3 className="text-slate-900 dark:text-white font-bold text-base">Reset Password</h3>
+                        <p className="text-xs text-slate-500 dark:text-white/40 mt-0.5">We'll send a secure link to your email</p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+                      <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                        🩺 Enter the email address associated with your MedOneX account and we'll send you a password reset link.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleForgotPassword} className="space-y-4">
+                      <div className="relative group">
+                        <EnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
+                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Your Email Address"
+                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
+                      </div>
+                      <button type="submit" disabled={loading} className="w-full group overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-px shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl py-4 flex items-center justify-center gap-2 font-bold text-white tracking-wide group-hover:opacity-90">
+                          {loading ? <CircleNotch className="animate-spin" size={20} /> : <><PaperPlaneTilt size={18} weight="fill"/> Send Reset Link</>}
+                        </div>
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-5">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 flex items-center justify-center">
+                      <CheckCircle size={40} weight="fill" className="text-green-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-slate-900 dark:text-white font-bold text-lg mb-2">Check Your Email</h3>
+                      <p className="text-sm text-slate-500 dark:text-white/50 leading-relaxed">
+                        We sent a password reset link to <span className="font-bold text-slate-700 dark:text-white/80">{email}</span>. Check your inbox and click the link to reset your password.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] text-xs text-slate-500 dark:text-white/40">
+                      Didn't receive it? Check your spam folder or{" "}
+                      <button onClick={() => setForgotSent(false)} className="text-blue-600 dark:text-blue-400 font-bold hover:underline">try again</button>.
+                    </div>
+                    <button onClick={() => { setShowForgot(false); setForgotSent(false); }} className="text-xs font-bold text-slate-400 dark:text-white/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 mx-auto">
+                      <ArrowLeft size={12}/> Back to Sign In
+                    </button>
+                  </motion.div>
+                )}
+              </motion.div>
             )}
 
             {/* REGISTER & ONBOARDING FLOW */}

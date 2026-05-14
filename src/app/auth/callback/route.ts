@@ -20,9 +20,9 @@ export async function GET(request: Request) {
         select: { universityId: true }
       });
 
-      // If user is new or missing profile info, redirect to complete-profile
+      // If user is new or missing profile info, redirect to onboarding
       if (!dbUser || !dbUser.universityId) {
-        return NextResponse.redirect(`${requestUrl.origin}/complete-profile`);
+        return NextResponse.redirect(`${requestUrl.origin}/auth?mode=onboarding`);
       }
       
       return NextResponse.redirect(`${requestUrl.origin}${next}`);
@@ -30,5 +30,5 @@ export async function GET(request: Request) {
   }
 
   // Return the user to an error page with some instructions
-  return NextResponse.redirect(`${requestUrl.origin}/login?error=auth-code-error`);
+  return NextResponse.redirect(`${requestUrl.origin}/auth?mode=login&error=auth-code-error`);
 }

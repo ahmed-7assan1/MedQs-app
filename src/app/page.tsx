@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { 
   ArrowRight, Play, CheckCircle2, 
@@ -16,9 +16,16 @@ import { ScrollReveal } from "@/components/landing/ScrollReveal";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 
 export default async function LandingPage() {
-  const session = await auth();
-  if (session?.user) {
-    if (!(session.user as any).universityId) redirect("/complete-profile");
+  // Use Supabase (not legacy NextAuth) for session check
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    // Check if profile is complete in DB
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { universityId: true }
+    }).catch(() => null);
+    if (!dbUser?.universityId) redirect("/auth?mode=onboarding");
     redirect("/dashboard");
   }
 

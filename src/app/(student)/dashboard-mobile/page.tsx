@@ -1,5 +1,4 @@
-import { auth } from "@/lib/auth";
-import { redirectIncompleteStudentToRegister } from "@/lib/student-onboarding";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -18,11 +17,11 @@ import {
 import { MobileDashboardWrapper } from "@/components/dashboard/MobileDashboardWrapper";
 
 export default async function MobileDashboardPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-  await redirectIncompleteStudentToRegister(session);
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/auth?mode=login");
 
-  const userId = session.user.id;
+  const userId = user.id;
   const chartDays = last7DayKeys();
   const chartDayKeyStrings = chartDays.map((d) => d.key);
 
@@ -49,7 +48,7 @@ export default async function MobileDashboardPage() {
   const overallPct = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
   const dailyTarget = 50;
   const dailyPct = Math.min(100, Math.round((todayItemCount / dailyTarget) * 100));
-  const firstName = session.user.name?.split(" ")[0] || "Student";
+  const firstName = (user.user_metadata?.name || user.email || "Student").split(" ")[0];
   const userInitial = firstName.charAt(0);
 
   const { label: rankLabel, totalPoints: rankPoints } = rankInfo || {
@@ -61,7 +60,7 @@ export default async function MobileDashboardPage() {
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <MobileDashboardWrapper user={{ name: session.user.name || "Student", role: rankLabel, initial: userInitial }}>
+    <MobileDashboardWrapper user={{ name: user.user_metadata?.name || user.email || "Student", role: rankLabel, initial: userInitial }}>
       <main className="pt-[72px] pb-[100px] px-4 space-y-7">
         
         {/* 2. GREETING BLOCK */}

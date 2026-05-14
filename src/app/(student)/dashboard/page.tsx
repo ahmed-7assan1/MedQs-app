@@ -1,10 +1,9 @@
-import { auth } from "@/lib/auth";
-import { redirectIncompleteStudentToRegister } from "@/lib/student-onboarding";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/");
-  await redirectIncompleteStudentToRegister(session);
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/auth?mode=login");
   redirect("/dashboard-app");
 }
