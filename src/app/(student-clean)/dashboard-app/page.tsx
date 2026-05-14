@@ -35,10 +35,33 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth?mode=login");
 
   // Fetch full user profile to check for missing academic info
-  const fullProfile = await prisma.user.findUnique({
+  let fullProfile = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { universityId: true, facultyId: true, semesterId: true }
+    select: { id: true, universityId: true, facultyId: true, semesterId: true }
   });
+
+  // Sync logic: If Prisma is missing data but metadata has it, sync now
+  if (!fullProfile || !fullProfile.universityId) {
+    const meta = user.user_metadata;
+    if (meta?.universityId) {
+       fullProfile = await prisma.user.upsert({
+         where: { id: user.id },
+         create: {
+            id: user.id,
+            email: user.email!,
+            name: meta.name || user.email?.split('@')[0] || "Student",
+            universityId: meta.universityId,
+            facultyId: meta.facultyId,
+            semesterId: meta.semesterId,
+         },
+         update: {
+            universityId: meta.universityId,
+            facultyId: meta.facultyId,
+            semesterId: meta.semesterId,
+         }
+       });
+    }
+  }
 
   const isProfileIncomplete = !fullProfile?.universityId || !fullProfile?.semesterId;
 

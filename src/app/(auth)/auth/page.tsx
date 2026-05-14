@@ -192,20 +192,6 @@ function AuthContent() {
     setForgotSent(true);
   };
 
-  const saveProfileData = async () => {
-    const res = await fetch("/api/v1/auth/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        universityId: selectedUni?.id,
-        facultyId: selectedFaculty?.id,
-        semesterId: selectedSem?.id,
-        nickname: name || email.split("@")[0],
-      }),
-    });
-    if (!res.ok) throw new Error("Failed to save profile");
-  };
-
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -215,23 +201,31 @@ function AuthContent() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Identity Verified. Access Granted.");
-        router.push("/dashboard");
+        router.push("/dashboard-app");
       } else {
         if (!selectedUni || !selectedSem || !password || !name) {
           throw new Error("Please finalize all academic and account details.");
         }
         
+        // Pass academic data to metadata so it's saved even without an immediate session
         const { data, error } = await supabase.auth.signUp({
           email, password,
-          options: { data: { name } }
+          options: { 
+            data: { 
+              name,
+              universityId: selectedUni.id,
+              facultyId: selectedFaculty?.id,
+              semesterId: selectedSem.id,
+              onboarding_completed: true
+            } 
+          }
         });
-        if (error) throw error;
         
-        await saveProfileData();
+        if (error) throw error;
         
         if (data.session) {
           toast.success("Professional Profile Established.");
-          router.push("/dashboard");
+          router.push("/dashboard-app");
         } else {
           toast.success("Credentials Created. Verification Required via Email.");
           setActiveTab("login");
