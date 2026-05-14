@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  MobileTopBar, 
-  MobileSidebar, 
-  MobileBottomNav 
-} from "./MobileDashboardComponents";
+import { MobileTopBar, MobileSidebar, MobileBottomNav } from "./MobileDashboardComponents";
 
 interface MobileDashboardWrapperProps {
   children: React.ReactNode;
@@ -16,31 +12,29 @@ interface MobileDashboardWrapperProps {
   };
 }
 
-export const MobileDashboardWrapper = ({ children, user }: MobileDashboardWrapperProps) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+export function MobileDashboardWrapper({ children, user }: MobileDashboardWrapperProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="md:hidden min-h-screen bg-[#07080f] text-white relative overflow-x-hidden">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-[#07080f] text-white selection:bg-[#4f5fff]/30 relative overflow-x-hidden">
+      {/* 1. STICKY TOP BAR */}
+      <MobileTopBar 
+        userInitial={user.initial} 
+        onMenuOpen={() => setIsMenuOpen(true)} 
+      />
+
+      {/* 2. SIDEBAR (DRAWER) */}
       <MobileSidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)} 
         user={user}
       />
 
-      {/* Top Bar */}
-      <MobileTopBar 
-        userInitial={user.initial} 
-        onMenuOpen={() => setIsSidebarOpen(true)} 
-      />
+      {/* 3. MAIN CONTENT */}
+      {children}
 
-      {/* Main Content */}
-      <main className="pt-[72px] pb-[100px] px-4 space-y-7">
-        {children}
-      </main>
-
-      {/* Bottom Nav */}
+      {/* 4. BOTTOM NAVIGATION */}
       <MobileBottomNav />
     </div>
   );
-};
+}

@@ -15,6 +15,7 @@ import {
   MobileSpecCard,
   MobileDrQCard
 } from "@/components/dashboard/MobileDashboardComponents";
+import { MobileDashboardWrapper } from "@/components/dashboard/MobileDashboardWrapper";
 
 export default async function MobileDashboardPage() {
   const session = await auth();
@@ -60,11 +61,7 @@ export default async function MobileDashboardPage() {
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="min-h-screen bg-[#07080f] text-white selection:bg-[#4f5fff]/30 relative overflow-x-hidden">
-      
-      {/* 1. STICKY TOP BAR */}
-      <MobileTopBar userInitial={userInitial} />
-
+    <MobileDashboardWrapper user={{ name: session.user.name || "Student", role: rankLabel, initial: userInitial }}>
       <main className="pt-[72px] pb-[100px] px-4 space-y-7">
         
         {/* 2. GREETING BLOCK */}
@@ -151,10 +148,6 @@ export default async function MobileDashboardPage() {
         </section>
 
       </main>
-
-      {/* 8. BOTTOM NAVIGATION */}
-      <MobileBottomNav />
-
-    </div>
+    </MobileDashboardWrapper>
   );
 }
