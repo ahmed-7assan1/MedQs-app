@@ -100,6 +100,25 @@ function AuthContent() {
   const supabase = createClient();
   
   type AuthMode = "login" | "register" | "onboarding" | "forgot-password";
+  
+  useEffect(() => {
+    // 1. URL Mode check
+    const mode = searchParams.get("mode");
+    if (mode === "register" || mode === "onboarding") setActiveTab("register");
+    else setActiveTab("login");
+
+    // 2. Client-side Session Failsafe
+    // If the user is already logged in, the middleware should have caught them.
+    // This is a second layer of defense to ensure they don't see the auth page if a session exists.
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && mode !== "onboarding") {
+        router.push("/dashboard");
+      }
+    };
+    checkSession();
+  }, [searchParams, supabase, router]);
+
   const initialMode = (searchParams.get("mode") as AuthMode) || "login";
   
   const isOnboarding = initialMode === "onboarding";

@@ -18,66 +18,75 @@ const GUEST_BROWSABLE = ["/", "/modules", "/leaderboard", "/forum", "/profile"];
 const AUTH_REQUIRED = ["/profile/edit", "/notifications", "/quiz", "/register"];
 
 export async function middleware(req: NextRequest) {
-  // Update Supabase session cookies
-  let response = await updateSession(req);
-
+  // 1. Update session and get the base response with cookies
+  const res = await updateSession(req);
   const { pathname } = req.nextUrl;
 
-  // Create a minimal client to check session
+  // 2. Create client using the request and response to ensure cookie sync
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value
+        get(name: string) { return req.cookies.get(name)?.value },
+        set(name: string, value: string, options: CookieOptions) {
+          req.cookies.set({ name, value, ...options });
+          res.cookies.set({ name, value, ...options });
         },
-        set(name: string, value: string, options: CookieOptions) {},
-        remove(name: string, options: CookieOptions) {},
+        remove(name: string, options: CookieOptions) {
+          req.cookies.set({ name, value: '', ...options });
+          res.cookies.set({ name, value: '', ...options });
+        },
       },
     }
   );
 
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
-
-  // For role-based checks, we might need a profile table fetch or user metadata
   const isAdmin = user?.user_metadata?.role === "ADMIN" || user?.user_metadata?.role === "SUPER_ADMIN";
   const guestQuizId = req.cookies.get(GUEST_QUIZ_COOKIE)?.value?.trim();
 
-  if (pathname === "/login") {
-    return NextResponse.redirect(new URL("/auth?mode=login", req.url));
-  }
-  if (pathname === "/register") {
-    return NextResponse.redirect(new URL("/auth?mode=register", req.url));
-  }
-  if (pathname === "/complete-profile") {
-    return NextResponse.redirect(new URL("/auth?mode=onboarding", req.url));
-  }
+  // Helper for redirects that preserves cookies
+  const redirectWithCookies = (path: string) => {
+    const redirectRes = NextResponse.redirect(new URL(path, req.url));
+    // Copy cookies from 'res' (the one updated by updateSession/setters) to the new redirect response
+    res.cookies.getAll().forEach(cookie => {
+      redirectRes.cookies.set(cookie.name, cookie.value, {
+        domain: cookie.domain,
+        path: cookie.path,
+        expires: cookie.expires,
+        httpOnly: cookie.httpOnly,
+        secure: cookie.secure,
+        sameSite: cookie.sameSite,
+      });
+    });
+    return redirectRes;
+  };
+
+  if (pathname === "/login") return redirectWithCookies("/auth?mode=login");
+  if (pathname === "/register") return redirectWithCookies("/auth?mode=register");
+  if (pathname === "/complete-profile") return redirectWithCookies("/auth?mode=onboarding");
 
   if (pathname.startsWith("/auth") || pathname.startsWith("/api/auth")) {
-    // Redirect already-logged-in users away from auth pages
-    // BUT allow onboarding mode so users with incomplete profiles can finish setup
-    // AND allow reset-password since users arrive from an email link without a session
     if (pathname === "/auth" && isLoggedIn) {
       const mode = req.nextUrl.searchParams.get("mode");
       if (mode !== "onboarding") {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        return redirectWithCookies("/dashboard");
       }
     }
-    return response;
+    return res;
   }
 
   if (pathname.startsWith("/guest") || pathname.startsWith("/api/v1/guest-quiz")) {
-    return response;
+    return res;
   }
 
   if (API_PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
-    return response;
+    return res;
   }
 
   if (!isLoggedIn && pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/auth?mode=login", req.url));
+    return redirectWithCookies("/auth?mode=login");
   }
 
   if (!isLoggedIn) {
@@ -106,24 +115,24 @@ export async function middleware(req: NextRequest) {
   const needsAuth = AUTH_REQUIRED.some((p) => pathname.startsWith(p));
 
   if (!isLoggedIn) {
-    if (isGuestBrowsable && !needsAuth) return response;
+    if (isGuestBrowsable && !needsAuth) return res;
     if (!pathname.startsWith("/api")) {
       // Redirect directly to /auth to avoid /login -> /auth loop
-      return NextResponse.redirect(new URL("/auth?mode=login", req.url));
+      return redirectWithCookies("/auth?mode=login");
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   if (pathname.startsWith("/admin") && pathname.includes("_")) {
     const fixedPath = pathname.replace(/_/g, "-");
-    return NextResponse.redirect(new URL(fixedPath, req.url));
+    return redirectWithCookies(fixedPath);
   }
 
   if (pathname.startsWith("/admin") && !isAdmin) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return redirectWithCookies("/dashboard");
   }
 
-  return response;
+  return res;
 }
 
 export const config = {
