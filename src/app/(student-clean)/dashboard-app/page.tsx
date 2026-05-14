@@ -118,15 +118,16 @@ export default async function DashboardPage() {
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       {/* 📱 MOBILE VIEW */}
-      <MobileDashboardWrapper 
-      user={{
-          name: user.user_metadata?.name || user.email || "Student",
-          role: "Academic Tier: " + rankLabel,
-          initial: userInitial
-        }}
-      >
+      <div className="md:hidden">
+        <MobileDashboardWrapper 
+          user={{
+            name: user.user_metadata?.name || user.email || "Student",
+            role: "Academic Tier: " + rankLabel,
+            initial: userInitial
+          }}
+        >
           <section className="space-y-1">
             <p className="text-[11px] font-medium text-[#8b8fa8] uppercase tracking-[0.08em]">{greeting},</p>
             <h1 className="text-[26px] font-bold text-white leading-tight">
@@ -199,7 +200,8 @@ export default async function DashboardPage() {
           <section>
             <MobileDrQCard />
           </section>
-      </MobileDashboardWrapper>
+        </MobileDashboardWrapper>
+      </div>
 
       {/* 🖥️ DESKTOP VIEW */}
       <div className="hidden md:block min-h-screen bg-background text-foreground transition-colors duration-500 selection:bg-primary/30 relative">

@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
 
   // SUPER_ADMIN BYPASS: Always allow access for super admins
   const userRole = user?.user_metadata?.role
-  const isSuperAdmin = userRole === 'SUPER_ADMIN' || user?.email === 'medqs.support@gmail.com'
+  const isSuperAdmin = userRole === 'SUPER_ADMIN' || user?.email === 'ahmedhassan0business@gmail.com'
 
   if (isSuperAdmin) {
     // If super admin is on auth pages, they can stay or go to dashboard, no forced redirects

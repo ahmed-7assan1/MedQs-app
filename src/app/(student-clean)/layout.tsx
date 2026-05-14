@@ -28,7 +28,7 @@ export default async function CleanStudentLayout({ children }: { children: React
 
   if (!isGuest && authUser) {
     const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
-    const isSuperAdmin = userRole === "SUPER_ADMIN" || authUser?.email === "medqs.support@gmail.com";
+    const isSuperAdmin = userRole === "SUPER_ADMIN" || authUser?.email === "ahmedhassan0business@gmail.com";
 
     if (!isAdmin && !userSemesterId && !isSuperAdmin) {
       redirect("/register");
