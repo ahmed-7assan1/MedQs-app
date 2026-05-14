@@ -242,21 +242,24 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
       */}
 
       {/* ══════════════════════════════════════════════
-          MOBILE FULL-SCREEN SIDE PANEL (slides from left)
+          SIDE PANEL (Always visible on desktop, slide-in on mobile)
       ══════════════════════════════════════════════ */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[150] lg:hidden" style={{ isolation: "isolate" }}>
-          {/* Backdrop */}
+      {(mobileOpen || mounted) && (
+        <div className={cn("fixed inset-0 z-[150]", !mobileOpen && "hidden lg:block lg:relative lg:inset-auto lg:z-0 lg:w-72")} style={{ isolation: "isolate" }}>
+          {/* Backdrop (Mobile only) */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-[6px]"
+            className="absolute inset-0 bg-black/60 backdrop-blur-[6px] lg:hidden"
             onClick={setMobileClose}
             aria-hidden
           />
 
           {/* Panel */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-72 max-w-[90vw] flex flex-col bg-card border-r border-white/10 shadow-2xl"
-            style={{ animation: "slideInFromLeft 300ms cubic-bezier(0.16,1,0.3,1)" }}
+            className={cn(
+              "absolute left-0 top-0 bottom-0 w-72 max-w-[90vw] flex flex-col bg-card border-r border-white/10 shadow-2xl lg:relative lg:translate-x-0 lg:shadow-none lg:max-w-none lg:w-full",
+              mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            )}
+            style={{ animation: mobileOpen ? "slideInFromLeft 300ms cubic-bezier(0.16,1,0.3,1)" : "none" }}
           >
             {/* Panel header */}
             <div className="flex h-14 items-center justify-between px-5">
@@ -268,7 +271,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
               </div>
               <button
                 onClick={setMobileClose}
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors lg:hidden"
               >
                 <X className="h-5 w-5" />
               </button>
