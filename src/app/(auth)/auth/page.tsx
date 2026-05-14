@@ -232,10 +232,6 @@ function AuthContent() {
               </div>
 
               <div className="flex gap-3 justify-center">
-                {/* Social Buttons */}
-                <button type="button" onClick={handleAppleLogin} className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.08] hover:border-white/20 transition-all hover:-translate-y-1">
-                  <svg className="w-6 h-6 fill-white" viewBox="0 0 24 24"><path d="M16.365 21.444c-1.506.857-3.14.876-4.673.016-1.576-.893-2.612-1.92-4.148-3.791C4.469 13.91 3.5 10.154 4.582 7.042c.536-1.543 1.541-2.736 3.015-3.486 1.488-.76 3.033-.717 4.55.086.72.38 1.341.38 2.052 0 1.583-.84 3.193-.84 4.67.046 1.13.682 1.954 1.597 2.44 2.76-2.22 1.168-2.69 3.518-1.282 5.176.626.737 1.436 1.16 2.373 1.259-1.042 2.92-2.723 5.378-5.385 8.163-.22.23-.45.45-.65.4zm-4.717-15.65c-.244-2.18 1.387-4.147 3.535-4.526.47 2.457-1.463 4.417-3.535 4.526z"/></svg>
-                </button>
                 {/* Google handled by One Tap, but we can add a fallback button if needed */}
                 <button type="button" onClick={() => {
                   const btn = document.querySelector('[role="button"][aria-labelledby="button-label"]') as HTMLElement;
