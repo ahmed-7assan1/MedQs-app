@@ -56,6 +56,10 @@ export async function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith("/auth") || pathname.startsWith("/api/auth")) {
+    // If user is already logged in and tries to visit /auth, send them to dashboard
+    if (pathname.startsWith("/auth") && isLoggedIn) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
     return response;
   }
 
@@ -99,7 +103,8 @@ export async function middleware(req: NextRequest) {
   if (!isLoggedIn) {
     if (isGuestBrowsable && !needsAuth) return response;
     if (!pathname.startsWith("/api")) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      // Redirect directly to /auth to avoid /login -> /auth loop
+      return NextResponse.redirect(new URL("/auth?mode=login", req.url));
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

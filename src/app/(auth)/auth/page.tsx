@@ -28,8 +28,18 @@ function AuthContent() {
   const isOnboarding = initialMode === "onboarding";
   const [activeTab, setActiveTab] = useState<"login" | "register">(isOnboarding ? "register" : (initialMode === "register" ? "register" : "login"));
   
-  const [step, setStep] = useState(isOnboarding ? 1 : 1);
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+
+  // If user is already signed in, redirect to dashboard immediately
+  useEffect(() => {
+    if (isOnboarding) return; // Let onboarding users stay
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        router.replace("/dashboard");
+      }
+    });
+  }, []);
 
   // Form State
   const [email, setEmail] = useState("");
@@ -66,12 +76,14 @@ function AuthContent() {
         fetch(`/api/v1/faculties?universityId=${selectedUni.id}`).then(r => r.json()),
         fetch(`/api/v1/academic-years?universityId=${selectedUni.id}`).then(r => r.json())
       ]).then(([facData, yearData]) => {
-        const facList = unwrapApiList(facData);
-        const yearList = unwrapApiList(yearData);
+        const facList = unwrapApiList<any>(facData);
+        const yearList = unwrapApiList<any>(yearData);
         
         setFaculties(facList);
         setHasFaculties(facList.length > 0);
+        // Academic years belong to university, NOT faculty - show all years regardless
         setYears(yearList);
+        console.log("[Auth] Loaded faculties:", facList.length, "years:", yearList.length);
       }).catch(err => {
         console.error("Error fetching uni data:", err);
         setHasFaculties(false);
@@ -305,7 +317,8 @@ function AuthContent() {
                               <div className="text-center text-xs text-slate-500 dark:text-white/30 py-4">No academic years found.</div>
                             ) : (
                               <div className="grid grid-cols-3 gap-2">
-                                {years.filter(y => !selectedFaculty || y.facultyId === selectedFaculty.id).map(year => (
+                                {/* Show ALL years for this university - years don't filter by faculty */}
+                                {years.map(year => (
                                   <button key={year.id} onClick={() => { setSelectedYear(year); setSelectedSem(null); }}
                                     className={cn("p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-2 shadow-sm", selectedYear?.id === year.id ? "bg-blue-50 dark:bg-blue-500/10 border-blue-500/50 text-blue-600 dark:text-blue-300" : "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.05] text-slate-500 dark:text-white/50 hover:bg-slate-100 dark:hover:bg-white/[0.05]")}>
                                     <Calendar size={18} />
