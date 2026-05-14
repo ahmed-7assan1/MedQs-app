@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, User, Mail, Lock, Phone, ArrowRight, Github } from "lucide-react";
 import toast from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -86,7 +86,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#131220] border border-white/[0.07] shadow-2xl">
-             <MedQsLogoMark className="h-10 w-10 text-primary" title="MedOneX" />
+             <MedOneXLogoMark className="h-10 w-10 text-primary" title="MedOneX" />
           </div>
           <div className="text-center">
             <h1 className="text-2xl font-black tracking-tighter text-white">Join MedOne<span className="text-primary">X</span></h1>

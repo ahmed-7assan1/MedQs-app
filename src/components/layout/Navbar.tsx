@@ -13,7 +13,7 @@ import { signOut } from "next-auth/react";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
 import { cn } from "@/lib/utils";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import toast from "react-hot-toast";
 
@@ -117,7 +117,7 @@ export function Navbar({ userName, userImage, userId, isAdmin, siteName = "MedOn
           {logoUrl ? (
             <img src={logoUrl} alt={siteName} className="h-8 w-8 rounded-lg object-contain" />
           ) : (
-            <MedQsLogoMark title={siteName} className="h-8 w-8" />
+            <MedOneXLogoMark title={siteName} className="h-8 w-8" />
           )}
           <span className="font-display text-lg font-bold tracking-tight">{siteName}</span>
         </Link>

@@ -1,16 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sun, Moon, LogIn } from "lucide-react";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { ArrowRight, Sun, Moon, LogIn, Menu, X } from "lucide-react";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { useThemeStore } from "@/lib/store";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function LandingNavbar() {
   const { theme, setTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isDark =
     theme === "dark" ||
@@ -20,54 +28,100 @@ export function LandingNavbar() {
     setTheme(isDark ? "light" : "dark");
   }
 
-  return (
-    <nav className="sticky top-0 z-50 border-b border-white/[0.02] bg-white/80 backdrop-blur-2xl dark:border-white/[0.02] dark:bg-[#0b0f1a]/85">
-      <div className="mx-auto flex h-[60px] max-w-7xl items-center justify-between px-4 sm:px-6">
+  const navLinks = [
+    { name: "Features", href: "#features" },
+    { name: "How it Works", href: "#how-it-works" },
+    { name: "Stats", href: "#stats" },
+    { name: "Community", href: "/social" },
+  ];
 
+  return (
+    <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+      scrolled 
+        ? "py-3 bg-[#05070f]/70 backdrop-blur-xl border-b border-white/5" 
+        : "py-6 bg-transparent"
+    }`}>
+      <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 decoration-transparent">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[12px] bg-primary/10 border border-primary/20">
-            <MedQsLogoMark className="h-5 w-5 text-primary shrink-0" title="MedOneX" interactiveColor={true} />
+        <Link href="/" className="flex items-center gap-2 group decoration-transparent">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 border border-primary/30 group-hover:scale-110 transition-transform">
+            <MedOneXLogoMark className="h-6 w-6 text-primary" title="MedOneX" />
           </div>
-          <span className="inline-flex items-center leading-none text-[16px] font-bold tracking-tight text-foreground dark:text-white">
+          <span className="text-xl font-black tracking-tighter text-white">
             MedOneX
           </span>
         </Link>
 
-        {/* Right side */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Theme toggle */}
-          {mounted && (
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.02] bg-background/60 text-muted-foreground transition-all hover:bg-muted hover:text-foreground dark:border-white/[0.03] dark:bg-white/5 dark:hover:bg-white/10 dark:hover:text-white"
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.name} 
+              href={link.href} 
+              className="text-sm font-medium text-white/60 hover:text-white transition-colors"
             >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
-          )}
+              {link.name}
+            </Link>
+          ))}
+        </div>
 
-          {/* Sign In — icon only on xs, text on sm+ */}
+        {/* Right side Actions */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white transition-all"
+          >
+            {mounted && (isDark ? <Sun size={18} /> : <Moon size={18} />)}
+          </button>
+
           <Link
             href="/login"
-            className="flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted/50 hover:text-foreground dark:text-white/60 dark:hover:bg-white/8 dark:hover:text-white"
+            className="hidden sm:flex items-center gap-2 text-sm font-bold text-white/80 hover:text-white transition-colors"
           >
-            <LogIn className="h-4 w-4 flex-shrink-0" />
-            <span className="hidden sm:inline">Sign In</span>
+            Sign In
           </Link>
 
-          {/* Get Started — icon+text on sm+, icon only on xs */}
           <Link
             href="/register"
-            className="inline-flex h-8 items-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-3 sm:px-4 text-sm font-semibold text-white shadow-[0_4px_18px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_6px_22px_rgba(37,99,235,0.45)] active:scale-[0.98]"
+            className="h-11 flex items-center px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-lg shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all"
           >
-            <span className="hidden sm:inline">Get Started</span>
-            <ArrowRight className="h-4 w-4" />
+            Start Free
           </Link>
+
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden p-2 text-white"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-full left-0 right-0 bg-[#05070f] border-b border-white/5 p-6 flex flex-col gap-4 md:hidden"
+          >
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                href={link.href} 
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-lg font-bold text-white/80"
+              >
+                {link.name}
+              </Link>
+            ))}
+            <hr className="border-white/5 my-2" />
+            <Link href="/login" className="text-lg font-bold text-primary">Sign In</Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
-
-

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { GuestSignOutButton } from "./GuestSignOutButton";
 
@@ -18,7 +18,7 @@ export default async function GuestQuizLayout({ children }: { children: React.Re
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 px-4 md:px-8 backdrop-blur-xl shadow-sm transition-all">
             <Link href="/guest/past-papers" className="flex items-center gap-3 transition-transform hover:scale-105">
               <div className="flex flex-shrink-0 items-center justify-center h-8 w-8 rounded-lg bg-sky-500/10 ring-1 ring-sky-500/20">
-                <MedQsLogoMark className="h-5 w-5 text-sky-500" interactiveColor={true} />
+                <MedOneXLogoMark className="h-5 w-5 text-sky-500" interactiveColor={true} />
               </div>
               <span className="font-display text-lg font-bold tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">{name}</span>
               <span className="hidden sm:inline-flex ml-2 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-500 ring-1 ring-sky-500/20">

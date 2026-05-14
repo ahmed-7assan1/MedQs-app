@@ -14,7 +14,7 @@ const STATIC_LOGO = "/logo.png";
  * In light mode the logo gets a white bg chip so transparent-bg PNGs look clean.
  * In dark mode it renders as-is.
  */
-export function MedQsLogoMark({
+export function MedOneXLogoMark({
   className,
   title,
   variant = "default",
@@ -96,8 +96,11 @@ export function MedQsLogoMark({
   );
 }
 
+// Backward compatibility alias
+export const MedQsLogoMark = MedOneXLogoMark;
+
 /** Wordmark — hidden because the new logo image already contains the text. */
-export function MedQsWordmark({
+export function MedOneXWordmark({
   className,
   variant = "default",
 }: {
@@ -109,7 +112,7 @@ export function MedQsWordmark({
 }
 
 /** Full lockup (icon + optional tagline) used on landing / auth screens. */
-export function MedQsLogoLockup({
+export function MedOneXLogoLockup({
   className,
   showTagline = true,
   variant = "default",

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-export function FadeIn({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) {
+export function FadeIn({ children, delay = 0, className }: { children: React.ReactNode, delay?: number, className?: string }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -13,6 +13,7 @@ export function FadeIn({ children, delay = 0 }: { children: React.ReactNode, del
 
   return (
     <div
+      className={className}
       style={{
         opacity: mounted ? 1 : 0,
         transform: mounted ? "translateY(0)" : "translateY(16px)",

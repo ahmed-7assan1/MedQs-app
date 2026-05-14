@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { AdminMobileNav } from "../../components/admin/AdminMobileNav";
@@ -36,7 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             {/* Logo header */}
             <div className="flex h-14 items-center gap-2.5 px-4">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/30">
-                <MedQsLogoMark className="h-5 w-5 shrink-0 text-white" title="MedQs" interactiveColor={true} />
+                <MedOneXLogoMark className="h-5 w-5 shrink-0 text-white" title="MedQs" interactiveColor={true} />
               </div>
               <span className="font-display text-sm font-bold tracking-tight">{siteName}</span>
               <span className="ml-auto rounded-lg bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-500"

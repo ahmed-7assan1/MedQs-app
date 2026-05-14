@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 
 export function PremiumLoading() {
   return (
@@ -45,7 +45,7 @@ export function PremiumLoading() {
           
           <div className="h-24 w-24 rounded-[32px] bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center shadow-2xl backdrop-blur-xl relative z-10 overflow-hidden group">
             <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
-            <MedQsLogoMark className="h-12 w-12 text-primary" interactiveColor={true} />
+            <MedOneXLogoMark className="h-12 w-12 text-primary" interactiveColor={true} />
           </div>
         </motion.div>
 

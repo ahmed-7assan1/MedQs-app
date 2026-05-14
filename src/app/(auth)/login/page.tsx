@@ -1,7 +1,7 @@
 import { signIn } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Users, BookOpen } from "lucide-react";
@@ -18,7 +18,7 @@ export default async function LoginPage() {
         {/* Logo */}
         <div className="mb-12 flex flex-col items-center gap-6">
           <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-[#131220] border border-white/[0.07] shadow-2xl transition-all hover:scale-105 hover:shadow-primary/20">
-             <MedQsLogoMark className="h-12 w-12 text-primary" title="MedOneX" interactiveColor={true} />
+             <MedOneXLogoMark className="h-12 w-12 text-primary" title="MedOneX" interactiveColor={true} />
           </div>
           <div className="text-center">
             <h1 className="text-3xl font-black tracking-tighter text-white">MedOne<span className="text-primary">X</span></h1>

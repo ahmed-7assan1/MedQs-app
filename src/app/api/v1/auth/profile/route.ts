@@ -131,9 +131,22 @@ export async function PUT(req: NextRequest) {
   // Remove verificationCode from data before passing to update
   const { verificationCode: _, ...updateData } = parsed.data;
 
-  const user = await prisma.user.update({
+  const user = await prisma.user.upsert({
     where: { id: session.user.id },
-    data: {
+    create: {
+      id: session.user.id,
+      email: session.user.email!,
+      name: session.user.name || "Student",
+      ...updateData,
+      ...telegramData,
+      studentCode,
+      nickname: nickname === "" ? null : nickname,
+      universityId: universityId === "" ? null : universityId,
+      facultyId: facultyId === "" ? null : facultyId,
+      semesterId: parsed.data.semesterId === "" ? null : parsed.data.semesterId,
+      studentId: resolvedStudentId,
+    },
+    update: {
       ...updateData,
       ...telegramData,
       studentCode,

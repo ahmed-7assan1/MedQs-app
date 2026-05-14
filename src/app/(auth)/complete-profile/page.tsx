@@ -18,7 +18,7 @@ import {
   CaretLeft
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import toast from "react-hot-toast";
 import { unwrapApiList } from "@/lib/api-list";
 import { createClient } from "@/lib/supabase/client";
@@ -244,7 +244,7 @@ export default function RegisterPage() {
         {/* Logo & Step indicator */}
         <div className="mb-12 flex flex-col items-center gap-6">
           <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-[#131220] border border-white/[0.07] shadow-2xl transition-all hover:scale-105 hover:shadow-primary/20">
-             <MedQsLogoMark className="h-12 w-12 text-primary" title="MedOneX" interactiveColor={true} />
+             <MedOneXLogoMark className="h-12 w-12 text-primary" title="MedOneX" interactiveColor={true} />
           </div>
           <div className="flex gap-2">
             {Array.from({ length: totalSteps }, (_, i) => (

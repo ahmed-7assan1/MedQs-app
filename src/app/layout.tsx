@@ -11,6 +11,7 @@ import { ConfirmProvider } from "@/contexts/ConfirmContext";
 import { FirebaseProvider } from "@/components/providers/FirebaseProvider";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
+import { SessionPersistence } from "@/components/system/SessionPersistence";
 import "../styles/globals.css";
 
 import { unstable_cache } from "next/cache";
@@ -284,6 +285,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <FirebaseProvider>
           <ConfirmProvider>
             <SupabaseAuthProvider>
+              <SessionPersistence />
               {children}
             </SupabaseAuthProvider>
           </ConfirmProvider>

@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { PlyrVideoPlayer } from "./PlyrVideoPlayer";
 
 interface VideoPlayerProps {
   src: string;
@@ -101,7 +102,27 @@ export function ProfessionalVideoPlayer({
     const current = videoRef.current.currentTime;
     const total = videoRef.current.duration;
     setProgress((current / total) * 100);
+    
+    // Save progress periodically (throttled by handleTimeUpdate which is frequent)
+    // We only save if it's more than 3 seconds in and not at the very end
+    if (current > 3 && current < total - 5) {
+      localStorage.setItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`, current.toString());
+    }
   };
+
+  // Restore position on mount
+  useEffect(() => {
+    if (src && videoRef.current) {
+      const savedTime = localStorage.getItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`);
+      if (savedTime) {
+        const time = parseFloat(savedTime);
+        // Only restore if we haven't started playing or are at the beginning
+        if (videoRef.current.currentTime < 1) {
+          videoRef.current.currentTime = time;
+        }
+      }
+    }
+  }, [src]);
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoRef.current || !containerRef.current) return;
@@ -194,16 +215,18 @@ export function ProfessionalVideoPlayer({
     >
       {/* Video Content */}
       {ytId ? (
-        <div className="absolute inset-0 w-full h-full bg-black overflow-hidden">
-          <iframe
-            ref={iframeRef}
-            src={`https://www.youtube.com/embed/${ytId}?autoplay=${playing ? 1 : 0}&mute=1&controls=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1${startTime ? `&start=${startTime}` : ""}${endTime ? `&end=${endTime}` : ""}`}
-            className="w-full h-full scale-[1.5] origin-center"
-            allow="autoplay; encrypted-media"
-            onLoad={() => setIsLoading(false)}
-          />
-          <div className="absolute inset-0 z-10 bg-transparent cursor-pointer" onClick={togglePlay} />
-        </div>
+        <PlyrVideoPlayer
+          src={src}
+          playing={isPlaying}
+          startTime={startTime}
+          onTimeUpdate={(time) => {
+            setProgress((time / (videoRef.current?.duration || 100)) * 100);
+            if (time > 3) {
+              localStorage.setItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`, time.toString());
+            }
+          }}
+          className="absolute inset-0 w-full h-full"
+        />
       ) : (
           <video
             ref={videoRef}

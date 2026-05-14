@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, ArrowLeft } from "lucide-react";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 
@@ -29,7 +29,7 @@ export function AdminMobileNav({ siteName, hubBadge }: AdminMobileNavProps) {
 
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow shadow-blue-500/30">
-            <MedQsLogoMark className="h-5 w-5 brightness-0 invert" />
+            <MedOneXLogoMark className="h-5 w-5 brightness-0 invert" />
           </div>
           <span className="font-display text-sm font-bold truncate">{siteName}</span>
           <span className="rounded-md bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-blue-500">
@@ -58,7 +58,7 @@ export function AdminMobileNav({ siteName, hubBadge }: AdminMobileNavProps) {
         {/* Drawer header */}
         <div className="flex h-14 items-center gap-2.5 px-4">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/30">
-            <MedQsLogoMark className="h-6 w-6 brightness-0 invert" />
+            <MedOneXLogoMark className="h-6 w-6 brightness-0 invert" />
           </div>
           <span className="font-display text-sm font-bold truncate">{siteName}</span>
           <button

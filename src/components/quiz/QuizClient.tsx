@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 
 interface Question {
   id: string;
@@ -379,7 +379,7 @@ export function QuizClient({
               onMouseLeave={() => setLogoHover(false)}
               className="flex items-center gap-2 rounded-xl bg-muted/50 dark:bg-white/[0.04] p-1.5 transition-colors hover:bg-muted dark:hover:bg-white/10"
             >
-              <MedQsLogoMark className="h-8 w-8" />
+              <MedOneXLogoMark className="h-8 w-8" />
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: logoHover ? "auto" : 0, opacity: logoHover ? 1 : 0 }}

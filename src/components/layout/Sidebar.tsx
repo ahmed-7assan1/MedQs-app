@@ -12,7 +12,7 @@ import {
 import { signOut } from "next-auth/react";
 import { useNotificationStore, useThemeStore, useSidebarStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import toast from "react-hot-toast";
@@ -41,9 +41,9 @@ export const NAV = [
 export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedOneX", logoUrl, isGuest, unreadCount = 0 }: SidebarProps) {
   function Logo() {
     if (logoUrl?.trim()) {
-      return <MedQsLogoMark title={siteName} className="h-8 w-8 text-primary" interactiveColor={true} />;
+      return <MedOneXLogoMark title={siteName} className="h-8 w-8 text-primary" interactiveColor={true} />;
     }
-    return <MedQsLogoMark title={siteName} className="h-8 w-8 text-primary" interactiveColor={true} />;
+    return <MedOneXLogoMark title={siteName} className="h-8 w-8 text-primary" interactiveColor={true} />;
   }
   const pathname = usePathname();
   const { unread } = useNotificationStore();
@@ -262,8 +262,8 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
             <div className="flex h-14 items-center justify-between px-5">
               <div className="flex items-center gap-2">
                 {logoUrl?.trim()
-                  ? <MedQsLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />
-                  : <MedQsLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />}
+                  ? <MedOneXLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />
+                  : <MedOneXLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />}
                 <span className="font-display text-[15px] font-extrabold">{siteName}</span>
               </div>
               <button

@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 
 const NAV_ITEMS = [
   { href: "/dashboard-app", label: "Home", icon: House },
@@ -109,7 +109,7 @@ export function FloatingIslandNavbar({
                 {logoUrl ? (
                   <img src={logoUrl} alt={siteName} className="h-7 w-7 object-contain" />
                 ) : (
-                  <MedQsLogoMark className="h-6 w-6 text-primary" interactiveColor={true} />
+                  <MedOneXLogoMark className="h-6 w-6 text-primary" interactiveColor={true} />
                 )}
               </div>
               <span className="text-[17px] font-black tracking-tighter dark:text-white text-black hidden lg:block">MedOneX</span>
@@ -196,7 +196,7 @@ export function FloatingIslandNavbar({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="h-14 w-14 rounded-[20px] bg-primary/10 flex items-center justify-center border border-primary/20">
-                    <MedQsLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />
+                    <MedOneXLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />
                   </div>
                   <div>
                     <h3 className="text-lg font-black dark:text-white text-black">MedOneX</h3>

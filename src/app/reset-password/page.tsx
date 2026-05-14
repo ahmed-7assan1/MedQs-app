@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { MedQsLogoMark } from "@/components/branding/MedQsLogo";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { motion } from "framer-motion";
 import { Lock, Eye, EyeSlash, Warning, CheckCircle } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
@@ -78,7 +78,7 @@ export default function ResetPasswordPage() {
       >
         <div className="flex flex-col items-center text-center mb-10">
           <div className="h-16 w-16 bg-gradient-to-br from-primary to-indigo-600 rounded-[20px] flex items-center justify-center shadow-xl shadow-primary/20 mb-6">
-            <MedQsLogoMark className="h-10 w-10 text-white" />
+            <MedOneXLogoMark className="h-10 w-10 text-white" />
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight mb-2">New Password</h1>
           <p className="text-white/40 text-sm font-medium">Create a strong password for your account.</p>
