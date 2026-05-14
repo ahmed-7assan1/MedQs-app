@@ -4,12 +4,12 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { GoogleOAuthProvider, useGoogleOneTapLogin, useGoogleLogin } from "@react-oauth/google";
+import { GoogleOAuthProvider, useGoogleOneTapLogin } from "@react-oauth/google";
 import { 
   EnvelopeSimple, LockKey, User, Phone, 
   Buildings, GraduationCap, Calendar, BookOpen, 
   CaretRight, CaretLeft, CircleNotch, CheckCircle, 
-  ShieldCheck, Brain, ArrowLeft, PaperPlaneTilt
+  ShieldCheck, Brain, ArrowLeft, PaperPlaneTilt, MagicWand
 } from "@phosphor-icons/react";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { CinematicBackground } from "@/components/landing/CinematicBackground";
@@ -22,14 +22,17 @@ function AuthContent() {
   const searchParams = useSearchParams();
   const supabase = createClient();
   
-  const initialMode = searchParams.get("mode") as "login" | "register" | "onboarding" || "login";
+  // Fix TypeScript error by including all possible modes
+  type AuthMode = "login" | "register" | "onboarding" | "forgot-password";
+  const initialMode = (searchParams.get("mode") as AuthMode) || "login";
   
-  // If user is just onboarding (completing profile), lock them in the register flow
   const isOnboarding = initialMode === "onboarding";
-  const [activeTab, setActiveTab] = useState<"login" | "register">(isOnboarding ? "register" : (initialMode === "register" ? "register" : "login"));
+  const [activeTab, setActiveTab] = useState<"login" | "register">(
+    isOnboarding ? "register" : (initialMode === "register" ? "register" : "login")
+  );
   
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(initialMode === "forgot-password");
   const [forgotSent, setForgotSent] = useState(false);
 
@@ -63,6 +66,9 @@ function AuthContent() {
       setHasFaculties(null);
       setFaculties([]);
       setYears([]);
+      setSelectedFaculty(null);
+      setSelectedYear(null);
+      setSelectedSem(null);
       
       Promise.all([
         fetch(`/api/v1/faculties?universityId=${selectedUni.id}`).then(r => r.json()),
@@ -73,9 +79,7 @@ function AuthContent() {
         
         setFaculties(facList);
         setHasFaculties(facList.length > 0);
-        // Academic years belong to university, NOT faculty - show all years regardless
         setYears(yearList);
-        console.log("[Auth] Loaded faculties:", facList.length, "years:", yearList.length);
       }).catch(err => {
         console.error("Error fetching uni data:", err);
         setHasFaculties(false);
@@ -88,6 +92,8 @@ function AuthContent() {
       fetch(`/api/v1/semesters?academicYearId=${selectedYear.id}`).then(r => r.json()).then(d => {
         setSemesters(unwrapApiList(d));
       });
+    } else {
+      setSemesters([]);
     }
   }, [selectedYear]);
 
@@ -106,7 +112,92 @@ function AuthContent() {
     if (!res.ok) throw new Error("Failed to save academic profile");
   };
 
-  // Google One Tap Hook (Triggers when at login or final step of register)
+  const handleMagicLink = async () => {
+    if (!email) return toast.error("Please enter your email first.");
+    setMagicLinkLoading(true);
+    
+    try {
+      // Check if email exists first (Security requirement)
+      const res = await fetch(`/api/v1/auth/check-email?email=${encodeURIComponent(email)}`);
+      const { exists } = await res.json();
+      
+      if (!exists) {
+        toast.error("This email is not registered. Please create an account first.");
+        setMagicLinkLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      
+      if (error) throw error;
+      toast.success("Magic Link sent! Check your inbox.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send magic link.");
+    } finally {
+      setMagicLinkLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return toast.error("Please enter your email address.");
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    setForgotSent(true);
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || (activeTab === "login" && !password)) return toast.error("Please fill in all fields.");
+    setLoading(true);
+
+    try {
+      if (activeTab === "login") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Welcome back!");
+        router.push("/dashboard");
+      } else {
+        if (!selectedUni || !selectedSem || !password) return toast.error("Please complete all academic and account info.");
+        
+        const { data, error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { name, phone } }
+        });
+        if (error) throw error;
+        
+        await saveProfileData();
+        
+        if (data.session) {
+          toast.success("Account created successfully!");
+          router.push("/dashboard");
+        } else {
+          toast.success("Account created! Check your email to verify.");
+          setActiveTab("login");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleClick = () => {
+    const btn = document.querySelector('[role="button"][aria-labelledby="button-label"]') as HTMLElement;
+    if(btn) btn.click();
+  };
+
+  // Google One Tap Hook
   useGoogleOneTapLogin({
     onSuccess: async (credentialResponse) => {
       setLoading(true);
@@ -128,138 +219,190 @@ function AuthContent() {
         setLoading(false);
       }
     },
-    onError: () => toast.error("Google login failed"),
+    onError: () => console.log("Google One Tap Error"),
     cancel_on_tap_outside: false,
   });
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return toast.error("Please enter your email address.");
-    setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    setForgotSent(true);
-  };
-
-  const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) return toast.error("Please fill in all fields.");
-    setLoading(true);
-
-    try {
-      if (activeTab === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success("Welcome back!");
-        router.push("/dashboard");
-      } else {
-        if (!selectedUni || !selectedSem) return toast.error("Academic data is missing.");
-        const { data, error } = await supabase.auth.signUp({
-          email, password,
-          options: { data: { name, phone } }
-        });
-        if (error) throw error;
-        
-        await saveProfileData();
-        
-        if (data.session) {
-          toast.success("Account created successfully!");
-          router.push("/dashboard");
-        } else {
-          toast.success("Confirmation email sent!");
-          setActiveTab("login");
-        }
-      }
-    } catch (err: any) {
-      toast.error(err.message || "Authentication failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleClick = () => {
-    const btn = document.querySelector('[role="button"][aria-labelledby="button-label"]') as HTMLElement;
-    if(btn) btn.click();
-  };
-
   return (
-    <div className="relative z-10 w-full max-w-[440px] flex flex-col items-center px-4 pt-12 pb-24 mx-auto">
+    <div className="relative z-10 w-full max-w-[480px] flex flex-col items-center px-4 pt-12 pb-24 mx-auto">
       
       {/* Brand Header */}
-      <div className="mb-10 flex flex-col items-center text-center">
-        <div className="p-4 rounded-[24px] bg-white/40 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-xl backdrop-blur-xl mb-6">
-          <MedOneXLogoMark className="h-12 w-12 text-slate-900 dark:text-white" />
+      <div className="mb-8 flex flex-col items-center text-center">
+        <div className="p-4 rounded-[24px] bg-white/40 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-xl backdrop-blur-xl mb-4">
+          <MedOneXLogoMark className="h-10 w-10 text-slate-900 dark:text-white" />
         </div>
-        <h1 className="text-3xl font-display font-black tracking-tight text-slate-900 dark:text-white">
-          {isOnboarding ? "Complete Your Profile" : "Medical Excellence"}
+        <h1 className="text-2xl font-display font-black tracking-tight text-slate-900 dark:text-white">
+          {isOnboarding ? "Complete Your Profile" : (showForgot ? "Reset Password" : "MedOneX Ecosystem")}
         </h1>
-        <p className="text-sm text-slate-500 dark:text-white/50 mt-2 font-medium">
-          {isOnboarding ? "We need a few more details to set up your workspace." : "Master Medicine. Faster. Smarter."}
+        <p className="text-xs text-slate-500 dark:text-white/50 mt-1 font-medium">
+          Professional Medical Education Reimagined.
         </p>
       </div>
 
-      <div className="w-full bg-white/60 dark:bg-[#05070f]/60 backdrop-blur-3xl border border-slate-200 dark:border-white/10 rounded-[32px] p-2 shadow-2xl">
+      <div className="w-full bg-white/60 dark:bg-[#05070f]/60 backdrop-blur-3xl border border-slate-200 dark:border-white/10 rounded-[32px] p-2 shadow-2xl overflow-hidden">
         
         {/* Tabs */}
-        {!isOnboarding && (
-          <div className="relative flex p-1 mb-6 bg-slate-200/50 dark:bg-white/5 rounded-[24px]">
-            <div className={cn("absolute inset-y-1 w-[calc(50%-4px)] bg-white dark:bg-[#1a1f3c] rounded-[20px] shadow-sm transition-all duration-300 ease-out", activeTab === "register" ? "left-[calc(50%)]" : "left-1")} />
-            <button onClick={() => { setActiveTab("login"); setStep(1); }} className={cn("relative z-10 flex-1 py-3 text-sm font-bold transition-colors", activeTab === "login" ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white/40")}>
+        {!isOnboarding && !showForgot && (
+          <div className="relative flex p-1 mb-4 bg-slate-200/50 dark:bg-white/5 rounded-[24px]">
+            <div className={cn("absolute inset-y-1 w-[calc(50%-4px)] bg-white dark:bg-blue-600 rounded-[20px] shadow-sm transition-all duration-300 ease-out", activeTab === "register" ? "left-[calc(50%)]" : "left-1")} />
+            <button onClick={() => { setActiveTab("login"); }} className={cn("relative z-10 flex-1 py-3 text-sm font-bold transition-colors", activeTab === "login" ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white/40")}>
               Sign In
             </button>
             <button onClick={() => setActiveTab("register")} className={cn("relative z-10 flex-1 py-3 text-sm font-bold transition-colors", activeTab === "register" ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white/40")}>
-              Create Account
+              Register
             </button>
           </div>
         )}
 
-        <div className="p-4 sm:p-6">
+        <div className="p-4 sm:p-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="wait">
             
             {/* LOGIN FLOW */}
             {activeTab === "login" && !showForgot && (
-              <motion.form key="login" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} onSubmit={handleEmailAuth} className="space-y-5">
-                <div className="space-y-4">
+              <motion.form key="login" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleEmailAuth} className="space-y-4">
+                <div className="space-y-3">
                   <div className="relative group">
-                    <EnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
+                    <EnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={18} />
                     <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address" 
-                      className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
+                      className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3.5 pl-11 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                   </div>
                   <div className="relative group">
-                    <LockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
+                    <LockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={18} />
                     <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" 
-                      className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
+                      className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3.5 pl-11 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                   </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <button type="button" onClick={() => { setShowForgot(true); setForgotSent(false); }} className="text-xs font-bold text-slate-500 dark:text-white/40 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Forgot Password?</button>
+                <div className="flex justify-between items-center">
+                  <button type="button" onClick={handleMagicLink} disabled={magicLinkLoading} className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    {magicLinkLoading ? <CircleNotch className="animate-spin" /> : <MagicWand weight="fill" />} 
+                    Magic Link
+                  </button>
+                  <button type="button" onClick={() => setShowForgot(true)} className="text-[11px] font-bold text-slate-500 dark:text-white/40 hover:text-blue-600 transition-colors">Forgot Password?</button>
                 </div>
 
-                <button type="submit" disabled={loading} className="w-full group overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-px shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl py-4 flex items-center justify-center font-bold text-white tracking-wide group-hover:opacity-90">
-                    {loading ? <CircleNotch className="animate-spin" size={20} /> : "Sign In to Workspace"}
-                  </div>
+                <button type="submit" disabled={loading} className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center">
+                  {loading ? <CircleNotch className="animate-spin" /> : "Enter Workspace"}
                 </button>
 
-                <div className="py-2 flex items-center justify-center gap-4">
-                  <div className="h-px w-full bg-slate-200 dark:bg-white/10" />
-                  <span className="text-[10px] text-slate-400 dark:text-white/30 uppercase font-black tracking-widest shrink-0">OR</span>
-                  <div className="h-px w-full bg-slate-200 dark:bg-white/10" />
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-white/10"></div></div>
+                  <div className="relative flex justify-center text-[10px] uppercase font-black"><span className="bg-transparent px-2 text-slate-400 dark:text-white/30">Or Continue With</span></div>
                 </div>
 
-                <button type="button" onClick={handleGoogleClick} className="w-full py-4 rounded-2xl bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center gap-3 hover:bg-slate-200/50 dark:hover:bg-white/[0.08] transition-all font-bold text-sm text-slate-700 dark:text-white/90">
+                <button type="button" onClick={handleGoogleClick} className="w-full py-3.5 rounded-xl border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-all font-bold text-xs">
                   <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.83c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-                  Continue with Google
+                  Google Account
                 </button>
               </motion.form>
             )}
 
+            {/* UNIFIED REGISTER FLOW */}
+            {activeTab === "register" && !showForgot && (
+              <motion.form key="register" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} onSubmit={handleEmailAuth} className="space-y-6">
+                
+                {/* 1. Academic Selection Section */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
+                    <Buildings size={16} /> 1. Academic Information
+                  </h3>
+                  
+                  <div className="grid gap-3">
+                    {/* University Select */}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">University</label>
+                      <select 
+                        value={selectedUni?.id || ""} 
+                        onChange={(e) => setSelectedUni(universities.find(u => u.id === e.target.value))}
+                        className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3 px-3 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none appearance-none"
+                      >
+                        <option value="" className="dark:bg-slate-900">Select University</option>
+                        {universities.map(uni => <option key={uni.id} value={uni.id} className="dark:bg-slate-900">{uni.name}</option>)}
+                      </select>
+                    </div>
+
+                    {/* Faculty Select (Conditional) */}
+                    {hasFaculties && (
+                      <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Faculty</label>
+                        <select 
+                          value={selectedFaculty?.id || ""} 
+                          onChange={(e) => setSelectedFaculty(faculties.find(f => f.id === e.target.value))}
+                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3 px-3 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none appearance-none"
+                        >
+                          <option value="" className="dark:bg-slate-900">Select Faculty</option>
+                          {faculties.map(f => <option key={f.id} value={f.id} className="dark:bg-slate-900">{f.name}</option>)}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Year & Semester Row */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Academic Year</label>
+                        <select 
+                          disabled={!selectedUni}
+                          value={selectedYear?.id || ""} 
+                          onChange={(e) => setSelectedYear(years.find(y => y.id === e.target.value))}
+                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3 px-3 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none appearance-none disabled:opacity-50"
+                        >
+                          <option value="" className="dark:bg-slate-900">Year</option>
+                          {years.map(y => <option key={y.id} value={y.id} className="dark:bg-slate-900">Year {y.yearNumber}</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Semester</label>
+                        <select 
+                          disabled={!selectedYear}
+                          value={selectedSem?.id || ""} 
+                          onChange={(e) => setSelectedSem(semesters.find(s => s.id === e.target.value))}
+                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3 px-3 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none appearance-none disabled:opacity-50"
+                        >
+                          <option value="" className="dark:bg-slate-900">Semester</option>
+                          {semesters.map(s => <option key={s.id} value={s.id} className="dark:bg-slate-900">{s.name}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Account Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
+                    <User size={16} /> 2. Personal Credentials
+                  </h3>
+                  
+                  <div className="grid gap-3">
+                    <div className="relative group">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
+                      <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Full Legal Name" 
+                        className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
+                    </div>
+                    <div className="relative group">
+                      <EnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
+                      <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Academic Email" 
+                        className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
+                    </div>
+                    <div className="relative group">
+                      <LockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
+                      <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Create Secure Password" 
+                        className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" disabled={loading} className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                  {loading ? <CircleNotch className="animate-spin" /> : <><ShieldCheck weight="fill" /> Finalize Registration</>}
+                </button>
+
+                <p className="text-[10px] text-center text-slate-500 dark:text-white/30 px-4">
+                  By registering, you agree to the MedOneX Professional Guidelines and Terms of Service.
+                </p>
+              </motion.form>
+            )}
+
             {/* FORGOT PASSWORD FLOW */}
-            {activeTab === "login" && showForgot && (
+            {showForgot && (
               <motion.div key="forgot" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
                 {!forgotSent ? (
                   <>
@@ -268,198 +411,27 @@ function AuthContent() {
                         <ArrowLeft size={16}/>
                       </button>
                       <div>
-                        <h3 className="text-slate-900 dark:text-white font-bold text-base">Reset Password</h3>
-                        <p className="text-xs text-slate-500 dark:text-white/40 mt-0.5">We'll send a secure link to your email</p>
+                        <h3 className="text-slate-900 dark:text-white font-bold text-sm">Reset Your Key</h3>
+                        <p className="text-[10px] text-slate-500 dark:text-white/40">Secure verification required</p>
                       </div>
                     </div>
-
-                    <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
-                      <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-                        🩺 Enter the email address associated with your MedOneX account and we'll send you a password reset link.
-                      </p>
-                    </div>
-
                     <form onSubmit={handleForgotPassword} className="space-y-4">
                       <div className="relative group">
-                        <EnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
-                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Your Email Address"
-                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
+                        <EnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
+                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Recovery Email"
+                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-xl py-3.5 pl-11 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
                       </div>
-                      <button type="submit" disabled={loading} className="w-full group overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-px shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl py-4 flex items-center justify-center gap-2 font-bold text-white tracking-wide group-hover:opacity-90">
-                          {loading ? <CircleNotch className="animate-spin" size={20} /> : <><PaperPlaneTilt size={18} weight="fill"/> Send Reset Link</>}
-                        </div>
+                      <button type="submit" disabled={loading} className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2">
+                        {loading ? <CircleNotch className="animate-spin" /> : <><PaperPlaneTilt weight="fill"/> Dispatch Link</>}
                       </button>
                     </form>
                   </>
                 ) : (
-                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-5">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 flex items-center justify-center">
-                      <CheckCircle size={40} weight="fill" className="text-green-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-slate-900 dark:text-white font-bold text-lg mb-2">Check Your Email</h3>
-                      <p className="text-sm text-slate-500 dark:text-white/50 leading-relaxed">
-                        We sent a password reset link to <span className="font-bold text-slate-700 dark:text-white/80">{email}</span>. Check your inbox and click the link to reset your password.
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] text-xs text-slate-500 dark:text-white/40">
-                      Didn't receive it? Check your spam folder or{" "}
-                      <button onClick={() => setForgotSent(false)} className="text-blue-600 dark:text-blue-400 font-bold hover:underline">try again</button>.
-                    </div>
-                    <button onClick={() => { setShowForgot(false); setForgotSent(false); }} className="text-xs font-bold text-slate-400 dark:text-white/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 mx-auto">
-                      <ArrowLeft size={12}/> Back to Sign In
-                    </button>
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
-
-            {/* REGISTER & ONBOARDING FLOW */}
-            {activeTab === "register" && (
-              <motion.div key="register" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                
-                {/* Stepper Header */}
-                <div className="flex gap-2 mb-8 justify-center">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className={cn("h-1.5 w-12 rounded-full transition-all duration-500", step >= i ? "bg-blue-500 shadow-sm" : "bg-slate-200 dark:bg-white/[0.05]")} />
-                  ))}
-                </div>
-
-                {/* Step 1: Academic Info */}
-                {step === 1 && (
-                  <div className="space-y-4">
-                    <h3 className="text-slate-900 dark:text-white font-bold mb-4 flex items-center gap-2"><Buildings size={20} className="text-blue-500"/> Select University</h3>
-                    
-                    {universities.length === 0 ? <div className="py-8 flex justify-center"><CircleNotch className="animate-spin text-blue-500" size={24} /></div> : (
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                        {universities.map(uni => (
-                          <button key={uni.id} onClick={() => { setSelectedUni(uni); setStep(2); }}
-                            className={cn("w-full flex items-center gap-4 p-4 rounded-2xl border transition-all", selectedUni?.id === uni.id ? "bg-blue-50 dark:bg-blue-500/10 border-blue-500/50" : "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.05] hover:bg-slate-100 dark:hover:bg-white/[0.05]")}>
-                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-white/[0.05] border border-slate-100 dark:border-transparent flex items-center justify-center shrink-0 shadow-sm">
-                              {uni.logoUrl ? <img src={uni.logoUrl} className="w-6 h-6 object-contain"/> : <Buildings className="text-slate-400 dark:text-white/40"/>}
-                            </div>
-                            <span className="text-sm font-bold text-slate-700 dark:text-white/90 text-left flex-1">{uni.name}</span>
-                            <CaretRight className="text-slate-400 dark:text-white/20"/>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Step 2: Faculty & Semester */}
-                {step === 2 && (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <button onClick={() => setStep(1)} className="p-2 bg-slate-100 dark:bg-white/[0.05] hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg text-slate-500 dark:text-white/60 transition-colors"><CaretLeft size={16}/></button>
-                      <h3 className="text-slate-900 dark:text-white font-bold flex items-center gap-2"><GraduationCap size={20} className="text-blue-500"/> Academic Stage</h3>
-                    </div>
-
-                    {hasFaculties === null ? (
-                      <div className="py-8 flex justify-center"><CircleNotch className="animate-spin text-blue-500" size={24} /></div>
-                    ) : (
-                      <>
-                        {hasFaculties && faculties.length > 0 && !selectedFaculty && (
-                          <div className="space-y-2 animate-in slide-in-from-top-2">
-                            <p className="text-xs text-slate-500 dark:text-white/40 uppercase tracking-widest font-bold mb-2 ml-1">Select Faculty</p>
-                            {faculties.map(fac => (
-                              <button key={fac.id} onClick={() => setSelectedFaculty(fac)}
-                                className="w-full flex items-center p-4 rounded-2xl border bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.05] hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all text-sm font-bold text-slate-700 dark:text-white/90 text-left">
-                                {fac.name}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {(hasFaculties === false || selectedFaculty) && (
-                          <div className="space-y-4 animate-in slide-in-from-top-2">
-                            {years.length === 0 ? (
-                              <div className="text-center text-xs text-slate-500 dark:text-white/30 py-4">No academic years found.</div>
-                            ) : (
-                              <div className="grid grid-cols-3 gap-2">
-                                {/* Show ALL years for this university - years don't filter by faculty */}
-                                {years.map(year => (
-                                  <button key={year.id} onClick={() => { setSelectedYear(year); setSelectedSem(null); }}
-                                    className={cn("p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-2 shadow-sm", selectedYear?.id === year.id ? "bg-blue-50 dark:bg-blue-500/10 border-blue-500/50 text-blue-600 dark:text-blue-300" : "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.05] text-slate-500 dark:text-white/50 hover:bg-slate-100 dark:hover:bg-white/[0.05]")}>
-                                    <Calendar size={18} />
-                                    <span className="text-xs font-bold">Year {year.yearNumber}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-
-                            {selectedYear && (
-                              <div className="space-y-2 mt-4 animate-in slide-in-from-top-2">
-                                {semesters.length === 0 ? (
-                                  <div className="text-center text-xs text-slate-500 dark:text-white/30 py-4">Loading semesters...</div>
-                                ) : (
-                                  semesters.map(sem => (
-                                    <button key={sem.id} onClick={() => setSelectedSem(sem)}
-                                      className={cn("w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-sm font-bold text-left shadow-sm", selectedSem?.id === sem.id ? "bg-blue-50 dark:bg-blue-500/10 border-blue-500/50 text-slate-900 dark:text-white" : "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.05] text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/[0.05]")}>
-                                      <div className="flex items-center gap-3"><BookOpen size={18} className={selectedSem?.id === sem.id ? "text-blue-500" : "text-slate-400 dark:text-white/20"}/> {sem.name}</div>
-                                      {selectedSem?.id === sem.id && <CheckCircle size={18} className="text-blue-500" weight="fill" />}
-                                    </button>
-                                  ))
-                                )}
-                              </div>
-                            )}
-
-                            <button disabled={!selectedSem} onClick={() => setStep(3)} className="w-full mt-4 py-4 rounded-2xl bg-slate-900 dark:bg-blue-600 text-white font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity shadow-lg shadow-slate-900/20 dark:shadow-blue-600/20">
-                              Continue to Profile <CaretRight />
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* Step 3: Account & Credentials */}
-                {step === 3 && (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <button onClick={() => setStep(2)} className="p-2 bg-slate-100 dark:bg-white/[0.05] hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg text-slate-500 dark:text-white/60 transition-colors"><CaretLeft size={16}/></button>
-                      <h3 className="text-slate-900 dark:text-white font-bold flex items-center gap-2"><ShieldCheck size={20} className="text-blue-500"/> Secure Account</h3>
-                    </div>
-
-                    <form onSubmit={handleEmailAuth} className="space-y-4">
-                      <div className="space-y-3">
-                        <div className="relative group">
-                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
-                          <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" 
-                            className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
-                        </div>
-                        <div className="relative group">
-                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
-                          <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone Number (Optional)" 
-                            className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
-                        </div>
-
-                        <div className="h-px bg-slate-200 dark:bg-white/10 my-4" />
-
-                        <div className="relative group">
-                          <EnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
-                          <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address" 
-                            className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
-                        </div>
-                        <div className="relative group">
-                          <LockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
-                          <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Create Password" 
-                            className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-2xl py-4 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/20" />
-                        </div>
-                      </div>
-
-                      <button type="submit" disabled={loading} className="w-full mt-4 group overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-px shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all">
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl py-4 flex items-center justify-center font-bold text-white tracking-wide group-hover:opacity-90">
-                          {loading ? <CircleNotch className="animate-spin" size={20} /> : "Complete Registration"}
-                        </div>
-                      </button>
-                    </form>
-
-                    <div className="text-center text-xs font-medium text-slate-400 dark:text-white/40 pt-4 flex items-center justify-center gap-1">
-                      <Brain size={14} className="text-blue-500"/> Or use the secure Google prompt on your screen.
-                    </div>
+                  <div className="text-center py-6 space-y-4">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-green-500/10 flex items-center justify-center text-green-500"><CheckCircle size={32} weight="fill" /></div>
+                    <h3 className="font-bold text-white">Transmission Successful</h3>
+                    <p className="text-xs text-white/50">Check your inbox for recovery instructions.</p>
+                    <button onClick={() => setShowForgot(false)} className="text-xs font-bold text-blue-400 hover:underline">Back to Entrance</button>
                   </div>
                 )}
               </motion.div>
@@ -472,8 +444,8 @@ function AuthContent() {
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); }
       `}</style>
     </div>
   );
