@@ -47,9 +47,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
   // Redirect guests without semester via metadata check (fast, no DB)
   if (!isGuest && authUser) {
     const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
-    if (!isAdmin && !userSemesterId) {
-      redirect("/register");
-    }
+    // if (!isAdmin && !userSemesterId) {
+    //   redirect("/register");
+    // }
   }
 
   // These two can run in parallel
