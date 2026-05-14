@@ -8,11 +8,9 @@ export async function GET(req: Request) {
   const universityId = searchParams.get("universityId");
   const facultyId = searchParams.get("facultyId");
 
-  const targetUniId = universityId;
-
   const years = await prisma.academicYear.findMany({
     where: {
-      universityId: targetUniId ? targetUniId : undefined,
+      ...(universityId ? { universityId } : {}),
       ...(facultyId ? { facultyId } : {}),
     },
     orderBy: { yearNumber: "asc" },
@@ -20,7 +18,6 @@ export async function GET(req: Request) {
 
   return ok({
     result: years,
-    tenantKey: targetUniId || "GLOBAL",
-    actor: { id: scope?.userId || "anonymous", role: scope?.role ?? "STUDENT" },
+    tenantKey: universityId || "GLOBAL"
   });
 }
