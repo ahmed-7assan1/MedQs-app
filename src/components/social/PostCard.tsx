@@ -148,7 +148,7 @@ export const PostCard = React.memo(({
       whileInView={{ opacity: 1, y: 0 }} 
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, ease: "easeOut" }} 
-      className="rounded-[32px] bg-white/70 dark:bg-[#161523]/70 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-3xl overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300"
+      className="rounded-[32px] bg-white dark:bg-[#161523] border border-slate-200/80 dark:border-white/[0.08] overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300 transform-gpu" 
     >
       
       {/* Header */}

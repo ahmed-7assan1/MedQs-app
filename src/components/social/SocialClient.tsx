@@ -27,7 +27,7 @@ interface Room {
   members?: any[]; isMember?: boolean; ownerId?: string;
 }
 
-const GLASS = "bg-white dark:bg-[#161523]/80 backdrop-blur-[32px] border border-slate-200 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300";
+const GLASS = "bg-white/95 dark:bg-[#161523]/90 backdrop-blur-md border border-slate-200 dark:border-white/[0.08] shadow-sm transition-all duration-300";
 
 export function SocialClient({
   circles, rooms: initialRooms, currentUserId, currentUserName, currentUserImage,
