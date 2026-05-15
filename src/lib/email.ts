@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_for_build");
 const FROM = process.env.EMAIL_FROM || "MedOneX <noreply@medonex.app>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://medonex.app";
 const APP_NAME = "MedOneX";
