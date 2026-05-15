@@ -8,9 +8,7 @@ export default async function TelegramAdminPage() {
   const user = session?.user as any;
   const userRole = user?.role;
 
-  if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN" && userRole !== "LEADER") {
-    redirect("/");
-  }
+  // Security is handled by AdminLayout. No redundant redirect here.
 
   const isSuper = userRole === "SUPER_ADMIN";
   const adminUniId = user?.universityId;

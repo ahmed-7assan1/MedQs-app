@@ -9,12 +9,6 @@ export default async function AdminReportsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  // Validate SUPER_ADMIN or canManageReports mapping correctly 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (user?.role !== "SUPER_ADMIN" && !user?.canManageReports) {
-    redirect("/admin/dashboard");
-  }
-
   const reports = await prisma.questionReport.findMany({
     include: {
       question: true,

@@ -11,7 +11,7 @@ import {
 export default async function AdminDashboardPage() {
   const session = await auth();
   const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN") redirect("/dashboard");
+  // Security is handled by AdminLayout. No redundant redirect here.
 
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

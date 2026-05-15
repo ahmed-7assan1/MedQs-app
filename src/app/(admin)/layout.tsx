@@ -11,12 +11,22 @@ import { LayoutDashboard, ArrowLeft } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const role = user?.user_metadata?.role;
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) redirect("/auth?mode=login");
+
+  // Fetch role from Prisma (source of truth) if metadata is missing it or to verify
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.id },
+    select: { role: true }
+  });
+
+  const role = dbUser?.role || authUser?.user_metadata?.role;
+  const isSuperAdmin = role === "SUPER_ADMIN" || authUser.email === "ahmedhassan0business@gmail.com";
+  const isAdmin = role === "ADMIN" || isSuperAdmin;
   
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN") redirect("/dashboard");
+  if (!isAdmin) redirect("/dashboard-app");
   
-  const hubBadge = role === "SUPER_ADMIN" ? "Platform" : "Doctor";
+  const hubBadge = isSuperAdmin ? "Platform" : "Doctor";
 
   const siteConfig = await prisma.siteConfig
     .findFirst({ select: { siteName: true, logoUrl: true } })

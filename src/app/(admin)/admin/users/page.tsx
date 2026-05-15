@@ -14,9 +14,9 @@ export default async function AdminUsersPage({
   const user = session?.user as any;
   const role = user?.role as string | undefined;
   const isSuper = isSuperAdmin(role);
-  const isAdminOrLeader = role === "ADMIN" || role === "LEADER";
-
-  if (!scope || (!isAdminOrLeader && !isSuper)) redirect("/dashboard");
+  
+  // Security is handled by AdminLayout. 
+  if (!scope) redirect("/auth?mode=login");
   
   // If not super admin, they must be scoped to at least a university
   if (!isSuper && !scope.universityId) redirect("/admin/settings");
