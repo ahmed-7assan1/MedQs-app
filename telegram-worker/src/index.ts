@@ -7,6 +7,9 @@ type Bindings = {
   DATABASE_URL: string;
   NEXTAUTH_URL: string;
   GEMINI_API_KEY: string;
+  GEMINI_API_KEY_2?: string;
+  GEMINI_API_KEY_3?: string;
+  GEMINI_API_KEY_4?: string;
   TELEGRAM_STORAGE_GROUP_ID: string;
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
@@ -527,23 +530,48 @@ const getBot = (env: Bindings) => {
         reply = data?.content?.[0]?.text || "No response from Claude.";
       }
       else {
-        // Gemini - PRIORITIZE user key (BYOK), fallback to platform key
-        const activeKey = userApiKey || platformKey;
+        // Gemini - PRIORITIZE user key (BYOK), fallback to platform key rotation
+        const userApiKey = state.apiKey;
+        const platformKeys = [
+          env.GEMINI_API_KEY,
+          env.GEMINI_API_KEY_2,
+          env.GEMINI_API_KEY_3,
+          env.GEMINI_API_KEY_4
+        ].filter(Boolean);
+        
+        const activeKey = userApiKey || platformKeys[Math.floor(Math.random() * platformKeys.length)];
         if (!activeKey) throw new Error("MISSING_KEY");
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${activeKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: promptContext }] }] })
-        });
-        const data: any = await res.json();
-        if (!res.ok) {
-          if (res.status === 400 && data?.error?.message?.includes("API key not valid")) {
-             throw new Error("INVALID_API_KEY");
+        // Try gemini-1.5-flash first, fallback to gemini-pro if needed
+        const models = ["gemini-1.5-flash", "gemini-pro"];
+        let lastErr = "";
+
+        for (const model of models) {
+          try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${activeKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: promptContext }] }] })
+            });
+            const data: any = await res.json();
+            if (res.ok) {
+              reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+              break; // Success!
+            } else {
+              lastErr = data?.error?.message || "Unknown API Error";
+              if (lastErr.includes("API key not valid")) throw new Error("INVALID_API_KEY");
+              continue; // Try next model
+            }
+          } catch (innerE: any) {
+            if (innerE.message === "INVALID_API_KEY") throw innerE;
+            lastErr = innerE.message;
+            continue;
           }
-          throw new Error(data?.error?.message || "Gemini Service Error");
         }
-        reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
+        
+        if (!reply || reply === "I'm not sure how to respond to that.") {
+          throw new Error(lastErr || "All Gemini models failed.");
+        }
       }
 
       await ctx.reply(reply, { parse_mode: 'Markdown' });

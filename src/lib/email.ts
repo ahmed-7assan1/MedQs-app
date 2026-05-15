@@ -9,11 +9,15 @@ const transporter = nodemailer.createTransport({
 });
 
 // Verify connection configuration
+console.log("[Email System] Attempting to connect with user:", process.env.SMTP_USER);
 transporter.verify(function (error, success) {
   if (error) {
-    console.error("[Email System] SMTP Connection Error:", error);
+    console.error("[Email System] SMTP Connection Error Detail:", error.message);
+    if (error.message.includes("535")) {
+      console.warn("[Email System] TIP: This 535 error means Google rejected your SMTP_USER or SMTP_PASS. Double check your App Password.");
+    }
   } else {
-    console.log("[Email System] Server is ready to take our messages");
+    console.log("[Email System] SMTP Server is ready to deliver messages");
   }
 });
 
