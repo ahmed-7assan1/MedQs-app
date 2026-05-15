@@ -461,7 +461,7 @@ const getBot = (env: Bindings) => {
     }
     
     if (text === "🧠 Ask Dr. Q") {
-      return ctx.reply("🩺 *I am Dr. Q, your medical assistant.*\n\nHow can I help you today? Send me any medical question!", { parse_mode: 'Markdown' });
+      return ctx.reply("🩺 *I am Dr. Q, your medical assistant.*\n\nYou can ask me anything! To customize my brain or use your own API key, go to *⚙️ Settings*.", { parse_mode: 'Markdown' });
     }
     
     // Process AI Chat
@@ -527,17 +527,22 @@ const getBot = (env: Bindings) => {
         reply = data?.content?.[0]?.text || "No response from Claude.";
       }
       else {
-        // Gemini - use user key if available, else platform key
+        // Gemini - PRIORITIZE user key (BYOK), fallback to platform key
         const activeKey = userApiKey || platformKey;
         if (!activeKey) throw new Error("MISSING_KEY");
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeKey}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${activeKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: promptContext }] }] })
         });
         const data: any = await res.json();
-        if (!res.ok) throw new Error(data?.error?.message || "Gemini Error");
+        if (!res.ok) {
+          if (res.status === 400 && data?.error?.message?.includes("API key not valid")) {
+             throw new Error("INVALID_API_KEY");
+          }
+          throw new Error(data?.error?.message || "Gemini Service Error");
+        }
         reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
       }
 
@@ -547,6 +552,8 @@ const getBot = (env: Bindings) => {
       console.error("Bot AI Error:", e);
       if (e.message === "MISSING_KEY") {
         await ctx.reply("⚠️ AI is currently unavailable (Missing API Key). Please contact an admin.");
+      } else if (e.message === "INVALID_API_KEY") {
+        await ctx.reply("❌ *Invalid API Key detected.*\n\nPlease go to *⚙️ Settings → 🔑 Manage API Key* to clear it and provide a valid one.", { parse_mode: 'Markdown' });
       } else {
         await ctx.reply(`🩺 *Dr. Q is temporarily resting.*\n\nError: ${e.message || "Unknown connectivity issue"}`);
       }
