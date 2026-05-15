@@ -398,17 +398,17 @@ export function SocialClient({
             <TimeWidget />
 
             {/* Reels Entry Widget - Bold & Unmissable */}
-            <div className="rounded-[28px] overflow-hidden relative group/reels shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-white/10">
+            <div className="rounded-[28px] overflow-hidden relative group/reels shadow-xl dark:shadow-[0_16px_48px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-white/10 bg-slate-200 dark:bg-white/5">
               <Link href="/videos/reels" className="relative block">
-                {/* Background image */}
+                {/* Background image - optimized size to 400px for speed */}
                 <div className="relative aspect-[16/9] overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800" 
-                    className="w-full h-full object-cover group-hover/reels:scale-105 transition-transform duration-700" 
+                    src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=70&w=400" 
+                    className="w-full h-full object-cover group-hover/reels:scale-105 transition-transform duration-700 transform-gpu" 
                     alt="Reels"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                   {/* Live badge */}
                   <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-red-600 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
                     <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
@@ -427,7 +427,7 @@ export function SocialClient({
                     </div>
                   </div>
                 </div>
-                {/* CTA Button - below image, very visible */}
+                {/* CTA Button */}
                 <div className="bg-gradient-to-r from-red-600 to-rose-500 p-4 flex items-center justify-between group-hover/reels:from-red-500 group-hover/reels:to-rose-400 transition-all">
                   <div>
                     <p className="text-white font-black text-[13px] uppercase tracking-widest">Explore Reels</p>
