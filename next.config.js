@@ -47,6 +47,7 @@ const nextConfig = {
       { protocol: "https", hostname: "www.transparenttextures.com" },
       { protocol: "https", hostname: "image.pollinations.ai" },
       { protocol: "https", hostname: "*.telegram.org" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
 
