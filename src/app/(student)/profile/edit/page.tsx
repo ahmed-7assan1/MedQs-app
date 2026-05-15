@@ -69,7 +69,7 @@ function EditProfileContent() {
     (async () => {
       try {
         const [meRes, unisRes, yrsRes, semsRes, facsRes] = await Promise.all([
-          fetch("/api/v1/auth/me"),
+          fetch(`/api/v1/auth/me?t=${Date.now()}`),
           fetch("/api/v1/universities"),
           fetch("/api/v1/academic-years"),
           fetch("/api/v1/semesters"),

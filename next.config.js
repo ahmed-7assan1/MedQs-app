@@ -32,6 +32,9 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"], // serve modern formats = 30-50% smaller
     remotePatterns: [
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "firebasestorage.googleapis.com" },
+      { protocol: "https", hostname: "*.firebasestorage.app" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "graph.facebook.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },

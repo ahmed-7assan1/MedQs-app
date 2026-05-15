@@ -59,12 +59,13 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const role = (session.user as { role?: string } | undefined)?.role;
-  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
-
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { semesterId: true },
+    select: { semesterId: true, role: true },
   });
+
+  const resolvedRole = user?.role || role;
+  const isAdmin = resolvedRole === "ADMIN" || resolvedRole === "SUPER_ADMIN";
 
   const mod = await prisma.module.findFirst({
     where: { id: params.moduleId, semesterId: user?.semesterId ?? "__none__" },

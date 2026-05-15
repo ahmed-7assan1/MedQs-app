@@ -118,6 +118,9 @@ function AuthContent() {
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(initialMode === "forgot-password");
   const [forgotSent, setForgotSent] = useState(false);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
 
   // Form State
   const [email, setEmail] = useState("");
@@ -185,7 +188,7 @@ function AuthContent() {
     if (!email) return toast.error("Please enter your email address.");
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
     });
     setLoading(false);
     if (error) return toast.error(error.message);
@@ -199,7 +202,19 @@ function AuthContent() {
     try {
       if (activeTab === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes("email not confirmed")) {
+            setResendEmail(email);
+            setEmailNotConfirmed(true);
+            setLoading(false);
+            return;
+          }
+          throw error;
+        }
+        
+        // Sync user to Prisma immediately after login
+        await fetch("/api/v1/auth/sync", { method: "POST" });
+        
         toast.success("Identity Verified. Access Granted.");
         window.location.href = "/dashboard-app";
       } else {
@@ -211,6 +226,7 @@ function AuthContent() {
         const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { 
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard-app`,
             data: { 
               name,
               universityId: selectedUni.id,
@@ -224,10 +240,11 @@ function AuthContent() {
         if (error) throw error;
         
         if (data.session) {
+          await fetch("/api/v1/auth/sync", { method: "POST" });
           toast.success("Professional Profile Established.");
           window.location.href = "/dashboard-app";
         } else {
-          toast.success("Credentials Created. Verification Required via Email.");
+          toast.success("Account created! Please verify your email to continue.");
           setActiveTab("login");
         }
       }
@@ -235,6 +252,25 @@ function AuthContent() {
       toast.error(err.message || "Protocol Failure. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: resendEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard-app`,
+        },
+      });
+      if (error) throw error;
+      toast.success("Confirmation email sent! Please check your inbox.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to resend confirmation email.");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -272,8 +308,38 @@ function AuthContent() {
         <div className="p-4 sm:p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="wait">
             
+            {/* EMAIL NOT CONFIRMED FLOW */}
+            {emailNotConfirmed && (
+              <motion.div key="not-confirmed" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="text-center py-6 space-y-6">
+                <div className="w-20 h-20 mx-auto rounded-[28px] bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-2xl shadow-amber-500/10">
+                  <EnvelopeSimple size={40} weight="fill" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black uppercase tracking-widest text-white">Verify Your Email</h3>
+                  <p className="text-xs font-bold text-white/40 max-w-xs mx-auto">
+                    Your email <span className="text-white font-black">{resendEmail}</span> has not been confirmed yet. Please check your inbox for the verification link.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleResendConfirmation}
+                    disabled={resendLoading}
+                    className="w-full py-4 rounded-[22px] bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    {resendLoading ? <CircleNotch className="animate-spin" size={20} /> : <><PaperPlaneTilt weight="fill" size={18} /> Resend Confirmation Email</>}
+                  </button>
+                  <button
+                    onClick={() => { setEmailNotConfirmed(false); setResendEmail(""); }}
+                    className="w-full py-3.5 rounded-[22px] bg-white/5 border border-white/10 text-white/60 font-black text-xs uppercase tracking-widest hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    Back to Sign In
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             {/* LOGIN FLOW */}
-            {activeTab === "login" && !showForgot && (
+            {activeTab === "login" && !showForgot && !emailNotConfirmed && (
               <motion.form key="login" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleEmailAuth} className="space-y-5">
                 <div className="space-y-5">
                   <div className="relative group">

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
 import { fail, ok } from "@/platform/api/envelope";
 
+export const dynamic = "force-dynamic";
+
 // GET all semesters (admin)
 export async function GET(req: Request) {
   const session = await auth();

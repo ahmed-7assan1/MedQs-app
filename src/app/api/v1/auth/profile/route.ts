@@ -26,6 +26,9 @@ const ProfileSchema = z.object({
   nickname:    z.preprocess((v) => (v === "" || v === null ? undefined : v), 
     z.string().max(30).trim().regex(/^[a-zA-Z0-9._-]+$/, "Username may include letters, numbers, dot, underscore, dash").optional()
   ),
+  handle:      z.preprocess((v) => (v === "" || v === null ? undefined : v),
+    z.string().max(30).trim().regex(/^[a-zA-Z0-9._-]+$/, "Handle may include letters, numbers, dot, underscore, dash").optional()
+  ),
   bio:         z.string().max(500).trim().nullable().optional(),
   phone:       z.string().max(20).trim().nullable().optional(),
   phoneVisible: z.boolean().optional(),
@@ -56,7 +59,7 @@ export async function PUT(req: NextRequest) {
   const parsed = ProfileSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
 
-  const { telegramPhone, verificationCode, universityId, facultyId, studentId, nickname } = parsed.data;
+  const { telegramPhone, verificationCode, universityId, facultyId, studentId, nickname, handle } = parsed.data;
 
   // ── Telegram Verification Check ──
   let telegramData: any = {};
@@ -89,7 +92,7 @@ export async function PUT(req: NextRequest) {
   }
 
   const current: any = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: session.user.email ? { email: session.user.email } : { id: session.user.id },
     select: { studentId: true, universityId: true, facultyId: true, telegramPhone: true, telegramVerified: true, studentCode: true } as any,
   });
 
@@ -132,7 +135,7 @@ export async function PUT(req: NextRequest) {
   const { verificationCode: _, ...updateData } = parsed.data;
 
   const user = await prisma.user.upsert({
-    where: { id: session.user.id },
+    where: session.user.email ? { email: session.user.email } : { id: session.user.id },
     create: {
       id: session.user.id,
       email: session.user.email!,
@@ -141,6 +144,7 @@ export async function PUT(req: NextRequest) {
       ...telegramData,
       studentCode,
       nickname: nickname === "" ? null : nickname,
+      handle: handle === "" ? null : handle,
       universityId: universityId === "" ? null : universityId,
       facultyId: facultyId === "" ? null : facultyId,
       semesterId: parsed.data.semesterId === "" ? null : parsed.data.semesterId,
@@ -151,6 +155,7 @@ export async function PUT(req: NextRequest) {
       ...telegramData,
       studentCode,
       nickname: nickname === "" ? null : nickname,
+      handle: handle === "" ? null : handle,
       universityId: universityId === "" ? null : universityId,
       facultyId: facultyId === "" ? null : facultyId,
       semesterId: parsed.data.semesterId === "" ? null : parsed.data.semesterId,
@@ -160,13 +165,34 @@ export async function PUT(req: NextRequest) {
       id: true, name: true, nickname: true, bio: true, phone: true, phoneVisible: true,
       hideRank: true, isPrivate: true, instagramUrl: true, facebookUrl: true,
       semesterId: true, universityId: true, facultyId: true, studentId: true,
-      coverImage: true, telegramVerified: true, studentCode: true,
+      coverImage: true, telegramVerified: true, studentCode: true, handle: true, telegramPhone: true, image: true,
     } as any,
   });
+
+  // ── Sync with Supabase Auth Metadata ──
+  try {
+    const { createClient: createAdminClient } = await import("@/lib/supabase/server");
+    const adminSupabase = createAdminClient(); 
+    // Note: createClient usually uses the service role if configured or just updates current user
+    await adminSupabase.auth.updateUser({
+      data: {
+        name: user.name,
+        nickname: user.nickname,
+        image: user.image,
+        avatar_url: user.image,
+        universityId: user.universityId,
+        facultyId: user.facultyId,
+        semesterId: user.semesterId,
+      }
+    });
+  } catch (syncErr) {
+    console.warn("[profile-sync] Failed to sync to Supabase metadata:", syncErr);
+  }
 
   revalidatePath("/profile/me");
   revalidatePath(`/profile/u/${session.user.id}`);
   revalidatePath("/", "layout");
+  revalidatePath("/dashboard-app");
 
   return NextResponse.json(user);
 }

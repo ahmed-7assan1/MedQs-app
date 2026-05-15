@@ -169,12 +169,23 @@ export function FloatingIslandNavbar({
               >
                 <div className="h-9 w-9 rounded-full overflow-hidden border-2 dark:border-white/10 border-black/5">
                   {userImage ? (
-                    <img src={userImage} alt="Profile" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary text-xs font-black">
-                      {userName ? userName.charAt(0).toUpperCase() : "U"}
-                    </div>
-                  )}
+                    <img 
+                      src={userImage} 
+                      alt="Profile" 
+                      className="h-full w-full object-cover" 
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const nextSibling = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (nextSibling) nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className="h-full w-full flex items-center justify-center bg-primary/10 text-primary text-xs font-black"
+                    style={{ display: userImage ? 'none' : 'flex' }}
+                  >
+                    {userName ? userName.charAt(0).toUpperCase() : "U"}
+                  </div>
                 </div>
                 <CaretDown className="h-3 w-3 dark:text-white/30 text-black/30" />
               </button>

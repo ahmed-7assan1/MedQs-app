@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { MobileTopBar, MobileSidebar, MobileBottomNav } from "./MobileDashboardComponents";
+import { MobileTopBar, MobileSidebar } from "./MobileDashboardComponents";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 interface MobileDashboardWrapperProps {
   children: React.ReactNode;
@@ -16,7 +17,7 @@ export function MobileDashboardWrapper({ children, user }: MobileDashboardWrappe
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#07080f] text-white selection:bg-[#4f5fff]/30 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#07080f] text-white selection:bg-[#4f5fff]/30 relative overflow-x-hidden md:hidden">
       {/* 1. STICKY TOP BAR */}
       <MobileTopBar 
         userInitial={user.initial} 

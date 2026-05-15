@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
+import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -22,20 +25,30 @@ export default async function CleanStudentLayout({ children }: { children: React
   const { data: { user: authUser } } = await supabase.auth.getUser();
   const isGuest = !authUser;
 
-  const userMeta = authUser?.user_metadata;
-  const userRole = userMeta?.role as string | undefined;
-  const userSemesterId = userMeta?.semesterId as string | undefined;
+  const sessionUserId = authUser?.id ?? "";
 
+  // Parallelize non-dependent fetches
+  const [siteConfig, dbUser] = await Promise.all([
+    getCachedSiteConfig(),
+    !isGuest ? prisma.user.findUnique({
+      where: { id: sessionUserId },
+      select: { name: true, nickname: true, image: true, semesterId: true, role: true }
+    }) : Promise.resolve(null)
+  ]);
+
+  const resolvedRole = dbUser?.role || authUser?.user_metadata?.role as string | undefined;
+  const resolvedSemesterId = dbUser?.semesterId || authUser?.user_metadata?.semesterId as string | undefined;
+  const displayName = dbUser?.nickname || dbUser?.name || authUser?.user_metadata?.name || "Student";
+  const userImage = dbUser?.image || authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.image || null;
+  const isAdmin = resolvedRole === "ADMIN" || resolvedRole === "SUPER_ADMIN";
+
+  // Redirect logic
   if (!isGuest && authUser) {
-    const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
-    const isSuperAdmin = userRole === "SUPER_ADMIN" || authUser?.email === "ahmedhassan0business@gmail.com";
-
-    if (!isAdmin && !userSemesterId && !isSuperAdmin) {
+    const isSuperAdmin = resolvedRole === "SUPER_ADMIN" || authUser?.email === "ahmedhassan0business@gmail.com";
+    if (!isAdmin && !resolvedSemesterId && !isSuperAdmin) {
       redirect("/register");
     }
   }
-
-  const siteConfig = await getCachedSiteConfig();
 
   return (
     <TelegramBlocker>
@@ -45,10 +58,39 @@ export default async function CleanStudentLayout({ children }: { children: React
           logoUrl: siteConfig?.logoUrl ?? null,
         }}
       >
-        <div className="min-h-screen dark:bg-[#07080f] bg-white">
-          <PageTransitionProvider>
-            {children}
-          </PageTransitionProvider>
+        <div className="min-h-screen dark:bg-[#07080f] bg-white flex flex-col">
+          {/* Desktop Navigation */}
+          <FloatingIslandNavbar
+            userImage={userImage}
+            userName={isGuest ? undefined : displayName}
+            userId={isGuest ? "" : sessionUserId}
+          />
+          
+          <Sidebar
+            userName={isGuest ? "Guest" : displayName}
+            userImage={userImage}
+            userId={isGuest ? "" : sessionUserId}
+            isAdmin={isAdmin ?? false}
+            siteName={siteConfig?.siteName ?? "MedOneX"}
+            logoUrl={siteConfig?.logoUrl ?? undefined}
+            isGuest={isGuest}
+          />
+
+          <div className="flex-1 flex flex-col min-w-0">
+            <PageTransitionProvider>
+              {children}
+            </PageTransitionProvider>
+          </div>
+
+          {/* Mobile bottom nav is already in the DashboardPage via MobileDashboardWrapper, 
+              but for other "clean" pages, we might need it. 
+              However, the user wants to avoid conflict. 
+              Since DashboardPage is the main page here, and it has its own, 
+              we only show this if it's NOT the dashboard? 
+              Actually, MobileBottomNav has md:hidden, so it will show on mobile.
+              To avoid conflict on the dashboard, we should probably NOT add it here 
+              or make it conditional.
+          */}
         </div>
       </SiteConfigProvider>
     </TelegramBlocker>

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getSessionScope, isSuperAdmin } from "@/lib/tenant";
 import { fail, ok } from "@/platform/api/envelope";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const universityId = searchParams.get("universityId");

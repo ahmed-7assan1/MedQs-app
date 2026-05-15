@@ -8,8 +8,8 @@ import { CreateRoomModal } from "./CreateRoomModal";
 import { JoinRoomModal } from "./JoinRoomModal";
 import {
   ChatCircle, Globe, Users, MagnifyingGlass, Plus, ArrowRight,
-  List, X, Hash, Lock, CalendarBlank, Fire, 
-  Gear, Crown, Clock, CaretRight, YoutubeLogo, Play
+  List, X, Hash, Lock, Fire, 
+  Crown, CaretRight, YoutubeLogo, Play
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -27,7 +27,7 @@ interface Room {
   members?: any[]; isMember?: boolean; ownerId?: string;
 }
 
-const GLASS = "bg-white/70 dark:bg-[#161523]/70 backdrop-blur-[40px] border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500";
+const GLASS = "bg-white dark:bg-[#161523]/80 backdrop-blur-[32px] border border-slate-200 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300";
 
 export function SocialClient({
   circles, rooms: initialRooms, currentUserId, currentUserName, currentUserImage,
@@ -77,23 +77,14 @@ export function SocialClient({
     const nextPage = isLoadMore ? page + 1 : 1;
     
     try {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
+      const res = await fetch(`/api/v1/forums/${circleId}/posts?page=${nextPage}`);
+      if (!res.ok) {
+        throw new Error("Failed to load posts");
+      }
       
-      const { data, error } = await supabase.rpc('get_forum_posts', {
-        p_forum_id: circleId,
-        p_user_id: currentUserId,
-        p_page: nextPage,
-        p_limit: 20
-      });
-
-      if (error) throw error;
+      const data = await res.json();
       
-      // Map Supabase result to match the expected format
-      const newPosts = (data as any[]).map(p => ({
-        ...p,
-        _count: { likes: p.likes_count, comments: p.comments_count }
-      }));
+      const newPosts = Array.isArray(data) ? data : [];
       
       setPosts(prev => isLoadMore ? [...prev, ...newPosts] : newPosts);
       setHasMore(newPosts.length === 20); 
@@ -141,10 +132,11 @@ export function SocialClient({
   useEffect(() => {
     const fetchTrends = async () => {
       try {
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
-        const { data } = await supabase.rpc('get_trending_tags');
-        setTrendingTags(Array.isArray(data) ? data : []);
+        const res = await fetch('/api/v1/social/trending');
+        if (res.ok) {
+          const data = await res.json();
+          setTrendingTags(Array.isArray(data) ? data : []);
+        }
       } catch (e) {}
     };
     fetchTrends();
@@ -217,11 +209,10 @@ export function SocialClient({
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white transition-colors duration-500">
-      {/* Dynamic Background Blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div animate={{ x: [0, 50, 0], y: [0, 30, 0] }} transition={{ duration: 20, repeat: Infinity }} className="absolute top-[-15%] right-[-10%] w-[700px] h-[700px] bg-primary/10 dark:bg-primary/15 blur-[160px] rounded-full" />
-        <motion.div animate={{ x: [0, -40, 0], y: [0, 50, 0] }} transition={{ duration: 25, repeat: Infinity }} className="absolute bottom-[-15%] left-[-10%] w-[600px] h-[600px] bg-blue-500/10 blur-[140px] rounded-full" />
-        <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 blur-[120px] rounded-full" />
+      {/* Static background - no animation for performance */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-[-15%] right-[-10%] w-[600px] h-[600px] bg-primary/8 dark:bg-primary/12 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-15%] left-[-10%] w-[500px] h-[500px] bg-blue-500/6 dark:bg-blue-500/10 blur-[100px] rounded-full" />
       </div>
 
       <div className="relative max-w-[1400px] mx-auto px-6 pt-24 pb-12">
@@ -402,33 +393,45 @@ export function SocialClient({
             {/* Elegant Time/Status Widget */}
             <TimeWidget />
 
-            {/* Reels Entry Widget - Enhanced Visibility */}
-            <div className={cn(GLASS, "rounded-[32px] p-1.5 overflow-hidden group/reels shadow-[0_25px_60px_rgba(0,0,0,0.4)] border-white/10")}>
-              <Link href="/videos/reels" className="relative block aspect-[4/5] rounded-[28px] overflow-hidden">
-                <img 
-                  src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000" 
-                  className="w-full h-full object-cover group-hover/reels:scale-105 transition-transform duration-1000" 
-                  alt="Reels"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-8">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center shadow-2xl shadow-red-500/50 group-hover/reels:rotate-12 transition-transform">
-                      <YoutubeLogo size={32} weight="fill" />
-                    </div>
-                    <div>
-                      <p className="text-white font-black text-2xl tracking-tighter leading-none mb-1">OneX Studio</p>
-                      <p className="text-white/60 text-[11px] font-black uppercase tracking-[0.2em]">Live Reels</p>
+            {/* Reels Entry Widget - Bold & Unmissable */}
+            <div className="rounded-[28px] overflow-hidden relative group/reels shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-white/10">
+              <Link href="/videos/reels" className="relative block">
+                {/* Background image */}
+                <div className="relative aspect-[16/9] overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800" 
+                    className="w-full h-full object-cover group-hover/reels:scale-105 transition-transform duration-700" 
+                    alt="Reels"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  {/* Live badge */}
+                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-red-600 text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+                    <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                    LIVE
+                  </div>
+                  {/* Content over image */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg shadow-red-500/40">
+                        <YoutubeLogo size={22} weight="fill" className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-white font-black text-[15px] leading-none">OneX Studio</p>
+                        <p className="text-white/60 text-[9px] font-black uppercase tracking-[0.2em] mt-0.5">Medical Reels</p>
+                      </div>
                     </div>
                   </div>
-                  <button className="w-full py-4.5 rounded-2xl bg-white text-black text-[13px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-white/90 transition-all active:scale-95 flex items-center justify-center gap-2">
-                    Explore Reels
-                    <Play size={18} weight="fill" />
-                  </button>
                 </div>
-                {/* Status Badge */}
-                <div className="absolute top-6 right-6 px-4 py-2 rounded-full bg-red-600 text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-2xl border border-white/20 backdrop-blur-md">
-                  <div className="h-2.5 w-2.5 rounded-full bg-white animate-pulse" />
-                  Trending
+                {/* CTA Button - below image, very visible */}
+                <div className="bg-gradient-to-r from-red-600 to-rose-500 p-4 flex items-center justify-between group-hover/reels:from-red-500 group-hover/reels:to-rose-400 transition-all">
+                  <div>
+                    <p className="text-white font-black text-[13px] uppercase tracking-widest">Explore Reels</p>
+                    <p className="text-white/70 text-[9px] font-bold uppercase tracking-widest">Short medical videos</p>
+                  </div>
+                  <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center group-hover/reels:bg-white/30 transition-all">
+                    <Play size={20} weight="fill" className="text-white" />
+                  </div>
                 </div>
               </Link>
             </div>
@@ -497,37 +500,7 @@ export function SocialClient({
               )}
             </div>
 
-            {/* Daily Schedule Widget */}
-            <div className={cn(GLASS, "rounded-[32px] p-6")}>
-              <div className="flex items-center justify-between mb-5 px-1">
-                <h3 className="text-sm font-black text-slate-800 dark:text-white flex items-center gap-2">
-                  <CalendarBlank size={18} className="text-primary" weight="fill" />
-                  Daily Schedule
-                </h3>
-                <Clock size={16} className="text-slate-400 dark:text-white/20" />
-              </div>
-              <div className="space-y-3">
-                {[
-                  { title: "Anatomy Lecture", time: "09:00 AM", type: "academic", active: true },
-                  { title: "Study Session", time: "11:30 AM", type: "room" },
-                  { title: "Pathology Review", time: "02:00 PM", type: "exam" },
-                ].map((item, i) => (
-                  <div key={i} className={cn("p-4 rounded-2xl border transition-all shadow-sm", item.active ? "bg-primary/5 dark:bg-primary/10 border-primary/20 ring-1 ring-primary/10" : "bg-white dark:bg-white/[0.02] border-slate-100 dark:border-white/5")}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <p className="text-[13px] font-black text-slate-800 dark:text-white">{item.title}</p>
-                      {item.active && <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />}
-                    </div>
-                    <p className="text-[10px] text-slate-400 dark:text-white/30 font-bold flex items-center gap-1.5">
-                      <Clock size={12} />
-                      {item.time}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <button className="w-full mt-4 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20 hover:border-primary/40 hover:text-primary transition-all">
-                Full Schedule
-              </button>
-            </div>
+
           </aside>
         </div>
       </div>

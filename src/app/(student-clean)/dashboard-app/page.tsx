@@ -103,7 +103,8 @@ export default async function DashboardPage() {
   const overallPct = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
   const dailyTarget = 50;
   const dailyPct = Math.min(100, Math.round((todayItemCount / dailyTarget) * 100));
-  const firstName = (user.user_metadata?.name || user.email || "Student").split(" ")[0];
+  const dbUser = dashData?.user;
+  const firstName = (dbUser?.name || user.email || "Student").split(" ")[0];
   const userInitial = firstName.charAt(0);
 
   const { label: rankLabel, totalPoints: rankPoints = 0, progressToNext = 0 } = rankInfo || {
@@ -123,7 +124,7 @@ export default async function DashboardPage() {
       <div className="md:hidden">
         <MobileDashboardWrapper 
           user={{
-            name: user.user_metadata?.name || user.email || "Student",
+            name: dbUser?.name || user.email || "Student",
             role: "Academic Tier: " + rankLabel,
             initial: userInitial
           }}

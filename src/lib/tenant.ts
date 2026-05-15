@@ -19,12 +19,12 @@ export async function getSessionScope(session: Session | null): Promise<SessionS
 
   // Prefer DB as source of truth (handles stale token fields).
   const db = await prisma.user
-    .findUnique({ where: { id: userId }, select: { universityId: true, semesterId: true, facultyId: true, isLeader: true } })
+    .findUnique({ where: { id: userId }, select: { universityId: true, semesterId: true, facultyId: true, isLeader: true, role: true } })
     .catch(() => null);
 
   return {
     userId,
-    role,
+    role: db?.role ?? role,
     semesterId: db?.semesterId ?? (tokenSem ?? null),
     universityId: db?.universityId ?? (tokenUni ?? null),
     facultyId: db?.facultyId ?? null,

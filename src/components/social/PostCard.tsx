@@ -212,11 +212,18 @@ export const PostCard = React.memo(({
                </div>
                <p className="text-[15px] font-bold text-slate-800 dark:text-white leading-relaxed mb-6">{post.sharedQuestion.body}</p>
                <div className="grid grid-cols-1 gap-2.5">
-                  {(Array.isArray(post.sharedQuestion.choices) ? post.sharedQuestion.choices : []).map((choice: string, idx: number) => (
-                    <div key={idx} className="w-full p-4 rounded-2xl bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 text-[13px] font-bold text-slate-700 dark:text-white/80">
-                       {choice}
+               {(Array.isArray(post.sharedQuestion.choices) ? post.sharedQuestion.choices : []).map((choice: any, idx: number) => {
+                  const label = typeof choice === "string" ? choice : (choice?.text || choice?.key || `Option ${idx + 1}`);
+                  const key = typeof choice === "object" ? (choice?.key || idx) : idx;
+                  return (
+                    <div key={key} className="w-full p-4 rounded-2xl bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 text-[13px] font-bold text-slate-700 dark:text-white/80">
+                       {key && typeof choice === "object" && choice?.key && (
+                         <span className="text-primary font-black mr-2">{choice.key}.</span>
+                       )}
+                       {label}
                     </div>
-                  ))}
+                  );
+               })}
                </div>
                <p className="mt-4 text-[10px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest text-center">Open lecture to view correct answer</p>
             </div>
@@ -243,13 +250,15 @@ export const PostCard = React.memo(({
                   </div>
                   <p className="text-[15px] font-black text-slate-800 dark:text-white leading-relaxed mb-6">{question}</p>
                   <div className="space-y-2.5">
-                    {options.map((opt: string, idx: number) => {
+                    {options.map((opt: any, idx: number) => {
+                       const optText = typeof opt === "string" ? opt : (opt?.text || opt?.key || `Option ${idx + 1}`);
+                       const optKey = typeof opt === "object" ? (opt?.key || idx) : idx;
                        const isSelected = selectedQaIdx === idx;
-                       const isCorrect = opt === data.correctAnswer;
+                       const isCorrect = optText === data.correctAnswer || opt === data.correctAnswer;
                        const showResult = selectedQaIdx !== null;
                        return (
                          <button 
-                           key={idx}
+                           key={optKey}
                            disabled={showResult}
                            onClick={() => setSelectedQaIdx(idx)}
                            className={cn(
@@ -260,7 +269,10 @@ export const PostCard = React.memo(({
                              "bg-white dark:bg-black/20 border-slate-200 dark:border-white/10 opacity-50"
                            )}
                          >
-                           <span className="text-[13px] font-bold relative z-10">{opt}</span>
+                           {typeof opt === "object" && opt?.key && (
+                             <span className="font-black mr-2">{opt.key}.</span>
+                           )}
+                           <span className="text-[13px] font-bold relative z-10">{optText}</span>
                          </button>
                        );
                     })}

@@ -36,13 +36,18 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const { data: { user: authUser } } = await supabase.auth.getUser();
   const isGuest = !authUser;
 
-  // Pull user info from Supabase metadata (already synced) — zero DB call!
-  const userMeta = authUser?.user_metadata;
-  const userRole = userMeta?.role as string | undefined;
-  const userSemesterId = userMeta?.semesterId as string | undefined;
-  const displayName = userMeta?.nickname || userMeta?.name || "Student";
-  const userImage = userMeta?.avatar_url || userMeta?.image || null;
   const sessionUserId = authUser?.id ?? "";
+  
+  // Fetch fresh user data from Prisma for consistency
+  const dbUser = !isGuest ? await prisma.user.findUnique({
+    where: { id: sessionUserId },
+    select: { name: true, nickname: true, image: true, semesterId: true, role: true }
+  }) : null;
+
+  const userRole = dbUser?.role || authUser?.user_metadata?.role as string | undefined;
+  const userSemesterId = dbUser?.semesterId || authUser?.user_metadata?.semesterId as string | undefined;
+  const displayName = dbUser?.nickname || dbUser?.name || authUser?.user_metadata?.name || "Student";
+  const userImage = dbUser?.image || authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.image || null;
 
   // Redirect guests without semester via metadata check (fast, no DB)
   if (!isGuest && authUser) {

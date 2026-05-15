@@ -19,7 +19,7 @@ export const MobileTopBar = ({ userInitial, onMenuOpen }: { userInitial: string,
   return (
     <motion.header
       style={{ backgroundColor, backdropFilter }}
-      className="fixed top-0 left-0 right-0 h-[56px] z-50 flex items-center justify-between px-4 border-b border-white/5"
+      className="fixed top-0 left-0 right-0 h-[56px] z-50 flex items-center justify-between px-4 border-b border-white/5 md:hidden"
     >
       <div className="flex items-center gap-4">
         <button 
@@ -243,7 +243,7 @@ export const MobileBottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-[64px] bg-[#0f1120] border-t border-[#1f2240] z-40 flex items-center justify-around pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 h-[64px] bg-[#0f1120] border-t border-[#1f2240] z-40 flex items-center justify-around pb-[env(safe-area-inset-bottom)] md:hidden">
       {navItems.map((item, i) => (
         <div key={i} className="flex flex-col items-center gap-1 relative px-2">
           {item.active && (

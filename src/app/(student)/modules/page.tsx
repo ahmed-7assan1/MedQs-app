@@ -44,8 +44,22 @@ export default async function ModulesPage() {
   const isGuest = !session?.user?.id;
   const user = session?.user;
   const userId = user?.id;
-  const semesterId = (user as any)?.semesterId;
-  const role = (user as any)?.role;
+
+  let semesterId = (user as any)?.semesterId;
+  let role = (user as any)?.role;
+
+  // Fallback to Prisma if Supabase metadata is missing the semesterId or role
+  if (userId) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { semesterId: true, role: true }
+    });
+    if (dbUser) {
+      if (!semesterId) semesterId = dbUser.semesterId;
+      role = dbUser.role || role;
+    }
+  }
+
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   // Fetch modules for the user's semester
@@ -163,11 +177,11 @@ export default async function ModulesPage() {
             </div>
             <h2 className="text-2xl font-black text-white uppercase tracking-widest">Library Empty</h2>
             <p className="mt-2 text-white/40 font-medium max-w-sm mx-auto">
-              {user?.semesterId 
+              {semesterId 
                 ? "Your academic curriculum is currently being updated. Check back soon for new modules." 
                 : "Please complete your profile by selecting your university and semester to view available modules."}
             </p>
-            {!user?.semesterId && (
+            {!semesterId && (
               <Link href="/profile/edit"
                 className="mt-8 inline-flex items-center gap-3 rounded-2xl btn-gradient px-8 py-3.5 text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20">
                 Configure Profile

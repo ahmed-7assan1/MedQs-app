@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { getSessionScope, isAdminRole, isSuperAdmin } from "@/lib/tenant";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/v1/universities
 export async function GET() {
   const session = await auth();

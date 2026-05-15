@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/v1/faculties?universityId=xxx
 export async function GET(req: NextRequest) {
   try {
