@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSessionScope } from "@/lib/tenant";
+export const dynamic = "force-dynamic";
 
 type Params = { params: { roomId: string } };
 

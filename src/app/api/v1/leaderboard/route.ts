@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 // Leaderboard refreshes every 5 minutes — no need to hit DB per student.
 // Real-time changes will appear after at most 5 minutes.
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   // Check if leaderboard is enabled
