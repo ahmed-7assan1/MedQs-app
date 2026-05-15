@@ -87,7 +87,7 @@ export default async function LandingPage() {
           {/* Hero Visual Mockup */}
           <div className="mt-20 relative mx-auto max-w-5xl group">
              <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 blur-[100px] -z-10 group-hover:bg-blue-500/30 transition-colors" />
-             <div className="rounded-[32px] border border-slate-200 dark:border-white/10 p-2 bg-white/40 dark:bg-white/5 backdrop-blur-3xl shadow-2xl animate-float">
+             <div className="rounded-[32px] border border-slate-200 dark:border-white/10 p-2 bg-white/60 dark:bg-white/10 backdrop-blur-md shadow-2xl animate-float transform-gpu">
                 <div className="aspect-video rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center relative">
                    <Image 
                       src="https://images.unsplash.com/photo-1576091160550-2173bdb999ef?q=70&w=1200" 

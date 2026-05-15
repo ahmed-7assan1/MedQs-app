@@ -18,7 +18,7 @@ export const CinematicBackground = () => {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute -top-[10%] -left-[10%] h-[600px] w-[600px] rounded-full bg-blue-400/10 dark:bg-[#2c35af]/20 blur-[120px]"
+        className="absolute -top-[10%] -left-[10%] h-[600px] w-[600px] rounded-full bg-blue-400/10 dark:bg-[#2c35af]/20 blur-[80px] transform-gpu will-change-transform"
       />
 
       {/* Secondary Glow Orb */}
@@ -33,7 +33,7 @@ export const CinematicBackground = () => {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-indigo-400/5 dark:bg-[#4f5fff]/10 blur-[100px]"
+        className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-indigo-400/5 dark:bg-[#4f5fff]/10 blur-[60px] transform-gpu will-change-transform"
       />
 
       {/* Soft Cyan Highlight */}
@@ -46,7 +46,7 @@ export const CinematicBackground = () => {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-[20%] right-[10%] h-[300px] w-[300px] rounded-full bg-cyan-400/5 dark:bg-[#00d4ff]/5 blur-[80px]"
+        className="absolute top-[20%] right-[10%] h-[300px] w-[300px] rounded-full bg-cyan-400/5 dark:bg-[#00d4ff]/5 blur-[40px] transform-gpu will-change-transform"
       />
 
       {/* Grid Overlay */}
