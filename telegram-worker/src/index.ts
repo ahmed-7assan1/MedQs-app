@@ -467,78 +467,88 @@ const getBot = (env: Bindings) => {
     // Process AI Chat
     const promptContext = `
       System: You are Dr. Q, an elite AI medical tutor for MedOneX. 
-      Student Context:
+      Instructions:
+      - Respond concisely and professionally in Telegram Markdown.
+      - You are bilingual in Arabic and English.
+      - Use bold for medical terms.
+      - If explaining procedures, use bullet points.
+      - Scope: Medicine, Clinical Reasoning, and Study Skills only.
+
+      Student Profile:
       - Name: ${user.name}
       - University: ${user.university_name || 'Unknown'}
       - Semester: ${user.semester_name || 'Unknown'}
-      Respond concisely and professionally in Telegram Markdown.
-      User Query: ${text}
+
+      Current Query: ${text}
     `;
 
     try {
       let reply = "I'm not sure how to respond to that.";
       const provider = state.provider;
-      const apiKey = state.apiKey; // Only BYOK keys for user-selected providers
+      const userApiKey = state.apiKey;
+      const platformKey = env.GEMINI_API_KEY;
 
-      // Always require a BYOK key - no silent fallback to avoid confusing errors
-      if (!apiKey) {
+      // 1. If using non-Gemini providers, require user key
+      if (provider !== 'gemini' && !userApiKey) {
         await ctx.reply(
           `⚠️ *API Key Required*\n\nYou selected *${provider.toUpperCase()}* but haven't provided an API key yet.\n\n` +
-          `Please go to *⚙️ Settings → 🤖 Change AI Model* to set it up.`,
+          `Please go to *⚙️ Settings → 🤖 Change AI Model* to set it up, or switch back to Gemini for free access.`,
           { parse_mode: 'Markdown' }
         );
         return;
       }
 
+      // 2. Execute based on provider
       if (provider === 'groq') {
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          headers: { 'Authorization': `Bearer ${userApiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ model: 'llama3-70b-8192', messages: [{ role: 'user', content: promptContext }] })
         });
         const data: any = await res.json();
-        if (!res.ok) throw new Error(`Groq API error: ${data?.error?.message || res.status}`);
         reply = data?.choices?.[0]?.message?.content || "No response from Groq.";
       } 
       else if (provider === 'openai') {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          headers: { 'Authorization': `Bearer ${userApiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'user', content: promptContext }] })
         });
         const data: any = await res.json();
-        if (!res.ok) throw new Error(`OpenAI API error: ${data?.error?.message || res.status}`);
         reply = data?.choices?.[0]?.message?.content || "No response from OpenAI.";
       }
       else if (provider === 'anthropic') {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
-          headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
+          headers: { 'x-api-key': userApiKey, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
           body: JSON.stringify({ model: 'claude-3-5-haiku-20241022', max_tokens: 1024, messages: [{ role: 'user', content: promptContext }] })
         });
         const data: any = await res.json();
-        if (!res.ok) throw new Error(`Anthropic API error: ${data?.error?.message || res.status}`);
         reply = data?.content?.[0]?.text || "No response from Claude.";
       }
       else {
-        // Gemini (Default) - use gemini-1.5-flash (gemini-pro is deprecated)
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // Gemini - use user key if available, else platform key
+        const activeKey = userApiKey || platformKey;
+        if (!activeKey) throw new Error("MISSING_KEY");
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: promptContext }] }] })
         });
         const data: any = await res.json();
-        if (!res.ok) throw new Error(`Gemini API error: ${data?.error?.message || res.status}`);
+        if (!res.ok) throw new Error(data?.error?.message || "Gemini Error");
         reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
       }
 
       await ctx.reply(reply, { parse_mode: 'Markdown' });
 
     } catch (e: any) {
+      console.error("Bot AI Error:", e);
       if (e.message === "MISSING_KEY") {
-        await ctx.reply(`⚠️ *API Key Required*\n\nYou selected *${state.provider.toUpperCase()}* but haven't provided an API key.\n\nPlease go to *⚙️ Settings -> 🤖 Change AI Model* to set it up.`, { parse_mode: 'Markdown' });
+        await ctx.reply("⚠️ AI is currently unavailable (Missing API Key). Please contact an admin.");
       } else {
-        await ctx.reply("Dr. Q is currently resting or the API key is invalid. 😴");
+        await ctx.reply(`🩺 *Dr. Q is temporarily resting.*\n\nError: ${e.message || "Unknown connectivity issue"}`);
       }
     }
   });
