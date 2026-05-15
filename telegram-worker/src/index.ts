@@ -542,8 +542,8 @@ const getBot = (env: Bindings) => {
         const activeKey = userApiKey || platformKeys[Math.floor(Math.random() * platformKeys.length)];
         if (!activeKey) throw new Error("MISSING_KEY");
 
-        // Try gemini-1.5-flash first, fallback to gemini-pro if needed
-        const models = ["gemini-1.5-flash", "gemini-pro"];
+        // Try gemini-1.5-flash first, fallback to gemini-1.5-pro if needed
+        const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
         let lastErr = "";
 
         for (const model of models) {
