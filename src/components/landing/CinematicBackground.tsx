@@ -6,48 +6,15 @@ import { motion } from "framer-motion";
 export const CinematicBackground = () => {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-slate-50 dark:bg-[#05070f] transition-colors duration-500">
-      {/* Primary Glow Orb */}
-      <motion.div
-        animate={{
-          x: [0, 100, 0],
-          y: [0, 50, 0],
-          scale: [1, 1.2, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute -top-[10%] -left-[10%] h-[600px] w-[600px] rounded-full bg-blue-400/10 dark:bg-[#2c35af]/20 blur-[80px] transform-gpu will-change-transform"
-      />
-
-      {/* Secondary Glow Orb */}
-      <motion.div
-        animate={{
-          x: [0, -80, 0],
-          y: [0, 100, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-indigo-400/5 dark:bg-[#4f5fff]/10 blur-[60px] transform-gpu will-change-transform"
-      />
-
-      {/* Soft Cyan Highlight */}
-      <motion.div
-        animate={{
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-[20%] right-[10%] h-[300px] w-[300px] rounded-full bg-cyan-400/5 dark:bg-[#00d4ff]/5 blur-[40px] transform-gpu will-change-transform"
-      />
+      {/* High-Performance Gradient Glows (No Blur Filters) */}
+      <div className="absolute inset-0 overflow-hidden opacity-30 dark:opacity-20 pointer-events-none">
+        <div 
+          className="absolute -top-[20%] -left-[10%] h-[1000px] w-[1000px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.15)_0%,transparent_70%)] dark:bg-[radial-gradient(circle,rgba(44,53,175,0.3)_0%,transparent_70%)]" 
+        />
+        <div 
+          className="absolute -bottom-[20%] -right-[10%] h-[800px] w-[800px] rounded-full bg-[radial-gradient(circle,rgba(79,95,255,0.1)_0%,transparent_70%)] dark:bg-[radial-gradient(circle,rgba(79,95,255,0.2)_0%,transparent_70%)]" 
+        />
+      </div>
 
       {/* Grid Overlay */}
       <div 
@@ -58,29 +25,8 @@ export const CinematicBackground = () => {
         }}
       />
 
-      {/* Floating Particles Simulation (Optimized) */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(10)].map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ 
-              x: (i * 10) + "%", 
-              y: Math.random() * 100 + "%",
-              opacity: 0
-            }}
-            animate={{
-              y: ["0%", "100%"],
-              opacity: [0, 0.2, 0]
-            }}
-            transition={{
-              duration: 15 + (i * 2),
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute h-1 w-1 rounded-full bg-blue-400/20"
-          />
-        ))}
-      </div>
+      {/* Static Grain Texture (Performance friendly) */}
+      <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
     </div>
   );
 };
