@@ -41,51 +41,39 @@ export async function GET(
       );
     }
 
-    // ── 2. Get Forwarded Message to obtain file_id ───────────────────────────
-    // If a directFileId is provided (stored in DB), skip the expensive forward step
-    const fwdRes = await fetch(
-      `https://api.telegram.org/bot${BOT_TOKEN}/forwardMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          from_chat_id: chatId,
-          message_id: parseInt(messageId),
-        }),
-      }
-    );
-
-    // Try a simpler approach: use copyMessage or sendMessage tricks
-    // The most reliable way is to use getFile with a known file_id
-    // First, let's use getChatMember trick — actually best is to call
-    // the undocumented but stable endpoint for getting file path
-    
-    // Use Bot API: get file link via a workaround with updates
-    // The cleanest approach: POST /getFile with file_id obtained from message
-    // Since we stored telegramFileId in DB, let's use that instead.
-    // 
-    // For this proxy, the chatId passed is the storage group ID,
-    // and the messageId is the message in that group.
-    // We use the bot to forward the message to itself and get file_id.
-
     let fileId: string | null = directFileId;
 
-    if (!fileId && fwdRes.ok) {
-      const fwdData = await fwdRes.json();
-      const msg = fwdData?.result;
-      fileId = msg?.video?.file_id
-        || msg?.document?.file_id
-        || msg?.video_note?.file_id
-        || null;
-
-      // Clean up: delete the forwarded copy
-      if (msg?.message_id) {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteMessage`, {
+    // ── 2. Get Forwarded Message to obtain file_id ONLY if missing ───────────
+    if (!fileId) {
+      const fwdRes = await fetch(
+        `https://api.telegram.org/bot${BOT_TOKEN}/forwardMessage`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatId, message_id: msg.message_id }),
-        }).catch(() => {});
+          body: JSON.stringify({
+            chat_id: chatId,
+            from_chat_id: chatId,
+            message_id: parseInt(messageId),
+          }),
+        }
+      );
+
+      if (fwdRes.ok) {
+        const fwdData = await fwdRes.json();
+        const msg = fwdData?.result;
+        fileId = msg?.video?.file_id
+          || msg?.document?.file_id
+          || msg?.video_note?.file_id
+          || null;
+
+        // Clean up: delete the forwarded copy
+        if (msg?.message_id) {
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: chatId, message_id: msg.message_id }),
+          }).catch(() => {});
+        }
       }
     }
 

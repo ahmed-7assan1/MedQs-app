@@ -207,6 +207,17 @@ export function SocialClient({
   };
 
 
+  const sortedPosts = useMemo(() => {
+    return [...posts].sort((a, b) => {
+      if (sortBy === "top") {
+        const scoreA = (a._count?.likes || 0) * 2 + (a._count?.comments || 0);
+        const scoreB = (b._count?.likes || 0) * 2 + (b._count?.comments || 0);
+        return scoreB - scoreA;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [posts, sortBy]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white transition-colors duration-500">
       {/* Static background - no animation for performance */}
@@ -350,15 +361,8 @@ export function SocialClient({
                     </div>
                   }
                 >
-                  <AnimatePresence mode="popLayout">
-                    {[...posts].sort((a, b) => {
-                       if (sortBy === "top") {
-                         const scoreA = (a._count?.likes || 0) * 2 + (a._count?.comments || 0);
-                         const scoreB = (b._count?.likes || 0) * 2 + (b._count?.comments || 0);
-                         return scoreB - scoreA;
-                       }
-                       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                    }).map((post) => (
+                  <div className="flex flex-col gap-6">
+                    {sortedPosts.map((post) => (
                       <PostCard
                         key={post.id}
                         post={post}
@@ -367,7 +371,7 @@ export function SocialClient({
                         currentUserUniversityId={currentUserUniversityId}
                       />
                     ))}
-                  </AnimatePresence>
+                  </div>
                 </InfiniteScrollContainer>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn(GLASS, "rounded-[40px] py-24 flex flex-col items-center justify-center text-center")}>

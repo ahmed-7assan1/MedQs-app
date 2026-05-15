@@ -152,7 +152,7 @@ export default async function DashboardPage() {
           </section>
 
           <section>
-            {lastLectureActivity ? (
+            {lastLectureActivity?.lecture?.subject ? (
               <MobileContinueCard 
                 module={lastLectureActivity.lecture.title}
                 subject={lastLectureActivity.lecture.subject.name}
@@ -262,7 +262,7 @@ export default async function DashboardPage() {
           <div className="grid lg:grid-cols-10 gap-8 mb-12">
              <div className="lg:col-span-6">
                 <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground mb-6">Mission Continuation</h2>
-                {lastLectureActivity ? (
+                {lastLectureActivity?.lecture?.subject ? (
                   <ContinueLearningHero module={{ title: lastLectureActivity.lecture.title, subject: lastLectureActivity.lecture.subject.name, href: `/modules/${lastLectureActivity.lecture.subject.moduleId}/lectures/${lastLectureActivity.lecture.id}` }} progress={overallPct} delay={0.5} />
                 ) : (
                   <div className="rounded-[2.5rem] border border-dashed border-border bg-card/50">

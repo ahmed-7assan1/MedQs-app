@@ -62,6 +62,8 @@ export function ProfessionalVideoPlayer({
   const [isLoading, setIsLoading] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const [duration, setDuration] = useState(0);
+  const lastSaveTimeRef = useRef<number>(0);
+  const lastYtSaveTimeRef = useRef<number>(0);
 
   const ytId = extractYouTubeId(src);
 
@@ -108,10 +110,11 @@ export function ProfessionalVideoPlayer({
     const total = videoRef.current.duration;
     setProgress((current / total) * 100);
     
-    // Save progress periodically (throttled by handleTimeUpdate which is frequent)
-    // We only save if it's more than 3 seconds in and not at the very end
-    if (current > 3 && current < total - 5) {
+    // Save progress periodically (throttled)
+    const now = Date.now();
+    if (current > 3 && current < total - 5 && now - lastSaveTimeRef.current > 5000) {
       localStorage.setItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`, current.toString());
+      lastSaveTimeRef.current = now;
     }
   };
 
@@ -226,8 +229,10 @@ export function ProfessionalVideoPlayer({
           startTime={startTime}
           onTimeUpdate={(time) => {
             setProgress((time / (videoRef.current?.duration || 100)) * 100);
-            if (time > 3) {
+            const now = Date.now();
+            if (time > 3 && now - lastYtSaveTimeRef.current > 5000) {
               localStorage.setItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`, time.toString());
+              lastYtSaveTimeRef.current = now;
             }
           }}
           className="absolute inset-0 w-full h-full"
