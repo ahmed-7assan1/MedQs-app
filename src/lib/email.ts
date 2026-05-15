@@ -1,6 +1,15 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_for_build");
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "465"),
+  secure: true, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
 const FROM = process.env.EMAIL_FROM || "MedOneX <noreply@medonex.app>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://medonex.app";
 const APP_NAME = "MedOneX";
@@ -42,7 +51,7 @@ function ctaButton(text: string, href: string) {
 
 // ─── 1. Email Confirmation ────────────────────────────────────────────────────
 export async function sendVerificationEmail(to: string, confirmUrl: string) {
-  return resend.emails.send({
+  return transporter.sendMail({
     from: FROM,
     to,
     subject: `Verify your ${APP_NAME} account`,
@@ -61,7 +70,7 @@ export async function sendVerificationEmail(to: string, confirmUrl: string) {
 
 // ─── 2. Password Reset ────────────────────────────────────────────────────────
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
-  return resend.emails.send({
+  return transporter.sendMail({
     from: FROM,
     to,
     subject: `Reset your ${APP_NAME} password`,
@@ -80,7 +89,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
 
 // ─── 3. Magic Link / OTP ──────────────────────────────────────────────────────
 export async function sendMagicLinkEmail(to: string, magicUrl: string) {
-  return resend.emails.send({
+  return transporter.sendMail({
     from: FROM,
     to,
     subject: `Your ${APP_NAME} login link`,
@@ -99,7 +108,7 @@ export async function sendMagicLinkEmail(to: string, magicUrl: string) {
 
 // ─── 4. Welcome Email (after confirmation) ────────────────────────────────────
 export async function sendWelcomeEmail(to: string, name: string) {
-  return resend.emails.send({
+  return transporter.sendMail({
     from: FROM,
     to,
     subject: `Welcome to ${APP_NAME}, ${name}!`,
