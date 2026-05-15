@@ -90,11 +90,11 @@ export default async function LandingPage() {
              <div className="rounded-[32px] border border-slate-200 dark:border-white/10 p-2 bg-white/40 dark:bg-white/5 backdrop-blur-3xl shadow-2xl animate-float">
                 <div className="aspect-video rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center relative">
                    <Image 
-                      src="https://images.unsplash.com/photo-1576091160550-2173bdb999ef?q=80&w=2000" 
-                      className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000" 
+                      src="https://images.unsplash.com/photo-1576091160550-2173bdb999ef?q=70&w=1200" 
+                      className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000 transform-gpu" 
                       alt="Dashboard Preview"
-                      width={2000}
-                      height={1125}
+                      width={1200}
+                      height={675}
                       priority
                    />
                    <div className="absolute inset-0 bg-gradient-to-t from-slate-50 dark:from-[#05070f] via-transparent to-transparent" />

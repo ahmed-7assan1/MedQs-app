@@ -290,7 +290,7 @@ function AuthContent() {
         </p>
       </motion.div>
 
-      <div className="w-full bg-white/70 dark:bg-[#05070f]/70 backdrop-blur-[60px] border border-slate-200 dark:border-white/[0.08] rounded-[40px] p-2 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden">
+      <div className="w-full bg-white/70 dark:bg-[#05070f]/70 backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-[40px] p-2 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden">
         
         {/* Tabs */}
         {!isOnboarding && !showForgot && (
