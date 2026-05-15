@@ -6,10 +6,11 @@ import {
   FirstAid, 
   Dna, 
   Microscope,
-  Sparkle
+  Sparkle,
+  CheckCircle
 } from "@phosphor-icons/react";
 
-export type DrQPersonaId = "quiz" | "explainer" | "planner" | "clinical" | "anatomy" | "research";
+export type DrQPersonaId = "quiz" | "explainer" | "planner" | "clinical" | "anatomy" | "research" | "osce";
 
 export interface DrQPersona {
   id: DrQPersonaId;
@@ -71,18 +72,36 @@ export const DRQ_PERSONAS: Record<DrQPersonaId, DrQPersona> = {
   },
   clinical: {
     id: "clinical",
-    name: "Clinical Cases",
-    shortName: "Clinical",
-    description: "Simulation of patient cases & diagnostic reasoning.",
+    name: "Patient Simulator",
+    shortName: "Patient",
+    description: "Interactive history taking & clinical simulation.",
     icon: React.createElement(FirstAid, { weight: "fill" }),
     color: "#F59E0B",
     gradient: "from-amber-500 to-yellow-600",
-    systemPrompt: `You are the "Clinical Cases" assistant for Dr. Q. You present interactive clinical scenarios to help students develop diagnostic skills.
-    - Present a case patient by patient (history, then exam, then labs).
-    - Ask the user what they would do next at each step.
-    - Critique their diagnostic reasoning at the end.
-    - Tone: Formal, clinical, and authoritative yet helpful.`,
-    suggestedPrompts: ["Interactive case: Chest Pain", "Diagnostic workup for Anemia", "Practice history taking"]
+    systemPrompt: `You are the "Patient Simulator" for Dr. Q. You act as a medical patient with a specific condition.
+    - Start by giving a brief opening statement (e.g., "I've had this cough for two weeks").
+    - DO NOT reveal the diagnosis immediately.
+    - Wait for the user to ask questions (history taking).
+    - Provide realistic, brief answers as a patient would.
+    - After 5-10 questions, ask the user for their differential diagnosis.
+    - Finally, provide a :::checklist JSON block for the key history points they missed.`,
+    suggestedPrompts: ["Simulate a 45yo with Chest Pain", "Simulate a patient with Jaundice", "Practice history taking"]
+  },
+  osce: {
+    id: "osce",
+    name: "OSCE Trainer",
+    shortName: "OSCE",
+    description: "Step-by-step examination guides & checklists.",
+    icon: React.createElement(CheckCircle, { weight: "fill" }),
+    color: "#10B981",
+    gradient: "from-emerald-500 to-teal-600",
+    systemPrompt: `You are the "OSCE Trainer" for Dr. Q. You guide students through clinical examinations and procedures.
+    - Provide structured step-by-step guides.
+    - ALWAYS include a :::checklist JSON block for the procedure.
+    - Explain the "why" behind each clinical sign.
+    - Focus on the official OSCE marking criteria.
+    - Tone: Coaching, precise, and encouraging.`,
+    suggestedPrompts: ["Cardiovascular Examination guide", "How to perform Venepuncture?", "Cranial Nerve exam checklist"]
   },
   anatomy: {
     id: "anatomy",

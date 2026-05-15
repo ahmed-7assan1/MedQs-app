@@ -168,7 +168,7 @@ export function DrQChat() {
                 Experience Dr. Q Overhaul
               </h2>
               <p className="text-white/40 text-[15px] font-medium mb-12 max-w-lg">
-                 Choose a specialized AI persona to help you master your medical journey.
+                 Practice history taking with AI patients, master OSCE exams with interactive checklists, and simplify complex lectures in real-time.
               </p>
               
               {/* Persona Grid (Image 1 Match) */}

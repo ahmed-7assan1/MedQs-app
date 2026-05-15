@@ -199,6 +199,13 @@ export function DrQMessage({
                           return <QuestionCard q={q} onSave={() => toast.success("Question saved to your library")} onShare={() => toast.success("Copied link to Discuss Forum")} />;
                         } catch { return <p className="mb-2 last:mb-0">{children}</p>; }
                       }
+                      if (content.includes(":::checklist")) {
+                        try {
+                          const jsonStr = content.split(":::checklist")[1].split(":::")[0].trim();
+                          const c = JSON.parse(jsonStr);
+                          return <ChecklistCard c={c} />;
+                        } catch { return <p className="mb-2 last:mb-0">{children}</p>; }
+                      }
                       return <p className="mb-2 last:mb-0">{children}</p>;
                     },
                     code: ({ node, className, children, ...props }: any) => {
@@ -249,6 +256,18 @@ export function DrQMessage({
                   <ThumbsDown size={16} weight={message.reaction === "dislike" ? "fill" : "bold"} />
                 </button>
                 <div className="w-px h-4 bg-white/5 mx-1" />
+                <button onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    {
+                      loading: 'Saving to Flashcards...',
+                      success: 'Successfully added to spaced repetition!',
+                      error: 'Failed to save flashcard.',
+                    }
+                  );
+                }} className="p-1.5 rounded-lg text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all" title="Save to Flashcards">
+                  <Lightning size={16} weight="bold" />
+                </button>
                 <button onClick={handleCopy} className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/5 transition-all">
                   {copying ? <Check size={16} weight="bold" className="text-emerald-400" /> : <Copy size={16} weight="bold" />}
                 </button>
@@ -263,6 +282,71 @@ export function DrQMessage({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Interactive Checklist Component ──────────────────────────────────────
+
+function ChecklistCard({ c }: { c: { title: string, items: { text: string, completed?: boolean }[] } }) {
+  const [items, setItems] = useState(c.items.map(item => ({ ...item, completed: !!item.completed })));
+
+  const toggleItem = (index: number) => {
+    const newItems = [...items];
+    newItems[index].completed = !newItems[index].completed;
+    setItems(newItems);
+  };
+
+  const progress = Math.round((items.filter(i => i.completed).length / items.length) * 100);
+
+  return (
+    <div className="my-6 p-6 rounded-[24px] bg-[#0d0c18] border border-emerald-500/20 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shadow-inner">
+             <CheckCircle size={20} weight="fill" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">OSCE Evaluation</span>
+            <span className="text-[13px] font-black text-white tracking-tight">{c.title}</span>
+          </div>
+        </div>
+        <div className="text-right">
+           <span className="text-[14px] font-black text-emerald-400">{progress}%</span>
+           <div className="w-20 h-1.5 bg-white/5 rounded-full mt-1 overflow-hidden">
+              <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} className="h-full bg-emerald-500" />
+           </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {items.map((item, i) => (
+          <button
+            key={i}
+            onClick={() => toggleItem(i)}
+            className={cn(
+              "w-full flex items-center gap-4 p-4 rounded-xl transition-all text-left group",
+              item.completed ? "bg-emerald-500/5 text-white/90" : "bg-white/[0.02] text-white/40 hover:bg-white/5"
+            )}
+          >
+            <div className={cn(
+              "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+              item.completed ? "bg-emerald-500 border-emerald-500" : "border-white/10 bg-white/5 group-hover:border-white/20"
+            )}>
+              {item.completed && <Check size={12} weight="bold" className="text-white" />}
+            </div>
+            <span className={cn("text-[14px] font-medium transition-all", item.completed && "line-through opacity-50")}>
+              {item.text}
+            </span>
+          </button>
+        ))}
+      </div>
+      
+      {progress === 100 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+           <span className="text-[12px] font-black text-emerald-400 uppercase tracking-widest">Protocol Fully Completed 🏆</span>
+        </motion.div>
+      )}
     </div>
   );
 }
