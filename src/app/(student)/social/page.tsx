@@ -39,7 +39,7 @@ const getCachedForums = unstable_cache(
     });
   },
   ["social-forums"],
-  { revalidate: 60, tags: ["forums"] }
+  { revalidate: 60 }
 );
 
 const getCachedRooms = unstable_cache(
@@ -58,7 +58,7 @@ const getCachedRooms = unstable_cache(
     });
   },
   ["social-rooms"],
-  { revalidate: 60, tags: ["rooms"] }
+  { revalidate: 60 }
 );
 
 export default async function SocialPage() {

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
@@ -14,6 +15,20 @@ import { WordFadeUp } from "@/components/landing/WordFadeUp";
 import { StatsCounter } from "@/components/landing/StatsCounter";
 import { ScrollReveal } from "@/components/landing/ScrollReveal";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
+import { unstable_cache } from "next/cache";
+
+// ─── Cached Stats (shared, refreshed every 1h) ────────────────────────────────
+const getCachedStats = unstable_cache(
+  async () => {
+    return Promise.all([
+      prisma.user.count().catch(() => 0),
+      prisma.question.count().catch(() => 0),
+      prisma.module.count().catch(() => 0),
+    ]);
+  },
+  ["landing-stats"],
+  { revalidate: 3600 }
+);
 
 export default async function LandingPage() {
   // Use Supabase (not legacy NextAuth) for session check
@@ -24,11 +39,7 @@ export default async function LandingPage() {
     redirect("/dashboard-app");
   }
 
-  const [userCount, questionCount, moduleCount] = await Promise.all([
-    prisma.user.count().catch(() => 0),
-    prisma.question.count().catch(() => 0),
-    prisma.module.count().catch(() => 0),
-  ]);
+  const [userCount, questionCount, moduleCount] = await getCachedStats();
 
   return (
     <div className="relative min-h-screen selection:bg-primary/30 selection:text-white transition-colors duration-500">
@@ -78,10 +89,13 @@ export default async function LandingPage() {
              <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 blur-[100px] -z-10 group-hover:bg-blue-500/30 transition-colors" />
              <div className="rounded-[32px] border border-slate-200 dark:border-white/10 p-2 bg-white/40 dark:bg-white/5 backdrop-blur-3xl shadow-2xl animate-float">
                 <div className="aspect-video rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center relative">
-                   <img 
+                   <Image 
                       src="https://images.unsplash.com/photo-1576091160550-2173bdb999ef?q=80&w=2000" 
                       className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000" 
                       alt="Dashboard Preview"
+                      width={2000}
+                      height={1125}
+                      priority
                    />
                    <div className="absolute inset-0 bg-gradient-to-t from-slate-50 dark:from-[#05070f] via-transparent to-transparent" />
                    <div className="absolute inset-0 flex items-center justify-center">

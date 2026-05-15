@@ -146,6 +146,8 @@ async function getModuleProgress(userId: string, semesterId: string): Promise<Mo
     },
   });
 
+  if (modules.length === 0) return [];
+
   // 2. Get correct question counts per module via raw aggregate
   const correctRows = await prisma.$queryRaw<Array<{ moduleId: string; cnt: bigint }>>(
     Prisma.sql`

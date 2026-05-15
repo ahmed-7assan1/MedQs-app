@@ -58,27 +58,26 @@ export const CinematicBackground = () => {
         }}
       />
 
-      {/* Floating Particles Simulation (Subtle) */}
+      {/* Floating Particles Simulation (Optimized) */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <motion.div
             key={i}
             initial={{ 
-              x: Math.random() * 100 + "%", 
+              x: (i * 10) + "%", 
               y: Math.random() * 100 + "%",
-              opacity: Math.random() * 0.5
+              opacity: 0
             }}
             animate={{
-              y: ["-10%", "110%"],
-              opacity: [0, 0.5, 0]
+              y: ["0%", "100%"],
+              opacity: [0, 0.2, 0]
             }}
             transition={{
-              duration: Math.random() * 20 + 10,
+              duration: 15 + (i * 2),
               repeat: Infinity,
               ease: "linear",
-              delay: Math.random() * 10
             }}
-            className="absolute h-1 w-1 rounded-full bg-white/20"
+            className="absolute h-1 w-1 rounded-full bg-blue-400/20"
           />
         ))}
       </div>

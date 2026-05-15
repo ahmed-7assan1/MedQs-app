@@ -41,26 +41,30 @@ export default async function DashboardPage() {
   }) : null;
 
   // Sync logic: If Prisma is missing data but metadata has it, sync now
-  if (user && (!fullProfile || !fullProfile.universityId)) {
-    const meta = user.user_metadata;
-    if (meta?.universityId) {
-       fullProfile = await prisma.user.upsert({
-         where: { id: user.id },
-         create: {
-            id: user.id,
-            email: user.email!,
-            name: meta.name || user.email?.split('@')[0] || "Student",
-            universityId: meta.universityId,
-            facultyId: meta.facultyId,
-            semesterId: meta.semesterId,
-         },
-         update: {
-            universityId: meta.universityId,
-            facultyId: meta.facultyId,
-            semesterId: meta.semesterId,
-         }
-       });
+  try {
+    if (user && (!fullProfile || !fullProfile.universityId)) {
+      const meta = user.user_metadata;
+      if (meta?.universityId) {
+         fullProfile = await prisma.user.upsert({
+           where: { id: user.id },
+           create: {
+              id: user.id,
+              email: user.email!,
+              name: meta.name || user.email?.split('@')[0] || "Student",
+              universityId: meta.universityId,
+              facultyId: meta.facultyId,
+              semesterId: meta.semesterId,
+           },
+           update: {
+              universityId: meta.universityId,
+              facultyId: meta.facultyId,
+              semesterId: meta.semesterId,
+           }
+         });
+      }
     }
+  } catch (syncErr) {
+    console.error("[dashboard-app] Profile sync error:", syncErr);
   }
 
   const isProfileIncomplete = user && (!fullProfile?.universityId || !fullProfile?.semesterId);
@@ -107,11 +111,12 @@ export default async function DashboardPage() {
   const firstName = (dbUser?.name || user.email || "Student").split(" ")[0];
   const userInitial = firstName.charAt(0);
 
-  const { label: rankLabel, totalPoints: rankPoints = 0, progressToNext = 0 } = rankInfo || {
-    label: "Med Student",
-    totalPoints: 0,
-    progressToNext: 0
+  const { rank, points: rankPoints = 0, progress: progressToNext = 0 } = rankInfo || {
+    rank: { label: "Med Student" },
+    points: 0,
+    progress: 0
   };
+  const rankLabel = rank?.label || "Med Student";
 
   const maxCount = Math.max(...(activityArr?.map((a: any) => a.count) || []), 5);
   
