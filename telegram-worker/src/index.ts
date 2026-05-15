@@ -531,7 +531,7 @@ const getBot = (env: Bindings) => {
         const activeKey = userApiKey || platformKey;
         if (!activeKey) throw new Error("MISSING_KEY");
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${activeKey}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${activeKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: promptContext }] }] })
