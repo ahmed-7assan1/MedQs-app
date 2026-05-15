@@ -258,15 +258,16 @@ function AuthContent() {
   const handleResendConfirmation = async () => {
     setResendLoading(true);
     try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email: resendEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard-app`,
-        },
+      const res = await fetch("/api/v1/auth/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "signup", email: resendEmail })
       });
-      if (error) throw error;
-      toast.success("Confirmation email sent! Please check your inbox.");
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to resend confirmation email.");
+      
+      toast.success("Professional verification link dispatched. Please check your inbox.");
     } catch (err: any) {
       toast.error(err.message || "Failed to resend confirmation email.");
     } finally {

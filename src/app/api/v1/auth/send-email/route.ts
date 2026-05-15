@@ -14,12 +14,24 @@ export async function POST(req: NextRequest) {
     }
 
     // Use Supabase Admin to generate a link for the user
-    const { createClient: createAdminClient } = await import("@/lib/supabase/server");
+    const { createAdminClient } = await import("@/lib/supabase/admin");
     const supabase = createAdminClient();
 
     if (type === "signup") {
-      // Generate email confirmation link
-      const { data, error } = await (supabase as any).auth.admin.generateLink({
+      // 1. Check if user exists in Supabase
+      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+      const user = users.find(u => u.email === email);
+
+      if (!user) {
+        console.warn(`[send-email] Attempted signup link for non-existent user: ${email}`);
+        return NextResponse.json({ 
+          error: "Account not found. Please register first.",
+          code: "USER_NOT_FOUND" 
+        }, { status: 404 });
+      }
+
+      // 2. Generate email confirmation link
+      const { data, error } = await supabase.auth.admin.generateLink({
         type: "signup",
         email,
         options: {
@@ -38,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     if (type === "recovery") {
       // Generate password reset link
-      const { data, error } = await (supabase as any).auth.admin.generateLink({
+      const { data, error } = await supabase.auth.admin.generateLink({
         type: "recovery",
         email,
         options: {

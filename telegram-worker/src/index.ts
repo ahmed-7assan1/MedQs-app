@@ -8,6 +8,8 @@ type Bindings = {
   NEXTAUTH_URL: string;
   GEMINI_API_KEY: string;
   TELEGRAM_STORAGE_GROUP_ID: string;
+  SUPABASE_URL: string;
+  SUPABASE_ANON_KEY: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -30,6 +32,10 @@ const getBot = (env: Bindings) => {
           "chatState" TEXT DEFAULT 'IDLE'
         );
       `;
+      // Ensure tempEmail column exists
+      try {
+        await sql`ALTER TABLE "TelegramBotState" ADD COLUMN "tempEmail" TEXT`;
+      } catch (e) { /* Column likely already exists */ }
     } catch (e) {
       console.error("DB Init error:", e);
     }
@@ -39,12 +45,12 @@ const getBot = (env: Bindings) => {
     const [state] = await sql`SELECT * FROM "TelegramBotState" WHERE "telegramId" = ${telegramId}`;
     if (!state) {
       await sql`INSERT INTO "TelegramBotState" ("telegramId") VALUES (${telegramId})`;
-      return { provider: 'gemini', apiKey: null, chatState: 'IDLE' };
+      return { provider: 'gemini', apiKey: null, chatState: 'IDLE', tempEmail: null };
     }
     return state;
   };
 
-  const updateBotState = async (telegramId: string, updates: { provider?: string|null, apiKey?: string|null, chatState?: string|null }) => {
+  const updateBotState = async (telegramId: string, updates: { provider?: string|null, apiKey?: string|null, chatState?: string|null, tempEmail?: string|null }) => {
     if (updates.provider !== undefined) {
       await sql`UPDATE "TelegramBotState" SET "provider" = ${updates.provider} WHERE "telegramId" = ${telegramId}`;
     }
@@ -53,6 +59,9 @@ const getBot = (env: Bindings) => {
     }
     if (updates.chatState !== undefined) {
       await sql`UPDATE "TelegramBotState" SET "chatState" = ${updates.chatState} WHERE "telegramId" = ${telegramId}`;
+    }
+    if (updates.tempEmail !== undefined) {
+      await sql`UPDATE "TelegramBotState" SET "tempEmail" = ${updates.tempEmail} WHERE "telegramId" = ${telegramId}`;
     }
   };
 
@@ -103,27 +112,34 @@ const getBot = (env: Bindings) => {
       );
     } else {
       await ctx.reply(`Welcome to MedOneX! 🩺🌌\n\nPlease link your account to get started.`, 
-        Markup.inlineKeyboard([[Markup.button.callback('📱 Link via Phone', 'auth_phone')]])
+        Markup.inlineKeyboard([[Markup.button.callback('🔑 Link via Email', 'auth_email')]])
       );
     }
   });
 
-  bot.action('auth_phone', async (ctx) => {
-    await ctx.reply("📱 Please share your contact:", 
-      Markup.keyboard([[Markup.button.contactRequest("📤 Share Contact")]]).oneTime().resize()
-    );
+  bot.action('auth_email', async (ctx) => {
+    await updateBotState(ctx.from!.id.toString(), { chatState: 'AWAITING_EMAIL' });
+    await ctx.reply("📧 Please enter your registered email address:");
   });
 
-  bot.on('contact', async (ctx) => {
-    const phone = ctx.message.contact.phone_number.replace('+', '');
+  const verifySupabaseAuth = async (email: string, password: string) => {
     try {
-      await sql`CREATE TABLE IF NOT EXISTS "BotUser" ("telegramId" TEXT UNIQUE, "phoneNumber" TEXT)`;
-      await sql`INSERT INTO "BotUser" ("telegramId", "phoneNumber") VALUES (${ctx.from.id.toString()}, ${phone}) ON CONFLICT ("telegramId") DO UPDATE SET "phoneNumber" = ${phone}`;
-      await ctx.reply("✅ Phone linked! Try /start now.", Markup.removeKeyboard());
+      const res = await fetch(`${env.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: {
+          'apikey': env.SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) return null;
+      const data = await res.json() as any;
+      return data.user;
     } catch (e) {
-      await ctx.reply("Error linking phone. Please try again.");
+      console.error("Auth Fetch Error:", e);
+      return null;
     }
-  });
+  };
 
   // ─── Command Handlers ───
   bot.hears("📚 My Modules", async (ctx) => {
@@ -170,9 +186,20 @@ const getBot = (env: Bindings) => {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
         [Markup.button.callback("🤖 Change AI Model", "set_ai")],
-        [Markup.button.callback("🔑 Manage API Key", "manage_key")]
+        [Markup.button.callback("🔑 Manage API Key", "manage_key")],
+        [Markup.button.callback("🚪 Logout / Unlink", "logout")]
       ])
     });
+  });
+
+  bot.action("logout", async (ctx) => {
+    const tid = ctx.from!.id.toString();
+    try {
+      await sql`UPDATE "User" SET "telegramId" = NULL, "telegramVerified" = false WHERE "telegramId" = ${tid}`;
+      await ctx.editMessageText("🚪 *Logged out successfully.*\n\nYour account has been unlinked from this Telegram ID. Send /start to link again.", { parse_mode: 'Markdown' });
+    } catch (e) {
+      await ctx.answerCbQuery("Error during logout. Please try again.");
+    }
   });
 
   // ─── AI BYOK Settings ───
@@ -387,6 +414,43 @@ const getBot = (env: Bindings) => {
     if (state.chatState.startsWith("AWAITING_KEY_")) {
       await updateBotState(tid, { apiKey: text.trim(), chatState: 'IDLE' });
       await ctx.reply(`✅ *API Key Saved successfully!* \n\nYour provider is set to *${state.provider.toUpperCase()}*.\nYou can now ask Dr. Q any questions.`, { parse_mode: 'Markdown' });
+      return;
+    }
+
+    // 2. Check if user is inputting Email
+    if (state.chatState === 'AWAITING_EMAIL') {
+      await updateBotState(tid, { tempEmail: text.trim(), chatState: 'AWAITING_PASSWORD' });
+      await ctx.reply("🔐 Excellent. Now please enter your password (it will be deleted for security):");
+      return;
+    }
+
+    // 3. Check if user is inputting Password
+    if (state.chatState === 'AWAITING_PASSWORD') {
+      const tempEmail = state.tempEmail;
+      if (!tempEmail) {
+        await updateBotState(tid, { chatState: 'IDLE' });
+        return ctx.reply("Something went wrong. Please try /start again.");
+      }
+
+      // Try to delete the password message for security
+      try { await ctx.deleteMessage(); } catch (e) { }
+
+      const supabaseUser = await verifySupabaseAuth(tempEmail, text.trim());
+      if (supabaseUser) {
+        // Link user in Prisma DB
+        const [userInDb] = await sql`SELECT id FROM "User" WHERE "email" = ${tempEmail} LIMIT 1`;
+        if (userInDb) {
+          await sql`UPDATE "User" SET "telegramId" = ${tid}, "telegramVerified" = true WHERE id = ${userInDb.id}`;
+          await updateBotState(tid, { chatState: 'IDLE', tempEmail: null });
+          await ctx.reply("✅ Account linked successfully! Welcome to MedOneX ecosystem.", MAIN_KEYBOARD);
+        } else {
+          await ctx.reply("❌ Account verified but profile not found in database. Please contact support.");
+          await updateBotState(tid, { chatState: 'IDLE', tempEmail: null });
+        }
+      } else {
+        await ctx.reply("❌ Invalid credentials. Connection rejected.", Markup.inlineKeyboard([[Markup.button.callback('🔑 Try Again', 'auth_email')]]));
+        await updateBotState(tid, { chatState: 'IDLE', tempEmail: null });
+      }
       return;
     }
 

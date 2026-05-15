@@ -87,17 +87,42 @@ export async function POST(req: NextRequest) {
     const existingCode = await (prisma.user as any).findUnique({ where: { studentCode } });
     if (existingCode) return NextResponse.json({ error: "Student Registration Code already exists" }, { status: 409 });
 
-    // 4. Create User
+    // 4. Create User in Supabase Auth first
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const supabase = createAdminClient();
+
+    const { data: sbData, error: sbError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: false,
+      user_metadata: {
+        name,
+        universityId,
+        facultyId,
+        semesterId,
+        onboarding_completed: true
+      }
+    });
+
+    if (sbError) {
+      console.error("[REGISTER] Supabase Error:", sbError);
+      return NextResponse.json({ error: sbError.message }, { status: 400 });
+    }
+
+    const supabaseUserId = sbData.user.id;
+
+    // 5. Create User in Prisma (use same ID as Supabase)
     const hashed = await bcrypt.hash(password, 12);
 
     const user = await (prisma.user as any).create({
       data: {
+        id: supabaseUserId, // Sync IDs
         name,
         nickname,
         email,
         password: hashed,
-        studentId, // Original ID provided by user
-        studentCode, // Generated Unique ID
+        studentId, 
+        studentCode, 
         telegramPhone: cleanPhone,
         telegramId: botUser.telegramId,
         telegramVerified: true,
@@ -108,13 +133,30 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // 6. Generate Link and Send Custom Email
+    try {
+      const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+        type: "signup",
+        email,
+        options: { redirectTo: `${req.nextUrl.origin}/auth/callback?next=/dashboard-app` }
+      });
+
+      if (!linkError && linkData.properties?.action_link) {
+        const { sendVerificationEmail } = await import("@/lib/email");
+        await sendVerificationEmail(email, linkData.properties.action_link);
+      }
+    } catch (emailErr) {
+      console.error("[REGISTER] Email Send Error (Non-blocking):", emailErr);
+    }
+
     // Clean up verification code
     await (prisma as any).botAuth.delete({ where: { telegramId: botUser.telegramId } }).catch(() => {});
 
     return NextResponse.json({ 
       id: user.id, 
       name: user.name, 
-      studentCode 
+      studentCode,
+      message: "Registration successful. Please verify your email."
     }, { status: 201 });
 
   } catch (error: any) {
