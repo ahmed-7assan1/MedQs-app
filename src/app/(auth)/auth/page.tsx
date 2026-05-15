@@ -61,7 +61,7 @@ function CustomDropdown({ label, options, value, onChange, icon: Icon, disabled,
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute z-[100] left-0 right-0 mt-2 p-2 bg-white dark:bg-[#0d101f] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-[240px] overflow-y-auto custom-scrollbar"
+            className="absolute z-[100] left-0 right-0 mt-2 p-2 bg-white dark:bg-[#0d101f] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl backdrop-blur-md max-h-[240px] overflow-y-auto custom-scrollbar"
           >
             {options.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-400">No options found</div>

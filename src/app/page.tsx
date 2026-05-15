@@ -99,7 +99,7 @@ export default async function LandingPage() {
                    />
                    <div className="absolute inset-0 bg-gradient-to-t from-slate-50 dark:from-[#05070f] via-transparent to-transparent" />
                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="p-8 rounded-full bg-white/40 dark:bg-white/10 border border-slate-200 dark:border-white/20 backdrop-blur-xl shadow-lg">
+                      <div className="p-8 rounded-full bg-white/60 dark:bg-white/10 border border-slate-200 dark:border-white/20 backdrop-blur-md shadow-lg transform-gpu">
                          <MedOneXLogoMark className="h-16 w-16 text-slate-900 dark:text-white" />
                       </div>
                    </div>

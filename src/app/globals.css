@@ -65,11 +65,11 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-lg;
+    @apply bg-white/60 dark:bg-white/10 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg;
   }
   
   .glass-morphism {
-    @apply bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-lg;
+    @apply bg-white/60 dark:bg-white/10 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg;
   }
 
   .text-shimmer {
@@ -123,6 +123,7 @@
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+  transform: translateZ(0);
 }
 
 .animate-fade-in {
@@ -136,6 +137,7 @@
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+  transform: translateZ(0);
 }
 
 /* Custom Scrollbar for the cinematic feel */
