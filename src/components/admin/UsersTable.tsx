@@ -145,7 +145,7 @@ export function UsersTable({
               const classification = getUserClassification(user);
               const roleInfo = ROLE_STYLE[classification] ?? ROLE_STYLE.STUDENT;
               const RoleIcon = roleInfo.icon;
-              const leaderName = teamLeaders.find(l => l.id === user.leaderId)?.name;
+              const leaderName = teamLeaders?.find(l => l.id === user.leaderId)?.name;
 
               return (
                 <tr key={user.id} className="transition-colors hover:bg-muted/20">
@@ -166,7 +166,7 @@ export function UsersTable({
                   <td className="px-4 py-3">
                     <p className="text-xs">{user.university?.name ?? <span className="text-muted-foreground">—</span>}</p>
                     {user.semester && <p className="text-[10px] text-muted-foreground">{user.semester.name}</p>}
-                    {viewerRole === "SUPER_ADMIN" && user.role === "ADMIN" && universities.length > 0 && (
+                    {viewerRole === "SUPER_ADMIN" && user.role === "ADMIN" && universities && universities.length > 0 && (
                       <MedqsSelect className="mt-1 h-7 text-xs" value={user.universityId ?? ""}
                         onChange={(e) => void setUniversity(user.id, e.target.value)}>
                         <option value="">— Unassigned —</option>
@@ -198,7 +198,7 @@ export function UsersTable({
                         {viewerRole === "SUPER_ADMIN" && <option value="SUPER_ADMIN">Platform (Super)</option>}
                       </MedqsSelect>
 
-                      {classification === "TEAM_ADMIN" && teamLeaders.length > 0 && (
+                      {classification === "TEAM_ADMIN" && teamLeaders && teamLeaders.length > 0 && (
                         <MedqsSelect 
                           className="h-8 text-xs w-36" 
                           value={user.leaderId ?? ""}
@@ -239,7 +239,7 @@ export function UsersTable({
           const classification = getUserClassification(user);
           const roleInfo = ROLE_STYLE[classification] ?? ROLE_STYLE.STUDENT;
           const RoleIcon = roleInfo.icon;
-          const leaderName = teamLeaders.find(l => l.id === user.leaderId)?.name;
+          const leaderName = teamLeaders?.find(l => l.id === user.leaderId)?.name;
 
           return (
             <div key={user.id} className="rounded-2xl border border-white/[0.02] bg-card p-4 space-y-3">
@@ -284,7 +284,7 @@ export function UsersTable({
                     {viewerRole === "SUPER_ADMIN" && <option value="SUPER_ADMIN">Platform (Super)</option>}
                   </MedqsSelect>
 
-                  {classification === "TEAM_ADMIN" && teamLeaders.length > 0 && (
+                  {classification === "TEAM_ADMIN" && teamLeaders && teamLeaders.length > 0 && (
                     <MedqsSelect 
                       className="h-8 text-xs w-full" 
                       value={user.leaderId ?? ""}
