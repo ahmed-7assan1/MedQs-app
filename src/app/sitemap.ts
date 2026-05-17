@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Use Vercel deployment URL or production URL if available, fallback to localhost
-  const baseUrl = process.env.NEXTAUTH_URL || "https://medqs-app.vercel.app";
+  const baseUrl = process.env.NEXTAUTH_URL || "https://medonex.vercel.app";
 
   const staticRoutes = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },

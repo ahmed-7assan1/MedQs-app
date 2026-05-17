@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXTAUTH_URL || "https://medqs-app.vercel.app";
+  const baseUrl = process.env.NEXTAUTH_URL || "https://medonex.vercel.app";
 
   return {
     rules: {
