@@ -50,7 +50,7 @@ export default async function AdminUsersPage({
       }
     : baseWhere;
 
-  const [users, total, universities] = await Promise.all([
+  const [users, total, universities, teamLeaders] = await Promise.all([
     prisma.user.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -58,7 +58,7 @@ export default async function AdminUsersPage({
       take: limit,
       select: {
         id: true, name: true, email: true, role: true, points: true,
-        createdAt: true, universityId: true,
+        createdAt: true, universityId: true, isLeader: true, leaderId: true,
         rank: { select: { label: true } },
         university: { select: { name: true } },
         semester: { select: { name: true } },
@@ -66,6 +66,11 @@ export default async function AdminUsersPage({
     }),
     prisma.user.count({ where }),
     isSuperAdmin(role) ? prisma.university.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }) : Promise.resolve([]),
+    prisma.user.findMany({
+      where: { isLeader: true },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
 
   return (
@@ -75,18 +80,28 @@ export default async function AdminUsersPage({
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin Panel</p>
           <h1 className="font-display text-2xl font-bold md:text-3xl">Users</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {total.toLocaleString()} total accounts — students, doctors &amp; platform admins
+            {total.toLocaleString()} total accounts — students, team leaders &amp; platform admins
           </p>
         </div>
         <div className="flex gap-2 flex-wrap text-xs font-bold">
           <span className="rounded-2xl bg-emerald-500/10 px-3 py-1.5 text-emerald-600 dark:text-emerald-400">Students</span>
-          <span className="rounded-2xl bg-blue-500/10 px-3 py-1.5 text-blue-500">Doctors</span>
+          <span className="rounded-2xl bg-cyan-500/10 px-3 py-1.5 text-cyan-500">Team Admins</span>
+          <span className="rounded-2xl bg-amber-500/10 px-3 py-1.5 text-amber-600 dark:text-amber-400">Leaders</span>
+          <span className="rounded-2xl bg-blue-500/10 px-3 py-1.5 text-blue-500">Admins</span>
           {role === "SUPER_ADMIN" && (
             <span className="rounded-2xl bg-purple-500/10 px-3 py-1.5 text-purple-500">Platform</span>
           )}
         </div>
       </div>
-      <UsersTable users={users as any} total={total} page={page} limit={limit} viewerRole={role ?? "STUDENT"} universities={universities as any} />
+      <UsersTable 
+        users={users as any} 
+        total={total} 
+        page={page} 
+        limit={limit} 
+        viewerRole={role ?? "STUDENT"} 
+        universities={universities as any} 
+        teamLeaders={teamLeaders as any}
+      />
     </div>
   );
 }

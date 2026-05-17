@@ -9,22 +9,34 @@ import { MedqsSelect } from "@/components/ui/MedqsSelect";
 type User = {
   id: string; name: string; email: string; role: string;
   points: number; createdAt: string; universityId?: string | null;
+  isLeader?: boolean; leaderId?: string | null;
   rank?: { label: string } | null;
   university?: { name: string } | null;
   semester?: { name: string } | null;
 };
 
 const ROLE_STYLE: Record<string, { cls: string; label: string; icon: typeof Crown }> = {
-  SUPER_ADMIN: { cls: "bg-purple-500/15 text-purple-500 ring-1 ring-purple-500/20", label: "Platform", icon: Crown },
-  ADMIN:       { cls: "bg-blue-500/15 text-blue-500 ring-1 ring-blue-500/20",       label: "Doctor",   icon: UserCheck },
-  STUDENT:     { cls: "bg-emerald-500/15 text-emerald-500 ring-1 ring-emerald-500/20", label: "Student", icon: Users },
+  SUPER_ADMIN: { cls: "bg-purple-500/15 text-purple-500 ring-1 ring-purple-500/20", label: "Platform (Super)", icon: Crown },
+  ADMIN:       { cls: "bg-blue-500/15 text-blue-500 ring-1 ring-blue-500/20",       label: "Doctor (Admin)",   icon: UserCheck },
+  TEAM_LEADER: { cls: "bg-amber-500/15 text-amber-500 ring-1 ring-amber-500/20",     label: "Team Leader",     icon: Crown },
+  TEAM_ADMIN:  { cls: "bg-cyan-500/15 text-cyan-500 ring-1 ring-cyan-500/20",       label: "Team Admin",      icon: Shield },
+  STUDENT:     { cls: "bg-emerald-500/15 text-emerald-500 ring-1 ring-emerald-500/20", label: "Student",      icon: Users },
 };
 
+export function getUserClassification(user: User): string {
+  if (user.role === "SUPER_ADMIN") return "SUPER_ADMIN";
+  if (user.role === "ADMIN") return "ADMIN";
+  if (user.isLeader) return "TEAM_LEADER";
+  if (user.leaderId) return "TEAM_ADMIN";
+  return "STUDENT";
+}
+
 export function UsersTable({
-  users, total, page, limit, viewerRole, universities = [],
+  users, total, page, limit, viewerRole, universities = [], teamLeaders = [],
 }: {
   users: User[]; total: number; page: number; limit: number;
   viewerRole: string; universities?: Array<{ id: string; name: string }>;
+  teamLeaders?: Array<{ id: string; name: string }>;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState(useSearchParams().get("q") ?? "");
@@ -38,13 +50,13 @@ export function UsersTable({
     });
   }
 
-  async function changeRole(userId: string, role: string) {
+  async function updateClassification(userId: string, classification: string, leaderId: string | null = null) {
     const res = await fetch(`/api/v1/admin/users/${userId}/role`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role }),
+      body: JSON.stringify({ classification, leaderId }),
     });
-    if (res.ok) { toast.success("Role updated"); router.refresh(); }
-    else toast.error("Failed to update role");
+    if (res.ok) { toast.success("User classification updated"); router.refresh(); }
+    else toast.error("Failed to update user classification");
   }
 
   async function deleteUser(userId: string, name: string) {
@@ -63,8 +75,11 @@ export function UsersTable({
     else toast.error("Failed to update university");
   }
 
-  const students = users.filter(u => u.role === "STUDENT").length;
-  const admins   = users.filter(u => u.role === "ADMIN").length;
+  const students = users.filter(u => getUserClassification(u) === "STUDENT").length;
+  const admins   = users.filter(u => getUserClassification(u) === "ADMIN").length;
+  const leaders  = users.filter(u => getUserClassification(u) === "TEAM_LEADER").length;
+  const teamAdmins = users.filter(u => getUserClassification(u) === "TEAM_ADMIN").length;
+  const supers   = users.filter(u => getUserClassification(u) === "SUPER_ADMIN").length;
 
   return (
     <div className="space-y-4">
@@ -86,16 +101,27 @@ export function UsersTable({
         </form>
 
         {/* Stat pills */}
-        <div className="flex gap-2 text-xs font-semibold">
+        <div className="flex gap-2 text-[10px] sm:text-xs font-semibold flex-wrap">
           <span className="flex items-center gap-1 rounded-full bg-muted/60 px-3 py-1.5">
             <Users className="h-3 w-3" /> {total.toLocaleString()} total
           </span>
           <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1.5 text-emerald-600 dark:text-emerald-400">
             {students} students
           </span>
-          <span className="flex items-center gap-1 rounded-full bg-blue-500/10 px-3 py-1.5 text-blue-500">
-            {admins} doctors
+          <span className="flex items-center gap-1 rounded-full bg-cyan-500/10 px-3 py-1.5 text-cyan-600 dark:text-cyan-400">
+            {teamAdmins} team admins
           </span>
+          <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1.5 text-amber-500">
+            {leaders} leaders
+          </span>
+          <span className="flex items-center gap-1 rounded-full bg-blue-500/10 px-3 py-1.5 text-blue-500">
+            {admins} admins
+          </span>
+          {supers > 0 && (
+            <span className="flex items-center gap-1 rounded-full bg-purple-500/10 px-3 py-1.5 text-purple-500">
+              {supers} supers
+            </span>
+          )}
         </div>
       </div>
 
@@ -108,15 +134,19 @@ export function UsersTable({
               <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">University</th>
               <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Rank</th>
               <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Pts</th>
-              <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Role</th>
+              <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Role Badge</th>
+              <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Manage Role</th>
               <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Joined</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.02]">
             {users.map((user) => {
-              const roleInfo = ROLE_STYLE[user.role] ?? ROLE_STYLE.STUDENT;
+              const classification = getUserClassification(user);
+              const roleInfo = ROLE_STYLE[classification] ?? ROLE_STYLE.STUDENT;
               const RoleIcon = roleInfo.icon;
+              const leaderName = teamLeaders.find(l => l.id === user.leaderId)?.name;
+
               return (
                 <tr key={user.id} className="transition-colors hover:bg-muted/20">
                   <td className="px-5 py-3">
@@ -127,6 +157,9 @@ export function UsersTable({
                       <div className="min-w-0">
                         <p className="truncate font-medium">{user.name}</p>
                         <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                        {leaderName && (
+                          <p className="text-[10px] text-cyan-500 font-bold mt-0.5">Leader: {leaderName}</p>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -151,16 +184,39 @@ export function UsersTable({
                       {roleInfo.label}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1">
+                      <MedqsSelect 
+                        className="h-8 text-xs font-bold w-36" 
+                        value={classification}
+                        onChange={(e) => void updateClassification(user.id, e.target.value, user.leaderId)}
+                      >
+                        <option value="STUDENT">Student</option>
+                        <option value="TEAM_ADMIN">Team Admin</option>
+                        <option value="TEAM_LEADER">Team Leader</option>
+                        <option value="ADMIN">Doctor (Admin)</option>
+                        {viewerRole === "SUPER_ADMIN" && <option value="SUPER_ADMIN">Platform (Super)</option>}
+                      </MedqsSelect>
+
+                      {classification === "TEAM_ADMIN" && teamLeaders.length > 0 && (
+                        <MedqsSelect 
+                          className="h-8 text-xs w-36" 
+                          value={user.leaderId ?? ""}
+                          onChange={(e) => void updateClassification(user.id, "TEAM_ADMIN", e.target.value || null)}
+                        >
+                          <option value="">— Select Leader —</option>
+                          {teamLeaders.map((leader) => (
+                            <option key={leader.id} value={leader.id}>{leader.name}</option>
+                          ))}
+                        </MedqsSelect>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" })}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => changeRole(user.id, user.role === "STUDENT" ? "ADMIN" : "STUDENT")}
-                        title="Toggle doctor hub access"
-                        className="rounded-lg p-1.5 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-500 transition-colors">
-                        <Shield className="h-3.5 w-3.5" />
-                      </button>
                       <button onClick={() => deleteUser(user.id, user.name)}
                         className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-colors">
                         <Trash2 className="h-3.5 w-3.5" />
@@ -171,7 +227,7 @@ export function UsersTable({
               );
             })}
             {users.length === 0 && (
-              <tr><td colSpan={7} className="py-16 text-center text-sm text-muted-foreground">No users found</td></tr>
+              <tr><td colSpan={8} className="py-16 text-center text-sm text-muted-foreground">No users found</td></tr>
             )}
           </tbody>
         </table>
@@ -180,10 +236,13 @@ export function UsersTable({
       {/* ── Mobile cards ── */}
       <div className="space-y-3 sm:hidden">
         {users.map((user) => {
-          const roleInfo = ROLE_STYLE[user.role] ?? ROLE_STYLE.STUDENT;
+          const classification = getUserClassification(user);
+          const roleInfo = ROLE_STYLE[classification] ?? ROLE_STYLE.STUDENT;
           const RoleIcon = roleInfo.icon;
+          const leaderName = teamLeaders.find(l => l.id === user.leaderId)?.name;
+
           return (
-            <div key={user.id} className="rounded-2xl border border-white/[0.02] bg-card p-4">
+            <div key={user.id} className="rounded-2xl border border-white/[0.02] bg-card p-4 space-y-3">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-sm font-bold text-blue-500">
                   {user.name?.[0]?.toUpperCase() ?? "?"}
@@ -197,19 +256,50 @@ export function UsersTable({
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   {user.university && <p className="mt-1 text-xs text-muted-foreground">{user.university.name}</p>}
+                  {leaderName && (
+                    <p className="text-[10px] text-cyan-500 font-bold mt-0.5">Leader: {leaderName}</p>
+                  )}
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => changeRole(user.id, user.role === "STUDENT" ? "ADMIN" : "STUDENT")}
-                    className="rounded-lg p-2 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-500 transition-colors">
-                    <Shield className="h-4 w-4" />
-                  </button>
                   <button onClick={() => deleteUser(user.id, user.name)}
                     className="rounded-lg p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+
+              {/* Mobile Role Controls */}
+              <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-muted/20 border border-white/[0.01]">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Classification</p>
+                <div className="flex flex-wrap gap-2">
+                  <MedqsSelect 
+                    className="h-8 text-xs font-bold w-full" 
+                    value={classification}
+                    onChange={(e) => void updateClassification(user.id, e.target.value, user.leaderId)}
+                  >
+                    <option value="STUDENT">Student</option>
+                    <option value="TEAM_ADMIN">Team Admin</option>
+                    <option value="TEAM_LEADER">Team Leader</option>
+                    <option value="ADMIN">Doctor (Admin)</option>
+                    {viewerRole === "SUPER_ADMIN" && <option value="SUPER_ADMIN">Platform (Super)</option>}
+                  </MedqsSelect>
+
+                  {classification === "TEAM_ADMIN" && teamLeaders.length > 0 && (
+                    <MedqsSelect 
+                      className="h-8 text-xs w-full" 
+                      value={user.leaderId ?? ""}
+                      onChange={(e) => void updateClassification(user.id, "TEAM_ADMIN", e.target.value || null)}
+                    >
+                      <option value="">— Select Leader —</option>
+                      {teamLeaders.map((leader) => (
+                        <option key={leader.id} value={leader.id}>{leader.name}</option>
+                      ))}
+                    </MedqsSelect>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
                 <span>{user.rank?.label ?? "Newbie"}</span>
                 <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
                 <span className="font-mono">{user.points} pts</span>

@@ -9,9 +9,25 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!isAdminRole(scope.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { role: newRole } = await req.json();
-  if (!["STUDENT", "ADMIN"].includes(newRole))
-    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  const body = await req.json();
+  const { classification, leaderId } = body;
+
+  let updateData: any = {};
+
+  if (classification === "SUPER_ADMIN") {
+    if (!isSuperAdmin(scope.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    updateData = { role: "SUPER_ADMIN", isLeader: false, leaderId: null };
+  } else if (classification === "ADMIN") {
+    updateData = { role: "ADMIN", isLeader: false, leaderId: null };
+  } else if (classification === "TEAM_LEADER") {
+    updateData = { role: "STUDENT", isLeader: true, leaderId: null };
+  } else if (classification === "TEAM_ADMIN") {
+    updateData = { role: "STUDENT", isLeader: false, leaderId: leaderId || null };
+  } else if (classification === "STUDENT") {
+    updateData = { role: "STUDENT", isLeader: false, leaderId: null };
+  } else {
+    return NextResponse.json({ error: "Invalid classification" }, { status: 400 });
+  }
 
   if (!isSuperAdmin(scope.role)) {
     if (!scope.universityId) return NextResponse.json({ error: "Admin university not set" }, { status: 400 });
@@ -23,8 +39,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
   const updated = await prisma.user.update({
     where: { id: params.id },
-    data: { role: newRole },
-    select: { id: true, role: true },
+    data: updateData,
+    select: { id: true, role: true, isLeader: true, leaderId: true },
   });
 
   return NextResponse.json(updated);
