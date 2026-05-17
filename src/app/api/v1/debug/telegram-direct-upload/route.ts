@@ -12,15 +12,12 @@ export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth: only admins can upload
+    // Auth: any authenticated user can upload to the forum storage
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const role = (session.user as any).role;
-    if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
-    }
+
 
     if (!STORAGE_GROUP_ID) {
       return NextResponse.json({ error: "STORAGE_GROUP_ID not configured" }, { status: 500 });
