@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const members = await prisma.platformMember.findMany({
+    const members = await (prisma as any).platformMember.findMany({
       orderBy: { sortOrder: 'asc' }
     });
     return NextResponse.json(members);
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, role, description, imageUrl, socialUrl, order } = body;
 
-    const member = await prisma.platformMember.create({
+    const member = await (prisma as any).platformMember.create({
       data: {
         name,
         role,

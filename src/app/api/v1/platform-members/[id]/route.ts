@@ -15,7 +15,7 @@ export async function PATCH(
     const body = await req.json();
     const { name, role, description, imageUrl, socialUrl, order } = body;
 
-    const member = await prisma.platformMember.update({
+    const member = await (prisma as any).platformMember.update({
       where: { id: params.id },
       data: {
         name,
@@ -43,7 +43,7 @@ export async function DELETE(
   }
 
   try {
-    await prisma.platformMember.delete({
+    await (prisma as any).platformMember.delete({
       where: { id: params.id }
     });
     return NextResponse.json({ success: true });

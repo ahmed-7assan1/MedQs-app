@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const members = await prisma.platformMember.findMany({
+    const members = await (prisma as any).platformMember.findMany({
       orderBy: { sortOrder: "asc" },
     });
     return NextResponse.json(members);
