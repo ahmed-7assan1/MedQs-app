@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Users, BookOpen, HelpCircle, FileText, MessageSquare,
   TrendingUp, Megaphone, Zap, Video, ArrowUpRight,
-  LayoutDashboard, GraduationCap, Star, Activity,
+  LayoutDashboard, GraduationCap, Star, Activity, Bone,
 } from "lucide-react";
 
 export default async function AdminDashboardPage() {
@@ -98,6 +98,7 @@ export default async function AdminDashboardPage() {
     { href: "/admin/questions", icon: HelpCircle, label: "Questions", desc: "Create & import question bank", color: "text-violet-500", bg: "bg-violet-500/10" },
     { href: "/admin/lectures", icon: Video, label: "Lectures", desc: "Upload videos & flashcards", color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { href: "/admin/past-papers", icon: FileText, label: "Past Papers", desc: "Manage exam archives", color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { href: "/admin/atlas", icon: Bone, label: "Atlas", desc: "Anatomy structures & systems", color: "text-teal-500", bg: "bg-teal-500/10" },
     { href: "/admin/ai-tools", icon: Zap, label: "AI Tools", desc: "Extract & generate from materials", color: "text-purple-500", bg: "bg-purple-500/10" },
     { href: "/admin/users", icon: Users, label: "Users", desc: "Manage roles & permissions", color: "text-pink-500", bg: "bg-pink-500/10" },
     { href: "/admin/forum", icon: MessageSquare, label: "Community", desc: "Forum moderation & status", color: "text-orange-500", bg: "bg-orange-500/10" },

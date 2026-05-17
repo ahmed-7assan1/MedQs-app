@@ -30,21 +30,21 @@ export async function POST(req: NextRequest) {
         }, { status: 404 });
       }
 
-      // 2. Generate email confirmation link
-      const { data, error } = await supabase.auth.admin.generateLink({
-        type: "signup",
+      // 2. Resend email confirmation using Supabase directly (this uses your Supabase templates!)
+      const supabaseClient = createClient();
+      const { error } = await supabaseClient.auth.resend({
+        type: 'signup',
         email,
         options: {
-          redirectTo: `${req.nextUrl.origin}/auth/callback?next=/dashboard-app`,
-        },
+          emailRedirectTo: `${req.nextUrl.origin}/auth/callback?next=/dashboard-app`,
+        }
       });
 
       if (error) {
-        console.error("[send-email] generateLink error:", error);
+        console.error("[send-email] resend error:", error);
         return NextResponse.json({ error: error.message }, { status: 400 });
       }
 
-      await sendVerificationEmail(email, data.properties?.action_link || data.action_link);
       return NextResponse.json({ success: true, type: "verification_sent" });
     }
 

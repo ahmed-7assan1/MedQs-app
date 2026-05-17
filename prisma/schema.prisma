@@ -534,6 +534,8 @@ model User {
   followers             UserFollow[]              @relation("UserFollowers")
   lectureActivities     UserLectureActivity[]
   tasks                 UserTask[]
+  atlasBookmarks        AtlasBookmark[]
+  atlasNotes            AtlasNote[]
 }
 
 model TelegramConfig {
@@ -1995,4 +1997,69 @@ model WhiteboardDocument {
   title          String
   contentJson    Json
   updatedAt      DateTime @updatedAt
+}
+
+// --- Atlas Models ---
+
+model AtlasSystem {
+  id         String           @id @default(uuid())
+  systemId   String           @unique
+  label      String
+  color      String
+  border     String
+  iconColor  String
+  iconName   String           @default("Activity")
+  desc       String
+  structures AtlasStructure[]
+}
+
+model AtlasStructure {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  latin       String?
+  type        String   @default("organ")
+  desc        String
+  region      String?
+  systemId    String
+  fn          String?
+  blood       String?
+  nerve       String?
+  relations   Json?
+  clinical    String?
+  memo        String?
+  imageUrl    String?
+  modelUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  system      AtlasSystem      @relation(fields: [systemId], references: [systemId], onDelete: Cascade)
+  bookmarks   AtlasBookmark[]
+  notes       AtlasNote[]
+}
+
+model AtlasBookmark {
+  id          String   @id @default(uuid())
+  userId      String
+  structureId String
+  createdAt   DateTime @default(now())
+  
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  structure   AtlasStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, structureId])
+}
+
+model AtlasNote {
+  id          String   @id @default(uuid())
+  userId      String
+  structureId String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  structure   AtlasStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, structureId])
 }
