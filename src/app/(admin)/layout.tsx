@@ -57,7 +57,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
             {/* Navigation */}
             <nav className="flex flex-1 flex-col overflow-y-auto px-3 py-4" aria-label={PLATFORM_COPY.doctorHub}>
-              <AdminSidebarNav />
+              <AdminSidebarNav isSuperAdmin={isSuperAdmin} />
             </nav>
 
             {/* Back to student view */}
@@ -71,7 +71,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </aside>
 
           {/* ── Mobile top bar + drawer ───────────────────────────────── */}
-          <AdminMobileNav siteName={siteName} hubBadge={hubBadge} />
+          <AdminMobileNav siteName={siteName} hubBadge={hubBadge} isSuperAdmin={isSuperAdmin} />
 
           {/* ── Main content ─────────────────────────────────────────── */}
           <div className="flex flex-1 flex-col overflow-auto">

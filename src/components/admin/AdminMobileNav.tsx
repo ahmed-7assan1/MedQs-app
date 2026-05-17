@@ -10,9 +10,10 @@ import { PLATFORM_COPY } from "@/lib/platform-copy";
 interface AdminMobileNavProps {
   siteName: string;
   hubBadge: string;
+  isSuperAdmin?: boolean;
 }
 
-export function AdminMobileNav({ siteName, hubBadge }: AdminMobileNavProps) {
+export function AdminMobileNav({ siteName, hubBadge, isSuperAdmin = false }: AdminMobileNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -75,7 +76,7 @@ export function AdminMobileNav({ siteName, hubBadge }: AdminMobileNavProps) {
           className="flex-1 overflow-y-auto px-3 py-4"
           onClick={() => setOpen(false)}
         >
-          <AdminSidebarNav />
+          <AdminSidebarNav isSuperAdmin={isSuperAdmin} />
         </nav>
 
         {/* Back link */}

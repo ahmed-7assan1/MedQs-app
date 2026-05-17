@@ -60,21 +60,28 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AdminSidebarNav() {
+export function AdminSidebarNav({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
   const pathname = usePathname() ?? "";
 
   return (
     <div className="space-y-4">
-      {NAV_GROUPS.map((group) => (
-        <div key={group.label}>
-          <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-            {group.label}
-          </p>
-          <div className="space-y-0.5">
-            {group.items.map(({ href, label, icon: Icon, badge }) => {
-              const active = isActive(pathname, href);
-              return (
-                <Link
+      {NAV_GROUPS.map((group) => {
+        // If the group has no visible items for ordinary admins, skip rendering the group header
+        const visibleItems = group.items.filter(
+          (item) => isSuperAdmin || (item.href !== "/admin/teams" && item.href !== "/admin/founders")
+        );
+        if (visibleItems.length === 0) return null;
+
+        return (
+          <div key={group.label}>
+            <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {visibleItems.map(({ href, label, icon: Icon, badge }) => {
+                const active = isActive(pathname, href);
+                return (
+                  <Link
                   key={href}
                   href={href}
                   className={cn(
@@ -103,7 +110,8 @@ export function AdminSidebarNav() {
             })}
           </div>
         </div>
-      ))}
-    </div>
-  );
+      );
+    })}
+  </div>
+);
 }
