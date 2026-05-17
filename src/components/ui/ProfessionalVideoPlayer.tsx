@@ -44,7 +44,7 @@ export function ProfessionalVideoPlayer({
   className, 
   playing, 
   minimal,
-  muted = true,
+  muted = false,
   startTime = 0,
   endTime
 }: VideoPlayerProps) {
