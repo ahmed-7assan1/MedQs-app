@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, role, description, imageUrl, order } = body;
+    const { name, role, description, imageUrl, socialUrl, order } = body;
 
     const member = await prisma.platformMember.create({
       data: {
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
         role,
         description,
         imageUrl,
+        socialUrl,
         sortOrder: order || 0,
       }
     });

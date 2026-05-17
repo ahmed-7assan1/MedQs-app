@@ -13,7 +13,7 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { name, role, description, imageUrl, order } = body;
+    const { name, role, description, imageUrl, socialUrl, order } = body;
 
     const member = await prisma.platformMember.update({
       where: { id: params.id },
@@ -22,6 +22,7 @@ export async function PATCH(
         role,
         description,
         imageUrl,
+        socialUrl,
         sortOrder: order,
       }
     });
