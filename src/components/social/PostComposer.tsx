@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { 
   Image as ImageIcon, 
   CircleNotch, 
@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { VoiceRecorder } from "./VoiceRecorder";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 
 interface Props {
   user: {
@@ -354,9 +355,15 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
   };
 
   const images = attachments.filter((a: any) => a.type === "image");
-  const audios = attachments.filter((a: any) => a.type === "audio");
-  const videos = attachments.filter((a: any) => a.type === "video");
-  const documents = attachments.filter((a: any) => a.type !== "image" && a.type !== "audio" && a.type !== "video");
+  const audios = attachments.filter((a: any) => a.type === "audio" || a.type === "telegram_audio");
+  const videos = attachments.filter((a: any) => a.type === "video" || a.type === "telegram_video");
+  const documents = attachments.filter((a: any) => a.type !== "image" && a.type !== "audio" && a.type !== "telegram_audio" && a.type !== "video" && a.type !== "telegram_video");
+
+  const inlineTelegramVideo = useMemo(() => {
+    if (attachments.length > 0) return null;
+    const match = content.match(/https?:\/\/(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]+)\/(\d+)/i);
+    return match ? match[0] : null;
+  }, [content, attachments]);
 
   return (
     <div className={cn(
@@ -535,6 +542,18 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                       <button onClick={() => setAttachments(prev => prev.filter(a => a.fileId !== att.fileId))} className="h-8 w-8 bg-slate-200 dark:bg-white/10 rounded-full flex items-center justify-center text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-all"><X size={14} weight="bold" /></button>
                     </div>
                   ))}
+
+                  {inlineTelegramVideo && (
+                    <div className="mt-4 rounded-[24px] overflow-hidden border border-emerald-500/25 bg-black shadow-lg">
+                      <div className="relative w-full aspect-video">
+                        <ProfessionalVideoPlayer src={inlineTelegramVideo} className="w-full h-full" />
+                        <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 z-10">
+                          <VideoCamera size={12} className="text-emerald-400" />
+                          <span className="text-[10px] font-black text-emerald-300 uppercase tracking-widest text-right">Telegram Link Preview</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import {
   Heart,
@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PostGallery } from "./PostGallery";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SharedQuestionBlock } from "../quiz/SharedQuestionBlock";
+import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 
 interface Props {
   post: any;
@@ -129,6 +130,13 @@ export function PostCardRedesigned({
     }
     return list;
   })();
+
+  const inlineTelegramVideo = useMemo(() => {
+    if (attachments.length > 0) return null;
+    if (!postContent) return null;
+    const match = postContent.match(/https?:\/\/(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]+)\/(\d+)/i);
+    return match ? match[0] : null;
+  }, [postContent, attachments]);
 
   // Robust shared question parsing
   const sharedQuestion = (() => {
@@ -497,6 +505,12 @@ export function PostCardRedesigned({
       {attachments.length > 0 && (
         <div className="mt-2 mx-4 mb-1 rounded-2xl overflow-hidden">
           <PostGallery attachments={attachments} />
+        </div>
+      )}
+
+      {inlineTelegramVideo && (
+        <div className="mt-2 mx-4 mb-2 rounded-2xl overflow-hidden border border-white/[0.06] shadow-lg bg-black">
+          <ProfessionalVideoPlayer src={inlineTelegramVideo} className="w-full max-h-[450px]" />
         </div>
       )}
 

@@ -29,15 +29,28 @@ interface Props {
   layout?: 'grid' | 'carousel';
 }
 
+function isItemVideo(item: Attachment) {
+  return (
+    item.type === 'video' ||
+    (typeof item.url === 'string' && (
+      item.url.toLowerCase().split('?')[0].endsWith('.mp4') ||
+      item.url.toLowerCase().split('?')[0].endsWith('.mov') ||
+      item.url.toLowerCase().split('?')[0].endsWith('.webm') ||
+      item.url.includes('t.me/') ||
+      item.url.includes('/api/v1/telegram/')
+    ))
+  );
+}
+
 export function PostGallery({ attachments, layout = 'grid' }: Props) {
   const [activeLayout, setActiveLayout] = useState<'grid' | 'carousel'>(layout);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
 
   if (!attachments || attachments.length === 0) return null;
 
-  const images = attachments.filter(a => a.type === 'image');
-  const videos = attachments.filter(a => a.type === 'video');
-  const files = attachments.filter(a => a.type === 'file');
+  const images = attachments.filter(a => a.type === 'image' && !isItemVideo(a));
+  const videos = attachments.filter(isItemVideo);
+  const files = attachments.filter(a => a.type === 'file' && !isItemVideo(a));
   const audio = attachments.filter(a => a.type === 'audio');
   const media = [...images, ...videos];
   const Player = ReactPlayer as any;
@@ -83,7 +96,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                     )}
                     onClick={() => setViewIndex(i)}
                   >
-                    {item.type === 'video' || item.url.toLowerCase().endsWith('.mp4') ? (
+                    {isItemVideo(item) ? (
                       <div className="relative w-full h-full">
                          <ProfessionalVideoPlayer src={item.url} className="w-full h-full" />
                       </div>
@@ -99,7 +112,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
               <div className="relative aspect-[4/5] max-h-[600px] overflow-hidden rounded-2xl border border-white/[0.05] bg-black/20">
                 <div className="flex h-full transition-transform duration-500 ease-out" style={{ transform: `translateX(-${(viewIndex || 0) * 100}%)` }}>
                   {media.map((item, i) => (
-                    item.type === 'video' ? (
+                    isItemVideo(item) ? (
                       <div key={i} className="w-full h-full shrink-0">
                         <ProfessionalVideoPlayer src={item.url} className="w-full h-full" />
                       </div>
@@ -188,7 +201,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
             </div>
           </header>
           <div className="flex-1 relative flex items-center justify-center p-4 sm:p-10 overflow-hidden">
-            {media[viewIndex].type === 'video' ? (
+            {isItemVideo(media[viewIndex]) ? (
               <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-black">
                 <ProfessionalVideoPlayer src={media[viewIndex].url} className="w-full h-full" />
               </div>

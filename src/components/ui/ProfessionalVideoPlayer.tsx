@@ -65,7 +65,15 @@ export function ProfessionalVideoPlayer({
   const lastSaveTimeRef = useRef<number>(0);
   const lastYtSaveTimeRef = useRef<number>(0);
 
-  const ytId = extractYouTubeId(src);
+  const resolvedSrc = React.useMemo(() => {
+    if (!src) return src;
+    if (src.includes('t.me/')) {
+      return `/api/v1/telegram/stream-public-post?url=${encodeURIComponent(src)}`;
+    }
+    return src;
+  }, [src]);
+
+  const ytId = extractYouTubeId(resolvedSrc);
 
   useEffect(() => {
     setIsMuted(muted);
@@ -113,15 +121,15 @@ export function ProfessionalVideoPlayer({
     // Save progress periodically (throttled)
     const now = Date.now();
     if (current > 3 && current < total - 5 && now - lastSaveTimeRef.current > 5000) {
-      localStorage.setItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`, current.toString());
+      localStorage.setItem(`medqs-vid-pos-${btoa(resolvedSrc).substring(0, 32)}`, current.toString());
       lastSaveTimeRef.current = now;
     }
   };
 
   // Restore position on mount
   useEffect(() => {
-    if (src && videoRef.current) {
-      const savedTime = localStorage.getItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`);
+    if (resolvedSrc && videoRef.current) {
+      const savedTime = localStorage.getItem(`medqs-vid-pos-${btoa(resolvedSrc).substring(0, 32)}`);
       if (savedTime) {
         const time = parseFloat(savedTime);
         // Only restore if we haven't started playing or are at the beginning
@@ -130,7 +138,7 @@ export function ProfessionalVideoPlayer({
         }
       }
     }
-  }, [src]);
+  }, [resolvedSrc]);
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoRef.current || !containerRef.current) return;
@@ -224,14 +232,14 @@ export function ProfessionalVideoPlayer({
       {/* Video Content */}
       {ytId ? (
         <PlyrVideoPlayer
-          src={src}
+          src={resolvedSrc}
           playing={isPlaying}
           startTime={startTime}
           onTimeUpdate={(time) => {
             setProgress((time / (videoRef.current?.duration || 100)) * 100);
             const now = Date.now();
             if (time > 3 && now - lastYtSaveTimeRef.current > 5000) {
-              localStorage.setItem(`medqs-vid-pos-${btoa(src).substring(0, 32)}`, time.toString());
+              localStorage.setItem(`medqs-vid-pos-${btoa(resolvedSrc).substring(0, 32)}`, time.toString());
               lastYtSaveTimeRef.current = now;
             }
           }}
@@ -240,7 +248,7 @@ export function ProfessionalVideoPlayer({
       ) : (
           <video
             ref={videoRef}
-            src={src}
+            src={resolvedSrc}
             poster={poster}
             className="w-full h-full object-contain cursor-pointer absolute inset-0"
             onTimeUpdate={handleTimeUpdate}

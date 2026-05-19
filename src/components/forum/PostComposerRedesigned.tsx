@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { 
   Image as ImageIcon, 
   PaperPlaneTilt, 
@@ -23,6 +23,7 @@ import { VoiceRecorder } from "./VoiceRecorder";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { SharedQuestionBlock } from "../quiz/SharedQuestionBlock";
+import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 
 interface Props {
   user: {
@@ -359,9 +360,15 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
     }
   };
 
-  const videos = attachments.filter(a => a.type === "video");
+  const videos = attachments.filter(a => a.type === "video" || a.type === "telegram_video");
   const images = attachments.filter(a => a.type === "image");
-  const others = attachments.filter(a => a.type !== "image" && a.type !== "video");
+  const others = attachments.filter(a => a.type !== "image" && a.type !== "video" && a.type !== "telegram_video");
+
+  const inlineTelegramVideo = useMemo(() => {
+    if (attachments.length > 0) return null;
+    const match = content.match(/https?:\/\/(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]+)\/(\d+)/i);
+    return match ? match[0] : null;
+  }, [content, attachments]);
 
   return (
     <div className={cn(
@@ -592,6 +599,19 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Inline Telegram Video Preview */}
+              {inlineTelegramVideo && (
+                <div className="mt-5 rounded-2xl overflow-hidden border border-emerald-500/20 bg-black">
+                  <div className="relative w-full aspect-video">
+                    <ProfessionalVideoPlayer src={inlineTelegramVideo} className="w-full h-full" />
+                    <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 z-10">
+                      <VideoCamera size={12} className="text-emerald-400" />
+                      <span className="text-[10px] font-black text-emerald-300 uppercase tracking-widest text-right">Telegram Link Preview</span>
+                    </div>
+                  </div>
                 </div>
               )}
 

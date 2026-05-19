@@ -98,14 +98,23 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
   const [currentTrackCode, setCurrentTrackCode] = useState<string | null>(null);
   const [selectedQuality, setSelectedQuality] = useState<string>("auto");
 
-  const ytId = extractYouTubeId(url);
-  const driveId = extractGoogleDriveId(url);
-  const isSharePoint = url.includes("sharepoint.com") || url.includes("onedrive.live.com");
-  const isEmbed = isSharePoint || url.includes("/embed/");
+  // Helper to resolve raw Telegram links to our proxy
+  const resolvedUrl = React.useMemo(() => {
+    if (!url) return url;
+    if (url.includes('t.me/')) {
+      return `/api/v1/telegram/stream-public-post?url=${encodeURIComponent(url)}`;
+    }
+    return url;
+  }, [url]);
+
+  const ytId = extractYouTubeId(resolvedUrl);
+  const driveId = extractGoogleDriveId(resolvedUrl);
+  const isSharePoint = resolvedUrl.includes("sharepoint.com") || resolvedUrl.includes("onedrive.live.com");
+  const isEmbed = isSharePoint || resolvedUrl.includes("/embed/");
 
   const driveStreamUrl = driveId ? getDriveStreamUrl(driveId) : null;
-  const isTelegram = url?.includes("/api/v1/telegram/video/") || url?.includes("/api/v1/files/telegram/");
-  const isHtml5 = (!ytId && !driveId && (/\.(mp4|webm|ogg)$/i.test(url || "") || isTelegram)) || (driveId && useNativeForDrive);
+  const isTelegram = resolvedUrl?.includes("/api/v1/telegram/") || resolvedUrl?.includes("/api/v1/files/telegram/");
+  const isHtml5 = (!ytId && !driveId && (/\.(mp4|webm|ogg)$/i.test(resolvedUrl || "") || isTelegram)) || (driveId && useNativeForDrive);
 
   // For HTML5/Telegram videos, set default playback rates since they don't come from the YT API
   useEffect(() => {
@@ -498,7 +507,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
 
         {isSharePoint && (
            <iframe
-             src={url.includes("action=embedview") ? url : `${url}${url.includes("?") ? "&" : "?"}action=embedview`}
+             src={resolvedUrl.includes("action=embedview") ? resolvedUrl : `${resolvedUrl}${resolvedUrl.includes("?") ? "&" : "?"}action=embedview`}
              className="absolute inset-0 h-full w-full border-0"
              allowFullScreen
              onLoad={() => setVideoReady(true)}
@@ -508,7 +517,7 @@ export function CustomVideoPlayer({ url, title }: CustomVideoPlayerProps) {
         {isHtml5 && (
           <video
             ref={videoRef}
-            src={driveId ? driveStreamUrl! : url}
+            src={driveId ? driveStreamUrl! : resolvedUrl}
             className="absolute inset-0 h-full w-full object-contain"
             playsInline
             onTimeUpdate={(e) => {

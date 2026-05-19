@@ -183,10 +183,13 @@ export const PostCard = React.memo(({
   const allAudios = attachments.filter((a: any) => a.type === 'audio' || a.type === 'telegram_audio');
   const allVideos = attachments.filter((a: any) => 
     a.type === 'video' || 
+    a.type === 'telegram_video' ||
     (typeof a.url === 'string' && (
       a.url.toLowerCase().split('?')[0].endsWith('.mp4') ||
       a.url.toLowerCase().split('?')[0].endsWith('.mov') ||
-      a.url.toLowerCase().split('?')[0].endsWith('.webm')
+      a.url.toLowerCase().split('?')[0].endsWith('.webm') ||
+      a.url.includes('t.me/') ||
+      a.url.includes('/api/v1/telegram/')
     ))
   );
   const allFiles = attachments.filter((a: any) => 
@@ -195,6 +198,13 @@ export const PostCard = React.memo(({
     a.type !== 'telegram_audio' &&
     !allVideos.some((v: any) => v.url === a.url)
   );
+
+  const inlineTelegramVideo = useMemo(() => {
+    if (attachments.length > 0) return null;
+    if (!postContent) return null;
+    const match = postContent.match(/https?:\/\/(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]+)\/(\d+)/i);
+    return match ? match[0] : null;
+  }, [postContent, attachments]);
 
   const canDelete =
     post.authorId === currentUserId ||
@@ -595,6 +605,12 @@ export const PostCard = React.memo(({
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {inlineTelegramVideo && (
+        <div className="mt-2 mx-6 mb-2 rounded-[24px] overflow-hidden shadow-lg bg-black/5 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/[0.05]">
+          <ProfessionalVideoPlayer src={inlineTelegramVideo} className="w-full max-h-[450px]" />
         </div>
       )}
 
