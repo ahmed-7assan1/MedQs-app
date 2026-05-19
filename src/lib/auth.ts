@@ -43,6 +43,19 @@ export const signOut = async () => {
 };
 
 export const handlers = {
-  GET: () => new Response("Supabase Auth Active", { status: 200 }),
+  GET: async () => {
+    try {
+      const session = await auth();
+      return new Response(JSON.stringify(session || {}), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({}), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  },
   POST: () => new Response("Supabase Auth Active", { status: 200 }),
 };
