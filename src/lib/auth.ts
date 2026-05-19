@@ -7,13 +7,16 @@ export const auth = async () => {
     if (!user) return null;
 
     // Return a session object compatible with NextAuth
+    const isSuperAdmin = user.user_metadata?.role === "SUPER_ADMIN" || user.email === "ahmedhassan0business@gmail.com";
+    const userRole = isSuperAdmin ? "SUPER_ADMIN" : (user.user_metadata?.role || "STUDENT");
+
     return {
       user: {
         id: user.id,
         email: user.email,
         name: user.user_metadata?.name,
         image: user.user_metadata?.avatar_url || user.user_metadata?.image,
-        role: user.user_metadata?.role,
+        role: userRole,
         semesterId: user.user_metadata?.semesterId,
         facultyId: user.user_metadata?.facultyId,
         universityId: user.user_metadata?.universityId,
