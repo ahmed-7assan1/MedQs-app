@@ -497,6 +497,7 @@ model User {
   videoComments         LectureVideoComment[]
   videoLikes            LectureVideoLike[]
   likes                 Like[]
+  reactions             PostReaction[]
   notes                 Note[]
   notifications         Notification[]
   notifMutes            NotificationMute?
@@ -666,8 +667,11 @@ model Post {
   isReel               Boolean       @default(false)
   videoStartTime       Int?
   videoEndTime         Int?
+  isAnonymous          Boolean       @default(false)
+  backgroundStyle      String?
   comments             Comment[]
   likes                Like[]
+  reactions            PostReaction[]
   author               User          @relation(fields: [authorId], references: [id])
   forum                Forum         @relation(fields: [forumId], references: [id])
   poll                 Poll?         @relation(fields: [pollId], references: [id])
@@ -732,6 +736,28 @@ model CommentLike {
   user      User    @relation(fields: [userId], references: [id])
 
   @@unique([userId, commentId])
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  SUPPORT
+  SMART
+  CONFUSED
+  IDEA
+}
+
+model PostReaction {
+  id        String       @id @default(uuid())
+  postId    String
+  userId    String
+  type      ReactionType
+  createdAt DateTime     @default(now())
+  
+  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
 }
 
 model Notification {

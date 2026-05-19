@@ -57,7 +57,9 @@ const POST_SCHEMA = z
     }).optional(),
     postType: z.string().optional(),
     qaAnswer: z.string().optional(),
-    hashtags: z.array(z.string()).optional()
+    hashtags: z.array(z.string()).optional(),
+    isAnonymous: z.boolean().optional().default(false),
+    backgroundStyle: z.string().optional()
   })
   .refine((v) => Boolean(v.content?.trim()) || Boolean(v.imageUrl?.trim()) || (v.attachments && v.attachments.length > 0) || Boolean(v.sharedQuestion) || Boolean(v.poll) || (v.postType === 'qa' && v.poll), {
     message: "Post cannot be empty",
@@ -160,7 +162,7 @@ export async function POST(
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    const { content, imageUrl, attachments, hashtags } = parsed.data;
+    const { content, imageUrl, attachments, hashtags, isAnonymous, backgroundStyle } = parsed.data;
     const audience = parsed.data.audience ?? "UNIVERSITY";
 
     // Calculate expiry (10 days from now)
@@ -193,6 +195,8 @@ export async function POST(
         expiresAt,
         isForumPost: parsed.data.isForumPost,
         isChatMessage: parsed.data.isChatMessage,
+        isAnonymous,
+        backgroundStyle,
         ...(parsed.data.sharedQuestion ? {
           sharedQuestionId: parsed.data.sharedQuestion.id,
           sharedQuestionData: parsed.data.sharedQuestion

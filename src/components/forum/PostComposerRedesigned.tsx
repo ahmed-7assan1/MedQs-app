@@ -13,7 +13,9 @@ import {
   Plus,
   ChartBar,
   Trash,
-  Check
+  Check,
+  Ghost,
+  Palette
 } from "@phosphor-icons/react";
 import { useCommunityShareStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -40,6 +42,8 @@ interface Props {
       postType?: string;
       qaAnswer?: string;
       attachments?: any[];
+      isAnonymous?: boolean;
+      backgroundStyle?: string;
     }
   ) => Promise<boolean>;
   forums?: { id: string; name: string }[];
@@ -56,6 +60,74 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
   const [videoUploadProgress, setVideoUploadProgress] = useState<string | null>(null);
   const [isRecordingMode, setIsRecordingMode] = useState(false);
   const [selectedForumId, setSelectedForumId] = useState<string>(forums?.[0]?.id || "");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [backgroundStyle, setBackgroundStyle] = useState<string>("");
+  const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
+  const [customBgs, setCustomBgs] = useState<string[]>([]);
+  const bgUploadRef = useRef<HTMLInputElement>(null);
+
+  const isClassName = (style: string) => {
+    if (!style) return true;
+    return !style.startsWith("data:") && !style.startsWith("http") && !style.startsWith("url(");
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("medqs_custom_bgs");
+      if (saved) {
+        try {
+          setCustomBgs(JSON.parse(saved));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
+
+  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const toastId = toast.loading("Processing background image...");
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxW = 800;
+        const maxH = 600;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxW || h > maxH) {
+          const ratio = Math.min(maxW / w, maxH / h);
+          w = w * ratio;
+          h = h * ratio;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          // Compress quality to 0.65 to ensure it is extremely lightweight
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.65);
+          // Wrap in SVG wrapper to satisfy raw SVG trace light format and scaling
+          const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice"><image href="${compressedDataUrl}" width="${w}" height="${h}"/></svg>`;
+          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`;
+
+          const updated = [...customBgs, svgDataUrl];
+          setCustomBgs(updated);
+          localStorage.setItem("medqs_custom_bgs", JSON.stringify(updated));
+          setBackgroundStyle(svgDataUrl);
+          toast.success("Background uploaded & optimized!", { id: toastId });
+        } else {
+          toast.error("Failed to process background", { id: toastId });
+        }
+      };
+      img.onerror = () => toast.error("Failed to load image", { id: toastId });
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
   const [pollOptions, setPollOptions] = useState<{ text: string }[]>([]);
   const [isPollMode, setIsPollMode] = useState(false);
   const [pollQuestion, setPollQuestion] = useState("");
@@ -64,18 +136,102 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
   const [qaOptions, setQaOptions] = useState<{ text: string }[]>([{ text: "" }, { text: "" }, { text: "" }, { text: "" }]);
   const [qaCorrectIdx, setQaCorrectIdx] = useState<number | null>(null);
 
+  const [mentionSearch, setMentionSearch] = useState<string | null>(null);
+  const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
+  const [selectedSuggestIdx, setSelectedSuggestIdx] = useState(0);
+
   const sharedQuestion = useCommunityShareStore((s) => s.sharedQuestion);
   const setSharedQuestion = useCommunityShareStore((s) => s.setSharedQuestion);
 
   useEffect(() => {
     if (sharedQuestion) {
       setIsExpanded(true);
-      // Automatically set some context text if content is empty
       if (!content) {
         setContent("Can anyone help me understand this question better?");
       }
     }
   }, [sharedQuestion]);
+
+  useEffect(() => {
+    if (mentionSearch === null) {
+      setSuggestedUsers([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/v1/users/search?q=${mentionSearch}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSuggestedUsers(data);
+          setSelectedSuggestIdx(0);
+        }
+      } catch {}
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [mentionSearch]);
+
+  const checkMentions = (val: string, selectionStart: number) => {
+    const textBeforeCursor = val.substring(0, selectionStart);
+    const lastAtIdx = textBeforeCursor.lastIndexOf("@");
+    if (lastAtIdx !== -1) {
+      const query = textBeforeCursor.substring(lastAtIdx + 1);
+      if (!query.includes(" ") && query.length >= 0) {
+        setMentionSearch(query);
+        return;
+      }
+    }
+    setMentionSearch(null);
+  };
+
+  const insertMention = (user: any) => {
+    const val = content;
+    const selectionStart = textareaRef.current?.selectionStart || 0;
+    const textBeforeCursor = val.substring(0, selectionStart);
+    const lastAtIdx = textBeforeCursor.lastIndexOf("@");
+    if (lastAtIdx === -1) return;
+
+    const userHandle = user.nickname || user.name.replace(/\s+/g, "_");
+    const replacement = `@${userHandle} `;
+    
+    const newVal = val.substring(0, lastAtIdx) + replacement + val.substring(selectionStart);
+    setContent(newVal);
+    setMentionSearch(null);
+    setSuggestedUsers([]);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        const cursorPosition = lastAtIdx + replacement.length;
+        textareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
+      }
+    }, 10);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (suggestedUsers.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedSuggestIdx(prev => (prev + 1) % suggestedUsers.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedSuggestIdx(prev => (prev - 1 + suggestedUsers.length) % suggestedUsers.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        insertMention(suggestedUsers[selectedSuggestIdx]);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setMentionSearch(null);
+        setSuggestedUsers([]);
+        return;
+      }
+    }
+  };
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,6 +265,8 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
       postType: isQaMode ? 'qa' : isPollMode ? 'poll' : 'post',
       poll: pollData || qaData,
       qaAnswer,
+      isAnonymous,
+      backgroundStyle,
     });
     if (ok) {
       setContent("");
@@ -122,6 +280,8 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
       setQaQuestion("");
       setQaOptions([{ text: "" }, { text: "" }, { text: "" }, { text: "" }]);
       setQaCorrectIdx(null);
+      setIsAnonymous(false);
+      setBackgroundStyle("");
     }
     setIsPosting(false);
   };
@@ -205,21 +365,75 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
 
       <div className="relative p-5">
         <div className="flex gap-4">
-          <img src={avatarUrl} className="h-10 w-10 rounded-full border border-white/10 shrink-0" alt="" />
-          <div className="flex-1 min-w-0 pt-2">
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => {
-                setContent(e.target.value);
-                e.target.style.height = "auto";
-                e.target.style.height = e.target.scrollHeight + "px";
-              }}
-              onFocus={() => setIsExpanded(true)}
-              placeholder={placeholder || `What's on your mind, ${user.name.split(" ")[0]}?`}
-              className="w-full bg-transparent border-none p-0 text-[16px] text-white/90 placeholder:text-white/20 resize-none focus:ring-0 font-medium leading-snug"
-              style={{ minHeight: "44px" }}
-            />
+          <div className="relative">
+            <img src={isAnonymous ? `https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous` : avatarUrl} className="h-10 w-10 rounded-full border border-white/10 shrink-0" alt="" />
+            {isAnonymous && (
+              <div className="absolute -bottom-1 -right-1 bg-purple-500 text-white rounded-full p-0.5 border border-black">
+                <Ghost size={8} weight="fill" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 pt-2 relative">
+            <div 
+              className={cn(
+                "relative rounded-2xl transition-all duration-300 overflow-hidden",
+                backgroundStyle ? "shadow-lg border border-white/10 min-h-[180px] flex items-center justify-center p-6" : "",
+                backgroundStyle && (isClassName(backgroundStyle) ? backgroundStyle : "bg-cover bg-center")
+              )}
+              style={backgroundStyle && !isClassName(backgroundStyle) ? { backgroundImage: `url("${backgroundStyle}")` } : undefined}
+            >
+              {/* Tint Overlay for Images to ensure readable text */}
+              {backgroundStyle && (!isClassName(backgroundStyle) || backgroundStyle.includes("url")) && (
+                <div className="absolute inset-0 bg-black/45 z-0" />
+              )}
+              
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setContent(val);
+                  checkMentions(val, e.target.selectionStart);
+                  e.target.style.height = "auto";
+                  e.target.style.height = e.target.scrollHeight + "px";
+                }}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setIsExpanded(true)}
+                placeholder={placeholder || (isAnonymous ? "Post anonymously..." : `What's on your mind, ${user.name.split(" ")[0]}?`)}
+                className={cn(
+                  "w-full bg-transparent border-none p-0 focus:ring-0 resize-none z-10",
+                  backgroundStyle 
+                    ? "text-white placeholder:text-white/60 text-xl font-extrabold text-center leading-normal" 
+                    : "text-white/90 placeholder:text-white/20 text-[16px] font-medium leading-snug"
+                )}
+                style={{ minHeight: backgroundStyle ? "100px" : "44px" }}
+              />
+            </div>
+
+            {suggestedUsers.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1 bg-[#19182C] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-48 overflow-y-auto">
+                {suggestedUsers.map((user, idx) => (
+                  <button
+                    key={user.id}
+                    onClick={() => insertMention(user)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-2 text-right transition-colors hover:bg-white/5",
+                      idx === selectedSuggestIdx ? "bg-primary/20" : ""
+                    )}
+                  >
+                    <img
+                      src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`}
+                      className="h-6 w-6 rounded-full border border-white/10"
+                      alt=""
+                    />
+                    <div className="flex flex-col text-right">
+                      <span className="text-xs font-black text-white">{user.name}</span>
+                      {user.nickname && <span className="text-[10px] text-white/40">@{user.nickname}</span>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -444,6 +658,93 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                   >
                     <Microphone size={20} weight="bold" />
                   </button>
+                  <button 
+                    onClick={() => setIsAnonymous(!isAnonymous)}
+                    title="Post Anonymously"
+                    className={cn("h-10 w-10 flex items-center justify-center rounded-xl transition-all", isAnonymous ? "text-purple-400 bg-purple-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}
+                  >
+                    <Ghost size={20} weight={isAnonymous ? "fill" : "bold"} />
+                  </button>
+                  <div className="relative">
+                    <button 
+                      onClick={() => setShowBackgroundPicker(!showBackgroundPicker)}
+                      type="button"
+                      title="Background Style"
+                      className={cn("h-10 w-10 flex items-center justify-center rounded-xl transition-all", backgroundStyle ? "text-pink-400 bg-pink-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}
+                    >
+                      <Palette size={20} weight={backgroundStyle ? "fill" : "bold"} />
+                    </button>
+                    
+                    {showBackgroundPicker && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowBackgroundPicker(false)} />
+                        <div className="absolute bottom-full left-0 mb-2 flex bg-[#1C1B22] border border-white/10 rounded-xl p-2.5 gap-2.5 shadow-2xl z-50 flex-wrap max-w-[280px]">
+                          {/* File input for custom background image upload */}
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            ref={bgUploadRef} 
+                            onChange={handleBgUpload} 
+                            className="hidden" 
+                          />
+                          
+                          {/* Upload '+' Icon Button */}
+                          <button
+                            type="button"
+                            onClick={() => bgUploadRef.current?.click()}
+                            title="Upload Custom Image Background"
+                            className="h-8 w-8 rounded-full border-2 border-dashed border-white/20 hover:border-primary flex items-center justify-center text-white/40 hover:text-primary transition-all shrink-0"
+                          >
+                            <Plus size={16} weight="bold" />
+                          </button>
+
+                          {/* Default/Reset Option */}
+                          <button
+                            type="button"
+                            onClick={() => setBackgroundStyle("")}
+                            className={cn(
+                              "h-8 w-8 rounded-full transition-all hover:scale-110 shadow-sm shrink-0 bg-transparent border border-white/20",
+                              backgroundStyle === "" ? "ring-2 ring-white scale-110" : ""
+                            )}
+                          />
+
+                          {/* Predefined Gradients */}
+                          {[
+                            "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500",
+                            "bg-gradient-to-br from-blue-500 to-cyan-400",
+                            "bg-gradient-to-br from-emerald-500 to-teal-400",
+                            "bg-gradient-to-br from-orange-500 to-red-500",
+                            "bg-gradient-to-br from-gray-800 to-black",
+                          ].map((grad, idx) => (
+                            <button
+                              key={`grad-${idx}`}
+                              type="button"
+                              onClick={() => setBackgroundStyle(grad)}
+                              className={cn(
+                                "h-8 w-8 rounded-full transition-all hover:scale-110 shadow-sm shrink-0", 
+                                grad, 
+                                backgroundStyle === grad ? "ring-2 ring-white scale-110" : ""
+                              )}
+                            />
+                          ))}
+
+                          {/* Custom Uploaded Backgrounds */}
+                          {customBgs.map((bgUrl, idx) => (
+                            <button
+                              key={`custom-${idx}`}
+                              type="button"
+                              onClick={() => setBackgroundStyle(bgUrl)}
+                              style={{ backgroundImage: `url("${bgUrl}")` }}
+                              className={cn(
+                                "h-8 w-8 rounded-full transition-all hover:scale-110 shadow-sm shrink-0 bg-cover bg-center", 
+                                backgroundStyle === bgUrl ? "ring-2 ring-white scale-110" : ""
+                              )}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <button

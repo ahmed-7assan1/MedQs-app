@@ -63,6 +63,7 @@ export async function GET(req: NextRequest) {
         },
       },
       _count: { select: { likes: true, comments: true } },
+      reactions: { select: { type: true, userId: true } },
     },
   });
 
@@ -83,9 +84,16 @@ export async function GET(req: NextRequest) {
       updatedAt: p.updatedAt.toISOString(),
       authorId: p.authorId,
       forumId: p.forumId,
-      author: (p as any).author,
+      isAnonymous: (p as any).isAnonymous,
+      backgroundStyle: (p as any).backgroundStyle,
+      author: (p as any).isAnonymous ? {
+        id: p.authorId,
+        name: "عضو مجهول",
+        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous"
+      } : (p as any).author,
       _count: (p as any)._count,
       likedByMe: likedSet.has(p.id),
+      reactions: (p as any).reactions || [],
     })),
     {
       headers: {

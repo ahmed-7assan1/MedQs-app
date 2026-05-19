@@ -10,6 +10,7 @@ import {
   PushPin,
   Trash,
   BookmarkSimple,
+  PencilSimple,
 } from "@phosphor-icons/react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -28,6 +29,15 @@ interface Props {
   currentUserRole?: string;
   currentUserUniversityId?: string;
 }
+
+const REACTION_MAP: Record<string, { emoji: string; label: string; color: string }> = {
+  LIKE: { emoji: "👍", label: "أعجبني", color: "text-blue-400" },
+  LOVE: { emoji: "❤️", label: "أحببته", color: "text-red-400" },
+  SUPPORT: { emoji: "🤝", label: "أدعم", color: "text-emerald-400" },
+  SMART: { emoji: "🧠", label: "عبقري", color: "text-indigo-400" },
+  CONFUSED: { emoji: "❓", label: "حائر", color: "text-amber-400" },
+  IDEA: { emoji: "💡", label: "مفيد", color: "text-yellow-400" },
+};
 
 function parseAttachments(raw: any): any[] {
   if (!raw) return [];
@@ -58,17 +68,25 @@ function getTimeAgo(date: string) {
   }
 }
 
-// Highlight #hashtags in content
-function renderContent(text: string) {
-  const parts = text.split(/(#\w+)/g);
-  return parts.map((part, i) =>
-    part.startsWith("#") ? (
-      <span key={i} className="text-[#534AB7] font-bold">{part}</span>
-    ) : (
-      part
-    )
-  );
+// Highlight #hashtags and @mentions in content
+function renderContentAndMentions(text: string) {
+  if (!text) return "";
+  const parts = text.split(/(#[a-zA-Z0-9_\u0600-\u06FF]+|@[a-zA-Z0-9_\u0600-\u06FF]+)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("#")) {
+      return <span key={i} className="text-[#534AB7] font-bold">{part}</span>;
+    }
+    if (part.startsWith("@")) {
+      return (
+        <span key={i} className="text-primary font-black hover:underline cursor-pointer">
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
 }
+
 
 import Image from "next/image";
 
@@ -78,14 +96,20 @@ export function PostCardRedesigned({
   currentUserRole,
   currentUserUniversityId,
 }: Props) {
-  const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
-  const [isLiked, setIsLiked] = useState(post.likedByMe ?? false);
-  const [liking, setLiking] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [reactions, setReactions] = useState<{ type: string; userId: string }[]>(post.reactions || []);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content || "");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [postContent, setPostContent] = useState(post.content || "");
+  const isEdited = post.updatedAt ? new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime() > 2000 : false;
+  const [editedState, setEditedState] = useState(isEdited);
 
   if (isDeleted) return null;
 
@@ -123,23 +147,69 @@ export function PostCardRedesigned({
     currentUserRole === "SUPER_ADMIN" ||
     (currentUserRole === "ADMIN" && currentUserUniversityId === post.universityId);
 
-  const handleLike = async () => {
-    if (!currentUserId) return toast.error("Sign in to like");
-    setLiking(true);
-    const prev = isLiked;
-    setIsLiked(!isLiked);
-    setLikeCount((c: number) => c + (isLiked ? -1 : 1));
+  const isAuthor = post.authorId === currentUserId;
+
+  const reactionCounts = reactions.reduce((acc: Record<string, number>, r) => {
+    acc[r.type] = (acc[r.type] || 0) + 1;
+    return acc;
+  }, {});
+
+  const myReaction = currentUserId ? reactions.find((r) => r.userId === currentUserId)?.type : null;
+
+  const handleSaveEdit = async () => {
+    if (!editContent.trim()) return;
+    setSavingEdit(true);
     try {
-      await fetch(`/api/v1/posts/${post.id}/like`, {
+      const res = await fetch(`/api/v1/posts/${post.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent }),
+      });
+      if (res.ok) {
+        setPostContent(editContent);
+        setEditedState(true);
+        setIsEditing(false);
+        toast.success("تم تعديل المنشور بنجاح");
+      } else {
+        toast.error("فشل تعديل المنشور");
+      }
+    } catch {
+      toast.error("فشل تعديل المنشور");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleReact = async (type: string | null) => {
+    if (!currentUserId) return toast.error("Sign in to react");
+    
+    const prevReactions = [...reactions];
+    let newReactions = reactions.filter((r) => r.userId !== currentUserId);
+    if (type) {
+      newReactions.push({ type, userId: currentUserId });
+    }
+    setReactions(newReactions);
+    setShowReactionPicker(false);
+
+    try {
+      const res = await fetch(`/api/v1/posts/${post.id}/reactions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: isLiked ? null : "like" }),
+        body: JSON.stringify({ type }),
       });
+      if (!res.ok) {
+        setReactions(prevReactions);
+      }
     } catch {
-      setIsLiked(prev);
-      setLikeCount((c: number) => c + (isLiked ? 1 : -1));
-    } finally {
-      setLiking(false);
+      setReactions(prevReactions);
+    }
+  };
+
+  const handleLikeClick = () => {
+    if (myReaction) {
+      handleReact(null);
+    } else {
+      handleReact("LIKE");
     }
   };
 
@@ -171,8 +241,32 @@ export function PostCardRedesigned({
     }
   };
 
+  const isClassName = (style: string) => {
+    if (!style) return true;
+    return !style.startsWith("data:") && !style.startsWith("http") && !style.startsWith("url(");
+  };
+
   const hasHashtags = post.content?.includes("#");
   const commentCount = post._count?.comments ?? 0;
+
+  const postComponents = {
+    ...markdownComponentsWithImages,
+    p: ({ children, ...props }: any) => {
+      if (typeof children === "string") {
+        return <p {...props}>{renderContentAndMentions(children)}</p>;
+      }
+      if (Array.isArray(children)) {
+        return (
+          <p {...props}>
+            {children.map((child, idx) =>
+              typeof child === "string" ? renderContentAndMentions(child) : child
+            )}
+          </p>
+        );
+      }
+      return <p {...props}>{children}</p>;
+    }
+  };
 
   return (
     <motion.div
@@ -183,24 +277,42 @@ export function PostCardRedesigned({
     >
       {/* ── Header ── */}
       <div className="flex items-center gap-3 p-4 pb-0">
-        <Link href={`/profile/u/${post.author?.id}`} className="relative flex-shrink-0">
-          <Image
-            src={avatarUrl}
-            alt=""
-            width={44}
-            height={44}
-            className="h-11 w-11 rounded-2xl object-cover border border-white/10"
-          />
-          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 rounded-full border-2 border-[#16152A]" />
-        </Link>
+        {post.isAnonymous ? (
+          <div className="relative flex-shrink-0">
+            <Image
+              src={avatarUrl}
+              alt=""
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-2xl object-cover border border-white/10"
+            />
+          </div>
+        ) : (
+          <Link href={`/profile/u/${post.author?.id}`} className="relative flex-shrink-0">
+            <Image
+              src={avatarUrl}
+              alt=""
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-2xl object-cover border border-white/10"
+            />
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 rounded-full border-2 border-[#16152A]" />
+          </Link>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Link
-              href={`/profile/u/${post.author?.id}`}
-              className="text-[14px] font-black text-white hover:text-[#AFA9EC] transition-colors leading-tight"
-            >
-              {post.author?.name}
-            </Link>
+            {post.isAnonymous ? (
+              <span className="text-[14px] font-black text-white leading-tight">
+                {post.author?.name}
+              </span>
+            ) : (
+              <Link
+                href={`/profile/u/${post.author?.id}`}
+                className="text-[14px] font-black text-white hover:text-[#AFA9EC] transition-colors leading-tight"
+              >
+                {post.author?.name}
+              </Link>
+            )}
             {post.author?.rank && (
               <span className="px-1.5 py-0.5 rounded-md bg-[#534AB7]/20 text-[#AFA9EC] text-[8px] font-black uppercase tracking-widest border border-[#534AB7]/20">
                 {post.author.rank.label}
@@ -210,9 +322,12 @@ export function PostCardRedesigned({
               <PushPin size={12} weight="fill" className="text-amber-400" />
             )}
           </div>
-          <p className="text-[11px] text-white/25 font-bold uppercase tracking-widest mt-0.5">
-            {getTimeAgo(post.createdAt)}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-tight">
+              {getTimeAgo(post.createdAt)}
+              {editedState && " • معدل"}
+            </span>
+          </div>
         </div>
         <div className="relative">
           <button
@@ -238,6 +353,15 @@ export function PostCardRedesigned({
                     <ShareNetwork size={16} weight="bold" />
                     Copy link
                   </button>
+                  {isAuthor && (
+                    <button
+                      onClick={() => { setShowOptions(false); setIsEditing(true); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-white/50 hover:bg-white/5 hover:text-white transition-all text-[12px] font-bold"
+                    >
+                      <PencilSimple size={16} weight="bold" />
+                      تعديل المنشور
+                    </button>
+                  )}
                   {canDelete && (
                     <button
                       onClick={() => { setShowOptions(false); setShowDeleteConfirm(true); }}
@@ -254,21 +378,81 @@ export function PostCardRedesigned({
         </div>
       </div>
 
-      {/* ── Content ── */}
-      {post.content?.trim() && (
-        <div className="px-4 pt-3 pb-1 text-[14px] leading-relaxed text-white/85 font-medium">
-          {hasHashtags ? (
-            <p className="whitespace-pre-wrap break-words">
-              {renderContent(post.content)}
-            </p>
-          ) : (
-            <div className="prose prose-invert prose-sm max-w-none prose-p:my-0.5">
-              <ReactMarkdown components={markdownComponentsWithImages}>
-                {enhancePlainImageUrls(post.content)}
-              </ReactMarkdown>
-            </div>
-          )}
+      {/* ── Content / Edit Mode ── */}
+      {isEditing ? (
+        <div className="p-4 space-y-3">
+          <div 
+            className={cn(
+              "relative rounded-2xl transition-all duration-300 overflow-hidden",
+              post.backgroundStyle ? "shadow-lg border border-white/10 min-h-[180px] flex items-center justify-center p-6" : "",
+              post.backgroundStyle && (isClassName(post.backgroundStyle) ? post.backgroundStyle : "bg-cover bg-center")
+            )}
+            style={post.backgroundStyle && !isClassName(post.backgroundStyle) ? { backgroundImage: `url("${post.backgroundStyle}")` } : undefined}
+          >
+            {/* Tint Overlay for Images to ensure readable text */}
+            {post.backgroundStyle && (!isClassName(post.backgroundStyle) || post.backgroundStyle.includes("url")) && (
+              <div className="absolute inset-0 bg-black/45 z-0" />
+            )}
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className={cn(
+                "w-full bg-transparent border-none p-0 focus:ring-0 resize-none z-10",
+                post.backgroundStyle 
+                  ? "text-white placeholder:text-white/60 text-xl font-extrabold text-center leading-normal" 
+                  : "w-full min-h-[100px] bg-white/[0.04] border border-white/10 rounded-2xl p-3 text-[14px] text-white placeholder:text-white/15 focus:ring-0 focus:outline-none resize-none"
+              )}
+              style={{ minHeight: post.backgroundStyle ? "100px" : "100px" }}
+              placeholder="عدل منشورك..."
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => setIsEditing(false)}
+              disabled={savingEdit}
+              className="px-4 py-2 rounded-xl text-white/40 hover:bg-white/5 hover:text-white transition-all text-xs font-bold"
+            >
+              إلغاء
+            </button>
+            <button
+              onClick={handleSaveEdit}
+              disabled={savingEdit || !editContent.trim()}
+              className="px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/95 transition-all text-xs font-bold"
+            >
+              {savingEdit ? "جاري الحفظ..." : "حفظ التعديلات"}
+            </button>
+          </div>
         </div>
+      ) : (
+        postContent?.trim() && (
+          <div 
+            className={cn(
+              "px-4 pt-3 pb-1 text-[14px] leading-relaxed text-white/85 font-medium", 
+              post.backgroundStyle && `m-4 rounded-2xl p-8 text-center text-xl font-extrabold flex items-center justify-center min-h-[160px] text-white shadow-lg relative overflow-hidden`,
+              post.backgroundStyle && (isClassName(post.backgroundStyle) ? post.backgroundStyle : "bg-cover bg-center")
+            )}
+            style={post.backgroundStyle && !isClassName(post.backgroundStyle) ? { backgroundImage: `url("${post.backgroundStyle}")` } : undefined}
+          >
+            {/* Tint Overlay for Images to ensure readable text */}
+            {post.backgroundStyle && (!isClassName(post.backgroundStyle) || post.backgroundStyle.includes("url")) && (
+              <div className="absolute inset-0 bg-black/45 z-0" />
+            )}
+            
+            <div className={cn("w-full relative z-10", post.backgroundStyle && "text-white select-none pointer-events-none")}>
+              {hasHashtags ? (
+                <p className="whitespace-pre-wrap break-words">
+                  {renderContentAndMentions(postContent)}
+                </p>
+              ) : (
+                <div className={cn("prose prose-invert prose-sm max-w-none prose-p:my-0.5", post.backgroundStyle && "text-white prose-p:text-white prose-p:text-xl prose-p:font-extrabold")}>
+                  <ReactMarkdown components={postComponents}>
+                    {enhancePlainImageUrls(postContent)}
+                  </ReactMarkdown>
+                </div>
+              )}
+            </div>
+          </div>
+        )
       )}
 
       {/* ── Poll ── */}
@@ -316,24 +500,85 @@ export function PostCardRedesigned({
         </div>
       )}
 
+      {/* ── Reactions & Comments Summary ── */}
+      {(reactions.length > 0 || commentCount > 0) && (
+        <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.04] text-[12px] text-white/40">
+          <div className="flex items-center gap-1.5">
+            {reactions.length > 0 && (
+              <>
+                <div className="flex items-center -space-x-1 select-none">
+                  {Object.keys(reactionCounts)
+                    .slice(0, 3)
+                    .map((type) => (
+                      <span key={type} className="text-[14px]">
+                        {REACTION_MAP[type]?.emoji}
+                      </span>
+                    ))}
+                </div>
+                <span className="font-bold text-white/50">{reactions.length}</span>
+              </>
+            )}
+          </div>
+          {commentCount > 0 && (
+            <button 
+              onClick={() => setShowComments(!showComments)}
+              className="hover:underline font-bold text-white/50"
+            >
+              {commentCount} تعليق
+            </button>
+          )}
+        </div>
+      )}
+
       {/* ── Action Bar ── */}
       <div className="flex items-center gap-1 px-3 py-3">
-        {/* Like */}
-        <button
-          onClick={handleLike}
-          disabled={liking}
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.96]",
-            isLiked
-              ? "text-red-400 bg-red-500/10"
-              : "text-white/40 hover:bg-white/5 hover:text-white"
-          )}
+        {/* Like/Reaction */}
+        <div 
+          className="relative"
+          onMouseEnter={() => setShowReactionPicker(true)}
+          onMouseLeave={() => setShowReactionPicker(false)}
         >
-          <Heart size={20} weight={isLiked ? "fill" : "bold"} />
-          <span className="text-[12px] font-black">
-            {likeCount > 0 ? likeCount.toLocaleString() : "Like"}
-          </span>
-        </button>
+          <button
+            onClick={handleLikeClick}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.96]",
+              myReaction
+                ? `${REACTION_MAP[myReaction]?.color} bg-white/5`
+                : "text-white/40 hover:bg-white/5 hover:text-white"
+            )}
+          >
+            {myReaction ? (
+              <span className="text-[18px]">{REACTION_MAP[myReaction]?.emoji}</span>
+            ) : (
+              <Heart size={20} />
+            )}
+            <span className="text-[12px] font-black">
+              {myReaction ? REACTION_MAP[myReaction]?.label : "أعجبني"}
+            </span>
+          </button>
+
+          <AnimatePresence>
+            {showReactionPicker && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute bottom-full left-0 mb-2 flex items-center gap-2 bg-[#19182C] border border-white/10 rounded-full px-3 py-2 shadow-2xl z-50"
+              >
+                {Object.entries(REACTION_MAP).map(([type, info]) => (
+                  <button
+                    key={type}
+                    onClick={() => handleReact(type)}
+                    className="text-2xl transition-all hover:scale-130 active:scale-95 duration-200"
+                    title={info.label}
+                  >
+                    {info.emoji}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Comment */}
         <button

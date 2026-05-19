@@ -12,6 +12,8 @@ export type ForumPostJson = {
   forumId: string;
   createdAt: string;
   updatedAt: string;
+  isAnonymous?: boolean;
+  backgroundStyle?: string | null;
   expiresAt: string | null;
   isPinned: boolean;
   author: {
@@ -26,6 +28,7 @@ export type ForumPostJson = {
   sharedQuestionId?: string | null;
   sharedQuestion?: any | null;
   sharedQuestionData?: any | null;
+  reactions?: { type: string; userId: string }[];
 };
 
 type PostRow = {
@@ -38,6 +41,8 @@ type PostRow = {
   forumId: string;
   createdAt: Date;
   updatedAt: Date;
+  isAnonymous?: boolean;
+  backgroundStyle?: string | null;
   expiresAt: Date | null;
   isPinned: boolean;
   author: {
@@ -51,6 +56,7 @@ type PostRow = {
   sharedQuestion?: any;
   sharedQuestionData?: any;
   likedByMe?: boolean;
+  reactions?: { type: string; userId: string }[];
 };
 
 export async function loadForumPostsForUser(options: {
@@ -135,6 +141,7 @@ export async function loadForumPostsForUser(options: {
           },
           _count: { select: { likes: true, comments: true } },
           sharedQuestion: { select: { id: true, body: true, choices: true, answer: true, difficulty: true, imageUrl: true, questionType: true, explanation: true } },
+          reactions: { select: { type: true, userId: true } },
         },
       }) as unknown as PostRow[]);
     } catch (inner) {
@@ -164,6 +171,7 @@ export async function loadForumPostsForUser(options: {
             },
             _count: { select: { likes: true, comments: true } },
             sharedQuestion: { select: { id: true, body: true, choices: true, answer: true, difficulty: true, imageUrl: true, questionType: true, explanation: true } },
+            reactions: { select: { type: true, userId: true } },
           },
         }) as unknown as PostRow[]);
       } catch (inner2) {
@@ -234,7 +242,14 @@ export async function loadForumPostsForUser(options: {
       updatedAt: p.updatedAt.toISOString(),
       expiresAt: p.expiresAt ? p.expiresAt.toISOString() : null,
       isPinned: p.isPinned,
-      author: {
+      isAnonymous: (p as any).isAnonymous,
+      backgroundStyle: (p as any).backgroundStyle,
+      author: (p as any).isAnonymous ? {
+        id: p.author.id,
+        name: "عضو مجهول",
+        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous",
+        handle: null,
+      } : {
         id: p.author.id,
         name: p.author.name,
         image: p.author.image,
@@ -246,6 +261,7 @@ export async function loadForumPostsForUser(options: {
       sharedQuestionId: (p as any).sharedQuestionId,
       sharedQuestion: (p as any).sharedQuestion,
       sharedQuestionData: (p as any).sharedQuestionData,
+      reactions: (p as any).reactions || [],
     }));
 
     // Perform final sort: Pinned > Affinity > Date

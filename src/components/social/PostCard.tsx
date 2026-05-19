@@ -20,10 +20,38 @@ import {
   ArrowLeft, 
   ArrowRight, 
   X as XIcon,
-  Video as VideoIcon
+  Video as VideoIcon,
+  PencilSimple
 } from "@phosphor-icons/react";
 import React, { useState, useRef, useMemo } from "react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
+
+const REACTION_MAP: Record<string, { emoji: string; label: string; color: string }> = {
+  LIKE: { emoji: "👍", label: "Like", color: "text-blue-500" },
+  LOVE: { emoji: "❤️", label: "Love", color: "text-red-500" },
+  SUPPORT: { emoji: "🤝", label: "Support", color: "text-emerald-500" },
+  SMART: { emoji: "🧠", label: "Smart", color: "text-indigo-500" },
+  CONFUSED: { emoji: "❓", label: "Confused", color: "text-amber-500" },
+  IDEA: { emoji: "💡", label: "Idea", color: "text-yellow-500" },
+};
+
+function renderContentAndMentions(text: string) {
+  if (!text) return "";
+  const parts = text.split(/(#[a-zA-Z0-9_\u0600-\u06FF]+|@[a-zA-Z0-9_\u0600-\u06FF]+)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("#")) {
+      return <span key={i} className="text-[#534AB7] font-bold">{part}</span>;
+    }
+    if (part.startsWith("@")) {
+      return (
+        <span key={i} className="text-primary font-black hover:underline cursor-pointer">
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
+}
 import ReactMarkdown from "react-markdown";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
@@ -59,6 +87,86 @@ export const PostCard = React.memo(({
   const [showOptions, setShowOptions] = useState(false);
   const [selectedQaIdx, setSelectedQaIdx] = useState<number | null>(null);
 
+  const [reactions, setReactions] = useState<{ type: string; userId: string }[]>(post.reactions || []);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content || "");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [postContent, setPostContent] = useState(post.content || "");
+  const isEdited = post.updatedAt ? new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime() > 2000 : false;
+  const [editedState, setEditedState] = useState(isEdited);
+
+  const myReaction = currentUserId ? reactions.find((r) => r.userId === currentUserId)?.type : null;
+  const reactionCounts = reactions.reduce((acc: Record<string, number>, r) => {
+    acc[r.type] = (acc[r.type] || 0) + 1;
+    return acc;
+  }, {});
+
+  const handleReact = async (type: string | null) => {
+    if (!currentUserId) return toast.error("Sign in to react");
+    setShowReactionPicker(false);
+
+    const prevReactions = [...reactions];
+    if (!type) {
+      setReactions(prevReactions.filter((r) => r.userId !== currentUserId));
+    } else {
+      const idx = prevReactions.findIndex((r) => r.userId === currentUserId);
+      if (idx !== -1) {
+        const updated = [...prevReactions];
+        updated[idx] = { ...updated[idx], type };
+        setReactions(updated);
+      } else {
+        setReactions([...prevReactions, { type, userId: currentUserId }]);
+      }
+    }
+
+    try {
+      const res = await fetch(`/api/v1/posts/${post.id}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      });
+      if (!res.ok) {
+        setReactions(prevReactions);
+      }
+    } catch {
+      setReactions(prevReactions);
+    }
+  };
+
+  const handleLikeClick = () => {
+    if (myReaction) {
+      handleReact(null);
+    } else {
+      handleReact("LIKE");
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editContent.trim()) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/v1/posts/${post.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent }),
+      });
+      if (res.ok) {
+        setPostContent(editContent);
+        setEditedState(true);
+        setIsEditing(false);
+        toast.success("Post updated successfully");
+      } else {
+        toast.error("Failed to update post");
+      }
+    } catch {
+      toast.error("Failed to update post");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   if (isDeleted) return null;
 
   const avatarUrl = post.author?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author?.name || "user")}`;
@@ -92,6 +200,11 @@ export const PostCard = React.memo(({
     post.authorId === currentUserId ||
     currentUserRole === "SUPER_ADMIN" ||
     (!isRoomPost && currentUserRole === "ADMIN" && currentUserUniversityId === post.universityId);
+
+  const isClassName = (style: string) => {
+    if (!style) return true;
+    return !style.startsWith("data:") && !style.startsWith("http") && !style.startsWith("url(");
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -153,13 +266,23 @@ export const PostCard = React.memo(({
       
       {/* Header */}
       <div className="flex items-center gap-4 p-5 pb-0">
-        <Link href={`/profile/u/${post.author?.id}`} className="relative flex-shrink-0">
-          <img src={avatarUrl} alt="" className="h-12 w-12 rounded-2xl object-cover border border-slate-200 dark:border-white/10 shadow-sm" />
-          <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#161523]" />
-        </Link>
+        {post.isAnonymous ? (
+          <div className="relative flex-shrink-0">
+            <img src={avatarUrl} alt="" className="h-12 w-12 rounded-2xl object-cover border border-slate-200 dark:border-white/10 shadow-sm" />
+          </div>
+        ) : (
+          <Link href={`/profile/u/${post.author?.id}`} className="relative flex-shrink-0">
+            <img src={avatarUrl} alt="" className="h-12 w-12 rounded-2xl object-cover border border-slate-200 dark:border-white/10 shadow-sm" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#161523]" />
+          </Link>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Link href={`/profile/u/${post.author?.id}`} className="text-[15px] font-black text-slate-800 dark:text-white hover:text-primary transition-colors leading-tight">{post.author?.name}</Link>
+            {post.isAnonymous ? (
+              <span className="text-[15px] font-black text-slate-800 dark:text-white leading-tight">{post.author?.name}</span>
+            ) : (
+              <Link href={`/profile/u/${post.author?.id}`} className="text-[15px] font-black text-slate-800 dark:text-white hover:text-primary transition-colors leading-tight">{post.author?.name}</Link>
+            )}
             {post.author?.rank && (
               <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest border border-primary/10">
                 {post.author.rank.label}
@@ -167,7 +290,9 @@ export const PostCard = React.memo(({
             )}
             {post.isPinned && <PushPin size={14} weight="fill" className="text-amber-400" />}
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">{formatDistanceToNow(new Date(post.createdAt))} ago</p>
+          <p className="text-[11px] text-slate-400 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">
+            {formatDistanceToNow(new Date(post.createdAt))} ago{editedState && " • Edited"}
+          </p>
         </div>
         <div className="relative">
           <button onClick={() => setShowOptions(!showOptions)} className="h-10 w-10 flex items-center justify-center rounded-2xl text-slate-400 dark:text-white/20 hover:text-primary hover:bg-primary/5 transition-all">
@@ -179,6 +304,9 @@ export const PostCard = React.memo(({
                 <div className="fixed inset-0 z-40" onClick={() => setShowOptions(false)} />
                 <motion.div initial={{ opacity: 0, scale: 0.95, y: -8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -8 }} className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1f1e36] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden py-1.5">
                   <button onClick={() => { setShowOptions(false); handleShare(); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-500 dark:text-white/50 hover:bg-primary/5 hover:text-primary transition-all text-[13px] font-bold"><ShareNetwork size={18} weight="bold" /> Copy link</button>
+                  {post.authorId === currentUserId && (
+                    <button onClick={() => { setShowOptions(false); setIsEditing(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-500 dark:text-white/50 hover:bg-primary/5 hover:text-primary transition-all text-[13px] font-bold"><PencilSimple size={18} weight="bold" /> Edit post</button>
+                  )}
                   {canDelete && <button onClick={() => { setShowOptions(false); setShowDeleteConfirm(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-500/10 transition-all text-[13px] font-bold"><Trash size={18} weight="bold" /> Delete post</button>}
                 </motion.div>
               </>
@@ -188,13 +316,95 @@ export const PostCard = React.memo(({
       </div>
 
       {/* Content */}
-      {post.content?.trim() && (
-        <div className="px-6 pt-4 pb-1 text-[15px] leading-relaxed text-slate-700 dark:text-white/85 font-medium">
-          <div className="prose prose-slate dark:prose-invert prose-sm max-w-none prose-p:my-1">
-            <ReactMarkdown components={markdownComponentsWithImages}>{enhancePlainImageUrls(post.content)}</ReactMarkdown>
+      {(() => {
+        const postComponents = {
+          ...markdownComponentsWithImages,
+          p: ({ children, ...props }: any) => {
+            if (typeof children === "string") {
+              return <p {...props}>{renderContentAndMentions(children)}</p>;
+            }
+            if (Array.isArray(children)) {
+              return (
+                <p {...props}>
+                  {children.map((child, idx) =>
+                    typeof child === "string" ? renderContentAndMentions(child) : child
+                  )}
+                </p>
+              );
+            }
+            return <p {...props}>{children}</p>;
+          },
+        };
+
+        if (isEditing) {
+          return (
+            <div className="px-6 py-4 space-y-3">
+              <div 
+                className={cn(
+                  "relative rounded-2xl transition-all duration-300 overflow-hidden",
+                  post.backgroundStyle ? "shadow-lg border border-slate-200/50 dark:border-white/10 min-h-[180px] flex items-center justify-center p-6" : "",
+                  post.backgroundStyle && (isClassName(post.backgroundStyle) ? post.backgroundStyle : "bg-cover bg-center")
+                )}
+                style={post.backgroundStyle && !isClassName(post.backgroundStyle) ? { backgroundImage: `url("${post.backgroundStyle}")` } : undefined}
+              >
+                {/* Tint Overlay for Images to ensure readable text */}
+                {post.backgroundStyle && (!isClassName(post.backgroundStyle) || post.backgroundStyle.includes("url")) && (
+                  <div className="absolute inset-0 bg-black/45 z-0" />
+                )}
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className={cn(
+                    "w-full bg-transparent border-none p-0 focus:ring-0 resize-none z-10",
+                    post.backgroundStyle 
+                      ? "text-white placeholder:text-white/60 text-xl font-extrabold text-center leading-normal" 
+                      : "w-full min-h-[120px] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-3 text-slate-900 dark:text-white text-[14px] focus:outline-none focus:border-primary resize-none"
+                  )}
+                  style={{ minHeight: post.backgroundStyle ? "100px" : "120px" }}
+                  placeholder="What's on your mind?"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-3.5 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-700 dark:text-white/60 text-[12px] font-bold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={savingEdit || !editContent.trim()}
+                  className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary/80 text-white text-[12px] font-bold transition-all disabled:opacity-50"
+                >
+                  {savingEdit ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </div>
+          );
+        }
+
+        return postContent?.trim() ? (
+          <div 
+            className={cn(
+              "px-6 pt-4 pb-1 text-[15px] leading-relaxed text-slate-700 dark:text-white/85 font-medium", 
+              post.backgroundStyle && `m-4 rounded-[24px] p-8 text-center text-xl font-extrabold flex items-center justify-center min-h-[160px] text-white shadow-lg relative overflow-hidden`,
+              post.backgroundStyle && (isClassName(post.backgroundStyle) ? post.backgroundStyle : "bg-cover bg-center")
+            )}
+            style={post.backgroundStyle && !isClassName(post.backgroundStyle) ? { backgroundImage: `url("${post.backgroundStyle}")` } : undefined}
+          >
+            {/* Tint Overlay for Images to ensure readable text */}
+            {post.backgroundStyle && (!isClassName(post.backgroundStyle) || post.backgroundStyle.includes("url")) && (
+              <div className="absolute inset-0 bg-black/45 z-0" />
+            )}
+            
+            <div className={cn("prose prose-slate dark:prose-invert prose-sm max-w-none prose-p:my-1", post.backgroundStyle && "relative z-10")}>
+              <ReactMarkdown components={postComponents} className={cn(post.backgroundStyle && "text-white prose-p:text-white prose-p:text-xl prose-p:font-extrabold select-none pointer-events-none")}>
+                {enhancePlainImageUrls(postContent)}
+              </ReactMarkdown>
+            </div>
           </div>
-        </div>
-      )}
+        ) : null;
+      })()}
       {/* ── INTERACTIVE CONTENT (POLLS, Q&A, SHARED QUESTIONS) ── */}
       <div className="px-6 pb-2">
          {/* 1. Shared Lecture Question */}
@@ -388,12 +598,86 @@ export const PostCard = React.memo(({
         </div>
       )}
 
+      {/* ── Reactions & Comments Summary ── */}
+      {(reactions.length > 0 || (post._count?.comments ?? 0) > 0) && (
+        <div className="flex items-center justify-between px-6 py-2 border-b border-slate-100 dark:border-white/[0.04] text-[12px] text-slate-500 dark:text-white/40">
+          <div className="flex items-center gap-1.5">
+            {reactions.length > 0 && (
+              <>
+                <div className="flex items-center -space-x-1 select-none">
+                  {Object.keys(reactionCounts)
+                    .slice(0, 3)
+                    .map((type) => (
+                      <span key={type} className="text-[14px]">
+                        {REACTION_MAP[type]?.emoji}
+                      </span>
+                    ))}
+                </div>
+                <span className="font-bold text-slate-600 dark:text-white/50">{reactions.length}</span>
+              </>
+            )}
+          </div>
+          {(post._count?.comments ?? 0) > 0 && (
+            <button 
+              onClick={() => setShowComments(!showComments)}
+              className="hover:underline font-bold text-slate-600 dark:text-white/50"
+            >
+              {(post._count?.comments ?? 0)} {(post._count?.comments ?? 0) === 1 ? "comment" : "comments"}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Action Bar */}
       <div className="flex items-center gap-2 px-4 py-4 mt-2">
-        <button onClick={handleLike} disabled={liking} className={cn("flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm", isLiked ? "text-red-500 bg-red-500/10 border border-red-500/20" : "text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 border border-transparent hover:border-primary/20 hover:text-primary")}>
-          <Heart size={22} weight={isLiked ? "fill" : "bold"} />
-          <span className="text-[13px] font-black">{likeCount > 0 ? likeCount.toLocaleString() : "Like"}</span>
-        </button>
+        {/* Like/Reaction */}
+        <div 
+          className="relative"
+          onMouseEnter={() => setShowReactionPicker(true)}
+          onMouseLeave={() => setShowReactionPicker(false)}
+        >
+          <button
+            onClick={handleLikeClick}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm",
+              myReaction
+                ? `${REACTION_MAP[myReaction]?.color} bg-primary/10 border border-primary/20`
+                : "text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 border border-transparent hover:border-primary/20 hover:text-primary"
+            )}
+          >
+            {myReaction ? (
+              <span className="text-[18px]">{REACTION_MAP[myReaction]?.emoji}</span>
+            ) : (
+              <Heart size={22} />
+            )}
+            <span className="text-[13px] font-black">
+              {myReaction ? REACTION_MAP[myReaction]?.label : "Like"}
+            </span>
+          </button>
+
+          <AnimatePresence>
+            {showReactionPicker && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute bottom-full left-0 mb-2 flex items-center gap-2 bg-white dark:bg-[#19182C] border border-slate-200 dark:border-white/10 rounded-full px-3 py-2 shadow-2xl z-50"
+              >
+                {Object.entries(REACTION_MAP).map(([type, info]) => (
+                  <button
+                    key={type}
+                    onClick={() => handleReact(type)}
+                    className="text-2xl transition-all hover:scale-125 active:scale-95 duration-200"
+                    title={info.label}
+                  >
+                    {info.emoji}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         <button onClick={() => setShowComments(!showComments)} className={cn("flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm", showComments ? "text-primary bg-primary/10 border border-primary/20" : "text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 border border-transparent hover:border-primary/20 hover:text-primary")}>
           <ChatCircle size={22} weight={showComments ? "fill" : "bold"} />
           <span className="text-[13px] font-black">{post._count?.comments ?? 0}</span>

@@ -43,3 +43,32 @@ export async function PUT(req: NextRequest, { params }: { params: { postId: stri
   });
   return NextResponse.json(updated);
 }
+
+export async function PATCH(req: NextRequest, { params }: { params: { postId: string } }) {
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const post = await prisma.post.findUnique({ where: { id: params.postId } });
+  if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (post.authorId !== session.user.id)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  try {
+    const { content, isAnonymous, backgroundStyle, interactionsDisabled } = await req.json();
+    const data: any = {};
+    if (content !== undefined) data.content = content;
+    if (isAnonymous !== undefined) data.isAnonymous = isAnonymous;
+    if (backgroundStyle !== undefined) data.backgroundStyle = backgroundStyle;
+    if (interactionsDisabled !== undefined) data.interactionsDisabled = interactionsDisabled;
+
+    const updated = await prisma.post.update({
+      where: { id: params.postId },
+      data,
+    });
+    return NextResponse.json(updated);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Failed to update post" }, { status: 500 });
+  }
+}
+
