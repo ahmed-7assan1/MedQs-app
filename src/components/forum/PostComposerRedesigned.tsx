@@ -107,17 +107,25 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, w, h);
-          // Compress quality to 0.65 to ensure it is extremely lightweight
-          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.65);
-          // Wrap in SVG wrapper to satisfy raw SVG trace light format and scaling
-          const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice"><image href="${compressedDataUrl}" width="${w}" height="${h}"/></svg>`;
-          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`;
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              toast.error("Failed to process background", { id: toastId });
+              return;
+            }
+            try {
+              toast.loading("Uploading background to Telegram...", { id: toastId });
+              const uploaded = await uploadToTelegram(blob, "background.jpg");
+              const bgUrl = uploaded.url;
 
-          const updated = [...customBgs, svgDataUrl];
-          setCustomBgs(updated);
-          localStorage.setItem("medqs_custom_bgs", JSON.stringify(updated));
-          setBackgroundStyle(svgDataUrl);
-          toast.success("Background uploaded & optimized!", { id: toastId });
+              const updated = [...customBgs, bgUrl];
+              setCustomBgs(updated);
+              localStorage.setItem("medqs_custom_bgs", JSON.stringify(updated));
+              setBackgroundStyle(bgUrl);
+              toast.success("Background uploaded to Telegram!", { id: toastId });
+            } catch {
+              toast.error("Upload to Telegram failed", { id: toastId });
+            }
+          }, "image/jpeg", 0.65);
         } else {
           toast.error("Failed to process background", { id: toastId });
         }
@@ -678,7 +686,7 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                     {showBackgroundPicker && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowBackgroundPicker(false)} />
-                        <div className="absolute bottom-full left-0 mb-2 flex bg-[#1C1B22] border border-white/10 rounded-xl p-2.5 gap-2.5 shadow-2xl z-50 flex-wrap max-w-[280px]">
+                        <div className="absolute bottom-full left-0 mb-2 flex bg-[#1C1B22] border border-white/10 rounded-xl p-2.5 gap-2.5 shadow-2xl z-50 flex-wrap w-[220px]">
                           {/* File input for custom background image upload */}
                           <input 
                             type="file" 
@@ -750,14 +758,15 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                 <button
                   onClick={handlePost}
                   disabled={!hasContent || isPosting}
+                  title="Publish Post"
                   className={cn(
-                    "px-8 py-2.5 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all shadow-xl",
+                    "h-11 w-11 rounded-2xl transition-all flex items-center justify-center shadow-xl shrink-0",
                     hasContent 
                       ? "bg-[#1D74FF] text-white shadow-[#1D74FF]/30 hover:bg-[#3483FF] hover:scale-105 active:scale-95" 
                       : "bg-white/5 text-white/10 cursor-not-allowed"
                   )}
                 >
-                  {isPosting ? <CircleNotch size={18} className="animate-spin" /> : "Post"}
+                  {isPosting ? <CircleNotch size={18} className="animate-spin" /> : <PaperPlaneTilt size={18} weight="bold" />}
                 </button>
               </div>
             </motion.div>

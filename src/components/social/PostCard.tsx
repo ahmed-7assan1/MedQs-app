@@ -203,7 +203,7 @@ export const PostCard = React.memo(({
 
   const isClassName = (style: string) => {
     if (!style) return true;
-    return !style.startsWith("data:") && !style.startsWith("http") && !style.startsWith("url(");
+    return !style.startsWith("data:") && !style.startsWith("http") && !style.startsWith("url(") && !style.startsWith("/");
   };
 
   const formatTime = (seconds: number) => {

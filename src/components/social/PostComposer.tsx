@@ -112,17 +112,25 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, w, h);
-          // Compress quality to 0.65 to ensure it is extremely lightweight
-          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.65);
-          // Wrap in SVG wrapper to satisfy raw SVG trace light format and scaling
-          const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice"><image href="${compressedDataUrl}" width="${w}" height="${h}"/></svg>`;
-          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`;
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              toast.error("Failed to process background", { id: toastId });
+              return;
+            }
+            try {
+              toast.loading("Uploading background to Telegram...", { id: toastId });
+              const uploaded = await uploadFile(blob, "background.jpg");
+              const bgUrl = uploaded.url;
 
-          const updated = [...customBgs, svgDataUrl];
-          setCustomBgs(updated);
-          localStorage.setItem("medqs_custom_bgs", JSON.stringify(updated));
-          setBackgroundStyle(svgDataUrl);
-          toast.success("Background uploaded & optimized!", { id: toastId });
+              const updated = [...customBgs, bgUrl];
+              setCustomBgs(updated);
+              localStorage.setItem("medqs_custom_bgs", JSON.stringify(updated));
+              setBackgroundStyle(bgUrl);
+              toast.success("Background uploaded to Telegram!", { id: toastId });
+            } catch {
+              toast.error("Upload to Telegram failed", { id: toastId });
+            }
+          }, "image/jpeg", 0.65);
         } else {
           toast.error("Failed to process background", { id: toastId });
         }
@@ -568,7 +576,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                     {showBackgroundPicker && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowBackgroundPicker(false)} />
-                        <div className="absolute bottom-full left-0 mb-2 flex bg-white dark:bg-[#1C1B22] border border-slate-200 dark:border-white/10 rounded-2xl p-2.5 gap-2.5 shadow-2xl z-50 flex-wrap max-w-[280px]">
+                        <div className="absolute bottom-full left-0 mb-2 flex bg-white dark:bg-[#1C1B22] border border-slate-200 dark:border-white/10 rounded-2xl p-2.5 gap-2.5 shadow-2xl z-50 flex-wrap w-[220px]">
                           {/* File input for custom background image upload */}
                           <input 
                             type="file" 
@@ -638,30 +646,31 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                   <button 
                     onClick={handleAiEnhance} 
                     disabled={isEnhancing || !content.trim()}
+                    title="Enhance with AI"
                     className={cn(
-                      "h-11 px-4 flex items-center gap-2 rounded-2xl transition-all border",
+                      "h-11 w-11 flex items-center justify-center rounded-2xl transition-all border shrink-0",
                       isEnhancing 
                         ? "bg-purple-500/10 border-purple-500/20 text-purple-500" 
                         : "bg-purple-500/5 border-transparent text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/10"
                     )}
                   >
                     {isEnhancing ? <CircleNotch size={18} className="animate-spin" /> : <Sparkle size={18} weight="fill" />}
-                    <span className="text-[11px] font-black uppercase tracking-widest hidden lg:inline">Enhance</span>
                   </button>
                 </div>
 
                 <button 
                   onClick={handlePost} 
                   disabled={!hasContent || isPosting} 
+                  title="Publish Post"
                   className={cn(
-                    "px-10 py-3 rounded-2xl text-[14px] font-black uppercase tracking-widest transition-all flex items-center justify-center min-w-[120px] relative group overflow-hidden",
+                    "h-11 w-11 rounded-2xl transition-all flex items-center justify-center relative group overflow-hidden shrink-0",
                     hasContent 
                       ? "bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] hover:-translate-y-0.5" 
                       : "bg-slate-200 dark:bg-white/5 text-slate-400 dark:text-white/10 cursor-not-allowed"
                   )}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  {isPosting ? <CircleNotch size={20} className="animate-spin" /> : "Post"}
+                  {isPosting ? <CircleNotch size={20} className="animate-spin" /> : <PaperPlaneTilt size={20} weight="bold" />}
                 </button>
               </div>
 

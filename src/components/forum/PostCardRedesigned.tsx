@@ -243,7 +243,7 @@ export function PostCardRedesigned({
 
   const isClassName = (style: string) => {
     if (!style) return true;
-    return !style.startsWith("data:") && !style.startsWith("http") && !style.startsWith("url(");
+    return !style.startsWith("data:") && !style.startsWith("http") && !style.startsWith("url(") && !style.startsWith("/");
   };
 
   const hasHashtags = post.content?.includes("#");
