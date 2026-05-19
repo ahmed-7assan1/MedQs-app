@@ -83,20 +83,11 @@ export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: Prem
 
       {/* ── Video Stage ── */}
       <div className="relative w-full">
-        {isYouTube(activeUrl) ? (
-          <CustomVideoPlayer 
-            key={activeUrl} 
-            url={activeUrl} 
-            title={activeTitle} 
-          />
-        ) : (
-          <ProfessionalVideoPlayer 
-            key={activeUrl} 
-            src={activeUrl} 
-            className="w-full"
-            minimal={true}
-          />
-        )}
+        <CustomVideoPlayer 
+          key={activeUrl} 
+          url={activeUrl} 
+          title={activeTitle} 
+        />
       </div>
 
       {/* ── Source Switcher (If multiple videos) ── */}

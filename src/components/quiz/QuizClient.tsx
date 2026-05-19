@@ -97,6 +97,8 @@ export function QuizClient({
   const [examMode, setExamMode] = useState(false);
   const { siteName, logoUrl } = useSiteConfig();
   const [logoHover, setLogoHover] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   const examActive = examMode || secureExamMode;
 
@@ -483,7 +485,32 @@ export function QuizClient({
         </div>
       </div>
 
-      <QuestionCard
+      <div
+        onTouchStart={(e) => {
+          setTouchStart(e.touches[0].clientX);
+          setTouchStartY(e.touches[0].clientY);
+        }}
+        onTouchEnd={(e) => {
+          if (touchStart === null || touchStartY === null) return;
+          const touchEnd = e.changedTouches[0].clientX;
+          const touchEndY = e.changedTouches[0].clientY;
+          const diffX = touchStart - touchEnd;
+          const diffY = touchStartY - touchEndY;
+
+          // Only trigger swipe if horizontal swipe is significantly larger than vertical (to allow scrolling)
+          if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+            if (diffX > 0) {
+              setCurrentIndex((i) => Math.min(questions.length - 1, i + 1)); // Swipe left -> next
+            } else {
+              setCurrentIndex((i) => Math.max(0, i - 1)); // Swipe right -> prev
+            }
+          }
+          setTouchStart(null);
+          setTouchStartY(null);
+        }}
+        className="touch-pan-y"
+      >
+        <QuestionCard
         key={q.id}
         question={q}
         index={currentIndex}
@@ -501,35 +528,39 @@ export function QuizClient({
         explainPaperId={paperId}
         protectContent={protectQuestion}
       />
+      </div>
 
-      <nav className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Question navigation">
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Spacer to prevent bottom nav from overlapping content on mobile */}
+      <div className="h-24 sm:hidden" />
+
+      <nav className="fixed bottom-0 inset-x-0 z-[60] flex flex-row items-center justify-between gap-4 border-t border-border bg-background/90 p-4 backdrop-blur-xl sm:static sm:mt-8 sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:backdrop-blur-none" aria-label="Question navigation">
+        <div className="flex flex-1 sm:flex-none flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
             disabled={currentIndex === 0}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 sm:py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
-            Previous
+            <span className="hidden sm:inline">Previous</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setNavigatorOpen((o) => !o)}
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-3 sm:py-2.5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-expanded={navigatorOpen}
+          >
+            <ListOrdered className="h-4 w-4" aria-hidden />
+            <span className="hidden sm:inline">Outline</span>
           </button>
           <button
             type="button"
             onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
             disabled={currentIndex >= questions.length - 1}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 sm:py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Next
+            <span className="hidden sm:inline">Next</span>
             <ChevronRight className="h-4 w-4" aria-hidden />
-          </button>
-          <button
-            type="button"
-            onClick={() => setNavigatorOpen((o) => !o)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-expanded={navigatorOpen}
-          >
-            <ListOrdered className="h-4 w-4" aria-hidden />
-            Outline
           </button>
         </div>
 
@@ -537,10 +568,11 @@ export function QuizClient({
           type="button"
           onClick={handleSubmit}
           disabled={submitting}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 sm:px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ChevronRight className="h-4 w-4" aria-hidden />}
-          {submitting ? "Submitting…" : "Submit quiz"}
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ChevronRight className="h-4 w-4 sm:hidden" aria-hidden />}
+          <span className="hidden sm:inline">{submitting ? "Submitting…" : "Submit quiz"}</span>
+          <span className="sm:hidden">{submitting ? "..." : "Submit"}</span>
         </button>
       </nav>
 

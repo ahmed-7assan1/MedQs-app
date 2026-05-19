@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { List, Bell, Sun, Moon, UserCircle, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { useThemeStore, useSidebarStore, useNotificationStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
+import { ProfileBottomSheet } from "@/components/layout/ProfileBottomSheet";
 
 interface MobileHeaderProps {
   userImage?: string | null;
@@ -15,90 +17,111 @@ interface MobileHeaderProps {
   userId?: string;
 }
 
-export function MobileHeader({ userImage, userName }: MobileHeaderProps) {
+export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps) {
+  const pathname = usePathname();
   const { siteName } = useSiteConfig();
   const { toggle: toggleSidebar } = useSidebarStore();
   const { theme, setTheme } = useThemeStore();
   const { unread } = useNotificationStore();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 10);
+      
+      // Hide on scroll down, show on scroll up
+      if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
+        setHidden(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setHidden(false);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
+  // Determine page title based on pathname
+  let pageTitle = siteName || "MedOneX";
+  if (pathname?.includes("/dashboard")) pageTitle = "Dashboard";
+  else if (pathname?.includes("/modules")) pageTitle = "Library";
+  else if (pathname?.includes("/videos")) pageTitle = "OneX Videos";
+  else if (pathname?.includes("/quiz") || pathname?.includes("/past-papers")) pageTitle = "Practice";
+  else if (pathname?.includes("/taskat")) pageTitle = "Schedule";
+  else if (pathname?.includes("/settings")) pageTitle = "Settings";
+  else if (pathname?.includes("/social") || pathname?.includes("/community")) pageTitle = "Community";
+  else if (pathname?.includes("/ai-chat")) pageTitle = "Dr. Q";
+
   return (
     <>
       <header 
         className={cn(
-          "fixed top-0 inset-x-0 z-[110] flex h-16 items-center justify-between px-4 md:hidden transition-all duration-300",
-          scrolled 
-            ? "bg-white dark:bg-[#09080F] border-b border-black/[0.05] dark:border-white/10 shadow-sm" 
-            : "bg-transparent"
+          "fixed top-0 inset-x-0 z-[150] flex h-14 items-center md:hidden transition-transform duration-300",
+          hidden ? "-translate-y-full" : "translate-y-0"
         )}
       >
-        <div className="flex w-full items-center justify-between">
-          {/* Left: Hamburger Menu */}
+        <div className={cn(
+          "flex w-full items-center justify-between px-4 py-2 transition-all duration-300 border-b",
+          scrolled 
+            ? "bg-white/95 dark:bg-[#07080f]/80 backdrop-blur-xl border-black/10 dark:border-white/[0.05]" 
+            : "bg-transparent border-transparent"
+        )}>
+          {/* Left: Avatar (Opens Bottom Sheet) */}
           <button
-            onClick={toggleSidebar}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 active:scale-95 transition-all"
+            onClick={() => setProfileSheetOpen(true)}
+            className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full overflow-hidden bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 active:scale-95 transition-all shrink-0"
           >
-            <List weight="bold" className="h-5 w-5 text-foreground" />
+            {userImage && !imageError ? (
+              <img 
+                src={userImage} 
+                alt={userName || "Profile"} 
+                className="h-full w-full object-cover" 
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#4f5fff] to-[#7b5fff] text-white font-bold text-sm uppercase">
+                {(userName || "S").charAt(0)}
+              </div>
+            )}
           </button>
+
+          {/* Center: Dynamic Title */}
+          <div className="flex-1 text-center truncate px-2">
+            <span className="text-[14px] font-black tracking-tight text-foreground">{pageTitle}</span>
+          </div>
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
             {/* Search */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 active:scale-95 transition-all"
+              className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shadow-sm active:scale-95 transition-all text-foreground/80 hover:text-foreground"
             >
-              <MagnifyingGlass weight="bold" className="h-5 w-5 text-foreground" />
+              <MagnifyingGlass weight="bold" className="h-5 w-5" />
             </button>
 
             {/* Notifications */}
             <button
               onClick={() => setNotifOpen(true)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 active:scale-95 transition-all"
+              className="relative flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shadow-sm active:scale-95 transition-all text-foreground/80 hover:text-foreground"
             >
-              <Bell weight="duotone" className="h-5 w-5 text-foreground" />
+              <Bell weight="duotone" className="h-5 w-5" />
               {unread > 0 && (
-                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-black" />
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 border border-white dark:border-[#07080f]" />
               )}
             </button>
-
-            {/* Theme Toggle */}
-            {mounted && (
-              <button
-                onClick={toggleTheme}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 active:scale-95 transition-all"
-              >
-                {theme === "dark" ? (
-                  <Sun weight="duotone" className="h-5 w-5 text-amber-400" />
-                ) : (
-                  <Moon weight="duotone" className="h-5 w-5 text-slate-600" />
-                )}
-              </button>
-            )}
-
-            {/* Profile */}
-            <Link
-              href="/profile/me"
-              className="flex h-10 w-10 items-center justify-center rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 active:scale-95 transition-all"
-            >
-              {userImage ? (
-                <img src={userImage} alt={userName || "Profile"} className="h-full w-full object-cover" />
-              ) : (
-                <UserCircle weight="duotone" className="h-6 w-6 text-primary" />
-              )}
-            </Link>
           </div>
         </div>
       </header>
@@ -121,6 +144,15 @@ export function MobileHeader({ userImage, userName }: MobileHeaderProps) {
 
       {/* Notifications Drawer */}
       {notifOpen && <NotificationPanel onClose={() => setNotifOpen(false)} />}
+
+      {/* Profile Bottom Sheet */}
+      <ProfileBottomSheet 
+        isOpen={profileSheetOpen} 
+        onClose={() => setProfileSheetOpen(false)} 
+        userImage={userImage}
+        userName={userName}
+        userId={userId}
+      />
     </>
   );
 }

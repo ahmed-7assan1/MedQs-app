@@ -367,26 +367,26 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
 
   return (
     <div className={cn(
-      "relative rounded-[32px] bg-white/70 dark:bg-[#161523]/70 backdrop-blur-3xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500 overflow-hidden"
+      "relative rounded-2xl sm:rounded-[32px] bg-white/70 dark:bg-[#161523]/70 backdrop-blur-3xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500 overflow-hidden"
     )}>
       {/* Visual Accents */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[40px] pointer-events-none" />
       
-      <div className="relative p-6">
-        <div className="flex gap-4">
+      <div className="relative p-4 sm:p-6">
+        <div className="flex gap-3 sm:gap-4">
           <div className="relative">
-            <img src={isAnonymous ? `https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous` : avatarUrl} className="h-12 w-12 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0 object-cover shadow-sm" alt="" />
+            <img src={isAnonymous ? `https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous` : avatarUrl} className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 shrink-0 object-cover shadow-sm" alt="" />
             {isAnonymous && (
               <div className="absolute -bottom-1 -right-1 bg-purple-500 text-white rounded-full p-0.5 border-2 border-white dark:border-[#161523]">
                 <Ghost size={10} weight="fill" />
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0 pt-1 relative">
+          <div className="flex-1 min-w-0 pt-0.5 sm:pt-1 relative">
             <div 
               className={cn(
                 "relative rounded-2xl transition-all duration-300 overflow-hidden",
-                backgroundStyle ? "shadow-lg border border-slate-200/50 dark:border-white/10 min-h-[180px] flex items-center justify-center p-6" : "",
+                backgroundStyle ? "shadow-lg border border-slate-200/50 dark:border-white/10 min-h-[140px] sm:min-h-[180px] flex items-center justify-center p-4 sm:p-6" : "",
                 backgroundStyle && (isClassName(backgroundStyle) ? backgroundStyle : "bg-cover bg-center")
               )}
               style={backgroundStyle && !isClassName(backgroundStyle) ? { backgroundImage: `url("${backgroundStyle}")` } : undefined}
@@ -412,10 +412,10 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                 className={cn(
                   "w-full bg-transparent border-none p-0 focus:ring-0 resize-none z-10",
                   backgroundStyle 
-                    ? "text-white placeholder:text-white/60 text-xl font-extrabold text-center leading-normal" 
-                    : "text-[17px] text-slate-800 dark:text-white/90 placeholder:text-slate-400 dark:placeholder:text-white/20 font-medium leading-relaxed"
+                    ? "text-white placeholder:text-white/60 text-lg sm:text-xl font-extrabold text-center leading-normal" 
+                    : "text-sm sm:text-[17px] text-slate-800 dark:text-white/90 placeholder:text-slate-400 dark:placeholder:text-white/20 font-medium leading-relaxed"
                 )}
-                style={{ minHeight: backgroundStyle ? "100px" : "48px" }}
+                style={{ minHeight: backgroundStyle ? "80px" : "40px" }}
               />
             </div>
 
@@ -558,39 +558,39 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
               )}
 
               {/* Interaction Bar */}
-              <div className="flex items-center justify-between mt-8 pt-5 border-t border-slate-100 dark:border-white/[0.05]">
-                <div className="flex items-center gap-1.5">
-                  <label className="h-11 px-4 flex items-center gap-2.5 text-slate-500 dark:text-white/30 hover:text-primary hover:bg-primary/5 rounded-2xl transition-all cursor-pointer group">
-                    <ImageIcon size={22} weight="fill" className="group-hover:scale-110 transition-transform" />
-                    <span className="text-[12px] font-black uppercase tracking-widest hidden sm:inline">Photo</span>
+              <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.05]">
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                  <label className="h-9 sm:h-11 px-2 sm:px-3 flex items-center gap-1.5 sm:gap-2.5 text-slate-500 dark:text-white/30 hover:text-primary hover:bg-primary/5 rounded-xl sm:rounded-2xl transition-all cursor-pointer group">
+                    <ImageIcon className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight="fill" />
+                    <span className="text-[10px] sm:text-[12px] font-black uppercase tracking-widest hidden sm:inline">Photo</span>
                     <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileInput} />
                   </label>
-                  <label className="h-11 px-4 flex items-center gap-2.5 text-slate-500 dark:text-white/30 hover:text-primary hover:bg-primary/5 rounded-2xl transition-all cursor-pointer group">
-                    <VideoCamera size={22} weight="fill" className="group-hover:scale-110 transition-transform" />
-                    <span className="text-[12px] font-black uppercase tracking-widest hidden sm:inline">Video</span>
+                  <label className="h-9 sm:h-11 px-2 sm:px-3 flex items-center gap-1.5 sm:gap-2.5 text-slate-500 dark:text-white/30 hover:text-primary hover:bg-primary/5 rounded-xl sm:rounded-2xl transition-all cursor-pointer group">
+                    <VideoCamera className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight="fill" />
+                    <span className="text-[10px] sm:text-[12px] font-black uppercase tracking-widest hidden sm:inline">Video</span>
                     <input type="file" accept="video/*" className="hidden" onChange={handleFileInput} />
                   </label>
-                  <button onClick={() => { setIsPollMode(true); if (pollOptions.length === 0) setPollOptions([{text:""}, {text:""}]); }} className={cn("h-11 w-11 flex items-center justify-center rounded-2xl transition-all", isPollMode ? "text-emerald-500 bg-emerald-500/10 shadow-inner shadow-emerald-500/10" : "text-slate-500 dark:text-white/30 hover:text-emerald-500 hover:bg-emerald-500/5")}>
-                    <ChartBar size={22} weight="bold" />
+                  <button onClick={() => { setIsPollMode(true); if (pollOptions.length === 0) setPollOptions([{text:""}, {text:""}]); }} className={cn("h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all", isPollMode ? "text-emerald-500 bg-emerald-500/10 shadow-inner" : "text-slate-500 dark:text-white/30 hover:text-emerald-500 hover:bg-emerald-500/5")}>
+                    <ChartBar className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight="bold" />
                   </button>
-                  <button onClick={() => setIsRecordingMode(!isRecordingMode)} className={cn("h-11 w-11 flex items-center justify-center rounded-2xl transition-all", isRecordingMode ? "text-primary bg-primary/10 shadow-inner shadow-primary/10" : "text-slate-500 dark:text-white/30 hover:text-primary hover:bg-primary/5")}>
-                    <Microphone size={22} weight="bold" />
+                  <button onClick={() => setIsRecordingMode(!isRecordingMode)} className={cn("h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all", isRecordingMode ? "text-primary bg-primary/10 shadow-inner" : "text-slate-500 dark:text-white/30 hover:text-primary hover:bg-primary/5")}>
+                    <Microphone className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight="bold" />
                   </button>
                   <button 
                     onClick={() => setIsAnonymous(!isAnonymous)}
                     title="Post Anonymously"
-                    className={cn("h-11 w-11 flex items-center justify-center rounded-2xl transition-all", isAnonymous ? "text-purple-500 bg-purple-500/10 shadow-inner" : "text-slate-500 dark:text-white/30 hover:text-purple-500 hover:bg-purple-500/5")}
+                    className={cn("h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all", isAnonymous ? "text-purple-500 bg-purple-500/10 shadow-inner" : "text-slate-500 dark:text-white/30 hover:text-purple-500 hover:bg-purple-500/5")}
                   >
-                    <Ghost size={22} weight={isAnonymous ? "fill" : "bold"} />
+                    <Ghost className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight={isAnonymous ? "fill" : "bold"} />
                   </button>
                   <div className="relative">
                     <button 
                       onClick={() => setShowBackgroundPicker(!showBackgroundPicker)}
                       type="button"
                       title="Background Style"
-                      className={cn("h-11 w-11 flex items-center justify-center rounded-2xl transition-all", backgroundStyle ? "text-pink-500 bg-pink-500/10 shadow-inner" : "text-slate-500 dark:text-white/30 hover:text-pink-500 hover:bg-pink-500/5")}
+                      className={cn("h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all", backgroundStyle ? "text-pink-500 bg-pink-500/10 shadow-inner" : "text-slate-500 dark:text-white/30 hover:text-pink-500 hover:bg-pink-500/5")}
                     >
-                      <Palette size={22} weight={backgroundStyle ? "fill" : "bold"} />
+                      <Palette className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight={backgroundStyle ? "fill" : "bold"} />
                     </button>
                     
                     {showBackgroundPicker && (
@@ -668,13 +668,13 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                     disabled={isEnhancing || !content.trim()}
                     title="Enhance with AI"
                     className={cn(
-                      "h-11 w-11 flex items-center justify-center rounded-2xl transition-all border shrink-0",
+                      "h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all border shrink-0",
                       isEnhancing 
                         ? "bg-purple-500/10 border-purple-500/20 text-purple-500" 
                         : "bg-purple-500/5 border-transparent text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/10"
                     )}
                   >
-                    {isEnhancing ? <CircleNotch size={18} className="animate-spin" /> : <Sparkle size={18} weight="fill" />}
+                    {isEnhancing ? <CircleNotch size={16} className="animate-spin" /> : <Sparkle size={16} weight="fill" />}
                   </button>
                 </div>
 
@@ -683,14 +683,14 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                   disabled={!hasContent || isPosting} 
                   title="Publish Post"
                   className={cn(
-                    "h-11 w-11 rounded-2xl transition-all flex items-center justify-center relative group overflow-hidden shrink-0",
+                    "h-9 w-9 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl transition-all flex items-center justify-center relative group overflow-hidden shrink-0",
                     hasContent 
                       ? "bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] hover:-translate-y-0.5" 
                       : "bg-slate-200 dark:bg-white/5 text-slate-400 dark:text-white/10 cursor-not-allowed"
                   )}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  {isPosting ? <CircleNotch size={20} className="animate-spin" /> : <PaperPlaneTilt size={20} weight="bold" />}
+                  {isPosting ? <CircleNotch size={18} className="animate-spin" /> : <PaperPlaneTilt size={18} weight="bold" />}
                 </button>
               </div>
 

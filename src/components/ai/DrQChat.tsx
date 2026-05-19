@@ -101,13 +101,13 @@ export function DrQChat() {
         </div>
 
         {/* Top Navigation / Header */}
-        <header className="h-20 flex items-center justify-between px-8 relative z-30">
-          <div className="flex items-center gap-6 overflow-x-auto no-scrollbar max-w-[70%]">
+        <header className="h-28 md:h-20 pt-12 md:pt-0 flex items-center justify-between px-4 md:px-8 relative z-30">
+          <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto no-scrollbar max-w-[75%]">
             <button 
               onClick={() => setMobileSidebarOpen(true)}
               className="md:hidden p-2 hover:bg-white/5 rounded-xl text-white/50 flex-shrink-0"
             >
-              <List size={24} weight="bold" />
+              <List size={20} weight="bold" />
             </button>
             
             {/* Persona Selector (Image 1/2 Match) */}
@@ -141,10 +141,10 @@ export function DrQChat() {
              
              <button 
                onClick={() => exportThread("markdown")}
-               className="h-11 w-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10"
+               className="h-9 w-9 md:h-11 md:w-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10"
                title="Export Chat"
              >
-               <Export size={20} weight="bold" />
+               <Export className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" weight="bold" />
              </button>
           </div>
         </header>

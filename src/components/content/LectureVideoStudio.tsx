@@ -232,7 +232,7 @@ export function LectureVideoStudio({
   return (
     <div className="w-full flex flex-col gap-8 animate-in fade-in duration-700">
       {/* 1. INTERNAL SUB-HEADER (Breadcrumbs & Progress) */}
-      <div className="w-full py-3 md:py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-0 z-40 mb-4">
+      <div className="w-full py-3 md:py-4 border-b border-[#1a1b2e]/50 bg-[#0c0d18]/30 backdrop-blur-md sticky top-16 md:top-0 z-40 mb-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 md:gap-4">
             {hubUrl && (
@@ -420,7 +420,7 @@ export function LectureVideoStudio({
               </div>
 
               {/* Enhanced Playlist Items */}
-              <div className="p-3 space-y-3 max-h-[calc(100vh-450px)] overflow-y-auto custom-scrollbar">
+              <div className="p-2 md:p-3 space-y-2 md:space-y-3 max-h-[calc(100vh-450px)] overflow-y-auto custom-scrollbar">
                 {videos.map((v, i) => {
                   const isActive = activeId === v.id;
                   const embed = getEmbed(v.url);
@@ -431,13 +431,13 @@ export function LectureVideoStudio({
                       key={v.id}
                       onClick={() => { setActiveId(v.id); setCommentsOpen(false); setCommentsLoaded(false); }}
                       className={cn(
-                        "relative w-full group flex items-center gap-4 p-3 rounded-2xl transition-all text-left overflow-hidden",
+                        "relative w-full group flex items-center gap-3 p-2.5 md:p-3 rounded-xl md:rounded-2xl transition-all text-left overflow-hidden",
                         isActive ? "bg-[#4f46e5]/10 border border-[#4f46e5]/30" : "hover:bg-[#13142a]"
                       )}
                     >
                       {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#4f46e5]" />}
                       
-                      <div className="relative w-[100px] h-[60px] rounded-xl overflow-hidden bg-black shrink-0 border border-white/5 shadow-lg group-hover:scale-105 transition-transform">
+                      <div className="relative w-[80px] sm:w-[100px] h-[48px] sm:h-[60px] rounded-lg md:rounded-xl overflow-hidden bg-black shrink-0 border border-white/5 shadow-lg group-hover:scale-105 transition-transform">
                         {thumbUrl ? (
                           <img src={thumbUrl} className="h-full w-full object-cover" />
                         ) : (
@@ -455,10 +455,10 @@ export function LectureVideoStudio({
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className={cn("text-[13px] font-[700] leading-[1.3] line-clamp-2", isActive ? "text-[#818cf8]" : "text-[#c7d2fe] group-hover:text-white")}>
+                        <p className={cn("text-[12px] md:text-[13px] font-[700] leading-[1.3] line-clamp-2", isActive ? "text-[#818cf8]" : "text-[#c7d2fe] group-hover:text-white")}>
                           {v.title}
                         </p>
-                        <div className="mt-1 flex items-center gap-2 text-[10px] text-[#4a4b6a] font-bold uppercase tracking-wider">
+                        <div className="mt-1 flex items-center gap-2 text-[9px] md:text-[10px] text-[#4a4b6a] font-bold uppercase tracking-wider">
                            <span>0{i + 1}</span>
                            <span>•</span>
                            <span>MedOneX Studio</span>

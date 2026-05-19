@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
+import { MobileHeader } from "@/components/layout/MobileHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { prisma } from "@/lib/prisma";
@@ -65,6 +66,13 @@ export default async function CleanStudentLayout({ children }: { children: React
             userName={isGuest ? undefined : displayName}
             userId={isGuest ? "" : sessionUserId}
           />
+
+          {/* Floating Mobile Header */}
+          <MobileHeader
+            userImage={userImage}
+            userName={isGuest ? undefined : displayName}
+            userId={isGuest ? "" : sessionUserId}
+          />
           
           <Sidebar
             userName={isGuest ? "Guest" : displayName}
@@ -82,15 +90,8 @@ export default async function CleanStudentLayout({ children }: { children: React
             </PageTransitionProvider>
           </div>
 
-          {/* Mobile bottom nav is already in the DashboardPage via MobileDashboardWrapper, 
-              but for other "clean" pages, we might need it. 
-              However, the user wants to avoid conflict. 
-              Since DashboardPage is the main page here, and it has its own, 
-              we only show this if it's NOT the dashboard? 
-              Actually, MobileBottomNav has md:hidden, so it will show on mobile.
-              To avoid conflict on the dashboard, we should probably NOT add it here 
-              or make it conditional.
-          */}
+          {/* Mobile Bottom Navigation */}
+          <MobileBottomNav />
         </div>
       </SiteConfigProvider>
     </TelegramBlocker>

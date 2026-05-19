@@ -1,41 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
-import { MobileTopBar, MobileSidebar } from "./MobileDashboardComponents";
-import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import React from "react";
 
 interface MobileDashboardWrapperProps {
   children: React.ReactNode;
-  user: {
+  user?: {
     name: string;
     role: string;
     initial: string;
   };
 }
 
-export function MobileDashboardWrapper({ children, user }: MobileDashboardWrapperProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+export function MobileDashboardWrapper({ children }: MobileDashboardWrapperProps) {
   return (
-    <div className="min-h-screen bg-[#07080f] text-white selection:bg-[#4f5fff]/30 relative overflow-x-hidden md:hidden">
-      {/* 1. STICKY TOP BAR */}
-      <MobileTopBar 
-        userInitial={user.initial} 
-        onMenuOpen={() => setIsMenuOpen(true)} 
-      />
-
-      {/* 2. SIDEBAR (DRAWER) */}
-      <MobileSidebar 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)} 
-        user={user}
-      />
-
-      {/* 3. MAIN CONTENT */}
-      {children}
-
-      {/* 4. BOTTOM NAVIGATION */}
-      <MobileBottomNav />
+    <div className="min-h-screen bg-slate-50 dark:bg-[#07080f] text-slate-900 dark:text-white selection:bg-[#4f5fff]/30 relative overflow-x-hidden md:hidden transition-colors duration-500">
+      {/* ── Main scrollable content ── */}
+      {/* pt-20 = header height + spacing | pb-32 = space for floating bottom nav */}
+      <main className="pt-20 pb-32 px-4 space-y-6">
+        {children}
+      </main>
     </div>
   );
 }

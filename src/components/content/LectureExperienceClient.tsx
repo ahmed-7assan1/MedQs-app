@@ -40,16 +40,29 @@ const TAB_META: Record<string, { icon: any; color: string }> = {
   drq:        { icon: Sparkles,     color: "text-primary"     },
 };
 
+import { downloadFileInline } from "@/lib/download-helper";
+import { Loader2 } from "lucide-react";
+
 function FileCard({ file }: { file: { id: string; name: string; url: string; mimeType: string } }) {
   const isPDF = file.mimeType.includes("pdf");
   const isImg = file.mimeType.includes("image");
+  const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (downloading) return;
+    setDownloading(true);
+    setProgress(0);
+    await downloadFileInline(file.url, file.name, (p) => setProgress(p));
+    setDownloading(false);
+  };
 
   return (
-    <a
-      href={file.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5"
+    <button
+      onClick={handleDownload}
+      disabled={downloading}
+      className="group flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5 text-left active:scale-[0.99] disabled:opacity-80"
     >
       <div className={cn(
         "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors",
@@ -67,10 +80,19 @@ function FileCard({ file }: { file: { id: string; name: string; url: string; mim
           {file.mimeType.split("/")[1] || "File"}
         </p>
       </div>
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all">
-        <Download className="h-4 w-4" />
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all relative">
+        {downloading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            {progress > 0 && progress < 100 && (
+              <span className="absolute -bottom-5 text-[8px] font-bold text-primary">{progress}%</span>
+            )}
+          </>
+        ) : (
+          <Download className="h-4 w-4" />
+        )}
       </div>
-    </a>
+    </button>
   );
 }
 
@@ -211,8 +233,35 @@ export function LectureExperienceClient({
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
 
-      {/* ══════════════ HERO ══════════════ */}
-      <div className="relative overflow-hidden pt-14">
+      {/* ── Mobile back navigation & title row ── */}
+      <div className="md:hidden pt-20 px-4 pb-2 space-y-3 shrink-0">
+        <Link
+          href={`/modules/${moduleId}`}
+          className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-white transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Module
+        </Link>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[8.5px] font-black uppercase tracking-[0.15em] text-primary ring-1 ring-primary/20">
+              {lecture.type === "PRACTICAL" ? <Microscope className="h-2.5 w-2.5" /> : <BookOpen className="h-2.5 w-2.5" />}
+              {lecture.type === "PRACTICAL" ? "Practical" : (lecture?.subject?.name || "Lecture")}
+            </span>
+            {lecture?.order != null && (
+              <span className="text-[8.5px] font-bold text-white/40 uppercase tracking-widest">
+                #{lecture.order}
+              </span>
+            )}
+          </div>
+          <h1 className="text-[22px] font-black leading-tight tracking-tight text-white capitalize">
+            {lecture.title}
+          </h1>
+        </div>
+      </div>
+
+      {/* ══════════════ HERO (Desktop Only) ══════════════ */}
+      <div className="relative overflow-hidden pt-14 hidden md:block">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 left-1/4 h-96 w-96 rounded-full bg-primary/10 blur-[100px]" />
           <div className="absolute -top-12 right-0 h-64 w-64 rounded-full bg-violet-500/8 blur-[80px]" />
@@ -310,7 +359,7 @@ export function LectureExperienceClient({
       </div>
 
       {/* ══════════════ TAB BAR ══════════════ */}
-      <div className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="sticky top-16 md:top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex gap-1 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
@@ -322,14 +371,19 @@ export function LectureExperienceClient({
                   key={tab.id}
                   onClick={() => setActive(tab.id)}
                   className={cn(
-                    "relative flex shrink-0 items-center gap-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-all",
+                    "relative flex flex-1 md:flex-none shrink-0 items-center justify-center gap-2 px-2 md:px-4 py-4 md:py-3 text-[11px] font-bold uppercase tracking-widest transition-all",
                     active_ ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   )}
+                  title={tab.label}
                 >
-                  <Icon className={cn("h-3.5 w-3.5 transition-colors", active_ ? meta.color : "text-muted-foreground/60")} />
-                  {tab.label}
+                  <Icon className={cn(
+                    "transition-colors", 
+                    active_ ? meta.color : "text-muted-foreground/60",
+                    "h-6 w-6 md:h-3.5 md:w-3.5"
+                  )} />
+                  <span className="hidden md:inline">{tab.label}</span>
                   {active_ && (
-                    <span className={cn("absolute bottom-0 left-0 h-[2px] w-full rounded-full", meta.color, "bg-current")} />
+                    <span className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 h-[3px] md:h-[2px] w-8 md:w-full rounded-t-full", meta.color, "bg-current")} />
                   )}
                 </button>
               );

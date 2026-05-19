@@ -271,27 +271,27 @@ export const PostCard = React.memo(({
       whileInView={{ opacity: 1, y: 0 }} 
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, ease: "easeOut" }} 
-      className="rounded-[32px] bg-white dark:bg-[#161523] border border-slate-200/80 dark:border-white/[0.08] overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300 transform-gpu" 
+      className="rounded-2xl sm:rounded-[32px] bg-white dark:bg-[#161523] border border-slate-200/80 dark:border-white/[0.08] overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300 transform-gpu" 
     >
       
       {/* Header */}
-      <div className="flex items-center gap-4 p-5 pb-0">
+      <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 pb-0">
         {post.isAnonymous ? (
           <div className="relative flex-shrink-0">
-            <img src={avatarUrl} alt="" className="h-12 w-12 rounded-2xl object-cover border border-slate-200 dark:border-white/10 shadow-sm" />
+            <img src={avatarUrl} alt="" className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl object-cover border border-slate-200 dark:border-white/10 shadow-sm" />
           </div>
         ) : (
           <Link href={`/profile/u/${post.author?.id}`} className="relative flex-shrink-0">
-            <img src={avatarUrl} alt="" className="h-12 w-12 rounded-2xl object-cover border border-slate-200 dark:border-white/10 shadow-sm" />
-            <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#161523]" />
+            <img src={avatarUrl} alt="" className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl object-cover border border-slate-200 dark:border-white/10 shadow-sm" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 sm:h-3.5 sm:w-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#161523]" />
           </Link>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
             {post.isAnonymous ? (
-              <span className="text-[15px] font-black text-slate-800 dark:text-white leading-tight">{post.author?.name}</span>
+              <span className="text-sm sm:text-[15px] font-black text-slate-800 dark:text-white leading-tight">{post.author?.name}</span>
             ) : (
-              <Link href={`/profile/u/${post.author?.id}`} className="text-[15px] font-black text-slate-800 dark:text-white hover:text-primary transition-colors leading-tight">{post.author?.name}</Link>
+              <Link href={`/profile/u/${post.author?.id}`} className="text-sm sm:text-[15px] font-black text-slate-800 dark:text-white hover:text-primary transition-colors leading-tight">{post.author?.name}</Link>
             )}
             {post.author?.rank && (
               <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest border border-primary/10">
@@ -300,13 +300,13 @@ export const PostCard = React.memo(({
             )}
             {post.isPinned && <PushPin size={14} weight="fill" className="text-amber-400" />}
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">
+          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">
             {formatDistanceToNow(new Date(post.createdAt))} ago{editedState && " • Edited"}
           </p>
         </div>
         <div className="relative">
-          <button onClick={() => setShowOptions(!showOptions)} className="h-10 w-10 flex items-center justify-center rounded-2xl text-slate-400 dark:text-white/20 hover:text-primary hover:bg-primary/5 transition-all">
-            <DotsThreeOutline size={20} weight="fill" />
+          <button onClick={() => setShowOptions(!showOptions)} className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl text-slate-400 dark:text-white/20 hover:text-primary hover:bg-primary/5 transition-all">
+            <DotsThreeOutline className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" weight="fill" />
           </button>
           <AnimatePresence>
             {showOptions && (
@@ -348,11 +348,11 @@ export const PostCard = React.memo(({
 
         if (isEditing) {
           return (
-            <div className="px-6 py-4 space-y-3">
+            <div className="px-4 sm:px-6 py-3.5 sm:py-4 space-y-3">
               <div 
                 className={cn(
                   "relative rounded-2xl transition-all duration-300 overflow-hidden",
-                  post.backgroundStyle ? "shadow-lg border border-slate-200/50 dark:border-white/10 min-h-[180px] flex items-center justify-center p-6" : "",
+                  post.backgroundStyle ? "shadow-lg border border-slate-200/50 dark:border-white/10 min-h-[180px] flex items-center justify-center p-4 sm:p-6" : "",
                   post.backgroundStyle && (isClassName(post.backgroundStyle) ? post.backgroundStyle : "bg-cover bg-center")
                 )}
                 style={post.backgroundStyle && !isClassName(post.backgroundStyle) ? { backgroundImage: `url("${post.backgroundStyle}")` } : undefined}
@@ -396,8 +396,8 @@ export const PostCard = React.memo(({
         return postContent?.trim() ? (
           <div 
             className={cn(
-              "px-6 pt-4 pb-1 text-[15px] leading-relaxed text-slate-700 dark:text-white/85 font-medium", 
-              post.backgroundStyle && `m-4 rounded-[24px] p-8 text-center text-xl font-extrabold flex items-center justify-center min-h-[160px] text-white shadow-lg relative overflow-hidden`,
+              "px-4 sm:px-6 pt-3 sm:pt-4 pb-1 text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-white/85 font-medium", 
+              post.backgroundStyle && `m-2 sm:m-4 rounded-xl sm:rounded-[24px] p-5 sm:p-8 text-center text-base sm:text-xl font-extrabold flex items-center justify-center min-h-[120px] sm:min-h-[160px] text-white shadow-lg relative overflow-hidden`,
               post.backgroundStyle && (isClassName(post.backgroundStyle) ? post.backgroundStyle : "bg-cover bg-center")
             )}
             style={post.backgroundStyle && !isClassName(post.backgroundStyle) ? { backgroundImage: `url("${post.backgroundStyle}")` } : undefined}
@@ -408,7 +408,7 @@ export const PostCard = React.memo(({
             )}
             
             <div className={cn("prose prose-slate dark:prose-invert prose-sm max-w-none prose-p:my-1", post.backgroundStyle && "relative z-10")}>
-              <ReactMarkdown components={postComponents} className={cn(post.backgroundStyle && "text-white prose-p:text-white prose-p:text-xl prose-p:font-extrabold select-none pointer-events-none")}>
+              <ReactMarkdown components={postComponents} className={cn(post.backgroundStyle && "text-white prose-p:text-white prose-p:text-base sm:prose-p:text-xl prose-p:font-extrabold select-none pointer-events-none")}>
                 {enhancePlainImageUrls(postContent)}
               </ReactMarkdown>
             </div>
@@ -416,10 +416,10 @@ export const PostCard = React.memo(({
         ) : null;
       })()}
       {/* ── INTERACTIVE CONTENT (POLLS, Q&A, SHARED QUESTIONS) ── */}
-      <div className="px-6 pb-2">
+      <div className="px-4 sm:px-6 pb-2">
          {/* 1. Shared Lecture Question */}
          {post.sharedQuestion && (
-            <div className="mt-2 p-6 rounded-[32px] bg-primary/[0.03] border border-primary/10 shadow-sm relative overflow-hidden group">
+            <div className="mt-2 p-4 sm:p-6 rounded-2xl sm:rounded-[32px] bg-primary/[0.03] border border-primary/10 shadow-sm relative overflow-hidden group">
                <div className="absolute -top-12 -left-12 w-24 h-24 bg-primary/10 blur-3xl rounded-full" />
                <div className="flex items-center gap-3 mb-4">
                   <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -460,7 +460,7 @@ export const PostCard = React.memo(({
             
             if (isQa) {
               return (
-                <div className="mt-2 p-6 rounded-[32px] bg-amber-500/[0.03] border border-amber-500/10 shadow-sm relative overflow-hidden group">
+                <div className="mt-2 p-4 sm:p-6 rounded-2xl sm:rounded-[32px] bg-amber-500/[0.03] border border-amber-500/10 shadow-sm relative overflow-hidden group">
                   <div className="absolute -top-12 -right-12 w-24 h-24 bg-amber-500/10 blur-3xl rounded-full" />
                   <div className="flex items-center gap-3 mb-5">
                      <div className="h-8 w-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
@@ -508,7 +508,7 @@ export const PostCard = React.memo(({
 
             // Regular Poll
             return (
-              <div className="mt-2 p-6 rounded-[32px] bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 shadow-inner">
+              <div className="mt-2 p-4 sm:p-6 rounded-2xl sm:rounded-[32px] bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 shadow-inner">
                 <div className="flex items-center gap-3 mb-5">
                    <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                       <ChartBar size={18} weight="fill" />
@@ -539,7 +539,7 @@ export const PostCard = React.memo(({
 
       {/* Attachments (Gallery) */}
       {attachments.length > 0 && (
-        <div className="mt-4 mx-6 mb-2 rounded-[24px] overflow-hidden shadow-lg bg-black/5 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/[0.05]">
+        <div className="mt-4 mx-4 sm:mx-6 mb-2 rounded-2xl sm:rounded-[24px] overflow-hidden shadow-lg bg-black/5 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/[0.05]">
           <div className={cn(
             "grid gap-1",
             attachments.filter((a: any) => a.type === 'image').length === 1 ? "grid-cols-1" : 
@@ -609,14 +609,14 @@ export const PostCard = React.memo(({
       )}
 
       {inlineTelegramVideo && (
-        <div className="mt-2 mx-6 mb-2 rounded-[24px] overflow-hidden shadow-lg bg-black/5 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/[0.05]">
+        <div className="mt-2 mx-4 sm:mx-6 mb-2 rounded-2xl sm:rounded-[24px] overflow-hidden shadow-lg bg-black/5 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/[0.05]">
           <ProfessionalVideoPlayer src={inlineTelegramVideo} className="w-full max-h-[450px]" />
         </div>
       )}
 
       {/* ── Reactions & Comments Summary ── */}
       {(reactions.length > 0 || (post._count?.comments ?? 0) > 0) && (
-        <div className="flex items-center justify-between px-6 py-2 border-b border-slate-100 dark:border-white/[0.04] text-[12px] text-slate-500 dark:text-white/40">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-2 border-b border-slate-100 dark:border-white/[0.04] text-[12px] text-slate-500 dark:text-white/40 font-bold">
           <div className="flex items-center gap-1.5">
             {reactions.length > 0 && (
               <>
@@ -645,7 +645,7 @@ export const PostCard = React.memo(({
       )}
 
       {/* Action Bar */}
-      <div className="flex items-center gap-2 px-4 py-4 mt-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-4 mt-1">
         {/* Like/Reaction */}
         <div 
           className="relative"
@@ -654,53 +654,60 @@ export const PostCard = React.memo(({
         >
           <button
             onClick={handleLikeClick}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setShowReactionPicker(true);
+            }}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm",
+              "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm select-none",
               myReaction
                 ? `${REACTION_MAP[myReaction]?.color} bg-primary/10 border border-primary/20`
                 : "text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 border border-transparent hover:border-primary/20 hover:text-primary"
             )}
           >
             {myReaction ? (
-              <span className="text-[18px]">{REACTION_MAP[myReaction]?.emoji}</span>
+              <span className="text-base sm:text-[18px]">{REACTION_MAP[myReaction]?.emoji}</span>
             ) : (
-              <Heart size={22} />
+              <Heart className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" />
             )}
-            <span className="text-[13px] font-black">
+            <span className="text-xs sm:text-[13px] font-black">
               {myReaction ? REACTION_MAP[myReaction]?.label : "Like"}
             </span>
           </button>
 
           <AnimatePresence>
             {showReactionPicker && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute bottom-full left-0 mb-2 flex items-center gap-2 bg-white dark:bg-[#19182C] border border-slate-200 dark:border-white/10 rounded-full px-3 py-2 shadow-2xl z-50"
-              >
-                {Object.entries(REACTION_MAP).map(([type, info]) => (
-                  <button
-                    key={type}
-                    onClick={() => handleReact(type)}
-                    className="text-2xl transition-all hover:scale-125 active:scale-95 duration-200"
-                    title={info.label}
-                  >
-                    {info.emoji}
-                  </button>
-                ))}
-              </motion.div>
+              <>
+                <div className="fixed inset-0 z-40 cursor-default" onClick={(e) => { e.stopPropagation(); setShowReactionPicker(false); }} />
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute bottom-full left-0 mb-2 flex items-center gap-1.5 bg-white dark:bg-[#19182C] border border-slate-200 dark:border-white/10 rounded-full px-2.5 py-1.5 shadow-2xl z-50"
+                >
+                  {Object.entries(REACTION_MAP).map(([type, info]) => (
+                    <button
+                      key={type}
+                      onClick={() => handleReact(type)}
+                      className="text-xl sm:text-2xl transition-all hover:scale-125 active:scale-95 duration-200"
+                      title={info.label}
+                    >
+                      {info.emoji}
+                    </button>
+                  ))}
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
         </div>
 
-        <button onClick={() => setShowComments(!showComments)} className={cn("flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm", showComments ? "text-primary bg-primary/10 border border-primary/20" : "text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 border border-transparent hover:border-primary/20 hover:text-primary")}>
-          <ChatCircle size={22} weight={showComments ? "fill" : "bold"} />
-          <span className="text-[13px] font-black">{post._count?.comments ?? 0}</span>
+        <button onClick={() => setShowComments(!showComments)} className={cn("flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm", showComments ? "text-primary bg-primary/10 border border-primary/20" : "text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 border border-transparent hover:border-primary/20 hover:text-primary")}>
+          <ChatCircle className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight={showComments ? "fill" : "bold"} />
+          <span className="text-xs sm:text-[13px] font-black">{post._count?.comments ?? 0}</span>
         </button>
-        <button onClick={handleShare} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 hover:bg-primary/10 hover:text-primary transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm">
-          <ShareNetwork size={22} weight="bold" />
-          <span className="text-[13px] font-black hidden sm:inline">Share</span>
+        <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl text-slate-500 dark:text-white/30 bg-slate-100 dark:bg-white/5 hover:bg-primary/10 hover:text-primary transition-all hover:scale-[1.03] active:scale-[0.97] shadow-sm">
+          <ShareNetwork className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight="bold" />
+          <span className="text-xs sm:text-[13px] font-black hidden sm:inline">Share</span>
         </button>
         <div className="flex-1" />
         <button 
@@ -708,9 +715,9 @@ export const PostCard = React.memo(({
             setIsSaved(!isSaved);
             toast.success(isSaved ? "Removed from saved posts" : "Post saved successfully!");
           }}
-          className={cn("h-11 w-11 flex items-center justify-center rounded-2xl transition-all shadow-sm", isSaved ? "text-primary bg-primary/10 border border-primary/20" : "text-slate-400 dark:text-white/20 hover:text-primary hover:bg-primary/5")}
+          className={cn("h-8 w-8 sm:h-11 sm:w-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all shadow-sm", isSaved ? "text-primary bg-primary/10 border border-primary/20" : "text-slate-400 dark:text-white/20 hover:text-primary hover:bg-primary/5")}
         >
-          <BookmarkSimple size={22} weight={isSaved ? "fill" : "bold"} />
+          <BookmarkSimple className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" weight={isSaved ? "fill" : "bold"} />
         </button>
       </div>
 

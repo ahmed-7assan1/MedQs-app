@@ -10,6 +10,7 @@ export interface LocalTask {
   completed: boolean;
   date: string; // ISO Date String (YYYY-MM-DD)
   createdAt: number;
+  priority?: "HIGH" | "MEDIUM" | "LOW";
 }
 
 export function useTaskPersistence(userId: string, selectedDate: Date) {

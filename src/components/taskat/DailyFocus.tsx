@@ -48,6 +48,7 @@ export function DailyFocus({
   const [newTitle, setNewTitle] = useState("");
   const [newTime, setNewTime] = useState("");
   const [selectedLectureId, setSelectedLectureId] = useState("");
+  const [newPriority, setNewPriority] = useState<"HIGH" | "MEDIUM" | "LOW">("MEDIUM");
 
   useEffect(() => {
     if (tasks.length === 0) {
@@ -86,12 +87,14 @@ export function DailyFocus({
       title,
       time: newTime,
       lectureId: taskType === "lecture" ? selectedLectureId : null,
+      priority: newPriority,
     });
 
     setIsAdding(false);
     setNewTitle("");
     setNewTime("");
     setSelectedLectureId("");
+    setNewPriority("MEDIUM");
     toast.success("Task added to your plan!");
   };
 
@@ -115,27 +118,59 @@ export function DailyFocus({
     }
   };
 
+  const isDayFinished = tasks.length > 0 && tasks.every(t => t.completed);
+
   return (
     <div className="space-y-8">
       {/* Date Strip Component */}
       <DateStrip selectedDate={selectedDate} onDateChange={onDateChange} />
 
       {/* Motivational / Status Card */}
-      <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#131220] p-6 md:p-8 shadow-2xl">
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-3xl transition-all group-hover:bg-primary/20" />
-        <div className="flex items-center gap-4 md:gap-6">
-          <div className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl btn-gradient shadow-2xl shadow-primary/30 shrink-0">
-            <CalendarDays className="h-6 w-6 md:h-7 md:w-7" />
-          </div>
-          <div>
-            <h3 className="text-xl md:text-2xl font-bold font-display text-white">
-               {selectedDate.toDateString() === new Date().toDateString() ? "Today's Agenda" : "Day Schedule"}
-            </h3>
-            <p className="text-[10px] md:text-[11px] text-white/35 font-bold uppercase tracking-widest mt-1">
-              {tasks.length} tasks planned · Stay focused
-            </p>
-          </div>
-        </div>
+      <div className={cn(
+        "group relative overflow-hidden rounded-2xl border p-6 md:p-8 shadow-2xl transition-all duration-300",
+        isDayFinished
+          ? "border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-transparent shadow-amber-500/5"
+          : "border-white/[0.07] bg-[#131220]"
+      )}>
+        {isDayFinished ? (
+          <>
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/20 blur-3xl" />
+            <div className="flex items-center gap-4 md:gap-6">
+              <motion.div 
+                animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+                transition={{ repeat: Infinity, repeatDelay: 5, duration: 1 }}
+                className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 shadow-2xl shadow-amber-500/30 shrink-0"
+              >
+                <Trophy className="h-6 w-6 md:h-7 md:w-7 text-white" />
+              </motion.div>
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold font-display text-amber-400 flex items-center gap-2">
+                   Perfect Day! <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse" />
+                </h3>
+                <p className="text-[10px] md:text-[11px] text-amber-500/70 font-bold uppercase tracking-widest mt-1">
+                   All {tasks.length} tasks completed · Outstanding job!
+                </p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-3xl transition-all group-hover:bg-primary/20" />
+            <div className="flex items-center gap-4 md:gap-6">
+              <div className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl btn-gradient shadow-2xl shadow-primary/30 shrink-0">
+                <CalendarDays className="h-6 w-6 md:h-7 md:w-7" />
+              </div>
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold font-display text-white">
+                   {selectedDate.toDateString() === new Date().toDateString() ? "Today's Agenda" : "Day Schedule"}
+                </h3>
+                <p className="text-[10px] md:text-[11px] text-white/35 font-bold uppercase tracking-widest mt-1">
+                  {tasks.length} tasks planned · Stay focused
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Task Section Header */}
@@ -161,9 +196,9 @@ export function DailyFocus({
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="rounded-2xl border border-white/[0.07] bg-[#131220] p-6 md:p-8 shadow-2xl"
+            className="rounded-2xl border border-white/[0.07] bg-[#131220] p-6 md:p-8 shadow-2xl space-y-5"
           >
-            <div className="mb-6 flex justify-center gap-3">
+            <div className="flex justify-center gap-3">
               <button
                 onClick={() => setTaskType("general")}
                 className={cn(
@@ -217,7 +252,33 @@ export function DailyFocus({
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3">
+              {/* Priority Selector */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/35 ml-2">Priority Level</label>
+                <div className="flex gap-2">
+                  {(["LOW", "MEDIUM", "HIGH"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setNewPriority(p)}
+                      className={cn(
+                        "flex-1 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all duration-300",
+                        newPriority === p
+                          ? p === "HIGH"
+                            ? "bg-red-500/10 text-red-400 border-red-500/30 shadow-lg shadow-red-500/5"
+                            : p === "MEDIUM"
+                            ? "bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-lg shadow-amber-500/5"
+                            : "bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-lg shadow-blue-500/5"
+                          : "bg-white/5 text-white/40 border-transparent hover:bg-white/10"
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <div className="relative flex-1">
                   <Clock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20" />
                   <input
@@ -284,6 +345,18 @@ export function DailyFocus({
 }
 
 const TaskItem = memo(({ task, onToggle, onDelete }: any) => {
+  const pColors = {
+    HIGH: "bg-red-500/10 text-red-400 border border-red-500/20",
+    MEDIUM: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+    LOW: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+  };
+
+  const pBorders = {
+    HIGH: "border-l-red-500",
+    MEDIUM: "border-l-amber-500",
+    LOW: "border-l-blue-500",
+  };
+
   return (
     <motion.div
       layout="position"
@@ -292,8 +365,10 @@ const TaskItem = memo(({ task, onToggle, onDelete }: any) => {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
       className={cn(
-          "row-card-new group",
-          task.completed ? "border-white/5 bg-white/5 opacity-50" : "border-l-[#6C5FF0]"
+          "row-card-new group border-l-[3.5px]",
+          task.completed 
+            ? "border-white/5 bg-white/5 opacity-50" 
+            : pBorders[task.priority as "HIGH" | "MEDIUM" | "LOW"] || "border-l-[#6C5FF0]"
       )}
     >
       <button
@@ -311,12 +386,12 @@ const TaskItem = memo(({ task, onToggle, onDelete }: any) => {
 
       <div className="flex-1 min-w-0">
         <h4 className={cn(
-          "row-title-new transition-all truncate",
+          "row-title-new transition-all truncate text-[15px] font-bold text-white",
           task.completed && "text-white/20 line-through font-normal"
         )}>
           {task.title}
         </h4>
-        <div className="row-meta-new">
+        <div className="row-meta-new flex items-center gap-2">
           {task.time && (
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
@@ -325,6 +400,11 @@ const TaskItem = memo(({ task, onToggle, onDelete }: any) => {
           )}
           {task.lectureId && (
             <span className="tag-new">Academic Link</span>
+          )}
+          {task.priority && !task.completed && (
+            <span className={cn("px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider", pColors[task.priority as "HIGH" | "MEDIUM" | "LOW"])}>
+              {task.priority}
+            </span>
           )}
         </div>
       </div>

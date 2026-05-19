@@ -104,7 +104,7 @@ export function CommentSection({ postId, isRoomPost, roomId, currentUserId, init
   };
 
   return (
-    <div className="p-6 flex flex-col gap-6">
+    <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
       {/* Input Section */}
       <div className="relative rounded-[28px] bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 p-3 shadow-inner group focus-within:ring-2 ring-primary/20 transition-all">
         <div className="flex items-center gap-3">
@@ -198,7 +198,7 @@ function CommentItem({ comment, isRoomPost, roomId, postId, currentUserId, onRep
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="rounded-[24px] bg-white dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 p-4 shadow-sm group-hover:border-primary/20 transition-colors">
+          <div className="rounded-2xl sm:rounded-[24px] bg-white dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 p-3.5 sm:p-4 shadow-sm group-hover:border-primary/20 transition-colors">
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-sm font-black text-slate-800 dark:text-white">{comment.author.name}</p>

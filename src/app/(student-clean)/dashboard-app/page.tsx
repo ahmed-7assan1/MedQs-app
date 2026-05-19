@@ -20,14 +20,8 @@ import {
   AnimatedRing,
   ActivityBar
 } from "@/components/dashboard/RedesignedComponents";
-import { 
-  MobileContinueCard,
-  MobileStatCard,
-  MobileQuickCard,
-  MobileSpecCard,
-  MobileDrQCard
-} from "@/components/dashboard/MobileDashboardComponents";
 import { MobileDashboardWrapper } from "@/components/dashboard/MobileDashboardWrapper";
+import { MobileDashboardClient } from "@/components/dashboard/MobileDashboardClient";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -108,7 +102,7 @@ export default async function DashboardPage() {
   const dailyTarget = 50;
   const dailyPct = Math.min(100, Math.round((todayItemCount / dailyTarget) * 100));
   const dbUser = dashData?.user;
-  const firstName = (dbUser?.name || user.email || "Student").split(" ")[0];
+  const firstName = (dbUser?.name || user.email?.split('@')[0] || "Student").split(" ")[0];
   const userInitial = firstName.charAt(0);
 
   const { rank, points: rankPoints = 0, progress: progressToNext = 0 } = rankInfo || {
@@ -125,89 +119,29 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 📱 MOBILE VIEW */}
-      <div className="md:hidden">
-        <MobileDashboardWrapper 
-          user={{
-            name: dbUser?.name || user.email || "Student",
-            role: "Academic Tier: " + rankLabel,
-            initial: userInitial
-          }}
-        >
-          <section className="space-y-1">
-            <p className="text-[11px] font-medium text-[#8b8fa8] uppercase tracking-[0.08em]">{greeting},</p>
-            <h1 className="text-[26px] font-bold text-white leading-tight">
-              Dr. <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4f5fff] to-[#7b5fff]">{firstName}</span>
-            </h1>
-            <div className="flex gap-2 pt-2">
-              <div className="flex-1 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#181a2e] border border-[#2a2d4a]">
-                 <div className="text-amber-500 text-sm">🔥</div>
-                 <span className="text-[13px] font-bold text-white">{currentStreak} Days</span>
-              </div>
-              <div className="flex-1 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#181a2e] border border-[#2a2d4a]">
-                 <div className="text-amber-400 text-sm">🏆</div>
-                 <span className="text-[13px] font-bold text-white">{rankPoints.toLocaleString()} Pts</span>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            {lastLectureActivity?.lecture?.subject ? (
-              <MobileContinueCard 
-                module={lastLectureActivity.lecture.title}
-                subject={lastLectureActivity.lecture.subject.name}
-                progress={overallPct}
-              />
-            ) : (
-              <MobileContinueCard module="Start Learning" subject="No active session" progress={0} />
-            )}
-          </section>
-
-          <section className="space-y-3.5">
-            <h2 className="text-[11px] font-medium text-[#8b8fa8] uppercase tracking-wider">Your Progress</h2>
-            <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 pb-1">
-              <MobileStatCard label="Daily Goal" value={`${dailyPct}%`} iconName="Target" colorClass="bg-[#3b82f6]" progress={dailyPct} delay={0} />
-              <MobileStatCard label="Knowledge" value={`${overallPct}%`} iconName="Brain" colorClass="bg-[#8b5cf6]" progress={overallPct} delay={0.05} />
-              <MobileStatCard label="Clinical Exp." value={totalQuestions.toLocaleString()} iconName="Stethoscope" colorClass="bg-[#06b6d4]" progress={75} delay={0.1} />
-              <MobileStatCard label="Modules" value={moduleProgress.length} iconName="Library" colorClass="bg-[#f59e0b]" progress={60} delay={0.15} />
-            </div>
-          </section>
-
-          <section className="space-y-3.5">
-            <h2 className="text-[11px] font-medium text-[#8b8fa8] uppercase tracking-wider">Quick Access</h2>
-            <div className="grid grid-cols-3 gap-2.5">
-              <MobileQuickCard label="Video Hub" iconName="PlayCircle" color="bg-red-500/10" delay={0.1} />
-              <MobileQuickCard label="Mock Exams" iconName="Zap" color="bg-emerald-500/10" delay={0.15} />
-              <MobileQuickCard label="Collaborate" iconName="Users" color="bg-indigo-500/10" delay={0.2} />
-              <MobileQuickCard label="Flashcards" iconName="Layers" color="bg-purple-500/10" delay={0.25} />
-              <MobileQuickCard label="Audio Lab" iconName="Mic" color="bg-amber-500/10" delay={0.3} />
-              <MobileQuickCard label="Prestige" iconName="BarChart" color="bg-cyan-500/10" delay={0.35} />
-            </div>
-          </section>
-
-          <section className="space-y-3.5">
-            <div className="flex justify-between items-center px-1">
-              <h2 className="text-[15px] font-semibold text-white">Active Specializations</h2>
-              <Link href="/modules" className="text-[11px] font-bold text-[#4f5fff]">View all →</Link>
-            </div>
-            <div className="space-y-0">
-              {moduleProgress.slice(0, 3).map((mod: any, i: number) => (
-                <MobileSpecCard 
-                  key={mod.id}
-                  name={mod.name}
-                  iconName={i === 0 ? "Brain" : i === 1 ? "Activity" : "Microscope"}
-                  progress={mod.pct}
-                  delay={0.1 * i}
-                />
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <MobileDrQCard />
-          </section>
-        </MobileDashboardWrapper>
-      </div>
+      {/* 📱 MOBILE VIEW — wrapped in MobileDashboardWrapper which handles layout shell */}
+      <MobileDashboardWrapper 
+        user={{
+          name: dbUser?.name || user.email?.split('@')[0] || "Student",
+          role: "Academic Tier: " + rankLabel,
+          initial: userInitial
+        }}
+      >
+        <MobileDashboardClient 
+          firstName={firstName}
+          greeting={greeting}
+          currentStreak={currentStreak}
+          rankPoints={rankPoints}
+          rankLabel={rankLabel}
+          dailyPct={dailyPct}
+          overallPct={overallPct}
+          todayItemCount={todayItemCount}
+          dailyTarget={dailyTarget}
+          totalQuestions={totalQuestions}
+          lastLectureActivity={lastLectureActivity}
+          moduleProgress={moduleProgress}
+        />
+      </MobileDashboardWrapper>
 
       {/* 🖥️ DESKTOP VIEW */}
       <div className="hidden md:block min-h-screen bg-background text-foreground transition-colors duration-500 selection:bg-primary/30 relative">

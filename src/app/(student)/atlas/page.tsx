@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, X, ChevronRight, Info, ExternalLink, Zap, ArrowLeft, BrainCircuit, Activity, Heart, Eye, ArrowUpRight, Home, Bone, Dumbbell, Brain, Wind, Utensils, FlaskConical, Droplets, Shield, Star, BookOpen, Sparkles, Loader2, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -66,6 +66,26 @@ export default function AtlasPage() {
   // Modals & Drawers state
   const [aiDrawerOpen, setAiDrawerOpen] = useState(false);
   const [quizModalOpen, setQuizModalOpen] = useState(false);
+
+  // Zoom & Pan state for Atlas Image
+  const [imgScale, setImgScale] = useState(1);
+  const [imgPos, setImgPos] = useState({ x: 0, y: 0 });
+  const imgLastTapTimeRef = useRef<number>(0);
+
+  const handleImgInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+    const now = Date.now();
+    if (now - imgLastTapTimeRef.current < 300) {
+      if (imgScale > 1) {
+        setImgScale(1);
+        setImgPos({ x: 0, y: 0 });
+      } else {
+        setImgScale(2.5);
+      }
+      imgLastTapTimeRef.current = 0;
+    } else {
+      imgLastTapTimeRef.current = now;
+    }
+  };
 
   // Load basic data
   useEffect(() => {
@@ -438,10 +458,32 @@ export default function AtlasPage() {
 
                   {/* Anatomical Image Display */}
                   <motion.div layoutId={`card-${selectedOrgan.id}`} className="relative aspect-square sm:aspect-video xl:aspect-square w-full rounded-[32px] border border-white/5 overflow-hidden bg-[#111115] flex flex-col items-center justify-center group shadow-xl">
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-950/20 via-black/40 to-black" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-950/20 via-black/40 to-black z-0 pointer-events-none" />
 
                     {selectedOrgan.imageUrl ? (
-                      <img src={selectedOrgan.imageUrl} alt={selectedOrgan.name} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                      <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
+                        <motion.img 
+                          src={selectedOrgan.imageUrl} 
+                          alt={selectedOrgan.name}
+                          drag={imgScale > 1}
+                          dragConstraints={{ top: -150 * imgScale, bottom: 150 * imgScale, left: -150 * imgScale, right: 150 * imgScale }}
+                          dragElastic={0.1}
+                          animate={{ scale: imgScale, x: imgPos.x, y: imgPos.y }}
+                          onDoubleClick={handleImgInteraction}
+                          onTouchStart={handleImgInteraction}
+                          className="w-full h-full object-cover opacity-80 cursor-grab active:cursor-grabbing hover:opacity-100 transition-opacity" 
+                        />
+                        {imgScale > 1 && (
+                          <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-white/70 border border-white/10 pointer-events-none">
+                            Drag to pan • Double tap to reset
+                          </div>
+                        )}
+                        {imgScale === 1 && (
+                          <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-md p-2 rounded-full border border-white/10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity md:hidden">
+                            <Search className="w-4 h-4 text-white/70" />
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <div className="relative z-10 flex flex-col items-center">
                         <div className="mb-6 drop-shadow-2xl opacity-50 text-cyan-500">

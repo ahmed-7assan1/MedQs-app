@@ -11,6 +11,8 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
+import { downloadFileInline } from "@/lib/download-helper";
+import { CircleNotch } from "@phosphor-icons/react";
 
 interface Attachment {
   url: string;
@@ -140,23 +142,11 @@ export function MessageBubble({ message, isMine }: Props) {
 
           {/* Files */}
           {files.map((f, i) => (
-            <a
-              key={i}
-              href={`${f.url}&download=true`}
-              className={cn(
-                "flex items-center gap-3 p-3 hover:bg-white/5 transition-all",
-                !hasContent && !images.length && !audio.length && !videos.length ? "" : "border-t border-white/5"
-              )}
-            >
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-white/10 shrink-0">
-                <FileText size={22} weight="bold" className="text-white/70" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[12px] font-bold text-white truncate">Attachment</p>
-                <p className="text-[10px] text-white/40 font-bold uppercase tracking-tight">Tap to download</p>
-              </div>
-              <DownloadSimple size={18} className="text-white/40 ml-auto shrink-0" />
-            </a>
+            <MessageFileItem 
+              key={i} 
+              f={f} 
+              hasBorder={!(!hasContent && !images.length && !audio.length && !videos.length)} 
+            />
           ))}
 
           {/* Text */}
@@ -176,5 +166,62 @@ export function MessageBubble({ message, isMine }: Props) {
         </div>
       </div>
     </div>
+  );
+}
+
+function MessageFileItem({ f, hasBorder }: { f: Attachment; hasBorder: boolean }) {
+  const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (downloading) return;
+    setDownloading(true);
+    setProgress(0);
+    
+    // Attempt to extract filename from URL or use a default one
+    let filename = "attachment";
+    try {
+      const urlObj = new URL(f.url);
+      const pathname = urlObj.pathname;
+      const lastSegment = pathname.substring(pathname.lastIndexOf('/') + 1);
+      if (lastSegment && lastSegment.includes('.')) {
+        filename = decodeURIComponent(lastSegment);
+      } else {
+        const fileIdParam = urlObj.searchParams.get("fileId") || urlObj.searchParams.get("id");
+        if (fileIdParam) filename = `attachment_${fileIdParam}`;
+      }
+    } catch (err) {
+      // Ignored
+    }
+
+    await downloadFileInline(f.url, filename, (p) => setProgress(p));
+    setDownloading(false);
+  };
+
+  return (
+    <button
+      onClick={handleDownload}
+      disabled={downloading}
+      className={cn(
+        "flex w-full items-center gap-3 p-3 hover:bg-white/5 transition-all text-left active:scale-[0.99] disabled:opacity-80",
+        hasBorder ? "border-t border-white/5" : ""
+      )}
+    >
+      <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-white/10 shrink-0">
+        {downloading ? (
+          <CircleNotch size={22} className="text-white/70 animate-spin" />
+        ) : (
+          <FileText size={22} weight="bold" className="text-white/70" />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[12px] font-bold text-white truncate">Attachment</p>
+        <p className="text-[10px] text-white/40 font-bold uppercase tracking-tight">
+          {downloading ? (progress > 0 && progress < 100 ? `Downloading ${progress}%` : "Downloading...") : "Tap to download"}
+        </p>
+      </div>
+      {!downloading && <DownloadSimple size={18} className="text-white/40 ml-auto shrink-0" />}
+    </button>
   );
 }

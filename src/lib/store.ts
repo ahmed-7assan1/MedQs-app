@@ -20,8 +20,18 @@ export const useThemeStore = create<ThemeStore>((set) => ({
       localStorage.setItem("medqs-theme", theme);
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDark = theme === "dark" || (theme === "system" && prefersDark);
-      document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-      document.documentElement.classList.toggle("dark", isDark);
+      
+      const updateDOM = () => {
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", isDark);
+      };
+
+      // Ensure view transition API is available
+      if (document.startViewTransition) {
+        document.startViewTransition(updateDOM);
+      } else {
+        updateDOM();
+      }
     }
   },
 }));

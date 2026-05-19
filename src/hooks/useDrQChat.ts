@@ -270,8 +270,41 @@ export function useDrQChat() {
   const [limits, setLimits] = useState<UsageLimits>({
     used: 0, limit: 100, filesUsed: 0, fileLimit: 10, rankLabel: "Student"
   });
+  const [syllabusContext, setSyllabusContext] = useState<string>("");
 
   const abortRef = useRef<boolean>(false);
+
+  // Load syllabus context
+  useEffect(() => {
+    const loadSyllabus = async () => {
+      try {
+        const res = await fetch("/api/v1/modules-all");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.result && Array.isArray(data.result)) {
+            let ctx = "MedQs Syllabus Context:\n";
+            data.result.forEach((mod: any) => {
+              ctx += `- Module: ${mod.name}\n`;
+              if (Array.isArray(mod.subjects)) {
+                mod.subjects.forEach((sub: any) => {
+                  ctx += `  * Subject: ${sub.name}\n`;
+                  if (Array.isArray(sub.lectures)) {
+                    sub.lectures.forEach((lec: any) => {
+                      ctx += `    - Lecture: ${lec.title}\n`;
+                    });
+                  }
+                });
+              }
+            });
+            setSyllabusContext(ctx);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load syllabus context for DrQ", err);
+      }
+    };
+    loadSyllabus();
+  }, []);
 
   // Load from localStorage initially
   useEffect(() => {
@@ -293,6 +326,7 @@ export function useDrQChat() {
     } catch {}
     fetchLimits();
   }, []);
+
 
   // Subscribe to Firestore for cross-device sync
   useEffect(() => {
@@ -516,6 +550,14 @@ export function useDrQChat() {
           systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
         }
 
+        // Image generation instructions
+        systemPrompt += `\n\nIMAGE GENERATION CAPABILITY: If the user asks you to draw, paint, visualize, generate, or create an image/diagram, you MUST output a markdown image tag of format: \`![Image](https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true)\` where \`{encoded_prompt}\` is a detailed description of the image in English, URL-encoded. You must choose to generate detailed, beautiful clinical illustrations or anatomical diagrams. Do not say you cannot draw.`;
+
+        // Inject syllabus context
+        if (syllabusContext) {
+          systemPrompt += `\n\nHere is the student's actual syllabus context on MedQs:\n${syllabusContext}\n\nUse this context to answer academic syllabus questions accurately (e.g. what lectures are in a module, or what subjects they study). Do not repeat this context verbatim unless asked.`;
+        }
+
         let enhancedHistory: MessageForAPI[] = [
           { role: 'system', content: systemPrompt },
           ...currentMessages.map(m => ({ role: m.role, content: m.content })),
@@ -529,6 +571,7 @@ export function useDrQChat() {
           const siteContext = `[SYSTEM CONTEXT: The user is a medical student on the MedQs platform. Current context: They are enrolled in "Internal Medicine" and their last mock exam score was 85%. Use this data to personalize your response if relevant. Do not mention this system context explicitly.]\n\n`;
           enhancedHistory[enhancedHistory.length - 1].content = siteContext + enhancedHistory[enhancedHistory.length - 1].content;
         }
+
 
         // 2. Smart Engine (Multi-Agent Consensus)
         if (settings.smartEngineEnabled) {

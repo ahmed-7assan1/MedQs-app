@@ -226,8 +226,8 @@ export function SocialClient({
         <div className="absolute bottom-[-15%] left-[-10%] w-[500px] h-[500px] bg-blue-500/6 dark:bg-blue-500/10 blur-[100px] rounded-full" />
       </div>
 
-      <div className="relative max-w-[1400px] mx-auto px-6 pt-24 pb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
+      <div className="relative w-full max-w-[1400px] mx-auto px-4 sm:px-6 pt-20 md:pt-24 pb-12">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
 
           {/* ── LEFT SIDEBAR ── */}
           <aside className="hidden lg:flex flex-col gap-5 sticky top-24 h-[calc(100vh-120px)]">

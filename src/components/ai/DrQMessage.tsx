@@ -143,30 +143,38 @@ export function DrQMessage({
               initial={{ opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               className={cn(
-                "p-4 md:p-6 rounded-[28px] shadow-2xl relative overflow-hidden transition-all backdrop-blur-xl",
+                "p-4 md:p-5 shadow-2xl relative overflow-hidden transition-all backdrop-blur-xl",
                 isAI 
-                  ? "rounded-tl-lg bg-white/[0.03] border border-white/10" 
-                  : "rounded-tr-lg border border-white/20"
+                  ? "rounded-2xl rounded-tl-sm bg-[#11121d]/75 border border-white/[0.04] text-white/90" 
+                  : "rounded-2xl rounded-tr-sm bg-[#1e2030] border border-white/[0.06] text-white"
               )}
               style={{ 
-                backgroundColor: isAI ? aiBubbleColor : `${userBubbleColor}33`, // 33 is ~20% opacity for glass effect
                 fontSize: `${fontSize}px`
               }}
             >
               {/* Glass effect gradient */}
               <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-transparent pointer-events-none" />
 
-              {/* File Chips */}
+              {/* File Cards (NeuraNest Style) */}
               {message.files && message.files.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {message.files.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/30 border border-white/10 text-[11px] font-bold text-white/70">
-                      {f.mimeType.startsWith("image/") ? <ImageIcon size={16} /> : <FileText size={16} />}
-                      {f.name}
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-2.5 mb-4">
+                  {message.files.map((f, i) => {
+                    const isImg = f.mimeType.startsWith("image/");
+                    return (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[#1f222f]/80 border border-white/[0.08] max-w-sm">
+                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 text-white/70">
+                          {isImg ? <ImageIcon size={20} className="text-blue-400" /> : <FileText size={20} className="text-red-400" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-white truncate">{f.name}</p>
+                          <p className="text-[10px] text-white/40 font-semibold">{isImg ? "Image File" : "PDF Document"}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
+
 
               {/* Markdown Content */}
               <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-black/30 prose-pre:border prose-pre:border-white/5 prose-table:border prose-table:border-white/10 prose-th:bg-white/5 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2">

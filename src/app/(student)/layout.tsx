@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/layout/Sidebar";
+import dynamic from "next/dynamic";
+const Sidebar = dynamic(() => import("@/components/layout/Sidebar").then(m => m.Sidebar), { ssr: false });
 import { NotificationsLoader } from "@/components/notifications/NotificationsLoader";
 import { AdBannerModal } from "@/components/ads/AdBannerModal";
 import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
@@ -114,7 +115,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
               {!isGuest && <AdBannerModal semesterId={userSemesterId ?? undefined} />}
 
-              <main id="main-content" className="flex-1 flex flex-col outline-none w-full pb-20 md:pb-8">
+              <main id="main-content" className="flex-1 flex flex-col outline-none w-full pt-0 md:pt-0 pb-20 md:pb-8">
                 <MobileSwipeLayout>
                   <PageTransitionProvider>
                     {children}
@@ -122,7 +123,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
                 </MobileSwipeLayout>
               </main>
 
-              <SiteFooter />
+              <div className="hidden md:block">
+                <SiteFooter />
+              </div>
               {!isGuest && <OnboardingTutorial />}
               <CookieConsentBanner />
               <PersistentAudioPlayer />
