@@ -15,7 +15,8 @@ import {
   ArrowUp,
   Ghost,
   Palette,
-  Check
+  Check,
+  PaperPlaneTilt
 } from "@phosphor-icons/react";
 import { useCommunityShareStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
