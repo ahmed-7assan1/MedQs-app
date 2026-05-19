@@ -84,20 +84,14 @@ export function PodcastsClient({
   const categories = ["Anatomy", "Physiology", "Biochemistry", "Pathology", "Pharma", "Micro"];
 
   return (
-    <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pb-36">
+    <div className="min-h-screen dark:bg-[#07080f] bg-slate-50 dark:text-white text-slate-900 pb-36">
       {/* Hero */}
       <div className="relative h-[360px] w-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/30 via-primary/10 to-transparent dark:to-[#0a0a0a] to-slate-50 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/30 via-primary/10 to-[#07080f] dark:block hidden z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-primary/10 to-slate-50 dark:hidden z-10" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=2000')] bg-cover bg-center opacity-30" />
         
-        <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-10">
-          <Link 
-            href="/dashboard-app" 
-            className="absolute top-6 left-6 flex items-center justify-center h-10 w-10 rounded-full bg-black/30 border border-white/20 text-white hover:bg-black/50 transition-all shadow-lg backdrop-blur-md"
-          >
-            <Home className="h-5 w-5" />
-          </Link>
-
+        <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-10 pt-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 text-[10px] font-black uppercase tracking-[0.2em] text-white mb-4 w-max">
             <Mic2 className="h-3.5 w-3.5" />
             MedOneX Audio Library
@@ -290,10 +284,10 @@ function RecordCard({ record, onClick, isActive }: { record: RecordItem, onClick
       whileHover={{ y: -4 }}
       onClick={onClick}
       className={cn(
-        "group relative flex flex-col p-3 rounded-[24px] transition-all cursor-pointer border shadow-sm",
+        "group relative flex flex-col p-4 rounded-[28px] transition-all cursor-pointer border shadow-sm dark:shadow-none",
         isActive 
           ? "bg-primary/10 dark:border-primary/20 border-primary/30" 
-          : "dark:bg-[#1a1a1a] bg-white dark:hover:bg-[#222] hover:bg-slate-50 dark:border-white/5 border-slate-200 hover:border-primary/30"
+          : "dark:bg-[#161523]/80 bg-white dark:hover:bg-white/[0.04] hover:bg-slate-50 border-slate-200/60 dark:border-white/[0.04] hover:border-primary/30"
       )}
     >
       <div className="aspect-square w-full rounded-xl overflow-hidden mb-3 relative">

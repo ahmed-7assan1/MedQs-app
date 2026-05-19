@@ -369,8 +369,8 @@ export function QuizClient({
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 md:px-6 md:py-8 animate-fade-in">
-      <header className="mb-6 sticky top-4 z-40 group">
+    <div className="mx-auto max-w-4xl px-4 pt-24 pb-6 md:px-6 md:py-8 animate-fade-in">
+      <header className="mb-6 sticky top-24 md:top-4 z-40 group">
         {/* Dynamic Glassmorphic Capsule */}
         <div className="rounded-2xl border border-border bg-background/80 dark:bg-muted/40 px-3 py-2.5 shadow-xl shadow-black/5 dark:shadow-black/20 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors">
           

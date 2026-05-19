@@ -141,29 +141,23 @@ export default function VideosHubPage() {
   }, [displayVideos, posts]);
 
   return (
-    <div className="min-h-screen dark:bg-[#0a0a0a] bg-slate-50 dark:text-white text-slate-900 pt-0 pb-32">
+    <div className="min-h-screen dark:bg-[#07080f] bg-slate-50 dark:text-white text-slate-900 pt-0 pb-32">
       {/* Hero */}
       <div className="relative h-[240px] md:h-[320px] w-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-red-600/20 via-transparent to-transparent z-10" />
-        <div className="absolute inset-0 dark:bg-black/40 bg-white/20 z-15" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492619334760-22c69e46a788?q=80&w=2000')] bg-cover bg-center opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-red-600/20 via-transparent to-[#07080f] z-10 hidden dark:block" />
+        <div className="absolute inset-0 bg-gradient-to-b from-red-600/10 via-transparent to-slate-50 z-10 dark:hidden" />
+        <div className="absolute inset-0 dark:bg-black/20 bg-white/40 z-15" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492619334760-22c69e46a788?q=80&w=2000')] bg-cover bg-center opacity-30 dark:opacity-20" />
         
-        <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-8 md:pb-10">
-          <Link 
-            href="/dashboard-app" 
-            className="absolute top-20 left-6 flex items-center justify-center h-10 w-10 rounded-full bg-black/10 border border-white/10 dark:text-white text-slate-800 hover:bg-black/20 transition-all shadow-sm backdrop-blur-md"
-          >
-            <Home className="h-5 w-5" />
-          </Link>
-
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 backdrop-blur-md border border-red-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-red-500 mb-4 w-max">
+        <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-end pb-8 md:pb-10 pt-20">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 backdrop-blur-md border border-red-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-red-600 dark:text-red-400 mb-3 w-max">
             <Video className="h-3.5 w-3.5" />
             Visual Learning Engine
           </div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter dark:text-white text-slate-900 mb-2">
+          <h1 className="text-4xl md:text-7xl font-black tracking-tighter dark:text-white text-slate-900 mb-2 leading-none">
             Videos.
           </h1>
-          <p className="text-sm md:text-base dark:text-white/40 text-slate-500 max-w-xl font-bold uppercase tracking-widest">
+          <p className="text-xs md:text-base dark:text-white/40 text-slate-500 max-w-xl font-bold uppercase tracking-widest">
             Medical lectures from top educators worldwide.
           </p>
         </div>
@@ -321,7 +315,7 @@ function VideoCard({ video, href }: { video: VideoResult, href: string }) {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       whileHover={{ y: -8 }}
-      className="group relative flex flex-col p-3.5 rounded-[32px] dark:bg-[#1a1a1a] bg-white dark:hover:bg-[#222] hover:bg-slate-100/50 dark:border-white/5 border-slate-200 border transition-all shadow-xl hover:shadow-2xl dark:shadow-none overflow-hidden"
+      className="group relative flex flex-col p-4 rounded-[28px] dark:bg-[#161523]/80 bg-white dark:hover:bg-white/[0.04] hover:bg-slate-50 border border-slate-200/60 dark:border-white/[0.04] transition-all shadow-sm hover:shadow-md dark:shadow-none overflow-hidden"
     >
       <Link href={href} className="relative aspect-video rounded-[24px] overflow-hidden mb-5 border dark:border-white/5 border-slate-200 dark:bg-black bg-slate-200 block">
         <div className={cn("absolute inset-0 transition-opacity duration-700", isHovered ? "opacity-0" : "opacity-100")}>
