@@ -46,6 +46,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
     return <MedOneXLogoMark title={siteName} className="h-8 w-8 text-primary" interactiveColor={true} />;
   }
   const pathname = usePathname();
+  if (pathname?.startsWith("/drawmed")) return null;
   const { unread } = useNotificationStore();
   const { setTheme } = useThemeStore();
   const totalUnread = unread || unreadCount;

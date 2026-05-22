@@ -26,7 +26,7 @@ import { MobileDashboardClient } from "@/components/dashboard/MobileDashboardCli
 export default async function DashboardPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  // if (!user) redirect("/auth?mode=login");
+  if (!user) redirect("/auth?mode=login");
 
   // Fetch full user profile to check for missing academic info
   let fullProfile = user ? await prisma.user.findUnique({
@@ -140,6 +140,18 @@ export default async function DashboardPage() {
           totalQuestions={totalQuestions}
           lastLectureActivity={lastLectureActivity}
           moduleProgress={moduleProgress}
+          alert={isProfileIncomplete ? (
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-50/10 border border-blue-500/20 mb-4">
+              <AlertCircle size={20} className="flex-shrink-0 text-blue-500" />
+              <div>
+                <p className="font-bold text-sm text-blue-800 mb-1">Profile Incomplete</p>
+                <p className="text-blue-600 text-sm">Please complete your academic details (university, faculty, semester) to unlock personalized features and accurate progress tracking.</p>
+                <Link href="/profile/edit" className="mt-2 inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors hover:bg-blue-50 bg-blue-100 rounded-md border border-blue-200 hover:text-white hover:bg-blue-600">
+                  Complete Profile <ArrowRightIcon size={14} className="ml-2" />
+                </Link>
+              </div>
+            </div>
+          ) : null}
         />
       </MobileDashboardWrapper>
 

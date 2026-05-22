@@ -47,8 +47,18 @@
 
   /* 📱 MOBILE UX REVOLUTION: Global Tap Targets & Feedback */
   @media (max-width: 768px) {
-    button, a, [role="button"], input, select {
-      min-height: 44px; /* Basic guard */
+    button,
+    [role="button"],
+    .btn,
+    .nav-link,
+    .mobile-tap-target {
+      min-height: 44px;
+      touch-action: manipulation;
+    }
+
+    input,
+    select,
+    textarea {
       touch-action: manipulation;
     }
     
@@ -178,6 +188,13 @@
   --surface-white-10: rgba(0,0,0,0.06);
   --surface-white-5: rgba(0,0,0,0.04);
   --surface-white-20: rgba(0,0,0,0.1);
+
+  /* Mobile chrome (student shell) */
+  --mobile-header-height: 3.5rem;
+  --mobile-tabbar-reserve: 5.85rem;
+  --mobile-header-offset: calc(var(--mobile-header-height) + env(safe-area-inset-top, 0px));
+  --mobile-main-pad-bottom: calc(var(--mobile-tabbar-reserve) + env(safe-area-inset-bottom, 0px));
+  --mobile-quiz-bar-pad: calc(1.25rem + env(safe-area-inset-bottom, 0px));
 }
 
 .dark {
@@ -703,15 +720,28 @@ html[data-theme="dark"] body {
   min-height: 0;
 }
 
-/* Logged-in mobile: reserve space for fixed bottom primary nav + safe area */
-/* Floating pill tab bar needs a bit more vertical room */
-.app-shell--tabbar .main-content {
-  padding-bottom: calc(5.85rem + env(safe-area-inset-bottom, 0px));
-}
-
+/* Logged-in mobile: reserve space for fixed header + floating tab bar */
 @media (max-width: 767px) {
+  .app-shell--tabbar .main-content {
+    padding-bottom: var(--mobile-main-pad-bottom);
+  }
+
+  .app-shell--tabbar .main-content > #main-content {
+    padding-top: var(--mobile-header-offset);
+    min-height: 0;
+  }
+
+  .app-shell--immersive .main-content {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .app-shell--immersive .main-content > #main-content {
+    padding-top: var(--mobile-header-offset);
+  }
+
   html:has(.app-shell--tabbar) {
-    scroll-padding-bottom: calc(5.85rem + env(safe-area-inset-bottom, 0px));
+    scroll-padding-top: var(--mobile-header-offset);
+    scroll-padding-bottom: var(--mobile-main-pad-bottom);
   }
 }
 
@@ -769,119 +799,7 @@ html[data-theme="dark"] body {
   }
 }
 
-/* Mobile drawer: always show full labels */
-.medqs-drawer .sb-link-label,
-.medqs-drawer .sb-section-label,
-.medqs-drawer .sb-badge {
-  opacity: 1 !important;
-  transform: none !important;
-  max-width: none !important;
-}
-
-.medqs-drawer .sb-link-dot {
-  opacity: 0;
-}
-
-.medqs-drawer .sb-user-info {
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-/* Mobile menu: light mode = same surfaces as the app (not always-dark rail) */
-.medqs-drawer {
-  background-color: hsl(var(--card));
-  border-right: 1px solid hsl(var(--border));
-}
-
-.medqs-drawer .sb-rail-glow {
-  opacity: 0.35;
-}
-
-html:not(.dark) .medqs-drawer .sb-rail-glow {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.dark .medqs-drawer {
-  background-color: hsl(222 32% 7%);
-  border-right-color: rgb(255 255 255 / 0.1);
-}
-
-.dark .medqs-drawer .sb-rail-glow {
-  opacity: 0.8;
-}
-
-html:not(.dark) .medqs-drawer .sb-section-label {
-  color: hsl(var(--muted-foreground));
-}
-
-html:not(.dark) .medqs-drawer .sb-link {
-  color: hsl(var(--foreground));
-}
-
-html:not(.dark) .medqs-drawer .sb-link:hover {
-  background: hsl(var(--muted));
-  color: hsl(var(--foreground));
-  transform: none;
-}
-
-html:not(.dark) .medqs-drawer .sb-link.active {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  box-shadow: 0 4px 14px hsl(var(--primary) / 0.28);
-}
-
-html:not(.dark) .medqs-drawer .sb-link.active::before {
-  background: hsl(var(--primary-foreground));
-  opacity: 0.4;
-}
-
-html:not(.dark) .medqs-drawer .sb-link-icon {
-  color: hsl(var(--muted-foreground));
-}
-
-html:not(.dark) .medqs-drawer .sb-link:hover .sb-link-icon {
-  color: hsl(var(--foreground));
-}
-
-html:not(.dark) .medqs-drawer .sb-link.active .sb-link-icon {
-  color: hsl(var(--primary-foreground));
-}
-
-html:not(.dark) .medqs-drawer .sb-footer {
-  border-top-color: hsl(var(--border));
-}
-
-html:not(.dark) .medqs-drawer .sb-user:hover {
-  background: hsl(var(--muted));
-}
-
-/* Mobile drawer: roomier tap targets, multi-line labels */
-.medqs-drawer .sb-nav {
-  gap: 4px;
-  padding: 12px 12px;
-}
-
-.medqs-drawer .sb-link {
-  height: auto;
-  min-height: 48px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  align-items: flex-start;
-  white-space: normal;
-}
-
-.medqs-drawer .sb-link-icon {
-  margin-top: 2px;
-}
-
-.medqs-drawer .sb-link-label {
-  white-space: normal;
-  line-height: 1.4;
-  padding-top: 1px;
-}
-
-/* Legacy mobile-topbar — replaced by medqs-mobile-bar in Sidebar */
+/* Legacy mobile-topbar — replaced by MobileHeader */
 .mobile-topbar {
   display: none !important;
 }
@@ -1037,8 +955,7 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   margin-bottom: 2px;
 }
 
-.sidebar.expanded .sb-section-label,
-.medqs-drawer .sb-section-label {
+.sidebar.expanded .sb-section-label {
   opacity: 1;
 }
 
@@ -1127,8 +1044,7 @@ html:not(.dark) .medqs-drawer .sb-user:hover {
   pointer-events: none;
 }
 
-.sidebar.expanded .sb-link-label,
-.medqs-drawer .sb-link-label {
+.sidebar.expanded .sb-link-label {
   opacity: 1;
   pointer-events: auto;
 }

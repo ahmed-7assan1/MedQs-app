@@ -1,27 +1,44 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { List, Bell, Sun, Moon, UserCircle, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
-import { cn } from "@/lib/utils";
-import { useThemeStore, useSidebarStore, useNotificationStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
+import { useThemeStore, useSidebarStore, useNotificationStore } from "@/lib/store";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
+import { NavigationSheet } from "@/components/layout/NavigationSheet";
 import { ProfileBottomSheet } from "@/components/layout/ProfileBottomSheet";
 
+import { 
+  Moon, 
+  Sun, 
+  Search, 
+  Bell, 
+  ChevronDown, 
+  Upload, 
+  Users, 
+  LogOut, 
+  MessageCircle, 
+  Loader2, 
+  FileText 
+} from "lucide-react";
+import { List, MagnifyingGlass } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+
+
 interface MobileHeaderProps {
-  userImage?: string | null;
+  userImage: string | null;
   userName?: string | null;
   userId?: string;
 }
 
 export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps) {
   const pathname = usePathname();
+  if (pathname?.startsWith("/drawmed")) return null;
   const { siteName } = useSiteConfig();
-  const { toggle: toggleSidebar } = useSidebarStore();
   const { theme, setTheme } = useThemeStore();
+  const { toggle: toggleSidebar } = useSidebarStore();
   const { unread } = useNotificationStore();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -29,9 +46,10 @@ export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps)
   const lastScrollY = useRef(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const [navSheetOpen, setNavSheetOpen] = useState(false); // New state
 
   const [imageError, setImageError] = useState(false);
+
 
   useEffect(() => {
     setMounted(true);
@@ -68,7 +86,8 @@ export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps)
     <>
       <header 
         className={cn(
-          "fixed top-0 inset-x-0 z-[150] flex h-14 items-center md:hidden transition-transform duration-300",
+          "fixed top-0 inset-x-0 z-[150] flex min-h-14 items-center md:hidden transition-transform duration-300",
+          "pt-[env(safe-area-inset-top,0px)]",
           hidden ? "-translate-y-full" : "translate-y-0"
         )}
       >
@@ -80,7 +99,7 @@ export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps)
         )}>
           {/* Left: Avatar (Opens Bottom Sheet) */}
           <button
-            onClick={() => setProfileSheetOpen(true)}
+            onClick={() => setNavSheetOpen(true)}
             className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full overflow-hidden bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 active:scale-95 transition-all shrink-0"
           >
             {userImage && !imageError ? (
@@ -104,6 +123,14 @@ export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps)
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shadow-sm active:scale-95 transition-all text-foreground/80 hover:text-foreground"
+              aria-label="Open navigation menu"
+            >
+              <List weight="bold" className="h-5 w-5" />
+            </button>
             {/* Search */}
             <button
               onClick={() => setSearchOpen(true)}
@@ -130,7 +157,7 @@ export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps)
       {searchOpen && (
         <div className="fixed inset-0 z-[200] md:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSearchOpen(false)} />
-          <div className="relative pt-20 px-4">
+          <div className="relative px-4" style={{ paddingTop: "var(--mobile-header-offset)" }}>
              <GlobalSearch isGuest={!userName} />
              <button 
                onClick={() => setSearchOpen(false)}
@@ -147,8 +174,8 @@ export function MobileHeader({ userImage, userName, userId }: MobileHeaderProps)
 
       {/* Profile Bottom Sheet */}
       <ProfileBottomSheet 
-        isOpen={profileSheetOpen} 
-        onClose={() => setProfileSheetOpen(false)} 
+        isOpen={navSheetOpen} 
+        onClose={() => setNavSheetOpen(false)} 
         userImage={userImage}
         userName={userName}
         userId={userId}

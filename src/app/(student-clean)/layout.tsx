@@ -4,6 +4,7 @@ import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -59,7 +60,8 @@ export default async function CleanStudentLayout({ children }: { children: React
           logoUrl: siteConfig?.logoUrl ?? null,
         }}
       >
-        <div className="min-h-screen dark:bg-[#07080f] bg-white flex flex-col">
+        <div className="app-shell app-shell--tabbar min-h-screen dark:bg-[#07080f] bg-white flex flex-col">
+          <MobileChromeController />
           {/* Desktop Navigation */}
           <FloatingIslandNavbar
             userImage={userImage}
@@ -84,10 +86,10 @@ export default async function CleanStudentLayout({ children }: { children: React
             isGuest={isGuest}
           />
 
-          <div className="flex-1 flex flex-col min-w-0">
-            <PageTransitionProvider>
-              {children}
-            </PageTransitionProvider>
+          <div className="main-content flex-1 flex flex-col min-w-0">
+            <main id="main-content" className="flex-1 flex flex-col outline-none w-full min-h-0 md:pb-8">
+              <PageTransitionProvider>{children}</PageTransitionProvider>
+            </main>
           </div>
 
           {/* Mobile Bottom Navigation */}

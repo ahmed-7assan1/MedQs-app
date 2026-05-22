@@ -166,3 +166,5 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+/* Override Tailwind arbitrary white border utilities for cleaner UI */
+[class*="border-white/"] { border-color: transparent !important; }

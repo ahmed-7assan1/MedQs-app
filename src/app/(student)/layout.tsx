@@ -13,6 +13,7 @@ import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlay
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { MobileSwipeLayout } from "@/components/layout/MobileSwipeLayout";
+import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { PremiumNotificationPrompt } from "@/components/notifications/PremiumNotificationPrompt";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -82,7 +83,8 @@ export default async function StudentLayout({ children }: { children: React.Reac
             logoUrl: siteConfig?.logoUrl ?? null,
           }}
         >
-          <div className={cn("app-shell min-h-screen flex flex-col dark:bg-[#09080F] bg-white")}>
+          <div className={cn("app-shell app-shell--tabbar min-h-screen flex flex-col dark:bg-[#09080F] bg-white")}>
+            <MobileChromeController />
             <a href="#main-content" className="skip-link sr-only">
               Skip to main content
             </a>
@@ -115,7 +117,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
               {!isGuest && <AdBannerModal semesterId={userSemesterId ?? undefined} />}
 
-              <main id="main-content" className="flex-1 flex flex-col outline-none w-full pt-0 md:pt-0 pb-20 md:pb-8">
+              <main id="main-content" className="flex-1 flex flex-col outline-none w-full min-h-0 md:pb-8">
                 <MobileSwipeLayout>
                   <PageTransitionProvider>
                     {children}

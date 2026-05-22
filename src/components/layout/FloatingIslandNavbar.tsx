@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { 
   House, Books, Question, Sparkle, MagnifyingGlass, X,
-  Chats, Clock, Sun, Moon, Gear, UsersThree,
+  Chats, Clock, Sun, Moon, Gear, UsersThree, Pen,
   PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt
 } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/social", label: "Community", icon: Chats },
   { href: "/taskat", label: "Tasks", icon: Clock },
   { href: "/teams", label: "Teams", icon: UsersThree },
+  { href: "/drawmed", label: "DrawMed", icon: Pen },
 ];
 
 export function FloatingIslandNavbar({ 
@@ -35,6 +36,7 @@ export function FloatingIslandNavbar({
   userId?: string 
 }) {
   const pathname = usePathname();
+  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed"))) return null;
   const router = useRouter();
   const { siteName, logoUrl } = useSiteConfig();
   const [isExpanded, setIsExpanded] = useState(false);

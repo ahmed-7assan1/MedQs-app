@@ -7,7 +7,7 @@ import { signOut } from "next-auth/react";
 import { 
   X, Moon, Sun, Monitor, LogOut, Settings, 
   Bell, BookOpen, Trophy, Smartphone, UserCircle,
-  BarChart3, Video, MessageSquare, Clock
+  BarChart3, Video, MessageSquare, Clock, Pen
 } from "lucide-react";
 import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -123,6 +123,7 @@ export function ProfileBottomSheet({ isOpen, onClose, userImage, userName }: Pro
               <div className="space-y-1 mb-8">
                 <MenuLink href="/modules" icon={BookOpen} label="My Library" onClick={onClose} />
                 <MenuLink href="/study-tools" icon={BarChart3} label="Study Tools" onClick={onClose} />
+                <MenuLink href="/drawmed" icon={Pen} label="DrawMed" onClick={onClose} />
                 <MenuLink href="/videos" icon={Video} label="OneX Videos" onClick={onClose} />
                 <MenuLink href="/taskat" icon={Clock} label="Taskat (Schedule)" onClick={onClose} />
                 <MenuLink href="/social" icon={MessageSquare} label="Community" onClick={onClose} />
