@@ -26,7 +26,7 @@ import {
   Bot,
   ArrowUp,
 } from "lucide-react";
-import "../../../node_modules/@excalidraw/excalidraw/dist/prod/index.css";
+import "./excalidraw-styles.css";
 import "./drawmed.css";
 
 const EXCALIDRAW_PATH = "../../../node_modules/@excalidraw/excalidraw/dist/prod/index.js" as const;
