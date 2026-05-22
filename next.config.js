@@ -1,3 +1,5 @@
+const path = require("path");
+
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
@@ -26,7 +28,7 @@ const nextConfig = {
   reactStrictMode: true,         // catch bugs early
 
   // Bundle next-auth through Next's compiler (fixes broken vendor-chunk paths on Windows).
-  transpilePackages: ["next-auth"],
+  transpilePackages: ["next-auth", "@excalidraw/excalidraw"],
 
   // ── Images ───────────────────────────────────────────────────────────────────
   images: {
@@ -99,7 +101,16 @@ const nextConfig = {
   // NOTE: Do NOT disable cache in dev — it causes slow HMR and full rebuilds.
   // The cache=false workaround was masking a stale .next issue; instead, just
   // delete .next when you see stale chunk errors.
-  webpack: (config) => config,
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@excalidraw/excalidraw": path.resolve(
+        __dirname,
+        "node_modules/@excalidraw/excalidraw/dist/prod/index.js",
+      ),
+    };
+    return config;
+  },
 };
 
 module.exports = withPWA(nextConfig);
