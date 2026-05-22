@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
-import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawImperativeAPI } from "../../../node_modules/@excalidraw/excalidraw/dist/types/excalidraw/types.d.ts";
 import { useThemeStore } from "@/lib/store";
 import { DrawMedHeader } from "./DrawMedHeader";
 import { DrawMedLibrary } from "./DrawMedLibrary";
@@ -26,11 +26,13 @@ import {
   Bot,
   ArrowUp,
 } from "lucide-react";
-import "@excalidraw/excalidraw/index.css";
+import "../../../node_modules/@excalidraw/excalidraw/dist/prod/index.css";
 import "./drawmed.css";
 
+const EXCALIDRAW_PATH = "../../../node_modules/@excalidraw/excalidraw/dist/prod/index.js" as const;
+
 const Excalidraw = dynamic(
-  () => import("@excalidraw/excalidraw").then((m) => m.Excalidraw),
+  () => import(EXCALIDRAW_PATH).then((m) => m.Excalidraw),
   { ssr: false, loading: () => <div className="drawmed-loading"><LoadingContent /></div> }
 );
 
@@ -179,7 +181,7 @@ export function DrawMedClient() {
 
   const handleExport = useCallback(async (format: "png" | "svg") => {
     if (!apiRef.current) return;
-    const { exportToBlob, exportToSvg } = await import("@excalidraw/excalidraw");
+    const { exportToBlob, exportToSvg } = await import(EXCALIDRAW_PATH);
     try {
       const elements = apiRef.current.getSceneElements();
       const appState = apiRef.current.getAppState();
