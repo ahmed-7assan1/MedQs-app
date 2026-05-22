@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <StudentPageShell maxWidthClass="max-w-5xl" className="pt-20 lg:pt-10">
+    <StudentPageShell maxWidthClass="max-w-5xl" className="lg:pt-10">
       {/* 1. Header Section Skeleton */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 px-2 lg:px-0">
         <div className="space-y-3 text-center md:text-left w-full md:w-auto">

@@ -74,6 +74,18 @@ const config: Config = {
           cyan: "#06b6d4",
           midnight: "#0f172a",
         },
+        drq: {
+          DEFAULT: "#06b6d4",
+          glow: "#22d3ee",
+          deep: "#083344",
+          dark: "#042f2e",
+          base: "#07080f",
+          panel: "#111827",
+          surface: "#1f2937",
+          border: "#374151",
+          primary: "#06b6d4",
+          secondary: "#94a3b8",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -113,6 +125,10 @@ const config: Config = {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.6" },
         },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -123,6 +139,7 @@ const config: Config = {
         "slide-up": "slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "slide-in": "slide-in-right 0.3s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        shimmer: "shimmer 2s ease-in-out infinite",
       },
     },
   },

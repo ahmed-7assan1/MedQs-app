@@ -113,6 +113,7 @@ export function DrQConfigPanel({
                             <label className="text-[12px] font-black text-white/60 uppercase tracking-widest flex items-center gap-2">
                               {pid === 'gemini' && <GoogleLogo size={16} />}
                               {pid === 'openai' && <OpenAiLogo size={16} />}
+                              {pid === 'siliconflow' && <Globe size={16} />}
                               {config.label}
                             </label>
                             {settings.byokKeys[pid] && (

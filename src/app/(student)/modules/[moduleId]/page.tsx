@@ -132,7 +132,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
         <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-transparent to-background z-10" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
         
-        <div className="container mx-auto px-6 relative z-20 pt-20">
+        <div className="container mx-auto px-6 relative z-20 max-md:pt-2 md:pt-20">
           <div className="flex flex-col md:flex-row items-center md:items-center gap-8">
              {/* Large Module Icon */}
              <div className="h-32 w-32 rounded-[32px] bg-gradient-to-br from-primary to-primary/40 p-[2px] shadow-2xl rotate-3">
@@ -175,7 +175,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
       </div>
 
       {/* Mobile Title Row */}
-      <div className="md:hidden pt-20 px-6 pb-2 flex items-center gap-4">
+      <div className="md:hidden px-6 pb-2 pt-2 flex items-center gap-4">
          <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-primary to-primary/40 p-[1.5px] shrink-0">
             <div className="h-full w-full rounded-[16.5px] bg-[#07080f] flex items-center justify-center">
                <Brain className="h-7 w-7 text-primary" />
@@ -208,6 +208,11 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Available Disciplines</p>
               </div>
             </div>
+            {mod.subjects.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-4 text-center">
+                No subjects available for this module.
+              </p>
+            )}
             
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-muted rounded-xl border border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                <Activity className="h-4 w-4 text-primary" /> Tracking Progress

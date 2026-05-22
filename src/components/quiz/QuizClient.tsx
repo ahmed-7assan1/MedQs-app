@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 
@@ -99,6 +99,26 @@ export function QuizClient({
   const [logoHover, setLogoHover] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [direction, setDirection] = useState(1);
+  const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+    };
+  }, []);
+
+  const slideVariants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+  };
+
+  const navigateTo = useCallback((index: number, dir: number) => {
+    if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+    setDirection(dir);
+    setCurrentIndex(index);
+  }, []);
 
   const examActive = examMode || secureExamMode;
 
@@ -228,6 +248,12 @@ export function QuizClient({
     return () => clearTimeout(t);
   }, [timeLeft, handleSubmit]);
 
+  useEffect(() => {
+    if (timeLeft !== null && timeLeft < 120 && timeLeft > 0 && timeLeft % 30 === 0) {
+      if (navigator.vibrate) navigator.vibrate([15, 50, 15]);
+    }
+  }, [timeLeft]);
+
   const q = questions[currentIndex];
   const answeredCount = useMemo(() => Object.keys(answers).length, [answers]);
   const pct = Math.round((answeredCount / questions.length) * 100);
@@ -294,8 +320,16 @@ export function QuizClient({
       if (revealed[q.id]) return;
       setAnswers((a) => ({ ...a, [q.id]: key }));
       setRevealed((r) => ({ ...r, [q.id]: true }));
+      if (navigator.vibrate) navigator.vibrate(10);
+      if (!examMode && currentIndex < questions.length - 1) {
+        if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+        autoAdvanceRef.current = setTimeout(() => {
+          setDirection(1);
+          setCurrentIndex((i) => Math.min(i + 1, questions.length - 1));
+        }, 1200);
+      }
     },
-    [q, revealed, examMode]
+    [q, revealed, examMode, currentIndex, questions.length]
   );
 
   const toggleFlag = useCallback(() => {
@@ -369,8 +403,8 @@ export function QuizClient({
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-24 pb-6 md:px-6 md:py-8 animate-fade-in">
-      <header className="mb-6 sticky top-24 md:top-4 z-40 group">
+    <div className="mx-auto max-w-4xl px-4 pt-4 pb-6 md:px-6 md:py-8 animate-fade-in">
+      <header className="mb-6 sticky top-2 md:top-4 z-40 group">
         {/* Dynamic Glassmorphic Capsule */}
         <div className="rounded-2xl border border-border bg-background/80 dark:bg-muted/40 px-3 py-2.5 shadow-xl shadow-black/5 dark:shadow-black/20 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors">
           
@@ -497,47 +531,65 @@ export function QuizClient({
           const diffX = touchStart - touchEnd;
           const diffY = touchStartY - touchEndY;
 
-          // Only trigger swipe if horizontal swipe is significantly larger than vertical (to allow scrolling)
           if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
             if (diffX > 0) {
-              setCurrentIndex((i) => Math.min(questions.length - 1, i + 1)); // Swipe left -> next
+              navigateTo(Math.min(currentIndex + 1, questions.length - 1), 1);
             } else {
-              setCurrentIndex((i) => Math.max(0, i - 1)); // Swipe right -> prev
+              navigateTo(Math.max(currentIndex - 1, 0), -1);
             }
           }
           setTouchStart(null);
           setTouchStartY(null);
         }}
-        className="touch-pan-y"
+        className="touch-pan-y min-h-[40vh] sm:min-h-0"
       >
-        <QuestionCard
-        key={q.id}
-        question={q}
-        index={currentIndex}
-        showResult={examMode ? false : !!revealed[q.id]}
-        selectedAnswer={answers[q.id]}
-        onAnswer={onSelectAnswer}
-        flagged={flagged.has(q.id)}
-        bookmarked={bookmarked.has(q.id)}
-        onToggleFlag={toggleFlag}
-        onToggleBookmark={toggleBookmark}
-        onReport={() => setReportOpen(true)}
-        questionSeconds={questionSeconds}
-        examMode={examMode}
-        showAiPanel={showAiPanel}
-        explainPaperId={paperId}
-        protectContent={protectQuestion}
-      />
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={q.id}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <QuestionCard
+            question={q}
+            index={currentIndex}
+            showResult={examMode ? false : !!revealed[q.id]}
+            selectedAnswer={answers[q.id]}
+            onAnswer={onSelectAnswer}
+            flagged={flagged.has(q.id)}
+            bookmarked={bookmarked.has(q.id)}
+            onToggleFlag={toggleFlag}
+            onToggleBookmark={toggleBookmark}
+            onReport={() => setReportOpen(true)}
+            questionSeconds={questionSeconds}
+            examMode={examMode}
+            showAiPanel={showAiPanel}
+            explainPaperId={paperId}
+            protectContent={protectQuestion}
+          />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Spacer to prevent bottom nav from overlapping content on mobile */}
-      <div className="h-24 sm:hidden" />
+      <div
+        className="sm:hidden"
+        style={{ height: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
+        aria-hidden
+      />
 
-      <nav className="fixed bottom-0 inset-x-0 z-[60] flex flex-row items-center justify-between gap-4 border-t border-border bg-background/90 p-4 backdrop-blur-xl sm:static sm:mt-8 sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:backdrop-blur-none" aria-label="Question navigation">
+      <nav
+        className="fixed bottom-0 inset-x-0 z-[130] flex flex-row items-center justify-between gap-4 border-t border-border bg-background/90 px-4 pt-4 backdrop-blur-xl sm:static sm:mt-8 sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
+        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
+        aria-label="Question navigation"
+      >
         <div className="flex flex-1 sm:flex-none flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+            onClick={() => navigateTo(Math.max(currentIndex - 1, 0), -1)}
             disabled={currentIndex === 0}
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 sm:py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
@@ -555,7 +607,7 @@ export function QuizClient({
           </button>
           <button
             type="button"
-            onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
+            onClick={() => navigateTo(Math.min(currentIndex + 1, questions.length - 1), 1)}
             disabled={currentIndex >= questions.length - 1}
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 sm:py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
@@ -576,9 +628,71 @@ export function QuizClient({
         </button>
       </nav>
 
+      {/* Mobile bottom sheet navigator */}
+      <AnimatePresence>
+        {navigatorOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[150] bg-black/50 sm:hidden"
+              onClick={() => setNavigatorOpen(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 400, damping: 35 }}
+              className="fixed inset-x-0 bottom-0 z-[160] rounded-t-2xl border border-border bg-card p-4 shadow-2xl sm:hidden"
+              style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Jump to question"
+            >
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/20" />
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Jump to</div>
+            <div className="flex max-h-60 flex-wrap gap-2 overflow-y-auto">
+              {questions.map((qq, i) => {
+                const done = !!answers[qq.id];
+                const rev = !!revealed[qq.id];
+                const choice = answers[qq.id];
+                const correct = !examMode && rev && choice === qq.answer;
+                const wrong = !examMode && rev && choice != null && choice !== qq.answer;
+                const isFlagged = flagged.has(qq.id);
+                return (
+                  <button
+                    key={qq.id}
+                    type="button"
+                    onClick={() => {
+                      navigateTo(i, i > currentIndex ? 1 : -1);
+                      setNavigatorOpen(false);
+                    }}
+                    className={cn(
+                      "flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      i === currentIndex && "border-primary ring-2 ring-primary/30",
+                      isFlagged && "border-amber-400 bg-amber-400/30 text-amber-800 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400",
+                      !done && !isFlagged && "border-border bg-muted/30 text-muted-foreground",
+                      examMode && done && !isFlagged && "border-primary/45 bg-primary/10 text-primary",
+                      correct && !isFlagged && "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+                      wrong && !isFlagged && "border-red-400/50 bg-red-500/10 text-red-700 dark:text-red-400"
+                    )}
+                    aria-label={`Question ${i + 1}${done ? ", answered" : ", unanswered"}${isFlagged ? ", marked for review" : ""}`}
+                  >
+                    {i + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop inline navigator */}
       {navigatorOpen && (
         <div
-          className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-lg"
+          className="mt-4 hidden sm:block rounded-2xl border border-border bg-card p-4 shadow-lg"
           role="region"
           aria-label="Jump to question"
         >
@@ -596,7 +710,7 @@ export function QuizClient({
                   key={qq.id}
                   type="button"
                   onClick={() => {
-                    setCurrentIndex(i);
+                    navigateTo(i, i > currentIndex ? 1 : -1);
                     setNavigatorOpen(false);
                   }}
                   className={cn(

@@ -84,14 +84,14 @@ export function DrQMessage({
   return (
     <div className={cn("flex group/msg relative", isAI ? "justify-start" : "justify-end")}>
       
-      {/* Floating Selection Reply Button (Image 2 Match) */}
+      {/* Floating Selection Reply Button */}
       <AnimatePresence>
         {selectionRange && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed z-[100] px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex items-center gap-2 text-[14px] font-bold transition-colors border border-blue-400/50"
+            className="fixed z-[100] px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-[0_8px_30px_rgba(79,70,229,0.4)] flex items-center gap-2 text-[14px] font-bold transition-colors border border-indigo-400/50"
             style={{ top: selectionRange.top, left: selectionRange.left, transform: "translateX(-50%)" }}
             onClick={(e) => {
               e.preventDefault();
@@ -109,33 +109,33 @@ export function DrQMessage({
         
         {/* Reply-to header */}
         {message.replyTo && (
-           <div className="flex items-center gap-2 px-4 text-[10px] text-white/30 font-black uppercase tracking-[0.2em] mb-1">
+           <div className={cn("flex items-center gap-2 px-4 text-[10px] font-black uppercase tracking-[0.2em] mb-1", isAI ? "text-slate-400 dark:text-white/40" : "text-indigo-400/80")}>
               <ArrowBendUpLeft size={12} weight="bold" />
               Replying to quote
            </div>
         )}
 
-        {/* Persona Header for AI (Image 2 Match) */}
+        {/* Persona Header for AI */}
         {isAI && (
           <div className="flex items-center gap-3 px-1 mb-1">
              <div className={cn(
-               "w-8 h-8 rounded-xl flex items-center justify-center shadow-lg",
+               "w-8 h-8 rounded-xl flex items-center justify-center shadow-md",
                `bg-gradient-to-br ${(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).gradient}`
              )}>
                 {React.cloneElement((DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement, { size: 16, weight: "fill", className: "text-white" })}
              </div>
              <div className="flex flex-col">
-                <span className="text-[12px] font-black text-white tracking-tight">{(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}</span>
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Medical Assistant</span>
+                <span className="text-[12px] font-black text-slate-800 dark:text-white tracking-tight">{(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}</span>
+                <span className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest">Medical Assistant</span>
              </div>
           </div>
         )}
 
         {message.isStreaming && !message.content ? (
-          /* Initial Streaming State (Image 2 Match) */
-          <div className="flex items-center gap-3 py-4 text-blue-400">
+          /* Initial Streaming State */
+          <div className="flex items-center gap-3 py-4 text-indigo-500">
              <Spinner size={24} className="animate-spin" />
-             <span className="text-[14px] font-medium">Getting a detailed report...</span>
+             <span className="text-[14px] font-bold">Dr. Q is thinking...</span>
           </div>
         ) : (
           <div className="relative">
@@ -143,31 +143,28 @@ export function DrQMessage({
               initial={{ opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               className={cn(
-                "p-4 md:p-5 shadow-2xl relative overflow-hidden transition-all backdrop-blur-xl",
+                "p-4 md:p-5 shadow-sm relative overflow-hidden transition-all",
                 isAI 
-                  ? "rounded-2xl rounded-tl-sm bg-[#11121d]/75 border border-white/[0.04] text-white/90" 
-                  : "rounded-2xl rounded-tr-sm bg-[#1e2030] border border-white/[0.06] text-white"
+                  ? "rounded-3xl rounded-tl-sm bg-white dark:bg-[#1a1a24] border border-slate-200/60 dark:border-white/10 text-slate-800 dark:text-white/90 shadow-lg shadow-slate-200/50 dark:shadow-none" 
+                  : "rounded-3xl rounded-tr-sm bg-indigo-600 border border-indigo-500 text-white shadow-md shadow-indigo-600/20"
               )}
               style={{ 
                 fontSize: `${fontSize}px`
               }}
             >
-              {/* Glass effect gradient */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-transparent pointer-events-none" />
-
               {/* File Cards (NeuraNest Style) */}
               {message.files && message.files.length > 0 && (
                 <div className="flex flex-col gap-2.5 mb-4">
                   {message.files.map((f, i) => {
                     const isImg = f.mimeType.startsWith("image/");
                     return (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[#1f222f]/80 border border-white/[0.08] max-w-sm">
-                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 text-white/70">
-                          {isImg ? <ImageIcon size={20} className="text-blue-400" /> : <FileText size={20} className="text-red-400" />}
+                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-sm", isAI ? "bg-slate-50 dark:bg-[#1f222f]/80 border-slate-200 dark:border-white/10" : "bg-white/10 border-white/20")}>
+                        <div className="w-10 h-10 rounded-lg bg-white/20 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
+                          {isImg ? <ImageIcon size={20} className={isAI ? "text-indigo-500" : "text-white"} /> : <FileText size={20} className={isAI ? "text-rose-500" : "text-white"} />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-white truncate">{f.name}</p>
-                          <p className="text-[10px] text-white/40 font-semibold">{isImg ? "Image File" : "PDF Document"}</p>
+                          <p className={cn("text-xs font-bold truncate", isAI ? "text-slate-800 dark:text-white" : "text-white")}>{f.name}</p>
+                          <p className={cn("text-[10px] font-semibold", isAI ? "text-slate-500 dark:text-white/50" : "text-indigo-200")}>{isImg ? "Image File" : "PDF Document"}</p>
                         </div>
                       </div>
                     );
@@ -177,19 +174,22 @@ export function DrQMessage({
 
 
               {/* Markdown Content */}
-              <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-black/30 prose-pre:border prose-pre:border-white/5 prose-table:border prose-table:border-white/10 prose-th:bg-white/5 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2">
+              <div className={cn(
+                "prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
+                isAI ? "prose-slate dark:prose-invert prose-pre:bg-slate-50 dark:prose-pre:bg-black/30 prose-pre:border-slate-200 dark:prose-pre:border-white/5 prose-table:border-slate-200 dark:prose-table:border-white/10 prose-th:bg-slate-50 dark:prose-th:bg-white/5" : "text-white prose-invert prose-p:text-white prose-headings:text-white prose-strong:text-white"
+              )}>
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
                   components={{
                     table: ({ children }) => (
-                      <div className="relative group/table overflow-hidden rounded-2xl border border-white/10 my-4">
+                      <div className="relative group/table overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 my-4 bg-white dark:bg-transparent">
                          <button 
                            onClick={(e) => {
                              const table = e.currentTarget.nextElementSibling;
                              if (table) navigator.clipboard.writeText(table.textContent || "");
                              toast.success("Table content copied");
                            }}
-                           className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white/50 opacity-0 group-hover/table:opacity-100 transition-all z-10"
+                           className="absolute top-2 right-2 p-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 rounded-lg text-slate-500 dark:text-white/50 opacity-0 group-hover/table:opacity-100 transition-all z-10"
                          >
                            <Copy size={14} />
                          </button>
@@ -220,18 +220,18 @@ export function DrQMessage({
                       const match = /language-(\w+)/.exec(className || '');
                       if (match) {
                          return (
-                           <div className="relative group/code my-4 overflow-hidden rounded-2xl border border-white/5">
-                              <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
-                                 <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{match[1]}</span>
-                                 <button onClick={() => { navigator.clipboard.writeText(String(children)); toast.success("Code copied"); }} className="p-1 hover:bg-white/10 rounded text-white/30 hover:text-white">
+                           <div className="relative group/code my-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm">
+                              <div className="flex items-center justify-between px-4 py-2 bg-slate-100 dark:bg-white/5 border-b border-slate-200 dark:border-white/5">
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40">{match[1]}</span>
+                                 <button onClick={() => { navigator.clipboard.writeText(String(children)); toast.success("Code copied"); }} className="p-1 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-400 dark:text-white/40 hover:text-slate-700 dark:hover:text-white">
                                     <Copy size={14} />
                                  </button>
                               </div>
-                              <pre className="p-4 overflow-x-auto text-[13px] bg-black/40"><code {...props}>{children}</code></pre>
+                              <pre className="p-4 overflow-x-auto text-[13px] bg-slate-50 dark:bg-black/40 text-slate-800 dark:text-white"><code {...props}>{children}</code></pre>
                            </div>
                          );
                       }
-                      return <code className={cn("bg-white/10 px-1.5 py-0.5 rounded text-purple-300 font-bold text-[0.9em]", className)} {...props}>{children}</code>;
+                      return <code className={cn("px-1.5 py-0.5 rounded font-bold text-[0.9em]", isAI ? "bg-slate-100 dark:bg-white/10 text-indigo-600 dark:text-purple-300" : "bg-white/20 text-white")} {...props}>{children}</code>;
                     }
                   }}
                 >
@@ -241,29 +241,29 @@ export function DrQMessage({
 
               {/* Streaming Indicator (Live Typing Orb) */}
               {message.isStreaming && (
-                <div className="flex items-center gap-2 mt-4 px-2 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 w-fit">
-                   <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-                   <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Dr. Q is thinking...</span>
+                <div className="flex items-center gap-2 mt-4 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 w-fit">
+                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
+                   <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Dr. Q is thinking...</span>
                 </div>
               )}
             </motion.div>
 
             {/* AI Message Actions */}
             {isAI && !message.isStreaming && (
-              <div className="absolute -bottom-4 right-4 flex items-center gap-1 p-1 bg-[#1a1830] border border-white/10 rounded-xl shadow-xl opacity-0 group-hover/msg:opacity-100 transition-all">
+              <div className="absolute -bottom-5 right-4 flex items-center gap-1 p-1 bg-white dark:bg-[#1a1830] border border-slate-200 dark:border-white/10 rounded-xl shadow-lg opacity-0 group-hover/msg:opacity-100 transition-all z-10">
                 <button 
                   onClick={() => onReaction(message.id, message.reaction === "like" ? null : "like")}
-                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "like" ? "text-emerald-400 bg-emerald-500/10" : "text-white/20 hover:text-white hover:bg-white/5")}
+                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "like" ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5")}
                 >
                   <ThumbsUp size={16} weight={message.reaction === "like" ? "fill" : "bold"} />
                 </button>
                 <button 
                   onClick={() => onReaction(message.id, message.reaction === "dislike" ? null : "dislike")}
-                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "dislike" ? "text-red-400 bg-red-500/10" : "text-white/20 hover:text-white hover:bg-white/5")}
+                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "dislike" ? "text-rose-500 bg-rose-50 dark:bg-rose-500/10" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5")}
                 >
                   <ThumbsDown size={16} weight={message.reaction === "dislike" ? "fill" : "bold"} />
                 </button>
-                <div className="w-px h-4 bg-white/5 mx-1" />
+                <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
                 <button onClick={() => {
                   toast.promise(
                     new Promise((resolve) => setTimeout(resolve, 1000)),
@@ -273,16 +273,16 @@ export function DrQMessage({
                       error: 'Failed to save flashcard.',
                     }
                   );
-                }} className="p-1.5 rounded-lg text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all" title="Save to Flashcards">
+                }} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all" title="Save to Flashcards">
                   <Lightning size={16} weight="bold" />
                 </button>
-                <button onClick={handleCopy} className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/5 transition-all">
-                  {copying ? <Check size={16} weight="bold" className="text-emerald-400" /> : <Copy size={16} weight="bold" />}
+                <button onClick={handleCopy} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                  {copying ? <Check size={16} weight="bold" className="text-emerald-500" /> : <Copy size={16} weight="bold" />}
                 </button>
-                <button onClick={onRegenerate} className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/5 transition-all">
+                <button onClick={onRegenerate} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
                   <ArrowClockwise size={16} weight="bold" />
                 </button>
-                <button onClick={() => onShare?.(message.content)} className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/5 transition-all">
+                <button onClick={() => onShare?.(message.content)} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
                   <ShareNetwork size={16} weight="bold" />
                 </button>
               </div>
@@ -308,20 +308,20 @@ function ChecklistCard({ c }: { c: { title: string, items: { text: string, compl
   const progress = Math.round((items.filter(i => i.completed).length / items.length) * 100);
 
   return (
-    <div className="my-6 p-6 rounded-[24px] bg-[#0d0c18] border border-emerald-500/20 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="my-6 p-6 rounded-[24px] bg-white dark:bg-[#0d0c18] border border-emerald-500/20 shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shadow-inner">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-inner border border-emerald-100 dark:border-transparent">
              <CheckCircle size={20} weight="fill" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">OSCE Evaluation</span>
-            <span className="text-[13px] font-black text-white tracking-tight">{c.title}</span>
+            <span className="text-[10px] font-black text-slate-400 dark:text-white/40 uppercase tracking-[0.2em]">OSCE Evaluation</span>
+            <span className="text-[14px] font-black text-slate-800 dark:text-white tracking-tight">{c.title}</span>
           </div>
         </div>
         <div className="text-right">
-           <span className="text-[14px] font-black text-emerald-400">{progress}%</span>
-           <div className="w-20 h-1.5 bg-white/5 rounded-full mt-1 overflow-hidden">
+           <span className="text-[15px] font-black text-emerald-500 dark:text-emerald-400">{progress}%</span>
+           <div className="w-20 h-1.5 bg-slate-100 dark:bg-white/5 rounded-full mt-1 overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} className="h-full bg-emerald-500" />
            </div>
         </div>
@@ -333,17 +333,17 @@ function ChecklistCard({ c }: { c: { title: string, items: { text: string, compl
             key={i}
             onClick={() => toggleItem(i)}
             className={cn(
-              "w-full flex items-center gap-4 p-4 rounded-xl transition-all text-left group",
-              item.completed ? "bg-emerald-500/5 text-white/90" : "bg-white/[0.02] text-white/40 hover:bg-white/5"
+              "w-full flex items-center gap-4 p-4 rounded-xl transition-all text-left group border border-transparent",
+              item.completed ? "bg-emerald-50 dark:bg-emerald-500/5 text-emerald-700 dark:text-white/90 border-emerald-100 dark:border-transparent" : "bg-slate-50 dark:bg-white/[0.02] text-slate-600 dark:text-white/60 hover:bg-slate-100 dark:hover:bg-white/5 hover:border-slate-200 dark:hover:border-white/5"
             )}
           >
             <div className={cn(
               "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
-              item.completed ? "bg-emerald-500 border-emerald-500" : "border-white/10 bg-white/5 group-hover:border-white/20"
+              item.completed ? "bg-emerald-500 border-emerald-500" : "border-slate-300 dark:border-white/20 bg-white dark:bg-white/5 group-hover:border-slate-400 dark:group-hover:border-white/30"
             )}>
               {item.completed && <Check size={12} weight="bold" className="text-white" />}
             </div>
-            <span className={cn("text-[14px] font-medium transition-all", item.completed && "line-through opacity-50")}>
+            <span className={cn("text-[14px] font-semibold transition-all", item.completed && "line-through opacity-50")}>
               {item.text}
             </span>
           </button>
@@ -351,8 +351,8 @@ function ChecklistCard({ c }: { c: { title: string, items: { text: string, compl
       </div>
       
       {progress === 100 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-           <span className="text-[12px] font-black text-emerald-400 uppercase tracking-widest">Protocol Fully Completed 🏆</span>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-center">
+           <span className="text-[12px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Protocol Fully Completed 🏆</span>
         </motion.div>
       )}
     </div>
@@ -366,24 +366,24 @@ function QuestionCard({ q, onSave, onShare }: { q: { question: string, options: 
   const isCorrect = selected === q.answer;
 
   return (
-    <div className="my-6 p-6 rounded-[24px] bg-[#161523] border border-purple-500/20 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
+    <div className="my-6 p-6 rounded-[24px] bg-white dark:bg-[#161523] border border-indigo-200 dark:border-indigo-500/20 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shadow-inner">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 shadow-inner border border-indigo-100 dark:border-transparent">
              <Lightning size={20} weight="fill" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Generated Assessment</span>
-            <span className="text-[13px] font-black text-white tracking-tight">Platform Question</span>
+            <span className="text-[10px] font-black text-slate-400 dark:text-white/40 uppercase tracking-[0.2em]">Generated Assessment</span>
+            <span className="text-[14px] font-black text-slate-800 dark:text-white tracking-tight">Platform Question</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-           <button onClick={onSave} className="p-2 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-all"><BookmarkSimple size={18} /></button>
-           <button onClick={onShare} className="p-2 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-all"><ShareNetwork size={18} /></button>
+           <button onClick={onSave} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-indigo-500 dark:hover:text-white transition-all"><BookmarkSimple size={18} /></button>
+           <button onClick={onShare} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-indigo-500 dark:hover:text-white transition-all"><ShareNetwork size={18} /></button>
         </div>
       </div>
       
-      <h3 className="text-[16px] font-bold text-white mb-6 leading-relaxed">{q.question}</h3>
+      <h3 className="text-[16px] font-bold text-slate-900 dark:text-white mb-6 leading-relaxed">{q.question}</h3>
       
       <div className="space-y-3">
         {q.options.map((opt, i) => (
@@ -393,9 +393,9 @@ function QuestionCard({ q, onSave, onShare }: { q: { question: string, options: 
             onClick={() => setSelected(opt)}
             className={cn(
               "w-full text-left px-5 py-4 rounded-2xl border transition-all flex items-center justify-between group",
-              selected === null ? "bg-white/5 border-white/5 hover:border-purple-500/50 hover:bg-purple-500/5" : 
-              opt === q.answer ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400" :
-              selected === opt ? "bg-red-500/10 border-red-500/50 text-red-400" : "bg-black/20 border-white/5 opacity-50"
+              selected === null ? "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/5 hover:border-indigo-500/30 dark:hover:border-indigo-500/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/5" : 
+              opt === q.answer ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500/30 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400 font-bold" :
+              selected === opt ? "bg-rose-50 dark:bg-rose-500/10 border-rose-500/30 dark:border-rose-500/50 text-rose-700 dark:text-rose-400 font-bold" : "bg-slate-100 dark:bg-black/20 border-slate-200 dark:border-white/5 opacity-50"
             )}
           >
             <span className="text-[14px] font-medium leading-normal">{opt}</span>
@@ -410,26 +410,26 @@ function QuestionCard({ q, onSave, onShare }: { q: { question: string, options: 
           <motion.div 
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            className="mt-6 pt-6 border-t border-white/5"
+            className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10"
           >
             <div className={cn(
               "p-4 rounded-2xl border flex flex-col gap-2",
-              isCorrect ? "bg-emerald-500/5 border-emerald-500/10" : "bg-red-500/5 border-red-500/10"
+              isCorrect ? "bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/10" : "bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/10"
             )}>
               <div className="flex items-center gap-2">
-                {isCorrect ? <CheckCircle size={18} className="text-emerald-500" /> : <WarningCircle size={18} className="text-red-500" />}
-                <span className={cn("text-[13px] font-black uppercase tracking-widest", isCorrect ? "text-emerald-500" : "text-red-500")}>
+                {isCorrect ? <CheckCircle size={18} className="text-emerald-600 dark:text-emerald-500" /> : <WarningCircle size={18} className="text-rose-600 dark:text-rose-500" />}
+                <span className={cn("text-[13px] font-black uppercase tracking-widest", isCorrect ? "text-emerald-600 dark:text-emerald-500" : "text-rose-600 dark:text-rose-500")}>
                   {isCorrect ? "Correct!" : "Incorrect"}
                 </span>
               </div>
               {q.explanation && (
-                <p className="text-[13px] text-white/60 leading-relaxed font-medium mt-1">{q.explanation}</p>
+                <p className="text-[13px] text-slate-600 dark:text-white/70 leading-relaxed font-semibold mt-1">{q.explanation}</p>
               )}
             </div>
             
             <button 
               onClick={() => { setSelected(null); }}
-              className="mt-4 w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-[11px] font-black uppercase tracking-widest text-white/50 hover:text-white transition-all"
+              className="mt-4 w-full py-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-[12px] font-black uppercase tracking-widest text-slate-500 dark:text-white/60 hover:text-slate-800 dark:hover:text-white transition-all"
             >
               Try Again
             </button>

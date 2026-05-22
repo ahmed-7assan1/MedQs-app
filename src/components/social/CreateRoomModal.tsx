@@ -75,14 +75,14 @@ export function CreateRoomModal({ isOpen, onClose, onSuccess }: CreateRoomModalP
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[500] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[500] flex items-end md:items-center justify-center p-0 md:p-4 max-md:overflow-y-auto"
           style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(16px)" }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
-            className="w-full max-w-lg rounded-[40px] overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.5)] border border-white/10 relative"
+            className="w-full max-w-lg max-md:max-h-[90dvh] max-md:overflow-y-auto max-md:rounded-t-[32px] md:rounded-[40px] rounded-[40px] overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.5)] border border-white/10 relative"
             style={{ background: "linear-gradient(135deg, #161523 0%, #0d0c16 100%)" }}
           >
             {/* Background Glows */}
@@ -106,7 +106,7 @@ export function CreateRoomModal({ isOpen, onClose, onSuccess }: CreateRoomModalP
             </div>
 
             {/* Body */}
-            <div className="p-8 relative z-10 min-h-[400px] flex flex-col">
+            <div className="p-6 md:p-8 relative z-10 min-h-0 md:min-h-[400px] flex flex-col">
               
               <AnimatePresence mode="wait">
                 {step === 1 ? (

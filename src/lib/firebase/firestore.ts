@@ -1,5 +1,5 @@
 import { db } from "./config";
-import { collection, doc, setDoc, getDoc, onSnapshot, query, orderBy, getDocs, writeBatch } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, onSnapshot, query, orderBy, getDocs, writeBatch, deleteDoc } from "firebase/firestore";
 import { Thread } from "@/hooks/useDrQChat";
 
 export const saveThreadToFirestore = async (userId: string, thread: Thread) => {
@@ -42,6 +42,17 @@ export const syncAllThreadsToFirestore = async (userId: string, threads: Thread[
     console.error("Error batch syncing threads to Firestore:", error);
   }
 };
+
+export const deleteThreadFromFirestore = async (userId: string, threadId: string) => {
+  if (!userId || !threadId) return;
+  try {
+    const threadRef = doc(db, `users/${userId}/drq_threads/${threadId}`);
+    await deleteDoc(threadRef);
+  } catch (error) {
+    console.error("Error deleting thread from Firestore:", error);
+  }
+};
+
 
 // ─── Forum Sync Utilities ──────────────────────────────────────────────────
 

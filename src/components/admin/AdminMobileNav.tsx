@@ -19,11 +19,11 @@ export function AdminMobileNav({ siteName, hubBadge, isSuperAdmin = false }: Adm
   return (
     <>
       {/* ── Mobile top-bar (only on mobile) ── */}
-      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.02] bg-background/90 px-4 backdrop-blur-md md:hidden">
+      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-gray-200/10 bg-background/90 px-4 backdrop-blur-md md:hidden">
         <button
           onClick={() => setOpen(true)}
           aria-label="Open menu"
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.03] bg-card/80 text-muted-foreground transition-colors hover:text-foreground"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200/10 bg-card/80 text-muted-foreground transition-colors hover:text-foreground"
         >
           <Menu className="h-4.5 w-4.5" />
         </button>
@@ -52,7 +52,7 @@ export function AdminMobileNav({ siteName, hubBadge, isSuperAdmin = false }: Adm
 
       {/* ── Drawer panel ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/[0.02] bg-background/95 backdrop-blur-xl transition-transform duration-300 md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-gray-200/10 bg-background/95 backdrop-blur-xl transition-transform duration-300 md:hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -65,7 +65,7 @@ export function AdminMobileNav({ siteName, hubBadge, isSuperAdmin = false }: Adm
           <button
             onClick={() => setOpen(false)}
             aria-label="Close menu"
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.03] text-muted-foreground hover:text-foreground"
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded-xl border border-gray-200/10 text-muted-foreground hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -80,7 +80,7 @@ export function AdminMobileNav({ siteName, hubBadge, isSuperAdmin = false }: Adm
         </nav>
 
         {/* Back link */}
-        <div className="border-t border-white/[0.02] p-3">
+        <div className="border-t border-gray-200/10 p-3">
           <Link href="/dashboard-app"
             className="flex items-center gap-2 rounded-xl px-2.5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
             onClick={() => setOpen(false)}>

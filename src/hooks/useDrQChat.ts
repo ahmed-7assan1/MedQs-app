@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
-import { syncAllThreadsToFirestore, subscribeToThreads } from "@/lib/firebase/firestore";
+import { syncAllThreadsToFirestore, subscribeToThreads, deleteThreadFromFirestore } from "@/lib/firebase/firestore";
 import { getAIEndpoint } from "@/lib/api-config";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ export type Thread = {
   pinnedProvider?: string;
 };
 
-export type AIProvider = "gemini" | "openai" | "groq" | "xai" | "openrouter" | "anthropic";
+export type AIProvider = "gemini" | "openai" | "groq" | "xai" | "openrouter" | "anthropic" | "siliconflow";
 
 export type BYOKKeys = {
   gemini?: string;
@@ -47,6 +47,7 @@ export type BYOKKeys = {
   xai?: string;
   openrouter?: string;
   anthropic?: string;
+  siliconflow?: string;
 };
 
 export type DrQSettings = {
@@ -122,6 +123,13 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     models: ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"],
     baseURL: "https://api.anthropic.com/v1",
     icon: "◈",
+  },
+  siliconflow: {
+    label: "SiliconFlow (DeepSeek)",
+    defaultModel: "deepseek-ai/DeepSeek-R1",
+    models: ["deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-V3", "Qwen/Qwen2.5-72B-Instruct", "Qwen/Qwen2.5-Coder-7B-Instruct"],
+    baseURL: "https://api.siliconflow.cn/v1",
+    icon: "🌀",
   },
 };
 
@@ -264,6 +272,7 @@ export function useDrQChat() {
 
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [deletedThreadIds, setDeletedThreadIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [settings, setSettings] = useState<DrQSettings>(DEFAULT_SETTINGS);
@@ -323,6 +332,11 @@ export function useDrQChat() {
           setActiveThreadId(parsed[0].id);
         }
       }
+
+      const storedDeleted = localStorage.getItem("medqs-drq-deleted-threads-v4");
+      if (storedDeleted) {
+        setDeletedThreadIds(JSON.parse(storedDeleted));
+      }
     } catch {}
     fetchLimits();
   }, []);
@@ -332,20 +346,49 @@ export function useDrQChat() {
   useEffect(() => {
     if (!userId) return;
     const unsubscribe = subscribeToThreads(userId, (firestoreThreads) => {
-      if (firestoreThreads.length > 0) {
-        setThreads(prev => {
-          // simple merge: favor firestore if it has same or more recent threads
-          const isDifferent = JSON.stringify(prev) !== JSON.stringify(firestoreThreads);
-          if (isDifferent && !loading) {
-             localStorage.setItem(THREADS_KEY, JSON.stringify(firestoreThreads));
-             return firestoreThreads;
+      const activeFirestoreThreads = firestoreThreads.filter(t => !deletedThreadIds.includes(t.id));
+
+      setThreads(prev => {
+        let changed = false;
+        
+        // Map over local threads and update if Firestore has a strictly newer version
+        const merged = prev.map(lThread => {
+          const fThread = activeFirestoreThreads.find(t => t.id === lThread.id);
+          if (fThread && fThread.updatedAt > lThread.updatedAt) {
+            changed = true;
+            return fThread;
           }
-          return prev;
+          return lThread;
         });
-      }
+
+        // Add new threads from Firestore that don't exist locally
+        const newFromFirestore = activeFirestoreThreads.filter(fThread => !prev.some(t => t.id === fThread.id));
+        if (newFromFirestore.length > 0) {
+          if (prev.length === 0) {
+            // Initial load from empty state
+            changed = true;
+            merged.push(...newFromFirestore);
+          } else {
+            // Only add if they are very recent (e.g. updated in the last 15 minutes) to avoid restoring deleted ones
+            const now = Date.now();
+            const recent = newFromFirestore.filter(f => (now - f.updatedAt) < 15 * 60 * 1000);
+            if (recent.length > 0) {
+              changed = true;
+              merged.push(...recent);
+            }
+          }
+        }
+
+        if (changed) {
+          merged.sort((a, b) => b.updatedAt - a.updatedAt);
+          localStorage.setItem(THREADS_KEY, JSON.stringify(merged));
+          return merged;
+        }
+        return prev;
+      });
     });
     return () => unsubscribe();
-  }, [userId, loading]);
+  }, [userId, deletedThreadIds]);
 
   // Save threads to localStorage & Debounced sync to Firestore
   const saveThreads = useCallback((newThreads: Thread[]) => {
@@ -400,12 +443,20 @@ export function useDrQChat() {
   const deleteThread = useCallback((id: string) => {
     const updated = threads.filter(t => t.id !== id);
     saveThreads(updated);
+    setDeletedThreadIds(prev => {
+      const next = [...prev, id];
+      localStorage.setItem("medqs-drq-deleted-threads-v4", JSON.stringify(next));
+      return next;
+    });
+    if (userId) {
+      deleteThreadFromFirestore(userId, id);
+    }
     if (activeThreadId === id) {
       const next = updated[0]?.id ?? null;
       setActiveThreadId(next);
       if (next) localStorage.setItem(ACTIVE_THREAD_KEY, next);
     }
-  }, [threads, saveThreads, activeThreadId]);
+  }, [threads, saveThreads, activeThreadId, userId]);
 
   const renameThread = useCallback((id: string, title: string) => {
     saveThreads(threads.map(t => t.id === id ? { ...t, title } : t));
@@ -622,36 +673,48 @@ export function useDrQChat() {
           });
         };
 
-        if (activeProvider === "gemini") {
+        if (!apiKey) {
           // Use site's API if no BYOK key
-          if (!apiKey) {
-            const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                message: content,
-                conversationHistory: historyForAPI.slice(0, -1),
-                images: files.filter(f => f.mimeType.startsWith("image/")),
-                pdfs: files.filter(f => f.mimeType === "application/pdf"),
-                stream: true,
-              }),
-            });
-            if (!res.ok) throw new Error("API error");
-            const reader = res.body!.getReader();
-            const decoder = new TextDecoder();
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done || abortRef.current) break;
-              finalContent += decoder.decode(value, { stream: true });
+          const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: content,
+              conversationHistory: historyForAPI.slice(0, -1),
+              images: files.filter(f => f.mimeType.startsWith("image/")),
+              pdfs: files.filter(f => f.mimeType === "application/pdf"),
+              provider: activeProvider,
+              specializedModel: activeModel,
+              stream: true,
+            }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || "API error");
+          }
+          const data = await res.json();
+          if (data.reply) {
+            // Simulate a smooth typing effect since the backend doesn't stream natively
+            const replyText = data.reply as string;
+            const chunkSize = Math.max(1, Math.floor(replyText.length / 20));
+            for (let i = 0; i < replyText.length; i += chunkSize) {
+              if (abortRef.current) break;
+              finalContent = replyText.slice(0, i + chunkSize);
               onChunk(finalContent);
+              await new Promise(r => setTimeout(r, 20));
             }
+            finalContent = replyText;
+            onChunk(finalContent);
           } else {
-            finalContent = await streamGemini(apiKey, activeModel, historyForAPI, files, onChunk);
+            throw new Error(data.error || "Invalid response format");
           }
         } else {
-          if (!apiKey) throw new Error(`Please add your ${PROVIDER_CONFIGS[activeProvider].label} API key in Configuration`);
-          const baseURL = PROVIDER_CONFIGS[activeProvider].baseURL ?? "https://api.openai.com/v1";
-          finalContent = await streamOpenAICompat(apiKey, baseURL, activeModel, historyForAPI, files, onChunk);
+          if (activeProvider === "gemini") {
+            finalContent = await streamGemini(apiKey, activeModel, historyForAPI, files, onChunk);
+          } else {
+            const baseURL = PROVIDER_CONFIGS[activeProvider].baseURL ?? "https://api.openai.com/v1";
+            finalContent = await streamOpenAICompat(apiKey, baseURL, activeModel, historyForAPI, files, onChunk);
+          }
         }
 
         // Mark streaming done

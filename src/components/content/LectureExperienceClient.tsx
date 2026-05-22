@@ -234,7 +234,7 @@ export function LectureExperienceClient({
     <div className="flex flex-col min-h-screen bg-background text-foreground">
 
       {/* ── Mobile back navigation & title row ── */}
-      <div className="md:hidden pt-20 px-4 pb-2 space-y-3 shrink-0">
+      <div className="md:hidden px-4 pb-2 pt-2 space-y-3 shrink-0">
         <Link
           href={`/modules/${moduleId}`}
           className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-white transition-colors"

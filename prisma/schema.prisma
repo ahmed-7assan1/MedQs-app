@@ -38,6 +38,24 @@ model SiteConfig {
   stabilityAIKey       String?
   assemblyAIKey        String?
   uploadcarePublicKey  String?
+  siliconFlowKey            String?
+  siliconFlowUrl            String?   @default("https://api.siliconflow.cn/v1")
+  siliconFlowModel          String?   @default("deepseek-ai/DeepSeek-R1")
+  geminiKeyOverride         String?
+  deepseekKeyOverride       String?
+  deepseekUrlOverride       String?
+  groqKeyOverride           String?
+  groqModelOverride         String?
+  openRouterKeyOverride     String?
+  openRouterModelOverride   String?
+  xaiKeyOverride            String?
+  xaiModelOverride          String?
+  proxyUrlOverride          String?
+  proxyKeyOverride          String?
+  anthropicKeyOverride      String?
+  anthropicModelOverride    String?
+  openAIKeyOverride         String?
+  openAIModelOverride       String?
 }
 
 model FeatureFlag {
@@ -480,6 +498,15 @@ model User {
   canManageReports      Boolean                   @default(false)
   facultyId             String?
   personalGeminiKey     String?
+  useCustomKey          Boolean                   @default(false)
+  personalOpenAIKey     String?
+  personalGroqKey       String?
+  personalOpenRouterKey String?
+  personalXAIKey        String?
+  personalAnthropicKey  String?
+  personalSiliconFlowKey String?
+  personalSiliconFlowModel String?                 @default("deepseek-ai/DeepSeek-R1")
+  personalSiliconFlowUrl String?                  @default("https://api.siliconflow.cn/v1")
   handle                String?                   @unique
   telegramId            String?                   @unique
   telegramVerified      Boolean                   @default(false)

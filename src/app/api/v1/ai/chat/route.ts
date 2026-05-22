@@ -17,7 +17,7 @@ import { getCachedSiteData } from "@/lib/site-cache";
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  const valid: string[] = ["proxy", "gemini", "openai", "anthropic", "deepseek", "groq", "openrouter", "xai", "duckduckgo", "custom"];
+  const valid: string[] = ["proxy", "gemini", "openai", "anthropic", "deepseek", "groq", "openrouter", "xai", "duckduckgo", "custom", "siliconflow"];
   if (valid.includes(s)) return s as AIProviderId;
   return undefined;
 }
@@ -323,6 +323,34 @@ export async function POST(req: NextRequest) {
   });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+  const byokActive = !!user.useCustomKey;
+  const isUsingCustom = useCustomKey || byokActive;
+
+  let activeCustomKey = customKey || null;
+  let activeCustomProvider = customProvider || null;
+  let activeCustomModel = customModel || null;
+  let activeCustomUrl = undefined;
+
+  if (byokActive) {
+    if (customProvider === "openai") {
+      activeCustomKey = user.personalOpenAIKey;
+    } else if (customProvider === "anthropic") {
+      activeCustomKey = user.personalAnthropicKey;
+    } else if (customProvider === "gemini") {
+      activeCustomKey = user.personalGeminiKey;
+    } else if (customProvider === "groq") {
+      activeCustomKey = user.personalGroqKey;
+    } else if (customProvider === "openrouter") {
+      activeCustomKey = user.personalOpenRouterKey;
+    } else if (customProvider === "xai") {
+      activeCustomKey = user.personalXAIKey;
+    } else if (customProvider === "siliconflow") {
+      activeCustomKey = user.personalSiliconFlowKey;
+      activeCustomModel = customModel || user.personalSiliconFlowModel;
+      activeCustomUrl = user.personalSiliconFlowUrl || undefined;
+    }
+  }
+
   const isAdmin = user.role === "ADMIN";
   const rankLabel = user.rank?.label ?? "Newbie";
   const dailyLimit = RANK_LIMITS[rankLabel] ?? 100;
@@ -331,7 +359,7 @@ export async function POST(req: NextRequest) {
 
   // File quota check
   const fileCount = images.length + pdfs.length;
-  if (fileCount > 0 && !isAdmin && !useCustomKey) {
+  if (fileCount > 0 && !isAdmin && !isUsingCustom) {
     const fileUsageRecord = await prisma.aIUsageLog.findUnique({
       where: { userId_type_date: { userId: user.id, type: "file_upload", date: today } },
     });
@@ -360,7 +388,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Chat message quota check
-  if (dailyLimit !== -1 && !isAdmin && !useCustomKey) {
+  if (dailyLimit !== -1 && !isAdmin && !isUsingCustom) {
     const usageRecord = await prisma.aIUsageLog.findUnique({
       where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
     });
@@ -441,10 +469,11 @@ Current Stats: ${siteData.totalUsers} users, ${siteData.totalLectures} lectures,
       images,
       pdfs,
       preferredProvider: effectiveProvider,
-      personalKey: customKey,
-      customProvider,
-      customModel,
-      useCustomKey,
+      personalKey: activeCustomKey || undefined,
+      customProvider: activeCustomProvider || undefined,
+      customModel: activeCustomModel || undefined,
+      customUrl: activeCustomUrl || undefined,
+      useCustomKey: isUsingCustom,
     });
   } catch (e) {
     console.error("[ai/chat]", e);

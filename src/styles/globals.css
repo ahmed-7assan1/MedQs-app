@@ -223,47 +223,6 @@
   --surface-white-20: rgba(255,255,255,0.20);
 }
 
-/* ── Dr. Q Redesign Design System (AI Chat Page) ── */
-.drq-redesign-root {
-  --drq-bg-base: #0A0A0F;
-  --drq-bg-panel: #111118;
-  --drq-bg-surface: #16161F;
-  --drq-bg-elevated: #1C1C28;
-  --drq-accent-primary: #7C6EFA;
-  --drq-accent-secondary: #4ECDC4;
-  --drq-text-primary: #F0EFF8;
-  --drq-text-secondary: #8A89A0;
-  --drq-border: rgba(255, 255, 255, 0.06);
-  --drq-gradient-violet: linear-gradient(135deg, #7C6EFA, #4ECDC4);
-  --drq-gradient-pink: linear-gradient(135deg, #FF6B6B, #FF8E53);
-  --drq-gradient-amber: linear-gradient(135deg, #FFB347, #FF7B54);
-  --drq-gradient-cyan: linear-gradient(135deg, #4ECDC4, #556270);
-}
-
-.drq-redesign-root {
-  background-color: var(--drq-bg-base);
-  color: var(--drq-text-primary);
-}
-
-/* Utility Classes */
-.bg-drq-base { background-color: var(--drq-bg-base); }
-.bg-drq-panel { background-color: var(--drq-bg-panel); }
-.bg-drq-surface { background-color: var(--drq-bg-surface); }
-.bg-drq-elevated { background-color: var(--drq-bg-elevated); }
-.bg-drq-primary { background-color: var(--drq-accent-primary); }
-.bg-drq-secondary { background-color: var(--drq-accent-secondary); }
-
-.text-drq-primary { color: var(--drq-text-primary); }
-.text-drq-secondary { color: var(--drq-text-secondary); }
-.text-drq-accent { color: var(--drq-accent-primary); }
-
-.border-drq-border { border-color: var(--drq-border); }
-
-.grad-1 { background: var(--drq-gradient-violet); }
-.grad-2 { background: var(--drq-gradient-pink); }
-.grad-3 { background: var(--drq-gradient-amber); }
-.grad-4 { background: var(--drq-gradient-cyan); }
-
 @keyframes fire-flicker {
 
   0%,

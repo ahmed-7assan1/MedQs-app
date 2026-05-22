@@ -320,11 +320,16 @@ export function QuestionCard({
                 role="radio"
                 aria-checked={isSelected}
                 tabIndex={showResult ? -1 : choiceIndex === rovingChoiceIndex ? 0 : -1}
-                onClick={() => !showResult && onAnswer?.(choice.key)}
+                onClick={() => {
+                  if (!showResult) {
+                    if (navigator.vibrate) navigator.vibrate(10);
+                    onAnswer?.(choice.key);
+                  }
+                }}
                 disabled={showResult}
                 onKeyDown={(e) => handleChoiceKeyDown(e, choiceIndex)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left text-sm transition-all duration-150 md:text-[15px]",
+                  "flex w-full items-center gap-3 rounded-xl border px-4 py-4 text-left text-sm transition-all duration-150 md:py-3.5 md:text-[15px]",
                   !showResult && !isSelected && "border-white/[0.02] hover:border-primary/45 hover:bg-primary/[0.04]",
                   !showResult && isSelected && "border-primary ring-2 ring-primary/25 bg-primary/10 font-semibold shadow-sm",
                   isCorrect && "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 font-semibold",

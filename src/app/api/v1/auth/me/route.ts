@@ -9,7 +9,7 @@ export async function GET() {
   console.log("[auth/me] Session:", session);
   if (!session?.user?.id) return NextResponse.json(null, { status: 401 });
 
-  let user = await prisma.user.findUnique({
+  let user: any = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
       id: true, name: true, nickname: true, bio: true, image: true,
@@ -20,6 +20,16 @@ export async function GET() {
       rank: { select: { label: true, badge: true } },
       university: { select: { name: true } },
       semester: { select: { name: true } },
+      useCustomKey: true,
+      personalGeminiKey: true,
+      personalOpenAIKey: true,
+      personalGroqKey: true,
+      personalOpenRouterKey: true,
+      personalXAIKey: true,
+      personalAnthropicKey: true,
+      personalSiliconFlowKey: true,
+      personalSiliconFlowModel: true,
+      personalSiliconFlowUrl: true,
     },
   });
 
@@ -35,8 +45,31 @@ export async function GET() {
         rank: { select: { label: true, badge: true } },
         university: { select: { name: true } },
         semester: { select: { name: true } },
+        useCustomKey: true,
+        personalGeminiKey: true,
+        personalOpenAIKey: true,
+        personalGroqKey: true,
+        personalOpenRouterKey: true,
+        personalXAIKey: true,
+        personalAnthropicKey: true,
+        personalSiliconFlowKey: true,
+        personalSiliconFlowModel: true,
+        personalSiliconFlowUrl: true,
       },
     });
+  }
+
+  if (user) {
+    user = {
+      ...user,
+      personalGeminiKey: user.personalGeminiKey ? "••••••••" : null,
+      personalOpenAIKey: user.personalOpenAIKey ? "••••••••" : null,
+      personalGroqKey: user.personalGroqKey ? "••••••••" : null,
+      personalOpenRouterKey: user.personalOpenRouterKey ? "••••••••" : null,
+      personalXAIKey: user.personalXAIKey ? "••••••••" : null,
+      personalAnthropicKey: user.personalAnthropicKey ? "••••••••" : null,
+      personalSiliconFlowKey: user.personalSiliconFlowKey ? "••••••••" : null,
+    };
   }
 
   return NextResponse.json(user, {

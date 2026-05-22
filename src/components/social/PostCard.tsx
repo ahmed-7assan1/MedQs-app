@@ -136,6 +136,15 @@ export const PostCard = React.memo(({
   };
 
   const handleLikeClick = () => {
+    const coarsePointer =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+    if (coarsePointer && !myReaction) {
+      setShowReactionPicker((open) => !open);
+      return;
+    }
+
     if (myReaction) {
       handleReact(null);
     } else {
@@ -647,10 +656,18 @@ export const PostCard = React.memo(({
       {/* Action Bar */}
       <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-4 mt-1">
         {/* Like/Reaction */}
-        <div 
+        <div
           className="relative"
-          onMouseEnter={() => setShowReactionPicker(true)}
-          onMouseLeave={() => setShowReactionPicker(false)}
+          onMouseEnter={() => {
+            if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) {
+              setShowReactionPicker(true);
+            }
+          }}
+          onMouseLeave={() => {
+            if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) {
+              setShowReactionPicker(false);
+            }
+          }}
         >
           <button
             onClick={handleLikeClick}

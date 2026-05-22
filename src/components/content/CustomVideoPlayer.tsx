@@ -86,6 +86,7 @@ export function CustomVideoPlayer({
   const [playing, setPlaying] = useState(externalPlaying || false);
   const [muted, setMuted] = useState(externalMuted || false);
   const [volume, setVolume] = useState(0.8);
+  const [brightness, setBrightness] = useState(1.0);
   const [played, setPlayed] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1.0);
@@ -132,6 +133,14 @@ export function CustomVideoPlayer({
     value?: string;
   } | null>(null);
   const overlayTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const gestureIndicatorTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const touchGestureRef = useRef<{
+    startX: number;
+    startY: number;
+    type: "brightness" | "volume" | null;
+    initialValue: number;
+  }>({ startX: 0, startY: 0, type: null, initialValue: 0 });
 
   const ytPlayerRef = useRef<any>(null);
   const progressTimer = useRef<ReturnType<typeof setInterval>>();
@@ -142,6 +151,9 @@ export function CustomVideoPlayer({
 
   const volumeRef = useRef(volume);
   useEffect(() => { volumeRef.current = volume; }, [volume]);
+
+  const brightnessRef = useRef(brightness);
+  useEffect(() => { brightnessRef.current = brightness; }, [brightness]);
 
   const mutedRef = useRef(muted);
   useEffect(() => { mutedRef.current = muted; }, [muted]);
@@ -677,6 +689,61 @@ export function CustomVideoPlayer({
     }
   };
 
+  // Mobile touch gesture handlers for volume (right side) and brightness (left side)
+  const [gestureIndicator, setGestureIndicator] = useState<{
+    type: "brightness" | "volume";
+    value: number;
+    visible: boolean;
+  } | null>(null);
+
+  const showGestureIndicator = (type: "brightness" | "volume", value: number) => {
+    setGestureIndicator({ type, value, visible: true });
+    if (gestureIndicatorTimeoutRef.current) clearTimeout(gestureIndicatorTimeoutRef.current);
+    gestureIndicatorTimeoutRef.current = setTimeout(() => {
+      setGestureIndicator((prev) => prev ? { ...prev, visible: false } : null);
+    }, 800);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const width = rect.width;
+    touchGestureRef.current = {
+      startX: x,
+      startY: touch.clientY - rect.top,
+      type: x < width * 0.5 ? "brightness" : "volume",
+      initialValue: x < width * 0.5 ? brightnessRef.current : volumeRef.current,
+    };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const gesture = touchGestureRef.current;
+    if (!gesture.type) return;
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = touch.clientY - rect.top;
+    const height = rect.height;
+    const delta = (gesture.startY - y) / height;
+    const newValue = Math.max(0, Math.min(1, gesture.initialValue + delta));
+    if (gesture.type === "brightness") {
+      setBrightness(0.3 + newValue * 1.7);
+      showGestureIndicator("brightness", newValue);
+    } else {
+      setVolume(newValue);
+      if (ytPlayerRef.current?.setVolume) ytPlayerRef.current.setVolume(newValue * 100);
+      if (videoRef.current) {
+        videoRef.current.volume = newValue;
+        videoRef.current.muted = newValue === 0;
+      }
+      showGestureIndicator("volume", newValue);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchGestureRef.current.type = null;
+  };
+
   // Seek bar custom mouse scrubbing
   const handleSeekStart = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -937,6 +1004,9 @@ export function CustomVideoPlayer({
       <div 
         className={cn("absolute inset-0 z-0 bg-black", (ytId || isHtml5) && "cursor-pointer")}
         onClick={handleVideoStageClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Placeholder / Poster image */}
         {((ytId || isHtml5) && !hasStarted) && (
@@ -996,12 +1066,17 @@ export function CustomVideoPlayer({
         {/* YouTube Frame */}
         {ytId && (
           <div
-            ref={iframeRef}
-            className="h-full w-full pointer-events-none"
-            style={{ 
-              visibility: iframeLoaded ? "visible" : "hidden"
-            }}
-          />
+            className="absolute inset-0"
+            style={{ filter: `brightness(${brightness})` }}
+          >
+            <div
+              ref={iframeRef}
+              className="h-full w-full pointer-events-none"
+              style={{ 
+                visibility: iframeLoaded ? "visible" : "hidden"
+              }}
+            />
+          </div>
         )}
 
         {/* HTML5 Video */}
@@ -1010,6 +1085,7 @@ export function CustomVideoPlayer({
             ref={videoRef}
             src={driveId ? driveStreamUrl! : resolvedUrl}
             className="absolute inset-0 h-full w-full object-contain pointer-events-none"
+            style={{ filter: `brightness(${brightness})` }}
             playsInline
             onTimeUpdate={(e) => {
               const v = e.currentTarget;
@@ -1112,6 +1188,47 @@ export function CustomVideoPlayer({
                   <span className="text-sm">▶▶▶</span>
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-white/95">10 Seconds</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* MOBILE TOUCH GESTURE INDICATOR (brightness / volume) */}
+        <AnimatePresence>
+          {gestureIndicator?.visible && (
+            <motion.div
+              key={gestureIndicator.type}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center gap-2"
+            >
+              <div className="flex items-center gap-2 rounded-2xl bg-black/70 backdrop-blur-md px-5 py-3 border border-white/10 shadow-2xl">
+                {gestureIndicator.type === "brightness" ? (
+                  <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="5" />
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M15.54 8.46a5 5 0 010 7.07" />
+                    <path d="M19.07 4.93a10 10 0 010 14.14" />
+                  </svg>
+                )}
+                <span className="text-xs font-bold text-white tabular-nums">
+                  {Math.round((gestureIndicator.type === "brightness" 
+                    ? (gestureIndicator.value - 0.3) / 1.7 
+                    : gestureIndicator.value) * 100)}%
+                </span>
+              </div>
+              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-white/20">
+                <div
+                  className="h-full rounded-full bg-white transition-all"
+                  style={{ width: `${Math.round((gestureIndicator.type === "brightness"
+                    ? (gestureIndicator.value - 0.3) / 1.7
+                    : gestureIndicator.value) * 100)}%` }}
+                />
               </div>
             </motion.div>
           )}

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Save, Loader2, User, Phone, BookOpen, Palette, Send, Sparkles, ShieldCheck, ChevronLeft, Camera, Trash2, LogOut, ShieldAlert } from "lucide-react";
+import { Save, Loader2, User, Phone, BookOpen, Palette, Send, Sparkles, ShieldCheck, ChevronLeft, Camera, Trash2, LogOut, ShieldAlert, Cpu } from "lucide-react";
 import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -34,7 +34,18 @@ function EditProfileContent() {
     isPrivate: false,
     studentId: "",
     instagramUrl: "",
+    instagramUrl: "",
     facebookUrl: "",
+    useCustomKey: false,
+    personalGeminiKey: "",
+    personalOpenAIKey: "",
+    personalGroqKey: "",
+    personalOpenRouterKey: "",
+    personalXAIKey: "",
+    personalAnthropicKey: "",
+    personalSiliconFlowKey: "",
+    personalSiliconFlowModel: "",
+    personalSiliconFlowUrl: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
@@ -62,6 +73,7 @@ function EditProfileContent() {
     { id: "telegram", label: "Telegram", icon: Send },
     { id: "privacy", label: "Privacy", icon: ShieldCheck },
     { id: "appearance", label: "Appearance", icon: Palette },
+    { id: "ai_agents", label: "AI & BYOK", icon: Cpu },
   ];
 
   useEffect(() => {
@@ -100,7 +112,18 @@ function EditProfileContent() {
             isPrivate: me.isPrivate ?? false,
             studentId: me.studentId ?? "",
             instagramUrl: me.instagramUrl ?? "",
+            instagramUrl: me.instagramUrl ?? "",
             facebookUrl: me.facebookUrl ?? "",
+            useCustomKey: me.useCustomKey ?? false,
+            personalGeminiKey: me.personalGeminiKey ?? "",
+            personalOpenAIKey: me.personalOpenAIKey ?? "",
+            personalGroqKey: me.personalGroqKey ?? "",
+            personalOpenRouterKey: me.personalOpenRouterKey ?? "",
+            personalXAIKey: me.personalXAIKey ?? "",
+            personalAnthropicKey: me.personalAnthropicKey ?? "",
+            personalSiliconFlowKey: me.personalSiliconFlowKey ?? "",
+            personalSiliconFlowModel: me.personalSiliconFlowModel ?? "",
+            personalSiliconFlowUrl: me.personalSiliconFlowUrl ?? "",
           });
           setAvatarUrl(me.image ?? null);
           setCoverUrl(me.coverImage ?? null);
@@ -776,6 +799,92 @@ function EditProfileContent() {
                         )}
                       </button>
                     ))}
+                  </div>
+               </section>
+            </div>
+          )}
+
+          {/* TAB: AI & BYOK */}
+          {activeTab === "ai_agents" && (
+            <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+               <section className="space-y-8 rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-8 shadow-xl">
+                  <div className="flex items-center gap-3 mb-2">
+                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500">
+                        <Cpu className="h-6 w-6" />
+                     </div>
+                     <div>
+                        <h2 className="text-xl font-black dark:text-white text-slate-800">AI & BYOK Settings</h2>
+                        <p className="text-xs font-bold dark:text-blue-400/50 text-blue-600 uppercase tracking-widest">Bring Your Own Key</p>
+                     </div>
+                  </div>
+
+                  <div className="rounded-2xl dark:bg-blue-500/10 bg-blue-50 border border-blue-500/20 p-5">
+                     <p className="text-xs font-bold text-blue-600 dark:text-blue-400 leading-relaxed">
+                       Activate BYOK to bypass platform-wide message limits and use your own preferred AI model provider directly. Your keys are securely stored and encrypted.
+                     </p>
+                  </div>
+
+                  <div className="grid gap-6">
+                     {/* BYOK Toggle */}
+                     <div onClick={() => setForm((f) => ({ ...f, useCustomKey: !f.useCustomKey }))} className="group flex cursor-pointer items-center justify-between rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 transition-all hover:bg-white/10">
+                        <div className="space-y-1">
+                           <p className="text-base font-black dark:text-white text-slate-800">Enable BYOK (Custom Keys)</p>
+                           <p className="text-[11px] font-bold dark:text-white/30 text-slate-400 uppercase tracking-widest leading-none">Use my own APIs for AI Chat</p>
+                        </div>
+                        <div className={cn("relative flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-all duration-300", form.useCustomKey ? "bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]" : "bg-slate-300 dark:bg-white/10")}>
+                           <span className={cn("absolute h-5 w-5 rounded-full bg-white shadow-lg transition-transform duration-300", form.useCustomKey ? "translate-x-6" : "translate-x-1")} />
+                        </div>
+                     </div>
+
+                     {/* API Keys Grid */}
+                     <div className={cn("grid gap-6 transition-all duration-500", !form.useCustomKey ? "opacity-30 pointer-events-none" : "opacity-100")}>
+                        {/* SiliconFlow */}
+                        <div className="rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 space-y-4">
+                           <h3 className="text-sm font-black dark:text-white text-slate-800 uppercase tracking-widest">SiliconFlow (DeepSeek)</h3>
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="group col-span-1 md:col-span-2">
+                                <label className="mb-2 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">API Key</label>
+                                <input type="password" value={form.personalSiliconFlowKey} onChange={(e) => setForm((f) => ({ ...f, personalSiliconFlowKey: e.target.value }))} placeholder="sk-..." className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                              </div>
+                              <div className="group">
+                                <label className="mb-2 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">Model Name</label>
+                                <input type="text" value={form.personalSiliconFlowModel} onChange={(e) => setForm((f) => ({ ...f, personalSiliconFlowModel: e.target.value }))} placeholder="deepseek-ai/DeepSeek-R1" className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                              </div>
+                              <div className="group">
+                                <label className="mb-2 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">Base URL (Optional)</label>
+                                <input type="url" value={form.personalSiliconFlowUrl} onChange={(e) => setForm((f) => ({ ...f, personalSiliconFlowUrl: e.target.value }))} placeholder="https://api.siliconflow.cn/v1" className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Other Providers */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Gemini Key</label>
+                             <input type="password" value={form.personalGeminiKey} onChange={(e) => setForm((f) => ({ ...f, personalGeminiKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                           </div>
+                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenAI Key</label>
+                             <input type="password" value={form.personalOpenAIKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenAIKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                           </div>
+                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Groq Key</label>
+                             <input type="password" value={form.personalGroqKey} onChange={(e) => setForm((f) => ({ ...f, personalGroqKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                           </div>
+                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenRouter Key</label>
+                             <input type="password" value={form.personalOpenRouterKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenRouterKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                           </div>
+                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Anthropic Key</label>
+                             <input type="password" value={form.personalAnthropicKey} onChange={(e) => setForm((f) => ({ ...f, personalAnthropicKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                           </div>
+                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">xAI Key</label>
+                             <input type="password" value={form.personalXAIKey} onChange={(e) => setForm((f) => ({ ...f, personalXAIKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                           </div>
+                        </div>
+                     </div>
                   </div>
                </section>
             </div>

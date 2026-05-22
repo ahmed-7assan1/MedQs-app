@@ -94,7 +94,7 @@ export default async function SubjectLecturesPage({
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#07080f] z-10" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
         
-        <div className="container mx-auto px-6 relative z-20 pt-20">
+        <div className="container mx-auto px-6 relative z-20 max-md:pt-2 md:pt-20">
           <div className="flex flex-col gap-4">
             {/* Breadcrumbs */}
             <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 overflow-x-auto whitespace-nowrap no-scrollbar pb-1">
@@ -127,7 +127,7 @@ export default async function SubjectLecturesPage({
       </div>
 
       {/* Mobile Title Row */}
-      <div className="md:hidden pt-20 px-6 pb-2 space-y-3">
+      <div className="md:hidden px-6 pb-2 pt-2 space-y-3">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.15em] text-white/40 overflow-x-auto whitespace-nowrap no-scrollbar">
           <Link href="/modules" className="hover:text-white">Hub</Link>

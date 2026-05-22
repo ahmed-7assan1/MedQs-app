@@ -83,7 +83,7 @@ export default async function AttemptResultPage({
     siteAiEnabled && attempt.pastPaper.aiExplanationEnabled !== false;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-24 pb-20 md:px-6 md:pt-12">
+    <div className="mx-auto max-w-3xl px-4 pt-4 pb-8 md:px-6 md:pt-12">
       {/* Header */}
       <Link href="/past-papers" className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="h-4 w-4" /> Back to Past Papers

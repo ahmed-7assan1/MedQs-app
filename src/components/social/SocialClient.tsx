@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, useMemo, memo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
 import { PostComposer, FloatingPostIsland } from "./PostComposer";
@@ -9,12 +9,13 @@ import { JoinRoomModal } from "./JoinRoomModal";
 import {
   ChatCircle, Globe, Users, MagnifyingGlass, Plus, ArrowRight,
   List, X, Hash, Lock, Fire, 
-  Crown, CaretRight, YoutubeLogo, Play
+  Crown, CaretRight, YoutubeLogo, Play, ArrowDown
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { ForumPostListSkeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 import { useSearchParams } from "next/navigation";
 import { useCommunityShareStore } from "@/lib/store";
@@ -324,65 +325,68 @@ export function SocialClient({
               </button>
             </div>
 
-            {/* Premium Post Composer */}
-            <PostComposer
-              user={{ name: currentUserName ?? "Student", id: currentUserId, image: currentUserImage }}
-              onPost={handlePost}
-              circles={circles}
-              rooms={myJoinedRooms}
-            />
+            {/* Pull to Refresh Wrapper */}
+            <PullToRefresh onRefresh={() => activeCircle && loadPosts(activeCircle.id)}>
+              {/* Premium Post Composer */}
+              <PostComposer
+                user={{ name: currentUserName ?? "Student", id: currentUserId, image: currentUserImage }}
+                onPost={handlePost}
+                circles={circles}
+                rooms={myJoinedRooms}
+              />
 
-            {/* Activity Feed */}
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between px-2">
-                <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/30 flex items-center gap-2">
-                  <Fire size={14} className="text-orange-500" weight="fill" />
-                  {activeCircle?.name || "Social Feed"} Activity
-                </h2>
-                
-                <div className="flex bg-slate-100 dark:bg-white/5 rounded-xl p-1 ml-4 shadow-inner">
-                  <button onClick={() => setSortBy("recent")} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", sortBy === "recent" ? "bg-white dark:bg-white/10 text-slate-800 dark:text-white shadow-sm" : "text-slate-400 dark:text-white/30 hover:text-slate-600 dark:hover:text-white/60")}>Recent</button>
-                  <button onClick={() => setSortBy("top")} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", sortBy === "top" ? "bg-white dark:bg-white/10 text-slate-800 dark:text-white shadow-sm" : "text-slate-400 dark:text-white/30 hover:text-slate-600 dark:hover:text-white/60")}>Top</button>
+              {/* Activity Feed */}
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center justify-between px-2">
+                  <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/30 flex items-center gap-2">
+                    <Fire size={14} className="text-orange-500" weight="fill" />
+                    {activeCircle?.name || "Social Feed"} Activity
+                  </h2>
+                  
+                  <div className="flex bg-slate-100 dark:bg-white/5 rounded-xl p-1 ml-4 shadow-inner">
+                    <button onClick={() => setSortBy("recent")} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", sortBy === "recent" ? "bg-white dark:bg-white/10 text-slate-800 dark:text-white shadow-sm" : "text-slate-400 dark:text-white/30 hover:text-slate-600 dark:hover:text-white/60")}>Recent</button>
+                    <button onClick={() => setSortBy("top")} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", sortBy === "top" ? "bg-white dark:bg-white/10 text-slate-800 dark:text-white shadow-sm" : "text-slate-400 dark:text-white/30 hover:text-slate-600 dark:hover:text-white/60")}>Top</button>
+                  </div>
                 </div>
-              </div>
 
-              {loading ? (
-                <ForumPostListSkeleton count={4} />
-              ) : posts.length > 0 ? (
-                <InfiniteScrollContainer
-                  onLoadMore={loadMore}
-                  hasMore={hasMore}
-                  isLoading={isLoadingMore}
-                  className="flex flex-col gap-6"
-                  endComponent={
-                    <div className="py-12 flex flex-col items-center justify-center opacity-30 text-center">
-                       <ChatCircle size={32} className="mb-3" />
-                       <p className="text-[10px] font-black uppercase tracking-[0.3em]">Welcome to the beginning of {activeCircle?.name}</p>
+                {loading ? (
+                  <ForumPostListSkeleton count={4} />
+                ) : posts.length > 0 ? (
+                  <InfiniteScrollContainer
+                    onLoadMore={loadMore}
+                    hasMore={hasMore}
+                    isLoading={isLoadingMore}
+                    className="flex flex-col gap-6"
+                    endComponent={
+                      <div className="py-12 flex flex-col items-center justify-center opacity-30 text-center">
+                         <ChatCircle size={32} className="mb-3" />
+                         <p className="text-[10px] font-black uppercase tracking-[0.3em]">Welcome to the beginning of {activeCircle?.name}</p>
+                      </div>
+                    }
+                  >
+                    <div className="flex flex-col gap-6">
+                      {sortedPosts.map((post) => (
+                        <PostCard
+                          key={post.id}
+                          post={post}
+                          currentUserId={currentUserId}
+                          currentUserRole={currentUserRole}
+                          currentUserUniversityId={currentUserUniversityId}
+                        />
+                      ))}
                     </div>
-                  }
-                >
-                  <div className="flex flex-col gap-6">
-                    {sortedPosts.map((post) => (
-                      <PostCard
-                        key={post.id}
-                        post={post}
-                        currentUserId={currentUserId}
-                        currentUserRole={currentUserRole}
-                        currentUserUniversityId={currentUserUniversityId}
-                      />
-                    ))}
-                  </div>
-                </InfiniteScrollContainer>
-              ) : (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn(GLASS, "rounded-[40px] py-24 flex flex-col items-center justify-center text-center")}>
-                  <div className="h-20 w-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                    <ChatCircle size={40} className="text-slate-300 dark:text-white/10" />
-                  </div>
-                  <h3 className="text-xl font-black text-slate-700 dark:text-white/40">No conversations yet</h3>
-                  <p className="text-sm text-slate-400 dark:text-white/20 mt-2 max-w-[240px]">Be the first to spark a discussion in {activeCircle?.name}!</p>
-                </motion.div>
-              )}
-            </div>
+                  </InfiniteScrollContainer>
+                ) : (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn(GLASS, "rounded-[40px] py-24 flex flex-col items-center justify-center text-center")}>
+                    <div className="h-20 w-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                      <ChatCircle size={40} className="text-slate-300 dark:text-white/10" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-700 dark:text-white/40">No conversations yet</h3>
+                    <p className="text-sm text-slate-400 dark:text-white/20 mt-2 max-w-[240px]">Be the first to spark a discussion in {activeCircle?.name}!</p>
+                  </motion.div>
+                )}
+              </div>
+            </PullToRefresh>
             
             <FloatingPostIsland
               user={{ name: currentUserName ?? "Student", id: currentUserId, image: currentUserImage }}
@@ -562,6 +566,95 @@ export function SocialClient({
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
+    </div>
+  );
+}
+
+function PullToRefresh({ onRefresh, children }: { onRefresh: () => void; children: React.ReactNode }) {
+  const [refreshing, setRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isAtTop, setIsAtTop] = useState(true);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const threshold = 80;
+
+  useEffect(() => {
+    const handleScroll = () => setIsAtTop(window.scrollY <= 0);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const doRefresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setPullDistance(threshold);
+    onRefresh();
+    await new Promise((r) => setTimeout(r, 600));
+    setRefreshing(false);
+    setPullDistance(0);
+  }, [onRefresh, refreshing]);
+
+  if (typeof window !== "undefined" && !("ontouchstart" in window)) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="relative" ref={contentRef}>
+      <AnimatePresence>
+        {(pullDistance > 5 || refreshing) && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute inset-x-0 top-0 z-10 flex items-center justify-center pt-4"
+            style={{ height: refreshing ? threshold : Math.min(pullDistance, threshold) }}
+          >
+            {refreshing ? (
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            ) : (
+              <motion.div
+                animate={{ rotate: pullDistance > threshold * 0.6 ? 180 : 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <ArrowDown size={20} weight="bold" className="text-muted-foreground" />
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div
+        onTouchStart={(e) => {
+          if (!isAtTop || refreshing) return;
+          const touch = e.touches[0];
+          const target = e.currentTarget;
+          const rect = target.getBoundingClientRect();
+          const relativeY = touch.clientY - rect.top;
+          if (relativeY < 80) {
+            target.setAttribute("data-pull-start", String(touch.clientY));
+          }
+        }}
+        onTouchMove={(e) => {
+          if (!isAtTop || refreshing) return;
+          const startY = e.currentTarget.getAttribute("data-pull-start");
+          if (!startY) return;
+          const diff = e.touches[0].clientY - Number(startY);
+          if (diff > 0) {
+            setPullDistance(diff);
+            if (diff > 15) e.preventDefault();
+          }
+        }}
+        onTouchEnd={async (e) => {
+          e.currentTarget.removeAttribute("data-pull-start");
+          if (pullDistance > threshold) {
+            e.preventDefault();
+            await doRefresh();
+          }
+          setPullDistance(0);
+        }}
+        style={{ transform: `translateY(${Math.min(pullDistance, threshold)}px)`, transition: refreshing ? "transform 0.3s ease" : "transform 0.1s ease" }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

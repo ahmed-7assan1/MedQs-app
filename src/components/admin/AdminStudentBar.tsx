@@ -49,10 +49,10 @@ export function AdminStudentBar() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="mb-4 w-[280px] overflow-hidden rounded-[32px] border border-white/5 bg-[#131220]/90 p-3 shadow-2xl backdrop-blur-2xl"
+              className="mb-4 w-[280px] overflow-hidden rounded-[32px] border border-gray-200/10 bg-[#131220]/90 p-3 shadow-2xl backdrop-blur-2xl"
               role="menu"
             >
-              <div className="px-4 py-3 border-b border-white/5 mb-2">
+              <div className="border-t border-gray-200/10 p-3">
                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
                    Admin Command Center
                  </p>
@@ -81,7 +81,7 @@ export function AdminStudentBar() {
           whileTap={{ scale: 0.95 }}
           onClick={() => setOpen((o) => !o)}
           className={cn(
-            "flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-primary text-white shadow-2xl shadow-primary/40 backdrop-blur-md transition-all",
+            "flex h-14 w-14 items-center justify-center rounded-full border border-gray-200/10 bg-primary text-white shadow-2xl shadow-primary/40 backdrop-blur-md transition-all",
             open && "rotate-[135deg] bg-red-500 shadow-red-500/40 border-red-500/20"
           )}
           aria-expanded={open}

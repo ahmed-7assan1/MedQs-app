@@ -747,7 +747,7 @@ export function FloatingPostIsland({ user, onPost, circles, rooms }: Props) {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-0 right-0 flex justify-center z-[400] pointer-events-none"
+            className="fixed left-0 right-0 flex justify-center z-[400] pointer-events-none max-md:bottom-[calc(var(--mobile-tabbar-reserve)+env(safe-area-inset-bottom,0px)+0.5rem)] md:bottom-8"
           >
             <div className="pointer-events-auto max-w-[min(540px,calc(100vw-48px))] w-full px-4 flex justify-center">
               <button 
@@ -766,7 +766,7 @@ export function FloatingPostIsland({ user, onPost, circles, rooms }: Props) {
 
       <AnimatePresence>
         {isExpanded && (
-          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[500] flex items-end md:items-center justify-center p-0 md:p-4 overflow-y-auto">
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
@@ -778,7 +778,7 @@ export function FloatingPostIsland({ user, onPost, circles, rooms }: Props) {
               initial={{ scale: 0.9, opacity: 0, y: 40 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 40 }}
-              className="relative w-full max-w-2xl"
+              className="relative w-full max-w-2xl max-md:max-h-[90dvh] max-md:overflow-y-auto max-md:mx-0 max-md:rounded-t-2xl max-md:pb-[env(safe-area-inset-bottom,0px)]"
             >
                <PostComposer 
                  user={user} 

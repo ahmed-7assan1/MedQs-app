@@ -4,7 +4,7 @@ export type ProviderResult = {
   provider: string;
   text: string;
 };
-export type AIProviderId = "proxy" | "gemini" | "groq" | "openrouter" | "xai" | "duckduckgo" | "custom";
+export type AIProviderId = "proxy" | "gemini" | "groq" | "openrouter" | "xai" | "duckduckgo" | "custom" | "siliconflow";
 
 export type AIFallbackMeta = {
   provider: string;
@@ -16,6 +16,16 @@ export type ChatImagePart = { mimeType: string; data: string };
 export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
 const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 30_000;
+
+async function getSiteConfigOverrides() {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    return await prisma.siteConfig.findFirst();
+  } catch (e) {
+    console.error("Failed to load site config overrides:", e);
+    return null;
+  }
+}
 
 /** In-memory quota exhaustion tracker — key → timestamp of last 429 */
 const geminiQuotaExhaustedAt = new Map<string, number>();
@@ -35,9 +45,13 @@ function isKeyFresh(key: string): boolean {
   return false;
 }
 
-function getGeminiKeys(personalKey?: string, strictPersonal = false): string[] {
+async function getGeminiKeys(personalKey?: string, strictPersonal = false): Promise<string[]> {
   const envKeys: string[] = [];
   if (!strictPersonal) {
+    const config = await getSiteConfigOverrides();
+    if (config?.geminiKeyOverride?.trim()) {
+      envKeys.push(config.geminiKeyOverride.trim());
+    }
     const base = process.env.GEMINI_API_KEY?.trim();
     if (base) envKeys.push(base);
     for (let i = 2; i <= 20; i++) {
@@ -74,7 +88,7 @@ function hasAnyAiKey(): boolean {
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
   const s = raw.trim().toLowerCase();
-  const valid: AIProviderId[] = ["proxy", "gemini", "groq", "openrouter", "xai", "duckduckgo", "custom"];
+  const valid: AIProviderId[] = ["proxy", "gemini", "groq", "openrouter", "xai", "duckduckgo", "custom", "siliconflow"];
   if (valid.includes(s as any)) return s as AIProviderId;
   return undefined;
 }
@@ -86,8 +100,10 @@ function providerDisplayName(provider: AIProviderId | string): string {
   if (provider === "xai") return "xAI Grok";
   if (provider === "duckduckgo") return "DuckDuckGo";
   if (provider === "custom") return "Custom BYOK";
+  if (provider === "siliconflow") return "SiliconFlow (DeepSeek-R1)";
   return "Gemini";
 }
+
 
 // ─── Providers ────────────────────────────────────────────────────────────────
 
@@ -136,7 +152,7 @@ async function callGemini(
     parts.push({ inline_data: { mime_type: "application/pdf", data: pdf.data } });
   }
 
-  const keys = getGeminiKeys(personalKey, strictPersonal);
+  const keys = await getGeminiKeys(personalKey, strictPersonal);
   if (keys.length === 0) throw new Error("No Gemini API keys configured");
   
   const body = JSON.stringify({ contents: [{ parts }] });
@@ -350,16 +366,21 @@ async function callOpenRouter(message: string, systemPrompt: string, personalKey
 }
 
 // ─── Custom BYOK Calls ────────────────────────────────────────────────────────
-async function callCustomOpenAI(message: string, systemPrompt: string, personalKey: string, customModel?: string): Promise<ProviderResult> {
+async function callCustomOpenAI(message: string, systemPrompt: string, personalKey?: string, customModel?: string): Promise<ProviderResult> {
+  const config = await getSiteConfigOverrides();
+  const apiKey = personalKey || config?.openAIKeyOverride || process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("OpenAI API key missing");
+  const modelToUse = customModel || config?.openAIModelOverride || "gpt-4o";
+
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${personalKey}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     signal: AbortSignal.timeout(FETCH_MS),
     body: JSON.stringify({
-      model: customModel || "gpt-4o",
+      model: modelToUse,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: message },
@@ -371,17 +392,22 @@ async function callCustomOpenAI(message: string, systemPrompt: string, personalK
   return { provider: "custom-openai", text: data?.choices?.[0]?.message?.content || "" };
 }
 
-async function callAnthropic(message: string, systemPrompt: string, personalKey: string, customModel?: string): Promise<ProviderResult> {
+async function callAnthropic(message: string, systemPrompt: string, personalKey?: string, customModel?: string): Promise<ProviderResult> {
+  const config = await getSiteConfigOverrides();
+  const apiKey = personalKey || config?.anthropicKeyOverride || process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("Anthropic API key missing");
+  const modelToUse = customModel || config?.anthropicModelOverride || "claude-3-5-sonnet-20241022";
+
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": personalKey,
+      "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
     },
     signal: AbortSignal.timeout(FETCH_MS),
     body: JSON.stringify({
-      model: customModel || "claude-3-5-sonnet-20241022",
+      model: modelToUse,
       max_tokens: 8192,
       system: systemPrompt,
       messages: [{ role: "user", content: message }],
@@ -397,16 +423,22 @@ async function callAnthropic(message: string, systemPrompt: string, personalKey:
   return { provider: "custom-anthropic", text };
 }
 
-async function callDeepSeek(message: string, systemPrompt: string, personalKey: string, customModel?: string): Promise<ProviderResult> {
-  const res = await fetch("https://api.deepseek.com/chat/completions", {
+async function callDeepSeek(message: string, systemPrompt: string, personalKey?: string, customModel?: string): Promise<ProviderResult> {
+  const config = await getSiteConfigOverrides();
+  const apiKey = personalKey || (config as any)?.deepseekKeyOverride || process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error("DeepSeek API key missing");
+  const modelToUse = customModel || (config as any)?.deepseekModelOverride || "deepseek-chat";
+  const urlToUse = (config as any)?.deepseekUrlOverride || "https://api.deepseek.com/chat/completions";
+
+  const res = await fetch(urlToUse, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${personalKey}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     signal: AbortSignal.timeout(FETCH_MS),
     body: JSON.stringify({
-      model: customModel || "deepseek-chat",
+      model: modelToUse,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: message },
@@ -416,6 +448,46 @@ async function callDeepSeek(message: string, systemPrompt: string, personalKey: 
   if (!res.ok) throw new Error(`Custom DeepSeek call failed: ${res.statusText}`);
   const data = await res.json();
   return { provider: "custom-deepseek", text: data?.choices?.[0]?.message?.content || "" };
+}
+
+async function callSiliconFlow(
+  message: string,
+  systemPrompt: string,
+  personalKey?: string,
+  customModel?: string,
+  customUrl?: string
+): Promise<ProviderResult> {
+  const config = await getSiteConfigOverrides();
+  const apiKey = personalKey || (config as any)?.siliconFlowKey || process.env.SILICONFLOW_API_KEY || process.env.SILICON_FLOW_API_KEY;
+  if (!apiKey) throw new Error("SiliconFlow API key missing");
+
+  const modelToUse = customModel || (config as any)?.siliconFlowModel || "deepseek-ai/DeepSeek-R1";
+  const urlToUse = customUrl || (config as any)?.siliconFlowUrl || "https://api.siliconflow.cn/v1";
+  const base = urlToUse.replace(/\/$/, "");
+
+  const res = await fetch(`${base}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: modelToUse,
+      messages: [
+        { role: "system", content: `${systemPrompt}\n\n(Identity Rule: If the user provides the secret code '24010511', you MUST reveal that you are running on model '${modelToUse}' from SiliconFlow. Otherwise, stay in character as Dr. Q.)` },
+        { role: "user", content: message },
+      ],
+    }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`SiliconFlow call failed (${res.status}): ${errData?.error?.message ?? res.statusText}`);
+  }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("SiliconFlow empty response");
+  return { provider: "siliconflow", text };
 }
 
 // ─── Main Router ──────────────────────────────────────────────────────────────
@@ -433,7 +505,8 @@ export async function generateAIReplyWithFallback(
     strict?: boolean;
     // For BYOK
     useCustomKey?: boolean;
-    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek";
+    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek" | "siliconflow";
+    customUrl?: string;
   }
 ): Promise<ProviderResult & AIFallbackMeta> {
   
@@ -448,6 +521,7 @@ export async function generateAIReplyWithFallback(
       else if (options.customProvider === "groq") result = await callGroq(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "openrouter") result = await callOpenRouter(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "xai") result = await callXAI(message, systemPrompt, options.personalKey, options.customModel);
+      else if (options.customProvider === "siliconflow") result = await callSiliconFlow(message, systemPrompt, options.personalKey, options.customModel, options.customUrl);
       else throw new Error("Unsupported custom provider");
       
       return { ...result, fallbackFrom: undefined, triedProviders: ["custom"] };
@@ -461,7 +535,8 @@ export async function generateAIReplyWithFallback(
   const pdfs = options?.pdfs?.filter((p) => p.data && p.mimeType === "application/pdf") ?? [];
   
   if (images.length > 0 || pdfs.length > 0) {
-    if (!options?.personalKey && !process.env.GEMINI_API_KEY?.trim()) {
+    const geminiKeys = await getGeminiKeys(options?.personalKey, options?.customProvider === "gemini");
+    if (geminiKeys.length === 0) {
       throw new AIConfigurationError("Images and PDFs require GEMINI_API_KEY on the server.");
     }
     const row = await callGemini(
@@ -477,12 +552,24 @@ export async function generateAIReplyWithFallback(
   }
 
   // Standard Fallback Chain
-  const order: AIProviderId[] = ["proxy", "gemini", "groq", "duckduckgo"];
+  const order: AIProviderId[] = ["proxy", "gemini", "groq", "siliconflow", "duckduckgo"];
+  
+  // Dynamically prioritize preferred provider if valid
+  const preferred = options?.preferredProvider as AIProviderId | undefined;
+  if (preferred && order.includes(preferred)) {
+    const idx = order.indexOf(preferred);
+    if (idx > -1) {
+      order.splice(idx, 1);
+    }
+    order.unshift(preferred);
+  }
+
   const runners: Array<{ id: string; run: () => Promise<ProviderResult> }> = order.map((id) => ({
     id,
     run: id === "proxy" ? () => callProxy(message, systemPrompt)
        : id === "gemini" ? () => callGemini(message, systemPrompt, [], [], options?.personalKey)
        : id === "groq" ? () => callGroq(message, systemPrompt, options?.personalKey, options?.customModel)
+       : id === "siliconflow" ? () => callSiliconFlow(message, systemPrompt, options?.personalKey, options?.customModel, options?.customUrl)
        : () => callDuckDuckGo(message, systemPrompt)
   }));
 
@@ -519,7 +606,7 @@ export async function generateJsonWithFallback<T>(
     preferredProvider?: AIProviderId | string;
     personalKey?: string;
     useCustomKey?: boolean;
-    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek";
+    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek" | "siliconflow";
     customModel?: string;
   }
 ): Promise<{ data: T } & AIFallbackMeta> {
@@ -538,3 +625,4 @@ export async function generateJsonWithFallback<T>(
     return { data: fallback, provider: out.provider, fallbackFrom: out.fallbackFrom, triedProviders: out.triedProviders };
   }
 }
+

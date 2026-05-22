@@ -43,6 +43,16 @@ const ProfileSchema = z.object({
   coverImage: z.string().nullable().optional(),
   telegramPhone: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.string().min(10).optional()),
   verificationCode: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.string().length(6).optional()),
+  useCustomKey: z.boolean().optional(),
+  personalGeminiKey: z.string().nullable().optional(),
+  personalOpenAIKey: z.string().nullable().optional(),
+  personalGroqKey: z.string().nullable().optional(),
+  personalOpenRouterKey: z.string().nullable().optional(),
+  personalXAIKey: z.string().nullable().optional(),
+  personalAnthropicKey: z.string().nullable().optional(),
+  personalSiliconFlowKey: z.string().nullable().optional(),
+  personalSiliconFlowModel: z.string().nullable().optional(),
+  personalSiliconFlowUrl: z.string().nullable().optional(),
 });
 
 async function generateStudentId(): Promise<string> {
@@ -93,7 +103,21 @@ export async function PUT(req: NextRequest) {
 
   const current: any = await prisma.user.findUnique({
     where: session.user.email ? { email: session.user.email } : { id: session.user.id },
-    select: { studentId: true, universityId: true, facultyId: true, telegramPhone: true, telegramVerified: true, studentCode: true } as any,
+    select: { 
+      studentId: true, 
+      universityId: true, 
+      facultyId: true, 
+      telegramPhone: true, 
+      telegramVerified: true, 
+      studentCode: true,
+      personalGeminiKey: true,
+      personalOpenAIKey: true,
+      personalGroqKey: true,
+      personalOpenRouterKey: true,
+      personalXAIKey: true,
+      personalAnthropicKey: true,
+      personalSiliconFlowKey: true,
+    } as any,
   });
 
   const resolvedStudentId =
@@ -131,8 +155,29 @@ export async function PUT(req: NextRequest) {
     }
   }
 
+  // Handle key overrides for masked keys (ignore overwrite if client sent '••••••••')
+  const geminiKey = parsed.data.personalGeminiKey === "••••••••" ? current?.personalGeminiKey : parsed.data.personalGeminiKey;
+  const openaiKey = parsed.data.personalOpenAIKey === "••••••••" ? current?.personalOpenAIKey : parsed.data.personalOpenAIKey;
+  const groqKey = parsed.data.personalGroqKey === "••••••••" ? current?.personalGroqKey : parsed.data.personalGroqKey;
+  const openrouterKey = parsed.data.personalOpenRouterKey === "••••••••" ? current?.personalOpenRouterKey : parsed.data.personalOpenRouterKey;
+  const xaiKey = parsed.data.personalXAIKey === "••••••••" ? current?.personalXAIKey : parsed.data.personalXAIKey;
+  const anthropicKey = parsed.data.personalAnthropicKey === "••••••••" ? current?.personalAnthropicKey : parsed.data.personalAnthropicKey;
+  const siliconflowKey = parsed.data.personalSiliconFlowKey === "••••••••" ? current?.personalSiliconFlowKey : parsed.data.personalSiliconFlowKey;
+
   // Remove verificationCode from data before passing to update
   const { verificationCode: _, ...updateData } = parsed.data;
+
+  // Overwrite sensitive key fields resolved from masked states
+  const resolvedUpdate = {
+    ...updateData,
+    personalGeminiKey: geminiKey,
+    personalOpenAIKey: openaiKey,
+    personalGroqKey: groqKey,
+    personalOpenRouterKey: openrouterKey,
+    personalXAIKey: xaiKey,
+    personalAnthropicKey: anthropicKey,
+    personalSiliconFlowKey: siliconflowKey,
+  };
 
   const user = await prisma.user.upsert({
     where: session.user.email ? { email: session.user.email } : { id: session.user.id },
@@ -140,7 +185,7 @@ export async function PUT(req: NextRequest) {
       id: session.user.id,
       email: session.user.email!,
       name: session.user.name || "Student",
-      ...updateData,
+      ...resolvedUpdate,
       ...telegramData,
       studentCode,
       nickname: nickname === "" ? null : nickname,
@@ -151,7 +196,7 @@ export async function PUT(req: NextRequest) {
       studentId: resolvedStudentId,
     },
     update: {
-      ...updateData,
+      ...resolvedUpdate,
       ...telegramData,
       studentCode,
       nickname: nickname === "" ? null : nickname,
@@ -166,6 +211,7 @@ export async function PUT(req: NextRequest) {
       hideRank: true, isPrivate: true, instagramUrl: true, facebookUrl: true,
       semesterId: true, universityId: true, facultyId: true, studentId: true,
       coverImage: true, telegramVerified: true, studentCode: true, handle: true, telegramPhone: true, image: true,
+      useCustomKey: true,
     } as any,
   });
 
