@@ -89,7 +89,7 @@ export function DrawMedLibrary({
         if (!res.ok) throw new Error("Failed to fetch library data");
         const text = await res.text();
 
-        const { loadLibraryFromBlob } = await import("@/vendor/excalidraw/index");
+        const { loadLibraryFromBlob } = await import("@/vendor/excalidraw/vendor");
         const blob = new Blob([text], { type: "application/json" });
         const items = await loadLibraryFromBlob(blob);
 
