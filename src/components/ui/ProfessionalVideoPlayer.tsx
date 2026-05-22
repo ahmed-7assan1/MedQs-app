@@ -1,17 +1,17 @@
 "use client";
 
-import React from "react";
-import { CustomVideoPlayer } from "@/components/content/CustomVideoPlayer";
+import { cn } from "@/lib/utils";
+import { VidStackPlayer } from "@/components/content/VidStackPlayer";
 
 interface VideoPlayerProps {
   src: string;
   poster?: string;
   className?: string;
   playing?: boolean;
-  minimal?: boolean;
   muted?: boolean;
   startTime?: number;
   endTime?: number;
+  minimal?: boolean;
 }
 
 export function ProfessionalVideoPlayer({ 
@@ -19,21 +19,18 @@ export function ProfessionalVideoPlayer({
   poster, 
   className, 
   playing, 
-  minimal = false,
   muted = false,
   startTime = 0,
-  endTime
+  ...rest
 }: VideoPlayerProps) {
   return (
-    <div className={className}>
-      <CustomVideoPlayer
+    <div className={cn(className)}>
+      <VidStackPlayer
         url={src}
         poster={poster}
         playing={playing}
-        minimal={minimal}
         muted={muted}
         startTime={startTime}
-        endTime={endTime}
       />
     </div>
   );

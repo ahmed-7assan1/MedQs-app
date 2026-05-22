@@ -1,0 +1,44 @@
+"use client";
+
+import { CheckCircle } from "@phosphor-icons/react";
+
+interface Props {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderImage?: string;
+  text: string;
+  createdAt: Date;
+  isOwn: boolean;
+}
+
+export default function ChatMessage({ senderName, senderImage, text, createdAt, isOwn }: Props) {
+  return (
+    <div className={`flex gap-2 ${isOwn ? "flex-row-reverse" : ""}`}>
+      {senderImage ? (
+        <img src={senderImage} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-1" />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0 mt-1">
+          {senderName.charAt(0).toUpperCase()}
+        </div>
+      )}
+      <div className={`max-w-[75%] ${isOwn ? "items-end" : "items-start"} flex flex-col`}>
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-xs font-medium text-gray-500">{senderName}</span>
+          <span className="text-[10px] text-gray-400">
+            {createdAt ? new Date(createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
+          </span>
+        </div>
+        <div
+          className={`px-3 py-2 rounded-2xl text-sm ${
+            isOwn
+              ? "bg-blue-600 text-white rounded-tr-sm"
+              : "bg-gray-100 text-gray-800 rounded-tl-sm"
+          }`}
+        >
+          {text}
+        </div>
+      </div>
+    </div>
+  );
+}

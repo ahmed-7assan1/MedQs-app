@@ -201,8 +201,8 @@ function RecordCard({ record }: { record: { id: string; title: string; url: stri
 }
 
 export function LectureExperienceClient({
-  lecture, moduleId, isAdmin = false,
-}: { lecture: any; moduleId: string; isAdmin?: boolean }) {
+  lecture, moduleId, isAdmin = false, userId,
+}: { lecture: any; moduleId: string; isAdmin?: boolean; userId?: string }) {
   const [active, setActive] = useState<TabId>("overview");
 
   const recordCount   = lecture?.records?.length || 0;
@@ -550,7 +550,7 @@ export function LectureExperienceClient({
           {active === "flashcards" && (
             <div className="min-h-[400px]">
               {flashcardCount > 0 ? (
-                <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" />
+                <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" userId={userId} lectureId={lecture.id} />
               ) : (
                 <EmptyState icon={Brain} title="No Flashcards Yet" desc="Flashcards for this lecture haven't been created yet." color="amber" />
               )}

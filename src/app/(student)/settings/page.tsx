@@ -28,15 +28,26 @@ export default async function SettingsPage() {
   } : null;
 
   return (
-    <StudentPageShell
-      maxWidthClass="max-w-4xl"
-      eyebrow="Preferences Hub"
-      title="Settings Center"
-      subtitle="Configure your clinical workspace, sync integrations, and manage your digital privacy with surgical precision."
-    >
-      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <SettingsClient user={userProfile} />
+    <>
+      {/* Mobile */}
+      <div className="md:hidden min-h-screen cinematic-bg">
+        <div className="px-4 pt-6 pb-12">
+          <SettingsClient user={userProfile} />
+        </div>
       </div>
-    </StudentPageShell>
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <StudentPageShell
+          maxWidthClass="max-w-4xl"
+          eyebrow="Preferences Hub"
+          title="Settings Center"
+          subtitle="Configure your clinical workspace, sync integrations, and manage your digital privacy with surgical precision."
+        >
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <SettingsClient user={userProfile} />
+          </div>
+        </StudentPageShell>
+      </div>
+    </>
   );
 }

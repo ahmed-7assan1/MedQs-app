@@ -232,11 +232,30 @@ model ChecklistItem {
 }
 
 model Flashcard {
-  id        String  @id @default(uuid())
+  id        String                   @id @default(uuid())
   front     String
   back      String
   lectureId String
-  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lecture   Lecture                  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  progress  UserFlashcardProgress[]
+}
+
+model UserFlashcardProgress {
+  id            String    @id @default(uuid())
+  userId        String
+  flashcardId   String
+  interval      Int       @default(0)
+  repetitions   Int       @default(0)
+  easeFactor    Float     @default(2.5)
+  nextReviewAt  DateTime  @default(now())
+  lastReviewedAt DateTime?
+  lastRating    Int?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, flashcardId])
+  @@index([userId, nextReviewAt])
 }
 
 model LectureFile {
@@ -546,6 +565,10 @@ model User {
   studyRoomPosts        StudyRoomPost[]
   studyRoomPostLikes    StudyRoomPostLike[]
   taskCompletions       StudyRoomTaskCompletion[]
+  studySessionsStarted  StudySession[]                @relation("SessionStarter")
+  sessionParticipations StudySessionParticipant[]
+  pointsTransactions    UserPointsTransaction[]
+  flashcardProgress     UserFlashcardProgress[]
   followedTeams         TeamFollower[]
   teamMemberships       TeamMember[]
   faculty               Faculty?                  @relation(fields: [facultyId], references: [id])
@@ -1165,6 +1188,7 @@ model StudyRoom {
   posts           StudyRoomPost[]
   schedule        StudyRoomSchedule?
   tasks           StudyRoomTask[]
+  sessions        StudySession[]
 
   @@index([universityId])
   @@index([inviteCode])
@@ -1293,6 +1317,57 @@ model StudyRoomPostLike {
   user   User          @relation(fields: [userId], references: [id])
 
   @@unique([postId, userId])
+}
+
+model StudySession {
+  id              String                     @id @default(uuid())
+  roomId          String
+  startedById     String
+  startedAt       DateTime                   @default(now())
+  endedAt         DateTime?
+  targetDuration  Int                        @default(25)
+  breakDuration   Int?                       @default(5)
+  status          String                     @default("WAITING")
+  lectureId       String?
+  lectureTitle    String?
+  pausedAt        DateTime?
+  totalPauseMs    BigInt                     @default(0)
+
+  room            StudyRoom                  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  startedBy       User                       @relation("SessionStarter", fields: [startedById], references: [id])
+  participants    StudySessionParticipant[]
+
+  @@index([roomId, status])
+  @@index([roomId, startedAt])
+}
+
+model StudySessionParticipant {
+  id                String       @id @default(uuid())
+  sessionId         String
+  userId            String
+  joinedAt          DateTime     @default(now())
+  focusSeconds      Int          @default(0)
+  sessionsCompleted Int          @default(0)
+  lastFocusAt       DateTime?
+
+  session           StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user              User         @relation(fields: [userId], references: [id])
+
+  @@unique([sessionId, userId])
+}
+
+model UserPointsTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  roomId    String?
+  points    Int
+  reason    String
+  reference String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
 }
 
 model AuditLog {

@@ -515,7 +515,7 @@ export function useDrQChat() {
   // ─── Send Message ────────────────────────────────────────────────────────────
 
   const sendMessage = useCallback(
-    async (content: string, files: FileAttachment[] = [], replyToId?: string) => {
+    async (content: string, files: FileAttachment[] = [], replyToId?: string, webSearch?: boolean) => {
       if (!content.trim() && files.length === 0) return;
       if (loading) return;
 
@@ -685,6 +685,7 @@ export function useDrQChat() {
               pdfs: files.filter(f => f.mimeType === "application/pdf"),
               provider: activeProvider,
               specializedModel: activeModel,
+              web_search: webSearch ?? false,
               stream: true,
             }),
           });

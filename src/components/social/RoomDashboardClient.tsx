@@ -9,17 +9,29 @@ import {
   ArrowLeft, Lock, Globe, Crown, Copy, Check,
   Plus, Trash, SignOut, Hash, CalendarBlank, Clock,
   Image as ImageIcon, SpotifyLogo, Timer, Play, Pause,
-  ArrowClockwise, Sparkle, Target,
+  Sparkle, Target, BookOpen,
   SpeakerHigh, SpeakerSlash, TelegramLogo
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import StudySessionBanner from "../rooms/StudySessionBanner";
+import RoomChatBox from "../rooms/RoomChatBox";
+import SessionParticipantCard from "../rooms/SessionParticipantCard";
+import SessionLeaderboard from "../rooms/SessionLeaderboard";
+import FocusStreak from "../rooms/FocusStreak";
+import NotificationBell from "../rooms/NotificationBell";
+import SessionHistory from "../rooms/SessionHistory";
+import SessionBadges from "../rooms/SessionBadges";
+import LecturePicker from "../rooms/LecturePicker";
+import { useRoomPresence } from "@/hooks/useRoomPresence";
+import { subscribeToRoomTimer, setRoomTimer, clearRoomTimer, RoomTimerState } from "@/lib/firebase/room-realtime";
 
 const GLASS = "bg-white/70 dark:bg-[#161523]/70 backdrop-blur-[40px] border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500";
 const TABS = [
   { id: "feed", label: "Community", icon: ChatCircle },
+  { id: "session", label: "Study Together", icon: Timer },
   { id: "tasks", label: "My Goals", icon: CheckSquare },
   { id: "schedule", label: "Schedule", icon: CalendarBlank },
   { id: "leaderboard", label: "Rankings", icon: Trophy },
@@ -60,8 +72,13 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
   const [tasks, setTasks] = useState<RoomTask[]>(room.tasks);
   const [members] = useState<RoomMember[]>(room.members);
   const [codeCopied, setCodeCopied] = useState(false);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [seconds, setSeconds] = useState(0);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [activeSession, setActiveSession] = useState<any | null>(null);
+  const [timerState, setTimerState] = useState<RoomTimerState | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [lecturePickerOpen, setLecturePickerOpen] = useState(false);
+  const [selectedLecture, setSelectedLecture] = useState<{ id: string; title: string } | null>(null);
+  const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0, sessionsThisWeek: 0 });
   const [isMuted, setIsMuted] = useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem(`muted-${room.id}`) === '1';
     return false;
@@ -97,17 +114,166 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
   };
 
   useEffect(() => {
-    let interval: any;
-    if (isTimerRunning) {
-      interval = setInterval(() => setSeconds(s => s + 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isTimerRunning]);
+    fetchSessions();
+    const unsub = subscribeToRoomTimer(room.id, (timer) => {
+      setTimerState(timer);
+    });
+    return () => { unsub(); };
+  }, [room.id]);
 
-  const formatTime = (sec: number) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+  useEffect(() => {
+    if (timerState) {
+      const active = sessions.find(s => s.id === timerState.sessionId);
+      setActiveSession(active ?? null);
+    }
+  }, [timerState, sessions]);
+
+  const fetchSessions = async () => {
+    try {
+      const res = await fetch(`/api/v1/rooms/${room.id}/sessions`);
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data);
+        const active = data.find((s: any) => ["WAITING", "ACTIVE", "PAUSED"].includes(s.status));
+        if (active) setActiveSession(active);
+      }
+    } catch {}
+  };
+
+  const fetchStreakData = async () => {
+    try {
+      const res = await fetch(`/api/v1/users/me/streak`);
+      if (res.ok) {
+        const data = await res.json();
+        setStreakData(data);
+      }
+    } catch {}
+  };
+
+  const handleSelectLecture = (lectureId: string, lectureTitle: string) => {
+    setSelectedLecture({ id: lectureId, title: lectureTitle });
+  };
+
+  const clearLecture = () => setSelectedLecture(null);
+
+  const createSession = async () => {
+    if (sessionLoading) return;
+    setSessionLoading(true);
+    try {
+      const body: any = { targetDuration: 25 };
+      if (selectedLecture) {
+        body.lectureId = selectedLecture.id;
+        body.lectureTitle = selectedLecture.title;
+      }
+      const res = await fetch(`/api/v1/rooms/${room.id}/sessions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(prev => [data, ...prev]);
+        await setRoomTimer(room.id, {
+          sessionId: data.id,
+          status: "WAITING",
+          startedAt: null,
+          pausedAt: null,
+          totalPauseMs: 0,
+          targetDuration: 25,
+        });
+      } else {
+        const err = await res.json();
+        toast.error(err.error);
+      }
+    } catch {
+      toast.error("Failed to create session");
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
+  const handleSessionAction = async (action: string) => {
+    if (!activeSession) return;
+    try {
+      const res = await fetch(`/api/v1/rooms/${room.id}/sessions/${activeSession.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setActiveSession(updated);
+        if (action === "start") {
+          await setRoomTimer(room.id, {
+            sessionId: updated.id,
+            status: "ACTIVE",
+            startedAt: Date.now(),
+            pausedAt: null,
+            totalPauseMs: 0,
+            targetDuration: updated.targetDuration,
+          });
+        } else if (action === "pause") {
+          await setRoomTimer(room.id, {
+            sessionId: updated.id,
+            status: "PAUSED",
+            startedAt: timerState?.startedAt ?? Date.now(),
+            pausedAt: Date.now(),
+            totalPauseMs: timerState?.totalPauseMs ?? 0,
+            targetDuration: updated.targetDuration,
+          });
+        } else if (action === "resume") {
+          await setRoomTimer(room.id, {
+            sessionId: updated.id,
+            status: "ACTIVE",
+            startedAt: timerState?.startedAt ?? Date.now(),
+            pausedAt: null,
+            totalPauseMs: updated.totalPauseMs ?? timerState?.totalPauseMs ?? 0,
+            targetDuration: updated.targetDuration,
+          });
+        } else if (action === "complete" || action === "cancel") {
+          await clearRoomTimer(room.id);
+          setActiveSession(null);
+          fetchSessions();
+        }
+      } else {
+        const err = await res.json();
+        toast.error(err.error);
+      }
+    } catch {
+      toast.error("Action failed");
+    }
+  };
+
+  const joinSession = async () => {
+    if (!activeSession) return;
+    try {
+      const res = await fetch(`/api/v1/rooms/${room.id}/sessions/${activeSession.id}/join`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Joined session!");
+        fetchSessions();
+      } else {
+        const err = await res.json();
+        toast.error(err.error);
+      }
+    } catch {
+      toast.error("Failed to join");
+    }
+  };
+
+  const { onlineUsers } = useRoomPresence(room.id, currentUserId, room.owner.name, room.owner.image);
+
+  const handleKick = async (targetUserId: string) => {
+    if (!activeSession) return;
+    if (!confirm("Remove this participant from the session?")) return;
+    try {
+      const res = await fetch(`/api/v1/rooms/${room.id}/sessions/${activeSession.id}/kick`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetUserId }),
+      });
+      if (res.ok) { toast.success("Participant removed"); fetchSessions(); }
+      else { const d = await res.json(); toast.error(d.error); }
+    } catch { toast.error("Failed to kick"); }
   };
 
   const copyCode = () => {
@@ -178,51 +344,53 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 blur-[60px] pointer-events-none" />
             <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
               <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                <div className="h-24 w-24 rounded-[32px] overflow-hidden bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-inner border border-white/20 relative">
-                  {room.image ? (
-                    <img src={room.image} className="w-full h-full object-cover" alt="" />
-                  ) : (
-                    room.isPublic 
-                      ? <Globe size={44} className="text-primary" weight="fill" />
-                      : <Lock size={44} className="text-amber-500" weight="fill" />
-                  )}
-                </div>
-                <div className="text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-3 mb-2 flex-wrap">
-                    <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{room.name}</h1>
-                    {isOwner && <span className="px-2 py-1 rounded-lg bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-widest border border-amber-500/20 flex items-center gap-1.5"><Crown size={12} weight="fill" /> Owner</span>}
-                    <span className={cn("px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border", room.isPublic ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/10" : "bg-amber-500/10 text-amber-500 border-amber-500/10")}>
-                      {room.isPublic ? "Public Circle" : "Private Circle"}
-                    </span>
+                  <div className="h-24 w-24 rounded-[32px] overflow-hidden bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-inner border border-white/20 relative">
+                    {room.image ? (
+                      <img src={room.image} className="w-full h-full object-cover" alt="" />
+                    ) : (
+                      room.isPublic 
+                        ? <Globe size={44} className="text-primary" weight="fill" />
+                        : <Lock size={44} className="text-amber-500" weight="fill" />
+                   )}
                   </div>
-                  {room.description && <p className="text-[15px] text-slate-500 dark:text-white/40 mb-4 max-w-md font-medium">{room.description}</p>}
-                  <div className="flex items-center justify-center md:justify-start gap-5 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20">
-                    <span className="flex items-center gap-2"><Users size={16} weight="fill" /> {room._count.members} Members</span>
-                    <span className="flex items-center gap-2"><ChatCircle size={16} weight="fill" /> {room._count.posts} Posts</span>
-                    <span className="flex items-center gap-2"><CheckSquare size={16} weight="fill" /> {room._count.tasks} Tasks</span>
+                  <div className="text-center md:text-left">
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-2 flex-wrap">
+                      <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{room.name}</h1>
+                      {isOwner && <span className="px-2 py-1 rounded-lg bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-widest border border-amber-500/20 flex items-center gap-1.5"><Crown size={12} weight="fill" /> Owner</span>}
+                      <span className={cn("px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border", room.isPublic ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/10" : "bg-amber-500/10 text-amber-500 border-amber-500/10")}>
+                        {room.isPublic ? "Public Circle" : "Private Circle"}
+                      </span>
+                    </div>
+                    {room.description && <p className="text-[15px] text-slate-500 dark:text-white/40 mb-4 max-w-md font-medium">{room.description}</p>}
+                    <div className="flex items-center justify-center md:justify-start gap-5 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20">
+                      <span className="flex items-center gap-2"><Users size={16} weight="fill" /> {room._count.members} Members</span>
+                      <span className="flex items-center gap-2"><ChatCircle size={16} weight="fill" /> {room._count.posts} Posts</span>
+                      <span className="flex items-center gap-2"><CheckSquare size={16} weight="fill" /> {room._count.tasks} Tasks</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Action Area */}
-              <div className="flex flex-col items-center md:items-end gap-3">
-                {isOwner && (
-                   <div className="hidden md:block">
-                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-2 text-right">Owner Control Panel</p>
-                   </div>
-                )}
-                {/* Glowing Action Button */}
-                <button 
-                  onClick={() => setActiveTab("ai")}
-                  className="group relative flex items-center gap-3 px-6 py-3 rounded-2xl bg-primary text-white shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 transition-all overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <Sparkle size={18} weight="fill" className="animate-pulse" />
-                  <span className="text-xs font-black uppercase tracking-widest">Ask Dr. Q</span>
-                </button>
+                {/* Action Area */}
+                <div className="flex flex-col items-center md:items-end gap-3">
+                  {isOwner && (
+                     <div className="hidden md:block">
+                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/20 mb-2 text-right">Owner Control Panel</p>
+                     </div>
+                  )}
+
+                  <NotificationBell />
+                  {/* Glowing Action Button */}
+                  <button 
+                    onClick={() => setActiveTab("ai")}
+                    className="group relative flex items-center gap-3 px-6 py-3 rounded-2xl bg-primary text-white shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 transition-all overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <Sparkle size={18} weight="fill" className="animate-pulse" />
+                    <span className="text-xs font-black uppercase tracking-widest">Ask Dr. Q</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
           {/* Media Player (Spotify or Telegram Audio) - Square Top Layout */}
           {hasMedia && (
@@ -253,27 +421,21 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
             </div>
           )}
 
-          {/* Focus Timer */}
+          {/* Study Session Banner */}
           <div className="mt-6">
-             <div className={cn(GLASS, "rounded-[28px] p-5 flex items-center justify-between")}>
-                <div className="flex items-center gap-4">
-                   <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-all", isTimerRunning ? "bg-primary text-white animate-pulse" : "bg-slate-100 dark:bg-white/5 text-slate-400")}>
-                      <Timer size={22} weight="bold" />
-                   </div>
-                   <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20">Focus Timer</p>
-                      <p className="text-xl font-black tabular-nums text-slate-800 dark:text-white">{formatTime(seconds)}</p>
-                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                   <button onClick={() => setSeconds(0)} className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-primary transition-all">
-                      <ArrowClockwise size={18} weight="bold" />
-                   </button>
-                   <button onClick={() => setIsTimerRunning(!isTimerRunning)} className={cn("h-10 px-5 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all", isTimerRunning ? "bg-amber-500 text-white" : "bg-primary text-white")}>
-                      {isTimerRunning ? "Pause" : "Start"}
-                   </button>
-                </div>
-             </div>
+            <StudySessionBanner
+              roomId={room.id}
+              userId={currentUserId}
+              isHost={activeSession?.startedById === currentUserId}
+              timerState={timerState}
+              participantCount={activeSession?.participants?.length ?? 0}
+              lectureTitle={activeSession?.lectureTitle}
+              onStart={() => handleSessionAction("start")}
+              onPause={() => handleSessionAction("pause")}
+              onResume={() => handleSessionAction("resume")}
+              onComplete={() => handleSessionAction("complete")}
+              onCancel={() => handleSessionAction("cancel")}
+            />
           </div>
         </div>
 
@@ -321,6 +483,111 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
                 </div>
               )}
 
+              {activeTab === "session" && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white dark:bg-white/5 rounded-[32px] border border-gray-100 dark:border-white/10 overflow-hidden" style={{ height: "min(70vh, 450px)" }}>
+                      <div className="px-5 py-3 border-b border-gray-100 dark:border-white/10">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Live Chat</h3>
+                      </div>
+                      <RoomChatBox
+                        roomId={room.id}
+                        userId={currentUserId}
+                        userName={room.owner.name}
+                        userImage={room.owner.image}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    <FocusStreak
+                      currentStreak={streakData.currentStreak}
+                      longestStreak={streakData.longestStreak}
+                      sessionsThisWeek={streakData.sessionsThisWeek}
+                    />
+                    <div className={cn(GLASS, "rounded-[32px] p-6")}>
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40 mb-4">Badges</h3>
+                      <SessionBadges roomId={room.id} />
+                    </div>
+                    {!activeSession && (
+                      <div className="space-y-3">
+                        <button
+                          onClick={createSession}
+                          disabled={sessionLoading}
+                          className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-bold text-sm hover:scale-[1.02] transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
+                        >
+                          {sessionLoading ? "Creating..." : "Start a Study Session"}
+                        </button>
+                        <button
+                          onClick={() => setLecturePickerOpen(true)}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400 hover:border-blue-400 hover:text-blue-600 transition-all"
+                        >
+                          <BookOpen size={18} />
+                          {selectedLecture ? `Lecture: ${selectedLecture.title}` : "Pick a Lecture (optional)"}
+                        </button>
+                        {selectedLecture && (
+                          <button onClick={clearLecture} className="text-xs text-red-500 hover:text-red-600 transition-colors">
+                            Remove lecture
+                          </button>
+                        )}
+                        <LecturePicker
+                          roomId={room.id}
+                          open={lecturePickerOpen}
+                          onClose={() => setLecturePickerOpen(false)}
+                          onSelect={handleSelectLecture}
+                          selectedId={selectedLecture?.id}
+                        />
+                      </div>
+                    )}
+                    {activeSession && activeSession.status === "WAITING" && (
+                      <div className="space-y-3">
+                        {activeSession.lectureTitle && (
+                          <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                            <BookOpen size={16} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{activeSession.lectureTitle}</p>
+                              <p className="text-[10px] text-gray-500">Shared Lecture</p>
+                            </div>
+                          </div>
+                        )}
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Participants</p>
+                        {activeSession.participants?.map((p: any) => (
+                          <SessionParticipantCard
+                            key={p.id}
+                            userId={p.userId}
+                            name={p.user?.name ?? "Unknown"}
+                            image={p.user?.image}
+                            focusSeconds={p.focusSeconds}
+                            sessionsCompleted={p.sessionsCompleted}
+                            isOnline={onlineUsers.some(u => u.userId === p.userId)}
+                            isHost={p.userId === activeSession.startedById}
+                            showKick={activeSession.startedById === currentUserId && p.userId !== currentUserId}
+                            onKick={handleKick}
+                          />
+                        ))}
+                        {!activeSession.participants?.some((p: any) => p.userId === currentUserId) && (
+                          <button onClick={joinSession} className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all">
+                            Join Session
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    <ParticipantsList
+                      activeSession={activeSession}
+                      currentUserId={currentUserId}
+                      timerState={timerState}
+                      onlineUsers={onlineUsers}
+                      onRefresh={fetchSessions}
+                      roomId={room.id}
+                    />
+                    <div className={cn(GLASS, "rounded-[32px] p-6")}>
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40 mb-4 flex items-center gap-2">
+                        <Clock size={14} /> Session History
+                      </h3>
+                      <SessionHistory roomId={room.id} />
+                    </div>
+                  </div>
+                </div>
+              )}
               {activeTab === "tasks" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2">
@@ -335,7 +602,6 @@ export function RoomDashboardClient({ room, currentUserId, isMember, isOwner }: 
                       <p className="text-[13px] font-bold text-slate-700 dark:text-white/80 leading-relaxed">Complete tasks within <span className="text-amber-500">2 hours</span> of assignment to earn 2x points!</p>
                     </div>
                     <ScheduleSidebar roomId={room.id} />
-                    <FocusTimer />
                     <SpotifyPlayer />
                   </div>
                 </div>
@@ -768,65 +1034,71 @@ function EmptyState({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-// ── Focus Timer (Persistent) ────────────────────────────────
-function FocusTimer() {
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [isActive, setIsActive] = useState(false);
+// ── Participants List (sidebar) ──────────────────────────────
+function ParticipantsList({ activeSession, currentUserId, timerState, onlineUsers, onRefresh, roomId }: {
+  activeSession: any; currentUserId: string; timerState: RoomTimerState | null;
+  onlineUsers: Array<{ userId: string }>; onRefresh: () => void; roomId: string;
+}) {
+  if (!activeSession || activeSession.status === "WAITING") return null;
 
-  useEffect(() => {
-    const saved = localStorage.getItem("medqs-focus-timer");
-    if (saved) {
-      const { time, lastUpdated, active } = JSON.parse(saved);
-      const elapsed = active ? Math.floor((Date.now() - lastUpdated) / 1000) : 0;
-      setTimeLeft(Math.max(0, time - elapsed));
-      setIsActive(active);
-    }
-  }, []);
+  const isHost = activeSession.startedById === currentUserId;
+  const hostOnline = onlineUsers.some((u) => u.userId === activeSession.startedById);
 
-  useEffect(() => {
-    let interval: any;
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
-      toast.success("Focus session complete!");
-    }
-    
-    localStorage.setItem("medqs-focus-timer", JSON.stringify({
-      time: timeLeft,
-      lastUpdated: Date.now(),
-      active: isActive
-    }));
+  const handleKick = async (targetUserId: string) => {
+    if (!confirm("Remove this participant from the session?")) return;
+    try {
+      const res = await fetch(`/api/v1/rooms/${roomId}/sessions/${activeSession.id}/kick`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetUserId }),
+      });
+      if (res.ok) { toast.success("Participant removed"); onRefresh(); }
+      else { const d = await res.json(); toast.error(d.error); }
+    } catch { toast.error("Failed to kick"); }
+  };
 
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft]);
-
-  const format = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
+  const handleClaimHost = async () => {
+    try {
+      const res = await fetch(`/api/v1/rooms/${roomId}/sessions/${activeSession.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "claim_host" }),
+      });
+      if (res.ok) { toast.success("You are now the host!"); onRefresh(); }
+      else { const d = await res.json(); toast.error(d.error); }
+    } catch { toast.error("Failed to claim host"); }
   };
 
   return (
-    <div className={cn(GLASS, "rounded-[32px] p-6 text-center group")}>
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Focus Session</p>
-      <div className="text-4xl font-black text-slate-800 dark:text-white tabular-nums tracking-tighter mb-6 group-hover:scale-110 transition-transform duration-500">
-        {format(timeLeft)}
+    <div className={cn(GLASS, "rounded-[32px] p-6")}>
+      <div className="flex items-center gap-2 mb-4">
+        <Timer size={16} className="text-primary" weight="fill" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40">Session Stats</p>
       </div>
-      <div className="flex gap-2">
-        <button 
-          onClick={() => setIsActive(!isActive)}
-          className={cn("flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", isActive ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : "bg-primary text-white shadow-lg shadow-primary/20")}
-        >
-          {isActive ? "Pause" : "Start"}
-        </button>
-        <button 
-          onClick={() => { setIsActive(false); setTimeLeft(25 * 60); }}
-          className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-red-500 transition-all"
-        >
-          <ArrowClockwise size={18} />
-        </button>
+      <div className="space-y-3">
+        {activeSession.participants?.map((p: any) => (
+          <SessionParticipantCard
+            key={p.id}
+            userId={p.userId}
+            name={p.user?.name ?? "Unknown"}
+            image={p.user?.image}
+            focusSeconds={p.focusSeconds}
+            sessionsCompleted={p.sessionsCompleted}
+            isOnline={onlineUsers.some((u) => u.userId === p.userId)}
+            isHost={p.userId === activeSession.startedById}
+            showKick={isHost && p.userId !== currentUserId}
+            onKick={handleKick}
+          />
+        ))}
       </div>
+      {!isHost && !hostOnline && (
+        <button
+          onClick={handleClaimHost}
+          className="mt-4 w-full py-2.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-xl text-xs font-semibold hover:bg-amber-500/20 transition-colors"
+        >
+          Claim Host (host offline)
+        </button>
+      )}
     </div>
   );
 }

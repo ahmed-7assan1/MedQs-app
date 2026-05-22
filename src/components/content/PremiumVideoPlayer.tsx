@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Youtube, PlayCircle, MonitorPlay, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CustomVideoPlayer } from "./CustomVideoPlayer";
+import { VidStackPlayer } from "./VidStackPlayer";
 import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 
 interface VideoSource {
@@ -83,7 +83,7 @@ export function PremiumVideoPlayer({ primaryUrl, extraVideos = [], title }: Prem
 
       {/* ── Video Stage ── */}
       <div className="relative w-full">
-        <CustomVideoPlayer 
+        <VidStackPlayer 
           key={activeUrl} 
           url={activeUrl} 
           title={activeTitle} 

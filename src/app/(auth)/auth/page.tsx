@@ -34,25 +34,25 @@ function CustomDropdown({ label, options, value, onChange, icon: Icon, disabled,
 
   return (
     <div className="space-y-1.5 relative" ref={dropdownRef}>
-      <label className="text-[10px] font-black text-slate-500 dark:text-white/30 uppercase ml-1 tracking-widest">{label}</label>
+      <label className="text-[10px] font-black text-white/30 uppercase ml-1 tracking-widest">{label}</label>
       <button
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "w-full flex items-center justify-between gap-3 px-6 py-4.5 rounded-2xl border transition-all duration-300",
-          "bg-slate-100/50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.05]",
-          isOpen ? "ring-2 ring-blue-500/20 border-blue-500/50" : "hover:bg-slate-200/50 dark:hover:bg-white/[0.06]",
+          "bg-white/[0.03] border-white/[0.06]",
+          isOpen ? "ring-2 ring-primary/20 border-primary/50" : "hover:bg-white/[0.06]",
           disabled && "opacity-40 cursor-not-allowed filter grayscale"
         )}
       >
         <div className="flex items-center gap-3 overflow-hidden">
-          <Icon className={cn("shrink-0", value ? "text-blue-500" : "text-slate-400 dark:text-white/20")} size={18} />
-          <span className={cn("text-sm font-bold truncate", value ? "text-slate-900 dark:text-white" : "text-slate-400 dark:text-white/20")}>
+          <Icon className={cn("shrink-0", value ? "text-primary" : "text-white/20")} size={18} />
+          <span className={cn("text-sm font-bold truncate", value ? "text-white" : "text-white/20")}>
             {value ? (options.find((o: any) => o.id === value.id)?.name || value.name || `Year ${value.yearNumber}`) : placeholder}
           </span>
         </div>
-        <CaretUpDown className="text-slate-400 dark:text-white/20 shrink-0" size={14} />
+        <CaretUpDown className="text-white/20 shrink-0" size={14} />
       </button>
 
       <AnimatePresence>
@@ -61,10 +61,10 @@ function CustomDropdown({ label, options, value, onChange, icon: Icon, disabled,
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute z-[100] left-0 right-0 mt-2 p-2 bg-white dark:bg-[#0d101f] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl backdrop-blur-md max-h-[240px] overflow-y-auto custom-scrollbar"
+            className="absolute z-[100] left-0 right-0 mt-2 p-2 bg-[#0d101f] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md max-h-[240px] overflow-y-auto custom-scrollbar"
           >
             {options.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">No options found</div>
+              <div className="py-8 text-center text-xs text-white/40">No options found</div>
             ) : (
               options.map((opt: any) => (
                 <button
@@ -77,7 +77,7 @@ function CustomDropdown({ label, options, value, onChange, icon: Icon, disabled,
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold transition-all text-left",
                     value?.id === opt.id 
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
+                      ? "bg-primary text-white shadow-lg shadow-primary/20" 
                       : "text-slate-700 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5"
                   )}
                 >
@@ -279,29 +279,29 @@ function AuthContent() {
     <div className="relative z-10 w-full max-w-[500px] flex flex-col items-center px-4 pt-10 pb-20 mx-auto">
       
       {/* Brand Header */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 flex flex-col items-center text-center">
-        <div className="p-4 rounded-[28px] bg-white/40 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-2xl backdrop-blur-2xl mb-6">
-          <MedOneXLogoMark className="h-12 w-12 text-slate-900 dark:text-white" />
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex flex-col items-center text-center">
+        <div className="p-4 rounded-[28px] bg-white/[0.04] border border-white/[0.06] backdrop-blur-2xl mb-5">
+          <MedOneXLogoMark className="h-12 w-12 text-white" />
         </div>
-        <h1 className="text-3xl font-display font-black tracking-tight text-slate-900 dark:text-white uppercase">
-          {isOnboarding ? "Finalize Profile" : (showForgot ? "Access Recovery" : "Medical Ecosystem")}
+        <h1 className="text-3xl font-black tracking-tight text-white uppercase">
+          {isOnboarding ? "Finalize Profile" : (showForgot ? "Access Recovery" : "MedOneX")}
         </h1>
-        <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-2 font-black uppercase tracking-[0.2em]">
-          Secure Infrastructure for Medical Excellence
+        <p className="text-[10px] text-primary mt-2 font-black uppercase tracking-[0.2em]">
+          Secure Medical Learning Infrastructure
         </p>
       </motion.div>
 
-      <div className="w-full bg-white/95 dark:bg-[#05070f]/95 border border-slate-200 dark:border-white/[0.08] rounded-[40px] p-2 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden">
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-[40px] p-2 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] backdrop-blur-2xl overflow-hidden">
         
         {/* Tabs */}
         {!isOnboarding && !showForgot && (
-          <div className="relative flex p-1.5 mb-6 bg-slate-200/50 dark:bg-white/5 rounded-[30px]">
-            <div className={cn("absolute inset-y-1.5 w-[calc(50%-6px)] bg-white dark:bg-blue-600 rounded-[24px] shadow-xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]", activeTab === "register" ? "left-[calc(50%)]" : "left-1.5")} />
-            <button onClick={() => setActiveTab("login")} className={cn("relative z-10 flex-1 py-4 text-xs font-black uppercase tracking-widest transition-colors", activeTab === "login" ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white/30")}>
+          <div className="relative flex p-1 mb-6 bg-white/5 rounded-[30px]">
+            <div className={cn("absolute inset-y-1 w-[calc(50%-4px)] bg-white/10 rounded-[24px] shadow-xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]", activeTab === "register" ? "left-[calc(50%+2px)]" : "left-1")} />
+            <button onClick={() => setActiveTab("login")} className={cn("relative z-10 flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest transition-colors", activeTab === "login" ? "text-white" : "text-white/30")}>
               Sign In
             </button>
-            <button onClick={() => setActiveTab("register")} className={cn("relative z-10 flex-1 py-4 text-xs font-black uppercase tracking-widest transition-colors", activeTab === "register" ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white/30")}>
-              Establish Profile
+            <button onClick={() => setActiveTab("register")} className={cn("relative z-10 flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest transition-colors", activeTab === "register" ? "text-white" : "text-white/30")}>
+              Register
             </button>
           </div>
         )}
@@ -344,22 +344,22 @@ function AuthContent() {
               <motion.form key="login" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleEmailAuth} className="space-y-5">
                 <div className="space-y-5">
                   <div className="relative group">
-                    <EnvelopeSimple className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
-                    <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Terminal Address" 
-                      className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-[24px] py-5 pl-16 pr-8 text-sm font-bold text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/10" />
+                    <EnvelopeSimple className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={20} />
+                    <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Medical Email" 
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-5 pl-16 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                   </div>
                   <div className="relative group">
-                    <LockKey className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20 group-focus-within:text-blue-500 transition-colors" size={20} />
-                    <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Security Keyphrase" 
-                      className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-[24px] py-5 pl-16 pr-8 text-sm font-bold text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-white/10" />
+                    <LockKey className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={20} />
+                    <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Passphrase" 
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-5 pl-16 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                   </div>
                 </div>
 
                 <div className="flex justify-end">
-                  <button type="button" onClick={() => setShowForgot(true)} className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/20 hover:text-blue-500 transition-colors">Credential Recovery?</button>
+                  <button type="button" onClick={() => setShowForgot(true)} className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-primary transition-colors">Forgot Password?</button>
                 </div>
 
-                <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 active:scale-[0.98] transition-all flex items-center justify-center">
+                <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] btn-primary-gradient shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center text-xs">
                   {loading ? <CircleNotch className="animate-spin" size={20} /> : "Initiate Connection"}
                 </button>
               </motion.form>
@@ -372,10 +372,10 @@ function AuthContent() {
                 {/* 1. Academic Scoped Selection */}
                 <div className="space-y-8 pb-4">
                   <div className="flex items-center gap-4">
-                     <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 shadow-sm"><Buildings weight="fill" size={24}/></div>
+                     <div className="p-3 rounded-2xl bg-primary/10 text-primary"><Buildings weight="fill" size={24}/></div>
                      <div>
-                        <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white">Academic Clearance</h3>
-                        <p className="text-[10px] text-slate-500 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">Identity & Institution</p>
+                        <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-white">Academic Clearance</h3>
+                        <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest mt-0.5">Identity & Institution</p>
                      </div>
                   </div>
                   
@@ -431,34 +431,34 @@ function AuthContent() {
 
                 {/* 2. Personal Credentials */}
                 {selectedSem && (
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 border-t border-slate-200 dark:border-white/5 pt-10">
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 border-t border-white/10 pt-10">
                     <div className="flex items-center gap-4">
-                       <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 shadow-sm"><User weight="fill" size={24}/></div>
+                       <div className="p-3 rounded-2xl bg-primary/10 text-primary"><User weight="fill" size={24}/></div>
                        <div>
-                          <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white">Account Protocols</h3>
-                          <p className="text-[10px] text-slate-500 dark:text-white/20 font-bold uppercase tracking-widest mt-0.5">Secure Credentials</p>
+                          <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-white">Account Protocols</h3>
+                          <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest mt-0.5">Secure Credentials</p>
                        </div>
                     </div>
                     
                     <div className="space-y-5">
                       <div className="relative group">
-                        <User className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
-                        <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Full Legal Name" 
-                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
+                        <User className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
+                        <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" 
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                       </div>
                       <div className="relative group">
-                        <EnvelopeSimple className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
-                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Official Email Address" 
-                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
+                        <EnvelopeSimple className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
+                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address" 
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                       </div>
                       <div className="relative group">
-                        <LockKey className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
-                        <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Global Passphrase" 
-                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
+                        <LockKey className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
+                        <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Passphrase" 
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                       </div>
                     </div>
 
-                    <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                    <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] btn-primary-gradient shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-xs">
                       {loading ? <CircleNotch className="animate-spin" size={20} /> : <><ShieldCheck weight="fill" size={20}/> Finalize Clearance</>}
                     </button>
                   </motion.div>
@@ -472,20 +472,20 @@ function AuthContent() {
                 {!forgotSent ? (
                   <>
                     <div className="flex items-center gap-4">
-                      <button onClick={() => setShowForgot(false)} className="p-3 bg-slate-100 dark:bg-white/[0.05] hover:bg-slate-200 dark:hover:bg-white/10 rounded-2xl text-slate-900 dark:text-white transition-all"><ArrowLeft size={20}/></button>
+                      <button onClick={() => setShowForgot(false)} className="p-3 bg-white/[0.05] hover:bg-white/10 rounded-2xl text-white transition-all"><ArrowLeft size={20}/></button>
                       <div>
-                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Protocol Recovery</h3>
-                        <p className="text-[10px] font-bold text-slate-500 dark:text-white/30 uppercase mt-1">Identity verification required</p>
+                        <h3 className="text-sm font-black uppercase tracking-widest text-white">Access Recovery</h3>
+                        <p className="text-[10px] font-bold text-white/30 uppercase mt-1">Identity verification required</p>
                       </div>
                     </div>
                     <form onSubmit={handleForgotPassword} className="space-y-4">
                       <div className="relative group">
-                        <EnvelopeSimple className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/20" size={18} />
-                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Registered Recovery Email"
-                          className="w-full bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] rounded-[22px] py-4.5 pl-14 pr-6 text-sm font-bold text-slate-900 dark:text-white focus:border-blue-500/50 outline-none transition-all" />
+                        <EnvelopeSimple className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
+                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Registered Email"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[22px] py-4.5 pl-14 pr-6 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                       </div>
-                      <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] bg-blue-600 text-white font-black text-xs uppercase tracking-[0.2em] shadow-lg flex items-center justify-center gap-3">
-                        {loading ? <CircleNotch className="animate-spin" size={20} /> : <><PaperPlaneTilt weight="fill" size={20}/> Dispatch Access Link</>}
+                      <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] btn-primary-gradient shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-xs">
+                        {loading ? <CircleNotch className="animate-spin" size={20} /> : <><PaperPlaneTilt weight="fill" size={20}/> Send Reset Link</>}
                       </button>
                     </form>
                   </>
@@ -518,7 +518,7 @@ function AuthContent() {
 
 export default function UnifiedAuthPage() {
   return (
-    <div className="relative min-h-screen flex flex-col bg-slate-50 dark:bg-[#05070f] selection:bg-blue-500/30 overflow-hidden">
+    <div className="relative min-h-screen flex flex-col cinematic-bg selection:bg-primary/30 overflow-hidden">
       <CinematicBackground />
       <Suspense fallback={<div className="flex-1 flex items-center justify-center"><CircleNotch className="animate-spin text-blue-500" size={32} /></div>}>
         <AuthContent />

@@ -9,7 +9,7 @@ import {
   ChevronRight, Sparkles, VideoOff, Info, GraduationCap, Check, BookOpen
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { CustomVideoPlayer } from "./CustomVideoPlayer";
+import { VidStackPlayer } from "./VidStackPlayer";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -265,7 +265,7 @@ export function LectureVideoStudio({
             <div className="relative group -mx-4 md:mx-0">
               <div className="relative overflow-hidden md:rounded-[24px] bg-black aspect-[16/9] shadow-2xl border-y md:border border-white/5">
                 {active ? (
-                  <CustomVideoPlayer key={activeId} url={active.url} title={active.title} />
+                  <VidStackPlayer key={activeId} url={active.url} title={active.title} />
                 ) : (
                   <div className="flex h-full flex-col items-center justify-center gap-4 bg-[#0c0d18] text-[#4a4b6a]">
                     <Video className="h-16 w-16 opacity-10 animate-pulse" />

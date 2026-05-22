@@ -4,94 +4,117 @@ import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { House, Books, Clock, ClipboardText, Sparkle } from "@phosphor-icons/react/dist/ssr";
+import { House, Books, Brain, Sparkle, ChatTeardropDots, User } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { isImmersiveMobileRoute } from "@/lib/mobile-chrome";
 
-const LEFT_TABS = [
+interface TabDef {
+  href: string;
+  label: string;
+  icon: ElementType;
+  match: (p: string) => boolean;
+}
+
+const TABS: TabDef[] = [
   {
     href: "/dashboard-app",
-    label: "HOME",
+    label: "Home",
     icon: House,
     match: (p: string) => p === "/dashboard-app" || p === "/dashboard",
   },
   {
     href: "/modules",
-    label: "LIBRARY",
+    label: "Learn",
     icon: Books,
-    match: (p: string) => p.startsWith("/modules"),
-  },
-];
-
-const RIGHT_TABS = [
-  {
-    href: "/taskat",
-    label: "SCHEDULE",
-    icon: Clock,
-    match: (p: string) => p.startsWith("/taskat"),
+    match: (p: string) => p.startsWith("/modules") || p.startsWith("/videos"),
   },
   {
     href: "/past-papers",
-    label: "PRACTICE",
-    icon: ClipboardText,
-    match: (p: string) => p.startsWith("/past-papers") || p.startsWith("/quizzes") || p.startsWith("/quiz"),
+    label: "QBank",
+    icon: Brain,
+    match: (p: string) => p.startsWith("/past-papers") || p.startsWith("/quiz"),
+  },
+  {
+    href: "/ai-chat",
+    label: "AI",
+    icon: Sparkle,
+    match: (p: string) => p.startsWith("/ai-chat") || p.startsWith("/atlas"),
+  },
+  {
+    href: "/social",
+    label: "Community",
+    icon: ChatTeardropDots,
+    match: (p: string) => p.startsWith("/social") || p.startsWith("/community"),
+  },
+  {
+    href: "/profile/me",
+    label: "Profile",
+    icon: User,
+    match: (p: string) => p.startsWith("/profile") || p.startsWith("/settings") || p.startsWith("/notifications"),
   },
 ];
 
-const CENTER_FAB = {
-  href: "/ai-chat",
-  label: "DR. Q",
-  icon: Sparkle,
-  match: (p: string) => p.startsWith("/ai-chat"),
-};
-
-export function MobileBottomNav() {
-  return null;
-}
-
-function TabItem({ tab, pathname }: { tab: any; pathname: string }) {
+function TabItem({ tab, pathname, idx }: { tab: TabDef; pathname: string; idx: number }) {
   const active = tab.match(pathname);
-  
-  return (
-    <li className="relative flex-1 flex justify-center">
-      <Link
-        href={tab.href}
-        className={cn(
-          "flex flex-col items-center justify-center gap-1",
-          "h-12 w-14 transition-all duration-300 relative z-10",
-          active ? "text-primary" : "text-muted-foreground"
-        )}
-      >
-        <div className="relative flex items-center justify-center">
-          <tab.icon
-            weight={active ? "fill" : "bold"}
-            className={cn(
-              "transition-all duration-300",
-              active ? "h-6 w-6" : "h-5 w-5 opacity-70"
-            )}
-          />
-        </div>
-        
-        {/* Only show label when active */}
-        <span
-          className={cn(
-            "text-[9px] font-black tracking-wider transition-all duration-300 overflow-hidden",
-            active ? "opacity-100 max-h-4" : "opacity-0 max-h-0"
-          )}
-        >
-          {tab.label}
-        </span>
 
-        {/* Liquid background pill */}
+  return (
+    <Link
+      href={tab.href}
+      className={cn(
+        "relative flex flex-col items-center justify-center gap-0.5",
+        "h-full flex-1 transition-all duration-300",
+        "active:scale-90"
+      )}
+    >
+      <div className="relative flex items-center justify-center">
+        <tab.icon
+          weight={active ? "fill" : "regular"}
+          className={cn(
+            "transition-all duration-300",
+            active ? "h-5 w-5" : "h-5 w-5 opacity-50"
+          )}
+        />
+        {/* Glow dot for active tab */}
         {active && (
           <motion.div
-            layoutId="activeTabPill"
-            className="absolute inset-0 z-[-1] bg-primary/10 dark:bg-primary/20 rounded-xl"
-            initial={false}
+            layoutId="navGlow"
+            className="absolute -bottom-2 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary"
             transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
           />
         )}
-      </Link>
-    </li>
+      </div>
+      <span
+        className={cn(
+          "text-[8px] font-black tracking-wider transition-all duration-300",
+          active ? "text-white opacity-100" : "text-white/30 opacity-60"
+        )}
+      >
+        {tab.label}
+      </span>
+    </Link>
+  );
+}
+
+export function MobileBottomNav() {
+  const pathname = usePathname();
+
+  if (isImmersiveMobileRoute(pathname)) return null;
+
+  return (
+    <nav
+      className={cn(
+        "md:hidden fixed bottom-0 left-0 right-0 z-[100]",
+        "pb-[env(safe-area-inset-bottom,0px)]",
+        "bg-[#0C0B17]/90 backdrop-blur-3xl",
+        "border-t border-white/[0.04]",
+        "shadow-[0_-12px_40px_rgba(0,0,0,0.3)]"
+      )}
+    >
+      <div className="flex items-center justify-around h-16 px-2">
+        {TABS.map((tab, idx) => (
+          <TabItem key={tab.href} tab={tab} pathname={pathname} idx={idx} />
+        ))}
+      </div>
+    </nav>
   );
 }

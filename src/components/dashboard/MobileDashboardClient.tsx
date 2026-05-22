@@ -1,35 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Play,
-  Brain,
-  Target,
-  Sparkle,
-  BookOpen,
-  ArrowRight,
-  Activity,
-  Trophy,
-  Flame,
-  PlayCircle,
-  Wrench,
-  Microscope,
-  Stethoscope,
-  List,
-  CaretRight,
-  Gear,
-  Bell,
-} from "@phosphor-icons/react";
-import {
-  MobileContinueCard,
-  MobileSpecCard,
-  MobileDrQCard,
-  MobileBentoStatCard,
-  MobileBentoQuickCard,
-  MobileListedStats,
-} from "./MobileDashboardComponents";
+  Flame, Trophy, Target, Brain, BookOpen, ArrowRight,
+  PlayCircle, Wrench, Mic, Sparkles, ChevronRight,
+  GraduationCap, Clock, Bell, TrendingUp,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { GlassCard, ProgressRing, StatsCard, SubjectCard, AIWidget, SwipeCarousel } from "@/components/mobile";
 
 interface MobileDashboardClientProps {
   firstName: string;
@@ -48,279 +28,199 @@ interface MobileDashboardClientProps {
 }
 
 export function MobileDashboardClient({
-  firstName,
-  greeting,
-  currentStreak,
-  rankPoints,
-  rankLabel,
-  dailyPct,
-  overallPct,
-  todayItemCount,
-  dailyTarget,
-  totalQuestions,
-  lastLectureActivity,
-  moduleProgress,
-  alert,
+  firstName, greeting, currentStreak, rankPoints, rankLabel,
+  dailyPct, overallPct, todayItemCount, dailyTarget,
+  totalQuestions, lastLectureActivity, moduleProgress, alert,
 }: MobileDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<"syllabus" | "analytics" | "tools">("syllabus");
-
-  const statsData = [
-    {
-      label: "Daily Target",
-      value: `${todayItemCount} / ${dailyTarget} solved`,
-      iconName: "Target",
-      progress: dailyPct,
-      color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-    },
-    {
-      label: "Knowledge Mastery",
-      value: `${overallPct}% completed`,
-      iconName: "Brain",
-      progress: overallPct,
-      color: "bg-violet-500/10 text-violet-500 border-violet-500/20",
-    },
-    {
-      label: "Active Modules",
-      value: `${moduleProgress.length} active`,
-      iconName: "BookOpen",
-      progress: Math.min(100, moduleProgress.length * 20),
-      color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-    },
-  ];
+  const container = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.06 } },
+  };
+  const itemAnim = {
+    hidden: { opacity: 0, y: 16 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  };
 
   return (
-    <div className="space-y-6 md:hidden pb-12">
-      {/* Greeting & Top Utilities Header */}
-      <section className="flex items-center justify-between">
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-[0.15em]">
-            {greeting},
-          </p>
-          <h1 className="text-[26px] font-extrabold text-slate-800 dark:text-white tracking-tight leading-tight flex items-center gap-1.5">
-            Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-300 font-black">
-              Dr. {firstName}
-            </span>{' '}
-            <span className="animate-bounce">dY`</span>
-          </h1>
-        </div>
-        {/* Top Right Icons */}
-        <div className="flex items-center gap-2">
-          <Link
-            href="/notifications"
-            className="h-9 w-9 rounded-full bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] flex items-center justify-center text-slate-600 dark:text-white/70 hover:text-primary active:scale-90 transition-all"
-          >
-            <Bell size={18} weight="bold" />
-          </Link>
-          <Link
-            href="/settings"
-            className="h-9 w-9 rounded-full bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] flex items-center justify-center text-slate-600 dark:text-white/70 hover:text-primary active:scale-90 transition-all"
-          >
-            <Gear size={18} weight="bold" />
-          </Link>
-        </div>
-      </section>
+    <div className="md:hidden cinematic-bg min-h-screen pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))]">
+      {alert && <div className="px-4 pt-4">{alert}</div>}
 
-      {/* Segmented Switcher Pill Tabs */}
-      <div className="p-1 rounded-full bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.04] flex items-center relative z-20">
-        {(["syllabus", "analytics", "tools"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className="flex-1 relative py-2.5 text-[11px] font-black uppercase tracking-wider text-center transition-all"
-          >
-            {activeTab === tab && (
-              <motion.div
-                layoutId="active-dashboard-tab"
-                className="absolute inset-0 rounded-full bg-white dark:bg-white/10 border border-slate-200/50 dark:border-white/5 shadow-sm"
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
-              />
-            )}
-            <span
-              className={
-                activeTab === tab
-                  ? "text-slate-800 dark:text-white z-10 relative font-extrabold"
-                  : "text-slate-400 dark:text-white/40 hover:text-slate-600 dark:hover:text-white/60 z-10 relative"
-              }
-            >
-              {tab}
-            </span>
-          </button>
-        ))}
-      </div>
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 px-4 pt-6">
 
-      {/* Highlight Cards (Streak & XP) */}
-      <div className="grid grid-cols-2 gap-3.5">
-        {/* Streak Card */}
-        <Link href="/taskat" className="block">
-          <div className="p-5 rounded-[28px] border border-blue-100 dark:border-indigo-500/10 bg-[#EFF6FF] dark:bg-indigo-950/20 shadow-sm dark:shadow-none relative flex flex-col justify-between h-[130px] active:scale-[0.98] transition-transform">
-            <div className="flex items-center justify-between w-full">
-              <div className="h-9 w-9 rounded-xl bg-blue-100 dark:bg-indigo-500/20 flex items-center justify-center text-blue-600 dark:text-indigo-400">
-                <Flame size={20} weight="fill" />
-              </div>
-              <CaretRight size={14} weight="bold" className="text-blue-500 dark:text-indigo-400" />
-            </div>
-            <div>
-              <p className="text-[22px] font-black text-blue-900 dark:text-indigo-200 leading-none">{currentStreak} Days</p>
-              <p className="text-[9px] font-bold text-blue-700/60 dark:text-indigo-400/50 uppercase tracking-wider mt-1.5">
-                Streak Progress
-              </p>
-            </div>
-          </div>
-        </Link>
-        {/* XP Card */}
-        <Link href="/profile" className="block">
-          <div className="p-5 rounded-[28px] border border-emerald-100 dark:border-emerald-500/10 bg-[#F0FDF4] dark:bg-emerald-950/20 shadow-sm dark:shadow-none relative flex flex-col justify-between h-[130px] active:scale-[0.98] transition-transform">
-            <div className="flex items-center justify-between w-full">
-              <div className="h-9 w-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                <Trophy size={20} weight="fill" />
-              </div>
-              <CaretRight size={14} weight="bold" className="text-emerald-500 dark:text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-[22px] font-black text-emerald-900 dark:text-emerald-200 leading-none">{rankPoints.toLocaleString()}</p>
-              <p className="text-[9px] font-bold text-emerald-700/60 dark:text-emerald-400/50 uppercase tracking-wider mt-1.5">
-                Academic XP
-              </p>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Tab Contents */}
-      <div className="min-h-[300px]">
-        <AnimatePresence mode="wait">
-          {activeTab === "syllabus" && (
-            <motion.div
-              key="syllabus"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-5"
-            >
-              {/* Resume learning feed card */}
-              <div>
-                <div className="flex items-center justify-between px-1 mb-2">
-                  <p className="text-[9px] font-black text-slate-400 dark:text-white/25 uppercase tracking-widest">
-                    Recent Activity
-                  </p>
+        {/* ── Hero: Greeting + Streak Stats ── */}
+        <motion.div variants={itemAnim} className="relative">
+          <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-primary/[0.06] blur-[80px]" />
+          <div className="relative z-10 flex items-start justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">{greeting}</p>
+              <h1 className="text-[28px] font-black text-white tracking-tight leading-tight">
+                {firstName}
+              </h1>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1">
+                  <Flame className="h-3 w-3 text-primary" />
+                  <span className="text-[10px] font-black text-primary">{currentStreak} day streak</span>
                 </div>
-                {lastLectureActivity?.lecture?.subject ? (
-                  <MobileContinueCard
-                    module={lastLectureActivity.lecture.title}
-                    subject={lastLectureActivity.lecture.subject.name}
-                    progress={overallPct}
-                    href={`/modules/${lastLectureActivity.lecture.subject.moduleId}/lectures/${lastLectureActivity.lecture.id}`}
-                  />
-                ) : (
-                  <MobileContinueCard module="Start Studying" subject="Select an academic module" progress={0} href="/modules" />
-                )}
-              </div>
-
-              {/* Ask Dr. Q search box */}
-              <MobileDrQCard />
-
-              {/* Active Disciplines list */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center px-1">
-                  <p className="text-[9px] font-black text-slate-400 dark:text-white/25 uppercase tracking-widest">
-                    Active disciplines
-                  </p>
-                  <Link href="/modules" className="text-[10px] font-black text-primary hover:underline">
-                    View All +
-                  </Link>
+                <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1">
+                  <Trophy className="h-3 w-3 text-emerald-400" />
+                  <span className="text-[10px] font-black text-emerald-400">{rankPoints.toLocaleString()} XP</span>
                 </div>
-                <div className="space-y-0.5">
-                  {moduleProgress.length > 0 ? (
-                    moduleProgress.slice(0, 3).map((mod: any, i: number) => (
-                      <MobileSpecCard
-                        key={mod.id}
-                        name={mod.name}
-                        iconName={i === 0 ? "Brain" : i === 1 ? "Wrench" : i === 2 ? "Microscope" : "Activity"}
-                        progress={mod.pct}
-                        delay={0.05 * i}
-                      />
-                    ))
-                  ) : (
-                    <div className="p-6 rounded-[24px] border border-slate-200/60 dark:border-white/[0.04] bg-white dark:bg-white/[0.01] text-center shadow-sm dark:shadow-none">
-                      <p className="text-xs text-slate-400 dark:text-white/40 font-bold uppercase tracking-wider">
-                        No disciplines active
-                      </p>
+              </div>
+            </div>
+            <Link
+              href="/profile/me"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] transition-all"
+            >
+              <Bell className="h-4 w-4 text-white/60" />
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* ── Main Progress Stats ── */}
+        <motion.div variants={itemAnim} className="grid grid-cols-2 gap-3">
+          <StatsCard
+            label="Daily Goal"
+            value={`${todayItemCount}/${dailyTarget}`}
+            icon={<Target className="h-4 w-4 text-primary" />}
+            progress={dailyPct}
+            color="text-primary"
+            ring
+          />
+          <StatsCard
+            label="Knowledge Mastery"
+            value={`${overallPct}%`}
+            icon={<Brain className="h-4 w-4 text-cyan-400" />}
+            progress={overallPct}
+            color="text-cyan-400"
+            ring
+          />
+          <StatsCard
+            label="Questions Solved"
+            value={totalQuestions.toLocaleString()}
+            icon={<GraduationCap className="h-4 w-4 text-emerald-400" />}
+            progress={Math.min(100, (totalQuestions / 1000) * 100)}
+            color="text-emerald-400"
+          />
+          <StatsCard
+            label="Active Modules"
+            value={`${moduleProgress.length}`}
+            icon={<BookOpen className="h-4 w-4 text-amber-400" />}
+            progress={Math.min(100, moduleProgress.length * 20)}
+            color="text-amber-400"
+          />
+        </motion.div>
+
+        {/* ── Continue Learning ── */}
+        <motion.div variants={itemAnim}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[11px] font-black text-white/60 uppercase tracking-[0.15em]">Continue Learning</h2>
+            <Link href="/modules" className="flex items-center gap-1 text-[10px] font-bold text-primary">
+              View All <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          {lastLectureActivity?.lecture?.subject ? (
+            <Link href={`/modules/${lastLectureActivity.lecture.subject.moduleId}/lectures/${lastLectureActivity.lecture.id}`}>
+              <GlassCard className="group relative overflow-hidden" padding="lg">
+                <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary to-cyan-500" />
+                <div className="relative flex items-center gap-4 pl-4">
+                  <ProgressRing progress={overallPct} size={52} strokeWidth={3.5}>
+                    <span className="text-[10px] font-black text-white">{overallPct}%</span>
+                  </ProgressRing>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">Resume</span>
                     </div>
-                  )}
+                    <h3 className="text-sm font-black text-white truncate">{lastLectureActivity.lecture.title}</h3>
+                    <p className="text-[10px] font-medium text-white/40 mt-0.5">{lastLectureActivity.lecture.subject.name}</p>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 border border-primary/30 shrink-0 group-hover:scale-110 transition-transform">
+                    <PlayCircle className="h-5 w-5 text-primary" />
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </GlassCard>
+            </Link>
+          ) : (
+            <GlassCard padding="lg" className="text-center">
+              <p className="text-xs font-bold text-white/40">No active sessions</p>
+              <Link href="/modules" className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-wider">
+                Start Learning <ArrowRight className="h-3 w-3" />
+              </Link>
+            </GlassCard>
           )}
+        </motion.div>
 
-          {activeTab === "analytics" && (
-            <motion.div
-              key="analytics"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-5"
-            >
-              {/* Detailed Metrics Switchboard */}
-              <div className="space-y-2">
-                <p className="text-[9px] font-black text-slate-400 dark:text-white/25 uppercase tracking-widest px-1">
-                  Detailed Metrics
-                </p>
-                <MobileListedStats stats={statsData} />
-              </div>
-            </motion.div>
-          )}
+        {/* ── AI Widget ── */}
+        <motion.div variants={itemAnim}>
+          <AIWidget placeholder="Ask about pharmacology, anatomy..." />
+        </motion.div>
 
-          {activeTab === "tools" && (
-            <motion.div
-              key="tools"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-5"
-            >
-              {/* Quick Actions Shortcuts Grid */}
-              <div className="space-y-2">
-                <p className="text-[9px] font-black text-slate-400 dark:text-white/25 uppercase tracking-widest px-1">
-                  Toolbox
-                </p>
-                <div className="grid grid-cols-2 gap-3.5">
-                  <MobileBentoQuickCard
-                    label="Video Hub"
-                    iconName="PlayCircle"
-                    colorClass="bg-red-500/10 text-red-500 dark:bg-red-500/15 dark:text-red-400"
-                    delay={0.05}
-                    href="/videos"
-                  />
-                  <MobileBentoQuickCard
-                    label="Mock Exams"
-                    iconName="Flame"
-                    colorClass="bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/15 dark:text-emerald-400"
-                    delay={0.1}
-                    href="/past-papers"
-                  />
-                  <MobileBentoQuickCard
-                    label="Study Tools"
-                    iconName="Wrench"
-                    colorClass="bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/15 dark:text-indigo-400"
-                    delay={0.15}
-                    href="/study-tools"
-                  />
-                  <MobileBentoQuickCard
-                    label="Audio Lab"
-                    iconName="Mic"
-                    colorClass="bg-amber-500/10 text-amber-500 dark:bg-amber-500/15 dark:text-amber-400"
-                    delay={0.2}
-                    href="/podcasts"
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+        {/* ── Active Disciplines ── */}
+        <motion.div variants={itemAnim}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[11px] font-black text-white/60 uppercase tracking-[0.15em]">Active Disciplines</h2>
+            <Link href="/modules" className="flex items-center gap-1 text-[10px] font-bold text-primary">
+              View All <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {moduleProgress.slice(0, 5).map((mod: any, i: number) => (
+              <SubjectCard
+                key={mod.id}
+                name={mod.name}
+                progress={mod.pct}
+                href={`/modules/${mod.id}`}
+                delay={i * 0.05}
+                icon={
+                  <BookOpen className={cn(
+                    "h-4 w-4",
+                    i === 0 ? "text-primary" : i === 1 ? "text-cyan-400" : i === 2 ? "text-emerald-400" : "text-amber-400"
+                  )} />
+                }
+                color={cn(
+                  i === 0 ? "text-primary" : i === 1 ? "text-cyan-400" : i === 2 ? "text-emerald-400" : "text-amber-400"
+                )}
+                gradient={cn(
+                  i === 0 ? "from-primary/20" : i === 1 ? "from-cyan-500/20" : i === 2 ? "from-emerald-500/20" : "from-amber-500/20"
+                )}
+              />
+            ))}
+            {moduleProgress.length === 0 && (
+              <GlassCard padding="lg" className="text-center">
+                <p className="text-xs font-bold text-white/40">No disciplines yet</p>
+                <Link href="/modules" className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-wider">
+                  Browse Modules <ArrowRight className="h-3 w-3" />
+                </Link>
+              </GlassCard>
+            )}
+          </div>
+        </motion.div>
+
+        {/* ── Quick Actions ── */}
+        <motion.div variants={itemAnim}>
+          <h2 className="text-[11px] font-black text-white/60 uppercase tracking-[0.15em] mb-3">Quick Access</h2>
+          <div className="grid grid-cols-4 gap-2.5">
+            {[
+              { label: "Videos", icon: PlayCircle, color: "text-rose-400 bg-rose-500/10 border-rose-500/20", href: "/videos" },
+              { label: "Exams", icon: Target, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", href: "/past-papers" },
+              { label: "Tools", icon: Wrench, color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20", href: "/study-tools" },
+              { label: "Audio", icon: Mic, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", href: "/podcasts" },
+            ].map((item) => (
+              <Link key={item.label} href={item.href}>
+                <GlassCard padding="md" className="flex flex-col items-center gap-2 text-center">
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", item.color)}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-[8px] font-black text-white/50 uppercase tracking-wider">{item.label}</span>
+                </GlassCard>
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ── Bottom spacing ── */}
+        <div className="h-4" />
+      </motion.div>
     </div>
   );
 }

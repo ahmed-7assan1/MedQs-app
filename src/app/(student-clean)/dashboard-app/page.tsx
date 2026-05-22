@@ -141,12 +141,12 @@ export default async function DashboardPage() {
           lastLectureActivity={lastLectureActivity}
           moduleProgress={moduleProgress}
           alert={isProfileIncomplete ? (
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-50/10 border border-blue-500/20 mb-4">
-              <AlertCircle size={20} className="flex-shrink-0 text-blue-500" />
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-4">
+              <AlertCircle size={20} className="flex-shrink-0 text-blue-400" />
               <div>
-                <p className="font-bold text-sm text-blue-800 mb-1">Profile Incomplete</p>
-                <p className="text-blue-600 text-sm">Please complete your academic details (university, faculty, semester) to unlock personalized features and accurate progress tracking.</p>
-                <Link href="/profile/edit" className="mt-2 inline-flex items-center px-3 py-1.5 text-sm font-medium transition-colors hover:bg-blue-50 bg-blue-100 rounded-md border border-blue-200 hover:text-white hover:bg-blue-600">
+                <p className="font-bold text-sm text-white mb-1">Profile Incomplete</p>
+                <p className="text-blue-300 text-sm">Complete your academic details to unlock personalized features.</p>
+                <Link href="/profile/edit" className="mt-2 inline-flex items-center px-3 py-1.5 text-sm font-medium bg-blue-500/20 border border-blue-500/30 rounded-xl text-blue-300">
                   Complete Profile <ArrowRightIcon size={14} className="ml-2" />
                 </Link>
               </div>

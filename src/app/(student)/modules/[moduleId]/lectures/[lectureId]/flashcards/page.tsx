@@ -42,7 +42,7 @@ export default async function LectureFlashcardsPage({
       <h1 className="mb-6 font-display text-xl font-bold md:text-2xl">Flashcards — {lecture.title}</h1>
 
       {lecture.flashcards.length > 0 ? (
-        <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" />
+        <LectureClient flashcards={lecture.flashcards} questions={[]} mode="flashcards" userId={session.user.id} lectureId={params.lectureId} />
       ) : (
         <p className="rounded-xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
           No flashcards for this lecture yet.

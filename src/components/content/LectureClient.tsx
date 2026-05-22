@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { PremiumVideoPlayer } from "@/components/content/PremiumVideoPlayer";
 import { useRouter } from "next/navigation";
 import { useCommunityShareStore } from "@/lib/store";
+import { RATING_LABELS } from "@/lib/sm2";
 interface Flashcard { id: string; front: string; back: string }
 interface Question {
   id: string; body: string; imageUrl?: string | null; videoUrl?: string | null;
@@ -23,6 +24,8 @@ interface Props {
   questions: Question[];
   /** `both` = tabs; single section pages hide tabs */
   mode?: "both" | "flashcards" | "questions" | "osce";
+  userId?: string;
+  lectureId?: string;
 }
 
 type Tab = "flashcards" | "questions";
@@ -36,32 +39,83 @@ const DIFF_COLORS: Record<string, DiffColor> = {
 
 // ─── Flashcard Deck ────────────────────────────────────────────────────────────
 
-function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
+function FlashcardDeck({ flashcards, lectureId, userId, onDueCountChange }: {
+  flashcards: Flashcard[]; lectureId?: string; userId?: string; onDueCountChange?: (n: number) => void;
+}) {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [known, setKnown] = useState<Set<string>>(new Set());
-  const card = flashcards[idx];
-  const pct = Math.round((known.size / flashcards.length) * 100);
-  const total = flashcards.length;
+  const [dueIds, setDueIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState<string | null>(null);
 
-  function next() {
+  useEffect(() => {
+    if (!lectureId || !userId) { setLoading(false); return; }
+    fetch(`/api/v1/lectures/${lectureId}/flashcards/due`)
+      .then((r) => r.json())
+      .then((data) => {
+        const ids = new Set<string>((data.due ?? []).map((c: any) => c.id));
+        setDueIds(ids);
+        onDueCountChange?.(data.dueCount ?? 0);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [lectureId, userId, onDueCountChange]);
+
+  const dueCards = flashcards.filter((c) => dueIds.has(c.id));
+  const allCards = dueCards.length > 0 ? dueCards : flashcards;
+  const currentIdx = Math.min(idx, allCards.length - 1);
+  const currentCard = allCards[currentIdx];
+  const totalCards = allCards.length;
+
+  function goNext() {
     setFlipped(false);
-    setTimeout(() => setIdx((i) => (i + 1) % flashcards.length), 160);
+    setTimeout(() => setIdx((i) => Math.min(i + 1, totalCards - 1)), 160);
   }
-  function prev() {
-    setFlipped(false);
-    setTimeout(() => setIdx((i) => (i - 1 + flashcards.length) % flashcards.length), 160);
+
+  async function handleRate(quality: string) {
+    if (!currentCard || submitting) return;
+    setSubmitting(currentCard.id);
+    try {
+      await fetch(`/api/v1/flashcards/${currentCard.id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quality }),
+      });
+      setDueIds((prev) => { const n = new Set(prev); n.delete(currentCard.id); return n; });
+      const newDueIds = new Set(dueIds);
+      newDueIds.delete(currentCard.id);
+      if (newDueIds.size === 0) {
+        toast.success("All due cards reviewed! 🎉");
+        onDueCountChange?.(0);
+      }
+      if (totalCards <= 1) {
+        setIdx(0);
+      } else {
+        goNext();
+      }
+    } catch {
+      toast.error("Failed to save review");
+    } finally {
+      setSubmitting(null);
+    }
   }
-  function markKnown() {
-    setKnown((s) => new Set([...s, card.id]));
-    next();
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
   }
-  function markAgain() {
-    const n = new Set(known);
-    n.delete(card.id);
-    setKnown(n);
-    next();
+
+  if (!currentCard) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
+        <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+        <p className="text-lg font-bold text-foreground">All caught up!</p>
+        <p className="text-sm text-muted-foreground">No flashcards due for review.</p>
+      </div>
+    );
   }
+
+  const r = RATING_LABELS;
+  const remaining = dueCards.filter((c) => dueIds.has(c.id)).length;
 
   return (
     <div className="flex w-full max-w-none flex-col gap-6">
@@ -70,39 +124,35 @@ function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Flashcard</p>
             <p className="font-display text-lg font-bold text-foreground md:text-xl">
-              {idx + 1} <span className="text-muted-foreground">/</span> {total}
+              {currentIdx + 1} <span className="text-muted-foreground">/</span> {totalCards}
+              {dueCards.length > 0 && dueCards.length < flashcards.length && (
+                <span className="ml-2 text-sm font-normal text-muted-foreground">({dueCards.length} due)</span>
+              )}
             </p>
           </div>
           <div className="flex flex-col items-end gap-1 text-xs">
-            <span className="font-medium text-emerald-600 dark:text-emerald-400">{known.size} known</span>
+            <span className="font-medium text-amber-600 dark:text-amber-400">{remaining} remaining</span>
             <button
               type="button"
-              onClick={() => {
-                setIdx(0);
-                setFlipped(false);
-                setKnown(new Set());
-              }}
+              onClick={() => { setIdx(0); setFlipped(false); }}
               className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
             >
-              <RotateCcw className="h-3 w-3" /> Reset
+              <RotateCcw className="h-3 w-3" /> Restart
             </button>
           </div>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-emerald-500 transition-all duration-300" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-amber-500 transition-all duration-300"
+            style={{ width: `${totalCards > 0 ? ((totalCards - remaining) / totalCards) * 100 : 0}%` }} />
         </div>
       </div>
 
-      {/* Card — wide, page-like (no nested heavy card frame) */}
       <div
         className="relative w-full cursor-pointer"
         style={{ perspective: "1200px", minHeight: "min(50vh, 480px)" }}
-        onClick={() => setFlipped((f) => !f)}
+        onClick={() => { if (!flipped) setFlipped(true); }}
         onKeyDown={(e) => {
-          if (e.key === " " || e.key === "Enter") {
-            e.preventDefault();
-            setFlipped((f) => !f);
-          }
+          if ((e.key === " " || e.key === "Enter") && !flipped) { e.preventDefault(); setFlipped(true); }
         }}
         role="button"
         tabIndex={0}
@@ -110,17 +160,14 @@ function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
       >
         <div
           className="relative min-h-[min(50vh,480px)] w-full transition-transform duration-500"
-          style={{
-            transformStyle: "preserve-3d",
-            transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-          }}
+          style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
         >
           <div
             className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-muted/35 p-6 text-center ring-1 ring-border/50 sm:p-10"
             style={{ backfaceVisibility: "hidden" }}
           >
             <p className="mb-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Front</p>
-            <p className="max-w-3xl text-lg font-black leading-tight text-foreground sm:text-2xl">{card.front}</p>
+            <p className="max-w-3xl text-lg font-black leading-tight text-foreground sm:text-2xl">{currentCard.front}</p>
             <p className="mt-8 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground animate-pulse">Tap to reveal answer</p>
           </div>
 
@@ -129,7 +176,7 @@ function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
             <p className="mb-4 text-[10px] font-bold uppercase tracking-wider text-primary/70">Back</p>
-            <p className="max-w-3xl text-lg leading-relaxed text-foreground sm:text-2xl">{card.back}</p>
+            <p className="max-w-3xl text-lg leading-relaxed text-foreground sm:text-2xl">{currentCard.back}</p>
           </div>
         </div>
       </div>
@@ -137,48 +184,48 @@ function FlashcardDeck({ flashcards }: { flashcards: Flashcard[] }) {
       <div className="flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"
-          onClick={prev}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-card transition-all hover:bg-muted hover:scale-105 active:scale-95"
+          onClick={() => { if (currentIdx > 0) { setFlipped(false); setTimeout(() => setIdx(currentIdx - 1), 160); } }}
+          disabled={currentIdx <= 0}
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-card transition-all hover:bg-muted hover:scale-105 active:scale-95 disabled:opacity-30"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <div className="flex flex-1 items-center gap-2 sm:flex-none">
-          <button
-            type="button"
-            onClick={markAgain}
-            className="flex min-h-12 flex-1 items-center justify-center rounded-2xl border border-border px-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground transition-all hover:bg-muted sm:w-40 sm:flex-none"
-          >
-            Study again
-          </button>
-          <button
-            type="button"
-            onClick={markKnown}
-            className="btn-gradient flex min-h-12 flex-1 items-center justify-center rounded-2xl px-6 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-primary/20 sm:w-40 sm:flex-none"
-          >
-            Got it
-          </button>
+          {flipped ? (
+            r.map((rating) => (
+              <button
+                key={rating.key}
+                type="button"
+                onClick={() => handleRate(rating.key)}
+                disabled={submitting === currentCard.id}
+                className={`flex min-h-12 flex-1 items-center justify-center rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50 sm:w-28 sm:flex-none ${rating.color}`}
+              >
+                {submitting === currentCard.id ? <Loader2 className="h-4 w-4 animate-spin" /> : rating.label}
+              </button>
+            ))
+          ) : (
+            <span className="text-[11px] text-muted-foreground">Tap the card to rate it</span>
+          )}
         </div>
         <button
           type="button"
-          onClick={next}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-card transition-all hover:bg-muted hover:scale-105 active:scale-95"
+          onClick={() => { if (currentIdx < totalCards - 1) { setFlipped(false); setTimeout(() => setIdx(currentIdx + 1), 160); } }}
+          disabled={currentIdx >= totalCards - 1}
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-card transition-all hover:bg-muted hover:scale-105 active:scale-95 disabled:opacity-30"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-1.5">
-        {flashcards.map((c, i) => (
+        {allCards.map((c, i) => (
           <button
             key={c.id}
             type="button"
-            onClick={() => {
-              setFlipped(false);
-              setIdx(i);
-            }}
+            onClick={() => { setFlipped(false); setIdx(i); }}
             className={cn(
               "h-2 rounded-full transition-all",
-              i === idx ? "w-8 bg-primary" : known.has(c.id) ? "w-2 bg-emerald-500" : "w-2 bg-muted"
+              i === currentIdx ? "w-8 bg-primary" : dueIds.has(c.id) ? "w-2 bg-amber-500" : "w-2 bg-emerald-500"
             )}
             aria-label={`Card ${i + 1}`}
           />
@@ -674,7 +721,7 @@ function QuestionsStepper({ questions, osce = false }: { questions: Question[], 
 
 // ─── Main Export ───────────────────────────────────────────────────────────────
 
-export function LectureClient({ flashcards, questions, mode = "both" }: Props) {
+export function LectureClient({ flashcards, questions, mode = "both", userId, lectureId }: Props) {
   const single: Tab | null = mode === "flashcards" ? "flashcards" : mode === "questions" ? "questions" : null;
   const [tab, setTab] = useState<Tab>(
     single === "questions" || mode === "osce" ? "questions" : (flashcards.length > 0 ? "flashcards" : "questions")
@@ -726,7 +773,7 @@ export function LectureClient({ flashcards, questions, mode = "both" }: Props) {
       {/* Content */}
       <div className={cn(single === "questions" || single === "flashcards" ? "p-0" : "p-4")}>
         {tab === "flashcards" && flashcards.length > 0 && (
-          <FlashcardDeck flashcards={flashcards} />
+          <FlashcardDeck flashcards={flashcards} lectureId={lectureId} userId={userId} />
         )}
         {tab === "questions" && questions.length > 0 && (
           <QuestionsStepper questions={questions} osce={mode === "osce"} />

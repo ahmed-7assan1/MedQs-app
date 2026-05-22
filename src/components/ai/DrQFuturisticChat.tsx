@@ -34,13 +34,18 @@ import {
   Palette,
   TextT,
   Users,
-  CalendarCheck
+  CalendarCheck,
+  Microphone,
+  ClockClockwise,
+  GlobeHemisphereWest
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DrQMessage } from "./DrQMessage";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
+import { DRQ_WORKSPACES, WORKSPACE_IDS, WorkspaceId } from "./DrQWorkspaces";
+import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
 import toast from "react-hot-toast";
 
 const NAV_ITEMS = [
@@ -70,11 +75,17 @@ export function DrQFuturisticChat() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(false);
-  const [showProviders, setShowProviders] = useState(false);
-  const [showPersonas, setShowPersonas] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
+  const [expandedProvider, setExpandedProvider] = useState<AIProvider | null>(null);
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const activePersonaObj = DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer;
+  const activeWorkspace = (Object.entries(DRQ_WORKSPACES).find(
+    ([, ws]) => ws.personaId === settings.activePersona
+  )?.[0] as WorkspaceId) || "general";
+  const [showNavMenu, setShowNavMenu] = useState(false);
+  const { isRecording: isVoiceRecording, startRecording, stopRecording } = useVoiceRecorder();
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streamingId]);
 
@@ -87,7 +98,7 @@ export function DrQFuturisticChat() {
 
   const handleSend = () => {
     if ((!input.trim() && files.length === 0) || loading) return;
-    sendMessage(input, files, replyContext?.id);
+    sendMessage(input, files, replyContext?.id, webSearchEnabled);
     setReplyContext(null);
     setInput("");
     setFiles([]);
@@ -127,7 +138,9 @@ export function DrQFuturisticChat() {
   ];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#07080f] text-white selection:bg-indigo-500/30 selection:text-white">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#09080F] dark:bg-[#09080F] text-white selection:bg-indigo-500/30 selection:text-white">
+      {/* Mobile cinematic background */}
+      <div className="md:hidden fixed inset-0 cinematic-bg -z-10" />
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -153,42 +166,50 @@ export function DrQFuturisticChat() {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSg5OSwgMTAyLCAyNDEsIDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
       </div>
 
-      {/* ─── LEFT RAIL ─── */}
-      <div className="hidden md:flex w-16 flex-shrink-0 flex-col items-center py-5 justify-between relative z-40 bg-[#0a0b14]/60 backdrop-blur-xl border-r border-white/[0.04]">
-        <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/30 group cursor-pointer hover:scale-105 transition-all" onClick={() => { newThread(); setShowProviders(false); }}>
-          <Sparkle size={20} weight="fill" className="text-white" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+      {/* ─── LEFT NAV (compact dropdown instead of rail) ─── */}
+      <div className="hidden md:flex w-12 flex-shrink-0 flex-col items-center py-4 justify-between relative z-40 bg-[#0a0b14]/60 backdrop-blur-xl border-r border-white/[0.04]">
+        <div className="relative w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/30 group cursor-pointer hover:scale-105 transition-all" onClick={newThread}>
+          <Plus size={18} weight="bold" className="text-white" />
         </div>
-        <div className="flex flex-col gap-3">
-          {NAV_ITEMS.map((item, idx) => (
-            <a key={idx} href={item.href}
-              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all group relative border border-transparent hover:border-white/[0.06]"
-              title={item.label}>
-              <item.icon size={20} />
-              <div className="absolute left-14 px-2.5 py-1.5 rounded-xl bg-[#0a0b14]/90 backdrop-blur-xl border border-white/10 text-[9px] font-bold text-white uppercase tracking-wider scale-0 group-hover:scale-100 transition-all origin-left whitespace-nowrap shadow-2xl z-50">
-                {item.label}
-              </div>
-            </a>
-          ))}
-          <div className="w-8 h-px bg-white/[0.04] my-1 self-center" />
-          <button onClick={() => setShowHistory(!showHistory)}
-            className={cn("w-10 h-10 rounded-2xl flex items-center justify-center transition-all group relative border", showHistory ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" : "text-white/30 hover:text-indigo-300 hover:bg-white/5 border-transparent")}
-            title="Chat History">
-            <Clock size={20} />
-            <div className="absolute left-14 px-2.5 py-1.5 rounded-xl bg-[#0a0b14]/90 backdrop-blur-xl border border-white/10 text-[9px] font-bold text-white uppercase tracking-wider scale-0 group-hover:scale-100 transition-all origin-left whitespace-nowrap shadow-2xl z-50">History</div>
+        <div className="relative">
+          <button onClick={() => setShowNavMenu(!showNavMenu)}
+            className="w-9 h-9 rounded-2xl flex items-center justify-center text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all border border-transparent hover:border-white/[0.06]"
+            title="Navigation">
+            <List size={18} weight="bold" />
           </button>
+          <AnimatePresence>
+            {showNavMenu && (
+              <motion.div
+                initial={{ opacity: 0, x: -8, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -8, scale: 0.95 }}
+                className="absolute left-full top-0 ml-2 w-40 bg-[#0a0b14]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-1.5 z-[70]">
+                {NAV_ITEMS.map((item, idx) => (
+                  <a key={idx} href={item.href}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-white/50 hover:text-indigo-300 transition-all text-[10px] font-bold uppercase tracking-wider">
+                    <item.icon size={16} />
+                    {item.label}
+                  </a>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
+          <button onClick={() => setShowHistory(!showHistory)}
+            className={cn("w-9 h-9 rounded-2xl flex items-center justify-center transition-all border", showHistory ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" : "text-white/30 hover:text-indigo-300 hover:bg-white/5 border-transparent")}
+            title="Chat History">
+            <Clock size={16} />
+          </button>
           <button onClick={() => setShowConfig(true)}
-            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all group relative border border-transparent hover:border-white/[0.06]"
+            className="w-9 h-9 rounded-2xl flex items-center justify-center text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all border border-transparent hover:border-white/[0.06]"
             title="Settings">
-            <Gear size={20} />
-            <div className="absolute left-14 px-2.5 py-1.5 rounded-xl bg-[#0a0b14]/90 backdrop-blur-xl border border-white/10 text-[9px] font-bold text-white uppercase tracking-wider scale-0 group-hover:scale-100 transition-all origin-left whitespace-nowrap shadow-2xl z-50">Settings</div>
+            <Gear size={16} />
           </button>
           <button
-            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all group relative border border-transparent hover:border-white/[0.06]"
+            className="w-9 h-9 rounded-2xl flex items-center justify-center text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all border border-transparent hover:border-white/[0.06]"
             title="Profile">
-            <img src={userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6366f1&color=fff&bold=true`} alt="" className="w-7 h-7 rounded-xl object-cover ring-1 ring-white/10" />
+            <img src={userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6366f1&color=fff&bold=true`} alt="" className="w-6 h-6 rounded-xl object-cover ring-1 ring-white/10" />
           </button>
         </div>
       </div>
@@ -259,43 +280,64 @@ export function DrQFuturisticChat() {
 
       {/* ─── MAIN CHAT AREA ─── */}
       <main className="flex-1 flex flex-col relative min-w-0 z-10">
-        {/* ── Header ── */}
-        <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/[0.04] bg-[#07080f]/40 backdrop-blur-2xl relative z-30">
-          <div className="flex items-center gap-3">
+        {/* ── Header with Workspace Tabs ── */}
+        <header className="h-14 flex items-center justify-between px-2 md:px-4 border-b border-white/[0.04] bg-[#07080f]/40 backdrop-blur-2xl relative z-30">
+          <div className="flex items-center gap-1 md:gap-2 min-w-0">
             <button onClick={() => setMobileSidebarOpen(true)}
-              className="md:hidden p-2.5 bg-white/5 border border-white/10 rounded-2xl text-white/60 hover:text-white transition-all active:scale-95">
+              className="md:hidden p-2 rounded-2xl text-white/60 hover:text-white hover:bg-white/5 transition-all active:scale-95">
               <List size={18} weight="bold" />
             </button>
-            <div className="flex items-center gap-3">
-              <div className={cn("w-9 h-9 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10", `bg-gradient-to-br ${activePersonaObj.gradient}`)}>
-                {React.cloneElement(activePersonaObj.icon as React.ReactElement, { size: 16, weight: "fill" })}
+            <div className="hidden md:flex items-center gap-0.5 overflow-x-auto no-scrollbar">
+              {WORKSPACE_IDS.map((wsId) => {
+                const ws = DRQ_WORKSPACES[wsId];
+                const isActive = activeWorkspace === wsId;
+                return (
+                  <button key={wsId} onClick={() => {
+                    if (wsId === activeWorkspace) return;
+                    updateSettings({
+                      activePersona: ws.personaId,
+                      activeProvider: ws.defaultProvider,
+                      activeModel: ws.defaultModel,
+                    });
+                    toast.success(`Switched to ${ws.name}`);
+                  }}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap",
+                      isActive
+                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 shadow-sm"
+                        : "text-white/30 hover:text-white/70 border border-transparent hover:bg-white/5"
+                    )}>
+                    <span className={cn("w-3.5 h-3.5 rounded-md flex items-center justify-center text-[8px]", isActive ? "text-indigo-300" : "text-white/30")}>
+                      {React.cloneElement(ws.icon as React.ReactElement, { size: 12, weight: isActive ? "fill" : "regular" })}
+                    </span>
+                    <span className="hidden sm:inline">{ws.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="md:hidden flex items-center gap-2 ml-1">
+              <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/10", `bg-gradient-to-br ${activePersonaObj.gradient}`)}>
+                {React.cloneElement(activePersonaObj.icon as React.ReactElement, { size: 12, weight: "fill" })}
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-white/90">{activeThread?.title || "Dr. Q"}</span>
-                <span className="text-[9px] text-indigo-400 font-semibold uppercase tracking-[0.2em]">{activePersonaObj.shortName} · {PROVIDER_CONFIGS[settings.activeProvider].label}</span>
-              </div>
+              <span className="text-xs font-bold text-white/70 truncate max-w-[100px]">{activeThread?.title || "Dr. Q"}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
-              <span className="text-[9px] font-bold uppercase tracking-wider text-white/50">{PROVIDER_CONFIGS[settings.activeProvider].label}</span>
-            </div>
+          <div className="flex items-center gap-1">
             <button onClick={() => setShowRightPanel(!showRightPanel)}
               className={cn("hidden lg:flex p-2 rounded-2xl border transition-all", showRightPanel ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" : "bg-white/5 border-white/10 text-white/40 hover:text-indigo-300")}>
-              <DotsThreeVertical size={18} weight="bold" />
+              <DotsThreeVertical size={15} weight="bold" />
             </button>
             <button onClick={() => setShowConfig(true)}
-              className="p-2 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-indigo-300 hover:bg-white/10 transition-all">
-              <Gear size={16} weight="bold" />
+              className="p-2 rounded-2xl text-white/40 hover:text-indigo-300 hover:bg-white/5 transition-all">
+              <Gear size={15} weight="bold" />
             </button>
             <button onClick={() => exportThread("markdown")}
-              className="p-2 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-indigo-300 hover:bg-white/10 transition-all">
-              <Export size={16} weight="bold" />
+              className="p-2 rounded-2xl text-white/40 hover:text-indigo-300 hover:bg-white/5 transition-all">
+              <Export size={15} weight="bold" />
             </button>
-            <div className="hidden sm:flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-full pl-2 pr-3.5 py-1.5 ml-2">
-              <img src={userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6366f1&color=fff&bold=true`} alt="" className="w-6 h-6 rounded-full ring-1 ring-indigo-500/30 object-cover" />
-              <span className="text-[10px] font-bold text-white/70 truncate max-w-[60px]">{userName.split(" ")[0]}</span>
+            <div className="flex items-center gap-1.5 pl-1">
+              <img src={userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6366f1&color=fff&bold=true`} alt="" className="w-6 h-6 rounded-xl ring-1 ring-indigo-500/30 object-cover" />
+              <span className="hidden sm:inline text-[9px] font-bold text-white/50 truncate max-w-[50px]">{userName.split(" ")[0]}</span>
             </div>
           </div>
         </header>
@@ -316,7 +358,7 @@ export function DrQFuturisticChat() {
                 </div>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-8">
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-2 text-white">Hey, <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-300 bg-clip-text text-transparent">{userName.split(" ")[0]}</span></h2>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-2 text-white">Hey, <span className="text-gradient-primary">{userName.split(" ")[0]}</span></h2>
                 <p className="text-lg md:text-xl text-white/40 font-medium">What can I help with today?</p>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl mb-8">
@@ -327,7 +369,7 @@ export function DrQFuturisticChat() {
                   { label: "Study Plan", desc: "Optimize your schedule", icon: Lightning },
                 ].map((item, i) => (
                   <button key={i} onClick={() => setInput(item.desc)}
-                    className="group relative p-5 rounded-3xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-indigo-500/20 transition-all duration-300 text-left overflow-hidden">
+                    className="glass-card-premium group relative p-5 text-left overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
                     <div className="absolute -top-12 -right-12 w-28 h-28 bg-indigo-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                     <div className="w-9 h-9 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/20 transition-all">
                       <item.icon size={16} className="text-indigo-400" />
@@ -344,6 +386,26 @@ export function DrQFuturisticChat() {
                     {p.name}
                   </button>
                 ))}
+              </motion.div>
+              {/* ── Recent Prompts ── */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="w-full max-w-2xl mt-8">
+                <div className="flex items-center gap-2 mb-3 px-1">
+                  <ClockClockwise size={12} className="text-white/30" />
+                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em]">Recent Prompts</span>
+                </div>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                  {[
+                    "Explain cellular respiration",
+                    "Quiz me on anatomy",
+                    "Summarize last lecture",
+                    "Create study plan",
+                  ].map((prompt, i) => (
+                    <button key={i} onClick={() => setInput(prompt)}
+                      className="flex-shrink-0 px-3.5 py-2 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-[10px] font-medium text-white/50 hover:text-white/80 hover:bg-white/5 transition-all whitespace-nowrap">
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
               </motion.div>
             </div>
           ) : (
@@ -374,14 +436,15 @@ export function DrQFuturisticChat() {
           )}
         </div>
 
-        {/* ── Suggestions (when chat is active) ── */}
+        {/* ── Suggestions & Recent Prompts (when chat is active) ── */}
         {messages.length > 0 && (
           <div className="absolute bottom-36 left-0 right-0 z-30 pointer-events-none">
             <div className="max-w-4xl mx-auto px-4 md:px-8">
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pointer-events-auto">
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 pointer-events-auto">
+                <span className="flex-shrink-0 text-[8px] font-bold text-white/25 uppercase tracking-[0.2em]">Suggestions</span>
                 {SUGGESTIONS.map((s, i) => (
                   <button key={i} onClick={() => setInput(s.prompt)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-medium text-white/50 hover:text-white/80 transition-all whitespace-nowrap flex-shrink-0">
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-[10px] font-medium text-white/50 hover:text-white/80 hover:bg-white/5 transition-all whitespace-nowrap flex-shrink-0">
                     <s.icon size={12} className="text-indigo-400" />
                     {s.label}
                   </button>
@@ -394,68 +457,8 @@ export function DrQFuturisticChat() {
         {/* ── Input Area ── */}
         <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#07080f] via-[#07080f]/95 to-transparent pt-20 pb-5 md:pb-6 px-4 md:px-8 pointer-events-none">
           <div className="max-w-4xl mx-auto pointer-events-auto">
-            {/* Provider / Tools Bar */}
-            <div className="flex items-center gap-2 mb-3 px-1">
-              <div className="relative">
-                <button onClick={() => setShowProviders(!showProviders)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-semibold uppercase tracking-wider text-white/50 hover:text-indigo-300 transition-all">
-                  <span className="text-[11px]">{PROVIDER_CONFIGS[settings.activeProvider].icon}</span>
-                  <span>{PROVIDER_CONFIGS[settings.activeProvider].label}</span>
-                  <CaretDown size={8} className="text-white/20 ml-0.5" />
-                </button>
-                <AnimatePresence>
-                  {showProviders && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute bottom-full left-0 mb-2 w-52 bg-[#0a0b14]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-1.5 z-[70]">
-                      {(Object.keys(PROVIDER_CONFIGS) as AIProvider[]).map((p) => (
-                        <button key={p} onClick={() => { updateSettings({ activeProvider: p, activeModel: PROVIDER_CONFIGS[p].defaultModel }); setShowProviders(false); }}
-                          className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left", activeProvider === p ? "bg-indigo-500/10 text-indigo-400" : "text-white/40 hover:text-white hover:bg-white/5")}>
-                          <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black", activeProvider === p ? "bg-indigo-500 text-white" : "bg-white/5 text-white/50")}>{PROVIDER_CONFIGS[p].icon}</div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider">{PROVIDER_CONFIGS[p].label}</span>
-                          {activeProvider === p && <Check size={12} weight="bold" className="ml-auto text-indigo-400" />}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              <div className="relative">
-                <button onClick={() => setShowPersonas(!showPersonas)}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-semibold uppercase tracking-wider transition-all", "bg-white/5 border-white/10 text-white/50 hover:text-indigo-300 hover:bg-white/10")}>
-                  <div className={cn("w-3.5 h-3.5 rounded-md flex items-center justify-center", `bg-gradient-to-br ${activePersonaObj.gradient}`)}>
-                    {React.cloneElement(activePersonaObj.icon as React.ReactElement, { size: 8, weight: "bold" })}
-                  </div>
-                  <span>{activePersonaObj.shortName}</span>
-                  <CaretDown size={8} className="text-white/20 ml-0.5" />
-                </button>
-                <AnimatePresence>
-                  {showPersonas && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute bottom-full left-0 mb-2 w-48 bg-[#0a0b14]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-1.5 z-[70]">
-                      {Object.values(DRQ_PERSONAS).map((p) => (
-                        <button key={p.id} onClick={() => { updateSettings({ activePersona: p.id }); setShowPersonas(false); toast.success(`Switched to ${p.name}`); }}
-                          className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-left", settings.activePersona === p.id ? "bg-indigo-500/10 text-indigo-400" : "text-white/40 hover:text-white hover:bg-white/5")}>
-                          <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center text-xs", `bg-gradient-to-br ${p.gradient}`)}>
-                            {React.cloneElement(p.icon as React.ReactElement, { size: 12, weight: "bold" })}
-                          </div>
-                          <span className="text-[11px] font-bold">{p.name}</span>
-                          {settings.activePersona === p.id && <Check size={12} weight="bold" className="ml-auto text-indigo-400" />}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
             {/* Main Input */}
-            <div className="relative bg-[#0a0b14]/60 backdrop-blur-3xl border border-white/[0.08] rounded-3xl shadow-[0_0_60px_rgba(99,102,241,0.03)] overflow-hidden transition-all duration-300 focus-within:border-indigo-500/30 focus-within:shadow-[0_0_50px_rgba(99,102,241,0.08)]">
+            <div className="relative rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl shadow-[0_0_60px_rgba(99,102,241,0.03)] overflow-hidden transition-all duration-300 focus-within:border-indigo-500/30 focus-within:shadow-[0_0_50px_rgba(99,102,241,0.08)]">
               {/* Reply Context */}
               <AnimatePresence>
                 {replyContext && (
@@ -507,10 +510,113 @@ export function DrQFuturisticChat() {
               <div className="flex items-end gap-2 px-4 py-3 min-h-[56px]">
                 <div className="flex items-center gap-1 pb-2">
                   <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className="p-2 rounded-2xl text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all active:scale-95">
+                    className="p-2 rounded-2xl text-white/30 hover:text-indigo-300 hover:bg-white/5 transition-all active:scale-95"
+                    title="Attach files">
                     <Paperclip size={18} weight="bold" />
                   </button>
+                  <button type="button"
+                    className={cn("p-2 rounded-2xl transition-all active:scale-95",
+                      webSearchEnabled
+                        ? "text-indigo-400 bg-indigo-500/10"
+                        : "text-white/30 hover:text-indigo-300 hover:bg-white/5"
+                    )}
+                    onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+                    title="Web search">
+                    <GlobeHemisphereWest size={18} weight="bold" />
+                  </button>
+                  <button type="button"
+                    className={cn("p-2 rounded-2xl transition-all active:scale-95",
+                      isVoiceRecording
+                        ? "text-red-400 bg-red-500/10 animate-pulse"
+                        : "text-white/30 hover:text-indigo-300 hover:bg-white/5"
+                    )}
+                    onClick={async () => {
+                      if (isVoiceRecording) {
+                        stopRecording();
+                        return;
+                      }
+                      try {
+                        const text = await startRecording();
+                        if (text) setInput(prev => prev ? `${prev} ${text}` : text);
+                      } catch (e: any) {
+                        toast.error(e.message || "Voice input failed");
+                      }
+                    }}
+                    title={isVoiceRecording ? "Stop recording" : "Voice input"}>
+                    <Microphone size={18} weight={isVoiceRecording ? "fill" : "bold"} />
+                  </button>
                   <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf" onChange={handleFileChange} />
+                  {/* Model Picker */}
+                  <div className="relative ml-1">
+                    <button onClick={() => {
+                      const opening = !showModelPicker;
+                      setShowModelPicker(opening);
+                      if (opening) setExpandedProvider(settings.activeProvider);
+                    }}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-semibold uppercase tracking-wider text-white/50 hover:text-indigo-300 transition-all whitespace-nowrap">
+                      <span className="text-[10px]">{PROVIDER_CONFIGS[settings.activeProvider].icon}</span>
+                      <span className="hidden sm:inline max-w-[100px] truncate">{settings.activeModel}</span>
+                      <span className="sm:hidden">{PROVIDER_CONFIGS[settings.activeProvider].label}</span>
+                      <CaretDown size={8} className="text-white/20 ml-0.5" />
+                    </button>
+                    <AnimatePresence>
+                      {showModelPicker && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                          className="absolute bottom-full left-0 mb-2 w-64 bg-[#0a0b14]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-1.5 z-[70] max-h-80 overflow-y-auto no-scrollbar">
+                          {(Object.keys(PROVIDER_CONFIGS) as AIProvider[]).map((p) => (
+                            <div key={p}>
+                              <button onClick={() => setExpandedProvider(expandedProvider === p ? null : p)}
+                                className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left",
+                                  settings.activeProvider === p ? "bg-indigo-500/10 text-indigo-400" : "text-white/40 hover:text-white hover:bg-white/5")}>
+                                <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black",
+                                  settings.activeProvider === p ? "bg-indigo-500 text-white" : "bg-white/5 text-white/50")}>
+                                  {PROVIDER_CONFIGS[p].icon}
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider flex-1">{PROVIDER_CONFIGS[p].label}</span>
+                                <motion.div animate={{ rotate: expandedProvider === p ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                                  <CaretDown size={10} className="text-white/20" />
+                                </motion.div>
+                              </button>
+                              <AnimatePresence>
+                                {expandedProvider === p && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden">
+                                    <div className="pl-10 pr-2 pb-1 space-y-0.5">
+                                      {PROVIDER_CONFIGS[p].models.map((m) => (
+                                        <button key={m}
+                                          onClick={() => {
+                                            updateSettings({ activeProvider: p, activeModel: m });
+                                            setShowModelPicker(false);
+                                            setExpandedProvider(null);
+                                          }}
+                                          className={cn("w-full text-left px-3 py-1.5 rounded-xl text-[10px] font-medium transition-all",
+                                            settings.activeProvider === p && settings.activeModel === m
+                                              ? "bg-indigo-500/10 text-indigo-300"
+                                              : "text-white/30 hover:text-white/70 hover:bg-white/5")}>
+                                          <div className="flex items-center gap-2">
+                                            <span className="truncate">{m}</span>
+                                            {settings.activeProvider === p && settings.activeModel === m && (
+                                              <Check size={10} weight="bold" className="text-indigo-400 flex-shrink-0" />
+                                            )}
+                                          </div>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
                 <textarea
                   ref={inputRef}
@@ -530,12 +636,12 @@ export function DrQFuturisticChat() {
                   <button onClick={handleSend}
                     disabled={!input.trim() && files.length === 0}
                     className={cn(
-                      "flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-lg",
+                      "flex-shrink-0 rounded-2xl flex items-center justify-center transition-all active:scale-90",
                       input.trim() || files.length > 0
-                        ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/30 hover:shadow-2xl scale-100"
-                        : "bg-white/5 text-white/20 scale-95 cursor-not-allowed"
+                        ? "btn-primary-gradient !p-0 w-10 h-10"
+                        : "bg-white/5 text-white/20 scale-95 cursor-not-allowed w-10 h-10"
                     )}>
-                    <ArrowUp size={18} weight="bold" className={input.trim() || files.length > 0 ? "text-white drop-shadow-sm" : ""} />
+                    <ArrowUp size={18} weight="bold" />
                   </button>
                 )}
               </div>
@@ -567,7 +673,7 @@ export function DrQFuturisticChat() {
                   {React.cloneElement(activePersonaObj.icon as React.ReactElement, { size: 18, weight: "fill" })}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white/90">{activePersonaObj.name}</h3>
+                  <h3 className="text-sm font-bold text-gradient-primary">{activePersonaObj.name}</h3>
                   <p className="text-[9px] text-white/40 uppercase tracking-wider font-medium">{activePersonaObj.shortName}</p>
                 </div>
               </div>
@@ -636,7 +742,7 @@ export function DrQFuturisticChat() {
               className="fixed top-0 left-0 bottom-0 w-full max-w-[320px] bg-[#0a0b14]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl z-[101] flex flex-col md:hidden"
             >
               <div className="p-5 flex items-center justify-between border-b border-white/[0.04]">
-                <span className="text-sm font-bold text-white/80">Dr. Q</span>
+                <span className="text-sm font-bold text-gradient-primary">Dr. Q</span>
                 <button onClick={() => setMobileSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-2xl text-white/40">
                   <X size={18} weight="bold" />
                 </button>
