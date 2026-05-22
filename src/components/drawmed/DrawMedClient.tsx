@@ -30,7 +30,7 @@ import "./excalidraw-styles.css";
 import "./drawmed.css";
 
 const Excalidraw = dynamic(
-  () => import("@excalidraw/excalidraw").then((m) => m.Excalidraw),
+  () => import("../../../node_modules/@excalidraw/excalidraw/dist/prod/index.js").then((m) => m.Excalidraw),
   { ssr: false, loading: () => <div className="drawmed-loading"><LoadingContent /></div> }
 );
 
@@ -179,7 +179,7 @@ export function DrawMedClient() {
 
   const handleExport = useCallback(async (format: "png" | "svg") => {
     if (!apiRef.current) return;
-    const { exportToBlob, exportToSvg } = await import("@excalidraw/excalidraw");
+    const { exportToBlob, exportToSvg } = await import("../../../node_modules/@excalidraw/excalidraw/dist/prod/index.js");
     try {
       const elements = apiRef.current.getSceneElements();
       const appState = apiRef.current.getAppState();
