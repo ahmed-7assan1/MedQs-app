@@ -26,7 +26,7 @@ const nextConfig = {
   reactStrictMode: true,         // catch bugs early
 
   // Bundle next-auth through Next's compiler (fixes broken vendor-chunk paths on Windows).
-  transpilePackages: ["next-auth"],
+  transpilePackages: ["next-auth", "@excalidraw/excalidraw"],
 
   // ── Images ───────────────────────────────────────────────────────────────────
   images: {
