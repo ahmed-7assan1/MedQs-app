@@ -21326,161 +21326,6 @@ var require_fuzzy = __commonJS({
   }
 });
 
-// node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js
-var require_use_sync_external_store_shim_development = __commonJS({
-  "node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.development.js"(exports2) {
-    "use strict";
-    (function() {
-      function is3(x65, y64) {
-        return x65 === y64 && (0 !== x65 || 1 / x65 === 1 / y64) || x65 !== x65 && y64 !== y64;
-      }
-      function useSyncExternalStore$2(subscribe, getSnapshot) {
-        didWarnOld18Alpha || void 0 === React29.startTransition || (didWarnOld18Alpha = true, console.error(
-          "You are using an outdated, pre-release alpha of React 18 that does not support useSyncExternalStore. The use-sync-external-store shim will not work correctly. Upgrade to a newer pre-release."
-        ));
-        var value2 = getSnapshot();
-        if (!didWarnUncachedGetSnapshot) {
-          var cachedValue = getSnapshot();
-          objectIs(value2, cachedValue) || (console.error(
-            "The result of getSnapshot should be cached to avoid an infinite loop"
-          ), didWarnUncachedGetSnapshot = true);
-        }
-        cachedValue = useState16({
-          inst: { value: value2, getSnapshot }
-        });
-        var inst = cachedValue[0].inst, forceUpdate = cachedValue[1];
-        useLayoutEffect5(
-          function() {
-            inst.value = value2;
-            inst.getSnapshot = getSnapshot;
-            checkIfSnapshotChanged(inst) && forceUpdate({ inst });
-          },
-          [subscribe, value2, getSnapshot]
-        );
-        useEffect16(
-          function() {
-            checkIfSnapshotChanged(inst) && forceUpdate({ inst });
-            return subscribe(function() {
-              checkIfSnapshotChanged(inst) && forceUpdate({ inst });
-            });
-          },
-          [subscribe]
-        );
-        useDebugValue3(value2);
-        return value2;
-      }
-      function checkIfSnapshotChanged(inst) {
-        var latestGetSnapshot = inst.getSnapshot;
-        inst = inst.value;
-        try {
-          var nextValue = latestGetSnapshot();
-          return !objectIs(inst, nextValue);
-        } catch (error3) {
-          return true;
-        }
-      }
-      function useSyncExternalStore$1(subscribe, getSnapshot) {
-        return getSnapshot();
-      }
-      "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-      var React29 = __require("react"), objectIs = "function" === typeof Object.is ? Object.is : is3, useState16 = React29.useState, useEffect16 = React29.useEffect, useLayoutEffect5 = React29.useLayoutEffect, useDebugValue3 = React29.useDebugValue, didWarnOld18Alpha = false, didWarnUncachedGetSnapshot = false, shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
-      exports2.useSyncExternalStore = void 0 !== React29.useSyncExternalStore ? React29.useSyncExternalStore : shim;
-      "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(Error());
-    })();
-  }
-});
-
-// node_modules/use-sync-external-store/shim/index.js
-var require_shim = __commonJS({
-  "node_modules/use-sync-external-store/shim/index.js"(exports2, module2) {
-    "use strict";
-    if (false) {
-      module2.exports = null;
-    } else {
-      module2.exports = require_use_sync_external_store_shim_development();
-    }
-  }
-});
-
-// node_modules/use-sync-external-store/cjs/use-sync-external-store-shim/with-selector.development.js
-var require_with_selector_development = __commonJS({
-  "node_modules/use-sync-external-store/cjs/use-sync-external-store-shim/with-selector.development.js"(exports2) {
-    "use strict";
-    (function() {
-      function is3(x65, y64) {
-        return x65 === y64 && (0 !== x65 || 1 / x65 === 1 / y64) || x65 !== x65 && y64 !== y64;
-      }
-      "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-      var React29 = __require("react"), shim = require_shim(), objectIs = "function" === typeof Object.is ? Object.is : is3, useSyncExternalStore = shim.useSyncExternalStore, useRef13 = React29.useRef, useEffect16 = React29.useEffect, useMemo6 = React29.useMemo, useDebugValue3 = React29.useDebugValue;
-      exports2.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
-        var instRef = useRef13(null);
-        if (null === instRef.current) {
-          var inst = { hasValue: false, value: null };
-          instRef.current = inst;
-        } else inst = instRef.current;
-        instRef = useMemo6(
-          function() {
-            function memoizedSelector(nextSnapshot) {
-              if (!hasMemo) {
-                hasMemo = true;
-                memoizedSnapshot = nextSnapshot;
-                nextSnapshot = selector(nextSnapshot);
-                if (void 0 !== isEqual && inst.hasValue) {
-                  var currentSelection = inst.value;
-                  if (isEqual(currentSelection, nextSnapshot))
-                    return memoizedSelection = currentSelection;
-                }
-                return memoizedSelection = nextSnapshot;
-              }
-              currentSelection = memoizedSelection;
-              if (objectIs(memoizedSnapshot, nextSnapshot))
-                return currentSelection;
-              var nextSelection = selector(nextSnapshot);
-              if (void 0 !== isEqual && isEqual(currentSelection, nextSelection))
-                return memoizedSnapshot = nextSnapshot, currentSelection;
-              memoizedSnapshot = nextSnapshot;
-              return memoizedSelection = nextSelection;
-            }
-            var hasMemo = false, memoizedSnapshot, memoizedSelection, maybeGetServerSnapshot = void 0 === getServerSnapshot ? null : getServerSnapshot;
-            return [
-              function() {
-                return memoizedSelector(getSnapshot());
-              },
-              null === maybeGetServerSnapshot ? void 0 : function() {
-                return memoizedSelector(maybeGetServerSnapshot());
-              }
-            ];
-          },
-          [getSnapshot, getServerSnapshot, selector, isEqual]
-        );
-        var value2 = useSyncExternalStore(subscribe, instRef[0], instRef[1]);
-        useEffect16(
-          function() {
-            inst.hasValue = true;
-            inst.value = value2;
-          },
-          [value2]
-        );
-        useDebugValue3(value2);
-        return value2;
-      };
-      "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(Error());
-    })();
-  }
-});
-
-// node_modules/use-sync-external-store/shim/with-selector.js
-var require_with_selector = __commonJS({
-  "node_modules/use-sync-external-store/shim/with-selector.js"(exports2, module2) {
-    "use strict";
-    if (false) {
-      module2.exports = null;
-    } else {
-      module2.exports = require_with_selector_development();
-    }
-  }
-});
-
 // node_modules/lodash.debounce/index.js
 var require_lodash2 = __commonJS({
   "node_modules/lodash.debounce/index.js"(exports2, module2) {
@@ -205329,10 +205174,10 @@ var createStoreImpl = (createState) => {
 var createStore2 = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
 
 // node_modules/zustand/esm/index.mjs
-var import_with_selector = __toESM(require_with_selector(), 1);
 import ReactExports2 from "react";
+import useSyncExternalStoreExports from "use-sync-external-store/shim/with-selector.js";
 var { useDebugValue: useDebugValue2 } = ReactExports2;
-var { useSyncExternalStoreWithSelector } = import_with_selector.default;
+var { useSyncExternalStoreWithSelector } = useSyncExternalStoreExports;
 var didWarnAboutEqualityFn = false;
 var identity = (arg) => arg;
 function useStore2(api2, selector = identity, equalityFn) {
@@ -214380,28 +214225,6 @@ image-blob-reduce/dist/image-blob-reduce.esm.mjs:
   https://github.com/nodeca/pica
   
   *)
-
-use-sync-external-store/cjs/use-sync-external-store-shim.development.js:
-  (**
-   * @license React
-   * use-sync-external-store-shim.development.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   *)
-
-use-sync-external-store/cjs/use-sync-external-store-shim/with-selector.development.js:
-  (**
-   * @license React
-   * use-sync-external-store-shim/with-selector.development.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   *)
 
 dompurify/dist/purify.es.mjs:
   (*! @license DOMPurify 3.4.0 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.0/LICENSE *)
