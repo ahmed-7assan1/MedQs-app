@@ -1,0 +1,795 @@
+/* ============================================================
+   DrawMed — Futuristic Glassmorphism Creative Workspace
+   ============================================================ */
+
+/* --- Premium Dark Background with Ambient Glow --- */
+.drawmed-workspace {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-flow: column nowrap;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(79, 95, 255, 0.08) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 50% at 80% 80%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
+              radial-gradient(ellipse 50% 70% at 20% 20%, rgba(236, 72, 153, 0.04) 0%, transparent 50%),
+              linear-gradient(160deg, #07080f 0%, #0a0818 30%, #0d0c16 60%, #080714 100%);
+}
+
+/* --- Animated Glowing Orb --- */
+.drawmed-orb {
+  position: fixed;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.12;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.drawmed-orb--1 {
+  top: -10%;
+  left: -5%;
+  background: radial-gradient(circle, rgba(124, 92, 252, 0.35) 0%, rgba(79, 95, 255, 0.1) 40%, transparent 70%);
+  animation: orbFloat1 20s ease-in-out infinite;
+}
+
+.drawmed-orb--2 {
+  bottom: -15%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.25) 0%, rgba(124, 58, 237, 0.08) 35%, transparent 65%);
+  animation: orbFloat2 25s ease-in-out infinite;
+}
+
+.drawmed-orb--3 {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(79, 95, 255, 0.06) 0%, transparent 60%);
+  animation: orbPulse 8s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, -40px) scale(1.05); }
+  66% { transform: translate(-30px, 50px) scale(0.95); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-50px, 30px) scale(0.95); }
+  66% { transform: translate(40px, -40px) scale(1.08); }
+}
+
+@keyframes orbPulse {
+  0%, 100% { opacity: 0.06; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.12; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* --- Floating Glassmorphism Panel Base --- */
+.drawmed-glass {
+  background: rgba(13, 12, 22, 0.55);
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35),
+              0 1px 4px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ============================================================
+   Floating Top Navigation Bar
+   ============================================================ */
+.drawmed-topbar {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  min-width: 0;
+  max-width: calc(100vw - 48px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawmed-topbar__section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.drawmed-topbar__divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.drawmed-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+}
+
+.drawmed-topbar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c5cfc, #4f5fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.25);
+  flex-shrink: 0;
+}
+
+.drawmed-topbar__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.drawmed-topbar__subtitle {
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(124, 92, 252, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .drawmed-topbar__subtitle { display: block; }
+}
+
+/* --- Topbar Search --- */
+.drawmed-topbar__search {
+  position: relative;
+  flex: 1;
+  max-width: 280px;
+}
+
+.drawmed-topbar__search input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 7px 14px 7px 36px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.drawmed-topbar__search input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.drawmed-topbar__search input:focus {
+  border-color: rgba(124, 92, 252, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 24px rgba(124, 92, 252, 0.08);
+}
+
+.drawmed-topbar__search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+/* --- Topbar Icon Button --- */
+.drawmed-topbar__btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.drawmed-topbar__btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.drawmed-topbar__btn:active {
+  transform: scale(0.92);
+}
+
+.drawmed-topbar__btn svg { width: 16px; height: 16px; }
+
+.drawmed-topbar__btn--primary {
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.15), rgba(79, 95, 255, 0.1));
+  color: rgba(124, 92, 252, 0.7);
+  border: 1px solid rgba(124, 92, 252, 0.12);
+}
+
+.drawmed-topbar__btn--primary:hover {
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.25), rgba(79, 95, 255, 0.18));
+  color: rgba(124, 92, 252, 0.9);
+  box-shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
+}
+
+/* ============================================================
+   Floating Bottom Toolbar
+   ============================================================ */
+.drawmed-bottom-bar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawmed-bottom-bar__group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.drawmed-bottom-bar__divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.drawmed-bottom-bar__btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawmed-bottom-bar__btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.drawmed-bottom-bar__btn:active { transform: scale(0.88); }
+.drawmed-bottom-bar__btn svg { width: 14px; height: 14px; }
+
+.drawmed-bottom-bar__zoom {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 0 8px;
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Floating AI Assistant
+   ============================================================ */
+.drawmed-ai-assistant {
+  position: absolute;
+  bottom: 88px;
+  right: 24px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  min-width: 200px;
+  max-width: 320px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawmed-ai-assistant--collapsed {
+  padding: 10px;
+  min-width: 44px;
+  cursor: pointer;
+}
+
+.drawmed-ai-assistant__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.drawmed-ai-assistant__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.2), rgba(236, 72, 153, 0.15));
+  color: rgba(124, 92, 252, 0.7);
+  flex-shrink: 0;
+}
+
+.drawmed-ai-assistant__icon svg { width: 14px; height: 14px; }
+
+.drawmed-ai-assistant__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  flex: 1;
+}
+
+.drawmed-ai-assistant__input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.drawmed-ai-assistant__input input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.drawmed-ai-assistant__input input::placeholder {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.drawmed-ai-assistant__input input:focus {
+  border-color: rgba(124, 92, 252, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 20px rgba(124, 92, 252, 0.06);
+}
+
+.drawmed-ai-assistant__send {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7c5cfc, #4f5fff);
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.2);
+}
+
+.drawmed-ai-assistant__send:hover {
+  box-shadow: 0 6px 24px rgba(124, 92, 252, 0.35);
+  transform: translateY(-1px);
+}
+
+.drawmed-ai-assistant__send:active { transform: scale(0.9); }
+.drawmed-ai-assistant__send svg { width: 14px; height: 14px; }
+
+/* ============================================================
+   Excalidraw Canvas Overrides — Glassmorphism
+   ============================================================ */
+
+/* Root canvas fill */
+.excalidraw {
+  font-family: inherit !important;
+  background: transparent !important;
+}
+
+/* Layer UI wrapper sits relative to canvas */
+.excalidraw .layer-ui__wrapper {
+  padding-top: 0 !important;
+}
+
+/* --- FixedSideContainer (top toolbar area) --- */
+.excalidraw .FixedSideContainer_side_top {
+  padding: 72px 0 0 !important;
+}
+
+/* --- App-menu_top container --- */
+.excalidraw .App-menu_top {
+  align-items: center !important;
+}
+
+/* --- Shapes Toolbar Section --- */
+.excalidraw .shapes-section {
+  margin-top: 0 !important;
+}
+
+/* --- App-toolbar (main floating shapes panel) --- */
+.excalidraw .App-toolbar-container {
+  background: rgba(13, 12, 22, 0.55) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+  padding: 4px !important;
+}
+
+.excalidraw .App-toolbar-container .App-toolbar {
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 14px !important;
+}
+
+/* Each tool icon in main toolbar */
+.excalidraw .App-toolbar .ToolIcon {
+  border-radius: 10px !important;
+}
+
+.excalidraw .App-toolbar .ToolIcon__icon {
+  border-radius: 10px !important;
+  width: 34px !important;
+  height: 34px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.excalidraw .App-toolbar .ToolIcon_type_radio:checked + .ToolIcon__icon {
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.2), rgba(79, 95, 255, 0.15)) !important;
+  box-shadow: 0 0 16px rgba(124, 92, 252, 0.12), inset 0 0 0 1px rgba(124, 92, 252, 0.2) !important;
+}
+
+.excalidraw .App-toolbar .ToolIcon_type_radio:checked + .ToolIcon__icon svg {
+  color: rgba(124, 92, 252, 0.9) !important;
+}
+
+.excalidraw .App-toolbar .ToolIcon__icon:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* --- App-menu__left (element properties panel) --- */
+.excalidraw .App-menu__left {
+  position: absolute !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  width: 240px !important;
+  max-height: 70vh !important;
+  padding: 12px !important;
+  left: 16px !important;
+  top: 100px !important;
+  border-radius: 20px !important;
+  background: rgba(13, 12, 22, 0.55) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+}
+
+.excalidraw .App-menu__left::-webkit-scrollbar {
+  width: 3px;
+}
+
+.excalidraw .App-menu__left::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.excalidraw .App-menu__left .buttonList {
+  padding: 4px 0 !important;
+}
+
+/* Style the section heading for selected shape actions */
+.excalidraw .App-menu__left .panelColumn h3,
+.excalidraw .App-menu__left legend,
+.excalidraw .App-menu__left .control-label {
+  color: rgba(255, 255, 255, 0.45) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  margin-bottom: 8px !important;
+}
+
+/* Excalidraw Island component */
+.excalidraw .island,
+.excalidraw .Island {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+}
+
+/* --- Fixed islands (like the footer area) --- */
+.excalidraw .layer-ui__wrapper__footer-left .Island,
+.excalidraw .layer-ui__wrapper__footer-right .Island {
+  background: rgba(13, 12, 22, 0.55) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* --- Stats / Zoom / Footer buttons in islands --- */
+.excalidraw .layer-ui__wrapper .footer-center .Island {
+  background: rgba(13, 12, 22, 0.55) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* --- Section component inside left panel --- */
+.excalidraw .App-menu__left .selected-shape-actions {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* --- Color picker popover --- */
+.excalidraw .color-picker,
+.excalidraw .popover,
+.excalidraw .context-menu {
+  background: rgba(13, 12, 22, 0.7) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4) !important;
+  padding: 8px !important;
+}
+
+/* --- Dropdown menu --- */
+.excalidraw .dropdown-menu {
+  background: rgba(13, 12, 22, 0.7) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* --- Sidebar (library sidebar) --- */
+.excalidraw .sidebar {
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+  background: rgba(13, 12, 22, 0.6) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.excalidraw .sidebar__header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* --- Button styling --- */
+.excalidraw .buttonList label,
+.excalidraw .buttonList button,
+.excalidraw .buttonList .zIndexButton {
+  border-radius: 10px !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.excalidraw .buttonList label:hover,
+.excalidraw .buttonList button:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.excalidraw .buttonList label.active,
+.excalidraw .buttonList button.active {
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.15), rgba(79, 95, 255, 0.1)) !important;
+  border-color: rgba(124, 92, 252, 0.2) !important;
+}
+
+/* --- Hamburger menu trigger --- */
+.excalidraw .main-menu-trigger {
+  display: none !important;
+}
+
+/* --- Right sidebar trigger --- */
+.excalidraw .right-sidebar-trigger {
+  display: none !important;
+}
+
+/* --- Help & misc buttons --- */
+.excalidraw .sidebar-footer,
+.excalidraw .sidebar-trigger-github,
+.excalidraw .github-link,
+.excalidraw .help-icon,
+.excalidraw .layer-ui__help-btn {
+  display: none !important;
+}
+
+/* --- Library menu browse button --- */
+.excalidraw .library-menu-browse-button {
+  display: none !important;
+}
+
+/* ============================================================
+   Excalidraw Context Menu & Modals
+   ============================================================ */
+.excalidraw .context-menu {
+  border-radius: 18px !important;
+  padding: 6px !important;
+}
+
+.excalidraw .context-menu .context-menu-item {
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+}
+
+/* --- Dialog / Modal --- */
+.excalidraw .Modal {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.excalidraw .Modal__content {
+  background: rgba(13, 12, 22, 0.75) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ============================================================
+   Excalidraw WYSIWYG Text Editor
+   ============================================================ */
+.excalidraw [data-type="wysiwyg"] {
+  font-family: var(--font-tajawal), "Helvetica", sans-serif !important;
+}
+
+/* ============================================================
+   Scrollbar for Excalidraw Elements
+   ============================================================ */
+.excalidraw ::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+.excalidraw ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.excalidraw ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================================
+   Layer UI footer (zoom, undo/redo area)
+   ============================================================ */
+.excalidraw .layer-ui__wrapper__footer-left {
+  margin-left: 8px !important;
+}
+
+.excalidraw .layer-ui__wrapper__footer-right {
+  margin-right: 8px !important;
+}
+
+/* --- Footer Island (zoom controls etc.) --- */
+.excalidraw .layer-ui__wrapper__footer-left .Island,
+.excalidraw .layer-ui__wrapper__footer-right .Island {
+  background: rgba(13, 12, 22, 0.55) !important;
+  backdrop-filter: blur(28px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Tooltip style */
+.excalidraw .Tooltip {
+  background: rgba(13, 12, 22, 0.8) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+  padding: 6px 10px !important;
+}
+
+/* Excalidraw buttons in footer / zoom */
+.excalidraw .excalidraw-button,
+.excalidraw .scroll-back-to-content {
+  border-radius: 12px !important;
+}
+
+/* ============================================================
+   Welcome Screen
+   ============================================================ */
+.excalidraw .welcome-screen-menu-item {
+  border-radius: 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+.excalidraw .welcome-screen-menu-item:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ============================================================
+   Custom Left Sliding Menu (Scene Settings)
+   ============================================================ */
+.drawmed-slide-menu {
+  background: rgba(13, 12, 22, 0.65) !important;
+  backdrop-filter: blur(32px) saturate(1.2) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 12px 0 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ============================================================
+   Subtle Mesh Grid Overlay for Canvas
+   ============================================================ */
+.drawmed-grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ============================================================
+   Loading State
+   ============================================================ */
+.drawmed-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(79, 95, 255, 0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 50% at 80% 80%, rgba(124, 58, 237, 0.04) 0%, transparent 50%),
+              linear-gradient(160deg, #07080f 0%, #0a0818 50%, #080714 100%);
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.drawmed-fade-in {
+  animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.drawmed-fade-in--delay-1 { animation-delay: 0.1s; }
+.drawmed-fade-in--delay-2 { animation-delay: 0.2s; }
+.drawmed-fade-in--delay-3 { animation-delay: 0.3s; }
