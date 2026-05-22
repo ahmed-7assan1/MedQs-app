@@ -99,7 +99,25 @@ const nextConfig = {
   // NOTE: Do NOT disable cache in dev — it causes slow HMR and full rebuilds.
   // The cache=false workaround was masking a stale .next issue; instead, just
   // delete .next when you see stale chunk errors.
-  webpack: (config) => config,
+  webpack: (config) => {
+    // @excalidraw/excalidraw has a broken "exports" field ("./*" wildcard maps to
+    // types only, no JS/CSS) which Webpack cannot resolve. Aliasing to the real
+    // dist files bypasses the exports boundary entirely.
+    const path = require("path");
+    const excalidrawRoot = path.resolve(
+      __dirname,
+      "node_modules/@excalidraw/excalidraw"
+    );
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@excalidraw/excalidraw$": path.join(excalidrawRoot, "dist/prod/index.js"),
+      "@excalidraw/excalidraw/index.css": path.join(
+        excalidrawRoot,
+        "dist/prod/index.css"
+      ),
+    };
+    return config;
+  },
 };
 
 module.exports = withPWA(nextConfig);
