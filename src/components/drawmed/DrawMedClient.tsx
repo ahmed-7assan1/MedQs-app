@@ -84,6 +84,65 @@ export function DrawMedClient() {
   const [zoomValue, setZoomValue] = useState(1);
   const [aiExpanded, setAiExpanded] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
+  const [apiReady, setApiReady] = useState(false);
+
+  // Make the Excalidraw shapes toolbar draggable once the API is ready
+  useEffect(() => {
+    if (!apiReady) return;
+
+    const findToolbar = (): HTMLElement | null =>
+      document.querySelector(".excalidraw .App-toolbar-container");
+
+    let cleanup: (() => void) | null = null;
+    const interval = setInterval(() => {
+      const toolbar = findToolbar();
+      if (toolbar) {
+        clearInterval(interval);
+        toolbar.style.position = "fixed";
+        toolbar.style.cursor = "grab";
+        toolbar.style.zIndex = "50";
+
+        let dragging = false;
+        let startX = 0, startY = 0;
+        let origLeft = 0, origTop = 0;
+
+        const onDown = (e: MouseEvent) => {
+          dragging = true;
+          toolbar.style.cursor = "grabbing";
+          startX = e.clientX;
+          startY = e.clientY;
+          const rect = toolbar.getBoundingClientRect();
+          origLeft = rect.left;
+          origTop = rect.top;
+          e.preventDefault();
+        };
+        const onMove = (e: MouseEvent) => {
+          if (!dragging) return;
+          toolbar.style.left = `${origLeft + e.clientX - startX}px`;
+          toolbar.style.top = `${origTop + e.clientY - startY}px`;
+        };
+        const onUp = () => {
+          dragging = false;
+          toolbar.style.cursor = "grab";
+        };
+
+        toolbar.addEventListener("mousedown", onDown);
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+
+        cleanup = () => {
+          toolbar.removeEventListener("mousedown", onDown);
+          document.removeEventListener("mousemove", onMove);
+          document.removeEventListener("mouseup", onUp);
+        };
+      }
+    }, 300);
+
+    return () => {
+      clearInterval(interval);
+      cleanup?.();
+    };
+  }, [apiReady]);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -438,7 +497,7 @@ export function DrawMedClient() {
 
         <div className="flex-1 h-full w-full overflow-hidden">
           <Excalidraw
-            excalidrawAPI={(api: ExcalidrawImperativeAPI) => { apiRef.current = api; }}
+            excalidrawAPI={(api: ExcalidrawImperativeAPI) => { apiRef.current = api; setApiReady(true); }}
             initialData={initialData}
             onChange={onChange as any}
             theme={isDark ? "dark" : "light"}

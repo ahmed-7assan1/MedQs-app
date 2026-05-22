@@ -87,8 +87,8 @@
 .drawmed-topbar {
   position: absolute;
   top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 16px;
+  transform: none;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -425,6 +425,12 @@
 /* --- App-menu_top container --- */
 .excalidraw .App-menu_top {
   align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+/* Push shapes to the right side */
+.excalidraw .App-menu_top .shapes-section {
+  justify-content: flex-end !important;
 }
 
 /* --- Shapes Toolbar Section --- */
@@ -667,10 +673,12 @@
 
 /* ============================================================
    Excalidraw WYSIWYG Text Editor
+   ------------------------------------------------------------
+   Font is controlled by Excalidraw dynamically based on the
+   selected font-family.  @font-face aliases (injected in JS)
+   map each Excalidraw font to Tajawal for Arabic Unicode range,
+   so Arabic characters render correctly regardless of font.
    ============================================================ */
-.excalidraw [data-type="wysiwyg"] {
-  font-family: var(--font-tajawal), "Helvetica", sans-serif !important;
-}
 
 /* ============================================================
    Scrollbar for Excalidraw Elements
@@ -692,16 +700,16 @@
 /* ============================================================
    Layer UI footer (zoom, undo/redo area)
    ============================================================ */
+/* Hide duplicate zoom controls — we have our own in the bottom bar */
 .excalidraw .layer-ui__wrapper__footer-left {
-  margin-left: 8px !important;
+  display: none !important;
 }
 
 .excalidraw .layer-ui__wrapper__footer-right {
   margin-right: 8px !important;
 }
 
-/* --- Footer Island (zoom controls etc.) --- */
-.excalidraw .layer-ui__wrapper__footer-left .Island,
+/* --- Footer Island --- */
 .excalidraw .layer-ui__wrapper__footer-right .Island {
   background: rgba(13, 12, 22, 0.55) !important;
   backdrop-filter: blur(28px) saturate(1.2) !important;
