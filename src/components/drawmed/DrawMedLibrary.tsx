@@ -4,9 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, Loader2, BookMarked, Package, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ExcalidrawImperativeAPI } from "../../../node_modules/@excalidraw/excalidraw/dist/types/excalidraw/types.d.ts";
-
-const EXCALIDRAW_PATH = "../../../node_modules/@excalidraw/excalidraw/dist/prod/index.js" as const;
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw";
 
 const LIBRARIES_JSON =
   "https://raw.githubusercontent.com/excalidraw/excalidraw-libraries/main/libraries.json";
@@ -91,7 +89,7 @@ export function DrawMedLibrary({
         if (!res.ok) throw new Error("Failed to fetch library data");
         const text = await res.text();
 
-        const { loadLibraryFromBlob } = await import(EXCALIDRAW_PATH);
+        const { loadLibraryFromBlob } = await import("@excalidraw/excalidraw");
         const blob = new Blob([text], { type: "application/json" });
         const items = await loadLibraryFromBlob(blob);
 
