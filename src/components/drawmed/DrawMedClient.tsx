@@ -96,9 +96,16 @@ export function DrawMedClient() {
     let cleanup: (() => void) | null = null;
     const interval = setInterval(() => {
       const toolbar = findToolbar();
-      if (toolbar) {
+      // Only make it draggable if it's visible and has dimensions
+      if (toolbar && toolbar.getBoundingClientRect().width > 0) {
         clearInterval(interval);
+        
+        // Get initial position before fixing it
+        const rect = toolbar.getBoundingClientRect();
+        
         toolbar.style.position = "fixed";
+        toolbar.style.left = `${rect.left}px`;
+        toolbar.style.top = `${rect.top}px`;
         toolbar.style.cursor = "grab";
         toolbar.style.zIndex = "50";
 
@@ -111,9 +118,9 @@ export function DrawMedClient() {
           toolbar.style.cursor = "grabbing";
           startX = e.clientX;
           startY = e.clientY;
-          const rect = toolbar.getBoundingClientRect();
-          origLeft = rect.left;
-          origTop = rect.top;
+          const currentRect = toolbar.getBoundingClientRect();
+          origLeft = currentRect.left;
+          origTop = currentRect.top;
           e.preventDefault();
         };
         const onMove = (e: MouseEvent) => {
@@ -136,7 +143,7 @@ export function DrawMedClient() {
           document.removeEventListener("mouseup", onUp);
         };
       }
-    }, 300);
+    }, 500);
 
     return () => {
       clearInterval(interval);
