@@ -1,22 +1,22 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, SafeAreaView,
-  RefreshControl, StatusBar, LayoutAnimation, Platform, UIManager
+  RefreshControl, LayoutAnimation, Platform, UIManager, Animated as RNA,
 } from 'react-native';
-import tw from 'twrnc';
+import { useThemeStore } from '../store/useThemeStore';
+import { mobileApi } from '../lib/api';
+import { Skeleton } from '../components/ui/Skeleton';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   FadeInDown, useSharedValue, useAnimatedStyle,
-  withTiming, withSpring
+  withTiming, withSpring, withSequence
 } from 'react-native-reanimated';
 import {
   BookOpen, ChevronRight, Layers, PlayCircle,
   Search, GraduationCap, ChevronDown,
-  Activity, BookMarked, Sparkles, Lock
+  Activity, BookMarked, Sparkles, Lock,
+  Brain
 } from 'lucide-react-native';
-import { useThemeStore } from '../store/useThemeStore';
-import { mobileApi } from '../lib/api';
-import * as Haptics from 'expo-haptics';
-import { Skeleton } from '../components/ui/Skeleton';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -30,18 +30,31 @@ const SUBJECT_COLORS = [
 function AnimatedProgressBar({ progress, color }: { progress: number; color: string }) {
   const width = useSharedValue(0);
   useEffect(() => {
-    width.value = withTiming(progress, { duration: 800 });
+    width.value = withTiming(progress, { duration: 1000 });
   }, [progress]);
   const animStyle = useAnimatedStyle(() => ({ width: `${width.value}%` as any }));
   return (
-    <View style={tw`h-1.5 bg-white/5 rounded-full mt-5 overflow-hidden`}>
-      <Animated.View style={[tw`h-full rounded-full`, animStyle, { backgroundColor: color }]} />
+    <View style={{ height: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 3, marginTop: 16, overflow: 'hidden' }}>
+      <Animated.View style={[{ height: '100%', borderRadius: 3 }, animStyle, { backgroundColor: color }]} />
     </View>
   );
 }
 
+function PulseDot() {
+  const opacity = useSharedValue(0.3);
+  useEffect(() => {
+    opacity.value = withSequence(
+      withTiming(1, { duration: 600 }),
+      withTiming(0.3, { duration: 600 }),
+    );
+  }, []);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  return <Animated.View style={[{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34d399', marginRight: 6 }, style]} />;
+}
+
 export function LibraryScreen({ navigation }: any) {
-  const { primaryColor, primaryLight } = useThemeStore();
+  const { primaryColor, primaryLight, getTheme } = useThemeStore();
+  const theme = getTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [modules, setModules] = useState<any[]>([]);
@@ -51,7 +64,6 @@ export function LibraryScreen({ navigation }: any) {
   const fetchData = useCallback(async () => {
     try {
       const data = await mobileApi.getModulesAuth();
-      // Attach color + compute progress from lecture count (server doesn't return completions)
       let totalSubjects = 0;
       const enriched = data.map((mod: any, mi: number) => {
         const subjects = (mod.subjects || []).map((sub: any, si: number) => ({
@@ -67,7 +79,6 @@ export function LibraryScreen({ navigation }: any) {
       setStats({ overallProgress: 0, activeSubjects: totalSubjects });
     } catch (err) {
       console.warn('Failed to fetch modules:', err);
-      // Fallback to empty — no mock data in production
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -85,40 +96,56 @@ export function LibraryScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-black`}>
-      <StatusBar barStyle="light-content" />
-
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {/* Header */}
-      <View style={tw`px-6 pt-6 pb-6`}>
-        <View style={tw`flex-row justify-between items-center mb-2`}>
-          <Text style={tw`text-white text-3xl font-black tracking-tight`}>Library</Text>
+      <View style={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 20 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <Text style={{ color: theme.colors.text, fontSize: 28, fontWeight: '900', letterSpacing: -0.5 }}>Library</Text>
           <TouchableOpacity
             activeOpacity={0.7}
-            style={tw`w-10 h-10 bg-[#0D1117] border border-[#1E2D4D] rounded-xl items-center justify-center`}
+            style={{
+              width: 40, height: 40,
+              backgroundColor: theme.colors.surface,
+              borderRadius: 14,
+              borderWidth: 1, borderColor: theme.colors.border,
+              alignItems: 'center', justifyContent: 'center',
+            }}
           >
-            <Search color="white" size={20} />
+            <Search color={theme.colors.text} size={20} />
           </TouchableOpacity>
         </View>
-        <Text style={tw`text-slate-500 font-bold text-sm uppercase tracking-widest`}>Medical Curriculum</Text>
+        <Text style={{ color: theme.colors.textMuted, fontWeight: '700', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+          Medical Curriculum
+        </Text>
       </View>
 
       <ScrollView
-        contentContainerStyle={tw`pb-32 px-6`}
+        contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 24 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={primaryColor} />}
       >
         {/* Quick Stats */}
-        <View style={tw`flex-row justify-between mb-8`}>
-          <Animated.View entering={FadeInDown.delay(0)} style={tw`bg-[#0D1117] border border-[#1E2D4D] p-4 rounded-3xl flex-1 mr-3`}>
-            <Activity color={primaryLight} size={20} style={tw`mb-2`} />
-            <Text style={tw`text-white font-black text-lg`}>{stats.overallProgress}%</Text>
-            <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>Overall Progress</Text>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(80)} style={tw`bg-[#0D1117] border border-[#1E2D4D] p-4 rounded-3xl flex-1`}>
-            <BookMarked color="#f59e0b" size={20} style={tw`mb-2`} />
-            <Text style={tw`text-white font-black text-lg`}>{stats.activeSubjects}</Text>
-            <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>Active Subjects</Text>
-          </Animated.View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 28 }}>
+          <View style={{
+            flex: 1, marginRight: 12,
+            backgroundColor: theme.colors.surface,
+            borderRadius: 24, padding: 16,
+            borderWidth: 1, borderColor: theme.colors.border,
+          }}>
+            <Activity color={primaryLight} size={20} style={{ marginBottom: 8 }} />
+            <Text style={{ color: theme.colors.text, fontWeight: '900', fontSize: 20 }}>{stats.overallProgress}%</Text>
+            <Text style={{ color: theme.colors.textMuted, fontSize: 10, fontWeight: '800', textTransform: 'uppercase' }}>Overall Progress</Text>
+          </View>
+          <View style={{
+            flex: 1,
+            backgroundColor: theme.colors.surface,
+            borderRadius: 24, padding: 16,
+            borderWidth: 1, borderColor: theme.colors.border,
+          }}>
+            <BookMarked color="#f59e0b" size={20} style={{ marginBottom: 8 }} />
+            <Text style={{ color: theme.colors.text, fontWeight: '900', fontSize: 20 }}>{stats.activeSubjects}</Text>
+            <Text style={{ color: theme.colors.textMuted, fontSize: 10, fontWeight: '800', textTransform: 'uppercase' }}>Subjects</Text>
+          </View>
         </View>
 
         {loading ? (
@@ -126,48 +153,75 @@ export function LibraryScreen({ navigation }: any) {
             <Skeleton key={i} height={100} mb={4} borderRadius={32} />
           ))
         ) : modules.length === 0 ? (
-          <View style={tw`items-center justify-center py-20`}>
-            <Lock color="#1E2D4D" size={48} style={tw`mb-4`} />
-            <Text style={tw`text-slate-600 font-black text-lg text-center`}>No curriculum yet</Text>
-            <Text style={tw`text-slate-700 text-sm text-center mt-2`}>Your faculty modules will appear here</Text>
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 60 }}>
+            <Lock color={theme.colors.border} size={48} style={{ marginBottom: 16 }} />
+            <Text style={{ color: theme.colors.textMuted, fontWeight: '900', fontSize: 18, textAlign: 'center' }}>No curriculum yet</Text>
+            <Text style={{ color: theme.colors.border, fontSize: 13, textAlign: 'center', marginTop: 8 }}>
+              Your faculty modules will appear here
+            </Text>
           </View>
         ) : (
           modules.map((module, index) => (
-            <Animated.View key={module.id} entering={FadeInDown.delay(index * 80)} style={tw`mb-4`}>
+            <Animated.View key={module.id} entering={FadeInDown.delay(index * 80)} style={{ marginBottom: 12 }}>
               <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => toggleModule(module.id)}
-                style={[
-                  tw`p-6 bg-[#0D1117] border border-[#1E2D4D] rounded-[32px]`,
-                  expandedModule === module.id && tw`border-b-0 rounded-b-none`
-                ]}
+                style={{
+                  padding: 20,
+                  backgroundColor: theme.colors.surface,
+                  borderRadius: expandedModule === module.id ? 24 : 28,
+                  borderWidth: 1,
+                  borderColor: expandedModule === module.id ? primaryColor + '30' : theme.colors.border,
+                  borderBottomLeftRadius: expandedModule === module.id ? 0 : 28,
+                  borderBottomRightRadius: expandedModule === module.id ? 0 : 28,
+                }}
               >
-                <View style={tw`flex-row items-center justify-between`}>
-                  <View style={tw`flex-row items-center flex-1`}>
-                    <View style={[tw`w-14 h-14 rounded-2xl items-center justify-center mr-4 border border-white/5`, { backgroundColor: primaryColor + '15' }]}>
-                      <Layers color={primaryColor} size={28} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View style={{
+                      width: 52, height: 52, borderRadius: 16,
+                      backgroundColor: primaryColor + '15',
+                      alignItems: 'center', justifyContent: 'center',
+                      marginRight: 14,
+                      borderWidth: 1, borderColor: primaryColor + '20',
+                    }}>
+                      <Layers color={primaryColor} size={26} />
                     </View>
-                    <View style={tw`flex-1`}>
-                      <Text style={tw`text-white font-black text-lg`} numberOfLines={1}>{module.name}</Text>
-                      <Text style={tw`text-slate-500 text-xs font-bold`}>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ color: theme.colors.text, fontWeight: '900', fontSize: 16 }} numberOfLines={1}>
+                          {module.name}
+                        </Text>
+                      </View>
+                      <Text style={{ color: theme.colors.textMuted, fontSize: 11, fontWeight: '700', marginTop: 2 }}>
                         {module.subjectsCount} Subject{module.subjectsCount !== 1 ? 's' : ''}
                       </Text>
                     </View>
                   </View>
                   <ChevronDown
-                    color="#4B5563"
-                    size={22}
+                    color={theme.colors.textMuted}
+                    size={20}
                     style={{ transform: [{ rotate: expandedModule === module.id ? '180deg' : '0deg' }] }}
                   />
                 </View>
-
                 <AnimatedProgressBar progress={0} color={primaryColor} />
               </TouchableOpacity>
 
               {expandedModule === module.id && (
-                <View style={tw`bg-[#0D1117] border border-[#1E2D4D] border-t-0 rounded-b-[32px] overflow-hidden px-4 pb-6`}>
+                <View style={{
+                  backgroundColor: theme.colors.surface,
+                  borderWidth: 1,
+                  borderColor: primaryColor + '30',
+                  borderTopWidth: 0,
+                  borderBottomLeftRadius: 24,
+                  borderBottomRightRadius: 24,
+                  paddingHorizontal: 16,
+                  paddingBottom: 20,
+                }}>
                   {module.subjects?.length === 0 ? (
-                    <Text style={tw`text-slate-600 text-sm text-center py-4`}>No subjects yet</Text>
+                    <Text style={{ color: theme.colors.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 16 }}>
+                      No subjects yet
+                    </Text>
                   ) : (
                     module.subjects?.map((subject: any) => (
                       <TouchableOpacity
@@ -177,28 +231,44 @@ export function LibraryScreen({ navigation }: any) {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           navigation.navigate('SubjectDetail', { subjectId: subject.id });
                         }}
-                        style={tw`flex-row items-center p-4 bg-white/[0.03] rounded-2xl mb-2 border border-white/5`}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          padding: 14,
+                          backgroundColor: theme.colors.surfaceLight,
+                          borderRadius: 20,
+                          marginBottom: 8,
+                          borderWidth: 1,
+                          borderColor: theme.colors.border,
+                        }}
                       >
-                        <View style={[tw`w-12 h-12 rounded-xl items-center justify-center mr-4`, { backgroundColor: subject.color + '20' }]}>
-                          <GraduationCap color={subject.color} size={22} />
+                        <View style={{
+                          width: 44, height: 44, borderRadius: 14,
+                          backgroundColor: subject.color + '20',
+                          alignItems: 'center', justifyContent: 'center',
+                          marginRight: 14,
+                        }}>
+                          <GraduationCap color={subject.color} size={20} />
                         </View>
-                        <View style={tw`flex-1`}>
-                          <Text style={tw`text-white font-black text-sm`} numberOfLines={1}>{subject.name}</Text>
-                          <View style={tw`flex-row mt-1 items-center`}>
-                            <PlayCircle color={subject.color} size={12} style={tw`mr-1`} />
-                            <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: theme.colors.text, fontWeight: '700', fontSize: 13 }} numberOfLines={1}>
+                            {subject.name}
+                          </Text>
+                          <View style={{ flexDirection: 'row', marginTop: 4, alignItems: 'center' }}>
+                            <PlayCircle color={subject.color} size={11} style={{ marginRight: 4 }} />
+                            <Text style={{ color: theme.colors.textMuted, fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>
                               {subject.lectureCount} Lecture{subject.lectureCount !== 1 ? 's' : ''}
                             </Text>
                             {subject.lectureCount > 0 && (
                               <>
-                                <View style={tw`w-1 h-1 rounded-full bg-slate-700 mx-2`} />
-                                <Sparkles color={primaryLight} size={10} style={tw`mr-1`} />
-                                <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>AI Ready</Text>
+                                <View style={{ width: 3, height: 3, borderRadius: 1.5, backgroundColor: theme.colors.border, marginHorizontal: 8 }} />
+                                <PulseDot />
+                                <Text style={{ color: theme.colors.textMuted, fontSize: 10, fontWeight: '700' }}>AI Ready</Text>
                               </>
                             )}
                           </View>
                         </View>
-                        <ChevronRight color="#4B5563" size={18} />
+                        <ChevronRight color={theme.colors.textMuted} size={16} />
                       </TouchableOpacity>
                     ))
                   )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, TextInput, FlatList, ActivityIndicator, StatusBar, Alert, Modal } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, TextInput, FlatList, ActivityIndicator, StatusBar, Alert, Modal, ScrollView } from 'react-native';
 import tw from 'twrnc';
 import { useThemeStore } from '../store/useThemeStore';
 import { ChevronLeft, Search, BookOpen, Layers, ArrowRightLeft, Copy, X, Database, CheckCircle2, ChevronRight } from 'lucide-react-native';

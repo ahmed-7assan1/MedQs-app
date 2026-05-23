@@ -93,6 +93,28 @@ const nextConfig = {
         "127.0.0.1:3002",
       ],
     },
+    // ── Bundle Performance ───────────────────────────────────────────────────────
+    // Split heavy packages so only imported code lands in the client bundle
+    optimizePackageImports: [
+      "lucide-react",         // tree-shake icons → load only the ones you use
+      "framer-motion",        // load only used exports (motion, AnimatePresence, etc.)
+      "@phosphor-icons/react",// tree-shake icons
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-toast",
+      "@radix-ui/react-tooltip",
+      "date-fns",             // tree-shake date utilities
+      "@tiptap/react",        // only load editor code when used
+      "@tiptap/starter-kit",
+      "@tiptap/extension-underline",
+      "@tiptap/extension-link",
+      "@tiptap/extension-image",
+      "@tiptap/extension-table",
+      "@tiptap/extension-code-block-lowlight",
+    ],
   },
 
   // ── Webpack ───────────────────────────────────────────────────────────────────

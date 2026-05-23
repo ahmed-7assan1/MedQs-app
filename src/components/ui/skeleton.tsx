@@ -1,15 +1,18 @@
-import type { HTMLAttributes } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
-/** Pulse placeholder for loading states (lists, cards, forms). */
-export function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-muted/80 dark:bg-muted/50", className)}
+      className={cn("animate-pulse rounded-md bg-primary/10", className)}
       {...props}
     />
-  );
+  )
 }
+
+export { Skeleton }
 
 /** Forum / feed style post card skeleton */
 export function ForumPostCardSkeleton() {
@@ -45,7 +48,6 @@ export function ForumPostListSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-/** Matches `StudentPageShell` header rhythm for route-level loading. */
 export function StudentShellHeaderSkeleton({ withSubtitle = true }: { withSubtitle?: boolean }) {
   return (
     <header className="mb-8 md:mb-10" aria-hidden>
@@ -60,7 +62,6 @@ export function StudentShellHeaderSkeleton({ withSubtitle = true }: { withSubtit
   );
 }
 
-/** Dashboard hero stat cards (2×2 → 4 col). */
 export function DashboardStatsSkeleton() {
   return (
     <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-hidden>
@@ -75,7 +76,6 @@ export function DashboardStatsSkeleton() {
   );
 }
 
-/** Generic bordered card row (modules, papers, lists). */
 export function ListCardRowSkeleton({ lines = 2 }: { lines?: number }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">

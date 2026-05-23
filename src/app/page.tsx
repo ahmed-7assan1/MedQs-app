@@ -1,320 +1,734 @@
-import Image from "next/image";
-import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { 
-  ArrowRight, Play, CheckCircle2, 
-  BookOpen, Brain, Layers, 
-  ClipboardList, MessageSquare, 
-  Trophy, Clock, Target, Star
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import {
+  ArrowRight, Play, Check, Star, Menu, X,
+  Brain, BookOpen, Layers, Target, MessageSquare, Clock,
+  Zap, Shield, BarChart3, Users, Sparkles, ChevronRight,
+  TrendingUp, GraduationCap, Award, HeartHandshake,
+  Monitor, Smartphone, Tablet, Eye, Bot,
 } from "lucide-react";
-import { LandingNavbar } from "@/components/landing/LandingNavbar";
-import { CinematicBackground } from "@/components/landing/CinematicBackground";
-import { WordFadeUp } from "@/components/landing/WordFadeUp";
-import { StatsCounter } from "@/components/landing/StatsCounter";
-import { ScrollReveal } from "@/components/landing/ScrollReveal";
-import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
-import { unstable_cache } from "next/cache";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-// ─── Cached Stats (shared, refreshed every 1h) ────────────────────────────────
-const getCachedStats = unstable_cache(
-  async () => {
-    return Promise.all([
-      prisma.user.count().catch(() => 0),
-      prisma.question.count().catch(() => 0),
-      prisma.module.count().catch(() => 0),
-    ]);
+/* ─── Constants ─── */
+const ACCENT = "#00FF88";
+const ACCENT2 = "#00D4FF";
+const PURPLE = "#7C3AED";
+
+const NAV_LINKS = [
+  { href: "#features", label: "Features" },
+  { href: "#pricing", label: "Pricing" },
+  { href: "#about", label: "About" },
+  { href: "#blog", label: "Blog" },
+];
+
+const FEATURES = [
+  { icon: Brain, title: "AI-Powered Learning", desc: "Adaptive algorithms that identify your weak areas and personalize your study path in real-time.", color: "#00FF88" },
+  { icon: Layers, title: "Curated Curriculum", desc: "Structured content mapped to your exact university syllabus with module-by-module progression.", color: "#00D4FF" },
+  { icon: Target, title: "Smart Analytics", desc: "Track your mastery with precision. Know exactly what you've covered and what needs review.", color: "#7C3AED" },
+  { icon: BookOpen, title: "50K+ MCQ Bank", desc: "Massive repository of past exam questions with detailed AI-generated explanations for every answer.", color: "#F59E0B" },
+  { icon: MessageSquare, title: "Medical Community", desc: "Connect with peers and doctors in moderated forums. Share insights and study together.", color: "#EF4444" },
+  { icon: Clock, title: "Spaced Repetition", desc: "Built-in flashcard system using proven memory techniques for long-term clinical retention.", color: "#10B981" },
+];
+
+const BENTO_ITEMS = [
+  { icon: Brain, title: "AI Tutor Available 24/7", desc: "Ask Dr. Q anything. It understands your curriculum and explains concepts like a senior doctor.", color: ACCENT, stat: "99.9%", statLabel: "Uptime" },
+  { icon: BarChart3, title: "Real-time Progress", desc: "See your mastery score grow with every lecture, quiz, and flashcard session.", color: ACCENT2, stat: "2.5x", statLabel: "Faster Learning" },
+  { icon: TrendingUp, title: "Exam Pass Rate", desc: "Students using MedOneX consistently score higher. Our data speaks for itself.", color: PURPLE, stat: "94%", statLabel: "Pass Rate" },
+];
+
+const TESTIMONIALS = [
+  { name: "Dr. Sara Ahmed", role: "Cairo University", quote: "MedOneX completely transformed how I prepare for exams. The AI explanations are better than any textbook.", rating: 5, initials: "SA" },
+  { name: "Ahmed Hassan", role: "Ain Shams University", quote: "The spaced repetition system is a game-changer. I retained 3x more information in half the study time.", rating: 5, initials: "AH" },
+  { name: "Laila Mohamed", role: "Alexandria University", quote: "Having the entire curriculum organized with AI assistance feels like having a personal tutor 24/7.", rating: 5, initials: "LM" },
+];
+
+const PRICING_PLANS = [
+  {
+    name: "Starter", price: "Free", description: "Perfect for exploring what MedOneX offers.",
+    features: ["Basic MCQ access", "Community forums", "Progress tracking", "Limited AI queries"],
+    cta: "Get Started Free", popular: false,
   },
-  ["landing-stats"],
-  { revalidate: 3600 }
-);
+  {
+    name: "Pro", price: "Free", description: "For serious students committed to excellence.",
+    features: ["Unlimited MCQ access", "Full AI assistant", "Spaced repetition", "Analytics dashboard", "Offline access", "Priority support"],
+    cta: "Start Pro Trial", popular: true,
+  },
+  {
+    name: "Enterprise", price: "Free", description: "For institutions and study groups.",
+    features: ["Everything in Pro", "Team management", "Custom curriculum", "API access", "Dedicated support", "Bulk enrollment"],
+    cta: "Contact Sales", popular: false,
+  },
+];
 
-export default async function LandingPage() {
-  // Use Supabase (not legacy NextAuth) for session check
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    // If logged in, go straight to dashboard as requested - no obstacles
-    redirect("/dashboard-app");
-  }
+/* ─── Animation Hooks ─── */
+function useScrollReveal(threshold = 0.1) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px", amount: threshold });
+  return { ref, isInView };
+}
 
-  const [userCount, questionCount, moduleCount] = await getCachedStats();
+function FadeUp({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { ref, isInView } = useScrollReveal();
+  return (
+    <div ref={ref} className={className}>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+        transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+function StaggerChildren({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, isInView } = useScrollReveal(0.05);
+  return (
+    <div ref={ref}>
+      <motion.div
+        className={className}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: delay } }, hidden: {} }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+function StaggerItem({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function CountUp({ target, suffix = "", delay = 0 }: { target: number; suffix?: string; delay?: number }) {
+  const [count, setCount] = useState(0);
+  const { ref, isInView } = useScrollReveal();
+  useEffect(() => {
+    if (!isInView) return;
+    const timer = setTimeout(() => {
+      const duration = 2000;
+      const steps = 60;
+      let current = 0;
+      const increment = target / steps;
+      const interval = setInterval(() => {
+        current += increment;
+        if (current >= target) { setCount(target); clearInterval(interval); }
+        else setCount(Math.floor(current));
+      }, duration / steps);
+      return () => clearInterval(interval);
+    }, delay * 1000);
+    return () => clearTimeout(timer);
+  }, [isInView, target, delay]);
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+/* ─── Navbar ─── */
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="relative min-h-screen selection:bg-primary/30 selection:text-white transition-colors duration-500">
-      <CinematicBackground />
-      <LandingNavbar />
-
-      {/* ── HERO SECTION ── */}
-      <section className="relative pt-32 pb-20 sm:pt-48 sm:pb-32 px-6 overflow-hidden">
-        <div className="mx-auto max-w-7xl text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-200/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest animate-fade-in mb-8 shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            Trusted by {userCount.toLocaleString()}+ Medical Students
+    <header className={cn(
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+      scrolled ? "bg-[#0A0E1A]/80 backdrop-blur-xl border-b border-white/5" : "bg-transparent"
+    )}>
+      <nav className="mx-auto max-w-7xl flex items-center justify-between px-6 h-16 md:h-20">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00FF88] to-[#00D4FF] flex items-center justify-center">
+            <Brain className="w-4 h-4 text-[#0A0E1A]" />
           </div>
+          <span className="text-lg font-bold text-white tracking-tight">MedOneX</span>
+        </Link>
 
-          <WordFadeUp 
-            text="Master Medicine. Faster. Smarter."
-            className="text-[clamp(40px,8vw,96px)] font-black leading-[0.95] tracking-tighter text-slate-900 dark:text-white mb-8"
-          />
-
-          <p className="mx-auto max-w-2xl text-lg sm:text-xl text-slate-600 dark:text-white/60 leading-relaxed mb-12 animate-fade-up">
-            The AI-powered platform built for medical students — with curated lectures, 
-            adaptive MCQs, spaced repetition, and your personal AI doctor assistant.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up">
-            <Link
-              href="/register"
-              className="group h-14 w-full sm:w-auto flex items-center justify-center px-10 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-lg font-bold text-white shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all"
-            >
-              Get Started Free
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/modules"
-              className="h-14 w-full sm:w-auto flex items-center justify-center px-10 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-lg font-bold text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
-            >
-              <Play className="mr-2 h-5 w-5 fill-current" />
-              Watch Demo
-            </Link>
-          </div>
-
-          {/* Hero Visual Mockup */}
-          <div className="mt-20 relative mx-auto max-w-5xl group">
-             <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 blur-[100px] -z-10 group-hover:bg-blue-500/30 transition-colors" />
-             <div className="rounded-[32px] border border-slate-200 dark:border-white/10 p-2 bg-white/60 dark:bg-white/10 backdrop-blur-md shadow-2xl animate-float transform-gpu">
-                <div className="aspect-video rounded-[24px] overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center relative">
-                   <Image 
-                      src="https://images.unsplash.com/photo-1576091160550-2173bdb999ef?q=70&w=1200" 
-                      className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000 transform-gpu" 
-                      alt="Dashboard Preview"
-                      width={1200}
-                      height={675}
-                      priority
-                   />
-                   <div className="absolute inset-0 bg-gradient-to-t from-slate-50 dark:from-[#05070f] via-transparent to-transparent" />
-                   <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="p-8 rounded-full bg-white/60 dark:bg-white/10 border border-slate-200 dark:border-white/20 backdrop-blur-md shadow-lg transform-gpu">
-                         <MedOneXLogoMark className="h-16 w-16 text-slate-900 dark:text-white" />
-                      </div>
-                   </div>
-                </div>
-             </div>
-          </div>
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-8">
+          {NAV_LINKS.map((link) => (
+            <a key={link.href} href={link.href} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+              {link.label}
+            </a>
+          ))}
         </div>
-      </section>
 
-      {/* ── SOCIAL PROOF BAR ── */}
-      <section className="py-10 border-y border-slate-200 dark:border-white/5 bg-slate-100/50 dark:bg-white/[0.02]">
-        <div className="mx-auto max-w-7xl px-6 overflow-hidden text-center">
-          <p className="text-xs font-bold text-slate-400 dark:text-white/30 uppercase tracking-[0.3em] mb-8">Used by students from</p>
-          <div className="flex space-x-12 animate-marquee whitespace-nowrap">
-            {["Cairo University", "Ain Shams", "Alexandria University", "Mansoura", "Tanta", "Assiut", "Zagazig"].map((uni) => (
-              <span key={uni} className="text-xl font-bold text-slate-300 dark:text-white/20 hover:text-slate-600 dark:hover:text-white/60 transition-colors cursor-default">{uni}</span>
-            ))}
-            {["Cairo University", "Ain Shams", "Alexandria University", "Mansoura", "Tanta", "Assiut", "Zagazig"].map((uni) => (
-              <span key={uni+"-2"} className="text-xl font-bold text-slate-300 dark:text-white/20 hover:text-slate-600 dark:hover:text-white/60 transition-colors cursor-default">{uni}</span>
-            ))}
-          </div>
+        {/* Desktop CTA */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors px-4">Sign In</Link>
+          <Link href="/download" className="text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors px-4 py-2 rounded-xl">Download App</Link>
+          <Link
+            href="/register"
+            className="relative group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#00FF88] to-[#00D4FF] hover:shadow-lg hover:shadow-[#00FF88]/30 transition-all duration-300"
+          >
+            Get Started Free <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
-      </section>
 
-      {/* ── FEATURES SECTION ── */}
-      <section id="features" className="py-32 px-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white mb-6">Built for Med School Rigor</h2>
-            <p className="text-lg text-slate-500 dark:text-white/50 max-w-xl mx-auto">Every tool engineered for efficiency — so you study smarter, not harder.</p>
-          </div>
+        {/* Mobile Toggle */}
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-white/60 hover:text-white">
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </nav>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { 
-                icon: BookOpen, title: "Curated Library", tag: "Core",
-                desc: "Organized lectures by subject, year, and university structure. No more hunting for files.",
-                color: "text-blue-600 dark:text-blue-400"
-              },
-              { 
-                icon: Brain, title: "Adaptive MCQ", tag: "Exams",
-                desc: "Smart past papers that analyze your performance and highlight weak areas automatically.",
-                color: "text-purple-600 dark:text-purple-400"
-              },
-              { 
-                icon: Layers, title: "Spaced Repetition", tag: "Memory",
-                desc: "Built-in flashcard system with an algorithm designed for long-term clinical retention.",
-                color: "text-emerald-600 dark:text-emerald-400"
-              },
-              { 
-                icon: Target, title: "Ask Dr.Q (AI)", tag: "Assistant",
-                desc: "Your personal AI medical assistant, ready to explain complex concepts 24/7.",
-                color: "text-cyan-600 dark:text-cyan-400"
-              },
-              { 
-                icon: Clock, title: "Study Scheduler", tag: "Planning",
-                desc: "Build your personalized study plan and track your mastery progress day by day.",
-                color: "text-orange-600 dark:text-orange-400"
-              },
-              { 
-                icon: MessageSquare, title: "Medical Community", tag: "Social",
-                desc: "Connect with doctors and fellow students in high-quality, verified forums.",
-                color: "text-rose-600 dark:text-rose-400"
-              }
-            ].map((feature, i) => (
-              <div 
-                key={i}
-                className="group p-8 rounded-3xl bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 hover:border-primary/50 hover:bg-white transition-all duration-500 shadow-sm hover:shadow-xl"
-              >
-                <div className={`w-12 h-12 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center mb-6 shadow-sm ${feature.color}`}>
-                  <feature.icon size={24} />
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">{feature.title}</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-white/5 text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest">{feature.tag}</span>
-                </div>
-                <p className="text-slate-500 dark:text-white/50 leading-relaxed">{feature.desc}</p>
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-[#0A0E1A]/95 backdrop-blur-xl border-t border-white/5"
+          >
+            <div className="px-6 py-6 space-y-4">
+              {NAV_LINKS.map((link) => (
+                <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="block text-sm font-medium text-gray-400 hover:text-white transition-colors">{link.label}</a>
+              ))}
+              <div className="pt-4 border-t border-white/5 space-y-3">
+                <Link href="/login" className="block text-center text-sm font-medium text-gray-400 hover:text-white">Sign In</Link>
+                <Link href="/download" onClick={() => setMobileOpen(false)} className="block text-center text-sm font-medium text-white bg-white/10 hover:bg-white/20 py-2 rounded-xl">Download App</Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="block text-center px-5 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#00FF88] to-[#00D4FF]"
+                >
+                  Get Started Free <ArrowRight className="w-4 h-4 inline ml-1" />
+                </Link>
               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}
+
+/* ─── Hero ─── */
+function HeroSection() {
+  return (
+    <section className="relative min-h-screen pt-24 md:pt-0 flex items-center overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-[#0A0E1A]">
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(0,255,136,0.08) 0%, transparent 50%)' }} />
+        <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-purple-600/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0A0E1A] to-transparent" />
+        {/* Grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-32">
+        <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+          {/* Left Content */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 text-xs font-semibold text-[#00FF88] mb-8"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Trusted by 10,000+ medical students
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-white mb-6"
+            >
+              Master Medicine{" "}
+              <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">
+                Faster. Smarter.
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg text-gray-400 leading-relaxed max-w-lg mb-10"
+            >
+              The AI-powered platform that adapts to your curriculum. Personalized learning paths, real-time analytics, and your personal AI tutor—all in one place.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 mb-10"
+            >
+              <Link
+                href="/register"
+                className="group h-14 px-8 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#00FF88] to-[#00D4FF] text-[#0A0E1A] font-bold text-base hover:shadow-lg hover:shadow-[#00FF88]/30 transition-all duration-300 hover:scale-[1.02]"
+              >
+                Start for Free <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="#demo"
+                className="h-14 px-8 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 text-white font-medium text-base hover:bg-white/5 transition-all"
+              >
+                <Play className="w-5 h-5" /> Watch Demo
+              </Link>
+            </motion.div>
+
+            {/* Social Proof */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex items-center gap-4"
+            >
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0A0E1A] bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center text-xs font-bold text-white">
+                    {String.fromCharCode(64 + i)}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div className="flex items-center gap-1 mb-0.5">
+                  {[1, 2, 3, 4, 5].map((i) => (<Star key={i} className="w-4 h-4 fill-[#00FF88] text-[#00FF88]" />))}
+                </div>
+                <p className="text-sm text-gray-500">Join 50K+ medical professionals</p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right Visual */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-[#00FF88]/20 via-[#00D4FF]/10 to-purple-600/20 blur-[100px] rounded-full" />
+            <div className="relative animate-float">
+              <div className="rounded-[24px] bg-[#111827]/80 backdrop-blur-xl border border-[#1F2937] p-6 shadow-2xl shadow-black/50">
+                {/* Dashboard Mockup */}
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                  <div className="ml-4 flex-1 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center px-3">
+                    <span className="text-[10px] text-gray-500">dashboard.medonex.com</span>
+                  </div>
+                </div>
+
+                {/* Mini Chart */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-[#00FF88]/10 to-transparent border border-[#00FF88]/20">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Mastery</p>
+                    <p className="text-2xl font-black text-white">87%</p>
+                    <div className="mt-2 h-1.5 rounded-full bg-[#00FF88]/20 overflow-hidden">
+                      <div className="h-full w-[87%] rounded-full bg-gradient-to-r from-[#00FF88] to-[#00D4FF]" />
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Streak</p>
+                    <p className="text-2xl font-black text-white">12🔥</p>
+                    <p className="text-xs text-gray-500 mt-1">Personal best!</p>
+                  </div>
+                </div>
+
+                {/* Activity List */}
+                <div className="space-y-2">
+                  {[
+                    { label: "Cardiovascular System", pct: 75, color: ACCENT },
+                    { label: "Neurology", pct: 45, color: ACCENT2 },
+                    { label: "Respiratory", pct: 90, color: PURPLE },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-white truncate">{item.label}</p>
+                        <div className="mt-1.5 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${item.pct}%`, backgroundColor: item.color }} />
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-white/60">{item.pct}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Logos Bar ─── */
+function LogosBar() {
+  const logos = ["Cairo University", "Ain Shams", "Alexandria", "Mansoura", "Tanta", "Assiut", "Zagazig"];
+  return (
+    <section className="py-12 border-y border-white/5 bg-white/[0.02]">
+      <div className="mx-auto max-w-7xl px-6">
+        <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-[0.2em] mb-8">Trusted by students at</p>
+        <div className="flex overflow-hidden">
+          <motion.div
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 30, ease: "linear", repeat: Infinity }}
+            className="flex gap-16 items-center"
+          >
+            {[...logos, ...logos].map((name, i) => (
+              <span key={i} className="text-lg font-bold text-gray-500/60 hover:text-gray-300 transition-colors whitespace-nowrap cursor-default">{name}</span>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* ── STATS SECTION ── */}
-      <section id="stats" className="py-20 px-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-slate-900 dark:text-white">
-            <StatsCounter value={userCount} suffix="+" label="Active Students" />
-            <StatsCounter value={questionCount} suffix="+" label="Bank Questions" />
-            <StatsCounter value={moduleCount} label="Modules Covered" />
-            <StatsCounter value={95} suffix="%" label="Exam Pass Rate" />
+/* ─── Features ─── */
+function FeaturesSection() {
+  return (
+    <section id="features" className="py-24 md:py-32 px-6">
+      <div className="mx-auto max-w-7xl">
+        <FadeUp className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 text-xs font-semibold text-[#00FF88] mb-6">
+            <Zap className="w-3.5 h-3.5" /> FEATURES
           </div>
-        </div>
-      </section>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
+            Everything You Need to{" "}
+            <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">Excel</span>
+          </h2>
+          <p className="text-gray-400 max-w-xl mx-auto">Built specifically for medical students by medical educators. Every feature is designed to maximize retention.</p>
+        </FadeUp>
 
-      {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-32 px-6 overflow-hidden">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col lg:flex-row items-center gap-20">
-            <div className="lg:w-1/2">
-              <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white mb-8">From Day 1 to Exam Day</h2>
-              <div className="space-y-12">
-                {[
-                  { step: "01", title: "Setup Profile", desc: "Select your university, faculty, and academic year to get a personalized view." },
-                  { step: "02", title: "Practice MCQs", desc: "Dive into our massive bank of previous exam questions with detailed rationales." },
-                  { step: "03", title: "Excel & Grow", desc: "Watch your mastery score climb and track your progress against your peers." }
-                ].map((item) => (
-                  <div key={item.step} className="flex gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/30 dark:border-primary/40 flex items-center justify-center text-primary font-black shadow-sm">
-                      {item.step}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
-                      <p className="text-slate-500 dark:text-white/50 leading-relaxed">{item.desc}</p>
-                    </div>
+        <StaggerChildren className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((f) => (
+            <StaggerItem key={f.title}>
+              <div className="group p-8 rounded-2xl bg-[#111827] border border-[#1F2937] hover:border-[#00FF88]/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#00FF88]/5">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ backgroundColor: f.color + "15", border: `1px solid ${f.color}25` }}>
+                  <f.icon className="w-6 h-6" style={{ color: f.color }} />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-3">{f.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerChildren>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Bento Grid ─── */
+function BentoSection() {
+  return (
+    <section className="py-24 md:py-32 px-6 bg-[#0A0E1A]">
+      <div className="mx-auto max-w-7xl">
+        <FadeUp className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">See It in{" "}
+            <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">Action</span>
+          </h2>
+          <p className="text-gray-400 max-w-xl mx-auto">A peek inside the platform that's changing how medical students study.</p>
+        </FadeUp>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Large card */}
+          <FadeUp className="md:col-span-2 relative">
+            <div className="rounded-2xl bg-gradient-to-br from-[#111827] to-[#0A0E1A] border border-[#1F2937] p-6 md:p-8 min-h-[300px] flex flex-col relative overflow-hidden group hover:border-[#00D4FF]/30 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#00D4FF]/10 to-purple-600/10 blur-[80px] rounded-full" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-[#00D4FF]/15 border border-[#00D4FF]/25 flex items-center justify-center">
+                  <Smartphone className="w-6 h-6 text-[#00D4FF]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Full Mobile Experience</h3>
+                  <p className="text-sm text-gray-400">Native iOS & Android apps</p>
+                </div>
+              </div>
+              <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
+                {["Dashboard", "Lectures", "Quizzes", "AI Chat", "Progress", "Community"].map((item) => (
+                  <div key={item} className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-colors">
+                    <div className="w-2 h-2 rounded-full bg-[#00D4FF]" />
+                    <span className="text-xs font-medium text-gray-300">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="lg:w-1/2 relative">
-               <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-500/20 blur-[120px] -z-10" />
-               <div className="p-8 rounded-[40px] bg-white/40 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-2xl shadow-xl">
-                  <div className="aspect-square rounded-[32px] bg-white dark:bg-slate-900/50 flex flex-col p-8 overflow-hidden shadow-inner">
-                     <div className="h-2 w-24 bg-slate-200 dark:bg-white/10 rounded-full mb-8" />
-                     <div className="space-y-4">
-                        {[1,2,3].map(i => (
-                          <div key={i} className="h-16 w-full rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 animate-pulse" />
-                        ))}
-                     </div>
-                     <div className="mt-auto flex justify-between items-end">
-                        <div className="h-20 w-20 rounded-3xl bg-blue-500/20" />
-                        <div className="h-32 w-20 rounded-3xl bg-indigo-500/40" />
-                        <div className="h-44 w-20 rounded-3xl bg-primary shadow-lg" />
-                     </div>
-                  </div>
-               </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          </FadeUp>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-32 px-6">
-        <div className="mx-auto max-w-7xl text-center">
-          <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Trusted by the Future Leaders</h2>
-          <p className="text-slate-400 dark:text-white/40 uppercase tracking-widest text-xs font-bold mb-20">Feedback from our community</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { name: "Sara M.", uni: "Cairo University", quote: "MedOneX completely changed how I prepare for exams. The structured curriculum is next level." },
-              { name: "Ahmed K.", uni: "Ain Shams", quote: "The AI assistant explains everything so clearly. I use it every day for clinical rounds." },
-              { name: "Laila H.", uni: "Alexandria", quote: "Finally a platform built specifically for us. The MCQ engine is a lifesaver." }
-            ].map((t, i) => (
-              <div key={i} className="p-8 rounded-3xl bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 relative group text-left shadow-sm hover:shadow-xl transition-all">
-                <Star className="absolute top-8 right-8 text-yellow-500/10 group-hover:text-yellow-500 transition-colors" size={24} fill="currentColor" />
-                <p className="text-lg text-slate-700 dark:text-white/80 leading-relaxed mb-8 italic">"{t.quote}"</p>
-                <div className="flex items-center gap-4">
-                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white text-lg shadow-lg">
-                      {t.name[0]}
-                   </div>
-                   <div>
-                      <p className="font-bold text-slate-900 dark:text-white">{t.name}</p>
-                      <p className="text-xs text-slate-400 dark:text-white/40 uppercase tracking-widest">{t.uni}</p>
-                   </div>
+          {/* Smaller cards */}
+          {BENTO_ITEMS.map((item, i) => (
+            <FadeUp key={item.title} delay={i * 0.1}>
+              <div className="rounded-2xl bg-[#111827] border border-[#1F2937] p-6 min-h-[220px] flex flex-col group hover:border-[#00FF88]/20 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: item.color + "15" }}>
+                  <item.icon className="w-5 h-5" style={{ color: item.color }} />
+                </div>
+                <h3 className="text-base font-bold text-white mb-2">{item.title}</h3>
+                <p className="text-sm text-gray-400 flex-1">{item.desc}</p>
+                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                  <span className="text-2xl font-black text-white">{item.stat}</span>
+                  <span className="text-xs text-gray-500">{item.statLabel}</span>
                 </div>
               </div>
-            ))}
+            </FadeUp>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Stats ─── */
+function StatsSection() {
+  const stats = [
+    { value: 50000, suffix: "+", label: "Active Students" },
+    { value: 100000, suffix: "+", label: "Questions Answered" },
+    { value: 99, suffix: ".9%", label: "Platform Uptime" },
+    { value: 94, suffix: "%", label: "Exam Pass Rate" },
+  ];
+  return (
+    <section className="py-20 px-6 bg-gradient-to-b from-[#0A0E1A] to-[#111827] border-y border-white/5">
+      <div className="mx-auto max-w-7xl">
+        <StaggerChildren className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          {stats.map((s, i) => (
+            <StaggerItem key={s.label}>
+              <div className="text-center">
+                <p className="text-4xl md:text-5xl font-black text-white mb-2">
+                  <CountUp target={s.value} suffix={s.suffix} delay={i * 0.2} />
+                </p>
+                <p className="text-sm text-gray-500 font-medium">{s.label}</p>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerChildren>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ─── */
+function TestimonialsSection() {
+  return (
+    <section className="py-24 md:py-32 px-6">
+      <div className="mx-auto max-w-7xl">
+        <FadeUp className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">Loved by{" "}
+            <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">Students</span>
+          </h2>
+          <p className="text-gray-400 max-w-xl mx-auto">Hear from the thousands of medical students who have transformed their study habits.</p>
+        </FadeUp>
+
+        <StaggerChildren className="grid md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t, i) => (
+            <StaggerItem key={t.name}>
+              <div className="p-8 rounded-2xl bg-[#111827] border border-[#1F2937] hover:border-[#00FF88]/20 transition-all duration-300 group">
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: t.rating }).map((_, i) => (<Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />))}
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed mb-6 italic">"{t.quote}"</p>
+                <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00FF88] to-[#00D4FF] flex items-center justify-center text-xs font-bold text-[#0A0E1A]">{t.initials}</div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerChildren>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Pricing ─── */
+function PricingSection() {
+  const [annual, setAnnual] = useState(false);
+
+  return (
+    <section id="pricing" className="py-24 md:py-32 px-6 bg-[#0A0E1A] border-y border-white/5">
+      <div className="mx-auto max-w-7xl">
+        <FadeUp className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
+            Simple{" "}
+            <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">Pricing</span>
+          </h2>
+          <p className="text-gray-400 max-w-xl mx-auto mb-8">Start free. Upgrade when you need more.</p>
+        </FadeUp>
+
+        <StaggerChildren className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {PRICING_PLANS.map((plan, i) => (
+            <StaggerItem key={plan.name}>
+              <div className={cn(
+                "relative p-8 rounded-2xl border transition-all duration-300",
+                plan.popular
+                  ? "bg-[#111827] border-[#00FF88]/40 shadow-lg shadow-[#00FF88]/5"
+                  : "bg-[#111827] border-[#1F2937] hover:border-white/20"
+              )}>
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#00FF88] to-[#00D4FF] text-[10px] font-bold text-[#0A0E1A] uppercase tracking-wider">
+                    Most Popular
+                  </div>
+                )}
+                <h3 className="text-lg font-bold text-white mb-2">{plan.name}</h3>
+                <p className="text-sm text-gray-400 mb-6">{plan.description}</p>
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-white">{plan.price}</span>
+                  </div>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm text-gray-300">
+                      <Check className="w-4 h-4 text-[#00FF88] shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={plan.price === null ? "/contact" : "/register"}
+                  className={cn(
+                    "w-full h-12 flex items-center justify-center rounded-xl text-sm font-bold transition-all",
+                    plan.popular
+                      ? "bg-gradient-to-r from-[#00FF88] to-[#00D4FF] text-[#0A0E1A] hover:shadow-lg hover:shadow-[#00FF88]/20"
+                      : "border border-white/10 text-white hover:bg-white/5"
+                  )}
+                >
+                  {plan.cta}
+                </Link>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerChildren>
+      </div>
+    </section>
+  );
+}
+
+/* ─── CTA ─── */
+function CTASection() {
+  return (
+    <section className="py-24 px-6">
+      <div className="mx-auto max-w-5xl">
+        <FadeUp>
+          <div className="relative p-8 md:p-16 rounded-[32px] bg-gradient-to-br from-[#111827] to-[#0A0E1A] border border-[#1F2937] overflow-hidden text-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#00FF88]/5 via-[#00D4FF]/5 to-purple-600/5" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#00FF88]/10 blur-[100px] rounded-full" />
+            <div className="relative">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
+                Ready to Transform Your{" "}
+                <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">Studies</span>?
+              </h2>
+              <p className="text-gray-400 max-w-lg mx-auto mb-10">Join 50,000+ medical students already using MedOneX. Start your journey today.</p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/register"
+                  className="group h-14 px-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#00FF88] to-[#00D4FF] text-[#0A0E1A] font-bold text-base hover:shadow-lg hover:shadow-[#00FF88]/30 transition-all duration-300 hover:scale-[1.02]"
+                >
+                  Get Started Free <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  href="/download"
+                  className="h-14 px-10 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 text-white font-medium text-base hover:bg-white/5 transition-all"
+                >
+                  <Smartphone className="w-5 h-5" /> Download App
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </FadeUp>
+      </div>
+    </section>
+  );
+}
 
-      {/* ── FINAL CTA SECTION ── */}
-      <section className="py-32 px-6 text-center overflow-hidden">
-        <div className="mx-auto max-w-4xl relative p-12 sm:p-24 rounded-[48px] bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 shadow-2xl transition-all">
-          <div className="absolute inset-0 bg-blue-600/5 dark:bg-blue-600/10 blur-[150px] -z-10" />
-          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white mb-8 leading-tight">Your Medical Career Starts Here.</h2>
-          <p className="text-lg text-slate-500 dark:text-white/60 mb-12 max-w-md mx-auto">Join thousands of medical students who are studying smarter and achieving better results.</p>
-          <Link
-            href="/register"
-            className="inline-flex items-center h-16 px-12 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-[#05070f] text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl"
-          >
-            Join MedOneX for Free →
-          </Link>
-          <p className="mt-8 text-sm text-slate-400 dark:text-white/30">No credit card required • Join in seconds</p>
-        </div>
-      </section>
+/* ─── Footer ─── */
+function FooterSection() {
+  const footerLinks = {
+    Product: ["Features", "Pricing", "Integrations", "API", "Changelog"],
+    Company: ["About", "Blog", "Careers", "Press", "Contact"],
+    Support: ["Help Center", "Documentation", "Community", "Status", "Privacy"],
+    Legal: ["Terms", "Privacy", "Cookies", "Licenses"],
+  };
 
-      {/* ── FOOTER ── */}
-      <footer className="py-20 px-6 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-transparent">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-10">
-            <Link href="/" className="flex items-center gap-2 decoration-transparent">
-              <MedOneXLogoMark className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">MedOneX</span>
+  return (
+    <footer className="py-16 px-6 border-t border-white/5 bg-[#0A0E1A]">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
+          {/* Logo + Description */}
+          <div className="col-span-2">
+            <Link href="/" className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00FF88] to-[#00D4FF] flex items-center justify-center">
+                <Brain className="w-4 h-4 text-[#0A0E1A]" />
+              </div>
+              <span className="text-lg font-bold text-white">MedOneX</span>
             </Link>
-            <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-400 dark:text-white/40">
-              <Link href="#features" className="hover:text-primary transition-colors">Features</Link>
-              <Link href="/social" className="hover:text-primary transition-colors">Community</Link>
-              <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-              <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
-            </div>
-            <div className="flex gap-4">
-               <div className="w-10 h-10 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 dark:text-white/40 hover:text-primary hover:border-primary/50 transition-all cursor-pointer shadow-sm">
-                  <Target size={18} />
-               </div>
-               <div className="w-10 h-10 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 dark:text-white/40 hover:text-primary hover:border-primary/50 transition-all cursor-pointer shadow-sm">
-                  <Brain size={18} />
-               </div>
-            </div>
+            <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
+              The AI-powered medical education platform. Empowering 50K+ students across Egypt and the Middle East.
+            </p>
           </div>
-          <div className="mt-20 pt-10 border-t border-slate-200 dark:border-white/5 text-center text-sm text-slate-400 dark:text-white/20">
-            © 2026 MedOneX. Excellence in medical education.
+
+          {Object.entries(footerLinks).map(([category, links]) => (
+            <div key={category}>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">{category}</h4>
+              <ul className="space-y-3">
+                {links.map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{link}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom */}
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-gray-500">© 2026 MedOneX. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <span>Made with ❤️ for medical education</span>
           </div>
         </div>
-      </footer>
+      </div>
+    </footer>
+  );
+}
+
+/* ─── Page ─── */
+export default function LandingPage() {
+  return (
+    <div className="bg-[#0A0E1A] text-white min-h-screen">
+      <Navbar />
+      <HeroSection />
+      <CTASection />
+      <LogosBar />
+      <FeaturesSection />
+      <BentoSection />
+      <StatsSection />
+      <TestimonialsSection />
+      <PricingSection />
+      <FooterSection />
+
+      {/* Float animation keyframes */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }

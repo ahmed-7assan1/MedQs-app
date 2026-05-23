@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -40,16 +40,30 @@ export function FloatingIslandNavbar({
   const router = useRouter();
   const { siteName, logoUrl } = useSiteConfig();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const islandRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
+  const lastScrollY = useRef(0);
+
+  const handleScroll = useCallback(() => {
+    const currentY = window.scrollY;
+    const threshold = 80;
+
+    if (currentY < threshold) {
+      setIsVisible(true);
+    } else if (currentY > lastScrollY.current) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
+    lastScrollY.current = currentY;
+  }, []);
 
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => setIsScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll, { passive: true });
     const handleClickOutside = (e: MouseEvent) => {
       if (islandRef.current && !islandRef.current.contains(e.target as Node)) {
@@ -61,7 +75,7 @@ export function FloatingIslandNavbar({
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [handleScroll]);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
@@ -88,9 +102,14 @@ export function FloatingIslandNavbar({
     }
   };
 
-  // DESKTOP ONLY: hidden on mobile via Tailwind
   return (
-    <div id="desktop-nav-island" className="fixed inset-x-0 top-0 z-[200] hidden md:flex justify-center items-start p-3 pointer-events-none">
+    <motion.div
+      id="desktop-nav-island"
+      initial={{ y: 0 }}
+      animate={{ y: isVisible ? 0 : -120 }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+      className="fixed inset-x-0 top-0 z-[200] hidden md:flex justify-center items-start p-3 pointer-events-none"
+    >
       <div
         ref={islandRef}
         className={cn(
@@ -99,12 +118,14 @@ export function FloatingIslandNavbar({
           "dark:bg-black/80 bg-white/90 backdrop-blur-[40px]",
           "shadow-[0_25px_60px_rgba(0,0,0,0.25)]",
           "transition-all duration-300 ease-out",
-          isExpanded ? "w-full p-6" : isScrolled ? "w-[min(460px,calc(100vw-24px))] h-[68px] px-4 justify-center" : "w-[min(1400px,calc(100vw-24px))] h-[68px] px-4 justify-center"
+          isExpanded
+            ? "w-full p-6"
+            : "w-[min(1400px,calc(100vw-24px))] h-[68px] px-4 justify-center"
         )}
       >
-        {/* COMPACT BAR */}
+        {/* COMPACT BAR — أيقونات فقط بدون كتابة */}
         {!isExpanded && (
-          <div className="flex w-full items-center justify-between gap-4">
+          <div className="flex w-full items-center justify-between gap-2">
             {/* Logo */}
             <Link href="/dashboard-app" className="flex items-center gap-3 shrink-0">
               <div className="h-10 w-10 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center border border-primary/20 hover:scale-110 transition-transform">
@@ -114,34 +135,31 @@ export function FloatingIslandNavbar({
                   <MedOneXLogoMark className="h-6 w-6 text-primary" interactiveColor={true} />
                 )}
               </div>
-              <span className="text-[17px] font-black tracking-tighter dark:text-white text-black hidden lg:block">MedOneX</span>
             </Link>
 
-            {/* Nav Links (hidden when scrolled/compact) */}
-            {!isScrolled && (
-              <nav className="flex items-center gap-1">
-                {NAV_ITEMS.map((item) => {
-                  const active = pathname.startsWith(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center justify-center rounded-xl h-10 px-3 transition-all gap-2 group",
-                        active
-                          ? "dark:bg-white/10 bg-black/5 dark:text-white text-black"
-                          : "dark:text-white/40 text-black/40 hover:text-primary dark:hover:bg-white/5 hover:bg-black/5"
-                      )}
-                    >
-                      <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "group-hover:text-primary")} />
-                      <span className={cn("text-[11px] font-black uppercase tracking-wider hidden xl:block", !active && "group-hover:block")}>
-                        {item.label}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </nav>
-            )}
+            {/* Nav Links — أيقونات + أسماء */}
+            <nav className="flex items-center gap-1">
+              {NAV_ITEMS.map((item) => {
+                const active = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center justify-center rounded-xl h-10 px-3 transition-all gap-2 group",
+                      active
+                        ? "dark:bg-white/10 bg-black/5 dark:text-white text-black"
+                        : "dark:text-white/40 text-black/40 hover:text-primary dark:hover:bg-white/5 hover:bg-black/5"
+                    )}
+                  >
+                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "group-hover:text-primary")} />
+                    <span className="text-[11px] font-black uppercase tracking-wider hidden lg:block">
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
 
             {/* Right Side */}
             <div className="flex items-center gap-2 shrink-0">
@@ -150,7 +168,6 @@ export function FloatingIslandNavbar({
                 className="flex items-center gap-2 px-3 py-2 rounded-full dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 hover:border-primary/30 transition-all group"
               >
                 <MagnifyingGlass className="h-4 w-4 dark:text-white/40 text-black/40 group-hover:text-primary" />
-                <span className="text-[11px] font-black uppercase dark:text-white/20 text-black/30 hidden sm:block">Search...</span>
               </button>
 
               <div className="h-8 w-px dark:bg-white/10 bg-black/10 mx-1" />
@@ -161,13 +178,15 @@ export function FloatingIslandNavbar({
                   else document.exitFullscreen().catch(() => {});
                 }}
                 className="hidden lg:flex h-10 w-10 items-center justify-center rounded-xl dark:bg-white/5 bg-black/5 hover:bg-primary/10 hover:text-primary transition-all dark:text-white/40 text-black/40"
+                title="Fullscreen"
               >
                 <CornersOut className="h-4 w-4" />
               </button>
 
               <button
                 onClick={() => setIsExpanded(true)}
-                className="flex items-center gap-1.5 rounded-full p-1 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                className="flex items-center gap-1.5 rounded-full p-1 hover:bg-black/5 dark:hover:bg-white/5 transition-all group"
+                title="Open menu"
               >
                 <div className="h-9 w-9 rounded-full overflow-hidden border-2 dark:border-white/10 border-black/5">
                   {userImage ? (
@@ -195,7 +214,7 @@ export function FloatingIslandNavbar({
           </div>
         )}
 
-        {/* EXPANDED PANEL */}
+        {/* EXPANDED PANEL — Search-focused */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -205,30 +224,30 @@ export function FloatingIslandNavbar({
               transition={{ duration: 0.2 }}
               className="w-full space-y-6"
             >
-              {/* Header */}
+              {/* Header بسيط */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="h-14 w-14 rounded-[20px] bg-primary/10 flex items-center justify-center border border-primary/20">
                     <MedOneXLogoMark className="h-7 w-7 text-primary" interactiveColor={true} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black dark:text-white text-black">MedOneX</h3>
+                    <h3 className="text-lg font-black dark:text-white text-black">{siteName || "MedOneX"}</h3>
                     <p className="text-[11px] font-black dark:text-white/30 text-black/30 uppercase tracking-[0.2em]">Quick Navigation</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {mounted && (
-                    <button onClick={toggleTheme} className="rounded-full dark:bg-white/5 bg-black/5 p-3.5 dark:text-white/40 text-black/40 hover:scale-110 transition-all">
+                    <button onClick={toggleTheme} className="rounded-full dark:bg-white/5 bg-black/5 p-3.5 dark:text-white/40 text-black/40 hover:scale-110 transition-all" title={theme === "dark" ? "Light Mode" : "Dark Mode"}>
                       {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                     </button>
                   )}
-                  <button onClick={() => setIsExpanded(false)} className="rounded-full dark:bg-white/5 bg-black/5 p-3.5 dark:text-white/40 text-black/40 hover:scale-110 transition-all">
+                  <button onClick={() => setIsExpanded(false)} className="rounded-full dark:bg-white/5 bg-black/5 p-3.5 dark:text-white/40 text-black/40 hover:scale-110 transition-all" title="Close">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
               </div>
 
-              {/* Search */}
+              {/* Search — المحور الرئيسي */}
               <div className="relative">
                 <MagnifyingGlass className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 dark:text-white/20 text-black/20" />
                 <input
@@ -259,24 +278,16 @@ export function FloatingIslandNavbar({
                 </AnimatePresence>
               </div>
 
-              {/* Grid Menu */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[...NAV_ITEMS, { href: "/settings", label: "Settings", icon: Gear }].map((item) => (
-                  <Link key={item.href} href={item.href} onClick={() => setIsExpanded(false)}
-                    className="flex items-center gap-3 rounded-[20px] dark:bg-white/[0.03] bg-black/[0.03] p-4 border dark:border-white/[0.05] border-black/[0.05] hover:border-primary/30 hover:bg-primary/5 transition-all group">
-                    <div className="h-10 w-10 rounded-[14px] dark:bg-white/5 bg-black/5 flex shrink-0 items-center justify-center dark:text-white/50 text-black/50 group-hover:text-primary group-hover:bg-primary/10 transition-all">
-                      <item.icon className="h-5 w-5" />
-                    </div>
-                    <span className="text-[13px] font-black dark:text-white/70 text-black/70 group-hover:text-primary truncate">{item.label}</span>
-                  </Link>
-                ))}
-              </div>
-
-              {/* CTA */}
+              {/* Quick actions — بس 3 */}
               <div className="flex gap-3">
                 <Link href="/ai-chat" className="flex-1" onClick={() => setIsExpanded(false)}>
                   <button className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-primary/30 hover:scale-[1.02] transition-all">
                     <Sparkle className="h-4 w-4" /> Consult Dr. Q
+                  </button>
+                </Link>
+                <Link href="/settings" className="flex-1" onClick={() => setIsExpanded(false)}>
+                  <button className="w-full flex items-center justify-center gap-2 rounded-2xl dark:bg-white/10 bg-slate-100 px-6 py-4 text-xs font-black uppercase tracking-widest dark:text-white text-slate-800 hover:scale-[1.02] transition-all border dark:border-white/5 border-slate-200">
+                    <Gear className="h-4 w-4" /> Settings
                   </button>
                 </Link>
                 <a href="https://t.me/MedOneX_bot" target="_blank" rel="noreferrer" className="flex-1">
@@ -289,6 +300,6 @@ export function FloatingIslandNavbar({
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }

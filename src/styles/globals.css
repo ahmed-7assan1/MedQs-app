@@ -208,6 +208,22 @@
   --cinema-amber: #FFB74D;
   --cinema-glow: 0 0 60px rgba(108,95,240,0.08);
   --cinema-shadow: 0 8px 32px rgba(0,0,0,0.2);
+
+  /* ── shadcn/ui Integration Variables ── */
+  /* These variables will be used by shadcn/ui components while preserving MedOneX identity */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 98%;
+  --info: 204 100% 50%;
+  --info-foreground: 0 0% 98%;
+  
+  /* MedOneX brand colors preserved */
+  --medq-primary: 180 77% 40%;
+  --medq-secondary: 188 47% 55%;
+  --medq-accent: 245 82% 66%;
 }
 
 .dark {
@@ -247,6 +263,21 @@
   --cinema-amber: #FFB74D;
   --cinema-glow: 0 0 60px rgba(108,95,240,0.08);
   --cinema-shadow: 0 8px 32px rgba(0,0,0,0.2);
+
+  /* ── shadcn/ui Integration Variables (Dark) ── */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 98%;
+  --info: 204 100% 50%;
+  --info-foreground: 0 0% 98%;
+  
+  /* MedOneX brand colors preserved for dark mode */
+  --medq-primary: 180 77% 40%;
+  --medq-secondary: 188 47% 55%;
+  --medq-accent: 245 82% 66%;
 }
 
 @keyframes fire-flicker {
@@ -1975,4 +2006,115 @@ select,
   border-radius: 50%;
   background: #FF4D6D;
   box-shadow: 0 0 12px rgba(255,77,109,0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PERFORMANCE FIXES — الأجهزة الضعيفة والموبايلات القديمة
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Reduce Motion: للمستخدمين اللي بيفضلو الحركة الخفيفة ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-fire,
+  .animate-trophy,
+  .animate-glow-pulse,
+  .animate-float-up,
+  .animate-scale-pulse,
+  .spring-hover,
+  .card-hover,
+  .landing-root-cta-glow,
+  .shimmer-box::after,
+  .skeleton-box::after {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* ── 2. Touch / Mobile: إطفاء التأثيرات الثقيلة ── */
+@media (hover: none) and (pointer: coarse) {
+  /* Glass effects تستهلك GPU كتير */
+  .premium-glass,
+  .glass-card-premium,
+  .ai-glass-panel,
+  .glass-card-glow {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .dark .premium-glass,
+  .dark .glass-card-premium,
+  .dark .ai-glass-panel {
+    backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* الظلال الثقيلة */
+  .landing-root-glow-pulse {
+    filter: none !important;
+  }
+
+  /* hover effects للأجهزة اللي مافيهاش hover حقيقي */
+  .spring-hover:hover {
+    transform: none !important;
+  }
+
+  .card-hover:hover {
+    transform: none !important;
+  }
+
+  .stream-card:hover {
+    transform: none !important;
+  }
+}
+
+/* ── 3. Low-end devices detection (screen small + limited RAM) ── */
+@media (max-width: 480px) {
+  /* إطفاء الـ backdrop-filter على الشاشات الصغيرة جداً */
+  .surface-card,
+  .surface-card-subtle {
+    backdrop-filter: none !important;
+  }
+
+  /* إنقاص عدد الظلال */
+  .module-card-new {
+    box-shadow: none !important;
+  }
+
+  /* إطفاء تأثيرات التدرج المعقدة */
+  .cinematic-bg,
+  .cinematic-bg--blue,
+  .cinematic-bg--warm,
+  .cinematic-bg--green {
+    background: #09080F !important;
+  }
+}
+
+/* ── 4. Data Saver: لو المستخدم شغال Data Saver ── */
+@media (prefers-reduced-data: reduce) {
+  .landing-root-ambient {
+    display: none !important;
+  }
+
+  /* تشغيل الصور بالـ placeholder بس */
+  img:not([loading="lazy"]) {
+    loading: lazy !important;
+  }
+}
+
+/* ── 5. شاشات 4K: منع التحميل الزائد ── */
+@media (min-width: 2560px) {
+  body {
+    max-width: 1920px;
+    margin: 0 auto;
+  }
 }

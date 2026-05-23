@@ -1,247 +1,273 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image, SafeAreaView,
-  RefreshControl, FlatList, Dimensions, ActivityIndicator, Alert, StatusBar
+  RefreshControl, FlatList, Dimensions, ActivityIndicator,
 } from 'react-native';
-import tw from 'twrnc';
-import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { useHomeStore } from '../store/useHomeStore';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { mobileApi } from '../lib/api';
 import { Skeleton } from '../components/ui/Skeleton';
 import {
   Bell, ChevronRight, Trophy, BookOpen,
   PlayCircle, CheckCircle2, Circle, Clock,
-  ArrowUpRight, AlertCircle, Brain, Sparkles
+  ArrowUpRight, AlertCircle, Brain, Sparkles, Target,
+  TrendingUp, Award, Zap, GraduationCap,
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
-// ─── Sub-Components ──────────────────────────────────────────────────────────
+function StatCard({ label, value, icon: Icon, color, subtitle }: any) {
+  const { getTheme } = useThemeStore();
+  const theme = getTheme();
 
-const SectionHeader = ({ title, onSeeAll }: { title: string; onSeeAll?: () => void }) => {
-  const { primaryColor } = useThemeStore();
   return (
-    <View style={tw`flex-row justify-between items-center mb-4 px-6`}>
-      <Text style={tw`text-xl font-outfit-black text-white`}>{title}</Text>
-      {onSeeAll && (
-        <TouchableOpacity onPress={onSeeAll}>
-          <Text style={[tw`font-inter-bold text-sm`, { color: primaryColor }]}>See All</Text>
-        </TouchableOpacity>
+    <View style={{
+      width: '48%',
+      backgroundColor: theme.colors.surface,
+      borderRadius: 24,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 3,
+    }}>
+      <View style={{
+        width: 40, height: 40,
+        borderRadius: 14,
+        backgroundColor: color + '20',
+        alignItems: 'center', justifyContent: 'center',
+        marginBottom: 12,
+      }}>
+        <Icon color={color} size={20} />
+      </View>
+      <Text style={{
+        color: theme.colors.text,
+        fontSize: 22,
+        fontWeight: '900',
+        letterSpacing: -0.5,
+      }}>{value}</Text>
+      <Text style={{
+        color: theme.colors.textMuted,
+        fontSize: 10,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginTop: 2,
+      }}>{label}</Text>
+      {subtitle && (
+        <Text style={{
+          color: theme.colors.textMuted,
+          fontSize: 11,
+          marginTop: 4,
+        }}>{subtitle}</Text>
       )}
     </View>
   );
-};
-
-const StatItem = ({ label, value, icon: Icon, color }: any) => (
-  <View style={tw`w-[48%] bg-[#0D1117] border border-[#1E2D4D] rounded-3xl p-4 mb-4`}>
-    <View style={[tw`w-10 h-10 rounded-2xl items-center justify-center mb-3`, { backgroundColor: color + '20' }]}>
-      <Icon color={color} size={20} />
-    </View>
-    <Text style={tw`text-white text-lg font-inter-black`}>{value}</Text>
-    <Text style={tw`text-slate-500 text-xs font-inter-bold uppercase tracking-widest`}>{label}</Text>
-  </View>
-);
-
-// ─── Main HomeScreen ─────────────────────────────────────────────────────────
+}
 
 export function HomeScreen({ navigation }: any) {
   const { user } = useAuthStore();
-  const { primaryColor, primaryLight } = useThemeStore();
+  const { primaryColor, primaryLight, getTheme } = useThemeStore();
+  const theme = getTheme();
   const { homeData: bootstrapData } = useHomeStore();
-  const queryClient = useQueryClient();
 
-  // ─── Caching with React Query ───
-  const { 
-    data: homeData, 
-    isLoading, 
-    isRefetching, 
-    refetch, 
-    error: queryError 
-  } = useQuery({
+  const { data: homeData, isLoading, isRefetching, refetch } = useQuery({
     queryKey: ['home'],
     queryFn: () => mobileApi.getHome(),
     initialData: bootstrapData,
-    staleTime: 1000 * 60 * 5, // Keep data fresh for 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-  const onRefresh = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    refetch();
-  };
+  const onRefresh = useCallback(() => refetch(), [refetch]);
 
-  const handlePress = (target: string, params?: any) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handlePress = useCallback((target: string, params?: any) => {
     navigation.navigate(target, params);
-  };
+  }, [navigation]);
 
-  const toggleTask = async (taskId: string, completed: boolean) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    try {
-      await mobileApi.toggleTask(taskId, !completed);
-      // Optimistically update the cache
-      queryClient.setQueryData(['home'], (old: any) => ({
-        ...old,
-        todayTasks: old.todayTasks.map((t: any) =>
-          t.id === taskId ? { ...t, completed: !completed } : t
-        )
-      }));
-    } catch (err) {
-      Alert.alert('Error', 'Failed to update task');
-    }
-  };
-
-  // Error handling
-  if (queryError && !homeData) {
+  if (!homeData && isLoading) {
     return (
-      <SafeAreaView style={tw`flex-1 bg-[#07090F] justify-center items-center px-10`}>
-        <AlertCircle color="#ef4444" size={64} style={tw`mb-4`} />
-        <Text style={tw`text-white text-xl font-bold text-center mb-2`}>Connection Error</Text>
-        <Text style={tw`text-slate-400 text-center mb-8`}>{queryError?.message || 'Something went wrong'}</Text>
-        <TouchableOpacity
-          onPress={() => refetch()}
-          style={[tw`px-10 py-4 rounded-2xl`, { backgroundColor: primaryColor }]}
-        >
-          <Text style={tw`text-white font-black`}>Try Again</Text>
-        </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 120, paddingTop: 60, paddingHorizontal: 24 }}>
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <Skeleton key={i} mb={16} height={i < 3 ? 160 : 80} borderRadius={24} />
+          ))}
+        </ScrollView>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-[#07090F]`}>
-      <StatusBar barStyle="light-content" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={tw`pb-32 pt-6`}
+        contentContainerStyle={{ paddingBottom: 120 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} tintColor={primaryColor} />
         }
       >
         {/* ── Header ── */}
-        <View style={tw`flex-row justify-between items-center mb-8 px-6`}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: 8, marginBottom: 24 }}>
           <View>
-            <Text style={tw`text-slate-400 text-sm font-inter-bold uppercase tracking-widest mb-1`}>Welcome back</Text>
-            <Text style={tw`text-white text-2xl font-outfit-black`}>
-              Hi, {homeData?.user?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Doctor'} 👋
+            <Text style={{ color: theme.colors.textMuted, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 4 }}>
+              Welcome back
+            </Text>
+            <Text style={{ color: theme.colors.text, fontSize: 24, fontWeight: '900', letterSpacing: -0.5 }}>
+              Hi, {homeData?.user?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Doctor'}
             </Text>
           </View>
           <TouchableOpacity
             onPress={() => handlePress('Notifications')}
-            style={tw`p-3 bg-[#0D1117] rounded-2xl border border-[#1E2D4D] relative`}
+            style={{
+              padding: 12,
+              backgroundColor: theme.colors.surface,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: theme.colors.border,
+              position: 'relative',
+            }}
           >
-            <Bell color="white" size={24} />
-            {homeData?.unreadNotifs > 0 && (
-              <View style={tw`absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full items-center justify-center border-2 border-[#07090F]`}>
-                <Text style={tw`text-white text-[10px] font-bold`}>{homeData.unreadNotifs}</Text>
+            <Bell color={theme.colors.text} size={22} />
+            {(homeData?.unreadNotifs || 0) > 0 && (
+              <View style={{
+                position: 'absolute', top: -4, right: -4,
+                backgroundColor: theme.colors.danger,
+                width: 20, height: 20, borderRadius: 10,
+                alignItems: 'center', justifyContent: 'center',
+                borderWidth: 2, borderColor: theme.colors.background,
+              }}>
+                <Text style={{ color: 'white', fontSize: 10, fontWeight: '800' }}>{homeData.unreadNotifs}</Text>
               </View>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* ── Ads Carousel ── */}
-        {isLoading ? (
-          <View style={tw`px-6 mb-8`}>
-            <Skeleton height={160} borderRadius={24} />
-          </View>
-        ) : homeData?.adBanners?.length > 0 && (
-          <FlatList
-            data={homeData.adBanners}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => item.linkUrl && Alert.alert('External Link', item.linkUrl)}
-                style={[tw`px-6`, { width }]}
-              >
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  style={[tw`w-full h-40 rounded-3xl`, { backgroundColor: '#0D1117' }]}
-                  resizeMode="cover"
-                />
-              </TouchableOpacity>
-            )}
-            style={tw`mb-8`}
-          />
-        )}
-
-        {/* ── Stats Grid ── */}
-        <View style={tw`flex-row flex-wrap justify-between px-6 mb-4`}>
-          {isLoading ? (
-            [1, 2, 3, 4].map(i => <View key={i} style={tw`w-[48%] mb-4`}><Skeleton height={100} borderRadius={24} /></View>)
-          ) : (
-            <>
-              <StatItem label="Points" value={homeData?.stats?.points || 0} icon={Trophy} color="#fbbf24" />
-              <StatItem label="Global Rank" value={`#${homeData?.stats?.rank?.label || 'N/A'}`} icon={ArrowUpRight} color={primaryLight} />
-              <StatItem label="Total Quizzes" value={homeData?.stats?.totalAttempts || 0} icon={BookOpen} color="#6366f1" />
-              <StatItem label="Avg. Score" value={`${homeData?.stats?.avgScore || 0}%`} icon={CheckCircle2} color="#10b981" />
-            </>
-          )}
-        </View>
-
-        {/* ── Study Assistant Quick Action ── */}
-        <View style={tw`px-6 mb-8`}>
-          <TouchableOpacity 
+        {/* ── AI Quick Action ── */}
+        <View style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          <TouchableOpacity
             onPress={() => handlePress('StudyAssistant')}
             activeOpacity={0.9}
-            style={[tw`p-6 rounded-[32px] flex-row items-center overflow-hidden`, { backgroundColor: primaryColor }]}
+            style={{
+              padding: 20,
+              borderRadius: 32,
+              backgroundColor: primaryColor,
+              flexDirection: 'row',
+              alignItems: 'center',
+              overflow: 'hidden',
+              shadowColor: primaryColor,
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.3,
+              shadowRadius: 20,
+              elevation: 8,
+            }}
           >
-            <View style={tw`absolute -right-4 -bottom-4 opacity-10`}>
-               <Brain color="white" size={140} />
+            <View style={{ position: 'absolute', right: -20, bottom: -20, opacity: 0.1 }}>
+              <Brain color="white" size={140} />
             </View>
-            <View style={tw`w-14 h-14 bg-white/20 rounded-2xl items-center justify-center mr-4`}>
-               <Sparkles color="white" size={28} />
+            <View style={{
+              width: 52, height: 52, borderRadius: 16,
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              alignItems: 'center', justifyContent: 'center',
+              marginRight: 16,
+            }}>
+              <Sparkles color="white" size={26} />
             </View>
-            <View style={tw`flex-1`}>
-               <Text style={tw`text-white font-black text-xl`}>AI Study Assistant</Text>
-               <Text style={tw`text-white/80 text-xs font-bold`}>Generate your plan or ask anything</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: 'white', fontWeight: '900', fontSize: 18 }}>AI Study Assistant</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: '700' }}>
+                Ask anything about your curriculum
+              </Text>
             </View>
-            <View style={tw`bg-white/20 p-2 rounded-xl`}>
-               <ChevronRight color="white" size={20} strokeWidth={3} />
+            <View style={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              padding: 8, borderRadius: 12,
+            }}>
+              <ChevronRight color="white" size={20} strokeWidth={3} />
             </View>
           </TouchableOpacity>
         </View>
 
+        {/* ── Stats Grid ── */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 28 }}>
+          <StatCard label="Total Points" value={(homeData?.stats?.points || 0).toLocaleString()} icon={Trophy} color="#fbbf24" subtitle="Lifetime earned" />
+          <StatCard label="Rank" value={homeData?.stats?.rank?.label || 'Student'} icon={Award} color={primaryLight} />
+          <StatCard label="Quizzes" value={homeData?.stats?.totalAttempts || 0} icon={BookOpen} color="#818cf8" subtitle="Completed" />
+          <StatCard label="Avg Score" value={`${homeData?.stats?.avgScore || 0}%`} icon={Target} color="#34d399" subtitle="Accuracy rate" />
+        </View>
+
         {/* ── Continue Learning ── */}
-        <SectionHeader title="Continue Learning" onSeeAll={() => handlePress('Lectures')} />
-        <View style={tw`px-6 mb-8`}>
-          {isLoading ? (
-            <Skeleton height={80} borderRadius={24} />
-          ) : homeData?.recentActivity?.length > 0 ? (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16 }}>
+          <Text style={{ color: theme.colors.text, fontSize: 18, fontWeight: '900' }}>Continue Learning</Text>
+          <TouchableOpacity onPress={() => handlePress('Lectures')}>
+            <Text style={{ color: primaryColor, fontSize: 12, fontWeight: '700' }}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          {(homeData?.recentActivity?.length || 0) > 0 ? (
             homeData.recentActivity.slice(0, 3).map((act: any) => (
               <TouchableOpacity
                 key={act.id}
                 onPress={() => handlePress('LectureDetail', { lectureId: act.lecture.id })}
-                style={tw`flex-row items-center bg-[#0D1117] p-4 rounded-3xl mb-3 border border-[#1E2D4D]`}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: theme.colors.surface,
+                  padding: 16,
+                  borderRadius: 24,
+                  marginBottom: 10,
+                  borderWidth: 1,
+                  borderColor: theme.colors.border,
+                }}
               >
-                <View style={tw`w-12 h-12 rounded-xl bg-teal-500/10 items-center justify-center mr-4`}>
-                  <PlayCircle color="#2dd4bf" size={24} />
+                <View style={{
+                  width: 48, height: 48, borderRadius: 14,
+                  backgroundColor: primaryColor + '15',
+                  alignItems: 'center', justifyContent: 'center',
+                  marginRight: 14,
+                }}>
+                  <PlayCircle color={primaryColor} size={24} />
                 </View>
-                <View style={tw`flex-1`}>
-                  <Text style={tw`text-white font-bold text-base`} numberOfLines={1}>{act.lecture.title}</Text>
-                  <Text style={tw`text-slate-500 text-xs`}>{act.lecture.subject.name}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: theme.colors.text, fontWeight: '700', fontSize: 14 }} numberOfLines={1}>
+                    {act.lecture.title}
+                  </Text>
+                  <Text style={{ color: theme.colors.textMuted, fontSize: 11, marginTop: 2 }}>
+                    {act.lecture.subject?.name || 'Medical'}
+                  </Text>
                 </View>
-                <ChevronRight color="#3B4A6B" size={20} />
+                <ChevronRight color={theme.colors.textMuted} size={18} />
               </TouchableOpacity>
             ))
           ) : (
-            <View style={tw`bg-[#0D1117] p-8 rounded-3xl items-center border border-dashed border-[#1E2D4D]`}>
-              <Brain color="#3B4A6B" size={32} style={tw`mb-2`} />
-              <Text style={tw`text-slate-400 font-bold`}>No activity yet. Start a lecture!</Text>
+            <View style={{
+              backgroundColor: theme.colors.surface,
+              padding: 32,
+              borderRadius: 24,
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: theme.colors.border,
+              borderStyle: 'dashed',
+            }}>
+              <Brain color={theme.colors.textMuted} size={36} style={{ marginBottom: 8 }} />
+              <Text style={{ color: theme.colors.textMuted, fontWeight: '700' }}>No activity yet. Start learning!</Text>
             </View>
           )}
         </View>
 
         {/* ── Recommended Quizzes ── */}
-        <SectionHeader title="Recommended Quiz" onSeeAll={() => handlePress('Quizzes')} />
-        <View style={tw`px-6 mb-8`}>
-          {isLoading ? (
-            <Skeleton height={120} borderRadius={24} />
-          ) : homeData?.suggestedPapers?.length > 0 ? (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16 }}>
+          <Text style={{ color: theme.colors.text, fontSize: 18, fontWeight: '900' }}>Quick Practice</Text>
+          <TouchableOpacity onPress={() => handlePress('Quizzes')}>
+            <Text style={{ color: primaryColor, fontSize: 12, fontWeight: '700' }}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ marginBottom: 28, paddingLeft: 24 }}>
+          {(homeData?.suggestedPapers?.length || 0) > 0 ? (
             <FlatList
               data={homeData.suggestedPapers}
               horizontal
@@ -250,73 +276,149 @@ export function HomeScreen({ navigation }: any) {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => handlePress('QuizPlayer', { pastPaperId: item.id })}
-                  style={tw`bg-[#0D1117] p-5 rounded-3xl mr-4 border border-[#1E2D4D] w-64`}
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    padding: 20,
+                    borderRadius: 24,
+                    marginRight: 12,
+                    width: 260,
+                    borderWidth: 1,
+                    borderColor: theme.colors.border,
+                  }}
                 >
-                  <View style={tw`bg-indigo-500/10 self-start px-3 py-1 rounded-full mb-3`}>
-                    <Text style={tw`text-indigo-400 text-[10px] font-black uppercase`}>{item.module.name}</Text>
+                  <View style={{
+                    backgroundColor: primaryColor + '15',
+                    alignSelf: 'flex-start',
+                    paddingHorizontal: 10, paddingVertical: 4,
+                    borderRadius: 20,
+                    marginBottom: 12,
+                  }}>
+                    <Text style={{ color: primaryColor, fontSize: 10, fontWeight: '900', textTransform: 'uppercase' }}>
+                      {item.module?.name || 'General'}
+                    </Text>
                   </View>
-                  <Text style={tw`text-white font-black text-lg mb-4`} numberOfLines={2}>{item.title}</Text>
-                  <View style={tw`flex-row items-center justify-between mt-auto`}>
-                    <View style={tw`flex-row items-center`}>
-                      <Clock color="#3B4A6B" size={12} style={tw`mr-1`} />
-                      <Text style={tw`text-slate-500 text-xs`}>20-30 mins</Text>
+                  <Text style={{ color: theme.colors.text, fontWeight: '900', fontSize: 16, marginBottom: 16 }} numberOfLines={2}>
+                    {item.title}
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Clock color={theme.colors.textMuted} size={12} style={{ marginRight: 4 }} />
+                      <Text style={{ color: theme.colors.textMuted, fontSize: 11 }}>20-30 min</Text>
                     </View>
-                    <Text style={[tw`font-bold text-xs`, { color: primaryLight }]}>Start Now →</Text>
+                    <Text style={{ color: primaryColor, fontWeight: '700', fontSize: 11 }}>Start →</Text>
                   </View>
                 </TouchableOpacity>
               )}
             />
           ) : (
-            <Text style={tw`text-slate-500 italic`}>No quizzes found for your semester.</Text>
+            <Text style={{ color: theme.colors.textMuted, fontStyle: 'italic', paddingRight: 24 }}>
+              No quizzes found for your semester.
+            </Text>
           )}
         </View>
 
-        {/* ── Today's Tasks ── */}
-        <SectionHeader title="Today's Tasks" onSeeAll={() => handlePress('Taskat')} />
-        <View style={tw`px-6 mb-8`}>
-          {isLoading ? (
-            <Skeleton height={60} borderRadius={24} />
-          ) : homeData?.todayTasks?.length > 0 ? (
-            homeData.todayTasks.map((task: any) => (
+        {/* ── Daily Tasks ── */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16 }}>
+          <Text style={{ color: theme.colors.text, fontSize: 18, fontWeight: '900' }}>Today's Tasks</Text>
+          <TouchableOpacity onPress={() => handlePress('Taskat')}>
+            <Text style={{ color: primaryColor, fontSize: 12, fontWeight: '700' }}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          {(homeData?.todayTasks?.length || 0) > 0 ? (
+            homeData.todayTasks.slice(0, 5).map((task: any) => (
               <TouchableOpacity
                 key={task.id}
-                onPress={() => toggleTask(task.id, task.completed)}
-                style={[tw`flex-row items-center bg-[#0D1117] p-4 rounded-2xl mb-2 border`, { borderColor: task.completed ? primaryColor + '40' : '#1E2D4D' }]}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: theme.colors.surface,
+                  padding: 16,
+                  borderRadius: 20,
+                  marginBottom: 8,
+                  borderWidth: 1,
+                  borderColor: task.completed ? primaryColor + '30' : theme.colors.border,
+                }}
               >
-                {task.completed ? <CheckCircle2 color={primaryColor} size={22} /> : <Circle color="#3B4A6B" size={22} />}
-                <View style={tw`flex-1 ml-4`}>
-                  <Text style={[tw`text-white font-bold`, task.completed && tw`text-slate-500 line-through`]}>{task.title}</Text>
-                  {task.time && <Text style={tw`text-slate-500 text-xs`}>{task.time}</Text>}
+                {task.completed ? (
+                  <CheckCircle2 color={primaryColor} size={22} />
+                ) : (
+                  <Circle color={theme.colors.textMuted} size={22} />
+                )}
+                <View style={{ flex: 1, marginLeft: 14 }}>
+                  <Text style={{
+                    color: theme.colors.text,
+                    fontWeight: '700',
+                    fontSize: 14,
+                    textDecorationLine: task.completed ? 'line-through' : 'none',
+                    opacity: task.completed ? 0.5 : 1,
+                  }}>{task.title}</Text>
+                  {task.time && (
+                    <Text style={{ color: theme.colors.textMuted, fontSize: 11, marginTop: 2 }}>{task.time}</Text>
+                  )}
                 </View>
               </TouchableOpacity>
             ))
           ) : (
-            <TouchableOpacity onPress={() => handlePress('Taskat')} style={tw`bg-[#0D1117] p-5 rounded-2xl border border-dashed border-[#1E2D4D] items-center`}>
-              <Text style={tw`text-slate-400 font-bold`}>+ Add your first task</Text>
+            <TouchableOpacity
+              onPress={() => handlePress('Taskat')}
+              style={{
+                backgroundColor: theme.colors.surface,
+                padding: 20,
+                borderRadius: 20,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+                borderStyle: 'dashed',
+              }}
+            >
+              <Text style={{ color: theme.colors.textMuted, fontWeight: '700' }}>+ Add your first task</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* ── Mini Leaderboard ── */}
-        <SectionHeader title="Top Performers" onSeeAll={() => handlePress('Leaderboard')} />
-        <View style={tw`px-6 mb-10`}>
-          <View style={tw`bg-[#0D1117] rounded-[32px] p-6 border border-[#1E2D4D]`}>
-            {isLoading ? (
-              [1, 2, 3].map(i => <Skeleton key={i} mb={4} height={50} />)
-            ) : homeData?.topUsers?.length > 0 ? (
-              homeData.topUsers.map((u: any, idx: number) => (
-                <View key={u.id} style={[tw`flex-row items-center mb-4`, idx === 2 && tw`mb-0`]}>
-                  <Text style={tw`text-slate-500 font-black mr-4 w-4`}>{idx + 1}</Text>
-                  <Image source={{ uri: u.image || `https://ui-avatars.com/api/?name=${u.name}&background=0D1117&color=fff` }} style={tw`w-10 h-10 rounded-full bg-slate-800 mr-4`} />
-                  <View style={tw`flex-1`}>
-                    <Text style={tw`text-white font-bold`}>{u.name}</Text>
-                    <Text style={tw`text-slate-500 text-[10px] uppercase font-bold`}>{u.rank?.label || 'Student'}</Text>
+        {/* ── Leaderboard Preview ── */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16 }}>
+          <Text style={{ color: theme.colors.text, fontSize: 18, fontWeight: '900' }}>Top Performers</Text>
+          <TouchableOpacity onPress={() => handlePress('Leaderboard')}>
+            <Text style={{ color: primaryColor, fontSize: 12, fontWeight: '700' }}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ paddingHorizontal: 24, marginBottom: 40 }}>
+          <View style={{
+            backgroundColor: theme.colors.surface,
+            borderRadius: 32,
+            padding: 20,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+          }}>
+            {(homeData?.topUsers?.length || 0) > 0 ? (
+              homeData.topUsers.slice(0, 3).map((u: any, idx: number) => (
+                <View key={u.id} style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: idx < 2 ? 16 : 0,
+                }}>
+                  <Text style={{ color: theme.colors.textMuted, fontWeight: '900', marginRight: 16, width: 20, fontSize: 16 }}>
+                    {idx + 1}
+                  </Text>
+                  <Image
+                    source={{ uri: u.image || `https://ui-avatars.com/api/?name=${u.name}&background=${theme.colors.surface.replace('#','')}&color=${primaryColor.replace('#','')}` }}
+                    style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: theme.colors.surfaceLight, marginRight: 14 }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: theme.colors.text, fontWeight: '700' }}>{u.name}</Text>
+                    <Text style={{ color: theme.colors.textMuted, fontSize: 10, textTransform: 'uppercase', fontWeight: '700' }}>
+                      {u.rank?.label || 'Student'}
+                    </Text>
                   </View>
-                  <Text style={[tw`font-black`, { color: primaryLight }]}>{u.points} pts</Text>
+                  <Text style={{ color: primaryColor, fontWeight: '900', fontSize: 14 }}>
+                    {u.points} pts
+                  </Text>
                 </View>
               ))
             ) : (
-              <Text style={tw`text-slate-500 text-center`}>No rankings yet.</Text>
+              <Text style={{ color: theme.colors.textMuted, textAlign: 'center' }}>No rankings yet.</Text>
             )}
           </View>
         </View>
