@@ -525,6 +525,9 @@ model User {
   personalAnthropicKey  String?
   personalSiliconFlowKey String?
   personalSiliconFlowModel String?                 @default("deepseek-ai/DeepSeek-R1")
+  personalCloudflareKey    String?
+  personalHuggingfaceKey   String?
+  personalTogetherKey      String?
   personalSiliconFlowUrl String?                  @default("https://api.siliconflow.cn/v1")
   handle                String?                   @unique
   telegramId            String?                   @unique

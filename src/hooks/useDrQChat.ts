@@ -38,16 +38,15 @@ export type Thread = {
   pinnedProvider?: string;
 };
 
-export type AIProvider = "gemini" | "openai" | "groq" | "xai" | "openrouter" | "anthropic" | "siliconflow";
+export type AIProvider = "gemini" | "groq" | "siliconflow" | "cloudflare" | "huggingface" | "together";
 
 export type BYOKKeys = {
   gemini?: string;
-  openai?: string;
   groq?: string;
-  xai?: string;
-  openrouter?: string;
-  anthropic?: string;
   siliconflow?: string;
+  cloudflare?: string;
+  huggingface?: string;
+  together?: string;
 };
 
 export type DrQSettings = {
@@ -83,18 +82,14 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
   models: string[];
   baseURL?: string;
   icon: string;
+  keyUrl: string;
 }> = {
   gemini: {
     label: "Google Gemini",
     defaultModel: "gemini-2.0-flash",
     models: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-flash-thinking-exp"],
     icon: "G",
-  },
-  openai: {
-    label: "OpenAI",
-    defaultModel: "gpt-4o",
-    models: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo", "o1", "o1-mini", "o3-mini"],
-    icon: "⊕",
+    keyUrl: "https://aistudio.google.com/app/apikey",
   },
   groq: {
     label: "Groq",
@@ -102,27 +97,7 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     models: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
     baseURL: "https://api.groq.com/openai/v1",
     icon: "⚡",
-  },
-  xai: {
-    label: "xAI Grok",
-    defaultModel: "grok-3",
-    models: ["grok-3", "grok-3-mini", "grok-2", "grok-beta"],
-    baseURL: "https://api.x.ai/v1",
-    icon: "𝕏",
-  },
-  openrouter: {
-    label: "OpenRouter",
-    defaultModel: "anthropic/claude-3.5-sonnet",
-    models: ["anthropic/claude-3.5-sonnet", "openai/gpt-4o", "google/gemini-2.0-flash", "meta-llama/llama-3.3-70b-instruct"],
-    baseURL: "https://openrouter.ai/api/v1",
-    icon: "⇌",
-  },
-  anthropic: {
-    label: "Anthropic Claude",
-    defaultModel: "claude-3-5-sonnet-20241022",
-    models: ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"],
-    baseURL: "https://api.anthropic.com/v1",
-    icon: "◈",
+    keyUrl: "https://console.groq.com/keys",
   },
   siliconflow: {
     label: "SiliconFlow (DeepSeek)",
@@ -130,6 +105,49 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     models: ["deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-V3", "Qwen/Qwen2.5-72B-Instruct", "Qwen/Qwen2.5-Coder-7B-Instruct"],
     baseURL: "https://api.siliconflow.cn/v1",
     icon: "🌀",
+    keyUrl: "https://cloud.siliconflow.cn/",
+  },
+  cloudflare: {
+    label: "Cloudflare Workers AI",
+    defaultModel: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    models: [
+      "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "@cf/meta/llama-3.1-8b-instruct",
+      "@cf/mistral/mistral-7b-instruct-v0.1",
+      "@cf/google/gemma-2-27b-it",
+      "@hf/nousresearch/hermes-2-pro-llama-3-8b",
+    ],
+    baseURL: "https://api.cloudflare.com/client/v4/accounts",
+    icon: "☁",
+    keyUrl: "https://developers.cloudflare.com/workers-ai/get-started/",
+  },
+  huggingface: {
+    label: "Hugging Face",
+    defaultModel: "meta-llama/Llama-3.3-70B-Instruct",
+    models: [
+      "meta-llama/Llama-3.3-70B-Instruct",
+      "mistralai/Mistral-7B-Instruct-v0.3",
+      "google/gemma-2-27b-it",
+      "Qwen/Qwen2.5-72B-Instruct",
+      "microsoft/Phi-3-medium-4k-instruct",
+    ],
+    baseURL: "https://api-inference.huggingface.co/v1",
+    icon: "🤗",
+    keyUrl: "https://huggingface.co/settings/tokens",
+  },
+  together: {
+    label: "Together AI",
+    defaultModel: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    models: [
+      "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "meta-llama/Llama-3.1-8B-Instruct-Turbo",
+      "mistralai/Mixtral-8x22B-Instruct-v0.1",
+      "Qwen/Qwen2.5-72B-Instruct-Turbo",
+      "deepseek-ai/DeepSeek-V3",
+    ],
+    baseURL: "https://api.together.xyz/v1",
+    icon: "◆",
+    keyUrl: "https://api.together.ai/settings/api-keys",
   },
 };
 
@@ -228,7 +246,7 @@ async function streamOpenAICompat(
         "X-Title": "MedQs Dr. Q"
       } : {}),
     },
-    body: JSON.stringify({ model, messages: apiMessages, stream: true }),
+    body: JSON.stringify({ model, messages: apiMessages, stream: true, max_tokens: 4096 }),
   });
 
   if (!resp.ok) {
@@ -322,7 +340,15 @@ export function useDrQChat() {
   useEffect(() => {
     try {
       const storedSettings = localStorage.getItem(SETTINGS_KEY);
-      if (storedSettings) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) });
+      if (storedSettings) {
+        const parsed = JSON.parse(storedSettings);
+        // Validate activeProvider — it may be stale from a previous version
+        if (!PROVIDER_CONFIGS[parsed.activeProvider as AIProvider]) {
+          parsed.activeProvider = DEFAULT_SETTINGS.activeProvider;
+          parsed.activeModel = DEFAULT_SETTINGS.activeModel;
+        }
+        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+      }
 
       const storedThreads = localStorage.getItem(THREADS_KEY);
       if (storedThreads) {
@@ -343,6 +369,31 @@ export function useDrQChat() {
     } catch {}
     fetchLimits();
   }, []);
+
+  // Fetch BYOK keys from server (cross-device sync)
+  useEffect(() => {
+    if (!userId) return;
+    fetch("/api/v1/user/byok-keys").then(r => r.json()).then(data => {
+      if (data?.keys) {
+        setSettings(prev => {
+          const merged = { ...prev, byokKeys: { ...prev.byokKeys, ...data.keys } };
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
+          return merged;
+        });
+      }
+    }).catch(() => {});
+  }, [userId]);
+
+  // Save BYOK keys to server whenever they change
+  const saveToServerRef = useRef<((keys: BYOKKeys) => void) | null>(null);
+  saveToServerRef.current = (keys: BYOKKeys) => {
+    if (!userId) return;
+    fetch("/api/v1/user/byok-keys", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keys }),
+    }).catch(() => {});
+  };
 
 
   // Subscribe to Firestore for cross-device sync
@@ -477,6 +528,9 @@ export function useDrQChat() {
     setSettings(prev => {
       const next = { ...prev, ...updated, byokKeys: { ...prev.byokKeys, ...(updated.byokKeys ?? {}) } };
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+      if (updated.byokKeys) {
+        saveToServerRef.current?.(next.byokKeys);
+      }
       return next;
     });
   }, []);
@@ -587,7 +641,19 @@ export function useDrQChat() {
       try {
         const apiKey = byokKeys[activeProvider] ?? "";
 
-        // 0. Persona & Context Injection
+        // 0. Fetch founder LinkedIn from site data
+        let founderLinkedIn = "";
+        try {
+          const founderRes = await fetch("/api/v1/platform-members");
+          if (founderRes.ok) {
+            const founders = await founderRes.json();
+            // Find the main founder (Dr. Ahmed) — first member or by name
+            const drAhmed = Array.isArray(founders) ? founders[0] : null;
+            if (drAhmed?.socialUrl) founderLinkedIn = drAhmed.socialUrl;
+          }
+        } catch {}
+
+        // 1. Persona & Context Injection
         let systemPrompt = "";
         try {
           const { DRQ_PERSONAS } = require("@/components/ai/DrQPersonas");
@@ -602,12 +668,25 @@ export function useDrQChat() {
           // MedOneX Identity Context
           systemPrompt = `You are MedOneX Expert AI, the intelligent medical AI assistant of MedOneX (also known as MedQs) — a premium medical education platform at medonex.app. You are an expert medical tutor with deep knowledge across all medical specialties.
 
+CREATOR INFO:
+You were created by Dr. Ahmed Mohamed Hassan (دكتور أحمد محمد حسان) — make sure to write it as "حسان" with an alif after the seen, NOT "حسن" without alif. He is the founder of MedOneX and the creator of MedVibes on Instagram. If the user asks "Who made you?", "Who is the founder?", or anything similar, proudly tell them about Dr. Ahmed — the visionary founder of MedOneX and MedVibes.${founderLinkedIn ? ` Include his LinkedIn profile as a professional markdown link: [Dr. Ahmed Mohamed Hassan](${founderLinkedIn}).` : ""}
+
 GLOBAL RULES:
 1. **Medical terminology must ALWAYS be in English** — even if the rest of the response is in Arabic. For example: "يسبب الـ Inflammation في الـ Liver" not "يسبب الالتهاب في الكبد".
 2. **Stay on medical topic** — if the user's query is not medically related, politely respond that you specialize in medical education and redirect to a medical topic. Do not engage deeply with non-medical subjects.
-3. **Response language** — respond in the same language the user writes in (Arabic or English).
-4. **MCQ format** — when generating questions, always use 5 multiple-choice options (A-E) in English, with one correct answer and detailed explanation.
-5. **Be helpful, accurate, and concise.**
+3. **Response language** — respond in the same language the user writes in (Arabic or English). You may use emojis naturally (Apple-style) to make responses friendly and engaging.
+4. **MCQ format** — when generating questions, always use 5 multiple-choice options in the following exact JSON format wrapped between ":::question" and ":::" delimiters:
+   :::question
+   {"questionType":"MCQ","body":"Question stem","choices":[{"key":"A","text":"Option A"},{"key":"B","text":"Option B"},{"key":"C","text":"Option C"},{"key":"D","text":"Option D"},{"key":"E","text":"Option E"}],"answer":"A","explanation":"Why this is correct","difficulty":"MEDIUM"}
+   :::
+5. **Flashcard format** — when generating flashcards, use this JSON format wrapped between ":::flashcard" and ":::" delimiters:
+   :::flashcard
+   {"front":"Question or term","back":"Answer or definition"}
+   :::
+   For multiple flashcards, use ":::flashcards" wrapping a JSON array.
+6. **IMAGE GENERATION** — if the user asks you to draw, paint, visualize, or create an image, output an inline markdown image tag: ![Image](https://image.pollinations.ai/prompt/ENCODED_PROMPT?width=1024&height=1024&nologo=true). Make the prompt detailed and clinical. Render the image at full width in the chat.
+7. **WEB SEARCH** — you have web search capability. When the user asks for recent information, news, or anything requiring up-to-date data, use the web search tool.
+8. **Be helpful, accurate, and concise.
 
 \t
 ${systemPrompt}`;
@@ -616,9 +695,6 @@ ${systemPrompt}`;
         } catch (e) {
           systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
         }
-
-        // Image generation instructions
-        systemPrompt += `\n\nIMAGE GENERATION CAPABILITY: If the user asks you to draw, paint, visualize, generate, or create an image/diagram, you MUST output a markdown image tag of format: \`![Image](https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true)\` where \`{encoded_prompt}\` is a detailed description of the image in English, URL-encoded. You must choose to generate detailed, beautiful clinical illustrations or anatomical diagrams. Do not say you cannot draw.`;
 
         // Inject syllabus context
         if (syllabusContext) {
@@ -674,7 +750,22 @@ ${systemPrompt}`;
           }
         }
 
-        const historyForAPI = enhancedHistory;
+        let historyForAPI = enhancedHistory;
+
+        // ─── Token Optimization: Smart History Compression ───
+        const MAX_HISTORY_TOKENS = 12; // keep last 12 exchanges max (excl. system)
+        const MAX_MSG_LENGTH = 3000;   // truncate individual messages over 3K chars
+        if (historyForAPI.length > MAX_HISTORY_TOKENS + 1) {
+          const sysMsg = historyForAPI[0];
+          const recent = historyForAPI.slice(-MAX_HISTORY_TOKENS);
+          historyForAPI = [sysMsg, ...recent];
+        }
+        for (let i = 0; i < historyForAPI.length; i++) {
+          if (historyForAPI[i].content.length > MAX_MSG_LENGTH) {
+            historyForAPI[i] = { ...historyForAPI[i], content: historyForAPI[i].content.slice(0, MAX_MSG_LENGTH) + "..." };
+          }
+        }
+
         let finalContent = "";
 
         const onChunk = (accumulated: string) => {
