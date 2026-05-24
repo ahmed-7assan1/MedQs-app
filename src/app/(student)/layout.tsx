@@ -4,7 +4,7 @@ const Sidebar = dynamic(() => import("@/components/layout/Sidebar").then(m => m.
 import { NotificationsLoader } from "@/components/notifications/NotificationsLoader";
 import { AdBannerModal } from "@/components/ads/AdBannerModal";
 import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
-import { SiteFooter } from "@/components/layout/SiteFooter";
+import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
@@ -126,7 +126,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               </main>
 
               <div className="hidden md:block">
-                <SiteFooter />
+                <ConditionalFooter />
               </div>
               {!isGuest && <OnboardingTutorial />}
               <CookieConsentBanner />

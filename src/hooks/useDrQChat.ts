@@ -283,16 +283,16 @@ export function useDrQChat() {
 
   const abortRef = useRef<boolean>(false);
 
-  // Load syllabus context
+  // Load syllabus context — user-specific modules
   useEffect(() => {
     const loadSyllabus = async () => {
       try {
-        const res = await fetch("/api/v1/modules-all");
+        const res = await fetch("/api/v1/user/syllabus");
         if (res.ok) {
           const data = await res.json();
-          if (data?.result && Array.isArray(data.result)) {
-            let ctx = "MedQs Syllabus Context:\n";
-            data.result.forEach((mod: any) => {
+          if (data?.modules && Array.isArray(data.modules) && data.modules.length > 0) {
+            let ctx = "Your enrolled modules on MedQs:\n";
+            data.modules.forEach((mod: any) => {
               ctx += `- Module: ${mod.name}\n`;
               if (Array.isArray(mod.subjects)) {
                 mod.subjects.forEach((sub: any) => {
@@ -306,11 +306,14 @@ export function useDrQChat() {
               }
             });
             setSyllabusContext(ctx);
+            return;
           }
         }
       } catch (err) {
-        console.warn("Failed to load syllabus context for DrQ", err);
+        console.warn("Failed to load user syllabus for DrQ", err);
       }
+      // Fallback: minimal context
+      setSyllabusContext("");
     };
     loadSyllabus();
   }, []);
@@ -580,8 +583,8 @@ export function useDrQChat() {
       setStreamingId(aiMsgId);
       abortRef.current = false;
 
+      const { activeProvider, activeModel, byokKeys, activePersona } = settings;
       try {
-        const { activeProvider, activeModel, byokKeys, activePersona } = settings;
         const apiKey = byokKeys[activeProvider] ?? "";
 
         // 0. Persona & Context Injection
@@ -591,12 +594,25 @@ export function useDrQChat() {
           const persona = DRQ_PERSONAS[activePersona] || DRQ_PERSONAS.explainer;
           systemPrompt = persona.systemPrompt;
           
-          // User Context
+          // User Context  
           const userName = (authUser as any)?.user_metadata?.name || "Student";
           const userUni = (authUser as any)?.user_metadata?.universityName || "Medical University";
           const userFaculty = (authUser as any)?.user_metadata?.facultyName || "Faculty of Medicine";
           
-          systemPrompt += `\n\nUSER CONTEXT: You are talking to ${userName}, a student at ${userUni}, ${userFaculty}. Use this to personalize the conversation if it feels natural. Always use the user's name at the start of the chat.`;
+          // MedOneX Identity Context
+          systemPrompt = `You are MedOneX Expert AI, the intelligent medical AI assistant of MedOneX (also known as MedQs) — a premium medical education platform at medonex.app. You are an expert medical tutor with deep knowledge across all medical specialties.
+
+GLOBAL RULES:
+1. **Medical terminology must ALWAYS be in English** — even if the rest of the response is in Arabic. For example: "يسبب الـ Inflammation في الـ Liver" not "يسبب الالتهاب في الكبد".
+2. **Stay on medical topic** — if the user's query is not medically related, politely respond that you specialize in medical education and redirect to a medical topic. Do not engage deeply with non-medical subjects.
+3. **Response language** — respond in the same language the user writes in (Arabic or English).
+4. **MCQ format** — when generating questions, always use 5 multiple-choice options (A-E) in English, with one correct answer and detailed explanation.
+5. **Be helpful, accurate, and concise.**
+
+\t
+${systemPrompt}`;
+          
+          systemPrompt += `\n\nUSER CONTEXT: You are talking to ${userName}, a ${userFaculty} student at ${userUni}. Use this information to personalize your responses. Always greet the user by their name (${userName}) at the start of the conversation. You have full access to their academic data including enrolled courses, past exam scores, syllabus, and study progress on MedOneX.`;
         } catch (e) {
           systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
         }
@@ -730,7 +746,20 @@ export function useDrQChat() {
 
         fetchLimits();
       } catch (err: any) {
-        toast.error(err.message || "Dr. Q encountered an error");
+        const msg = err.message || "";
+        let friendly = "";
+        if (msg.includes("429") || msg.includes("quota") || msg.includes("Quota")) {
+          friendly = `${PROVIDER_CONFIGS[activeProvider].label} quota exceeded. Check your billing or try another provider.`;
+        } else if (msg.includes("401") || msg.includes("403") || msg.includes("API_KEY_INVALID") || msg.includes("not valid") || msg.includes("unauthorized")) {
+          friendly = `Invalid ${PROVIDER_CONFIGS[activeProvider].label} API key. Update it in Settings.`;
+        } else if (msg.includes("fetch") || msg.includes("network") || msg.includes("Network") || msg.includes("ENOTFOUND")) {
+          friendly = `Network error connecting to ${PROVIDER_CONFIGS[activeProvider].label}. Check your connection.`;
+        } else if (msg.includes("500") || msg.includes("502") || msg.includes("503")) {
+          friendly = `${PROVIDER_CONFIGS[activeProvider].label} server error. Try again later.`;
+        } else {
+          friendly = msg.split(". ").slice(0, 2).join(". ") || `${PROVIDER_CONFIGS[activeProvider].label} error. Try again.`;
+        }
+        toast.error(friendly);
         // Remove the empty AI message
         setThreads(prev => {
           const updated = prev.map(t => t.id === threadId

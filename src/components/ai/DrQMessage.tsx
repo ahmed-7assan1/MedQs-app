@@ -37,6 +37,7 @@ interface MessageProps {
   onReply?: (id: string, text: string) => void;
   onShare?: (text: string) => void;
   activePersona?: string;
+  variant?: "bubble" | "flat";
 }
 
 export function DrQMessage({
@@ -48,7 +49,8 @@ export function DrQMessage({
   onRegenerate,
   onReply,
   onShare,
-  activePersona = "explainer"
+  activePersona = "explainer",
+  variant = "bubble",
 }: MessageProps) {
   const isAI = message.role === "assistant";
   const [copying, setCopying] = useState(false);
@@ -115,8 +117,8 @@ export function DrQMessage({
            </div>
         )}
 
-        {/* Persona Header for AI */}
-        {isAI && (
+        {/* Persona Header for AI (hidden in flat mode — rendered by parent) */}
+        {isAI && variant !== "flat" && (
           <div className="flex items-center gap-3 px-1 mb-1">
              <div className={cn(
                "w-8 h-8 rounded-xl flex items-center justify-center shadow-md",
@@ -135,36 +137,50 @@ export function DrQMessage({
           /* Initial Streaming State */
           <div className="flex items-center gap-3 py-4 text-indigo-500">
              <Spinner size={24} className="animate-spin" />
-             <span className="text-[14px] font-bold">Dr. Q is thinking...</span>
+             <span className="text-[14px] font-bold">MedOneX Expert is thinking...</span>
           </div>
         ) : (
           <div className="relative">
             <motion.div 
               initial={{ opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className={cn(
-                "p-4 md:p-5 shadow-sm relative overflow-hidden transition-all",
-                isAI 
-                  ? "rounded-3xl rounded-tl-sm bg-white dark:bg-[#1a1a24] border border-slate-200/60 dark:border-white/10 text-slate-800 dark:text-white/90 shadow-lg shadow-slate-200/50 dark:shadow-none" 
-                  : "rounded-3xl rounded-tr-sm bg-indigo-600 border border-indigo-500 text-white shadow-md shadow-indigo-600/20"
+                "relative overflow-hidden transition-all",
+                variant === "flat" && isAI 
+                  ? "p-4 md:p-5 text-slate-800 dark:text-white/90" 
+                  : "p-4 md:p-5 shadow-sm",
+                !variant && isAI 
+                  ? "rounded-3xl rounded-tl-sm bg-white dark:bg-[#1a1a24] border border-slate-200/60 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none" 
+                  : "",
+                !isAI 
+                  ? "rounded-2xl bg-indigo-500/90 text-white shadow-sm"
+                  : ""
               )}
               style={{ 
                 fontSize: `${fontSize}px`
               }}
             >
-              {/* File Cards (NeuraNest Style) */}
+              {/* File/Image Inline Display */}
               {message.files && message.files.length > 0 && (
-                <div className="flex flex-col gap-2.5 mb-4">
+                <div className="flex flex-wrap gap-3 mb-4">
                   {message.files.map((f, i) => {
                     const isImg = f.mimeType.startsWith("image/");
-                    return (
-                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-sm", isAI ? "bg-slate-50 dark:bg-[#1f222f]/80 border-slate-200 dark:border-white/10" : "bg-white/10 border-white/20")}>
+                    return isImg ? (
+                      <div key={i} className="relative group overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm max-w-md">
+                        <img src={f.data} alt={f.name} className="w-full h-auto object-cover max-h-[400px]" />
+                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-xs text-white truncate block">{f.name}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-xs", isAI ? "bg-slate-50 dark:bg-[#1f222f]/80 border-slate-200 dark:border-white/10" : "bg-white/10 border-white/20")}>
                         <div className="w-10 h-10 rounded-lg bg-white/20 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
-                          {isImg ? <ImageIcon size={20} className={isAI ? "text-indigo-500" : "text-white"} /> : <FileText size={20} className={isAI ? "text-rose-500" : "text-white"} />}
+                          <FileText size={20} className={isAI ? "text-rose-500" : "text-white"} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={cn("text-xs font-bold truncate", isAI ? "text-slate-800 dark:text-white" : "text-white")}>{f.name}</p>
-                          <p className={cn("text-[10px] font-semibold", isAI ? "text-slate-500 dark:text-white/50" : "text-indigo-200")}>{isImg ? "Image File" : "PDF Document"}</p>
+                          <p className="text-xs font-bold truncate text-slate-800 dark:text-white">{f.name}</p>
+                          <p className="text-[10px] font-semibold text-slate-500 dark:text-white/50">{isImg ? "Image File" : "PDF Document"}</p>
                         </div>
                       </div>
                     );
@@ -174,7 +190,7 @@ export function DrQMessage({
 
 
               {/* Markdown Content */}
-              <div className={cn(
+              <div dir="auto" className={cn(
                 "prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
                 isAI ? "prose-slate dark:prose-invert prose-pre:bg-slate-50 dark:prose-pre:bg-black/30 prose-pre:border-slate-200 dark:prose-pre:border-white/5 prose-table:border-slate-200 dark:prose-table:border-white/10 prose-th:bg-slate-50 dark:prose-th:bg-white/5" : "text-white prose-invert prose-p:text-white prose-headings:text-white prose-strong:text-white"
               )}>
@@ -243,14 +259,19 @@ export function DrQMessage({
               {message.isStreaming && (
                 <div className="flex items-center gap-2 mt-4 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 w-fit">
                    <div className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-                   <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Dr. Q is thinking...</span>
+                   <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">MedOneX Expert is thinking...</span>
                 </div>
               )}
             </motion.div>
 
             {/* AI Message Actions */}
             {isAI && !message.isStreaming && (
-              <div className="absolute -bottom-5 right-4 flex items-center gap-1 p-1 bg-white dark:bg-[#1a1830] border border-slate-200 dark:border-white/10 rounded-xl shadow-lg opacity-0 group-hover/msg:opacity-100 transition-all z-10">
+              <div className={cn(
+                "flex items-center gap-1 p-1 rounded-xl z-10",
+                variant === "flat" 
+                  ? "mt-2 border border-slate-200 dark:border-white/10 bg-transparent w-fit" 
+                  : "absolute -bottom-5 right-4 bg-white dark:bg-[#1a1830] border border-slate-200 dark:border-white/10 shadow-lg opacity-0 group-hover/msg:opacity-100"
+              )}>
                 <button 
                   onClick={() => onReaction(message.id, message.reaction === "like" ? null : "like")}
                   className={cn("p-1.5 rounded-lg transition-all", message.reaction === "like" ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5")}
