@@ -140,16 +140,23 @@ function appIconsFromConfig(
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getSiteConfig();
-  const title = `${config.siteName} — The Ultimate Medical Education Platform`;
+  const title = `${config.siteName} — AI-Powered Medical Education Platform`;
   const description =
-    "Elevate your medical studies with MedOneX: Curated lectures, interactive MCQs, smart spaced repetition, AI-powered study assistance, and a community of doctors and students.";
+    "MedOneX is the AI-powered medical education platform for medical students. Access past papers, interactive MCQs, video lectures, anatomy atlas, AI chat tutor, and a community of doctors. Study smarter for USMLE, PLAB, and medical exams.";
   const base = safeMetadataBase();
   const ogImage = base ? `${base.origin}/og-image.png` : "https://medonex.vercel.app/og-image.png";
   return {
     metadataBase: base,
     title: { default: title, template: `%s | ${config.siteName}` },
     description,
-    keywords: ["Medical Education", "Medical Students", "MCQ", "Clinical Cases", "Medical University", "MedOneX", "Med Students Forum"],
+    keywords: [
+      "Medical Education", "Medical Students", "MCQ", "Clinical Cases",
+      "Medical University", "MedOneX", "Med Students Forum",
+      "USMLE", "PLAB", "Medical Exam Prep", "Anatomy Atlas",
+      "AI Medical Tutor", "Medical Past Papers", "Medical Quizzes",
+      "Egypt Medical Students", "طب بشري", "امتحانات طب",
+      "Online Medical Learning", "Medical Study Tools",
+    ],
     applicationName: config.siteName,
     authors: [{ name: config.siteName }],
     creator: config.siteName,
@@ -170,7 +177,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: `${config.siteName} — The Ultimate Medical Education Platform`,
+          alt: `${config.siteName} — AI-Powered Medical Education Platform`,
         },
       ],
     },
@@ -257,17 +264,40 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   "@id": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/#website`,
                   "url": safeMetadataBase()?.origin ?? "https://medonex.vercel.app",
                   "name": config.siteName,
-                  "description": "The Ultimate Medical Education Platform",
+                  "description": "The AI-powered medical education platform for students across Egypt and the Middle East.",
+                  "inLanguage": "en",
                   "publisher": { "@id": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/#organization` },
                 },
                 {
-                  "@type": "Organization",
+                  "@type": "EducationalOrganization",
                   "@id": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/#organization`,
                   "name": config.siteName,
                   "url": safeMetadataBase()?.origin ?? "https://medonex.vercel.app",
+                  "description": "AI-powered medical education platform offering past papers, quizzes, video lectures, and interactive anatomy tools for medical students.",
                   "logo": {
                     "@type": "ImageObject",
                     "url": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/og-image.png`,
+                  },
+                  "founder": [
+                    {
+                      "@type": "Person",
+                      "name": "Ahmed Hassan",
+                      "jobTitle": "Founder & Lead Developer",
+                      "description": "Medical student and software engineer who built MedOneX to revolutionize medical education.",
+                    },
+                  ],
+                },
+                {
+                  "@type": "WebApplication",
+                  "@id": `${safeMetadataBase()?.origin ?? "https://medonex.vercel.app"}/#webapp`,
+                  "name": config.siteName,
+                  "url": safeMetadataBase()?.origin ?? "https://medonex.vercel.app",
+                  "applicationCategory": "EducationalApplication",
+                  "operatingSystem": "Web",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD",
                   },
                 },
               ],

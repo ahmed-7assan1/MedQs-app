@@ -662,18 +662,32 @@ function DownloadSection() {
 
 /* ─── Footer ─── */
 function FooterSection() {
-  const footerLinks = {
-    Product: ["Features", "Pricing", "Integrations", "API", "Changelog"],
-    Company: ["About", "Blog", "Careers", "Press", "Contact"],
-    Support: ["Help Center", "Documentation", "Community", "Status", "Privacy"],
-    Legal: ["Terms", "Privacy", "Cookies", "Licenses"],
+  const footerLinks: Record<string, { label: string; href: string }[]> = {
+    Product: [
+      { label: "Features", href: "/#features" },
+      { label: "Atlas", href: "/atlas" },
+      { label: "AI Chat", href: "/ai-chat" },
+      { label: "Videos", href: "/videos" },
+      { label: "Download", href: "/download" },
+    ],
+    Company: [
+      { label: "About", href: "/about" },
+      { label: "Founders", href: "/founders" },
+      { label: "Community", href: "/community" },
+      { label: "Leaderboard", href: "/leaderboard" },
+    ],
+    Support: [
+      { label: "Help Center", href: "/help" },
+      { label: "Documentation", href: "/docs" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
+    ],
   };
 
   return (
     <footer className="py-16 px-6 border-t border-white/5 bg-[#0A0E1A]">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
-          {/* Logo + Description */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00FF88] to-[#00D4FF] flex items-center justify-center">
@@ -691,8 +705,8 @@ function FooterSection() {
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">{category}</h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{link}</a>
+                  <li key={link.label}>
+                    <Link href={link.href} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{link.label}</Link>
                   </li>
                 ))}
               </ul>
@@ -700,11 +714,10 @@ function FooterSection() {
           ))}
         </div>
 
-        {/* Bottom */}
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-500">© 2026 MedOneX. All rights reserved.</p>
           <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span>Made with ❤️ for medical education</span>
+            <Link href="/founders" className="hover:text-gray-300 transition-colors">Made with ❤️ by the MedOneX Team</Link>
           </div>
         </div>
       </div>

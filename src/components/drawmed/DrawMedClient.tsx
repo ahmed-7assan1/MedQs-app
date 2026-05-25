@@ -103,8 +103,13 @@ export function DrawMedClient() {
     let cleanup: (() => void) | null = null;
     const interval = setInterval(() => {
       const toolbar = findToolbar();
-      if (toolbar && toolbar.getBoundingClientRect().width > 0) {
-        clearInterval(interval);
+      if (toolbar) {
+        // Force toolbar visible — Excalidraw hides it on mobile
+        toolbar.style.display = "flex";
+        toolbar.style.visibility = "visible";
+
+        if (toolbar.getBoundingClientRect().width > 0) {
+          clearInterval(interval);
         
         const rect = toolbar.getBoundingClientRect();
         

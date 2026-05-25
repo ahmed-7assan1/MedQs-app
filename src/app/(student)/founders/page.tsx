@@ -28,8 +28,31 @@ export default function PublicFoundersPage() {
     );
   }
 
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://medonex.vercel.app";
+
   return (
     <div className="min-h-screen bg-[#07080f] pb-32 pt-0">
+      {/* JSON-LD for founders — indexed by Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": members.map((m: any) => ({
+              "@type": "Person",
+              "@id": `${baseUrl}/founders#${m.id}`,
+              "name": m.name,
+              "jobTitle": m.role,
+              "description": m.description || `Member of the MedOneX team`,
+              "url": `${baseUrl}/founders`,
+              "memberOf": {
+                "@type": "Organization",
+                "name": "MedOneX",
+              },
+            })),
+          }),
+        }}
+      />
       {/* Hero Section */}
       <div className="relative h-[400px] w-full overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-[#07080f] z-10" />

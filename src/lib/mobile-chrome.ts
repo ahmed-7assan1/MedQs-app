@@ -32,6 +32,7 @@ export function isImmersiveMobileRoute(pathname: string): boolean {
     p.startsWith("/quiz") ||
     p.startsWith("/past-papers") ||
     p.startsWith("/guest/quiz") ||
-    p.startsWith("/guest/past-papers")
+    p.startsWith("/guest/past-papers") ||
+    p.startsWith("/drawmed")
   );
 }
