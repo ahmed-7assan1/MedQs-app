@@ -40,7 +40,7 @@ interface SiteConfig {
 }
 
 const DEFAULTS: SiteConfig = {
-  siteName: "MedQs", logoUrl: "", logoUrlDark: "", faviconUrl: "", pwaIconUrl: "", primaryColor: "#0d9488",
+  siteName: "MedOneX", logoUrl: "", logoUrlDark: "", faviconUrl: "", pwaIconUrl: "", primaryColor: "#0d9488",
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
   enableCreativeStudio: false,
   aiPreferredProvider: "auto",

@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .findFirst({ select: { siteName: true, logoUrl: true } })
     .catch(() => null);
 
-  const siteName = siteConfig?.siteName ?? "MedQs";
+  const siteName = siteConfig?.siteName ?? "MedOneX";
 
   return (
     <>

@@ -56,7 +56,7 @@ export default async function CleanStudentLayout({ children }: { children: React
     <TelegramBlocker>
       <SiteConfigProvider
         initial={{
-          siteName: siteConfig?.siteName ?? "MedQs",
+          siteName: siteConfig?.siteName ?? "MedOneX",
           logoUrl: siteConfig?.logoUrl ?? null,
         }}
       >

@@ -6,6 +6,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { syncAllThreadsToFirestore, subscribeToThreads, deleteThreadFromFirestore } from "@/lib/firebase/firestore";
 import { getAIEndpoint } from "@/lib/api-config";
+import { getCachedResponse, setCachedResponse, getDirectReply } from "@/lib/chat-cache";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,9 @@ export type DrQSettings = {
   fontSize: number;
   userBubbleColor: string;
   aiBubbleColor: string;
+  bgImage?: string;
+  bgBlur?: number;
+  bgOpacity?: number;
 };
 
 export type UsageLimits = {
@@ -95,11 +99,8 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     defaultModel: "gemini-2.0-flash",
     models: [
       "gemini-2.0-flash", "gemini-2.0-flash-lite",
-      "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
-      "gemini-3.5-flash",
-      "gemini-3-flash-preview", "gemini-3-pro-preview",
-      "gemini-3.1-pro-preview", "gemini-3.1-flash-lite",
-      "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-pro-latest",
+      "gemini-2.5-pro",
+      "gemini-3.1-pro-preview",
     ],
     icon: "G",
     keyUrl: "https://aistudio.google.com/app/apikey",
@@ -263,8 +264,8 @@ const MODEL_TIERS: Partial<Record<AIProvider, ProviderModelTiers>> = {
   gemini: {
     tiny: ["gemini-2.0-flash-lite"],
     small: ["gemini-2.0-flash"],
-    medium: ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"],
-    large: ["gemini-2.5-pro", "gemini-3.5-flash", "gemini-3-pro-preview", "gemini-3.1-pro-preview", "gemini-pro-latest"],
+    medium: ["gemini-2.5-pro"],
+    large: ["gemini-3.1-pro-preview"],
   },
   groq: {
     tiny: ["allam-2-7b"],
@@ -380,6 +381,9 @@ const DEFAULT_SETTINGS: DrQSettings = {
   fontSize: 15,
   userBubbleColor: "#6d28d9",
   aiBubbleColor: "#1a1830",
+  bgImage: "",
+  bgBlur: 0,
+  bgOpacity: 0.15,
 };
 
 // ─── Streaming Client Helpers ─────────────────────────────────────────────────
@@ -394,14 +398,18 @@ async function streamGemini(
   onChunk: (text: string) => void,
   webSearch?: boolean
 ): Promise<string> {
+  // Extract system instruction (first message with role "system")
+  const sysMsg = messages.find(m => m.role === "system");
+  const nonSystem = messages.filter(m => m.role !== "system");
+
   const genAI = new GoogleGenerativeAI(apiKey);
-  const mdl = genAI.getGenerativeModel({
-    model,
-    ...(webSearch ? { tools: [{ googleSearch: {} }] } : {}),
-  });
+  const modelOpts: any = { model };
+  if (sysMsg) modelOpts.systemInstruction = sysMsg.content;
+  if (webSearch) modelOpts.tools = [{ googleSearch: {} }];
+  const mdl = genAI.getGenerativeModel(modelOpts);
 
   // Build Gemini history (all but last)
-  const history = messages.slice(0, -1).map((m) => ({
+  const history = nonSystem.slice(0, -1).map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
     parts: [{ text: m.content }],
   }));
@@ -409,7 +417,7 @@ async function streamGemini(
   const chat = mdl.startChat({ history });
 
   // Build the user turn parts
-  const lastMsg = messages[messages.length - 1];
+  const lastMsg = nonSystem[nonSystem.length - 1] || messages[messages.length - 1];
   const parts: any[] = [{ text: lastMsg.content || "" }];
 
   for (const f of files) {
@@ -486,7 +494,7 @@ async function streamOpenAICompat(
       ...(skipAuth ? {} : { "Authorization": `Bearer ${apiKey}` }),
       ...(baseURL.includes("openrouter") || baseURL.includes("ovh") ? {
         "HTTP-Referer": window.location.origin,
-        "X-Title": "MedQs Dr. Q"
+        "X-Title": "MedOneX Dr. Q"
       } : {}),
     },
     body: JSON.stringify({ model, messages: apiMessages, stream: true, max_tokens: 4096 }),
@@ -552,7 +560,7 @@ export function useDrQChat() {
         if (res.ok) {
           const data = await res.json();
           if (data?.modules && Array.isArray(data.modules) && data.modules.length > 0) {
-            let ctx = "Your enrolled modules on MedQs:\n";
+            let ctx = "Your enrolled modules on MedOneX:\n";
             data.modules.forEach((mod: any) => {
               ctx += `- Module: ${mod.name}\n`;
               if (Array.isArray(mod.subjects)) {
@@ -881,6 +889,41 @@ export function useDrQChat() {
       abortRef.current = false;
 
       const { activeProvider, activeModel, byokKeys, activePersona } = settings;
+
+      // ─── Direct Reply for Greetings ───
+      if (!files.length && !replyToId) {
+        const directReply = getDirectReply(content);
+        if (directReply) {
+          setThreads(prev => {
+            const updated = prev.map(t => t.id === threadId
+              ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: directReply, isStreaming: false } : m) }
+              : t
+            );
+            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+            return updated;
+          });
+          setLoading(false);
+          setStreamingId(null);
+          return;
+        }
+
+        // ─── IndexedDB Cache Lookup ───
+        const cached = await getCachedResponse(content, activePersona, activeModel);
+        if (cached) {
+          setThreads(prev => {
+            const updated = prev.map(t => t.id === threadId
+              ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: cached, isStreaming: false } : m) }
+              : t
+            );
+            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+            return updated;
+          });
+          setLoading(false);
+          setStreamingId(null);
+          return;
+        }
+      }
+
       let effectiveProvider: AIProvider = activeProvider;
       try {
         effectiveProvider = activeProvider;
@@ -936,40 +979,32 @@ export function useDrQChat() {
           const userUni = (authUser as any)?.user_metadata?.universityName || "Medical University";
           const userFaculty = (authUser as any)?.user_metadata?.facultyName || "Faculty of Medicine";
           
-          // MedOneX Identity Context
-          systemPrompt = `You are MedOneX Expert AI, the intelligent medical AI assistant of MedOneX (also known as MedQs) — a premium medical education platform at medonex.app. You are an expert medical tutor with deep knowledge across all medical specialties.
+          // MedOneX Identity Context (concise for token efficiency)
+          systemPrompt = `You are MedOneX Expert AI — a medical AI tutor on medonex.app. Speak in the user's language (Arabic/English). Keep medical terms in English (e.g. "Inflammation في الـ Liver"). Stay on medical topics. Be concise.
 
-CREATOR INFO:
-You were created by Dr. Ahmed Mohamed Hassan (دكتور أحمد محمد حسان) — make sure to write it as "حسان" with an alif after the seen, NOT "حسن" without alif. He is the founder of MedOneX and the creator of MedVibes on Instagram. If the user asks "Who made you?", "Who is the founder?", or anything similar, proudly tell them about Dr. Ahmed — the visionary founder of MedOneX and MedVibes.${founderLinkedIn ? ` Include his LinkedIn profile as a professional markdown link: [Dr. Ahmed Mohamed Hassan](${founderLinkedIn}).` : ""}
+CREATOR: Dr. Ahmed Mohamed Hassan (أحمد محمد حسان — with alif).${founderLinkedIn ? ` LinkedIn: ${founderLinkedIn}` : ""}
 
-GLOBAL RULES:
-1. **Medical terminology must ALWAYS be in English** — even if the rest of the response is in Arabic. For example: "يسبب الـ Inflammation في الـ Liver" not "يسبب الالتهاب في الكبد".
-2. **Stay on medical topic** — if the user's query is not medically related, politely respond that you specialize in medical education and redirect to a medical topic. Do not engage deeply with non-medical subjects.
-3. **Response language** — respond in the same language the user writes in (Arabic or English). You may use emojis naturally (Apple-style) to make responses friendly and engaging.
-4. **MCQ format** — when generating questions, always use 5 multiple-choice options in the following exact JSON format wrapped between ":::question" and ":::" delimiters:
-   :::question
-   {"questionType":"MCQ","body":"Question stem","choices":[{"key":"A","text":"Option A"},{"key":"B","text":"Option B"},{"key":"C","text":"Option C"},{"key":"D","text":"Option D"},{"key":"E","text":"Option E"}],"answer":"A","explanation":"Why this is correct","difficulty":"MEDIUM"}
-   :::
-5. **Flashcard format** — when generating flashcards, use this JSON format wrapped between ":::flashcard" and ":::" delimiters:
-   :::flashcard
-   {"front":"Question or term","back":"Answer or definition"}
-   :::
-   For multiple flashcards, use ":::flashcards" wrapping a JSON array.
-6. **IMAGE GENERATION** — if the user asks you to draw, paint, visualize, or create an image, output an inline markdown image tag: ![Image](https://image.pollinations.ai/prompt/ENCODED_PROMPT?width=1024&height=1024&nologo=true). Make the prompt detailed and clinical. Render the image at full width in the chat.
-7. **WEB SEARCH** — you have web search capability. When the user asks for recent information, news, or anything requiring up-to-date data, use the web search tool.
-8. **Be helpful, accurate, and concise.
+FORMATS:
+- MCQ: :::question {"questionType":"MCQ","body":"...","choices":[{"key":"A","text":"..."}],"answer":"A","explanation":"..."} :::
+- Flashcard: :::flashcard {"front":"...","back":"..."} :::
+- Images: ![Image](https://image.pollinations.ai/prompt/...?width=1024&height=1024&nologo=true)
+- Web search available for recent info.
 
-\t
 ${systemPrompt}`;
-          
-          systemPrompt += `\n\nUSER CONTEXT: You are talking to ${userName}, a ${userFaculty} student at ${userUni}. Use this information to personalize your responses. Always greet the user by their name (${userName}) at the start of the conversation. You have full access to their academic data including enrolled courses, past exam scores, syllabus, and study progress on MedOneX.`;
+
+          systemPrompt += `\n\nUser: ${userName}, ${userFaculty} student at ${userUni}. Greet them by name.`;
         } catch (e) {
           systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
         }
 
-        // Inject syllabus context
+        // Inject syllabus context (only on syllabus-related questions)
         if (syllabusContext) {
-          systemPrompt += `\n\nHere is the student's actual syllabus context on MedQs:\n${syllabusContext}\n\nUse this context to answer academic syllabus questions accurately (e.g. what lectures are in a module, or what subjects they study). Do not repeat this context verbatim unless asked.`;
+          const syllabusKeywords = ['module', 'lecture', 'syllabus', 'curriculum', 'subject', 'topic', 'study',
+            'منهج', 'محاضرة', 'مادة', 'درس', 'مقرر', 'موديول'];
+          const lower = content.toLowerCase();
+          if (syllabusKeywords.some(k => lower.includes(k))) {
+            systemPrompt += `\n\nSyllabus: ${syllabusContext}`;
+          }
         }
 
         let enhancedHistory: MessageForAPI[] = [
@@ -982,8 +1017,7 @@ ${systemPrompt}`;
         const lowerContent = content.toLowerCase();
         const dataKeywords = ['course', 'exam', 'score', 'اسئله', 'امتحان', 'منهج', 'درجاتي'];
         if (dataKeywords.some(kw => lowerContent.includes(kw))) {
-          const siteContext = `[SYSTEM CONTEXT: The user is a medical student on the MedQs platform. Current context: They are enrolled in "Internal Medicine" and their last mock exam score was 85%. Use this data to personalize your response if relevant. Do not mention this system context explicitly.]\n\n`;
-          enhancedHistory[enhancedHistory.length - 1].content = siteContext + enhancedHistory[enhancedHistory.length - 1].content;
+          enhancedHistory[enhancedHistory.length - 1].content = `[User is a medical student on MedOneX]\n\n` + enhancedHistory[enhancedHistory.length - 1].content;
         }
 
 
@@ -1024,7 +1058,7 @@ ${systemPrompt}`;
         let historyForAPI = enhancedHistory;
 
         // ─── Token Optimization: Smart History Compression ───
-        const MAX_HISTORY_TOKENS = 12; // keep last 12 exchanges max (excl. system)
+        const MAX_HISTORY_TOKENS = 6; // keep last 6 exchanges max (excl. system)
         const MAX_MSG_LENGTH = 3000;   // truncate individual messages over 3K chars
         if (historyForAPI.length > MAX_HISTORY_TOKENS + 1) {
           const sysMsg = historyForAPI[0];
@@ -1111,6 +1145,11 @@ ${systemPrompt}`;
           localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
           return updated;
         });
+
+        // ─── Cache the response ───
+        if (finalContent && !replyToId && !webSearch) {
+          setCachedResponse(content, activePersona, activeModel, finalContent).catch(() => {});
+        }
 
         fetchLimits();
       } catch (err: any) {

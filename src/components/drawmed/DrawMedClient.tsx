@@ -395,7 +395,7 @@ export function DrawMedClient() {
           ...(skipAuth ? {} : { "Authorization": `Bearer ${apiKey}` }),
           ...(needsHeader ? {
             "HTTP-Referer": window.location.origin,
-            "X-Title": "MedQs DrawMed",
+            "X-Title": "MedOneX DrawMed",
           } : {}),
         },
         body: JSON.stringify({

@@ -2197,3 +2197,18 @@ model AtlasNote {
 
   @@unique([userId, structureId])
 }
+
+model AiResponseCache {
+  id                   String   @id @default(uuid())
+  questionHash         String   @unique
+  normalizedQuestion   String
+  persona              String
+  model                String
+  response             String
+  hitCount             Int      @default(1)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([questionHash])
+  @@index([hitCount])
+}

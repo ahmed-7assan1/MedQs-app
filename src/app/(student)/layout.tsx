@@ -79,7 +79,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       <TelegramBlocker>
         <SiteConfigProvider
           initial={{
-            siteName: siteConfig?.siteName ?? "MedQs",
+            siteName: siteConfig?.siteName ?? "MedOneX",
             logoUrl: siteConfig?.logoUrl ?? null,
           }}
         >
