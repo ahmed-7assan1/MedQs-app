@@ -262,8 +262,8 @@ const MODEL_TIERS: Partial<Record<AIProvider, ProviderModelTiers>> = {
   gemini: {
     tiny: ["gemini-2.0-flash-lite"],
     small: ["gemini-2.0-flash"],
-    medium: ["gemini-2.5-pro"],
-    large: ["gemini-3.1-pro-preview"],
+    medium: ["gemini-2.0-flash"],
+    large: ["gemini-2.0-flash"],
   },
   groq: {
     tiny: ["allam-2-7b"],
@@ -1137,7 +1137,7 @@ ${systemPrompt}`;
             // ─── BYOK failed: retry via server API (which uses env keys) ───
             const byokMsg = byokErr.message || "";
             if ((byokMsg.includes("429") || byokMsg.includes("quota") || byokMsg.includes("Quota") || byokMsg.includes("exhausted") || byokMsg.includes("rate_limit")) && effectiveProvider === "gemini") {
-              // Retry via server API — pass user's BYOK key so server uses it
+              // Retry via server API (uses env keys — GEMINI_API_KEY_5 has fresh quota)
               const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1150,9 +1150,6 @@ ${systemPrompt}`;
                   specializedModel: finalModel,
                   web_search: webSearch ?? false,
                   stream: true,
-                  customKey: apiKey,
-                  customProvider: "gemini",
-                  useCustomKey: true,
                 }),
               });
               if (res.ok) {
