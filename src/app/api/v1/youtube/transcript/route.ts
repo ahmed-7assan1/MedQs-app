@@ -2,17 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { YoutubeTranscript } from "youtube-transcript";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { callGeminiWithRetry } from "@/lib/gemini-keys";
 
 export async function POST(req: NextRequest) {
   const { videoUrl, lectureId } = await req.json();
-  const apiKey = process.env.GEMINI_API_KEY;
 
-  if (!videoUrl || !apiKey) {
+  if (!videoUrl) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
   }
 
   try {
-    // 1. Caching Check: Has this lecture been summarized already?
     if (lectureId) {
       const lecture = await prisma.lecture.findUnique({
         where: { id: lectureId },
@@ -23,7 +22,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Fetch Transcript from YouTube
     let transcriptText = "";
     try {
       const transcript = await YoutubeTranscript.fetchTranscript(videoUrl);
@@ -35,10 +33,6 @@ export async function POST(req: NextRequest) {
     if (!transcriptText || transcriptText.length < 50) {
       return NextResponse.json({ error: "Transcript is too short to summarize." }, { status: 400 });
     }
-
-    // 3. Prompt Gemini AI for a High-Yield Medical Summary
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using stable flash for long transcripts
 
     const prompt = `
       You are an expert medical educator. Below is a transcript of a medical lecture.
@@ -55,10 +49,13 @@ export async function POST(req: NextRequest) {
       ${transcriptText.substring(0, 30000)}
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await callGeminiWithRetry(async (key) => {
+      const genAI = new GoogleGenerativeAI(key);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      return await model.generateContent(prompt);
+    });
     const summary = result.response.text();
 
-    // 4. Update Database (Global Cache)
     if (lectureId) {
       await prisma.lecture.update({
         where: { id: lectureId },

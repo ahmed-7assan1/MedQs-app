@@ -1,4 +1,5 @@
 import { geminiModelChain } from "./gemini-model-chain";
+import { getGeminiApiKeys, callGeminiWithRetry, markKeyExhausted, getSiteConfigOverrides } from "./gemini-keys";
 
 export type ProviderResult = {
   provider: string;
@@ -16,58 +17,6 @@ export type ChatImagePart = { mimeType: string; data: string };
 export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
 const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 30_000;
-
-async function getSiteConfigOverrides() {
-  try {
-    const { prisma } = await import("@/lib/prisma");
-    return await prisma.siteConfig.findFirst();
-  } catch (e) {
-    console.error("Failed to load site config overrides:", e);
-    return null;
-  }
-}
-
-/** In-memory quota exhaustion tracker — key → timestamp of last 429 */
-const geminiQuotaExhaustedAt = new Map<string, number>();
-
-function markKeyExhausted(key: string): void {
-  geminiQuotaExhaustedAt.set(key, Date.now());
-}
-
-function isKeyFresh(key: string): boolean {
-  const t = geminiQuotaExhaustedAt.get(key);
-  if (!t) return true;
-  const now = Date.now();
-  if (now - t > 65 * 1000) {
-    geminiQuotaExhaustedAt.delete(key);
-    return true;
-  }
-  return false;
-}
-
-async function getGeminiKeys(personalKey?: string, strictPersonal = false): Promise<string[]> {
-  const envKeys: string[] = [];
-  if (!strictPersonal) {
-    const config = await getSiteConfigOverrides();
-    if (config?.geminiKeyOverride?.trim()) {
-      envKeys.push(config.geminiKeyOverride.trim());
-    }
-    const base = process.env.GEMINI_API_KEY?.trim();
-    if (base) envKeys.push(base);
-    for (let i = 2; i <= 20; i++) {
-      const k = process.env[`GEMINI_API_KEY_${i}`]?.trim();
-      if (k) envKeys.push(k);
-    }
-  }
-
-  const allKeys: string[] = [];
-  if (personalKey?.trim()) allKeys.push(personalKey.trim());
-  allKeys.push(...envKeys);
-
-  if (allKeys.length === 0) return [];
-  const fresh = allKeys.filter((k) => isKeyFresh(k));
-  return fresh.length > 0 ? fresh : allKeys;
-}
 
 export class AIConfigurationError extends Error {
   constructor(message: string) {
@@ -152,7 +101,7 @@ async function callGemini(
     parts.push({ inline_data: { mime_type: "application/pdf", data: pdf.data } });
   }
 
-  const keys = await getGeminiKeys(personalKey, strictPersonal);
+  const keys = await getGeminiApiKeys(personalKey, strictPersonal);
   if (keys.length === 0) throw new Error("No Gemini API keys configured");
   
   const body = JSON.stringify({ contents: [{ parts }] });
@@ -535,7 +484,7 @@ export async function generateAIReplyWithFallback(
   const pdfs = options?.pdfs?.filter((p) => p.data && p.mimeType === "application/pdf") ?? [];
   
   if (images.length > 0 || pdfs.length > 0) {
-    const geminiKeys = await getGeminiKeys(options?.personalKey, options?.customProvider === "gemini");
+    const geminiKeys = await getGeminiApiKeys(options?.personalKey, options?.customProvider === "gemini");
     if (geminiKeys.length === 0) {
       throw new AIConfigurationError("Images and PDFs require GEMINI_API_KEY on the server.");
     }

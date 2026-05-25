@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { callGeminiWithRetry, getGeminiApiKeys } from "@/lib/gemini-keys";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -41,13 +42,10 @@ Structures in this system: ${sys.structures.map((s: any) => s.name).join(", ")}`
       }
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || (session.user as any).personalGeminiKey;
-
-    if (apiKey) {
+    const persistentGeminiKey = (session.user as any).personalGeminiKey;
+    const keys = await getGeminiApiKeys(persistentGeminiKey);
+    if (keys.length > 0) {
       try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
         const prompt = `You are a professional medical school professor.
 Generate 5 high-yield clinical multiple-choice questions (MCQs) for a medical student about: ${targetName}.
 
@@ -68,10 +66,13 @@ Requirements:
   }
 ]`;
 
-        const result = await model.generateContent(prompt);
-        let text = result.response.text().trim();
+        const geminiResult = await callGeminiWithRetry(async (key) => {
+          const genAI = new GoogleGenerativeAI(key);
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          return await model.generateContent(prompt);
+        }, persistentGeminiKey);
+        let text = geminiResult.response.text().trim();
         
-        // Remove markdown tags if any
         if (text.startsWith("```json")) {
           text = text.substring(7);
         }

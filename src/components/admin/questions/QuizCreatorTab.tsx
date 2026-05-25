@@ -427,9 +427,8 @@ export function QuizCreatorTab() {
                         )}
                         {customAgent === "gemini" && (
                           <>
-                            <option value="gemini-1.5-pro" />
+                            <option value="gemini-2.0-flash" />
                             <option value="gemini-1.5-flash" />
-                            <option value="gemini-2.0-flash-exp" />
                           </>
                         )}
                         {customAgent === "deepseek" && (

@@ -41,9 +41,8 @@ export const PUTER_MODELS: PuterModel[] = [
   { id: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet", provider: "Anthropic", icon: "🟠" },
   { id: "claude-3-haiku-20240307",    label: "Claude 3 Haiku",    provider: "Anthropic", icon: "🟠", badge: "Fast" },
   // Google
-  { id: "gemini-2.5-pro-exp-03-25",   label: "Gemini 2.5 Pro",    provider: "Google",    icon: "🔵", badge: "Best" },
   { id: "gemini-2.0-flash",           label: "Gemini 2.0 Flash",  provider: "Google",    icon: "🔵", badge: "Fast" },
-  { id: "gemini-1.5-pro",             label: "Gemini 1.5 Pro",    provider: "Google",    icon: "🔵" },
+  { id: "gemini-2.0-flash-lite",      label: "Gemini 2.0 Flash Lite",  provider: "Google",    icon: "🔵", badge: "Lite" },
   // Meta
   { id: "meta-llama/llama-3.3-70b-instruct:free", label: "Llama 3.3 70B",    provider: "Meta", icon: "⚫" },
   { id: "meta-llama/llama-4-maverick:free",        label: "Llama 4 Maverick", provider: "Meta", icon: "⚫", badge: "New" },

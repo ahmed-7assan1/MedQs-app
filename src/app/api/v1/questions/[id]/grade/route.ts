@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { callGeminiWithRetry, getGeminiApiKeys } from "@/lib/gemini-keys";
 
 export async function POST(
   req: Request,
@@ -26,13 +27,10 @@ export async function POST(
       return NextResponse.json({ error: "Invalid question for essay grading" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || session.user.personalGeminiKey;
-    if (!apiKey) {
+    const keys = await getGeminiApiKeys(session.user.personalGeminiKey);
+    if (keys.length === 0) {
       return NextResponse.json({ error: "AI not configured" }, { status: 500 });
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
       As a medical professor, grade the following student's response to a clinical question.
@@ -57,10 +55,13 @@ export async function POST(
       }
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await callGeminiWithRetry(async (key) => {
+      const genAI = new GoogleGenerativeAI(key);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      return await model.generateContent(prompt);
+    }, session.user.personalGeminiKey);
     const text = result.response.text();
     
-    // Extract JSON from markdown if needed
     const jsonStr = text.match(/\{[\s\S]*\}/)?.[0] || text;
     const grading = JSON.parse(jsonStr);
 
