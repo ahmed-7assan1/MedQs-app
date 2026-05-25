@@ -689,21 +689,21 @@ function EditProfileContent() {
                     </div>
 
                     <div className="grid gap-4">
-                       {[
-                         { field: "phoneVisible", label: "Public Contact Info", sub: "Display phone number on your public profile", icon: Phone },
-                         { field: "hideRank", label: "Stealth Mode", sub: "Hide your identity from global leaderboards", icon: User },
-                         { field: "isPrivate", label: "Restricted Profile", sub: "Only followers can see your full activity", icon: Save },
-                       ].map(({ field, label, sub }) => (
-                         <div key={field} onClick={() => setForm((f: any) => ({ ...f, [field]: !f[field] }))} className="group flex cursor-pointer items-center justify-between rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 transition-all hover:bg-white/10">
-                            <div className="space-y-1">
-                               <p className="text-base font-black dark:text-white text-slate-800">{label}</p>
-                               <p className="text-[11px] font-bold dark:text-white/30 text-slate-400 uppercase tracking-widest leading-none">{sub}</p>
-                            </div>
-                            <div className={cn("relative flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-all duration-300", (form as any)[field] ? "bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)]" : "bg-slate-300 dark:bg-white/10")}>
-                               <span className={cn("absolute h-5 w-5 rounded-full bg-white shadow-lg transition-transform duration-300", (form as any)[field] ? "translate-x-6" : "translate-x-1")} />
-                            </div>
-                         </div>
-                       ))}
+                        {[
+                          { field: "phoneVisible", label: "Public Contact Info", sub: "Display phone number on your public profile", icon: Phone },
+                          { field: "hideRank", label: "Stealth Mode", sub: "Hide your identity from global leaderboards", icon: User },
+                          { field: "isPrivate", label: "Restricted Profile", sub: "Only followers can see your full activity", icon: Save },
+                        ].map(({ field, label, sub }) => (
+                          <div key={field} role="switch" aria-checked={(form as any)[field]} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setForm((f: any) => ({ ...f, [field]: !f[field] })); } }} onClick={() => setForm((f: any) => ({ ...f, [field]: !f[field] }))} className="group flex cursor-pointer items-center justify-between rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 transition-all hover:bg-white/10">
+                             <div className="space-y-1">
+                                <p className="text-base font-black dark:text-white text-slate-800">{label}</p>
+                                <p className="text-[11px] font-bold dark:text-white/30 text-slate-400 uppercase tracking-widest leading-none">{sub}</p>
+                             </div>
+                             <div className={cn("relative flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-all duration-300", (form as any)[field] ? "bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)]" : "bg-slate-300 dark:bg-white/10")}>
+                                <span className={cn("absolute h-5 w-5 rounded-full bg-white shadow-lg transition-transform duration-300", (form as any)[field] ? "translate-x-6" : "translate-x-1")} />
+                             </div>
+                          </div>
+                        ))}
                     </div>
                   </div>
                </section>
@@ -826,7 +826,7 @@ function EditProfileContent() {
 
                   <div className="grid gap-6">
                      {/* BYOK Toggle */}
-                     <div onClick={() => setForm((f) => ({ ...f, useCustomKey: !f.useCustomKey }))} className="group flex cursor-pointer items-center justify-between rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 transition-all hover:bg-white/10">
+                     <div role="switch" aria-checked={form.useCustomKey} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setForm((f) => ({ ...f, useCustomKey: !f.useCustomKey })); } }} onClick={() => setForm((f) => ({ ...f, useCustomKey: !f.useCustomKey }))} className="group flex cursor-pointer items-center justify-between rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 transition-all hover:bg-white/10">
                         <div className="space-y-1">
                            <p className="text-base font-black dark:text-white text-slate-800">Enable BYOK (Custom Keys)</p>
                            <p className="text-[11px] font-bold dark:text-white/30 text-slate-400 uppercase tracking-widest leading-none">Use my own APIs for AI Chat</p>

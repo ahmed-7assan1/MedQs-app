@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useThemeStore } from "@/lib/store";
 import {
   ArrowLeft,
@@ -26,6 +26,7 @@ export function DrawMedHeader({
   onOpenCommunityLibraries,
   onClearCanvas,
 }: DrawMedHeaderProps) {
+  const router = useRouter();
   const { theme, setTheme } = useThemeStore();
 
   const cycleTheme = () => {
@@ -38,9 +39,9 @@ export function DrawMedHeader({
     <div className="drawmed-topbar drawmed-glass drawmed-fade-in">
       {/* Left: back + menu */}
       <div className="drawmed-topbar__section">
-        <Link href="/" className="drawmed-topbar__btn" aria-label="Back">
+        <button onClick={() => router.back()} className="drawmed-topbar__btn" aria-label="Back">
           <ArrowLeft />
-        </Link>
+        </button>
         <button
           onClick={onToggleLeftMenu}
           className="drawmed-topbar__btn"

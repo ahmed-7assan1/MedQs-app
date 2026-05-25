@@ -177,7 +177,7 @@ export function DrQChat() {
           <button 
             onClick={() => setShowConfig(true)}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-white/40 hover:text-cyan-400 hover:bg-white/5 transition-all group relative border border-transparent"
-            title="Dr. Q Settings"
+            title="MedOneX Expert Settings"
           >
             <Gear size={22} />
             <div className="absolute left-14 px-2.5 py-1 rounded bg-[#0d0d12] border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider scale-0 group-hover:scale-100 transition-all origin-left whitespace-nowrap shadow-xl z-50">
@@ -254,7 +254,7 @@ export function DrQChat() {
                   {React.cloneElement(activePersonaObj.icon as React.ReactElement, { size: 14, weight: "bold" })}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-bold text-white truncate">Dr. Q: {activePersonaObj.name}</span>
+                  <span className="text-[10px] font-bold text-white truncate">MedOneX Expert: {activePersonaObj.name}</span>
                   <span className="text-[8px] text-cyan-400 uppercase tracking-widest font-semibold">{activePersonaObj.shortName}</span>
                 </div>
               </div>
@@ -286,7 +286,7 @@ export function DrQChat() {
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-bold text-white truncate max-w-[180px] md:max-w-[300px]">
-                  {activeThread?.title || "Dr. Q Assistant"}
+                  {activeThread?.title || "MedOneX Expert"}
                 </span>
                 <span className="text-[9px] text-cyan-400 font-semibold uppercase tracking-widest leading-none">
                   {activePersonaObj.name}

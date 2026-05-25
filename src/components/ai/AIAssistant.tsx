@@ -268,7 +268,7 @@ export function AIAssistantPanel({
 
   const labels = {
     en: {
-      drq: "Dr. Q",
+      drq: "MedOneX Expert",
       placeholder: "Ask a medical question...",
       thinking: "Thinking...",
       newTopic: "New topic",
@@ -287,7 +287,7 @@ export function AIAssistantPanel({
       context: "Lecture Context",
       model: "Expertise",
       models: {
-        general: "General Dr. Q",
+        general: "MedOneX Expert",
         internal_medicine: "Internal Medicine",
         surgery: "Surgery",
         pediatrics: "Pediatrics",

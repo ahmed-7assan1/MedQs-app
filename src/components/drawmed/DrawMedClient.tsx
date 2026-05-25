@@ -7,6 +7,7 @@ import { useThemeStore } from "@/lib/store";
 import { DrawMedHeader } from "./DrawMedHeader";
 import { DrawMedLibrary } from "./DrawMedLibrary";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDrQChat } from "@/hooks/useDrQChat";
 import {
   Loader2,
   X,
@@ -25,6 +26,7 @@ import {
   ZoomOut,
   Bot,
   ArrowUp,
+  StopCircle,
 } from "lucide-react";
 import "./excalidraw-styles.css";
 import "./drawmed.css";
@@ -84,7 +86,11 @@ export function DrawMedClient() {
   const [zoomValue, setZoomValue] = useState(1);
   const [aiExpanded, setAiExpanded] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
   const [apiReady, setApiReady] = useState(false);
+
+  const { settings, loading: aiGlobalLoading } = useDrQChat();
 
   // Make the Excalidraw shapes toolbar draggable once the API is ready
   useEffect(() => {
@@ -96,11 +102,9 @@ export function DrawMedClient() {
     let cleanup: (() => void) | null = null;
     const interval = setInterval(() => {
       const toolbar = findToolbar();
-      // Only make it draggable if it's visible and has dimensions
       if (toolbar && toolbar.getBoundingClientRect().width > 0) {
         clearInterval(interval);
         
-        // Get initial position before fixing it
         const rect = toolbar.getBoundingClientRect();
         
         toolbar.style.position = "fixed";
@@ -108,39 +112,52 @@ export function DrawMedClient() {
         toolbar.style.top = `${rect.top}px`;
         toolbar.style.cursor = "grab";
         toolbar.style.zIndex = "50";
+        toolbar.style.touchAction = "none";
 
         let dragging = false;
         let startX = 0, startY = 0;
         let origLeft = 0, origTop = 0;
 
-        const onDown = (e: MouseEvent) => {
+        const onDown = (clientX: number, clientY: number) => {
           dragging = true;
           toolbar.style.cursor = "grabbing";
-          startX = e.clientX;
-          startY = e.clientY;
+          startX = clientX;
+          startY = clientY;
           const currentRect = toolbar.getBoundingClientRect();
           origLeft = currentRect.left;
           origTop = currentRect.top;
-          e.preventDefault();
         };
-        const onMove = (e: MouseEvent) => {
+        const onMove = (clientX: number, clientY: number) => {
           if (!dragging) return;
-          toolbar.style.left = `${origLeft + e.clientX - startX}px`;
-          toolbar.style.top = `${origTop + e.clientY - startY}px`;
+          toolbar.style.left = `${origLeft + clientX - startX}px`;
+          toolbar.style.top = `${origTop + clientY - startY}px`;
         };
         const onUp = () => {
           dragging = false;
           toolbar.style.cursor = "grab";
         };
 
-        toolbar.addEventListener("mousedown", onDown);
-        document.addEventListener("mousemove", onMove);
-        document.addEventListener("mouseup", onUp);
+        const handleMouseDown = (e: MouseEvent) => { e.preventDefault(); onDown(e.clientX, e.clientY); };
+        const handleMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
+        const handleMouseUp = () => onUp();
+        const handleTouchStart = (e: TouchEvent) => { if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY); };
+        const handleTouchMove = (e: TouchEvent) => { if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); };
+        const handleTouchEnd = () => onUp();
+
+        toolbar.addEventListener("mousedown", handleMouseDown);
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+        toolbar.addEventListener("touchstart", handleTouchStart, { passive: true });
+        document.addEventListener("touchmove", handleTouchMove, { passive: true });
+        document.addEventListener("touchend", handleTouchEnd);
 
         cleanup = () => {
-          toolbar.removeEventListener("mousedown", onDown);
-          document.removeEventListener("mousemove", onMove);
-          document.removeEventListener("mouseup", onUp);
+          toolbar.removeEventListener("mousedown", handleMouseDown);
+          document.removeEventListener("mousemove", handleMouseMove);
+          document.removeEventListener("mouseup", handleMouseUp);
+          toolbar.removeEventListener("touchstart", handleTouchStart);
+          document.removeEventListener("touchmove", handleTouchMove);
+          document.removeEventListener("touchend", handleTouchEnd);
         };
       }
     }, 500);
@@ -267,6 +284,91 @@ export function DrawMedClient() {
 
   const handleSetBgColor = useCallback((color: string) => {
     apiRef.current?.updateScene({ appState: { viewBackgroundColor: color } });
+  }, []);
+
+  const aiMessageRef = useRef(aiMessage);
+  aiMessageRef.current = aiMessage;
+  const abortRef = useRef<AbortController | null>(null);
+
+  const handleAiSend = useCallback(async () => {
+    const msg = aiMessageRef.current;
+    if (!msg.trim() || aiLoading) return;
+    const apiKey = settings.byokKeys[settings.activeProvider];
+    if (!apiKey) {
+      setAiResponse("⚠️ Please set your API key in AI Chat settings first.");
+      return;
+    }
+    setAiLoading(true);
+    setAiResponse("");
+    setAiMessage("");
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const baseURL = (await import("@/hooks/useDrQChat")).PROVIDER_CONFIGS[settings.activeProvider].baseURL || `https://api.${settings.activeProvider}.com/v1`;
+      const model = settings.activeModel;
+      const resp = await fetch(`${baseURL}/chat/completions`, {
+        signal: controller.signal,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: "You are a helpful drawing assistant. Help the user create and describe drawings for their medical whiteboard." },
+            { role: "user", content: msg }
+          ],
+          stream: true,
+          max_tokens: 1024,
+        }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `API error ${resp.status}`);
+      }
+      const reader = resp.body!.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") continue;
+          try {
+            const json = JSON.parse(data);
+            const delta = json.choices?.[0]?.delta?.content;
+            if (delta) {
+              full += delta;
+              setAiResponse(full);
+            }
+          } catch {}
+        }
+      }
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        setAiResponse(`❌ Error: ${err.message}`);
+      }
+    } finally {
+      setAiLoading(false);
+      abortRef.current = null;
+    }
+  }, [aiLoading, settings]);
+
+  const handleAiStop = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setAiLoading(false);
   }, []);
 
   useEffect(() => {
@@ -539,20 +641,44 @@ export function DrawMedClient() {
                 <X />
               </button>
             </div>
+            {aiResponse && (
+              <div className="drawmed-ai-assistant__response">
+                {aiResponse}
+              </div>
+            )}
+            {aiLoading && (
+              <div className="drawmed-ai-assistant__loading">
+                <span className="drawmed-ai-assistant__typing-dot" />
+                <span className="drawmed-ai-assistant__typing-dot" />
+                <span className="drawmed-ai-assistant__typing-dot" />
+              </div>
+            )}
             <div className="drawmed-ai-assistant__input">
               <input
                 placeholder="Describe what you'd like to draw…"
                 value={aiMessage}
                 onChange={(e) => setAiMessage(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') { setAiMessage(''); } }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAiSend();
+                  }
+                }}
+                disabled={aiLoading}
               />
-              <button
-                className="drawmed-ai-assistant__send"
-                onClick={() => setAiMessage('')}
-                disabled={!aiMessage.trim()}
-              >
-                <ArrowUp />
-              </button>
+              {aiLoading ? (
+                <button className="drawmed-ai-assistant__send" onClick={handleAiStop} title="Stop">
+                  <StopCircle />
+                </button>
+              ) : (
+                <button
+                  className="drawmed-ai-assistant__send"
+                  onClick={handleAiSend}
+                  disabled={!aiMessage.trim()}
+                >
+                  <ArrowUp />
+                </button>
+              )}
             </div>
           </>
         ) : (

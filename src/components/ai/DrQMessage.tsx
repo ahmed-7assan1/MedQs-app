@@ -40,7 +40,7 @@ interface MessageProps {
   variant?: "bubble" | "flat";
 }
 
-export function DrQMessage({
+const DrQMessageInner: React.FC<MessageProps> = ({
   message,
   fontSize,
   userBubbleColor,
@@ -51,7 +51,7 @@ export function DrQMessage({
   onShare,
   activePersona = "explainer",
   variant = "bubble",
-}: MessageProps) {
+}) => {
   const isAI = message.role === "assistant";
   const [copying, setCopying] = useState(false);
   const [selectionRange, setSelectionRange] = useState<{ text: string, top: number, left: number } | null>(null);
@@ -219,7 +219,13 @@ export function DrQMessage({
                       if (content.includes(":::question")) {
                         try {
                           const jsonStr = content.split(":::question")[1].split(":::")[0].trim();
-                          const q = JSON.parse(jsonStr);
+                          const raw = JSON.parse(jsonStr);
+                          const q = {
+                            question: raw.question || raw.body || "",
+                            options: raw.options || (raw.choices ? raw.choices.map((c: any) => c.text || c) : []),
+                            answer: raw.answer || "",
+                            explanation: raw.explanation || ""
+                          };
                           return <QuestionCard q={q} onSave={() => toast.success("Question saved to your library")} onShare={() => toast.success("Copied link to Discuss Forum")} />;
                         } catch { return <p className="mb-2 last:mb-0">{children}</p>; }
                       }
@@ -313,7 +319,9 @@ export function DrQMessage({
       </div>
     </div>
   );
-}
+};
+
+export const DrQMessage = React.memo(DrQMessageInner);
 
 // ─── Interactive Checklist Component ──────────────────────────────────────
 

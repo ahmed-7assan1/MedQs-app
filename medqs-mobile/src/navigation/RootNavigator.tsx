@@ -18,6 +18,7 @@ import { useThemeStore } from '../store/useThemeStore';
 import { useHomeStore } from '../store/useHomeStore';
 import { mobileApi } from '../lib/api';
 import { View, ActivityIndicator, StatusBar } from 'react-native';
+import { logErrorToFile } from '../lib/debug_logger';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +44,7 @@ export function RootNavigator() {
         
       } catch (err) {
         console.error('[RootNavigator] Bootstrap failed:', err);
+        logErrorToFile(err);
       } finally {
         setConfigLoading(false);
         setHomeLoading(false);

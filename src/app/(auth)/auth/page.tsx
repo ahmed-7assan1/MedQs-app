@@ -215,11 +215,11 @@ function AuthContent() {
         // Sync user to Prisma immediately after login
         await fetch("/api/v1/auth/sync", { method: "POST" });
         
-        toast.success("Identity Verified. Access Granted.");
+        toast.success("Signed in successfully!");
         window.location.href = "/dashboard-app";
       } else {
         if (!selectedUni || !selectedSem || !password || !name) {
-          throw new Error("Please finalize all academic and account details.");
+          throw new Error("Please complete all fields before continuing.");
         }
         
         // Pass academic data to metadata so it's saved even without an immediate session
@@ -241,7 +241,7 @@ function AuthContent() {
         
         if (data.session) {
           await fetch("/api/v1/auth/sync", { method: "POST" });
-          toast.success("Professional Profile Established.");
+          toast.success("Account created successfully!");
           window.location.href = "/dashboard-app";
         } else {
           toast.success("Account created! Please verify your email to continue.");
@@ -249,7 +249,7 @@ function AuthContent() {
         }
       }
     } catch (err: any) {
-      toast.error(err.message || "Protocol Failure. Please try again.");
+      toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -267,7 +267,7 @@ function AuthContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to resend confirmation email.");
       
-      toast.success("Professional verification link dispatched. Please check your inbox.");
+      toast.success("Verification email sent. Please check your inbox.");
     } catch (err: any) {
       toast.error(err.message || "Failed to resend confirmation email.");
     } finally {
@@ -287,7 +287,7 @@ function AuthContent() {
           {isOnboarding ? "Finalize Profile" : (showForgot ? "Access Recovery" : "MedOneX")}
         </h1>
         <p className="text-[10px] text-primary mt-2 font-black uppercase tracking-[0.2em]">
-          Secure Medical Learning Infrastructure
+          Medical Learning Platform
         </p>
       </motion.div>
 
@@ -295,12 +295,12 @@ function AuthContent() {
         
         {/* Tabs */}
         {!isOnboarding && !showForgot && (
-          <div className="relative flex p-1 mb-6 bg-white/5 rounded-[30px]">
+          <div role="tablist" className="relative flex p-1 mb-6 bg-white/5 rounded-[30px]">
             <div className={cn("absolute inset-y-1 w-[calc(50%-4px)] bg-white/10 rounded-[24px] shadow-xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]", activeTab === "register" ? "left-[calc(50%+2px)]" : "left-1")} />
-            <button onClick={() => setActiveTab("login")} className={cn("relative z-10 flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest transition-colors", activeTab === "login" ? "text-white" : "text-white/30")}>
+            <button role="tab" aria-selected={activeTab === "login"} aria-controls="panel-login" onClick={() => setActiveTab("login")} className={cn("relative z-10 flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest transition-colors", activeTab === "login" ? "text-white" : "text-white/30")}>
               Sign In
             </button>
-            <button onClick={() => setActiveTab("register")} className={cn("relative z-10 flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest transition-colors", activeTab === "register" ? "text-white" : "text-white/30")}>
+            <button role="tab" aria-selected={activeTab === "register"} aria-controls="panel-register" onClick={() => setActiveTab("register")} className={cn("relative z-10 flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest transition-colors", activeTab === "register" ? "text-white" : "text-white/30")}>
               Register
             </button>
           </div>
@@ -341,16 +341,18 @@ function AuthContent() {
 
             {/* LOGIN FLOW */}
             {activeTab === "login" && !showForgot && !emailNotConfirmed && (
-              <motion.form key="login" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleEmailAuth} className="space-y-5">
+              <motion.form key="login" id="panel-login" role="tabpanel" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleEmailAuth} className="space-y-5">
                 <div className="space-y-5">
                   <div className="relative group">
                     <EnvelopeSimple className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={20} />
-                    <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Medical Email" 
+                    <label htmlFor="login-email" className="sr-only">Email Address</label>
+                    <input id="login-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address" 
                       className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-5 pl-16 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                   </div>
                   <div className="relative group">
+                    <label htmlFor="login-password" className="sr-only">Password</label>
                     <LockKey className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={20} />
-                    <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Passphrase" 
+                    <input id="login-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" 
                       className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-5 pl-16 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                   </div>
                 </div>
@@ -360,14 +362,14 @@ function AuthContent() {
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] btn-primary-gradient shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center text-xs">
-                  {loading ? <CircleNotch className="animate-spin" size={20} /> : "Initiate Connection"}
+                  {loading ? <CircleNotch className="animate-spin" size={20} /> : "Sign In"}
                 </button>
               </motion.form>
             )}
 
             {/* UNIFIED REGISTER FLOW (SCOPED) */}
             {activeTab === "register" && !showForgot && (
-              <motion.form key="register" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} onSubmit={handleEmailAuth} className="space-y-8">
+              <motion.form key="register" id="panel-register" role="tabpanel" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} onSubmit={handleEmailAuth} className="space-y-8">
                 
                 {/* 1. Academic Scoped Selection */}
                 <div className="space-y-8 pb-4">
@@ -442,24 +444,27 @@ function AuthContent() {
                     
                     <div className="space-y-5">
                       <div className="relative group">
+                        <label htmlFor="reg-name" className="sr-only">Full Name</label>
                         <User className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
-                        <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" 
+                        <input id="reg-name" type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" 
                           className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                       </div>
                       <div className="relative group">
+                        <label htmlFor="reg-email" className="sr-only">Email Address</label>
                         <EnvelopeSimple className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
-                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address" 
+                        <input id="reg-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address" 
                           className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                       </div>
                       <div className="relative group">
+                        <label htmlFor="reg-password" className="sr-only">Password</label>
                         <LockKey className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
-                        <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Passphrase" 
+                        <input id="reg-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" 
                           className="w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] py-4.5 pl-15 pr-8 text-sm font-bold text-white focus:border-primary/50 outline-none transition-all placeholder:text-white/20" />
                       </div>
                     </div>
 
                     <button type="submit" disabled={loading} className="w-full py-5 rounded-[22px] btn-primary-gradient shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-xs">
-                      {loading ? <CircleNotch className="animate-spin" size={20} /> : <><ShieldCheck weight="fill" size={20}/> Finalize Clearance</>}
+                      {loading ? <CircleNotch className="animate-spin" size={20} /> : <><ShieldCheck weight="fill" size={20}/> Create Account</>}
                     </button>
                   </motion.div>
                 )}

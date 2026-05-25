@@ -439,7 +439,7 @@ export function LectureVideoStudio({
                       
                       <div className="relative w-[80px] sm:w-[100px] h-[48px] sm:h-[60px] rounded-lg md:rounded-xl overflow-hidden bg-black shrink-0 border border-white/5 shadow-lg group-hover:scale-105 transition-transform">
                         {thumbUrl ? (
-                          <img src={thumbUrl} className="h-full w-full object-cover" />
+                          <img src={thumbUrl} alt="Video thumbnail" className="h-full w-full object-cover" />
                         ) : (
                           <div className="h-full w-full flex items-center justify-center bg-[#13142a]"><Video className="h-5 w-5 text-[#4a4b6a]" /></div>
                         )}

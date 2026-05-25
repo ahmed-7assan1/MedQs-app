@@ -89,6 +89,23 @@ export function ForumSkeleton() {
   );
 }
 
+export function PageSkeleton() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+          <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+        <div className="space-y-2">
+          <div className="skeleton-box mx-auto h-4 w-32 rounded-lg" />
+          <div className="skeleton-box mx-auto h-3 w-48 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function QuizSkeleton() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6 space-y-4">

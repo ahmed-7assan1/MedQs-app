@@ -7,7 +7,7 @@ import {
   Brain, BookOpen, Layers, Target, MessageSquare, Clock,
   Zap, Shield, BarChart3, Users, Sparkles, ChevronRight,
   TrendingUp, GraduationCap, Award, HeartHandshake,
-  Monitor, Smartphone, Tablet, Eye, Bot,
+  Monitor, Smartphone, Tablet, Eye, Bot, Download,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -170,7 +170,12 @@ function Navbar() {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors px-4">Sign In</Link>
-          <Link href="/download" className="text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors px-4 py-2 rounded-xl">Download App</Link>
+          <Link
+            href="/download"
+            className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#00FF88] to-[#00D4FF] hover:shadow-lg hover:shadow-[#00FF88]/30 transition-all duration-300"
+          >
+            Download App <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+          </Link>
           <Link
             href="/register"
             className="relative group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#00FF88] to-[#00D4FF] hover:shadow-lg hover:shadow-[#00FF88]/30 transition-all duration-300"
@@ -616,34 +621,36 @@ function PricingSection() {
 }
 
 /* ─── CTA ─── */
-function CTASection() {
+function DownloadSection() {
   return (
     <section className="py-24 px-6">
       <div className="mx-auto max-w-5xl">
         <FadeUp>
           <div className="relative p-8 md:p-16 rounded-[32px] bg-gradient-to-br from-[#111827] to-[#0A0E1A] border border-[#1F2937] overflow-hidden text-center">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#00FF88]/5 via-[#00D4FF]/5 to-purple-600/5" />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#00FF88]/10 blur-[100px] rounded-full" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#00FF88]/5 to-blue-500/5" />
             <div className="relative">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
-                Ready to Transform Your{" "}
-                <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">Studies</span>?
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-6">
+                Get the <span className="bg-gradient-to-r from-[#00FF88] to-[#00D4FF] bg-clip-text text-transparent">MedOneX</span> App
               </h2>
-              <p className="text-gray-400 max-w-lg mx-auto mb-10">Join 50,000+ medical students already using MedOneX. Start your journey today.</p>
+              <p className="text-lg text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
+                Take your medical studies anywhere. The full MedOneX experience optimized for your phone and tablet.
+              </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  href="/register"
+                <a
+                  href="/download"
                   className="group h-14 px-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#00FF88] to-[#00D4FF] text-[#0A0E1A] font-bold text-base hover:shadow-lg hover:shadow-[#00FF88]/30 transition-all duration-300 hover:scale-[1.02]"
                 >
-                  Get Started Free <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  href="/download"
-                  className="h-14 px-10 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 text-white font-medium text-base hover:bg-white/5 transition-all"
-                >
-                  <Smartphone className="w-5 h-5" /> Download App
-                </Link>
+                  <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                  Download for Android
+                </a>
+                <div className="h-14 w-full sm:w-auto flex items-center justify-center px-10 rounded-2xl bg-white/5 border border-white/10 text-lg font-bold text-gray-500 cursor-not-allowed">
+                  <Smartphone className="mr-3 h-6 w-6" />
+                  iOS — Coming Soon
+                </div>
               </div>
+              <p className="mt-6 text-sm text-gray-500">
+                APK · v1.0.0 · ~25 MB · Android 8.0+
+              </p>
             </div>
           </div>
         </FadeUp>
@@ -651,6 +658,7 @@ function CTASection() {
     </section>
   );
 }
+
 
 /* ─── Footer ─── */
 function FooterSection() {
@@ -710,7 +718,7 @@ export default function LandingPage() {
     <div className="bg-[#0A0E1A] text-white min-h-screen">
       <Navbar />
       <HeroSection />
-      <CTASection />
+      <DownloadSection />
       <LogosBar />
       <FeaturesSection />
       <BentoSection />

@@ -327,7 +327,7 @@ export default function TeamProfilePage() {
                                  #{idx + 1}
                                </div>
                                <div className="h-10 w-10 rounded-full bg-white/5 overflow-hidden">
-                                 <img src={m.user.image || `https://api.dicebear.com/7.x/shapes/svg?seed=${m.userId}`} className="w-full h-full object-cover" />
+                                 <img src={m.user.image || `https://api.dicebear.com/7.x/shapes/svg?seed=${m.userId}`} alt={m.user.name || "User avatar"} className="w-full h-full object-cover" />
                                </div>
                                <p className="font-bold text-sm text-white">{m.user.name}</p>
                              </div>

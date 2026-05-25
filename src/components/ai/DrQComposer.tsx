@@ -204,7 +204,7 @@ export function DrQComposer({
                 <div key={i} className="relative group flex-shrink-0">
                   <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-2 text-center overflow-hidden shadow-inner">
                     {f.mimeType.startsWith('image/') ? (
-                      <img src={f.data} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={f.data} alt="Attached image" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <Files size={20} className="text-white/40 mb-1" />
                     )}
@@ -235,7 +235,7 @@ export function DrQComposer({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask Dr. Q anything..."
+            placeholder="Ask MedOneX Expert anything..."
             className="flex-1 bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none resize-none py-2 text-[14px] text-white placeholder-white/20 max-h-48 no-scrollbar font-medium"
           />
 
@@ -284,7 +284,7 @@ export function DrQComposer({
       </div>
       
       <div className="text-center mt-3">
-         <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] select-none">Dr. Q Intelligence • Medical AI Can Make Mistakes</span>
+         <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] select-none">MedOneX Expert AI • Medical AI Can Make Mistakes</span>
       </div>
     </div>
   );

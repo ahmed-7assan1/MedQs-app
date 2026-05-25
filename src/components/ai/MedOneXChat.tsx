@@ -7,7 +7,7 @@ import {
   Plus, Paperclip, ArrowUp, Stop, X, Trash, ChatDots,
   MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
   Check, GlobeHemisphereWest, Sparkle, Sun, Moon,
-  WarningCircle, Clock, House, ChatCircle
+  WarningCircle, Clock, House, ChatCircle, Key
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -59,7 +59,18 @@ export function MedOneXChat() {
   const [activeTab, setActiveTab] = useState("recent");
   const [inputFocused, setInputFocused] = useState(false);
   const [showApiAlert, setShowApiAlert] = useState(false);
-  const [fileUploading, setFileUploading] = useState(false);
+  const [showModules, setShowModules] = useState(false);
+  const [modulesData, setModulesData] = useState<any[]>([]);
+  const [modulesSearch, setModulesSearch] = useState("");
+
+  // Fetch user modules when the modal opens
+  useEffect(() => {
+    if (showModules && modulesData.length === 0) {
+      fetch("/api/v1/user/syllabus").then(r => r.json()).then(d => {
+        if (d?.modules) setModulesData(d.modules);
+      }).catch(() => {});
+    }
+  }, [showModules]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -82,7 +93,7 @@ export function MedOneXChat() {
   }, [settings.byokKeys, settings.activeProvider, messages.length]);
 
   const handleSend = () => {
-    if ((!input.trim() && files.length === 0) || loading) return;
+    if ((!input.trim() && files.length === 0) || loading || files.some(f => f.loading)) return;
     const apiKey = settings.byokKeys[settings.activeProvider];
     if (!apiKey) {
       setShowApiAlert(true);
@@ -100,18 +111,18 @@ export function MedOneXChat() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
     if (!selected) return;
-    setFileUploading(true);
-    const newFiles: FileAttachment[] = [];
-    let count = 0;
     Array.from(selected).forEach(file => {
+      const placeholder: FileAttachment = { data: "", mimeType: file.type, name: file.name, size: file.size, loading: true };
+      setFiles(prev => [...prev, placeholder]);
       const reader = new FileReader();
       reader.onload = (ev) => {
-        newFiles.push({ data: ev.target?.result as string, mimeType: file.type, name: file.name, size: file.size });
-        count++;
-        if (count === selected.length) { setFiles([...files, ...newFiles]); setFileUploading(false); }
+        setFiles(prev => prev.map(f => f === placeholder ? { ...f, data: ev.target?.result as string, loading: false } : f));
       };
-      reader.onerror = () => setFileUploading(false);
-      if (file.type.startsWith('image/') || file.type === 'application/pdf') reader.readAsDataURL(file);
+      reader.onerror = () => {
+        setFiles(prev => prev.filter(f => f !== placeholder));
+      };
+      reader.onprogress = (e) => {};
+      if (file.type.startsWith('image/') || file.type === 'application/pdf' || file.name.match(/\.pptx?$/i)) reader.readAsDataURL(file);
       else reader.readAsText(file);
     });
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -150,7 +161,7 @@ export function MedOneXChat() {
               <div className="flex-1 min-w-0">
                 <p className={cn("text-sm font-bold", isDark ? "text-red-300" : "text-red-800")}>API Key Required</p>
                 <p className={cn("text-xs mt-1", isDark ? "text-red-400/80" : "text-red-600")}>
-                  Set your {PROVIDER_CONFIGS[settings.activeProvider].label} API key in settings to start chatting.
+                  Set your {PROVIDER_CONFIGS[settings.activeProvider]?.label ?? "Provider"} API key in settings to start chatting.
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -234,6 +245,19 @@ export function MedOneXChat() {
               ))}
             </div>
 
+            {/* Modules Button */}
+            <button
+              onClick={() => setShowModules(true)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all",
+                isDark ? "text-white/40 hover:bg-white/5 hover:text-white/70" : "text-gray-400 hover:bg-black/5 hover:text-gray-700"
+              )}
+              title="My Modules"
+            >
+              <BookOpen size={14} weight="bold" />
+              <span className="hidden sm:inline">Modules</span>
+            </button>
+
             {/* Right: Actions */}
             <div className="flex items-center gap-1.5">
               {/* Model Selector Widget — always visible chips */}
@@ -275,8 +299,20 @@ export function MedOneXChat() {
                               isDark ? "bg-[#1e1e1e] border-white/10" : "bg-white border-gray-200"
                             )}
                           >
-                            <div className={cn("px-3 py-2 text-[10px] font-bold uppercase tracking-wider", isDark ? "text-white/30" : "text-gray-400")}>
-                              {PROVIDER_CONFIGS[p].label}
+                            <div className={cn("flex items-center justify-between px-3 py-2", isDark ? "" : "")}>
+                              <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-white/30" : "text-gray-400")}>
+                                {PROVIDER_CONFIGS[p].label}
+                              </span>
+                              <a
+                                href={PROVIDER_CONFIGS[p].keyUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className={cn("p-1 rounded-lg transition-colors flex items-center gap-1", isDark ? "text-white/30 hover:bg-white/10 hover:text-white" : "text-gray-400 hover:bg-gray-100 hover:text-gray-700")}
+                                title="Get API Key"
+                              >
+                                <Key size={12} weight="bold" />
+                              </a>
                             </div>
                             {PROVIDER_CONFIGS[p].models.map(m => (
                               <button
@@ -416,6 +452,97 @@ export function MedOneXChat() {
         )}
       </AnimatePresence>
 
+      {/* ─── Modules Widget ─── */}
+      <AnimatePresence>
+        {showModules && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-30 flex items-center justify-center p-4"
+          >
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModules(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className={cn(
+                "relative w-full max-w-lg h-[75vh] rounded-3xl overflow-hidden border shadow-2xl flex flex-col",
+                isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200"
+              )}
+            >
+              {/* Header */}
+              <div className={cn("flex items-center justify-between p-4 border-b flex-shrink-0", isDark ? "border-white/10" : "border-gray-200")}>
+                <div className="flex items-center gap-3">
+                  <BookOpen size={18} weight="fill" className="text-indigo-500" />
+                  <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-gray-900")}>My Modules</span>
+                </div>
+                <button onClick={() => setShowModules(false)} className={cn("p-2 rounded-xl transition-colors", isDark ? "text-white/50 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800")}>
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="p-3 flex-shrink-0">
+                <div className="relative">
+                  <MagnifyingGlass size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-gray-500" : "text-gray-400")} />
+                  <input
+                    value={modulesSearch}
+                    onChange={e => setModulesSearch(e.target.value)}
+                    placeholder="Search modules, subjects, lectures..."
+                    className={cn(
+                      "w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition-colors",
+                      isDark ? "bg-white/5 text-white placeholder-gray-500 border border-white/10" : "bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-200"
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Module List */}
+              <div className="flex-1 overflow-y-auto no-scrollbar px-3 pb-3 space-y-2">
+                {modulesData.length === 0 ? (
+                  <div className={cn("flex flex-col items-center justify-center h-48 text-sm gap-3", isDark ? "text-gray-500" : "text-gray-400")}>
+                    <BookOpen size={32} weight="thin" />
+                    <span>No modules found for your semester</span>
+                  </div>
+                ) : (
+                  modulesData
+                    .filter((mod: any) =>
+                      !modulesSearch || mod.name.toLowerCase().includes(modulesSearch.toLowerCase()) ||
+                      mod.subjects?.some((s: any) =>
+                        s.name.toLowerCase().includes(modulesSearch.toLowerCase()) ||
+                        s.lectures?.some((l: any) => l.title.toLowerCase().includes(modulesSearch.toLowerCase()))
+                      )
+                    )
+                    .map((mod: any) => (
+                      <div key={mod.id} className={cn("rounded-2xl overflow-hidden border transition-all", isDark ? "border-white/10" : "border-gray-200")}>
+                        <div className={cn("px-4 py-3 font-bold text-sm flex items-center gap-2", isDark ? "bg-white/5 text-white" : "bg-gray-50 text-gray-900")}>
+                          <BookOpen size={14} weight="fill" className="text-indigo-500" />
+                          {mod.name}
+                        </div>
+                        {mod.subjects?.map((sub: any) => (
+                          <div key={sub.id} className={cn("border-t", isDark ? "border-white/5" : "border-gray-100")}>
+                            <div className={cn("px-4 py-2 text-xs font-semibold", isDark ? "text-gray-300" : "text-gray-600")}>{sub.name}</div>
+                            {sub.lectures?.map((lec: any) => (
+                              <div key={lec.id} className={cn("px-4 py-1.5 text-[11px] pl-8", isDark ? "text-gray-500" : "text-gray-400")}>
+                                {lec.title}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                        {(!mod.subjects || mod.subjects.length === 0) && (
+                          <div className={cn("px-4 py-2 text-xs", isDark ? "text-gray-500" : "text-gray-400")}>No subjects</div>
+                        )}
+                      </div>
+                    ))
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ─── Messages Area ─── */}
       <main className={cn("flex flex-col flex-1 min-h-0 pt-[60px]", isDark ? "bg-black" : "bg-white")}>
         <div className="flex-1 overflow-y-auto scrollbar-hover min-h-0">
@@ -508,7 +635,7 @@ export function MedOneXChat() {
                             {(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
                           </span>
                           <span className={cn("text-[10px] font-semibold uppercase tracking-widest", isDark ? "text-gray-500" : "text-gray-400")}>
-                            {PROVIDER_CONFIGS[settings.activeProvider].label} · MedOneX Expert
+                            {PROVIDER_CONFIGS[settings.activeProvider]?.label ?? "Provider"} · MedOneX Expert
                           </span>
                         </div>
                       </div>
@@ -543,6 +670,51 @@ export function MedOneXChat() {
           )}
         </div>
 
+        {/* File Preview Bar */}
+        {files.length > 0 && (
+          <div className="flex-shrink-0 flex justify-center px-3 md:px-4 pb-1">
+            <div className="w-full max-w-3xl flex flex-wrap gap-2">
+              {files.map((f, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "group relative flex items-center gap-2 px-2 py-1.5 rounded-xl border max-w-[200px]",
+                    isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-200"
+                  )}
+                >
+                  {f.loading ? (
+                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", isDark ? "bg-white/10" : "bg-gray-200")}>
+                      <svg className="animate-spin h-3.5 w-3.5 text-indigo-500" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    </div>
+                  ) : f.mimeType.startsWith("image/") ? (
+                    <img src={f.data} alt={f.name} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold flex-shrink-0", isDark ? "bg-white/10 text-gray-300" : "bg-gray-200 text-gray-500")}>
+                      {f.name.match(/\.pdf$/i) ? "PDF" : f.name.match(/\.pptx?$/i) ? "PPT" : "📄"}
+                    </div>
+                  )}
+                  <div className="flex flex-col min-w-0">
+                    <span className={cn("text-xs truncate max-w-[100px]", f.loading && "text-indigo-500")}>{f.name}</span>
+                    {f.loading && <span className="text-[9px] text-indigo-400">Reading...</span>}
+                  </div>
+                  <button
+                    onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
+                    className={cn(
+                      "absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity",
+                      isDark ? "bg-gray-700 text-gray-300" : "bg-gray-300 text-gray-600"
+                    )}
+                  >
+                    <X size={10} weight="bold" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Floating Input Island - Fixed Bottom */}
         <div className={cn("flex-shrink-0 pb-2 md:pb-3 pt-4 flex justify-center", isDark ? "bg-black" : "bg-white")}>
           <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
@@ -562,7 +734,7 @@ export function MedOneXChat() {
                     onClick={() => fileInputRef.current?.click()}
                     className={cn("p-1.5 rounded-lg transition-colors flex items-center justify-center", isDark ? "text-gray-300 hover:bg-white/10 hover:text-white" : "text-gray-400 hover:bg-gray-100")}
                   >
-                    {fileUploading ? (
+                    {files.some(f => f.loading) ? (
                       <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -571,7 +743,7 @@ export function MedOneXChat() {
                       <Paperclip size={16} />
                     )}
                   </button>
-                  <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf" onChange={handleFileChange} />
+                  <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
                   <button
                     onClick={() => setWebSearchEnabled(!webSearchEnabled)}
                     className={cn(

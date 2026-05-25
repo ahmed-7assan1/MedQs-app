@@ -14,6 +14,7 @@ export type FileAttachment = {
   mimeType: string;
   name: string;
   size?: number;
+  loading?: boolean;  // true while FileReader is processing
 };
 
 export type MessageReaction = "like" | "dislike" | null;
@@ -87,14 +88,25 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
   gemini: {
     label: "Google Gemini",
     defaultModel: "gemini-2.0-flash",
-    models: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-flash-thinking-exp"],
+    models: [
+      "gemini-2.0-flash", "gemini-2.0-flash-lite",
+      "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
+      "gemini-3.5-flash",
+      "gemini-3-flash-preview", "gemini-3-pro-preview",
+      "gemini-3.1-pro-preview", "gemini-3.1-flash-lite",
+      "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-pro-latest",
+    ],
     icon: "G",
     keyUrl: "https://aistudio.google.com/app/apikey",
   },
   groq: {
     label: "Groq",
     defaultModel: "llama-3.3-70b-versatile",
-    models: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
+    models: [
+      "llama-3.3-70b-versatile", "llama-3.1-8b-instant",
+      "meta-llama/llama-4-scout-17b-16e-instruct", "qwen/qwen3-32b",
+      "openai/gpt-oss-120b", "openai/gpt-oss-20b", "allam-2-7b",
+    ],
     baseURL: "https://api.groq.com/openai/v1",
     icon: "⚡",
     keyUrl: "https://console.groq.com/keys",
@@ -102,7 +114,16 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
   siliconflow: {
     label: "SiliconFlow (DeepSeek)",
     defaultModel: "deepseek-ai/DeepSeek-R1",
-    models: ["deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-V3", "Qwen/Qwen2.5-72B-Instruct", "Qwen/Qwen2.5-Coder-7B-Instruct"],
+    models: [
+      "deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-V3",
+      "Qwen/Qwen2.5-72B-Instruct", "Qwen/Qwen2.5-32B-Instruct", "Qwen/Qwen2.5-14B-Instruct", "Qwen/Qwen2.5-7B-Instruct",
+      "Qwen/Qwen2.5-Coder-32B-Instruct", "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "Qwen/Qwen2-VL-72B-Instruct", "Qwen/Qwen2-VL-7B-Instruct",
+      "meta-llama/Llama-3.3-70B-Instruct", "meta-llama/Llama-3.1-8B-Instruct",
+      "mistralai/Mixtral-8x22B-Instruct-v0.1", "mistralai/Mistral-7B-Instruct-v0.3",
+      "THUDM/glm-4-9b-chat", "internlm/internlm2_5-20b-chat",
+      "microsoft/Phi-3.5-mini-instruct", "BAAI/bge-large-zh-v1.5",
+    ],
     baseURL: "https://api.siliconflow.cn/v1",
     icon: "🌀",
     keyUrl: "https://cloud.siliconflow.cn/",
@@ -151,6 +172,75 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
   },
 };
 
+// ─── Smart Model Selector ──────────────────────────────────────────────────────
+
+type ModelTier = "tiny" | "small" | "medium" | "large";
+
+interface ProviderModelTiers {
+  tiny: string[];
+  small: string[];
+  medium: string[];
+  large: string[];
+}
+
+const MODEL_TIERS: Partial<Record<AIProvider, ProviderModelTiers>> = {
+  gemini: {
+    tiny: ["gemini-2.0-flash-lite"],
+    small: ["gemini-2.0-flash"],
+    medium: ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"],
+    large: ["gemini-2.5-pro", "gemini-3.5-flash", "gemini-3-pro-preview", "gemini-3.1-pro-preview", "gemini-pro-latest"],
+  },
+  groq: {
+    tiny: ["allam-2-7b"],
+    small: ["openai/gpt-oss-20b", "llama-3.1-8b-instant"],
+    medium: ["meta-llama/llama-4-scout-17b-16e-instruct", "qwen/qwen3-32b"],
+    large: ["llama-3.3-70b-versatile", "openai/gpt-oss-120b"],
+  },
+  siliconflow: {
+    tiny: ["Qwen/Qwen2.5-Coder-7B-Instruct", "microsoft/Phi-3.5-mini-instruct"],
+    small: ["Qwen/Qwen2.5-7B-Instruct", "Qwen/Qwen2.5-Coder-7B-Instruct"],
+    medium: ["Qwen/Qwen2.5-14B-Instruct", "Qwen/Qwen2.5-32B-Instruct", "Qwen/Qwen2.5-72B-Instruct", "deepseek-ai/DeepSeek-V3"],
+    large: ["deepseek-ai/DeepSeek-R1", "meta-llama/Llama-3.3-70B-Instruct"],
+  },
+  cloudflare: {
+    tiny: ["@cf/meta/llama-3.1-8b-instruct"],
+    small: ["@cf/meta/llama-3.1-8b-instruct", "@hf/nousresearch/hermes-2-pro-llama-3-8b"],
+    medium: ["@cf/mistral/mistral-7b-instruct-v0.1", "@cf/google/gemma-2-27b-it"],
+    large: ["@cf/meta/llama-3.3-70b-instruct-fp8-fast"],
+  },
+  huggingface: {
+    tiny: ["microsoft/Phi-3-medium-4k-instruct"],
+    small: ["mistralai/Mistral-7B-Instruct-v0.3", "microsoft/Phi-3-medium-4k-instruct"],
+    medium: ["google/gemma-2-27b-it", "Qwen/Qwen2.5-72B-Instruct"],
+    large: ["meta-llama/Llama-3.3-70B-Instruct"],
+  },
+  together: {
+    tiny: ["meta-llama/Llama-3.1-8B-Instruct-Turbo"],
+    small: ["meta-llama/Llama-3.1-8B-Instruct-Turbo"],
+    medium: ["mistralai/Mixtral-8x22B-Instruct-v0.1", "Qwen/Qwen2.5-72B-Instruct-Turbo", "deepseek-ai/DeepSeek-V3"],
+    large: ["meta-llama/Llama-3.3-70B-Instruct-Turbo"],
+  },
+};
+
+function selectSmartModel(provider: AIProvider, content: string, persona: string, conversationDepth: number): string {
+  const tiers = MODEL_TIERS[provider];
+  if (!tiers) return PROVIDER_CONFIGS[provider].defaultModel;
+
+  const lower = content.trim().toLowerCase();
+  // Quiz always needs best quality
+  if (persona === "quiz") return tiers.large[0] || tiers.medium[0] || PROVIDER_CONFIGS[provider].defaultModel;
+  // Greetings / very short
+  if (lower.length < 30 || /^(hi|hello|hey|thanks|thx|شكرا|هلا|مرحبا|تمام|ok|okay|yes|no|yep|nope|👍|✅|😊|🙏|good|great|nice|ko|k)$/i.test(lower)) {
+    return tiers.tiny[0] || tiers.small[0] || PROVIDER_CONFIGS[provider].defaultModel;
+  }
+  // Short follow-ups
+  if (lower.length < 150 && conversationDepth > 0) return tiers.small[0] || tiers.medium[0] || PROVIDER_CONFIGS[provider].defaultModel;
+  // Medium questions
+  if (lower.length < 600) return tiers.medium[0] || tiers.large[0] || PROVIDER_CONFIGS[provider].defaultModel;
+  // Complex / long
+  return tiers.large[0] || PROVIDER_CONFIGS[provider].defaultModel;
+}
+
 const DEFAULT_SETTINGS: DrQSettings = {
   byokKeys: {},
   activeProvider: "gemini",
@@ -170,10 +260,14 @@ async function streamGemini(
   model: string,
   messages: MessageForAPI[],
   files: FileAttachment[],
-  onChunk: (text: string) => void
+  onChunk: (text: string) => void,
+  webSearch?: boolean
 ): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const mdl = genAI.getGenerativeModel({ model });
+  const mdl = genAI.getGenerativeModel({
+    model,
+    ...(webSearch ? { tools: [{ googleSearch: {} }] } : {}),
+  });
 
   // Build Gemini history (all but last)
   const history = messages.slice(0, -1).map((m) => ({
@@ -188,11 +282,10 @@ async function streamGemini(
   const parts: any[] = [{ text: lastMsg.content || "" }];
 
   for (const f of files) {
-    if (f.mimeType.startsWith("image/") || f.mimeType === "application/pdf") {
+    if (f.mimeType.startsWith("image/") || f.mimeType === "application/pdf" || f.mimeType.includes("presentation")) {
       const base64 = f.data.split(",")[1];
       parts.push({ inlineData: { mimeType: f.mimeType, data: base64 } });
     } else {
-      // Treat text files as text parts
       const textContent = atob(f.data.split(",")[1] || f.data);
       parts.push({ text: `\n\n[File: ${f.name}]\n${textContent}` });
     }
@@ -214,13 +307,31 @@ async function streamOpenAICompat(
   model: string,
   messages: MessageForAPI[],
   files: FileAttachment[],
-  onChunk: (text: string) => void
+  onChunk: (text: string) => void,
+  webSearch?: boolean
 ): Promise<string> {
+  let searchContext = "";
+  if (webSearch) {
+    try {
+      const lastMsg = messages[messages.length - 1];
+      const searchRes = await fetch("/api/v1/ai/web-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: lastMsg.content }),
+      });
+      if (searchRes.ok) {
+        const data = await searchRes.json();
+        if (data.results) searchContext = `\n\n[WEB SEARCH RESULTS]\n${data.results}\n[/WEB SEARCH RESULTS]\n`;
+      }
+    } catch {}
+  }
+
   // Build messages with vision support
   const apiMessages: any[] = messages.map((m, idx) => {
     const isLast = idx === messages.length - 1;
+    const text = isLast && searchContext ? m.content + searchContext : m.content;
     if (isLast && files.length > 0) {
-      const content: any[] = [{ type: "text", text: m.content || " " }];
+      const content: any[] = [{ type: "text", text: text || " " }];
       for (const f of files) {
         if (f.mimeType.startsWith("image/")) {
           content.push({ type: "image_url", image_url: { url: f.data } });
@@ -233,7 +344,7 @@ async function streamOpenAICompat(
       }
       return { role: m.role, content };
     }
-    return { role: m.role, content: m.content };
+    return { role: m.role, content: text };
   });
 
   const resp = await fetch(`${baseURL}/chat/completions`, {
@@ -376,7 +487,7 @@ export function useDrQChat() {
     fetch("/api/v1/user/byok-keys").then(r => r.json()).then(data => {
       if (data?.keys) {
         setSettings(prev => {
-          const merged = { ...prev, byokKeys: { ...prev.byokKeys, ...data.keys } };
+          const merged = { ...prev, byokKeys: { ...data.keys, ...prev.byokKeys } };
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
           return merged;
         });
@@ -817,11 +928,12 @@ ${systemPrompt}`;
             throw new Error(data.error || "Invalid response format");
           }
         } else {
+          const effectiveModel = selectSmartModel(activeProvider as AIProvider, content, activePersona, currentMessages.length);
           if (activeProvider === "gemini") {
-            finalContent = await streamGemini(apiKey, activeModel, historyForAPI, files, onChunk);
+            finalContent = await streamGemini(apiKey, effectiveModel, historyForAPI, files, onChunk, webSearch);
           } else {
             const baseURL = PROVIDER_CONFIGS[activeProvider].baseURL ?? "https://api.openai.com/v1";
-            finalContent = await streamOpenAICompat(apiKey, baseURL, activeModel, historyForAPI, files, onChunk);
+            finalContent = await streamOpenAICompat(apiKey, baseURL, effectiveModel, historyForAPI, files, onChunk, webSearch);
           }
         }
 
@@ -839,8 +951,8 @@ ${systemPrompt}`;
       } catch (err: any) {
         const msg = err.message || "";
         let friendly = "";
-        if (msg.includes("429") || msg.includes("quota") || msg.includes("Quota")) {
-          friendly = `${PROVIDER_CONFIGS[activeProvider].label} quota exceeded. Check your billing or try another provider.`;
+        if (msg.includes("429") || msg.includes("quota") || msg.includes("Quota") || msg.includes("exhausted") || msg.includes("rate_limit")) {
+          friendly = `${PROVIDER_CONFIGS[activeProvider].label}: ${msg}`;
         } else if (msg.includes("401") || msg.includes("403") || msg.includes("API_KEY_INVALID") || msg.includes("not valid") || msg.includes("unauthorized")) {
           friendly = `Invalid ${PROVIDER_CONFIGS[activeProvider].label} API key. Update it in Settings.`;
         } else if (msg.includes("fetch") || msg.includes("network") || msg.includes("Network") || msg.includes("ENOTFOUND")) {

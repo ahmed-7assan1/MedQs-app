@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { 
   House, Books, Question, Sparkle, MagnifyingGlass, X,
   Chats, Clock, Sun, Moon, Gear, UsersThree, Pen,
-  PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt
+  PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt, Robot
 } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/store";
@@ -24,6 +24,7 @@ const NAV_ITEMS = [
   { href: "/taskat", label: "Tasks", icon: Clock },
   { href: "/teams", label: "Teams", icon: UsersThree },
   { href: "/drawmed", label: "DrawMed", icon: Pen },
+  { href: "/ai-chat", label: "AI Chat", icon: Robot, glow: true },
 ];
 
 export function FloatingIslandNavbar({ 
@@ -108,13 +109,13 @@ export function FloatingIslandNavbar({
       initial={{ y: 0 }}
       animate={{ y: isVisible ? 0 : -120 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="fixed inset-x-0 top-0 z-[200] hidden md:flex justify-center items-start p-3 pointer-events-none"
+      className="fixed inset-x-0 top-0 z-[200] hidden md:flex justify-center items-start px-3 pt-0 pointer-events-none"
     >
       <div
         ref={islandRef}
         className={cn(
           "pointer-events-auto relative flex flex-col items-center overflow-hidden",
-          "rounded-[32px] border dark:border-white/10 border-black/5",
+          "rounded-b-[32px] rounded-t-none border-x border-b dark:border-white/10 border-black/5 border-t-0",
           "dark:bg-black/80 bg-white/90 backdrop-blur-[40px]",
           "shadow-[0_25px_60px_rgba(0,0,0,0.25)]",
           "transition-all duration-300 ease-out",
@@ -149,10 +150,14 @@ export function FloatingIslandNavbar({
                       "flex items-center justify-center rounded-xl h-10 px-3 transition-all gap-2 group",
                       active
                         ? "dark:bg-white/10 bg-black/5 dark:text-white text-black"
-                        : "dark:text-white/40 text-black/40 hover:text-primary dark:hover:bg-white/5 hover:bg-black/5"
+                        : "dark:text-white/40 text-black/40 hover:text-primary dark:hover:bg-white/5 hover:bg-black/5",
+                      (item as any).glow && !active && "relative"
                     )}
                   >
-                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "group-hover:text-primary")} />
+                    {(item as any).glow && !active && (
+                      <span className="absolute inset-0 rounded-xl bg-primary/10 animate-pulse blur-sm" />
+                    )}
+                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "group-hover:text-primary", (item as any).glow && !active && "text-primary/70")} />
                     <span className="text-[11px] font-black uppercase tracking-wider hidden lg:block">
                       {item.label}
                     </span>

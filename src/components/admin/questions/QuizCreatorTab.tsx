@@ -544,7 +544,7 @@ export function QuizCreatorTab() {
                                 </label>
                              </div>
                              {q.imageUrl && <div className="mt-2 relative group aspect-video rounded-xl border border-white/[0.02] overflow-hidden">
-                                <img src={q.imageUrl} className="h-full w-full object-cover" />
+                                <img src={q.imageUrl} alt="Question image" className="h-full w-full object-cover" />
                                 <button onClick={() => updateQ(qi, "imageUrl", "")} className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="h-3 w-3" /></button>
                              </div>}
                           </div>

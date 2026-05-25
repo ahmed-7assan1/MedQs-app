@@ -319,7 +319,7 @@ export function DrQFuturisticChat() {
               <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/10", `bg-gradient-to-br ${activePersonaObj.gradient}`)}>
                 {React.cloneElement(activePersonaObj.icon as React.ReactElement, { size: 12, weight: "fill" })}
               </div>
-              <span className="text-xs font-bold text-white/70 truncate max-w-[100px]">{activeThread?.title || "Dr. Q"}</span>
+              <span className="text-xs font-bold text-white/70 truncate max-w-[100px]">{activeThread?.title || "MedOneX Expert"}</span>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -490,7 +490,7 @@ export function DrQFuturisticChat() {
                       <div key={i} className="relative group flex-shrink-0">
                         <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-2 overflow-hidden">
                           {f.mimeType.startsWith('image/') ? (
-                            <img src={f.data} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <img src={f.data} alt="Attached image" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
                             <NoteBlank size={16} className="text-white/30" />
                           )}
@@ -545,7 +545,7 @@ export function DrQFuturisticChat() {
                     title={isVoiceRecording ? "Stop recording" : "Voice input"}>
                     <Microphone size={18} weight={isVoiceRecording ? "fill" : "bold"} />
                   </button>
-                  <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf" onChange={handleFileChange} />
+                  <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
                   {/* Model Picker */}
                   <div className="relative ml-1">
                     <button onClick={() => {
@@ -624,7 +624,7 @@ export function DrQFuturisticChat() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask Dr. Q anything..."
+                  placeholder="Ask MedOneX Expert anything..."
                   className="flex-1 bg-transparent border-none outline-none resize-none py-2 text-sm text-white/90 placeholder-white/20 max-h-44 no-scrollbar font-medium leading-relaxed"
                 />
                 {loading ? (
@@ -648,7 +648,7 @@ export function DrQFuturisticChat() {
             </div>
 
             <div className="flex items-center justify-between mt-2.5 px-1">
-              <span className="text-[8px] font-bold text-white/15 uppercase tracking-[0.25em]">Dr. Q Intelligence · AI Can Make Mistakes</span>
+              <span className="text-[8px] font-bold text-white/15 uppercase tracking-[0.25em]">MedOneX Expert AI · AI Can Make Mistakes</span>
               <span className="text-[8px] text-white/15 font-medium">
                 {limits.used}/{limits.limit}
               </span>
@@ -742,7 +742,7 @@ export function DrQFuturisticChat() {
               className="fixed top-0 left-0 bottom-0 w-full max-w-[320px] bg-[#0a0b14]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl z-[101] flex flex-col md:hidden"
             >
               <div className="p-5 flex items-center justify-between border-b border-white/[0.04]">
-                <span className="text-sm font-bold text-gradient-primary">Dr. Q</span>
+                <span className="text-sm font-bold text-gradient-primary">MedOneX Expert</span>
                 <button onClick={() => setMobileSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-2xl text-white/40">
                   <X size={18} weight="bold" />
                 </button>

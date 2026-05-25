@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // ─── Base URL ────────────────────────────────────────────────────────────────
 // Local: Use localhost for web preview or your Wi-Fi IPv4 for mobile.
+// IMPORTANT: If testing on a real device, replace 'localhost' with your computer's IP address.
 const BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 export const API_URL = `${BASE}/api/mobile`;
 export const API_V1_URL = `${BASE}/api/v1/mobile`;
@@ -146,7 +147,6 @@ export const mobileApi = {
     const q = new URLSearchParams(params as any).toString();
     return api.get<any[]>(`/library-resources?${q}`);
   },
-
   // Forums
   getForums: (params: { universityId?: string; type?: string; semesterId?: string }) => {
     const q = new URLSearchParams(params as any).toString();
@@ -181,8 +181,7 @@ export const mobileApi = {
   // ─── V1 Mobile API ────────────────────────────────────────────────────────
   // Curriculum: Modules → Subjects → Lectures
   getModules: () => {
-    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
-    return fetch(`${base}/api/v1/mobile/modules`, {
+    return fetch(`${BASE}/api/v1/mobile/modules`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     }).then(async r => {
@@ -193,8 +192,7 @@ export const mobileApi = {
   getModulesAuth: async () => {
     const { getItemAsync } = await import('expo-secure-store');
     const token = await getItemAsync('sessionToken').catch(() => null);
-    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
-    return fetch(`${base}/api/v1/mobile/modules`, {
+    return fetch(`${BASE}/api/v1/mobile/modules`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -205,13 +203,11 @@ export const mobileApi = {
       return r.json() as Promise<any[]>;
     });
   },
-
   // Community feed
   getCommunity: async () => {
     const { getItemAsync } = await import('expo-secure-store');
     const token = await getItemAsync('sessionToken').catch(() => null);
-    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
-    return fetch(`${base}/api/v1/mobile/community`, {
+    return fetch(`${BASE}/api/v1/mobile/community`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -222,13 +218,11 @@ export const mobileApi = {
       return r.json() as Promise<{ posts: any[]; stats: { onlineMembers: number; totalDiscussions: number } }>;
     });
   },
-
   // Subject detail
   getSubject: async (id: string) => {
     const { getItemAsync } = await import('expo-secure-store');
     const token = await getItemAsync('sessionToken').catch(() => null);
-    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
-    return fetch(`${base}/api/v1/mobile/subjects/${id}`, {
+    return fetch(`${BASE}/api/v1/mobile/subjects/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -239,24 +233,19 @@ export const mobileApi = {
       return r.json() as Promise<any>;
     });
   },
-
   // AI Study Assistant Chat (uses v1/mobile base path with Bearer token)
   sendAiMessage: async (messages: { role: string; content: string }[], puterModel?: string) => {
     const { getItemAsync } = await import('expo-secure-store');
     const token = await getItemAsync('sessionToken').catch(() => null);
-    const base = (process.env.EXPO_PUBLIC_API_URL || 'http://10.209.217.227:3000');
-    // Build request: last message is the user message, prior are history
-    const history = messages.slice(0, -1);
-    const last = messages[messages.length - 1];
-    return fetch(`${base}/api/v1/ai/chat`, {
+    return fetch(`${BASE}/api/v1/ai/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
-        message: last?.content || '',
-        conversationHistory: history,
+        message: messages[messages.length - 1]?.content || '',
+        conversationHistory: messages.slice(0, -1),
         puterModel,
       }),
     }).then(async r => {
@@ -266,3 +255,4 @@ export const mobileApi = {
     });
   },
 };
+

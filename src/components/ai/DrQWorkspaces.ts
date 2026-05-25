@@ -33,8 +33,8 @@ export const DRQ_WORKSPACES: Record<WorkspaceId, Workspace> = {
     icon: React.createElement(Student, { weight: "fill" }),
     description: "Medical exam preparation & clinical reasoning",
     personaId: "quiz",
-    defaultProvider: "openai",
-    defaultModel: "gpt-4o",
+    defaultProvider: "groq",
+    defaultModel: "llama-3.3-70b-versatile",
   },
   quiz: {
     id: "quiz",
