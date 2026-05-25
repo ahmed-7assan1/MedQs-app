@@ -31,9 +31,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch {
-    // Return a colored placeholder as fallback
-    const color = req.nextUrl.searchParams.get("fallback") || "e2e8f0";
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect fill="#${color}" width="400" height="400"/><text x="200" y="180" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="16">Image unavailable</text><text x="200" y="210" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="13">Click to search alternative</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect fill="#e2e8f0" width="400" height="400"/></svg>`;
 
     return new NextResponse(svg, {
       status: 200,
@@ -45,5 +43,3 @@ export async function GET(req: NextRequest) {
     });
   }
 }
-
-export const config = { runtime: "edge" };

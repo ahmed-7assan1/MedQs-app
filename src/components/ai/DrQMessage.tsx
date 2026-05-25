@@ -348,57 +348,50 @@ export const DrQMessage = React.memo(DrQMessageInner);
 // ─── Image Gallery Section (handles direct URLs + Search queries) ────────
 
 function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[]; searchTopics: string[] }) {
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  type GalleryImg = { url: string; fallbacks: string[] };
+  const [galleryImages, setGalleryImages] = useState<GalleryImg[]>([]);
   const [loading, setLoading] = useState(searchTopics.length > 0);
 
-  const proxyUrl = (src: string) => `/api/v1/images/proxy?url=${encodeURIComponent(src)}`;
-
   useEffect(() => {
-    const directProxied = directUrls.map(u => proxyUrl(u));
+    const direct: GalleryImg[] = directUrls.map(u => ({
+      url: u,
+      fallbacks: [`/api/v1/images/proxy?url=${encodeURIComponent(u)}`],
+    }));
 
     if (searchTopics.length === 0) {
-      setGalleryImages(directProxied);
+      setGalleryImages(direct);
       return;
     }
 
     let cancelled = false;
-
-    Promise.all(searchTopics.map(async (topic) => {
-      try {
-        const res = await fetch(`/api/v1/images/search?q=${encodeURIComponent(topic)}&max=4`);
-        if (!res.ok) throw new Error("Search failed");
-        const data = await res.json();
-        return (data.images || []).map((img: any) => img.url);
-      } catch { return []; }
-    })).then((results) => {
+    Promise.all(searchTopics.map(topic =>
+      fetch(`/api/v1/images/search?q=${encodeURIComponent(topic)}&max=4`)
+        .then(r => r.json())
+        .then(data => (data.images || []).map((img: any) => img.url))
+        .catch(() => [])
+    )).then((results) => {
       if (cancelled) return;
-      setGalleryImages([...directProxied, ...results.flat()].filter(Boolean));
+      const searched: GalleryImg[] = results.flat().filter(Boolean).map(u => ({
+        url: u,
+        fallbacks: [`/api/v1/images/proxy?url=${encodeURIComponent(u)}`],
+      }));
+      setGalleryImages([...direct, ...searched]);
       setLoading(false);
     }).catch(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
   }, [directUrls, searchTopics]);
 
-  const handleImgError = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
-    const img = e.currentTarget;
-    // Skip if already replaced
-    if (img.dataset.replaced) return;
-    img.dataset.replaced = "1";
-
-    // Check if original URL was Pollinations — extract prompt for fallback search
-    const origUrl = directUrls[idx] || "";
-    const pollMatch = origUrl.match(/pollinations\.ai\/prompt\/([^?]+)/);
-    if (pollMatch) {
-      const prompt = decodeURIComponent(pollMatch[1]);
-      fetch(`/api/v1/images/search?q=${encodeURIComponent(prompt)}&max=1`)
-        .then(r => r.json())
-        .then(data => {
-          const fallbackUrl = data.images?.[0]?.url;
-          if (fallbackUrl) img.src = fallbackUrl;
-        })
-        .catch(() => {});
-    }
-  }, [directUrls]);
+  const handleImgError = useCallback((_e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
+    setGalleryImages(prev => {
+      const img = prev[idx];
+      if (!img || img.fallbacks.length === 0) return prev;
+      const [nextUrl, ...rest] = img.fallbacks;
+      const next = [...prev];
+      next[idx] = { url: nextUrl, fallbacks: rest };
+      return next;
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -415,8 +408,9 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
     );
   }
 
-  if (galleryImages.length === 0) return null;
-  return <AiImageGallery images={galleryImages} onError={handleImgError} />;
+  const validImages = galleryImages.map(g => g.url).filter(Boolean);
+  if (validImages.length === 0) return null;
+  return <AiImageGallery images={validImages} onError={handleImgError} />;
 }
 
 // ─── AI Image Gallery ─────────────────────────────────────────────────────
