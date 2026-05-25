@@ -331,7 +331,7 @@ export async function POST(req: NextRequest) {
   let activeCustomModel = customModel || null;
   let activeCustomUrl = undefined;
 
-  if (byokActive) {
+  if (byokActive && !customKey) {
     if (customProvider === "openai") {
       activeCustomKey = user.personalOpenAIKey;
     } else if (customProvider === "anthropic") {

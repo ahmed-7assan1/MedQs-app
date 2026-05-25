@@ -99,8 +99,6 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     defaultModel: "gemini-2.0-flash",
     models: [
       "gemini-2.0-flash", "gemini-2.0-flash-lite",
-      "gemini-2.5-pro",
-      "gemini-3.1-pro-preview",
     ],
     icon: "G",
     keyUrl: "https://aistudio.google.com/app/apikey",
@@ -1139,7 +1137,7 @@ ${systemPrompt}`;
             // ─── BYOK failed: retry via server API (which uses env keys) ───
             const byokMsg = byokErr.message || "";
             if ((byokMsg.includes("429") || byokMsg.includes("quota") || byokMsg.includes("Quota") || byokMsg.includes("exhausted") || byokMsg.includes("rate_limit")) && effectiveProvider === "gemini") {
-              // Retry on server with user's BYOK key explicitly (bypasses useCustomKey flag)
+              // Retry via server API — pass user's BYOK key so server uses it
               const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

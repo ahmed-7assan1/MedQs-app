@@ -33,8 +33,6 @@ export function geminiModelChain(): string[] {
     "gemini-2.0-flash-lite",
     "gemini-1.5-flash",
     "gemini-1.5-flash-8b",
-    "gemini-2.0-pro-exp",
-    "gemini-1.5-pro",
   ];
 
   const raw = env ? [env, ...fallbacks.filter((m) => m !== env)] : fallbacks;
