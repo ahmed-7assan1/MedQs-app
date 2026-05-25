@@ -374,7 +374,7 @@
    Floating AI Assistant
    ============================================================ */
 .drawmed-ai-assistant {
-  position: absolute;
+  position: fixed;
   bottom: 88px;
   right: 24px;
   z-index: 60;
@@ -383,14 +383,59 @@
   gap: 8px;
   padding: 12px;
   min-width: 200px;
-  max-width: 320px;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 400px;
+  max-height: 80vh;
+  resize: both;
+  overflow: hidden;
+  user-select: none;
 }
 
 .drawmed-ai-assistant--collapsed {
   padding: 10px;
   min-width: 44px;
   cursor: pointer;
+  resize: none;
+}
+
+.drawmed-ai-assistant__drag-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 32px;
+  height: 28px;
+  cursor: grab;
+  z-index: 2;
+  border-radius: 20px 20px 0 0;
+}
+
+.drawmed-ai-assistant__drag-handle:active {
+  cursor: grabbing;
+}
+
+.drawmed-ai-assistant__resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  z-index: 3;
+  opacity: 0.4;
+  background: linear-gradient(135deg, transparent 50%, rgba(124, 92, 252, 0.6) 50%);
+  border-radius: 0 0 20px 0;
+  transition: opacity 0.2s;
+}
+
+.drawmed-ai-assistant__resize-handle:hover {
+  opacity: 0.8;
+}
+
+.drawmed-ai-assistant__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-left: 16px;
 }
 
 .drawmed-ai-assistant__header {
@@ -593,6 +638,26 @@
 
 .excalidraw .App-toolbar .ToolIcon__icon:hover {
   background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* --- Light theme for toolbar --- */
+[data-theme="light"] .excalidraw .App-toolbar-container {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .excalidraw .App-toolbar .ToolIcon__icon:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .excalidraw .App-toolbar .ToolIcon_type_radio:checked + .ToolIcon__icon {
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.12), rgba(79, 95, 255, 0.08)) !important;
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.08), inset 0 0 0 1px rgba(124, 92, 252, 0.2) !important;
+}
+
+[data-theme="light"] .excalidraw .App-toolbar .ToolIcon_type_radio:checked + .ToolIcon__icon svg {
+  color: rgba(124, 92, 252, 0.85) !important;
 }
 
 /* --- App-menu__left (element properties panel) --- */

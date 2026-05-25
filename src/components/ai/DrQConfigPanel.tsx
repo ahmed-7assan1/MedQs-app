@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { 
   X, Key, TextT, Palette, Check, ShieldCheck,
   Lightning, GoogleLogo, OpenAiLogo, Globe, CaretDown,
-  Eye, EyeSlash
+  Eye, EyeSlash, ArrowUpRight
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DrQSettings, PROVIDER_CONFIGS, AIProvider } from "@/hooks/useDrQChat";
@@ -106,6 +106,21 @@ export function DrQConfigPanel({ isOpen, onClose, settings, onUpdate }: ConfigPa
                                 {config.icon}
                               </div>
                               <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-gray-900")}>{config.label}</span>
+                              {config.keyUrl && (
+                                <a
+                                  href={config.keyUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className={cn(
+                                    "flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:scale-105",
+                                    isDark ? "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20" : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                                  )}
+                                >
+                                  Get API
+                                  <ArrowUpRight size={10} weight="bold" />
+                                </a>
+                              )}
                             </div>
                             {key ? (
                               <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600")}>Connected</span>

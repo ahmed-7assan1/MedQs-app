@@ -528,6 +528,8 @@ model User {
   personalCloudflareKey    String?
   personalHuggingfaceKey   String?
   personalTogetherKey      String?
+  personalGithubKey       String?
+  personalCerebrasKey     String?
   personalSiliconFlowUrl String?                  @default("https://api.siliconflow.cn/v1")
   handle                String?                   @unique
   telegramId            String?                   @unique

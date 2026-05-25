@@ -89,6 +89,7 @@ export function DrawMedClient() {
   const [aiResponse, setAiResponse] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [apiReady, setApiReady] = useState(false);
+  const aiAssistantRef = useRef<HTMLDivElement>(null);
 
   const { settings, loading: aiGlobalLoading } = useDrQChat();
 
@@ -167,6 +168,81 @@ export function DrawMedClient() {
       cleanup?.();
     };
   }, [apiReady]);
+
+  // AI assistant drag
+  useEffect(() => {
+    const el = aiAssistantRef.current;
+    if (!el || !aiExpanded) return;
+
+    const dragHandle = el.querySelector<HTMLElement>(".drawmed-ai-assistant__drag-handle");
+    const resizeHandle = el.querySelector<HTMLElement>(".drawmed-ai-assistant__resize-handle");
+    if (!dragHandle || !resizeHandle) return;
+
+    let dragging = false, resizing = false;
+    let startX = 0, startY = 0;
+    let startLeft = 0, startTop = 0;
+    let startW = 0, startH = 0;
+
+    const onDragStart = (clientX: number, clientY: number) => {
+      dragging = true;
+      const rect = el.getBoundingClientRect();
+      startLeft = rect.left;
+      startTop = rect.top;
+      startX = clientX;
+      startY = clientY;
+    };
+    const onDragMove = (clientX: number, clientY: number) => {
+      if (!dragging) return;
+      el.style.left = `${startLeft + clientX - startX}px`;
+      el.style.top = `${startTop + clientY - startY}px`;
+      el.style.right = "auto";
+      el.style.bottom = "auto";
+    };
+    const onDragEnd = () => { dragging = false; };
+
+    const onResizeStart = (clientX: number, clientY: number) => {
+      resizing = true;
+      startW = el.offsetWidth;
+      startH = el.offsetHeight;
+      startX = clientX;
+      startY = clientY;
+    };
+    const onResizeMove = (clientX: number, clientY: number) => {
+      if (!resizing) return;
+      el.style.width = `${Math.max(200, startW + clientX - startX)}px`;
+      el.style.height = `${Math.max(100, startH + clientY - startY)}px`;
+      el.style.maxWidth = "none";
+      el.style.maxHeight = "none";
+    };
+    const onResizeEnd = () => { resizing = false; };
+
+    const handleMouseDown = (e: MouseEvent) => { e.preventDefault(); onDragStart(e.clientX, e.clientY); };
+    const handleMouseMove = (e: MouseEvent) => { onDragMove(e.clientX, e.clientY); onResizeMove(e.clientX, e.clientY); };
+    const handleMouseUp = () => { onDragEnd(); onResizeEnd(); };
+    const handleTouchStart = (e: TouchEvent) => { if (e.touches.length === 1) { if (e.target === dragHandle) onDragStart(e.touches[0].clientX, e.touches[0].clientY); if (e.target === resizeHandle) onResizeStart(e.touches[0].clientX, e.touches[0].clientY); }};
+    const handleTouchMove = (e: TouchEvent) => { if (e.touches.length === 1) { onDragMove(e.touches[0].clientX, e.touches[0].clientY); onResizeMove(e.touches[0].clientX, e.touches[0].clientY); }};
+    const handleTouchEnd = () => { onDragEnd(); onResizeEnd(); };
+
+    dragHandle.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    resizeHandle.addEventListener("mousedown", (e) => { e.preventDefault(); onResizeStart((e as MouseEvent).clientX, (e as MouseEvent).clientY); });
+    dragHandle.addEventListener("touchstart", handleTouchStart, { passive: true });
+    resizeHandle.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      dragHandle.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      resizeHandle.removeEventListener("mousedown", handleMouseDown);
+      dragHandle.removeEventListener("touchstart", handleTouchStart);
+      resizeHandle.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [aiExpanded]);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -293,8 +369,10 @@ export function DrawMedClient() {
   const handleAiSend = useCallback(async () => {
     const msg = aiMessageRef.current;
     if (!msg.trim() || aiLoading) return;
-    const apiKey = settings.byokKeys[settings.activeProvider];
-    if (!apiKey) {
+    const apiKey = settings.byokKeys[settings.activeProvider] ?? "";
+    const drq = await import("@/hooks/useDrQChat");
+    const skipAuth = drq.PROVIDER_CONFIGS[settings.activeProvider]?.needsKey === false;
+    if (!apiKey && !skipAuth) {
       setAiResponse("⚠️ Please set your API key in AI Chat settings first.");
       return;
     }
@@ -306,14 +384,19 @@ export function DrawMedClient() {
     abortRef.current = controller;
 
     try {
-      const baseURL = (await import("@/hooks/useDrQChat")).PROVIDER_CONFIGS[settings.activeProvider].baseURL || `https://api.${settings.activeProvider}.com/v1`;
+      const baseURL = drq.PROVIDER_CONFIGS[settings.activeProvider].baseURL || `https://api.${settings.activeProvider}.com/v1`;
       const model = settings.activeModel;
+      const needsHeader = baseURL.includes("openrouter") || baseURL.includes("ovh");
       const resp = await fetch(`${baseURL}/chat/completions`, {
         signal: controller.signal,
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
+          ...(skipAuth ? {} : { "Authorization": `Bearer ${apiKey}` }),
+          ...(needsHeader ? {
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "MedQs DrawMed",
+          } : {}),
         },
         body: JSON.stringify({
           model,
@@ -629,9 +712,12 @@ export function DrawMedClient() {
       </div>
 
       <div
+        ref={aiAssistantRef}
         className={`drawmed-ai-assistant drawmed-glass drawmed-fade-in drawmed-fade-in--delay-2 ${!aiExpanded ? 'drawmed-ai-assistant--collapsed' : ''}`}
         onClick={!aiExpanded ? () => setAiExpanded(true) : undefined}
       >
+        {aiExpanded && <div className="drawmed-ai-assistant__drag-handle" />}
+        {aiExpanded && <div className="drawmed-ai-assistant__resize-handle" />}
         {aiExpanded ? (
           <>
             <div className="drawmed-ai-assistant__header">

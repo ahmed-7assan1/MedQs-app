@@ -39,7 +39,7 @@ export type Thread = {
   pinnedProvider?: string;
 };
 
-export type AIProvider = "gemini" | "groq" | "siliconflow" | "cloudflare" | "huggingface" | "together";
+export type AIProvider = "gemini" | "groq" | "siliconflow" | "cloudflare" | "huggingface" | "together" | "openrouter" | "ovhcloud" | "github" | "cerebras";
 
 export type BYOKKeys = {
   gemini?: string;
@@ -48,6 +48,10 @@ export type BYOKKeys = {
   cloudflare?: string;
   huggingface?: string;
   together?: string;
+  openrouter?: string;
+  ovhcloud?: string;
+  github?: string;
+  cerebras?: string;
 };
 
 export type DrQSettings = {
@@ -84,6 +88,7 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
   baseURL?: string;
   icon: string;
   keyUrl: string;
+  needsKey?: boolean;
 }> = {
   gemini: {
     label: "Google Gemini",
@@ -170,6 +175,77 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     icon: "◆",
     keyUrl: "https://api.together.ai/settings/api-keys",
   },
+  openrouter: {
+    label: "OpenRouter",
+    defaultModel: "openrouter/free",
+    models: [
+      "openrouter/free",
+      "deepseek/deepseek-v4-flash:free",
+      "google/gemma-4-26b-a4b-it:free",
+      "google/gemma-4-31b-it:free",
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "minimax/minimax-m2.5:free",
+      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "arcee-ai/trinity-large-thinking:free",
+      "poolside/laguna-m.1:free",
+      "baidu/cobuddy:free",
+      "liquid/lfm-2.5-1.2b-thinking:free",
+    ],
+    baseURL: "https://openrouter.ai/api/v1",
+    icon: "⊜",
+    keyUrl: "https://openrouter.ai/keys",
+  },
+  ovhcloud: {
+    label: "OVHcloud",
+    defaultModel: "Meta-Llama-3_3-70B-Instruct",
+    models: [
+      "Meta-Llama-3_3-70B-Instruct",
+      "gpt-oss-120b",
+      "Qwen3-32B",
+      "Qwen3.5-397B-A17B",
+      "Qwen3-Coder-30B-A3B-Instruct",
+      "Mistral-7B-Instruct-v0.3",
+      "Mistral-Small-3.2-24B-Instruct-2506",
+      "Mistral-Nemo-Instruct-2407",
+      "Llama-3.1-8B-Instruct",
+      "Qwen2.5-VL-72B-Instruct",
+    ],
+    baseURL: "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
+    icon: "☁",
+    keyUrl: "https://endpoints.ai.cloud.ovh.net/",
+    needsKey: false,
+  },
+  github: {
+    label: "GitHub Models",
+    defaultModel: "gpt-4o",
+    models: [
+      "gpt-4o", "gpt-4.1", "gpt-4.1-mini", "gpt-5",
+      "o4-mini",
+      "Meta-Llama-3.3-70B-Instruct",
+      "Llama-4-Scout-17B-16E",
+      "Llama-4-Maverick-17B-128E",
+      "DeepSeek-R1",
+      "Mistral-Small-3.1-24B-Instruct-2506",
+    ],
+    baseURL: "https://models.github.ai/inference",
+    icon: "◇",
+    keyUrl: "https://github.com/settings/tokens",
+  },
+  cerebras: {
+    label: "Cerebras",
+    defaultModel: "llama-3.3-70b",
+    models: [
+      "llama-3.3-70b",
+      "gpt-oss-120b",
+      "qwen-3-32b",
+      "qwen-3-235b-a22b-instruct-2507",
+      "llama-4-scout-17b-16e-instruct",
+      "zai-glm-4.7",
+    ],
+    baseURL: "https://api.cerebras.ai/v1",
+    icon: "⚙",
+    keyUrl: "https://cloud.cerebras.ai/",
+  },
 };
 
 // ─── Smart Model Selector ──────────────────────────────────────────────────────
@@ -220,6 +296,30 @@ const MODEL_TIERS: Partial<Record<AIProvider, ProviderModelTiers>> = {
     medium: ["mistralai/Mixtral-8x22B-Instruct-v0.1", "Qwen/Qwen2.5-72B-Instruct-Turbo", "deepseek-ai/DeepSeek-V3"],
     large: ["meta-llama/Llama-3.3-70B-Instruct-Turbo"],
   },
+  openrouter: {
+    tiny: ["nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "liquid/lfm-2.5-1.2b-thinking:free", "baidu/cobuddy:free"],
+    small: ["poolside/laguna-m.1:free", "arcee-ai/trinity-large-thinking:free"],
+    medium: ["google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3-super-120b-a12b:free", "minimax/minimax-m2.5:free"],
+    large: ["deepseek/deepseek-v4-flash:free", "google/gemma-4-31b-it:free", "openrouter/free"],
+  },
+  ovhcloud: {
+    tiny: ["Mistral-7B-Instruct-v0.3"],
+    small: ["Llama-3.1-8B-Instruct", "Mistral-Small-3.2-24B-Instruct-2506"],
+    medium: ["Qwen3-32B", "gpt-oss-120b"],
+    large: ["Meta-Llama-3_3-70B-Instruct", "Qwen3.5-397B-A17B"],
+  },
+  github: {
+    tiny: ["gpt-4.1-mini", "Mistral-Small-3.1-24B-Instruct-2506"],
+    small: ["gpt-4.1", "gpt-4o"],
+    medium: ["o4-mini", "gpt-5"],
+    large: ["gpt-4o", "DeepSeek-R1"],
+  },
+  cerebras: {
+    tiny: ["zai-glm-4.7"],
+    small: ["qwen-3-32b"],
+    medium: ["llama-4-scout-17b-16e-instruct", "llama-3.3-70b"],
+    large: ["gpt-oss-120b", "qwen-3-235b-a22b-instruct-2507"],
+  },
 };
 
 function selectSmartModel(provider: AIProvider, content: string, persona: string, conversationDepth: number): string {
@@ -239,6 +339,37 @@ function selectSmartModel(provider: AIProvider, content: string, persona: string
   if (lower.length < 600) return tiers.medium[0] || tiers.large[0] || PROVIDER_CONFIGS[provider].defaultModel;
   // Complex / long
   return tiers.large[0] || PROVIDER_CONFIGS[provider].defaultModel;
+}
+
+// ─── Auto-Fallback ──────────────────────────────────────────────────────────
+
+const FALLBACK_ORDER: AIProvider[] = [
+  "ovhcloud",
+  "openrouter",
+  "gemini",
+  "groq",
+  "github",
+  "cerebras",
+  "siliconflow",
+  "together",
+  "cloudflare",
+  "huggingface",
+];
+
+function findFallbackProvider(byokKeys: BYOKKeys, exclude: AIProvider, prefer?: AIProvider): AIProvider | null {
+  const hasKey = (p: AIProvider) => byokKeys[p] || PROVIDER_CONFIGS[p]?.needsKey === false;
+  if (prefer && prefer !== exclude && hasKey(prefer)) return prefer;
+  for (const p of FALLBACK_ORDER) {
+    if (p !== exclude && hasKey(p)) return p;
+  }
+  return null;
+}
+
+function findFirstAvailableProvider(byokKeys: BYOKKeys): AIProvider | null {
+  for (const p of FALLBACK_ORDER) {
+    if (byokKeys[p] || PROVIDER_CONFIGS[p]?.needsKey === false) return p;
+  }
+  return null;
 }
 
 const DEFAULT_SETTINGS: DrQSettings = {
@@ -308,7 +439,8 @@ async function streamOpenAICompat(
   messages: MessageForAPI[],
   files: FileAttachment[],
   onChunk: (text: string) => void,
-  webSearch?: boolean
+  webSearch?: boolean,
+  skipAuth?: boolean
 ): Promise<string> {
   let searchContext = "";
   if (webSearch) {
@@ -351,8 +483,8 @@ async function streamOpenAICompat(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      ...(baseURL.includes("openrouter") ? {
+      ...(skipAuth ? {} : { "Authorization": `Bearer ${apiKey}` }),
+      ...(baseURL.includes("openrouter") || baseURL.includes("ovh") ? {
         "HTTP-Referer": window.location.origin,
         "X-Title": "MedQs Dr. Q"
       } : {}),
@@ -749,8 +881,36 @@ export function useDrQChat() {
       abortRef.current = false;
 
       const { activeProvider, activeModel, byokKeys, activePersona } = settings;
+      let effectiveProvider: AIProvider = activeProvider;
       try {
-        const apiKey = byokKeys[activeProvider] ?? "";
+        effectiveProvider = activeProvider;
+        let apiKey = byokKeys[effectiveProvider] ?? "";
+        const needsKey = PROVIDER_CONFIGS[effectiveProvider]?.needsKey !== false;
+
+        if (!apiKey && needsKey) {
+          const fallback = findFirstAvailableProvider(byokKeys);
+          if (fallback) {
+            const reason = `No API key set for ${PROVIDER_CONFIGS[effectiveProvider].label}`;
+            effectiveProvider = fallback;
+            apiKey = byokKeys[fallback] ?? "";
+            const label = PROVIDER_CONFIGS[fallback].label;
+            toast.success(`🔄 Auto-switched to ${label}: ${reason}`);
+            updateSettings({ activeProvider: fallback, activeModel: PROVIDER_CONFIGS[fallback].defaultModel });
+          } else {
+            toast.error("No API keys configured. Get a free key from OpenRouter (no credit card needed) or add one in Settings.");
+            setThreads(prev => {
+              const updated = prev.map(t => t.id === threadId
+                ? { ...t, messages: t.messages.filter(m => m.id !== aiMsgId) }
+                : t
+              );
+              localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+              return updated;
+            });
+            setLoading(false);
+            setStreamingId(null);
+            return;
+          }
+        }
 
         // 0. Fetch founder LinkedIn from site data
         let founderLinkedIn = "";
@@ -831,7 +991,7 @@ ${systemPrompt}`;
         if (settings.smartEngineEnabled) {
           // Find a secondary provider that is configured
           const availableProviders = Object.keys(byokKeys).filter(k => byokKeys[k as AIProvider]) as AIProvider[];
-          const secondaryProvider = availableProviders.find(p => p !== activeProvider);
+          const secondaryProvider = availableProviders.find(p => p !== effectiveProvider);
           
           if (secondaryProvider) {
             try {
@@ -901,8 +1061,8 @@ ${systemPrompt}`;
               conversationHistory: historyForAPI.slice(0, -1),
               images: files.filter(f => f.mimeType.startsWith("image/")),
               pdfs: files.filter(f => f.mimeType === "application/pdf"),
-              provider: activeProvider,
-              specializedModel: activeModel,
+              provider: effectiveProvider,
+              specializedModel: effectiveProvider === activeProvider ? activeModel : PROVIDER_CONFIGS[effectiveProvider].defaultModel,
               web_search: webSearch ?? false,
               stream: true,
             }),
@@ -928,12 +1088,17 @@ ${systemPrompt}`;
             throw new Error(data.error || "Invalid response format");
           }
         } else {
-          const effectiveModel = selectSmartModel(activeProvider as AIProvider, content, activePersona, currentMessages.length);
-          if (activeProvider === "gemini") {
-            finalContent = await streamGemini(apiKey, effectiveModel, historyForAPI, files, onChunk, webSearch);
+          const smartModel = selectSmartModel(effectiveProvider as AIProvider, content, activePersona, currentMessages.length);
+          const useModel = (effectiveProvider === "openrouter" && !activeModel.includes(":free") && !activeModel.includes("/free"))
+            ? "openrouter/free"
+            : (effectiveProvider === activeProvider ? activeModel : PROVIDER_CONFIGS[effectiveProvider].defaultModel);
+          const finalModel = smartModel || useModel;
+          if (effectiveProvider === "gemini") {
+            finalContent = await streamGemini(apiKey, finalModel, historyForAPI, files, onChunk, webSearch);
           } else {
-            const baseURL = PROVIDER_CONFIGS[activeProvider].baseURL ?? "https://api.openai.com/v1";
-            finalContent = await streamOpenAICompat(apiKey, baseURL, effectiveModel, historyForAPI, files, onChunk, webSearch);
+            const baseURL = PROVIDER_CONFIGS[effectiveProvider].baseURL ?? "https://api.openai.com/v1";
+            const skipAuth = PROVIDER_CONFIGS[effectiveProvider]?.needsKey === false;
+            finalContent = await streamOpenAICompat(apiKey, baseURL, finalModel, historyForAPI, files, onChunk, webSearch, skipAuth);
           }
         }
 
@@ -950,19 +1115,31 @@ ${systemPrompt}`;
         fetchLimits();
       } catch (err: any) {
         const msg = err.message || "";
+        const failedProvider: AIProvider = effectiveProvider || activeProvider;
         let friendly = "";
         if (msg.includes("429") || msg.includes("quota") || msg.includes("Quota") || msg.includes("exhausted") || msg.includes("rate_limit")) {
-          friendly = `${PROVIDER_CONFIGS[activeProvider].label}: ${msg}`;
+          friendly = `${PROVIDER_CONFIGS[failedProvider].label}: ${msg}`;
         } else if (msg.includes("401") || msg.includes("403") || msg.includes("API_KEY_INVALID") || msg.includes("not valid") || msg.includes("unauthorized")) {
-          friendly = `Invalid ${PROVIDER_CONFIGS[activeProvider].label} API key. Update it in Settings.`;
+          friendly = `Invalid ${PROVIDER_CONFIGS[failedProvider].label} API key. Update it in Settings.`;
         } else if (msg.includes("fetch") || msg.includes("network") || msg.includes("Network") || msg.includes("ENOTFOUND")) {
-          friendly = `Network error connecting to ${PROVIDER_CONFIGS[activeProvider].label}. Check your connection.`;
+          friendly = `Network error connecting to ${PROVIDER_CONFIGS[failedProvider].label}. Check your connection.`;
         } else if (msg.includes("500") || msg.includes("502") || msg.includes("503")) {
-          friendly = `${PROVIDER_CONFIGS[activeProvider].label} server error. Try again later.`;
+          friendly = `${PROVIDER_CONFIGS[failedProvider].label} server error. Try again later.`;
         } else {
-          friendly = msg.split(". ").slice(0, 2).join(". ") || `${PROVIDER_CONFIGS[activeProvider].label} error. Try again.`;
+          friendly = msg.split(". ").slice(0, 2).join(". ") || `${PROVIDER_CONFIGS[failedProvider].label} error. Try again.`;
         }
-        toast.error(friendly);
+
+        // ─── Auto-Fallback on Provider Error ───
+        const fallback = findFallbackProvider(byokKeys, failedProvider);
+        if (fallback) {
+          const label = PROVIDER_CONFIGS[fallback].label;
+          const failedLabel = PROVIDER_CONFIGS[failedProvider].label;
+          toast.success(`🔄 Auto-switched to ${label}: ${failedLabel} failed — ${friendly}`);
+          updateSettings({ activeProvider: fallback, activeModel: PROVIDER_CONFIGS[fallback].defaultModel });
+        } else {
+          toast.error(friendly);
+        }
+
         // Remove the empty AI message
         setThreads(prev => {
           const updated = prev.map(t => t.id === threadId

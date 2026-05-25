@@ -9,6 +9,9 @@ const FIELD_MAP: Record<string, string> = {
   cloudflare: "personalCloudflareKey",
   huggingface: "personalHuggingfaceKey",
   together: "personalTogetherKey",
+  openrouter: "personalOpenRouterKey",
+  github: "personalGithubKey",
+  cerebras: "personalCerebrasKey",
 };
 
 export async function GET() {
