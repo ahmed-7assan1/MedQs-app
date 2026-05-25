@@ -837,7 +837,7 @@ function EditProfileContent() {
                      </div>
 
                      {/* API Keys Grid */}
-                     <div className={cn("grid gap-6 transition-all duration-500", !form.useCustomKey ? "opacity-30 pointer-events-none" : "opacity-100")}>
+                      <div className="grid gap-6">
                         {/* SiliconFlow */}
                         <div className="rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 space-y-4">
                            <h3 className="text-sm font-black dark:text-white text-slate-800 uppercase tracking-widest">SiliconFlow (DeepSeek)</h3>
