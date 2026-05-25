@@ -1139,6 +1139,7 @@ ${systemPrompt}`;
             // ─── BYOK failed: retry via server API (which uses env keys) ───
             const byokMsg = byokErr.message || "";
             if ((byokMsg.includes("429") || byokMsg.includes("quota") || byokMsg.includes("Quota") || byokMsg.includes("exhausted") || byokMsg.includes("rate_limit")) && effectiveProvider === "gemini") {
+              // Retry on server with user's BYOK key explicitly (bypasses useCustomKey flag)
               const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1151,6 +1152,9 @@ ${systemPrompt}`;
                   specializedModel: finalModel,
                   web_search: webSearch ?? false,
                   stream: true,
+                  customKey: apiKey,
+                  customProvider: "gemini",
+                  useCustomKey: true,
                 }),
               });
               if (res.ok) {
