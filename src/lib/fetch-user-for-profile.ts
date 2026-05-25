@@ -35,6 +35,7 @@ const FALLBACK: Pick<
   | "instagramUrl"
   | "facebookUrl"
   | "handle"
+  | "coverImage"
 > = {
   phone: null,
   phoneVisible: false,

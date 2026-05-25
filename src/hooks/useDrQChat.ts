@@ -1127,12 +1127,53 @@ ${systemPrompt}`;
             ? "openrouter/free"
             : (effectiveProvider === activeProvider ? activeModel : PROVIDER_CONFIGS[effectiveProvider].defaultModel);
           const finalModel = smartModel || useModel;
-          if (effectiveProvider === "gemini") {
-            finalContent = await streamGemini(apiKey, finalModel, historyForAPI, files, onChunk, webSearch);
-          } else {
-            const baseURL = PROVIDER_CONFIGS[effectiveProvider].baseURL ?? "https://api.openai.com/v1";
-            const skipAuth = PROVIDER_CONFIGS[effectiveProvider]?.needsKey === false;
-            finalContent = await streamOpenAICompat(apiKey, baseURL, finalModel, historyForAPI, files, onChunk, webSearch, skipAuth);
+          try {
+            if (effectiveProvider === "gemini") {
+              finalContent = await streamGemini(apiKey, finalModel, historyForAPI, files, onChunk, webSearch);
+            } else {
+              const baseURL = PROVIDER_CONFIGS[effectiveProvider].baseURL ?? "https://api.openai.com/v1";
+              const skipAuth = PROVIDER_CONFIGS[effectiveProvider]?.needsKey === false;
+              finalContent = await streamOpenAICompat(apiKey, baseURL, finalModel, historyForAPI, files, onChunk, webSearch, skipAuth);
+            }
+          } catch (byokErr: any) {
+            // ─── BYOK failed: retry via server API (which uses env keys) ───
+            const byokMsg = byokErr.message || "";
+            if ((byokMsg.includes("429") || byokMsg.includes("quota") || byokMsg.includes("Quota") || byokMsg.includes("exhausted") || byokMsg.includes("rate_limit")) && effectiveProvider === "gemini") {
+              const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  message: content,
+                  conversationHistory: historyForAPI.slice(0, -1),
+                  images: files.filter(f => f.mimeType.startsWith("image/")),
+                  pdfs: files.filter(f => f.mimeType === "application/pdf"),
+                  provider: "gemini",
+                  specializedModel: finalModel,
+                  web_search: webSearch ?? false,
+                  stream: true,
+                }),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (data.reply) {
+                  const replyText = data.reply as string;
+                  const chunkSize = Math.max(1, Math.floor(replyText.length / 20));
+                  for (let i = 0; i < replyText.length; i += chunkSize) {
+                    if (abortRef.current) break;
+                    onChunk(replyText.slice(0, i + chunkSize));
+                    await new Promise(r => setTimeout(r, 20));
+                  }
+                  finalContent = replyText;
+                  onChunk(finalContent);
+                } else {
+                  throw byokErr; // fall through to auto-fallback
+                }
+              } else {
+                throw byokErr;
+              }
+            } else {
+              throw byokErr;
+            }
           }
         }
 
