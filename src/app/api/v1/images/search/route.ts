@@ -25,11 +25,14 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json();
+    const origin = `${req.nextUrl.protocol}//${req.nextUrl.host}`;
+    const proxyUrl = (src: string) => `${origin}/api/v1/images/proxy?url=${encodeURIComponent(src)}`;
+
     const images: { url: string; thumbnail: string; title: string; source: string }[] = (data.results || [])
       .slice(0, maxResults)
       .map((r: any) => ({
-        url: r.image,
-        thumbnail: r.thumbnail,
+        url: proxyUrl(r.image),
+        thumbnail: r.thumbnail ? proxyUrl(r.thumbnail) : "",
         title: r.title,
         source: r.url,
       }));

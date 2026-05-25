@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   ThumbsUp, 
   ThumbsDown, 
@@ -197,15 +197,15 @@ const DrQMessageInner: React.FC<MessageProps> = ({
               {/* ✦ AI Images Gallery ✦ */}
               {isAI && (() => {
                 const directImgRegex = /!\[.*?\]\((https?:\/\/[^\s)]+)\)/g;
-                const searchImgRegex = /!\[Search:\s*(.*?)\]\s*\((?:https?:\/\/)?[^\s)]+\)/gi;
+                const topicImgRegex = /!\[(.*?)\]\s*\((image:[^\s)]+)\)/gi;
                 const directMatches = [...message.content.matchAll(directImgRegex)];
-                const searchMatches = [...message.content.matchAll(searchImgRegex)];
-                if (directMatches.length === 0 && searchMatches.length === 0) return null;
+                const topicMatches = [...message.content.matchAll(topicImgRegex)];
+                if (directMatches.length === 0 && topicMatches.length === 0) return null;
                 return (
                   <div className="mb-4">
                     <ImageGallerySection
                       directUrls={directMatches.map(m => m[1])}
-                      searchQueries={searchMatches.map(m => m[1].trim())}
+                      searchTopics={topicMatches.map(m => m[1].trim())}
                     />
                   </div>
                 );
@@ -279,7 +279,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     }
                   }}
                 >
-                  {message.content.replace(/!\[.*?\]\((?:https?:\/\/)?[^\s)]+\)/g, "").trim()}
+                  {message.content.replace(/!\[.*?\]\((?:https?:\/\/)?[^\s)]+\)|!\[.*?\]\s*\(image:[^\s)]+\)/g, "").trim()}
                 </ReactMarkdown>
               </div>
 
@@ -347,29 +347,58 @@ export const DrQMessage = React.memo(DrQMessageInner);
 
 // ─── Image Gallery Section (handles direct URLs + Search queries) ────────
 
-function ImageGallerySection({ directUrls, searchQueries }: { directUrls: string[]; searchQueries: string[] }) {
-  const [galleryImages, setGalleryImages] = useState<string[]>(directUrls);
-  const [loading, setLoading] = useState(searchQueries.length > 0);
+function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[]; searchTopics: string[] }) {
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [loading, setLoading] = useState(searchTopics.length > 0);
+
+  const proxyUrl = (src: string) => `/api/v1/images/proxy?url=${encodeURIComponent(src)}`;
 
   useEffect(() => {
-    if (searchQueries.length === 0) return;
+    const directProxied = directUrls.map(u => proxyUrl(u));
+
+    if (searchTopics.length === 0) {
+      setGalleryImages(directProxied);
+      return;
+    }
+
     let cancelled = false;
 
-    Promise.all(searchQueries.map(async (q) => {
+    Promise.all(searchTopics.map(async (topic) => {
       try {
-        const res = await fetch(`/api/v1/images/search?q=${encodeURIComponent(q)}&max=4`);
+        const res = await fetch(`/api/v1/images/search?q=${encodeURIComponent(topic)}&max=4`);
         if (!res.ok) throw new Error("Search failed");
         const data = await res.json();
         return (data.images || []).map((img: any) => img.url);
       } catch { return []; }
     })).then((results) => {
       if (cancelled) return;
-      setGalleryImages([...directUrls, ...results.flat()].filter(Boolean));
+      setGalleryImages([...directProxied, ...results.flat()].filter(Boolean));
       setLoading(false);
     }).catch(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [searchQueries, directUrls]);
+  }, [directUrls, searchTopics]);
+
+  const handleImgError = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
+    const img = e.currentTarget;
+    // Skip if already replaced
+    if (img.dataset.replaced) return;
+    img.dataset.replaced = "1";
+
+    // Check if original URL was Pollinations — extract prompt for fallback search
+    const origUrl = directUrls[idx] || "";
+    const pollMatch = origUrl.match(/pollinations\.ai\/prompt\/([^?]+)/);
+    if (pollMatch) {
+      const prompt = decodeURIComponent(pollMatch[1]);
+      fetch(`/api/v1/images/search?q=${encodeURIComponent(prompt)}&max=1`)
+        .then(r => r.json())
+        .then(data => {
+          const fallbackUrl = data.images?.[0]?.url;
+          if (fallbackUrl) img.src = fallbackUrl;
+        })
+        .catch(() => {});
+    }
+  }, [directUrls]);
 
   if (loading) {
     return (
@@ -378,7 +407,7 @@ function ImageGallerySection({ directUrls, searchQueries }: { directUrls: string
           <Spinner size={14} /> Searching real images...
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {Array.from({ length: Math.min(searchQueries.length * 2, 6) }).map((_, i) => (
+          {Array.from({ length: Math.min(searchTopics.length * 2, 6) }).map((_, i) => (
             <div key={i} className="aspect-square rounded-xl bg-slate-200 dark:bg-white/5 animate-pulse" />
           ))}
         </div>
@@ -387,12 +416,12 @@ function ImageGallerySection({ directUrls, searchQueries }: { directUrls: string
   }
 
   if (galleryImages.length === 0) return null;
-  return <AiImageGallery images={galleryImages} />;
+  return <AiImageGallery images={galleryImages} onError={handleImgError} />;
 }
 
 // ─── AI Image Gallery ─────────────────────────────────────────────────────
 
-function AiImageGallery({ images }: { images: string[] }) {
+function AiImageGallery({ images, onError }: { images: string[]; onError?: (e: React.SyntheticEvent<HTMLImageElement>, idx: number) => void }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -412,6 +441,7 @@ function AiImageGallery({ images }: { images: string[] }) {
             className="w-full h-auto object-cover cursor-pointer transition-transform duration-500 group-hover:scale-[1.02]"
             onClick={() => open(0)}
             loading="lazy"
+            onError={(e) => onError?.(e, 0)}
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
           <button
@@ -428,6 +458,7 @@ function AiImageGallery({ images }: { images: string[] }) {
           onClose={() => setLightboxOpen(false)}
           onPrev={() => setActiveIdx(i => Math.max(0, i - 1))}
           onNext={() => setActiveIdx(i => Math.min(images.length - 1, i + 1))}
+          onError={onError}
         />
       </>
     );
@@ -450,6 +481,7 @@ function AiImageGallery({ images }: { images: string[] }) {
               alt={`Generated image ${i + 1}`}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
+              onError={(e) => onError?.(e, i)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold">
@@ -465,18 +497,20 @@ function AiImageGallery({ images }: { images: string[] }) {
         onClose={() => setLightboxOpen(false)}
         onPrev={() => setActiveIdx(i => Math.max(0, i - 1))}
         onNext={() => setActiveIdx(i => Math.min(images.length - 1, i + 1))}
+        onError={onError}
       />
     </>
   );
 }
 
-function Lightbox({ images, activeIdx, isOpen, onClose, onPrev, onNext }: {
+function Lightbox({ images, activeIdx, isOpen, onClose, onPrev, onNext, onError }: {
   images: string[];
   activeIdx: number;
   isOpen: boolean;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
+  onError?: (e: React.SyntheticEvent<HTMLImageElement>, idx: number) => void;
 }) {
   useEffect(() => {
     if (!isOpen) return;
@@ -542,6 +576,7 @@ function Lightbox({ images, activeIdx, isOpen, onClose, onPrev, onNext }: {
               alt={`Image ${activeIdx + 1}`}
               className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
               draggable={false}
+              onError={(e) => onError?.(e, activeIdx)}
             />
           </motion.div>
         </motion.div>

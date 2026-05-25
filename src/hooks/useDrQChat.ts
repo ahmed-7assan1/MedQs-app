@@ -987,7 +987,7 @@ CREATOR: Dr. Ahmed Mohamed Hassan (أحمد محمد حسان — with alif).${f
 FORMATS:
 - MCQ: :::question {"questionType":"MCQ","body":"...","choices":[{"key":"A","text":"..."}],"answer":"A","explanation":"..."} :::
 - Flashcard: :::flashcard {"front":"...","back":"..."} :::
-- Images: ![Search: medical description in English](https://search.medonex.app/medical+description+in+English) — our system will auto-fetch real images from Google
+- Images: Include ![short English description](image:the-image-topic) — our system will auto-fetch a real image
 - Web search available for recent info.
 
 ${systemPrompt}`;
