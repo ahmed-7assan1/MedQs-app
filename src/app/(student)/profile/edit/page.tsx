@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Save, Loader2, User, Phone, BookOpen, Palette, Send, Sparkles, ShieldCheck, ChevronLeft, Camera, Trash2, LogOut, ShieldAlert, Cpu } from "lucide-react";
+import { Save, Loader2, User, Phone, BookOpen, Palette, Send, Sparkles, ShieldCheck, ChevronLeft, Camera, Trash2, LogOut, ShieldAlert, Cpu, CircleCheck, XCircle } from "lucide-react";
 import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -842,10 +842,13 @@ function EditProfileContent() {
                         <div className="rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-6 space-y-4">
                            <h3 className="text-sm font-black dark:text-white text-slate-800 uppercase tracking-widest">SiliconFlow (DeepSeek)</h3>
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="group col-span-1 md:col-span-2">
-                                <label className="mb-2 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">API Key</label>
-                                <input type="password" value={form.personalSiliconFlowKey} onChange={(e) => setForm((f) => ({ ...f, personalSiliconFlowKey: e.target.value }))} placeholder="sk-..." className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
-                              </div>
+                            <div className="group col-span-1 md:col-span-2">
+                                 <label className="mb-2 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">API Key</label>
+                                 <div className="flex items-center gap-2">
+                                   <input type="password" value={form.personalSiliconFlowKey} onChange={(e) => setForm((f) => ({ ...f, personalSiliconFlowKey: e.target.value }))} placeholder="sk-..." className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                   <TestKeyButton provider="siliconflow" keyValue={form.personalSiliconFlowKey} />
+                                 </div>
+                               </div>
                               <div className="group">
                                 <label className="mb-2 block text-[10px] font-black uppercase tracking-widest dark:text-white/40 text-slate-400">Model Name</label>
                                 <input type="text" value={form.personalSiliconFlowModel} onChange={(e) => setForm((f) => ({ ...f, personalSiliconFlowModel: e.target.value }))} placeholder="deepseek-ai/DeepSeek-R1" className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
@@ -859,30 +862,48 @@ function EditProfileContent() {
 
                         {/* Other Providers */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
-                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Gemini Key</label>
-                             <input type="password" value={form.personalGeminiKey} onChange={(e) => setForm((f) => ({ ...f, personalGeminiKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
-                           </div>
-                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
-                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenAI Key</label>
-                             <input type="password" value={form.personalOpenAIKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenAIKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
-                           </div>
-                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
-                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Groq Key</label>
-                             <input type="password" value={form.personalGroqKey} onChange={(e) => setForm((f) => ({ ...f, personalGroqKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
-                           </div>
-                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
-                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenRouter Key</label>
-                             <input type="password" value={form.personalOpenRouterKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenRouterKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
-                           </div>
-                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
-                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Anthropic Key</label>
-                             <input type="password" value={form.personalAnthropicKey} onChange={(e) => setForm((f) => ({ ...f, personalAnthropicKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
-                           </div>
-                           <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
-                             <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">xAI Key</label>
-                             <input type="password" value={form.personalXAIKey} onChange={(e) => setForm((f) => ({ ...f, personalXAIKey: e.target.value }))} className="w-full rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
-                           </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Gemini Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" value={form.personalGeminiKey} onChange={(e) => setForm((f) => ({ ...f, personalGeminiKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="gemini" keyValue={form.personalGeminiKey} />
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenAI Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" value={form.personalOpenAIKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenAIKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="openai" keyValue={form.personalOpenAIKey} />
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Groq Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" value={form.personalGroqKey} onChange={(e) => setForm((f) => ({ ...f, personalGroqKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="groq" keyValue={form.personalGroqKey} />
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenRouter Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" value={form.personalOpenRouterKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenRouterKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="openrouter" keyValue={form.personalOpenRouterKey} />
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Anthropic Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" value={form.personalAnthropicKey} onChange={(e) => setForm((f) => ({ ...f, personalAnthropicKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="anthropic" keyValue={form.personalAnthropicKey} />
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">xAI Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" value={form.personalXAIKey} onChange={(e) => setForm((f) => ({ ...f, personalXAIKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="xai" keyValue={form.personalXAIKey} />
+                              </div>
+                            </div>
                         </div>
                      </div>
                   </div>
@@ -892,6 +913,46 @@ function EditProfileContent() {
         </div>
       </div>
     </StudentPageShell>
+  );
+}
+
+// ─── Test Key Button ──────────────────────────────────────────────────────
+
+function TestKeyButton({ provider, keyValue }: { provider: string; keyValue: string }) {
+  const [state, setState] = useState<"idle" | "loading" | "ok" | "err">("idle");
+  const [error, setError] = useState("");
+
+  const test = async () => {
+    if (!keyValue.trim()) { setState("err"); setError("No key entered"); return; }
+    setState("loading");
+    setError("");
+    try {
+      const res = await fetch("/api/v1/user/test-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider, key: keyValue.trim() }),
+      });
+      const data = await res.json();
+      if (data.ok) setState("ok");
+      else { setState("err"); setError(data.error || "Invalid key"); }
+    } catch { setState("err"); setError("Network error"); }
+  };
+
+  if (state === "ok") return <CircleCheck size={16} className="text-green-500 shrink-0" />;
+  if (state === "loading") return <Loader2 size={14} className="animate-spin text-blue-500 shrink-0" />;
+  if (state === "err") return (
+    <div className="group relative">
+      <XCircle size={16} className="text-red-400 shrink-0 cursor-help" />
+      <div className="absolute right-0 top-full mt-1 whitespace-nowrap rounded-xl bg-red-500 px-3 py-1.5 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 shadow-lg">
+        {error}
+      </div>
+    </div>
+  );
+
+  return (
+    <button type="button" onClick={test} className="rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 px-3 py-2 text-[10px] font-bold tracking-wider text-slate-600 dark:text-white/70 transition-all shrink-0">
+      Test
+    </button>
   );
 }
 
