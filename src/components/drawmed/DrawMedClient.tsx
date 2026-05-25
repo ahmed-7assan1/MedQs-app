@@ -110,61 +110,62 @@ export function DrawMedClient() {
 
         if (toolbar.getBoundingClientRect().width > 0) {
           clearInterval(interval);
-        
-        const rect = toolbar.getBoundingClientRect();
-        
-        toolbar.style.position = "fixed";
-        toolbar.style.left = `${rect.left}px`;
-        toolbar.style.top = `${rect.top}px`;
-        toolbar.style.cursor = "grab";
-        toolbar.style.zIndex = "50";
-        toolbar.style.touchAction = "none";
 
-        let dragging = false;
-        let startX = 0, startY = 0;
-        let origLeft = 0, origTop = 0;
+          const rect = toolbar.getBoundingClientRect();
 
-        const onDown = (clientX: number, clientY: number) => {
-          dragging = true;
-          toolbar.style.cursor = "grabbing";
-          startX = clientX;
-          startY = clientY;
-          const currentRect = toolbar.getBoundingClientRect();
-          origLeft = currentRect.left;
-          origTop = currentRect.top;
-        };
-        const onMove = (clientX: number, clientY: number) => {
-          if (!dragging) return;
-          toolbar.style.left = `${origLeft + clientX - startX}px`;
-          toolbar.style.top = `${origTop + clientY - startY}px`;
-        };
-        const onUp = () => {
-          dragging = false;
+          toolbar.style.position = "fixed";
+          toolbar.style.left = `${rect.left}px`;
+          toolbar.style.top = `${rect.top}px`;
           toolbar.style.cursor = "grab";
-        };
+          toolbar.style.zIndex = "50";
+          toolbar.style.touchAction = "none";
 
-        const handleMouseDown = (e: MouseEvent) => { e.preventDefault(); onDown(e.clientX, e.clientY); };
-        const handleMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
-        const handleMouseUp = () => onUp();
-        const handleTouchStart = (e: TouchEvent) => { if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY); };
-        const handleTouchMove = (e: TouchEvent) => { if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); };
-        const handleTouchEnd = () => onUp();
+          let dragging = false;
+          let startX = 0, startY = 0;
+          let origLeft = 0, origTop = 0;
 
-        toolbar.addEventListener("mousedown", handleMouseDown);
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-        toolbar.addEventListener("touchstart", handleTouchStart, { passive: true });
-        document.addEventListener("touchmove", handleTouchMove, { passive: true });
-        document.addEventListener("touchend", handleTouchEnd);
+          const onDown = (clientX: number, clientY: number) => {
+            dragging = true;
+            toolbar.style.cursor = "grabbing";
+            startX = clientX;
+            startY = clientY;
+            const currentRect = toolbar.getBoundingClientRect();
+            origLeft = currentRect.left;
+            origTop = currentRect.top;
+          };
+          const onMove = (clientX: number, clientY: number) => {
+            if (!dragging) return;
+            toolbar.style.left = `${origLeft + clientX - startX}px`;
+            toolbar.style.top = `${origTop + clientY - startY}px`;
+          };
+          const onUp = () => {
+            dragging = false;
+            toolbar.style.cursor = "grab";
+          };
 
-        cleanup = () => {
-          toolbar.removeEventListener("mousedown", handleMouseDown);
-          document.removeEventListener("mousemove", handleMouseMove);
-          document.removeEventListener("mouseup", handleMouseUp);
-          toolbar.removeEventListener("touchstart", handleTouchStart);
-          document.removeEventListener("touchmove", handleTouchMove);
-          document.removeEventListener("touchend", handleTouchEnd);
-        };
+          const handleMouseDown = (e: MouseEvent) => { e.preventDefault(); onDown(e.clientX, e.clientY); };
+          const handleMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
+          const handleMouseUp = () => onUp();
+          const handleTouchStart = (e: TouchEvent) => { if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY); };
+          const handleTouchMove = (e: TouchEvent) => { if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); };
+          const handleTouchEnd = () => onUp();
+
+          toolbar.addEventListener("mousedown", handleMouseDown);
+          document.addEventListener("mousemove", handleMouseMove);
+          document.addEventListener("mouseup", handleMouseUp);
+          toolbar.addEventListener("touchstart", handleTouchStart, { passive: true });
+          document.addEventListener("touchmove", handleTouchMove, { passive: true });
+          document.addEventListener("touchend", handleTouchEnd);
+
+          cleanup = () => {
+            toolbar.removeEventListener("mousedown", handleMouseDown);
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+            toolbar.removeEventListener("touchstart", handleTouchStart);
+            document.removeEventListener("touchmove", handleTouchMove);
+            document.removeEventListener("touchend", handleTouchEnd);
+          };
+        }
       }
     }, 500);
 
