@@ -17,7 +17,10 @@ import {
   Lightning,
   Quotes,
   Spinner,
-  BookmarkSimple
+  BookmarkSimple,
+  CaretLeft,
+  CaretRight,
+  X as XIcon
 } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -148,17 +151,19 @@ const DrQMessageInner: React.FC<MessageProps> = ({
               className={cn(
                 "relative overflow-hidden transition-all",
                 variant === "flat" && isAI 
-                  ? "p-4 md:p-5 text-slate-800 dark:text-white/90" 
-                  : "p-4 md:p-5 shadow-sm",
+                  ? "px-4 py-2.5 text-slate-800 dark:text-white/90" 
+                  : "px-4 py-2.5 shadow-sm",
                 !variant && isAI 
-                  ? "rounded-3xl rounded-tl-sm bg-white dark:bg-[#1a1a24] border border-slate-200/60 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none" 
+                  ? "rounded-3xl rounded-tl-sm border border-slate-200/60 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none" 
                   : "",
                 !isAI 
-                  ? "rounded-2xl bg-indigo-500/90 text-white shadow-sm"
+                  ? "rounded-2xl text-white shadow-sm"
                   : ""
               )}
               style={{ 
-                fontSize: `${fontSize}px`
+                fontSize: `${fontSize}px`,
+                backgroundColor: isAI && variant !== "flat" ? aiBubbleColor : !isAI ? userBubbleColor : undefined,
+                borderColor: isAI && variant !== "flat" ? undefined : undefined,
               }}
             >
               {/* File/Image Inline Display */}
@@ -189,7 +194,24 @@ const DrQMessageInner: React.FC<MessageProps> = ({
               )}
 
 
-              {/* Markdown Content */}
+              {/* ✦ AI Images Gallery ✦ */}
+              {isAI && (() => {
+                const directImgRegex = /!\[.*?\]\((https?:\/\/[^\s)]+)\)/g;
+                const searchImgRegex = /!\[Search:\s*(.*?)\]\s*\((?:https?:\/\/)?[^\s)]+\)/gi;
+                const directMatches = [...message.content.matchAll(directImgRegex)];
+                const searchMatches = [...message.content.matchAll(searchImgRegex)];
+                if (directMatches.length === 0 && searchMatches.length === 0) return null;
+                return (
+                  <div className="mb-4">
+                    <ImageGallerySection
+                      directUrls={directMatches.map(m => m[1])}
+                      searchQueries={searchMatches.map(m => m[1].trim())}
+                    />
+                  </div>
+                );
+              })()}
+
+              {/* Markdown Content (images stripped) */}
               <div dir="auto" className={cn(
                 "prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
                 isAI ? "prose-slate dark:prose-invert prose-pre:bg-slate-50 dark:prose-pre:bg-black/30 prose-pre:border-slate-200 dark:prose-pre:border-white/5 prose-table:border-slate-200 dark:prose-table:border-white/10 prose-th:bg-slate-50 dark:prose-th:bg-white/5" : "text-white prose-invert prose-p:text-white prose-headings:text-white prose-strong:text-white"
@@ -257,7 +279,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     }
                   }}
                 >
-                  {message.content}
+                  {message.content.replace(/!\[.*?\]\((?:https?:\/\/)?[^\s)]+\)/g, "").trim()}
                 </ReactMarkdown>
               </div>
 
@@ -322,6 +344,211 @@ const DrQMessageInner: React.FC<MessageProps> = ({
 };
 
 export const DrQMessage = React.memo(DrQMessageInner);
+
+// ─── Image Gallery Section (handles direct URLs + Search queries) ────────
+
+function ImageGallerySection({ directUrls, searchQueries }: { directUrls: string[]; searchQueries: string[] }) {
+  const [galleryImages, setGalleryImages] = useState<string[]>(directUrls);
+  const [loading, setLoading] = useState(searchQueries.length > 0);
+
+  useEffect(() => {
+    if (searchQueries.length === 0) return;
+    let cancelled = false;
+
+    Promise.all(searchQueries.map(async (q) => {
+      try {
+        const res = await fetch(`/api/v1/images/search?q=${encodeURIComponent(q)}&max=4`);
+        if (!res.ok) throw new Error("Search failed");
+        const data = await res.json();
+        return (data.images || []).map((img: any) => img.url);
+      } catch { return []; }
+    })).then((results) => {
+      if (cancelled) return;
+      setGalleryImages([...directUrls, ...results.flat()].filter(Boolean));
+      setLoading(false);
+    }).catch(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [searchQueries, directUrls]);
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">
+          <Spinner size={14} /> Searching real images...
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {Array.from({ length: Math.min(searchQueries.length * 2, 6) }).map((_, i) => (
+            <div key={i} className="aspect-square rounded-xl bg-slate-200 dark:bg-white/5 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (galleryImages.length === 0) return null;
+  return <AiImageGallery images={galleryImages} />;
+}
+
+// ─── AI Image Gallery ─────────────────────────────────────────────────────
+
+function AiImageGallery({ images }: { images: string[] }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const open = (i: number) => { setActiveIdx(i); setLightboxOpen(true); };
+
+  if (images.length === 1) {
+    return (
+      <>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative group rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-lg max-w-xl"
+        >
+          <img
+            src={images[0]}
+            alt="AI generated image"
+            className="w-full h-auto object-cover cursor-pointer transition-transform duration-500 group-hover:scale-[1.02]"
+            onClick={() => open(0)}
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+          <button
+            onClick={() => open(0)}
+            className="absolute top-3 right-3 p-2 rounded-xl bg-black/40 backdrop-blur-sm text-white/80 opacity-0 group-hover:opacity-100 transition-all hover:bg-black/60"
+          >
+            <ImageIcon size={16} weight="bold" />
+          </button>
+        </motion.div>
+        <Lightbox
+          images={images}
+          activeIdx={activeIdx}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          onPrev={() => setActiveIdx(i => Math.max(0, i - 1))}
+          onNext={() => setActiveIdx(i => Math.min(images.length - 1, i + 1))}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-w-xl">
+        {images.map((url, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 20 }}
+            className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-md aspect-square cursor-pointer"
+            onClick={() => open(i)}
+          >
+            <img
+              src={url}
+              alt={`Generated image ${i + 1}`}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold">
+              {i + 1}/{images.length}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <Lightbox
+        images={images}
+        activeIdx={activeIdx}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onPrev={() => setActiveIdx(i => Math.max(0, i - 1))}
+        onNext={() => setActiveIdx(i => Math.min(images.length - 1, i + 1))}
+      />
+    </>
+  );
+}
+
+function Lightbox({ images, activeIdx, isOpen, onClose, onPrev, onNext }: {
+  images: string[];
+  activeIdx: number;
+  isOpen: boolean;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") onPrev();
+      if (e.key === "ArrowRight") onNext();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [isOpen, onClose, onPrev, onNext]);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl"
+          onClick={onClose}
+        >
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all"
+          >
+            <XIcon size={20} weight="bold" />
+          </button>
+
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs font-bold z-10">
+            {activeIdx + 1} / {images.length}
+          </div>
+
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); onPrev(); }}
+                disabled={activeIdx === 0}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <CaretLeft size={24} weight="bold" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onNext(); }}
+                disabled={activeIdx === images.length - 1}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <CaretRight size={24} weight="bold" />
+              </button>
+            </>
+          )}
+
+          <motion.div
+            key={activeIdx}
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            className="max-w-[90vw] max-h-[85vh] flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={images[activeIdx]}
+              alt={`Image ${activeIdx + 1}`}
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+              draggable={false}
+            />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
 // ─── Interactive Checklist Component ──────────────────────────────────────
 

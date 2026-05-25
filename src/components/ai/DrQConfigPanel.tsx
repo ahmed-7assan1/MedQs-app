@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { 
   X, Key, TextT, Palette, Check, ShieldCheck,
   Lightning, GoogleLogo, OpenAiLogo, Globe, CaretDown,
-  Eye, EyeSlash, ArrowUpRight
+  Eye, EyeSlash, ArrowUpRight, ImageSquare
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DrQSettings, PROVIDER_CONFIGS, AIProvider } from "@/hooks/useDrQChat";
@@ -19,8 +19,8 @@ interface ConfigPanelProps {
 }
 
 const FONT_SIZES = [12, 13, 14, 15, 16, 18, 20, 22];
-const USER_COLORS = ["#6366f1", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
-const AI_COLORS = ["#1e1e2e", "#111827", "#064e3b", "#1e293b", "#2d1b69", "#1a1a2e"];
+const USER_COLORS = ["#6d28d9", "#7c3aed", "#4f46e5", "#3b82f6", "#0891b2", "#059669"];
+const AI_COLORS = ["#1a1830", "#1e1b4b", "#172554", "#0c4a6e", "#022c22", "#1c1917"];
 
 export function DrQConfigPanel({ isOpen, onClose, settings, onUpdate }: ConfigPanelProps) {
   const { theme } = useThemeStore();
@@ -211,6 +211,102 @@ export function DrQConfigPanel({ isOpen, onClose, settings, onUpdate }: ConfigPa
                       ))}
                     </div>
                   </div>
+
+                  {/* Background Image */}
+                  <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10" : "border-gray-200")}>
+                    <label className={cn("text-xs font-bold uppercase tracking-wider block mb-3", isDark ? "text-gray-400" : "text-gray-500")}>Chat Background</label>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="text"
+                          placeholder="Paste image URL or upload..."
+                          value={settings.bgImage || ""}
+                          onChange={(e) => onUpdate({ bgImage: e.target.value })}
+                          className={cn(
+                            "flex-1 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-all",
+                            isDark ? "bg-black/40 text-white placeholder-gray-600 border border-white/10 focus:border-indigo-500/50" : "bg-white text-gray-900 placeholder-gray-300 border border-gray-200 focus:border-indigo-400/50"
+                          )}
+                        />
+                        <button
+                          onClick={() => {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = "image/*";
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (ev) => onUpdate({ bgImage: ev.target?.result as string });
+                                reader.readAsDataURL(file);
+                              }
+                            };
+                            input.click();
+                          }}
+                          className={cn(
+                            "flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-sm font-bold transition-all whitespace-nowrap",
+                            isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                          )}
+                        >
+                          <ImageSquare size={16} weight="bold" />
+                          Upload
+                        </button>
+                        {settings.bgImage && (
+                          <button
+                            onClick={() => onUpdate({ bgImage: "" })}
+                            className={cn("p-2.5 rounded-xl transition-all", isDark ? "text-red-400 hover:bg-red-500/10" : "text-red-500 hover:bg-red-50")}
+                          >
+                            <X size={16} weight="bold" />
+                          </button>
+                        )}
+                      </div>
+                      {settings.bgImage && (
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-12 h-12 rounded-xl border overflow-hidden flex-shrink-0"
+                            style={{ backgroundImage: `url(${settings.bgImage})`, backgroundSize: "cover", backgroundPosition: "center" }}
+                          />
+                          <span className={cn("text-[10px] font-medium truncate flex-1", isDark ? "text-gray-500" : "text-gray-400")}>
+                            {settings.bgImage.length > 60 ? settings.bgImage.slice(0, 60) + "..." : settings.bgImage}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Blur & Opacity */}
+                  {settings.bgImage && (
+                    <>
+                      <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10" : "border-gray-200")}>
+                        <div className="flex items-center justify-between mb-3">
+                          <label className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-gray-400" : "text-gray-500")}>
+                            <ImageSquare size={14} weight="bold" />
+                            Blur
+                          </label>
+                          <span className="text-sm font-bold text-indigo-500">{settings.bgBlur || 0}px</span>
+                        </div>
+                        <input
+                          type="range" min="0" max="20" step="1"
+                          value={settings.bgBlur || 0}
+                          onChange={(e) => onUpdate({ bgBlur: parseInt(e.target.value) })}
+                          className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-indigo-500"
+                          style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.08)" }}
+                        />
+                      </div>
+                      <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10" : "border-gray-200")}>
+                        <div className="flex items-center justify-between mb-3">
+                          <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-gray-400" : "text-gray-500")}>Opacity</label>
+                          <span className="text-sm font-bold text-indigo-500">{Math.round((settings.bgOpacity || 0.15) * 100)}%</span>
+                        </div>
+                        <input
+                          type="range" min="0" max="100" step="1"
+                          value={Math.round((settings.bgOpacity || 0.15) * 100)}
+                          onChange={(e) => onUpdate({ bgOpacity: parseInt(e.target.value) / 100 })}
+                          className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-indigo-500"
+                          style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.08)" }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

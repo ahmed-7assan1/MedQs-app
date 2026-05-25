@@ -7,7 +7,7 @@ import {
   Plus, Paperclip, ArrowUp, Stop, X, Trash, ChatDots,
   MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
   Check, GlobeHemisphereWest, Sparkle, Sun, Moon,
-  WarningCircle, Clock, House, ChatCircle, Key
+  WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -62,6 +62,7 @@ export function MedOneXChat() {
   const [showModules, setShowModules] = useState(false);
   const [modulesData, setModulesData] = useState<any[]>([]);
   const [modulesSearch, setModulesSearch] = useState("");
+  const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
 
   // Fetch user modules when the modal opens
   useEffect(() => {
@@ -99,9 +100,10 @@ export function MedOneXChat() {
       setShowApiAlert(true);
       return;
     }
-    sendMessage(input, files, undefined, webSearchEnabled);
+    sendMessage(input, files, replyContext?.id, webSearchEnabled);
     setInput("");
     setFiles([]);
+    setReplyContext(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -544,8 +546,27 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       {/* ─── Messages Area ─── */}
-      <main className={cn("flex flex-col flex-1 min-h-0 pt-[60px]", isDark ? "bg-black" : "bg-white")}>
-        <div className="flex-1 overflow-y-auto scrollbar-hover min-h-0">
+      <main className={cn("flex flex-col flex-1 min-h-0 pt-[60px] relative", isDark ? "bg-black" : "bg-white")}
+        style={{
+          ...(settings.bgImage ? {
+            backgroundImage: `url(${settings.bgImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          } : {}),
+        }}
+      >
+        {settings.bgImage && (
+          <div className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              backdropFilter: `blur(${settings.bgBlur || 0}px)`,
+              backgroundColor: isDark
+                ? `rgba(0,0,0,${settings.bgOpacity ?? 0.15})`
+                : `rgba(255,255,255,${settings.bgOpacity ?? 0.15})`,
+            }}
+          />
+        )}
+        <div className={cn("flex-1 overflow-y-auto scrollbar-hover min-h-0 relative z-10", settings.bgImage && (isDark ? "bg-black/20" : "bg-white/20"))}>
           {messages.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -646,7 +667,7 @@ export function MedOneXChat() {
                         aiBubbleColor={settings.aiBubbleColor}
                         onReaction={setReaction}
                         onRegenerate={regenerate}
-                        onReply={() => {}}
+                        onReply={(id, text) => setReplyContext({ id, text })}
                         activePersona={settings.activePersona}
                         variant="flat"
                       />
@@ -659,7 +680,7 @@ export function MedOneXChat() {
                       aiBubbleColor={settings.aiBubbleColor}
                       onReaction={setReaction}
                       onRegenerate={undefined}
-                      onReply={() => {}}
+                      onReply={(id, text) => setReplyContext({ id, text })}
                       activePersona={settings.activePersona}
                     />
                   )}
@@ -711,6 +732,27 @@ export function MedOneXChat() {
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Reply Context Bar */}
+        {replyContext && (
+          <div className={cn("flex-shrink-0 flex justify-center", isDark ? "bg-black" : "bg-white")}>
+            <div className="w-full max-w-3xl mx-auto px-3 md:px-4 pb-1">
+              <div className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs",
+                isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"
+              )}>
+                <ArrowBendUpLeft size={14} weight="bold" className="flex-shrink-0" />
+                <span className="truncate flex-1">Replying to: "{replyContext.text}"</span>
+                <button
+                  onClick={() => setReplyContext(null)}
+                  className={cn("p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0", isDark ? "hover:text-white" : "hover:text-gray-800")}
+                >
+                  <X size={12} weight="bold" />
+                </button>
+              </div>
             </div>
           </div>
         )}

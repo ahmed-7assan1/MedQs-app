@@ -343,7 +343,25 @@ export function DrQFuturisticChat() {
         </header>
 
         {/* ── Messages ── */}
-        <div className="flex-1 overflow-y-auto no-scrollbar relative z-20 scroll-smooth">
+        <div className="flex-1 relative overflow-hidden"
+          style={{
+            ...(settings.bgImage ? {
+              backgroundImage: `url(${settings.bgImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            } : {}),
+          }}
+        >
+          {settings.bgImage && (
+            <div className="absolute inset-0 z-0 pointer-events-none"
+              style={{
+                backdropFilter: `blur(${settings.bgBlur || 0}px)`,
+                backgroundColor: `rgba(0,0,0,${settings.bgOpacity ?? 0.15})`,
+              }}
+            />
+          )}
+          <div className="absolute inset-0 z-10 overflow-y-auto no-scrollbar scroll-smooth">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center p-6 md:p-12 text-center max-w-4xl mx-auto">
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative mb-10">
@@ -434,6 +452,7 @@ export function DrQFuturisticChat() {
               <div ref={endRef} className="h-4" />
             </div>
           )}
+        </div>
         </div>
 
         {/* ── Suggestions & Recent Prompts (when chat is active) ── */}
