@@ -7,7 +7,7 @@ import { useThemeStore } from "@/lib/store";
 import { DrawMedHeader } from "./DrawMedHeader";
 import { DrawMedLibrary } from "./DrawMedLibrary";
 import { motion, AnimatePresence } from "framer-motion";
-import { useDrQChat } from "@/hooks/useDrQChat";
+import { useDrQChat, getFirstModel } from "@/hooks/useDrQChat";
 import {
   Loader2,
   X,
@@ -391,7 +391,7 @@ export function DrawMedClient() {
 
     try {
       const baseURL = drq.PROVIDER_CONFIGS[settings.activeProvider].baseURL || `https://api.${settings.activeProvider}.com/v1`;
-      const model = settings.activeModel;
+      const model = getFirstModel(settings.activeModels, settings.activeProvider);
       const needsHeader = baseURL.includes("openrouter") || baseURL.includes("ovh");
       const resp = await fetch(`${baseURL}/chat/completions`, {
         signal: controller.signal,

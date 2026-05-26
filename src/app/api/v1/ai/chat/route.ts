@@ -160,7 +160,7 @@ function sanitizeImages(raw: unknown): ChatImagePart[] {
     }
     if (!/^image\/(jpeg|png|webp|gif)$/i.test(mimeType)) continue;
     const approxBytes = (data.length * 3) / 4;
-    if (approxBytes > 4 * 1024 * 1024) continue;
+    if (approxBytes > 5 * 1024 * 1024) continue;  // Max 5MB per image
     if (data) out.push({ mimeType: mimeType.toLowerCase(), data });
   }
   return out;
@@ -169,7 +169,7 @@ function sanitizeImages(raw: unknown): ChatImagePart[] {
 function sanitizePdfs(raw: unknown): ChatPdfPart[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];
   const out: ChatPdfPart[] = [];
-  for (const item of raw.slice(0, 3)) { // Max 3 PDFs
+  for (const item of raw.slice(0, 1)) { // Max 1 PDF (prevent bulk uploads)
     if (!item || typeof item !== "object") continue;
     const o = item as Record<string, unknown>;
     const mimeType = typeof o.mimeType === "string" ? o.mimeType.toLowerCase() : "";
@@ -180,7 +180,7 @@ function sanitizePdfs(raw: unknown): ChatPdfPart[] {
     }
     if (mimeType !== "application/pdf") continue;
     const approxBytes = (data.length * 3) / 4;
-    if (approxBytes > 5 * 1024 * 1024) continue;
+    if (approxBytes > 2 * 1024 * 1024) continue;  // Max 2MB per PDF (prevent full textbooks)
     if (data) out.push({ mimeType: "application/pdf", data });
   }
   return out;
@@ -348,6 +348,8 @@ export async function POST(req: NextRequest) {
       activeCustomKey = user.personalSiliconFlowKey;
       activeCustomModel = customModel || user.personalSiliconFlowModel;
       activeCustomUrl = user.personalSiliconFlowUrl || undefined;
+    } else if (customProvider === "mistral") {
+      activeCustomKey = user.personalMistralKey;
     }
   }
 
@@ -465,6 +467,13 @@ Current Stats: ${siteData.totalUsers} users, ${siteData.totalLectures} lectures,
 
   let aiResult: { provider: string; text: string; fallbackFrom?: string };
   try {
+    // If BYOK is active but no key is set, fail fast instead of falling through to server env keys
+    if (isUsingCustom && !activeCustomKey) {
+      return NextResponse.json(
+        { error: `No API key configured for ${activeCustomProvider || "selected"} provider. Set it in your settings first.` },
+        { status: 400 }
+      );
+    }
     aiResult = await generateAIReplyWithFallback(message, enhancedPrompt, {
       images,
       pdfs,

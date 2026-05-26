@@ -5,7 +5,7 @@ export type ProviderResult = {
   provider: string;
   text: string;
 };
-export type AIProviderId = "proxy" | "gemini" | "groq" | "openrouter" | "xai" | "duckduckgo" | "custom" | "siliconflow";
+export type AIProviderId = "proxy" | "gemini" | "groq" | "openrouter" | "xai" | "duckduckgo" | "custom" | "siliconflow" | "huggingface" | "mistral";
 
 export type AIFallbackMeta = {
   provider: string;
@@ -50,6 +50,8 @@ function providerDisplayName(provider: AIProviderId | string): string {
   if (provider === "duckduckgo") return "DuckDuckGo";
   if (provider === "custom") return "Custom BYOK";
   if (provider === "siliconflow") return "SiliconFlow (DeepSeek-R1)";
+  if (provider === "huggingface") return "HuggingFace";
+  if (provider === "mistral") return "Mistral AI";
   return "Gemini";
 }
 
@@ -135,11 +137,18 @@ async function callGemini(
         const apiMsg = typeof data?.error?.message === "string" ? data.error.message : res.statusText;
         lastErr = `Gemini error (${res.status}) [${keyLabel}/${model}]: ${apiMsg}`;
 
-        const isQuota = res.status === 429 || /quota|limit:\s*0|free_tier|resource_exhausted/i.test(apiMsg);
+        const isDailyQuota = res.status === 403 || /limit:\s*0|free_tier|resource_exhausted/i.test(apiMsg);
+        const isRateLimit = res.status === 429 || /quota|rate_limit/i.test(apiMsg);
+        const isQuota = isDailyQuota || isRateLimit;
         const isModelIssue = res.status === 404 || res.status === 503 || /not found|not supported|overloaded/i.test(apiMsg);
 
-        if (isQuota) {
-          markKeyExhausted(key);
+        if (isDailyQuota) {
+          markKeyExhausted(key, "daily");
+          keyQuotaExhausted = true;
+          break;
+        }
+        if (isRateLimit) {
+          markKeyExhausted(key, "rate");
           keyQuotaExhausted = true;
           break;
         }
@@ -439,6 +448,68 @@ async function callSiliconFlow(
   return { provider: "siliconflow", text };
 }
 
+async function callHuggingFace(message: string, systemPrompt: string): Promise<ProviderResult> {
+  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  if (!apiKey) throw new Error("HuggingFace API key missing");
+
+  const res = await fetch("https://api-inference.huggingface.co/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: "meta-llama/Llama-3.3-70B-Instruct",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+      max_tokens: 4096,
+    }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`HuggingFace call failed (${res.status}): ${errData?.error ?? res.statusText}`);
+  }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("HuggingFace empty response");
+  return { provider: "huggingface", text };
+}
+
+async function callMistral(message: string, systemPrompt: string, personalKey?: string, customModel?: string): Promise<ProviderResult> {
+  const apiKey = personalKey || process.env.MISTRAL_API_KEY;
+  if (!apiKey) throw new Error("Mistral API key missing");
+
+  const modelToUse = customModel || "mistral-large-latest";
+
+  const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    signal: AbortSignal.timeout(FETCH_MS),
+    body: JSON.stringify({
+      model: modelToUse,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+      max_tokens: 8192,
+    }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`Mistral call failed (${res.status}): ${errData?.error?.message ?? res.statusText}`);
+  }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("Mistral empty response");
+  return { provider: "mistral", text };
+}
+
 // ─── Main Router ──────────────────────────────────────────────────────────────
 
 export async function generateAIReplyWithFallback(
@@ -454,7 +525,7 @@ export async function generateAIReplyWithFallback(
     strict?: boolean;
     // For BYOK
     useCustomKey?: boolean;
-    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek" | "siliconflow";
+    customProvider?: "gemini" | "openai" | "groq" | "openrouter" | "xai" | "anthropic" | "deepseek" | "siliconflow" | "huggingface" | "mistral";
     customUrl?: string;
   }
 ): Promise<ProviderResult & AIFallbackMeta> {
@@ -471,6 +542,8 @@ export async function generateAIReplyWithFallback(
       else if (options.customProvider === "openrouter") result = await callOpenRouter(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "xai") result = await callXAI(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "siliconflow") result = await callSiliconFlow(message, systemPrompt, options.personalKey, options.customModel, options.customUrl);
+      else if (options.customProvider === "huggingface") result = await callHuggingFace(message, systemPrompt);
+      else if (options.customProvider === "mistral") result = await callMistral(message, systemPrompt, options.personalKey, options.customModel);
       else throw new Error("Unsupported custom provider");
       
       return { ...result, fallbackFrom: undefined, triedProviders: ["custom"] };
@@ -500,8 +573,8 @@ export async function generateAIReplyWithFallback(
     return { ...row, triedProviders: ["gemini"] };
   }
 
-  // Standard Fallback Chain
-  const order: AIProviderId[] = ["proxy", "gemini", "groq", "siliconflow", "duckduckgo"];
+  // Standard Fallback Chain (free providers only — BYOK handled separately)
+  const order: AIProviderId[] = ["siliconflow", "huggingface", "duckduckgo"];
   
   // Dynamically prioritize preferred provider if valid
   const preferred = options?.preferredProvider as AIProviderId | undefined;
@@ -515,10 +588,8 @@ export async function generateAIReplyWithFallback(
 
   const runners: Array<{ id: string; run: () => Promise<ProviderResult> }> = order.map((id) => ({
     id,
-    run: id === "proxy" ? () => callProxy(message, systemPrompt)
-       : id === "gemini" ? () => callGemini(message, systemPrompt, [], [], options?.personalKey)
-       : id === "groq" ? () => callGroq(message, systemPrompt, options?.personalKey, options?.customModel)
-       : id === "siliconflow" ? () => callSiliconFlow(message, systemPrompt, options?.personalKey, options?.customModel, options?.customUrl)
+    run: id === "siliconflow" ? () => callSiliconFlow(message, systemPrompt)
+       : id === "huggingface" ? () => callHuggingFace(message, systemPrompt)
        : () => callDuckDuckGo(message, systemPrompt)
   }));
 

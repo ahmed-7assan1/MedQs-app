@@ -56,7 +56,7 @@ export const MAX_FILE_SIZE: Record<string, number> = {
   forum:       8 * 1024 * 1024, // 8 MB
   question:   8 * 1024 * 1024, // 8 MB
   site:       10 * 1024 * 1024, // 10 MB
-  ai:          4 * 1024 * 1024, // 4 MB — Dr. Q chat attachments
+  ai:          2 * 1024 * 1024, // 2 MB — Dr. Q chat attachments (prevent full textbooks)
   template:   32 * 1024 * 1024, // 32 MB
 };
 

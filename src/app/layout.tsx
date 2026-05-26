@@ -12,6 +12,7 @@ import { FirebaseProvider } from "@/components/providers/FirebaseProvider";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { SessionPersistence } from "@/components/system/SessionPersistence";
+import { ApplyLocale } from "@/components/system/ApplyLocale";
 import "../styles/globals.css";
 
 import { unstable_cache } from "next/cache";
@@ -216,7 +217,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   `.trim();
 
   return (
-    <html lang="en" className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning>
+    <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning>
       <head>
         {process.env.NODE_ENV === "development" ? (
           <script
@@ -225,7 +226,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }}
           />
         ) : null}
-        {/* No-flicker theme script — runs before first paint */}
+        {/* No-flicker theme + lang script — runs before first paint */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -246,6 +247,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     window.__MEDQS_CONFIG__ = ${JSON.stringify({ siteName: config.siteName, logoUrl: config.logoUrl })};
                   } catch (_) {}
                 }
+                try {
+                  var lang = localStorage.getItem('medqs-lang') || 'en';
+                  document.documentElement.setAttribute('lang', lang);
+                  if (lang === 'ar') {
+                    document.documentElement.setAttribute('dir', 'rtl');
+                    document.documentElement.classList.add('font-arabic');
+                  } else {
+                    document.documentElement.setAttribute('dir', 'ltr');
+                    document.documentElement.classList.remove('font-arabic');
+                  }
+                } catch(e) {}
               })();
             `,
           }}
@@ -316,6 +328,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ConfirmProvider>
             <SupabaseAuthProvider>
               <SessionPersistence />
+              <ApplyLocale />
               {children}
             </SupabaseAuthProvider>
           </ConfirmProvider>

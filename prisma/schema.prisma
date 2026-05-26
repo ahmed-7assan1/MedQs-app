@@ -10,52 +10,52 @@ datasource db {
 }
 
 model SiteConfig {
-  id                   String   @id @default(uuid())
-  siteName             String   @default("MedOneX")
-  logoUrl              String?
-  faviconUrl           String?
-  primaryColor         String   @default("#0d9488")
-  enableAI             Boolean  @default(true)
-  enableForum          Boolean  @default(true)
-  enableAds            Boolean  @default(true)
-  enableNotifs         Boolean  @default(true)
-  enableLeaderboard    Boolean  @default(true)
-  updatedAt            DateTime @updatedAt
-  fontArabic           String?
-  fontSans             String?
-  aiPreferredProvider  String   @default("auto")
+  id                      String   @id @default(uuid())
+  siteName                String   @default("MedOneX")
+  logoUrl                 String?
+  faviconUrl              String?
+  primaryColor            String   @default("#0d9488")
+  enableAI                Boolean  @default(true)
+  enableForum             Boolean  @default(true)
+  enableAds               Boolean  @default(true)
+  enableNotifs            Boolean  @default(true)
+  enableLeaderboard       Boolean  @default(true)
+  updatedAt               DateTime @updatedAt
+  fontArabic              String?
+  fontSans                String?
+  aiPreferredProvider     String   @default("auto")
   /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
-  pwaIconUrl           String?
-  logoUrlDark          String?
-  facebookUrl          String?
-  hulkLogoUrl          String?
-  instagramUrl         String?
-  telegramUrl          String?
-  twitterUrl           String?
-  whatsappUrl          String?
-  youtubeUrl           String?
-  enableCreativeStudio Boolean  @default(false)
-  stabilityAIKey       String?
-  assemblyAIKey        String?
-  uploadcarePublicKey  String?
-  siliconFlowKey            String?
-  siliconFlowUrl            String?   @default("https://api.siliconflow.cn/v1")
-  siliconFlowModel          String?   @default("deepseek-ai/DeepSeek-R1")
-  geminiKeyOverride         String?
-  deepseekKeyOverride       String?
-  deepseekUrlOverride       String?
-  groqKeyOverride           String?
-  groqModelOverride         String?
-  openRouterKeyOverride     String?
-  openRouterModelOverride   String?
-  xaiKeyOverride            String?
-  xaiModelOverride          String?
-  proxyUrlOverride          String?
-  proxyKeyOverride          String?
-  anthropicKeyOverride      String?
-  anthropicModelOverride    String?
-  openAIKeyOverride         String?
-  openAIModelOverride       String?
+  pwaIconUrl              String?
+  logoUrlDark             String?
+  facebookUrl             String?
+  hulkLogoUrl             String?
+  instagramUrl            String?
+  telegramUrl             String?
+  twitterUrl              String?
+  whatsappUrl             String?
+  youtubeUrl              String?
+  enableCreativeStudio    Boolean  @default(false)
+  stabilityAIKey          String?
+  assemblyAIKey           String?
+  uploadcarePublicKey     String?
+  siliconFlowKey          String?
+  siliconFlowUrl          String?  @default("https://api.siliconflow.cn/v1")
+  siliconFlowModel        String?  @default("deepseek-ai/DeepSeek-R1")
+  geminiKeyOverride       String?
+  deepseekKeyOverride     String?
+  deepseekUrlOverride     String?
+  groqKeyOverride         String?
+  groqModelOverride       String?
+  openRouterKeyOverride   String?
+  openRouterModelOverride String?
+  xaiKeyOverride          String?
+  xaiModelOverride        String?
+  proxyUrlOverride        String?
+  proxyKeyOverride        String?
+  anthropicKeyOverride    String?
+  anthropicModelOverride  String?
+  openAIKeyOverride       String?
+  openAIModelOverride     String?
 }
 
 model FeatureFlag {
@@ -232,24 +232,24 @@ model ChecklistItem {
 }
 
 model Flashcard {
-  id        String                   @id @default(uuid())
+  id        String                  @id @default(uuid())
   front     String
   back      String
   lectureId String
-  lecture   Lecture                  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lecture   Lecture                 @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   progress  UserFlashcardProgress[]
 }
 
 model UserFlashcardProgress {
-  id            String    @id @default(uuid())
-  userId        String
-  flashcardId   String
-  interval      Int       @default(0)
-  repetitions   Int       @default(0)
-  easeFactor    Float     @default(2.5)
-  nextReviewAt  DateTime  @default(now())
+  id             String    @id @default(uuid())
+  userId         String
+  flashcardId    String
+  interval       Int       @default(0)
+  repetitions    Int       @default(0)
+  easeFactor     Float     @default(2.5)
+  nextReviewAt   DateTime  @default(now())
   lastReviewedAt DateTime?
-  lastRating    Int?
+  lastRating     Int?
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
@@ -486,112 +486,113 @@ model QuizAttemptItem {
 }
 
 model User {
-  id                    String                    @id @default(uuid())
-  name                  String
-  nickname              String?
-  email                 String                    @unique
-  emailVerified         DateTime?
-  image                 String?
-  bio                   String?
-  phone                 String?
-  phoneVisible          Boolean                   @default(false)
-  hideRank              Boolean                   @default(false)
-  theme                 Theme                     @default(SYSTEM)
-  role                  Role                      @default(STUDENT)
-  points                Int                       @default(0)
-  password              String?
-  studentId             String?
-  universityId          String?
-  semesterId            String?
-  rankId                String?
-  studentCode           String?                   @unique
-  rolePermissions       Json?
-  telegramPhone         String?                   @unique
-  isLeader              Boolean                   @default(false)
-  leaderId              String?
-  createdAt             DateTime                  @default(now())
-  updatedAt             DateTime                  @updatedAt
-  facebookUrl           String?
-  instagramUrl          String?
-  isPrivate             Boolean                   @default(false)
-  canManageReports      Boolean                   @default(false)
-  facultyId             String?
-  personalGeminiKey     String?
-  useCustomKey          Boolean                   @default(false)
-  personalOpenAIKey     String?
-  personalGroqKey       String?
-  personalOpenRouterKey String?
-  personalXAIKey        String?
-  personalAnthropicKey  String?
-  personalSiliconFlowKey String?
-  personalSiliconFlowModel String?                 @default("deepseek-ai/DeepSeek-R1")
+  id                       String                    @id @default(uuid())
+  name                     String
+  nickname                 String?
+  email                    String                    @unique
+  emailVerified            DateTime?
+  image                    String?
+  bio                      String?
+  phone                    String?
+  phoneVisible             Boolean                   @default(false)
+  hideRank                 Boolean                   @default(false)
+  theme                    Theme                     @default(SYSTEM)
+  role                     Role                      @default(STUDENT)
+  points                   Int                       @default(0)
+  password                 String?
+  studentId                String?
+  universityId             String?
+  semesterId               String?
+  rankId                   String?
+  studentCode              String?                   @unique
+  rolePermissions          Json?
+  telegramPhone            String?                   @unique
+  isLeader                 Boolean                   @default(false)
+  leaderId                 String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  facebookUrl              String?
+  instagramUrl             String?
+  isPrivate                Boolean                   @default(false)
+  canManageReports         Boolean                   @default(false)
+  facultyId                String?
+  personalGeminiKey        String?
+  useCustomKey             Boolean                   @default(false)
+  personalOpenAIKey        String?
+  personalGroqKey          String?
+  personalOpenRouterKey    String?
+  personalXAIKey           String?
+  personalAnthropicKey     String?
+  personalSiliconFlowKey   String?
+  personalSiliconFlowModel String?                   @default("deepseek-ai/DeepSeek-R1")
   personalCloudflareKey    String?
   personalHuggingfaceKey   String?
   personalTogetherKey      String?
-  personalGithubKey       String?
-  personalCerebrasKey     String?
-  personalSiliconFlowUrl String?                  @default("https://api.siliconflow.cn/v1")
-  handle                String?                   @unique
-  telegramId            String?                   @unique
-  telegramVerified      Boolean                   @default(false)
-  coverImage            String?
-  aiUsageLogs           AIUsageLog[]
-  accounts              Account[]
-  auditLogs             AuditLog[]
-  channelFollows        ChannelFollow[]
-  comments              Comment[]
-  commentLikes          CommentLike[]
-  dmReceived            DirectMessage[]           @relation("DmReceived")
-  dmSent                DirectMessage[]           @relation("DmSent")
-  documentTemplates     DocumentTemplate[]
-  engagementLogs        EngagementLog[]
-  videoComments         LectureVideoComment[]
-  videoLikes            LectureVideoLike[]
-  likes                 Like[]
-  reactions             PostReaction[]
-  notes                 Note[]
-  notifications         Notification[]
-  notifMutes            NotificationMute?
-  pollVotes             PollVote[]
-  posts                 Post[]
-  receivedInvites       PrivateForumInvite[]      @relation("InviteReceiver")
-  sentInvites           PrivateForumInvite[]      @relation("InviteSender")
-  forumMemberships      PrivateForumMember[]
-  pushSubscriptions     PushSubscription[]
-  questionReports       QuestionReport[]
-  quizAttempts          QuizAttempt[]
-  savedPosts            SavedPost[]
-  savedQuestions        SavedQuestion[]
-  sessions              Session[]
-  studyAssistantProfile StudyAssistantProfile?
-  ownedStudyRoom        StudyRoom?                @relation("RoomOwner")
-  studyRoomComments     StudyRoomComment[]
-  studyRoomMembers      StudyRoomMember[]
-  studyRoomPosts        StudyRoomPost[]
-  studyRoomPostLikes    StudyRoomPostLike[]
-  taskCompletions       StudyRoomTaskCompletion[]
-  studySessionsStarted  StudySession[]                @relation("SessionStarter")
-  sessionParticipations StudySessionParticipant[]
-  pointsTransactions    UserPointsTransaction[]
-  flashcardProgress     UserFlashcardProgress[]
-  followedTeams         TeamFollower[]
-  teamMemberships       TeamMember[]
-  faculty               Faculty?                  @relation(fields: [facultyId], references: [id])
-  rank                  Rank?                     @relation(fields: [rankId], references: [id])
-  semester              Semester?                 @relation(fields: [semesterId], references: [id])
-  university            University?               @relation(fields: [universityId], references: [id])
-  v2IdentityProviders   IdentityProvider[]
-  v2RoleAssignments     UserRoleAssignment[]
-  v2TeacherProfile      TeacherProfile?
-  v2CourseEnrollments   CourseEnrollment[]
-  v2AuditLogs           V2AuditLog[]
-  v2OutboxEvents        OutboxEvent[]             @relation("OutboxActor")
-  following             UserFollow[]              @relation("UserFollows")
-  followers             UserFollow[]              @relation("UserFollowers")
-  lectureActivities     UserLectureActivity[]
-  tasks                 UserTask[]
-  atlasBookmarks        AtlasBookmark[]
-  atlasNotes            AtlasNote[]
+  personalGithubKey        String?
+  personalCerebrasKey      String?
+  personalMistralKey       String?
+  personalSiliconFlowUrl   String?                   @default("https://api.siliconflow.cn/v1")
+  handle                   String?                   @unique
+  telegramId               String?                   @unique
+  telegramVerified         Boolean                   @default(false)
+  coverImage               String?
+  aiUsageLogs              AIUsageLog[]
+  accounts                 Account[]
+  auditLogs                AuditLog[]
+  channelFollows           ChannelFollow[]
+  comments                 Comment[]
+  commentLikes             CommentLike[]
+  dmReceived               DirectMessage[]           @relation("DmReceived")
+  dmSent                   DirectMessage[]           @relation("DmSent")
+  documentTemplates        DocumentTemplate[]
+  engagementLogs           EngagementLog[]
+  videoComments            LectureVideoComment[]
+  videoLikes               LectureVideoLike[]
+  likes                    Like[]
+  reactions                PostReaction[]
+  notes                    Note[]
+  notifications            Notification[]
+  notifMutes               NotificationMute?
+  pollVotes                PollVote[]
+  posts                    Post[]
+  receivedInvites          PrivateForumInvite[]      @relation("InviteReceiver")
+  sentInvites              PrivateForumInvite[]      @relation("InviteSender")
+  forumMemberships         PrivateForumMember[]
+  pushSubscriptions        PushSubscription[]
+  questionReports          QuestionReport[]
+  quizAttempts             QuizAttempt[]
+  savedPosts               SavedPost[]
+  savedQuestions           SavedQuestion[]
+  sessions                 Session[]
+  studyAssistantProfile    StudyAssistantProfile?
+  ownedStudyRoom           StudyRoom?                @relation("RoomOwner")
+  studyRoomComments        StudyRoomComment[]
+  studyRoomMembers         StudyRoomMember[]
+  studyRoomPosts           StudyRoomPost[]
+  studyRoomPostLikes       StudyRoomPostLike[]
+  taskCompletions          StudyRoomTaskCompletion[]
+  studySessionsStarted     StudySession[]            @relation("SessionStarter")
+  sessionParticipations    StudySessionParticipant[]
+  pointsTransactions       UserPointsTransaction[]
+  flashcardProgress        UserFlashcardProgress[]
+  followedTeams            TeamFollower[]
+  teamMemberships          TeamMember[]
+  faculty                  Faculty?                  @relation(fields: [facultyId], references: [id])
+  rank                     Rank?                     @relation(fields: [rankId], references: [id])
+  semester                 Semester?                 @relation(fields: [semesterId], references: [id])
+  university               University?               @relation(fields: [universityId], references: [id])
+  v2IdentityProviders      IdentityProvider[]
+  v2RoleAssignments        UserRoleAssignment[]
+  v2TeacherProfile         TeacherProfile?
+  v2CourseEnrollments      CourseEnrollment[]
+  v2AuditLogs              V2AuditLog[]
+  v2OutboxEvents           OutboxEvent[]             @relation("OutboxActor")
+  following                UserFollow[]              @relation("UserFollows")
+  followers                UserFollow[]              @relation("UserFollowers")
+  lectureActivities        UserLectureActivity[]
+  tasks                    UserTask[]
+  atlasBookmarks           AtlasBookmark[]
+  atlasNotes               AtlasNote[]
 }
 
 model TelegramConfig {
@@ -697,42 +698,42 @@ model PrivateForumInvite {
 }
 
 model Post {
-  id                   String        @id @default(uuid())
+  id                   String         @id @default(uuid())
   content              String
   imageUrl             String?
   telegramFileId       String?
   telegramChatId       String?
   telegramMessageId    String?
   attachments          Json?
-  interactionsDisabled Boolean       @default(false)
+  interactionsDisabled Boolean        @default(false)
   authorId             String
   forumId              String
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  audience             PostAudience  @default(UNIVERSITY)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  audience             PostAudience   @default(UNIVERSITY)
   universityId         String
   expiresAt            DateTime?
-  isPinned             Boolean       @default(false)
-  isChatMessage        Boolean       @default(false)
-  isForumPost          Boolean       @default(true)
+  isPinned             Boolean        @default(false)
+  isChatMessage        Boolean        @default(false)
+  isForumPost          Boolean        @default(true)
   teamId               String?
-  pollId               String?       @unique
+  pollId               String?        @unique
   sharedQuestionId     String?
   sharedQuestionData   Json?
-  isReel               Boolean       @default(false)
+  isReel               Boolean        @default(false)
   videoStartTime       Int?
   videoEndTime         Int?
-  isAnonymous          Boolean       @default(false)
+  isAnonymous          Boolean        @default(false)
   backgroundStyle      String?
   comments             Comment[]
   likes                Like[]
   reactions            PostReaction[]
-  author               User          @relation(fields: [authorId], references: [id])
-  forum                Forum         @relation(fields: [forumId], references: [id])
-  poll                 Poll?         @relation(fields: [pollId], references: [id])
-  sharedQuestion       Question?     @relation(fields: [sharedQuestionId], references: [id])
-  team                 MedicalTeam?  @relation(fields: [teamId], references: [id])
-  university           University    @relation(fields: [universityId], references: [id])
+  author               User           @relation(fields: [authorId], references: [id])
+  forum                Forum          @relation(fields: [forumId], references: [id])
+  poll                 Poll?          @relation(fields: [pollId], references: [id])
+  sharedQuestion       Question?      @relation(fields: [sharedQuestionId], references: [id])
+  team                 MedicalTeam?   @relation(fields: [teamId], references: [id])
+  university           University     @relation(fields: [universityId], references: [id])
   hashtags             PostHashtag[]
   savedBy              SavedPost[]
 
@@ -808,9 +809,9 @@ model PostReaction {
   userId    String
   type      ReactionType
   createdAt DateTime     @default(now())
-  
-  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
 }
@@ -1325,38 +1326,38 @@ model StudyRoomPostLike {
 }
 
 model StudySession {
-  id              String                     @id @default(uuid())
-  roomId          String
-  startedById     String
-  startedAt       DateTime                   @default(now())
-  endedAt         DateTime?
-  targetDuration  Int                        @default(25)
-  breakDuration   Int?                       @default(5)
-  status          String                     @default("WAITING")
-  lectureId       String?
-  lectureTitle    String?
-  pausedAt        DateTime?
-  totalPauseMs    BigInt                     @default(0)
+  id             String    @id @default(uuid())
+  roomId         String
+  startedById    String
+  startedAt      DateTime  @default(now())
+  endedAt        DateTime?
+  targetDuration Int       @default(25)
+  breakDuration  Int?      @default(5)
+  status         String    @default("WAITING")
+  lectureId      String?
+  lectureTitle   String?
+  pausedAt       DateTime?
+  totalPauseMs   BigInt    @default(0)
 
-  room            StudyRoom                  @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  startedBy       User                       @relation("SessionStarter", fields: [startedById], references: [id])
-  participants    StudySessionParticipant[]
+  room         StudyRoom                 @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  startedBy    User                      @relation("SessionStarter", fields: [startedById], references: [id])
+  participants StudySessionParticipant[]
 
   @@index([roomId, status])
   @@index([roomId, startedAt])
 }
 
 model StudySessionParticipant {
-  id                String       @id @default(uuid())
+  id                String    @id @default(uuid())
   sessionId         String
   userId            String
-  joinedAt          DateTime     @default(now())
-  focusSeconds      Int          @default(0)
-  sessionsCompleted Int          @default(0)
+  joinedAt          DateTime  @default(now())
+  focusSeconds      Int       @default(0)
+  sessionsCompleted Int       @default(0)
   lastFocusAt       DateTime?
 
-  session           StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user              User         @relation(fields: [userId], references: [id])
+  session StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id])
 
   @@unique([sessionId, userId])
 }
@@ -1370,7 +1371,7 @@ model UserPointsTransaction {
   reference String?
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
 }
@@ -1468,6 +1469,7 @@ enum TeamRole {
   ADMIN
   MEMBER
 }
+
 enum PlatformRole {
   SUPER_ADMIN
   FACULTY_ADMIN
@@ -1502,17 +1504,17 @@ enum QuizAttemptState {
 }
 
 model Tenant {
-  id            String         @id @default(uuid())
-  key           String         @unique
+  id            String               @id @default(uuid())
+  key           String               @unique
   displayName   String
-  status        String         @default("ACTIVE")
+  status        String               @default("ACTIVE")
   defaultDomain String?
   config        TenantConfig?
   domains       TenantDomain[]
   users         UserRoleAssignment[]
   courses       CourseCatalog[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
 }
 
 model TenantDomain {
@@ -1546,22 +1548,22 @@ model V2Role {
 }
 
 model Permission {
-  id          String @id @default(uuid())
-  key         String @unique
+  id          String  @id @default(uuid())
+  key         String  @unique
   description String?
 }
 
 model UserRoleAssignment {
-  id         String       @id @default(uuid())
-  userId     String
-  tenantId   String
-  roleId     String
-  scopeJson  Json?
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  role       V2Role       @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  tenantId  String
+  roleId    String
+  scopeJson Json?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role      V2Role   @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, tenantId, roleId])
   @@index([tenantId, roleId])
@@ -1581,57 +1583,57 @@ model IdentityProvider {
 }
 
 model TeacherProfile {
-  id              String       @id @default(uuid())
-  userId          String       @unique
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bio             String?
-  verified        Boolean      @default(false)
-  ratingAvg       Float        @default(0)
-  ratingCount     Int          @default(0)
-  totalStudents   Int          @default(0)
-  courses         CourseCatalog[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id            String          @id @default(uuid())
+  userId        String          @unique
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio           String?
+  verified      Boolean         @default(false)
+  ratingAvg     Float           @default(0)
+  ratingCount   Int             @default(0)
+  totalStudents Int             @default(0)
+  courses       CourseCatalog[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model CourseCatalog {
-  id              String           @id @default(uuid())
-  tenantId        String
-  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id               String             @id @default(uuid())
+  tenantId         String
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   teacherProfileId String
-  teacherProfile  TeacherProfile   @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
-  title           String
-  slug            String
-  description     String?
-  visibility      CourseVisibility @default(DRAFT)
-  tagsJson        Json?
-  pricing         CoursePricing?
-  enrollments     CourseEnrollment[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  teacherProfile   TeacherProfile     @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  title            String
+  slug             String
+  description      String?
+  visibility       CourseVisibility   @default(DRAFT)
+  tagsJson         Json?
+  pricing          CoursePricing?
+  enrollments      CourseEnrollment[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId, visibility])
 }
 
 model CoursePricing {
-  id            String       @id @default(uuid())
-  courseId      String       @unique
-  course        CourseCatalog @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  currency      String       @default("USD")
-  amountCents   Int
+  id             String        @id @default(uuid())
+  courseId       String        @unique
+  course         CourseCatalog @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  currency       String        @default("USD")
+  amountCents    Int
   compareAtCents Int?
-  updatedAt     DateTime     @updatedAt
+  updatedAt      DateTime      @updatedAt
 }
 
 model CourseEnrollment {
-  id          String       @id @default(uuid())
+  id          String        @id @default(uuid())
   courseId    String
   course      CourseCatalog @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status      String       @default("ACTIVE")
-  enrolledAt  DateTime     @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      String        @default("ACTIVE")
+  enrolledAt  DateTime      @default(now())
   completedAt DateTime?
 
   @@unique([courseId, userId])
@@ -1664,106 +1666,106 @@ model NotificationTemplate {
 }
 
 model OutboxEvent {
-  id            String   @id @default(uuid())
-  tenantKey     String?
-  topic         String
-  payload       Json
-  actorUserId   String?
-  actor         User?    @relation("OutboxActor", fields: [actorUserId], references: [id], onDelete: SetNull)
-  occurredAt    DateTime @default(now())
-  publishedAt   DateTime?
-  retryCount    Int      @default(0)
-  lastError     String?
+  id          String    @id @default(uuid())
+  tenantKey   String?
+  topic       String
+  payload     Json
+  actorUserId String?
+  actor       User?     @relation("OutboxActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  occurredAt  DateTime  @default(now())
+  publishedAt DateTime?
+  retryCount  Int       @default(0)
+  lastError   String?
 
   @@index([publishedAt, occurredAt])
   @@index([tenantKey, occurredAt])
 }
 
 model V2Faculty {
-  id          String    @id @default(uuid())
+  id          String      @id @default(uuid())
   tenantKey   String
   code        String
   name        String
   programs    Program[]
   communities Community[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@unique([tenantKey, code])
 }
 
 model Program {
-  id            String        @id @default(uuid())
-  tenantKey     String
-  facultyId     String
-  faculty       V2Faculty     @relation(fields: [facultyId], references: [id], onDelete: Cascade)
-  code          String
-  name          String
-  curriculums   Curriculum[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id          String       @id @default(uuid())
+  tenantKey   String
+  facultyId   String
+  faculty     V2Faculty    @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  code        String
+  name        String
+  curriculums Curriculum[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@unique([tenantKey, facultyId, code])
 }
 
 model Curriculum {
-  id              String            @id @default(uuid())
-  tenantKey       String
-  programId       String
-  program         Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
-  code            String
-  title           String
-  levels          CurriculumLevel[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id        String            @id @default(uuid())
+  tenantKey String
+  programId String
+  program   Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  code      String
+  title     String
+  levels    CurriculumLevel[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
   @@unique([tenantKey, programId, code])
 }
 
 model CurriculumLevel {
-  id              String       @id @default(uuid())
-  tenantKey       String
-  curriculumId    String
-  curriculum      Curriculum   @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  levelNumber     Int
-  name            String
-  terms           Term[]
+  id           String     @id @default(uuid())
+  tenantKey    String
+  curriculumId String
+  curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  levelNumber  Int
+  name         String
+  terms        Term[]
 
   @@unique([curriculumId, levelNumber])
   @@index([tenantKey, levelNumber])
 }
 
 model Term {
-  id              String          @id @default(uuid())
-  tenantKey       String
-  levelId         String
-  level           CurriculumLevel @relation(fields: [levelId], references: [id], onDelete: Cascade)
-  name            String
-  modules         V2Module[]
-  enrollments     StudentEnrollment[]
+  id          String              @id @default(uuid())
+  tenantKey   String
+  levelId     String
+  level       CurriculumLevel     @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  name        String
+  modules     V2Module[]
+  enrollments StudentEnrollment[]
 
   @@index([tenantKey, name])
 }
 
 model V2Module {
-  id              String      @id @default(uuid())
-  tenantKey       String
-  termId          String
-  term            Term        @relation(fields: [termId], references: [id], onDelete: Cascade)
-  code            String
-  name            String
-  isOptional      Boolean     @default(false)
-  subjects        V2Subject[]
-  quizzes         V2Quiz[]
+  id         String      @id @default(uuid())
+  tenantKey  String
+  termId     String
+  term       Term        @relation(fields: [termId], references: [id], onDelete: Cascade)
+  code       String
+  name       String
+  isOptional Boolean     @default(false)
+  subjects   V2Subject[]
+  quizzes    V2Quiz[]
 
   @@unique([tenantKey, termId, code])
 }
 
 model V2Subject {
-  id              String      @id @default(uuid())
+  id              String            @id @default(uuid())
   tenantKey       String
   moduleId        String
-  module          V2Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module          V2Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   code            String
   name            String
   lectures        V2Lecture[]
@@ -1774,13 +1776,13 @@ model V2Subject {
 }
 
 model V2Lecture {
-  id              String                @id @default(uuid())
+  id              String                   @id @default(uuid())
   tenantKey       String
   subjectId       String
-  subject         V2Subject             @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subject         V2Subject                @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   slug            String
   title           String
-  status          String                @default("DRAFT")
+  status          String                   @default("DRAFT")
   componentToggle LectureComponentToggle[]
   files           V2LectureFile[]
   notes           V2LectureNote[]
@@ -1789,102 +1791,102 @@ model V2Lecture {
   quizzes         V2Quiz[]
   studySessions   V2StudySession[]
   savedByStudents V2SavedLecture[]
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
 
   @@unique([tenantKey, subjectId, slug])
 }
 
 model LectureComponentToggle {
-  id         String    @id @default(uuid())
-  lectureId  String
-  lecture    V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
-  component  String
-  enabled    Boolean   @default(true)
-  updatedAt  DateTime  @updatedAt
+  id        String    @id @default(uuid())
+  lectureId String
+  lecture   V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  component String
+  enabled   Boolean   @default(true)
+  updatedAt DateTime  @updatedAt
 
   @@unique([lectureId, component])
 }
 
 model V2LectureFile {
-  id         String    @id @default(uuid())
-  lectureId  String
-  lecture    V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
-  fileUrl    String
-  title      String?
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(uuid())
+  lectureId String
+  lecture   V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  title     String?
+  createdAt DateTime  @default(now())
 }
 
 model V2LectureNote {
-  id         String    @id @default(uuid())
-  lectureId  String
-  lecture    V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  id           String    @id @default(uuid())
+  lectureId    String
+  lecture      V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   authorUserId String
-  body       String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  body         String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model V2LectureVideo {
-  id         String    @id @default(uuid())
-  lectureId  String
-  lecture    V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
-  videoUrl   String
-  title      String
-  sortOrder  Int       @default(0)
+  id        String    @id @default(uuid())
+  lectureId String
+  lecture   V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  videoUrl  String
+  title     String
+  sortOrder Int       @default(0)
 }
 
 model V2LectureFlashcardSet {
-  id         String    @id @default(uuid())
-  lectureId  String
-  lecture    V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
-  title      String
-  source     String    @default("MANUAL")
-  cardsJson  Json
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(uuid())
+  lectureId String
+  lecture   V2Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  title     String
+  source    String    @default("MANUAL")
+  cardsJson Json
+  createdAt DateTime  @default(now())
 }
 
 model QuestionBank {
-  id         String      @id @default(uuid())
-  tenantKey  String
-  subjectId  String
-  subject    V2Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  title      String
-  questions  V2Question[]
+  id        String       @id @default(uuid())
+  tenantKey String
+  subjectId String
+  subject   V2Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title     String
+  questions V2Question[]
 }
 
 model V2Question {
-  id               String          @id @default(uuid())
-  tenantKey        String
-  questionBankId   String
-  questionBank     QuestionBank    @relation(fields: [questionBankId], references: [id], onDelete: Cascade)
-  stem             String
-  type             QuestionTypeV2
-  difficulty       DifficultyLevel
-  explanation      String?
-  options          V2QuestionOption[]
-  tags             V2QuestionTag[]
-  versions         V2QuestionVersion[]
-  quizQuestions    QuizQuestion[]
-  createdAt        DateTime        @default(now())
+  id             String              @id @default(uuid())
+  tenantKey      String
+  questionBankId String
+  questionBank   QuestionBank        @relation(fields: [questionBankId], references: [id], onDelete: Cascade)
+  stem           String
+  type           QuestionTypeV2
+  difficulty     DifficultyLevel
+  explanation    String?
+  options        V2QuestionOption[]
+  tags           V2QuestionTag[]
+  versions       V2QuestionVersion[]
+  quizQuestions  QuizQuestion[]
+  createdAt      DateTime            @default(now())
 }
 
 model V2QuestionOption {
-  id           String     @id @default(uuid())
-  questionId   String
-  question     V2Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  key          String
-  content      String
-  isCorrect    Boolean
+  id         String     @id @default(uuid())
+  questionId String
+  question   V2Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  key        String
+  content    String
+  isCorrect  Boolean
 
   @@unique([questionId, key])
 }
 
 model V2QuestionTag {
-  id           String     @id @default(uuid())
-  questionId   String
-  question     V2Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  tag          String
+  id         String     @id @default(uuid())
+  questionId String
+  question   V2Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag        String
 
   @@index([tag])
 }
@@ -1901,55 +1903,55 @@ model V2QuestionVersion {
 }
 
 model V2Quiz {
-  id              String       @id @default(uuid())
-  tenantKey       String
-  moduleId        String
-  module          V2Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  lectureId       String?
-  lecture         V2Lecture?   @relation(fields: [lectureId], references: [id], onDelete: SetNull)
-  title           String
-  timeLimitSec    Int?
-  aiExplanation   Boolean      @default(false)
-  questions       QuizQuestion[]
-  attempts        V2QuizAttempt[]
-  publishedAt     DateTime?
-  createdAt       DateTime     @default(now())
+  id            String          @id @default(uuid())
+  tenantKey     String
+  moduleId      String
+  module        V2Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lectureId     String?
+  lecture       V2Lecture?      @relation(fields: [lectureId], references: [id], onDelete: SetNull)
+  title         String
+  timeLimitSec  Int?
+  aiExplanation Boolean         @default(false)
+  questions     QuizQuestion[]
+  attempts      V2QuizAttempt[]
+  publishedAt   DateTime?
+  createdAt     DateTime        @default(now())
 }
 
 model QuizQuestion {
-  id          String     @id @default(uuid())
-  quizId      String
-  quiz        V2Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  questionId  String
-  question    V2Question @relation(fields: [questionId], references: [id], onDelete: Restrict)
-  orderNo     Int
-  points      Float      @default(1)
+  id         String     @id @default(uuid())
+  quizId     String
+  quiz       V2Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionId String
+  question   V2Question @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  orderNo    Int
+  points     Float      @default(1)
 
   @@unique([quizId, questionId])
   @@unique([quizId, orderNo])
 }
 
 model V2QuizAttempt {
-  id            String           @id @default(uuid())
+  id            String              @id @default(uuid())
   tenantKey     String
-  quizId         String
-  quiz          V2Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId        String
+  quiz          V2Quiz              @relation(fields: [quizId], references: [id], onDelete: Cascade)
   studentUserId String
-  startedAt     DateTime         @default(now())
+  startedAt     DateTime            @default(now())
   submittedAt   DateTime?
-  state         QuizAttemptState @default(IN_PROGRESS)
+  state         QuizAttemptState    @default(IN_PROGRESS)
   scorePercent  Float?
   answers       QuizAttemptAnswer[]
 }
 
 model QuizAttemptAnswer {
-  id             String        @id @default(uuid())
-  attemptId      String
-  attempt        V2QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  questionId     String
-  answerJson     Json
-  isCorrect      Boolean?
-  earnedPoints   Float?
+  id           String        @id @default(uuid())
+  attemptId    String
+  attempt      V2QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId   String
+  answerJson   Json
+  isCorrect    Boolean?
+  earnedPoints Float?
 
   @@unique([attemptId, questionId])
 }
@@ -1966,36 +1968,36 @@ model QuizAnalyticsSnapshot {
 }
 
 model StudentEnrollment {
-  id             String   @id @default(uuid())
-  tenantKey      String
-  studentUserId  String
-  termId         String
-  term           Term     @relation(fields: [termId], references: [id], onDelete: Cascade)
-  status         String   @default("ACTIVE")
-  createdAt      DateTime @default(now())
+  id            String   @id @default(uuid())
+  tenantKey     String
+  studentUserId String
+  termId        String
+  term          Term     @relation(fields: [termId], references: [id], onDelete: Cascade)
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
 
   @@unique([studentUserId, termId])
 }
 
 model StudentProgress {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   tenantKey      String
   studentUserId  String
   subjectId      String
   subject        V2Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  completionPct  Float    @default(0)
+  completionPct  Float     @default(0)
   lastActivityAt DateTime?
 
   @@unique([studentUserId, subjectId])
 }
 
 model V2StudySession {
-  id            String    @id @default(uuid())
+  id            String     @id @default(uuid())
   tenantKey     String
   studentUserId String
   lectureId     String?
   lecture       V2Lecture? @relation(fields: [lectureId], references: [id], onDelete: SetNull)
-  startedAt     DateTime  @default(now())
+  startedAt     DateTime   @default(now())
   endedAt       DateTime?
   durationSec   Int?
 }
@@ -2012,25 +2014,25 @@ model V2SavedLecture {
 }
 
 model Community {
-  id           String    @id @default(uuid())
-  tenantKey    String
-  facultyId    String
-  faculty      V2Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade)
-  name         String
-  posts        V2Post[]
-  groups       V2Group[]
+  id        String    @id @default(uuid())
+  tenantKey String
+  facultyId String
+  faculty   V2Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  name      String
+  posts     V2Post[]
+  groups    V2Group[]
 }
 
 model V2Post {
-  id           String      @id @default(uuid())
+  id           String       @id @default(uuid())
   communityId  String
-  community    Community   @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  community    Community    @relation(fields: [communityId], references: [id], onDelete: Cascade)
   authorUserId String
   title        String
   body         String
   comments     V2Comment[]
   reactions    V2Reaction[]
-  createdAt    DateTime    @default(now())
+  createdAt    DateTime     @default(now())
 }
 
 model V2Comment {
@@ -2044,63 +2046,63 @@ model V2Comment {
 }
 
 model V2Reaction {
-  id           String   @id @default(uuid())
-  postId       String
-  post         V2Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId       String
-  type         String
+  id     String @id @default(uuid())
+  postId String
+  post   V2Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  type   String
 
   @@unique([postId, userId, type])
 }
 
 model V2Group {
-  id            String            @id @default(uuid())
-  communityId   String
-  community     Community         @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  title         String
-  memberships   V2GroupMembership[]
-  messages      V2Message[]
+  id          String              @id @default(uuid())
+  communityId String
+  community   Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  title       String
+  memberships V2GroupMembership[]
+  messages    V2Message[]
 }
 
 model V2GroupMembership {
-  id            String   @id @default(uuid())
-  groupId       String
-  group         V2Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  userId        String
-  role          String   @default("MEMBER")
-  createdAt     DateTime @default(now())
+  id        String   @id @default(uuid())
+  groupId   String
+  group     V2Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  role      String   @default("MEMBER")
+  createdAt DateTime @default(now())
 
   @@unique([groupId, userId])
 }
 
 model V2Message {
-  id            String   @id @default(uuid())
-  groupId       String
-  group         V2Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  senderUserId  String
-  body          String
-  createdAt     DateTime @default(now())
+  id           String   @id @default(uuid())
+  groupId      String
+  group        V2Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  senderUserId String
+  body         String
+  createdAt    DateTime @default(now())
 }
 
 model Workspace {
-  id             String          @id @default(uuid())
-  tenantKey      String
-  ownerUserId    String
-  title          String          @default("My Study Space")
-  background     String?
+  id                  String               @id @default(uuid())
+  tenantKey           String
+  ownerUserId         String
+  title               String               @default("My Study Space")
+  background          String?
   widgets             WidgetInstance[]
   pomodoroSessions    PomodoroSession[]
   whiteboardDocuments WhiteboardDocument[]
-  updatedAt           DateTime        @updatedAt
+  updatedAt           DateTime             @updatedAt
 }
 
 model WidgetInstance {
-  id             String        @id @default(uuid())
-  workspaceId    String
-  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  type           String
-  configJson     Json?
-  layout         WidgetLayout?
+  id          String        @id @default(uuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  type        String
+  configJson  Json?
+  layout      WidgetLayout?
 }
 
 model WidgetLayout {
@@ -2114,23 +2116,23 @@ model WidgetLayout {
 }
 
 model PomodoroSession {
-  id             String   @id @default(uuid())
-  workspaceId    String
-  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  ownerUserId    String
-  durationMin    Int
-  startedAt      DateTime @default(now())
-  endedAt        DateTime?
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  ownerUserId String
+  durationMin Int
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
 }
 
 model WhiteboardDocument {
-  id             String   @id @default(uuid())
-  workspaceId    String
-  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  ownerUserId    String
-  title          String
-  contentJson    Json
-  updatedAt      DateTime @updatedAt
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  ownerUserId String
+  title       String
+  contentJson Json
+  updatedAt   DateTime  @updatedAt
 }
 
 // --- Atlas Models ---
@@ -2148,28 +2150,28 @@ model AtlasSystem {
 }
 
 model AtlasStructure {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  name        String
-  latin       String?
-  type        String   @default("organ")
-  desc        String
-  region      String?
-  systemId    String
-  fn          String?
-  blood       String?
-  nerve       String?
-  relations   Json?
-  clinical    String?
-  memo        String?
-  imageUrl    String?
-  modelUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  system      AtlasSystem      @relation(fields: [systemId], references: [systemId], onDelete: Cascade)
-  bookmarks   AtlasBookmark[]
-  notes       AtlasNote[]
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  latin     String?
+  type      String   @default("organ")
+  desc      String
+  region    String?
+  systemId  String
+  fn        String?
+  blood     String?
+  nerve     String?
+  relations Json?
+  clinical  String?
+  memo      String?
+  imageUrl  String?
+  modelUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  system    AtlasSystem     @relation(fields: [systemId], references: [systemId], onDelete: Cascade)
+  bookmarks AtlasBookmark[]
+  notes     AtlasNote[]
 }
 
 model AtlasBookmark {
@@ -2177,9 +2179,9 @@ model AtlasBookmark {
   userId      String
   structureId String
   createdAt   DateTime @default(now())
-  
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  structure   AtlasStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  structure AtlasStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
 
   @@unique([userId, structureId])
 }
@@ -2191,23 +2193,23 @@ model AtlasNote {
   content     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  structure   AtlasStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  structure AtlasStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
 
   @@unique([userId, structureId])
 }
 
 model AiResponseCache {
-  id                   String   @id @default(uuid())
-  questionHash         String   @unique
-  normalizedQuestion   String
-  persona              String
-  model                String
-  response             String
-  hitCount             Int      @default(1)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  questionHash       String   @unique
+  normalizedQuestion String
+  persona            String
+  model              String
+  response           String
+  hitCount           Int      @default(1)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@index([questionHash])
   @@index([hitCount])

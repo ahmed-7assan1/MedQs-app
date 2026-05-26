@@ -1,13 +1,17 @@
-const geminiQuotaExhaustedAt = new Map<string, number>();
+const RATE_LIMIT_COOLDOWN_MS = 65_000;
+const DAILY_QUOTA_COOLDOWN_MS = 86_400_000; // 24 hours
 
-export function markKeyExhausted(key: string): void {
-  geminiQuotaExhaustedAt.set(key, Date.now());
+const geminiQuotaExhaustedAt = new Map<string, { at: number; reason: "rate" | "daily" }>();
+
+export function markKeyExhausted(key: string, reason: "rate" | "daily" = "rate"): void {
+  geminiQuotaExhaustedAt.set(key, { at: Date.now(), reason });
 }
 
 function isKeyFresh(key: string): boolean {
-  const t = geminiQuotaExhaustedAt.get(key);
-  if (!t) return true;
-  if (Date.now() - t > 65_000) {
+  const entry = geminiQuotaExhaustedAt.get(key);
+  if (!entry) return true;
+  const cooldown = entry.reason === "daily" ? DAILY_QUOTA_COOLDOWN_MS : RATE_LIMIT_COOLDOWN_MS;
+  if (Date.now() - entry.at > cooldown) {
     geminiQuotaExhaustedAt.delete(key);
     return true;
   }

@@ -6,11 +6,15 @@ import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider } from "@/hook
 import {
   Plus, Paperclip, ArrowUp, Stop, X, Trash, ChatDots,
   MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
-  Check, GlobeHemisphereWest, Sparkle, Sun, Moon,
-  WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft
+  Check, GlobeHemisphereWest, Sparkle, Sun, Moon, Brain,
+  WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft,
+  ShieldCheck, ClockCountdown, ChartBar
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
+import { SuperExpertProgress, SuperExpertStep } from "@/lib/super-expert";
+import { checkProviderRate } from "@/lib/rate-limits";
 import { DrQMessage } from "./DrQMessage";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
@@ -42,17 +46,19 @@ export function MedOneXChat() {
 
   const {
     threads, activeThreadId, messages, loading, streamingId,
-    settings, limits, newThread, switchThread, deleteThread,
+    settings, limits, superExpertStatus, newThread, switchThread, deleteThread,
     sendMessage, stopGeneration, regenerate, setReaction, updateSettings,
   } = useDrQChat();
 
   const endRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef<boolean>(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
   const [files, setFiles] = useState<FileAttachment[]>([]);
   const [showConfig, setShowConfig] = useState(false);
-  const [modelPickerProvider, setModelPickerProvider] = useState<AIProvider | null>(null);
+  const [showProviderPicker, setShowProviderPicker] = useState(false);
   const [showThreads, setShowThreads] = useState(false);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,6 +69,7 @@ export function MedOneXChat() {
   const [modulesData, setModulesData] = useState<any[]>([]);
   const [modulesSearch, setModulesSearch] = useState("");
   const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
+  const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
 
   // Fetch user modules when the modal opens
   useEffect(() => {
@@ -73,8 +80,26 @@ export function MedOneXChat() {
     }
   }, [showModules]);
 
+  // ─── Smart auto-scroll (IntersectionObserver, scroll container directly) ───
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isAtBottomRef.current = entry.isIntersecting;
+      },
+      { root: el, threshold: 0.01 }
+    );
+    const sentinel = endRef.current;
+    if (sentinel) observer.observe(sentinel);
+    return () => { observer.disconnect(); };
+  }, []);
+
+  useEffect(() => {
+    if (isAtBottomRef.current) {
+      const el = scrollContainerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    }
   }, [messages, streamingId]);
 
   useEffect(() => {
@@ -110,10 +135,16 @@ export function MedOneXChat() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB client-side limit
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
     if (!selected) return;
     Array.from(selected).forEach(file => {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`"${file.name}" is too large (max 10MB)`);
+        return;
+      }
       const placeholder: FileAttachment = { data: "", mimeType: file.type, name: file.name, size: file.size, loading: true };
       setFiles(prev => [...prev, placeholder]);
       const reader = new FileReader();
@@ -122,8 +153,8 @@ export function MedOneXChat() {
       };
       reader.onerror = () => {
         setFiles(prev => prev.filter(f => f !== placeholder));
+        toast.error(`Failed to read "${file.name}"`);
       };
-      reader.onprogress = (e) => {};
       if (file.type.startsWith('image/') || file.type === 'application/pdf' || file.name.match(/\.pptx?$/i)) reader.readAsDataURL(file);
       else reader.readAsText(file);
     });
@@ -145,6 +176,118 @@ export function MedOneXChat() {
       <style>{`
         :root { color-scheme: ${isDark ? "dark" : "light"}; }
       `}</style>
+
+      {/* ─── Super Expert Warning Modal ─── */}
+      <AnimatePresence>
+        {showSuperExpertWarning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+          >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSuperExpertWarning(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              className={cn(
+                "relative w-full max-w-sm rounded-3xl overflow-hidden border shadow-2xl",
+                isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200"
+              )}
+            >
+              {/* Header */}
+              <div className={cn("flex items-center justify-between p-5 border-b", isDark ? "border-white/10" : "border-gray-200")}>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <Lightning size={18} weight="fill" className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-gray-900")}>Super Expert</h2>
+                    <p className={cn("text-[10px] font-medium uppercase tracking-wider", isDark ? "text-gray-500" : "text-gray-400")}>Multi-Provider Orchestration</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowSuperExpertWarning(false)} className={cn("p-2 rounded-xl transition-all", isDark ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500 hover:text-gray-800")}>
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-5 space-y-4">
+                <p className={cn("text-sm leading-relaxed", isDark ? "text-gray-400" : "text-gray-500")}>
+                  Uses <span className={cn("font-bold", isDark ? "text-white" : "text-gray-900")}>Gemini</span> to coordinate multiple providers — each plays a distinct role for higher quality responses.
+                </p>
+
+                <div className={cn("space-y-1.5 p-4 rounded-2xl", isDark ? "bg-white/[0.03] border border-white/10" : "bg-gray-50 border border-gray-100")}>
+                  {/* Item 1: Orchestration */}
+                  <div className="super-expert-warning-item">
+                    <div className="super-expert-warning-icon bg-indigo-500/10 text-indigo-500">
+                      <Brain size={18} weight="fill" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-xs font-bold", isDark ? "text-white" : "text-gray-900")}>Gemini Orchestrates</p>
+                      <p className={cn("text-[11px] mt-0.5 leading-relaxed", isDark ? "text-gray-500" : "text-gray-500")}>Analyzes context, assigns roles (Generator → Critic → Formatter), and synthesizes the final response.</p>
+                    </div>
+                  </div>
+
+                  {/* Item 2: Time */}
+                  <div className="super-expert-warning-item">
+                    <div className="super-expert-warning-icon bg-amber-500/10 text-amber-500">
+                      <ClockCountdown size={18} weight="fill" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-xs font-bold", isDark ? "text-white" : "text-gray-900")}>Increased Response Time</p>
+                      <p className={cn("text-[11px] mt-0.5 leading-relaxed", isDark ? "text-gray-500" : "text-gray-500")}>Responses flow through sequential stages — may take longer than a single provider.</p>
+                    </div>
+                  </div>
+
+                  {/* Item 3: Quota */}
+                  <div className="super-expert-warning-item">
+                    <div className="super-expert-warning-icon bg-rose-500/10 text-rose-500">
+                      <ChartBar size={18} weight="fill" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-xs font-bold", isDark ? "text-white" : "text-gray-900")}>Higher Quota Usage</p>
+                      <p className={cn("text-[11px] mt-0.5 leading-relaxed", isDark ? "text-gray-500" : "text-gray-500")}>Uses Gemini (2 requests) + each worker provider — consumes more daily quota.</p>
+                    </div>
+                  </div>
+
+                  {/* Item 4: Requirement */}
+                  <div className="super-expert-warning-item">
+                    <div className="super-expert-warning-icon bg-emerald-500/10 text-emerald-500">
+                      <ShieldCheck size={18} weight="fill" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-xs font-bold", isDark ? "text-white" : "text-gray-900")}>Gemini Key Required</p>
+                      <p className={cn("text-[11px] mt-0.5 leading-relaxed", isDark ? "text-gray-500" : "text-gray-500")}>At least one non-Gemini provider must also be configured for workers.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className={cn("p-4 border-t flex justify-end gap-2", isDark ? "border-white/10 bg-black/20" : "border-gray-200 bg-gray-50")}>
+                <button
+                  onClick={() => setShowSuperExpertWarning(false)}
+                  className={cn("px-4 py-2.5 rounded-xl text-sm font-medium transition-all", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    updateSettings({ superExpertEnabled: true });
+                    setShowSuperExpertWarning(false);
+                  }}
+                  className="px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/20 transition-all"
+                >
+                  Enable Super Expert
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── API Key Alert ─── */}
       <AnimatePresence>
@@ -211,7 +354,7 @@ export function MedOneXChat() {
                     key={pid}
                     onClick={() => {
                       const ws = Object.values(DRQ_WORKSPACES).find(w => w.personaId === pid);
-                      if (ws) updateSettings({ activePersona: pid, activeProvider: ws.defaultProvider, activeModel: ws.defaultModel });
+                      if (ws) updateSettings({ activePersona: pid, activeProvider: ws.defaultProvider, activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] } });
                       else updateSettings({ activePersona: pid });
                     }}
                     className={cn(
@@ -262,84 +405,17 @@ export function MedOneXChat() {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-1.5">
-              {/* Model Selector Widget — always visible chips */}
-              <div className="flex items-center gap-0.5">
-                {(Object.keys(PROVIDER_CONFIGS) as AIProvider[]).map(p => {
-                  const isActive = settings.activeProvider === p;
-                  return (
-                    <div key={p} className="relative">
-                      <button
-                        onClick={() => {
-                          if (isActive) {
-                            setModelPickerProvider(modelPickerProvider === p ? null : p);
-                          } else {
-                            updateSettings({ activeProvider: p, activeModel: PROVIDER_CONFIGS[p].defaultModel });
-                            setModelPickerProvider(null);
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center gap-1 px-2 py-1.5 rounded-xl text-xs font-medium transition-all",
-                          isActive
-                            ? isDark ? "bg-white/10 text-white shadow-sm" : "bg-black/5 text-gray-900 shadow-sm"
-                            : isDark ? "text-white/40 hover:bg-white/5 hover:text-white/70" : "text-gray-400 hover:bg-black/5 hover:text-gray-700"
-                        )}
-                        title={PROVIDER_CONFIGS[p].label}
-                      >
-                        <span className="text-[11px] font-bold">{PROVIDER_CONFIGS[p].icon}</span>
-                        {isActive && (
-                          <span className="hidden sm:inline truncate max-w-[80px] text-[11px]">{settings.activeModel}</span>
-                        )}
-                      </button>
-                      <AnimatePresence>
-                        {modelPickerProvider === p && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 4, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                            className={cn(
-                              "absolute top-full right-0 mt-1 w-52 rounded-2xl shadow-2xl border overflow-hidden z-50",
-                              isDark ? "bg-[#1e1e1e] border-white/10" : "bg-white border-gray-200"
-                            )}
-                          >
-                            <div className={cn("flex items-center justify-between px-3 py-2", isDark ? "" : "")}>
-                              <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-white/30" : "text-gray-400")}>
-                                {PROVIDER_CONFIGS[p].label}
-                              </span>
-                              <a
-                                href={PROVIDER_CONFIGS[p].keyUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className={cn("p-1 rounded-lg transition-colors flex items-center gap-1", isDark ? "text-white/30 hover:bg-white/10 hover:text-white" : "text-gray-400 hover:bg-gray-100 hover:text-gray-700")}
-                                title="Get API Key"
-                              >
-                                <Key size={12} weight="bold" />
-                              </a>
-                            </div>
-                            {PROVIDER_CONFIGS[p].models.map(m => (
-                              <button
-                                key={m}
-                                onClick={() => { updateSettings({ activeProvider: p, activeModel: m }); setModelPickerProvider(null); }}
-                                className={cn(
-                                  "w-full text-left px-3 py-2 text-xs transition-colors flex items-center gap-2",
-                                  settings.activeModel === m
-                                    ? isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900"
-                                    : isDark ? "text-white/50 hover:bg-white/5" : "text-gray-500 hover:bg-gray-50"
-                                )}
-                              >
-                                <span className="truncate">{m}</span>
-                                {settings.activeModel === m && (
-                                  <Check size={12} weight="bold" className="flex-shrink-0 text-indigo-400" />
-                                )}
-                              </button>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-              </div>
+              {/* Provider Selector — single button opens picker */}
+              <button
+                onClick={() => setShowProviderPicker(true)}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1.5 rounded-xl text-xs font-medium transition-all",
+                  isDark ? "bg-white/10 text-white shadow-sm hover:bg-white/15" : "bg-black/5 text-gray-900 shadow-sm hover:bg-black/10"
+                )}
+                title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
+              >
+                <span className="text-[11px] font-bold">{PROVIDER_CONFIGS[settings.activeProvider]?.icon}</span>
+              </button>
 
               <div className={cn("w-px h-5", isDark ? "bg-white/10" : "bg-gray-200")} />
 
@@ -566,7 +642,7 @@ export function MedOneXChat() {
             }}
           />
         )}
-        <div className={cn("flex-1 overflow-y-auto scrollbar-hover min-h-0 relative z-10", settings.bgImage && (isDark ? "bg-black/20" : "bg-white/20"))}>
+        <div ref={scrollContainerRef} className={cn("flex-1 overflow-y-auto scrollbar-hover min-h-0 relative z-10", settings.bgImage && (isDark ? "bg-black/20" : "bg-white/20"))}>
           {messages.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -636,11 +712,11 @@ export function MedOneXChat() {
                   key={m.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  transition={{ duration: 0.2, delay: idx < 5 ? idx * 0.03 : 0 }}
                   className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
                 >
                   {m.role === "assistant" ? (
-                    <div className="w-full max-w-full">
+                    <div className={cn("w-full max-w-full", m.isStreaming && "stream-cursor")}>
                       <div className="flex items-center gap-3 px-1 mb-2 mt-6">
                         <div className={cn(
                           "w-8 h-8 rounded-xl flex items-center justify-center shadow-md",
@@ -660,17 +736,17 @@ export function MedOneXChat() {
                           </span>
                         </div>
                       </div>
-                      <DrQMessage
-                        message={m}
-                        fontSize={settings.fontSize}
-                        userBubbleColor={settings.userBubbleColor}
-                        aiBubbleColor={settings.aiBubbleColor}
-                        onReaction={setReaction}
-                        onRegenerate={regenerate}
-                        onReply={(id, text) => setReplyContext({ id, text })}
-                        activePersona={settings.activePersona}
-                        variant="flat"
-                      />
+                    <DrQMessage
+                      message={m}
+                      fontSize={settings.fontSize}
+                      userBubbleColor={settings.userBubbleColor}
+                      aiBubbleColor={settings.aiBubbleColor}
+                      onReaction={setReaction}
+                      onRegenerate={regenerate}
+                      onReply={(id, text) => setReplyContext({ id, text })}
+                      activePersona={settings.activePersona}
+                      variant="flat"
+                    />
                     </div>
                   ) : (
                     <DrQMessage
@@ -687,13 +763,20 @@ export function MedOneXChat() {
                 </motion.div>
               ))}
               <div ref={endRef} />
+
+              {/* ─── Super Expert: Expandable Individual Responses ─── */}
+              {superExpertStatus?.phase === "done" && superExpertStatus.steps.length > 0 && (
+                <div className="mt-6 mb-2">
+                  <SuperExpertResults steps={superExpertStatus.steps} isDark={isDark} />
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* File Preview Bar */}
         {files.length > 0 && (
-          <div className="flex-shrink-0 flex justify-center px-3 md:px-4 pb-1">
+          <div className="flex-shrink-0 flex justify-center px-3 md:px-4 pb-1 relative z-10">
             <div className="w-full max-w-3xl flex flex-wrap gap-2">
               {files.map((f, i) => (
                 <div
@@ -738,7 +821,7 @@ export function MedOneXChat() {
 
         {/* Reply Context Bar */}
         {replyContext && (
-          <div className={cn("flex-shrink-0 flex justify-center", isDark ? "bg-black" : "bg-white")}>
+          <div className={cn("flex-shrink-0 flex justify-center relative z-10", isDark ? "bg-black" : "bg-white")}>
             <div className="w-full max-w-3xl mx-auto px-3 md:px-4 pb-1">
               <div className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs",
@@ -757,47 +840,109 @@ export function MedOneXChat() {
           </div>
         )}
 
+        {/* ─── Super Expert Progress Panel ─── */}
+        {superExpertStatus && superExpertStatus.phase !== "idle" && superExpertStatus.phase !== "done" && (
+          <div className={cn("flex-shrink-0 flex justify-center pt-2 relative z-10", isDark ? "bg-black" : "bg-white")}>
+            <div className={cn(
+              "super-expert-panel w-full max-w-3xl mx-auto px-3 md:px-4 pb-2",
+              "rounded-2xl border p-3",
+              isDark ? "bg-white/[0.03] border-indigo-500/20" : "bg-indigo-50/60 border-indigo-200/40"
+            )}>
+              <div className="flex items-center gap-2 mb-2 px-1">
+                <Lightning size={14} weight="fill" className="text-indigo-500" />
+                <span className={cn("text-xs font-bold", isDark ? "text-indigo-400" : "text-indigo-700")}>
+                  {superExpertStatus.phase === "analyzing" ? "Analyzing Context..." :
+                   superExpertStatus.phase === "generating" ? "Generating Drafts..." :
+                   superExpertStatus.phase === "critiquing" ? "Reviewing Quality..." :
+                   superExpertStatus.phase === "formatting" ? "Formatting Output..." :
+                   superExpertStatus.phase === "synthesizing" ? "Synthesizing Response..." : "Processing..."}
+                </span>
+              </div>
+              <div className="space-y-0.5">
+                {superExpertStatus.steps.map(step => (
+                  <div key={step.id} className={cn(
+                    "super-expert-step",
+                    step.status === "active" && "super-expert-step-active",
+                    step.status === "completed" && "super-expert-step-done",
+                    step.status === "failed" && "super-expert-step-failed"
+                  )}>
+                    <div className={cn(
+                      "super-expert-step-icon",
+                      step.status === "active" ? "bg-indigo-500/15" :
+                      step.status === "completed" ? "bg-emerald-500/15" :
+                      step.status === "failed" ? "bg-red-500/15" :
+                      isDark ? "bg-white/5" : "bg-gray-100"
+                    )}>
+                      {step.status === "active" ? (
+                        <div className="super-expert-spinner" />
+                      ) : step.status === "completed" ? (
+                        <Check size={12} weight="bold" className="text-emerald-500" />
+                      ) : step.status === "failed" ? (
+                        <X size={12} weight="bold" className="text-red-500" />
+                      ) : (
+                        <span className={isDark ? "text-gray-500" : "text-gray-400"}>{step.icon}</span>
+                      )}
+                    </div>
+                    <span className={cn(
+                      "font-semibold text-xs",
+                      step.status === "active" ? isDark ? "text-white" : "text-gray-900" :
+                      step.status === "completed" ? isDark ? "text-gray-400" : "text-gray-500" :
+                      step.status === "failed" ? "text-red-500" :
+                      isDark ? "text-gray-500" : "text-gray-400"
+                    )}>
+                      {step.label}
+                    </span>
+                    {step.status === "active" && (
+                      <span className="text-[10px] text-indigo-500 font-medium ml-auto flex items-center gap-1">
+                        <div className="super-expert-spinner inline-block !w-2.5 !h-2.5 !border-[1.5px]" />
+                        Working
+                      </span>
+                    )}
+                    {step.status === "completed" && (
+                      <span className="text-[10px] text-emerald-500 font-medium ml-auto">✓ Done</span>
+                    )}
+                    {step.status === "failed" && step.error && (
+                      <span className="text-[10px] text-red-400 font-medium ml-auto truncate max-w-[120px]">{step.error}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Floating Input Island - Fixed Bottom */}
-        <div className={cn("flex-shrink-0 pb-2 md:pb-3 pt-4 flex justify-center", isDark ? "bg-black" : "bg-white")}>
+        <div className={cn("flex-shrink-0 pb-2 md:pb-3 pt-4 flex justify-center relative z-10", isDark ? "bg-black" : "bg-white")}>
           <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
             <div
               className={cn(
-                "rounded-[28px] border transition-all duration-200",
+                files.length > 0 ? "rounded-[28px]" : "rounded-full",
+                "border transition-all duration-200",
                 inputFocused
                   ? isDark ? "border-gray-500" : "border-gray-300"
-                  : isDark ? "border-white/20" : "border-gray-200/80",
-                isDark ? "bg-black" : "bg-white",
+                  : isDark ? "border-white/10" : "border-gray-200/80",
+                isDark ? "bg-[#0d0d12]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl",
                 "shadow-sm"
               )}
             >
-              <div className="flex items-center gap-1 px-2 py-1">
-                <div className="flex items-center gap-0.5">
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className={cn("p-1.5 rounded-lg transition-colors flex items-center justify-center", isDark ? "text-gray-300 hover:bg-white/10 hover:text-white" : "text-gray-400 hover:bg-gray-100")}
-                  >
-                    {files.some(f => f.loading) ? (
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    ) : (
-                      <Paperclip size={16} />
-                    )}
-                  </button>
-                  <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
-                  <button
-                    onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                    className={cn(
-                      "p-1.5 rounded-lg transition-colors flex items-center justify-center",
-                      webSearchEnabled
-                        ? "bg-indigo-500/20 text-indigo-500"
-                        : isDark ? "text-gray-300 hover:bg-white/10 hover:text-white" : "text-gray-400 hover:bg-gray-100"
-                    )}
-                  >
-                    <GlobeHemisphereWest size={16} />
-                  </button>
-                </div>
+              <div className="flex items-center gap-0.5 px-1.5 py-1">
+                {/* ── Left: Attachment ── */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                >
+                  {files.some(f => f.loading) ? (
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : (
+                    <Paperclip size={16} />
+                  )}
+                </button>
+                <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
+
+                {/* ── Middle: Text Input ── */}
                 <textarea
                   ref={inputRef}
                   rows={1}
@@ -808,34 +953,63 @@ export function MedOneXChat() {
                   onBlur={() => setInputFocused(false)}
                   placeholder="Message MedOneX Expert..."
                   className={cn(
-                    "w-full bg-transparent border-none outline-none resize-none py-1.5 px-1 text-sm leading-relaxed no-scrollbar",
+                    "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar",
                     isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
                   )}
                 />
-                {loading ? (
+
+                {/* ── Right: Super Expert Pill + Send ── */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {/* Super Expert Pill */}
                   <button
-                    onClick={stopGeneration}
+                    onClick={() => {
+                      if (!settings.superExpertEnabled) {
+                        setShowSuperExpertWarning(true);
+                      } else {
+                        updateSettings({ superExpertEnabled: false });
+                      }
+                    }}
                     className={cn(
-                      "flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-all",
-                      isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all select-none",
+                      settings.superExpertEnabled
+                        ? "super-expert-pill-active text-indigo-300"
+                        : isDark
+                          ? "text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                          : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                     )}
+                    title="Super Expert — Multi-provider AI"
                   >
-                    <Stop size={14} weight="fill" />
+                    <Lightning size={12} weight={settings.superExpertEnabled ? "fill" : "regular"} />
+                    <span>Super Expert</span>
                   </button>
-                ) : (
-                  <button
-                    onClick={handleSend}
-                    disabled={!input.trim() && files.length === 0}
-                    className={cn(
-                      "flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-200",
-                      input.trim() || files.length > 0
-                        ? "bg-indigo-500 text-white hover:bg-indigo-600"
-                        : isDark ? "bg-white/5 text-gray-500" : "bg-gray-100 text-gray-400"
-                    )}
-                  >
-                    <ArrowUp size={14} weight="bold" />
-                  </button>
-                )}
+
+                  {/* Send / Stop */}
+                  {loading ? (
+                    <button
+                      onClick={stopGeneration}
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                    >
+                      <Stop size={14} weight="fill" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSend}
+                      disabled={!input.trim() && files.length === 0}
+                      className={cn(
+                        "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                        input.trim() || files.length > 0
+                          ? isDark
+                            ? "bg-white text-black hover:bg-gray-200 shadow-md"
+                            : "bg-black text-white hover:bg-gray-800 shadow-md"
+                          : isDark
+                            ? "bg-white/5 text-gray-500"
+                            : "bg-black/5 text-gray-300"
+                      )}
+                    >
+                      <ArrowUp size={16} weight="bold" />
+                    </button>
+                  )}
+                </div>
               </div>
               {files.length > 0 && (
                 <div className={cn("flex gap-1.5 px-3 pb-2.5 overflow-x-auto no-scrollbar", isDark ? "border-t border-white/5" : "border-t border-gray-100")}>
@@ -874,6 +1048,168 @@ export function MedOneXChat() {
       </main>
 
       <DrQConfigPanel isOpen={showConfig} settings={settings} onUpdate={updateSettings} onClose={() => setShowConfig(false)} />
+
+      {/* ─── Provider Picker Modal ─── */}
+      <AnimatePresence>
+        {showProviderPicker && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowProviderPicker(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              className={cn(
+                "relative w-full max-w-sm rounded-3xl overflow-hidden border shadow-2xl",
+                isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200"
+              )}
+            >
+              <div className={cn("flex items-center justify-between p-5 border-b", isDark ? "border-white/10" : "border-gray-200")}>
+                <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-gray-900")}>Select Provider</h2>
+                <button onClick={() => setShowProviderPicker(false)} className={cn("p-2 rounded-xl transition-all", isDark ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500 hover:text-gray-800")}>
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+              <div className="p-3 max-h-[60vh] overflow-y-auto no-scrollbar">
+                <div className="grid grid-cols-3 gap-2">
+                  {(Object.keys(PROVIDER_CONFIGS) as AIProvider[]).map(p => {
+                    const isActive = settings.activeProvider === p;
+                    const config = PROVIDER_CONFIGS[p];
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => { updateSettings({ activeProvider: p }); setShowProviderPicker(false); }}
+                        className={cn(
+                          "flex flex-col items-center gap-1.5 px-2 py-4 rounded-2xl text-center transition-all",
+                          isActive
+                            ? isDark ? "bg-white/10 text-white shadow-sm ring-1 ring-indigo-500/40" : "bg-gray-100 text-gray-900 shadow-sm ring-1 ring-indigo-400/30"
+                            : isDark ? "text-white/50 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold",
+                          isActive
+                            ? "bg-indigo-500 text-white"
+                            : isDark ? "bg-white/10" : "bg-gray-200"
+                        )}>
+                          {config.icon}
+                        </div>
+                        <div className={cn("text-[10px] font-semibold leading-tight", isActive && "text-indigo-400")}>
+                          {config.label}
+                        </div>
+                        {isActive && <Check size={12} weight="bold" className="text-indigo-400" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ─── Super Expert Results Sub-Component ─── */
+function SuperExpertResults({ steps, isDark }: { steps: SuperExpertStep[]; isDark: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const [expandedStep, setExpandedStep] = useState<string | null>(null);
+
+  return (
+    <div className={cn(
+      "rounded-2xl border overflow-hidden transition-all",
+      isDark ? "border-white/10 bg-white/[0.02]" : "border-gray-200 bg-gray-50/50"
+    )}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className={cn(
+          "w-full flex items-center justify-between px-4 py-3 text-xs font-bold transition-all",
+          isDark ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-800"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <Lightning size={14} weight="fill" className="text-indigo-500" />
+          <span>Individual AI Responses ({steps.length})</span>
+        </div>
+        <motion.div
+          animate={{ rotate: expanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M3 5L6 8L9 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className={cn("border-t px-3 py-2 space-y-1", isDark ? "border-white/10" : "border-gray-200")}>
+              {steps.map(step => (
+                <div key={step.id}>
+                  <button
+                    onClick={() => setExpandedStep(expandedStep === step.id ? null : step.id)}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all",
+                      isDark ? "hover:bg-white/5" : "hover:bg-gray-100"
+                    )}
+                  >
+                    <span className="text-sm flex-shrink-0">{step.icon}</span>
+                    <span className={cn("font-semibold flex-1 text-left", isDark ? "text-white" : "text-gray-900")}>
+                      {step.label}
+                    </span>
+                    <span className={cn(
+                      "text-[10px] font-medium px-2 py-0.5 rounded-full",
+                      step.status === "completed"
+                        ? isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600"
+                        : step.status === "failed"
+                        ? "bg-red-500/10 text-red-500"
+                        : isDark ? "bg-white/5 text-gray-500" : "bg-gray-100 text-gray-400"
+                    )}>
+                      {step.status === "completed" ? "Done" : step.status === "failed" ? "Failed" : "Pending"}
+                    </span>
+                    <svg
+                      width="10" height="10" viewBox="0 0 10 10" fill="none"
+                      className={cn("transition-transform", expandedStep === step.id && "rotate-180")}
+                    >
+                      <path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <AnimatePresence>
+                    {expandedStep === step.id && step.content && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="overflow-hidden"
+                      >
+                        <div className={cn(
+                          "super-expert-detail-content mx-3 mb-2",
+                          isDark ? "bg-white/5 text-gray-300 border border-white/10" : "bg-white text-gray-700 border border-gray-200"
+                        )}>
+                          {step.content.length > 800 ? step.content.slice(0, 800) + "..." : step.content}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

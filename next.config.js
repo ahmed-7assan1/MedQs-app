@@ -24,6 +24,10 @@ const nextConfig = {
   compress: true,                // gzip responses
   poweredByHeader: false,        // remove X-Powered-By header
   reactStrictMode: true,         // catch bugs early
+  devIndicators: false,          // remove bottom-right build indicator in dev
+
+  // ── Output ───────────────────────────────────────────────────────────────────
+  // output: "standalone",       // uncomment for Docker/self-host deployments
 
   // Bundle next-auth through Next's compiler (fixes broken vendor-chunk paths on Windows).
   transpilePackages: ["next-auth"],

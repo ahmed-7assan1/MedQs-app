@@ -58,6 +58,11 @@ Thumbs.db
 # Prisma client partial writes on Windows (failed rename during generate)
 src/generated/prisma/query_engine*.tmp*
 
+# Temp / build artifacts
+UsersAdminAppDataLocalTempdata*.sqlite
+public/worker-*.js
+public/downloads/
+
 # Misc
 *.pem
 .turbo

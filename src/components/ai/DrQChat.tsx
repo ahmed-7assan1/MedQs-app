@@ -482,7 +482,7 @@ export function DrQChat() {
                onStop={stopGeneration}
                loading={loading}
                activeProvider={settings.activeProvider}
-               onProviderChange={(p) => updateSettings({ activeProvider: p, activeModel: PROVIDER_CONFIGS[p].defaultModel })}
+                onProviderChange={(p) => updateSettings({ activeProvider: p, activeModels: { ...settings.activeModels, [p]: [PROVIDER_CONFIGS[p].defaultModel] } })}
                replyContext={replyContext}
                onClearReply={() => setReplyContext(null)}
                smartEngineEnabled={settings.smartEngineEnabled}

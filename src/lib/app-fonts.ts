@@ -1,19 +1,23 @@
-import { Plus_Jakarta_Sans, Tajawal, DM_Sans, Syne } from "next/font/google";
+import localFont from "next/font/local";
+import { Tajawal, DM_Sans, Syne } from "next/font/google";
 
 /**
- * UI pair: **Plus Jakarta Sans** (Latin / UI) + **Tajawal** (Arabic).
- * Variables on `<html>`: `--font-jakarta`, `--font-tajawal`.
+ * UI pair: **Geist** (Latin / UI) + **Tajawal** (Arabic).
+ * Variables on `<html>`: `--font-geist-sans`, `--font-tajawal`.
  * For RTL use `font-arabic` or `dir="rtl"` / `:lang(ar)` (globals.css).
  */
-export const fontJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-jakarta",
+export const fontGeist = localFont({
+  src: [
+    {
+      path: "../../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+      weight: "100 900",
+    },
+  ],
+  variable: "--font-geist-sans",
   display: "swap",
-  adjustFontFallback: false,
 });
 
-export const fontTajawal = Tajawal({
+export const fontArabic = Tajawal({
   subsets: ["arabic", "latin"],
   weight: ["300", "400", "500", "700", "800"],
   variable: "--font-tajawal",
@@ -34,4 +38,4 @@ export const fontSyne = Syne({
   display: "swap",
 });
 
-export const appFontVariableClassName = `${fontJakarta.variable} ${fontTajawal.variable} ${fontDMSans.variable} ${fontSyne.variable}`.trim();
+export const appFontVariableClassName = `${fontGeist.variable} ${fontArabic.variable} ${fontDMSans.variable} ${fontSyne.variable}`.trim();

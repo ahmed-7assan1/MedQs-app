@@ -7,6 +7,18 @@ import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { syncAllThreadsToFirestore, subscribeToThreads, deleteThreadFromFirestore } from "@/lib/firebase/firestore";
 import { getAIEndpoint } from "@/lib/api-config";
 import { getCachedResponse, setCachedResponse, getDirectReply } from "@/lib/chat-cache";
+import {
+  assignRoles,
+  getRolePrompt,
+  getAnalyzerPrompt,
+  getSynthesisPrompt,
+  createStep,
+  SuperExpertProgress,
+  SuperExpertStep,
+  ProviderAssignment,
+  SuperExpertRole,
+} from "@/lib/super-expert";
+import { checkProviderRate, recordProviderRequest } from "@/lib/rate-limits";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,29 +52,29 @@ export type Thread = {
   pinnedProvider?: string;
 };
 
-export type AIProvider = "gemini" | "groq" | "siliconflow" | "cloudflare" | "huggingface" | "together" | "openrouter" | "ovhcloud" | "github" | "cerebras";
+export type AIProvider = "gemini" | "groq" | "siliconflow" | "cloudflare" | "huggingface" | "together" | "openrouter" | "ovhcloud" | "github" | "cerebras" | "mistral";
 
 export type BYOKKeys = {
-  gemini?: string;
-  groq?: string;
-  siliconflow?: string;
-  cloudflare?: string;
-  huggingface?: string;
-  together?: string;
-  openrouter?: string;
-  ovhcloud?: string;
-  github?: string;
-  cerebras?: string;
+  gemini?: string[];
+  groq?: string[];
+  siliconflow?: string[];
+  cloudflare?: string[];
+  huggingface?: string[];
+  together?: string[];
+  openrouter?: string[];
+  ovhcloud?: string[];
+  github?: string[];
+  cerebras?: string[];
+  mistral?: string[];
 };
 
 export type DrQSettings = {
-  // per-provider API keys (stored in localStorage, never sent to server)
   byokKeys: BYOKKeys;
   activeProvider: AIProvider;
-  activeModel: string;
-  activePersona: string; // "quiz", "explainer", etc.
-  smartEngineEnabled?: boolean; // Multi-agent & deep reasoning mode
-  // appearance
+  activeModels: Partial<Record<AIProvider, string[]>>;
+  activePersona: string;
+  smartEngineEnabled?: boolean;
+  superExpertEnabled?: boolean;
   fontSize: number;
   userBubbleColor: string;
   aiBubbleColor: string;
@@ -84,6 +96,7 @@ export type UsageLimits = {
 const SETTINGS_KEY = "medqs-drq-settings-v4";
 const THREADS_KEY  = "medqs-drq-threads-v4";
 const ACTIVE_THREAD_KEY = "medqs-drq-active-thread";
+const STREAM_TIMEOUT = 60000;
 
 export const PROVIDER_CONFIGS: Record<AIProvider, {
   label: string;
@@ -96,9 +109,9 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
 }> = {
   gemini: {
     label: "Google Gemini",
-    defaultModel: "gemini-2.0-flash",
+    defaultModel: "gemini-2.5-flash-lite",
     models: [
-      "gemini-2.0-flash", "gemini-2.0-flash-lite",
+      "gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.0-flash",
     ],
     icon: "G",
     keyUrl: "https://aistudio.google.com/app/apikey",
@@ -245,6 +258,16 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     icon: "⚙",
     keyUrl: "https://cloud.cerebras.ai/",
   },
+  mistral: {
+    label: "Mistral AI",
+    defaultModel: "mistral-large-latest",
+    models: [
+      "mistral-large-latest", "mistral-small-latest", "open-mistral-nemo", "codestral-latest",
+    ],
+    baseURL: "https://api.mistral.ai/v1",
+    icon: "◆",
+    keyUrl: "https://console.mistral.ai/api-keys/",
+  },
 };
 
 // ─── Smart Model Selector ──────────────────────────────────────────────────────
@@ -260,10 +283,10 @@ interface ProviderModelTiers {
 
 const MODEL_TIERS: Partial<Record<AIProvider, ProviderModelTiers>> = {
   gemini: {
-    tiny: ["gemini-2.0-flash-lite"],
-    small: ["gemini-2.0-flash"],
-    medium: ["gemini-2.0-flash"],
-    large: ["gemini-2.0-flash"],
+    tiny: ["gemini-2.5-flash-lite"],
+    small: ["gemini-2.5-flash-lite"],
+    medium: ["gemini-2.5-flash"],
+    large: ["gemini-2.5-flash"],
   },
   groq: {
     tiny: ["allam-2-7b"],
@@ -319,6 +342,12 @@ const MODEL_TIERS: Partial<Record<AIProvider, ProviderModelTiers>> = {
     medium: ["llama-4-scout-17b-16e-instruct", "llama-3.3-70b"],
     large: ["gpt-oss-120b", "qwen-3-235b-a22b-instruct-2507"],
   },
+  mistral: {
+    tiny: ["open-mistral-nemo"],
+    small: ["mistral-small-latest"],
+    medium: ["mistral-large-latest"],
+    large: ["mistral-large-latest"],
+  },
 };
 
 function selectSmartModel(provider: AIProvider, content: string, persona: string, conversationDepth: number): string {
@@ -353,10 +382,25 @@ const FALLBACK_ORDER: AIProvider[] = [
   "together",
   "cloudflare",
   "huggingface",
+  "mistral",
 ];
 
+export function getFirstKey(byokKeys: BYOKKeys, p: AIProvider): string | undefined {
+  const k = byokKeys[p];
+  return Array.isArray(k) ? k.find(kk => kk) : (k || undefined);
+}
+
+export function getActiveModels(activeModels: Partial<Record<AIProvider, string[]>>, provider: AIProvider): string[] {
+  return activeModels[provider]?.length ? activeModels[provider]! : [PROVIDER_CONFIGS[provider]?.defaultModel].filter(Boolean);
+}
+
+export function getFirstModel(activeModels: Partial<Record<AIProvider, string[]>>, provider: AIProvider): string {
+  const models = getActiveModels(activeModels, provider);
+  return models[0] || PROVIDER_CONFIGS[provider]?.defaultModel || "";
+}
+
 function findFallbackProvider(byokKeys: BYOKKeys, exclude: AIProvider, prefer?: AIProvider): AIProvider | null {
-  const hasKey = (p: AIProvider) => byokKeys[p] || PROVIDER_CONFIGS[p]?.needsKey === false;
+  const hasKey = (p: AIProvider) => getFirstKey(byokKeys, p) || PROVIDER_CONFIGS[p]?.needsKey === false;
   if (prefer && prefer !== exclude && hasKey(prefer)) return prefer;
   for (const p of FALLBACK_ORDER) {
     if (p !== exclude && hasKey(p)) return p;
@@ -366,15 +410,41 @@ function findFallbackProvider(byokKeys: BYOKKeys, exclude: AIProvider, prefer?: 
 
 function findFirstAvailableProvider(byokKeys: BYOKKeys): AIProvider | null {
   for (const p of FALLBACK_ORDER) {
-    if (byokKeys[p] || PROVIDER_CONFIGS[p]?.needsKey === false) return p;
+    if (getFirstKey(byokKeys, p) || PROVIDER_CONFIGS[p]?.needsKey === false) return p;
   }
   return null;
+}
+
+function migrateSettings(parsed: any): DrQSettings {
+  // Migrate old single-key format → new array format
+  const bk = parsed.byokKeys || {};
+  const migrated: any = {};
+  for (const p of Object.keys(bk)) {
+    const v = bk[p];
+    if (typeof v === "string" && v) migrated[p] = [v];
+    else if (Array.isArray(v)) migrated[p] = v.filter(Boolean);
+  }
+  // Migrate old activeModel → activeModels
+  let activeModels: Partial<Record<AIProvider, string[]>> = parsed.activeModels || {};
+  if (parsed.activeModel && typeof parsed.activeModel === "string") {
+    const p = parsed.activeProvider as AIProvider;
+    if (!activeModels[p]) {
+      activeModels = { ...activeModels, [p]: [parsed.activeModel] };
+    }
+  }
+  // Ensure every provider with keys has at least its default model selected
+  for (const p of Object.keys(migrated) as AIProvider[]) {
+    if (!activeModels[p]?.length && PROVIDER_CONFIGS[p]) {
+      activeModels[p] = [PROVIDER_CONFIGS[p].defaultModel];
+    }
+  }
+  return { ...parsed, byokKeys: migrated, activeModels };
 }
 
 const DEFAULT_SETTINGS: DrQSettings = {
   byokKeys: {},
   activeProvider: "gemini",
-  activeModel: "gemini-2.0-flash",
+  activeModels: {},
   activePersona: "explainer",
   fontSize: 15,
   userBubbleColor: "#6d28d9",
@@ -382,6 +452,7 @@ const DEFAULT_SETTINGS: DrQSettings = {
   bgImage: "",
   bgBlur: 0,
   bgOpacity: 0.15,
+  superExpertEnabled: false,
 };
 
 // ─── Streaming Client Helpers ─────────────────────────────────────────────────
@@ -394,9 +465,9 @@ async function streamGemini(
   messages: MessageForAPI[],
   files: FileAttachment[],
   onChunk: (text: string) => void,
-  webSearch?: boolean
+  webSearch?: boolean,
+  signal?: AbortSignal
 ): Promise<string> {
-  // Extract system instruction (first message with role "system")
   const sysMsg = messages.find(m => m.role === "system");
   const nonSystem = messages.filter(m => m.role !== "system");
 
@@ -406,7 +477,6 @@ async function streamGemini(
   if (webSearch) modelOpts.tools = [{ googleSearch: {} }];
   const mdl = genAI.getGenerativeModel(modelOpts);
 
-  // Build Gemini history (all but last)
   const history = nonSystem.slice(0, -1).map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
     parts: [{ text: m.content }],
@@ -414,7 +484,6 @@ async function streamGemini(
 
   const chat = mdl.startChat({ history });
 
-  // Build the user turn parts
   const lastMsg = nonSystem[nonSystem.length - 1] || messages[messages.length - 1];
   const parts: any[] = [{ text: lastMsg.content || "" }];
 
@@ -428,7 +497,7 @@ async function streamGemini(
     }
   }
 
-  const result = await chat.sendMessageStream(parts);
+  const result = await chat.sendMessageStream(parts, { signal: signal ?? AbortSignal.timeout(STREAM_TIMEOUT) });
   let full = "";
   for await (const chunk of result.stream) {
     const text = chunk.text();
@@ -446,7 +515,8 @@ async function streamOpenAICompat(
   files: FileAttachment[],
   onChunk: (text: string) => void,
   webSearch?: boolean,
-  skipAuth?: boolean
+  skipAuth?: boolean,
+  signal?: AbortSignal
 ): Promise<string> {
   let searchContext = "";
   if (webSearch) {
@@ -496,6 +566,7 @@ async function streamOpenAICompat(
       } : {}),
     },
     body: JSON.stringify({ model, messages: apiMessages, stream: true, max_tokens: 4096 }),
+    signal: signal ?? AbortSignal.timeout(STREAM_TIMEOUT),
   });
 
   if (!resp.ok) {
@@ -547,8 +618,16 @@ export function useDrQChat() {
     used: 0, limit: 100, filesUsed: 0, fileLimit: 10, rankLabel: "Student"
   });
   const [syllabusContext, setSyllabusContext] = useState<string>("");
+  const [superExpertStatus, setSuperExpertStatus] = useState<SuperExpertProgress | null>(null);
 
   const abortRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const superExpertControllersRef = useRef<AbortController[]>([]);
+
+  // ─── RAF-batched streaming refs ───
+  const pendingContentRef = useRef<string>("");
+  const rafIdRef = useRef<number>(0);
+  const streamingActiveRef = useRef<boolean>(false);
 
   // Load syllabus context — user-specific modules
   useEffect(() => {
@@ -591,12 +670,10 @@ export function useDrQChat() {
       const storedSettings = localStorage.getItem(SETTINGS_KEY);
       if (storedSettings) {
         const parsed = JSON.parse(storedSettings);
-        // Validate activeProvider — it may be stale from a previous version
         if (!PROVIDER_CONFIGS[parsed.activeProvider as AIProvider]) {
           parsed.activeProvider = DEFAULT_SETTINGS.activeProvider;
-          parsed.activeModel = DEFAULT_SETTINGS.activeModel;
         }
-        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+        setSettings(migrateSettings({ ...DEFAULT_SETTINGS, ...parsed }));
       }
 
       const storedThreads = localStorage.getItem(THREADS_KEY);
@@ -706,6 +783,14 @@ export function useDrQChat() {
     }, 2000);
     return () => clearTimeout(timeoutId);
   }, [threads, userId, loading]);
+
+  // Abort any in-flight generation on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current = true;
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const fetchLimits = async () => {
     try {
@@ -886,7 +971,7 @@ export function useDrQChat() {
       setStreamingId(aiMsgId);
       abortRef.current = false;
 
-      const { activeProvider, activeModel, byokKeys, activePersona } = settings;
+      const { activeProvider, activeModels, byokKeys, activePersona } = settings;
 
       // ─── Direct Reply for Greetings ───
       if (!files.length && !replyToId) {
@@ -906,7 +991,7 @@ export function useDrQChat() {
         }
 
         // ─── IndexedDB Cache Lookup ───
-        const cached = await getCachedResponse(content, activePersona, activeModel);
+        const cached = await getCachedResponse(content, activePersona, getFirstModel(activeModels, activeProvider));
         if (cached) {
           setThreads(prev => {
             const updated = prev.map(t => t.id === threadId
@@ -925,7 +1010,8 @@ export function useDrQChat() {
       let effectiveProvider: AIProvider = activeProvider;
       try {
         effectiveProvider = activeProvider;
-        let apiKey = byokKeys[effectiveProvider] ?? "";
+        const providerKeys = byokKeys[effectiveProvider];
+        let apiKey = Array.isArray(providerKeys) ? (providerKeys.find(k => k) || "") : (typeof providerKeys === "string" ? providerKeys : "");
         const needsKey = PROVIDER_CONFIGS[effectiveProvider]?.needsKey !== false;
 
         if (!apiKey && needsKey) {
@@ -933,10 +1019,11 @@ export function useDrQChat() {
           if (fallback) {
             const reason = `No API key set for ${PROVIDER_CONFIGS[effectiveProvider].label}`;
             effectiveProvider = fallback;
-            apiKey = byokKeys[fallback] ?? "";
+            const fbKeys = byokKeys[fallback];
+            apiKey = Array.isArray(fbKeys) ? (fbKeys.find(k => k) || "") : (typeof fbKeys === "string" ? fbKeys : "");
             const label = PROVIDER_CONFIGS[fallback].label;
             toast.success(`🔄 Auto-switched to ${label}: ${reason}`);
-            updateSettings({ activeProvider: fallback, activeModel: PROVIDER_CONFIGS[fallback].defaultModel });
+            updateSettings({ activeProvider: fallback, activeModels: { ...settings.activeModels, [fallback]: [PROVIDER_CONFIGS[fallback].defaultModel] } });
           } else {
             toast.error("No API keys configured. Get a free key from OpenRouter (no credit card needed) or add one in Settings.");
             setThreads(prev => {
@@ -1019,25 +1106,36 @@ ${systemPrompt}`;
         }
 
 
+        // Create AbortController for this generation
+        abortRef.current = false;
+        const ac = new AbortController();
+        abortControllerRef.current = ac;
+        const streamSignal = ac.signal;
+
         // 2. Smart Engine (Multi-Agent Consensus)
         if (settings.smartEngineEnabled) {
           // Find a secondary provider that is configured
-          const availableProviders = Object.keys(byokKeys).filter(k => byokKeys[k as AIProvider]) as AIProvider[];
+          const availableProviders = (Object.keys(byokKeys) as AIProvider[]).filter(k => {
+            const v = byokKeys[k];
+            return Array.isArray(v) ? v.some(kk => kk) : !!v;
+          });
           const secondaryProvider = availableProviders.find(p => p !== effectiveProvider);
           
           if (secondaryProvider) {
             try {
               // Fetch insights from secondary provider
-              const secondaryKey = byokKeys[secondaryProvider]!;
+              const secKeys = byokKeys[secondaryProvider];
+              const secondaryKey = Array.isArray(secKeys) ? secKeys.find(k => k)! : (secKeys || "");
+              if (!secondaryKey) throw new Error("No key");
               const pConfig = PROVIDER_CONFIGS[secondaryProvider];
               const sysPrompt = `You are a researcher AI. Provide a brief, highly accurate 2-paragraph analysis on the user's latest message to help the primary synthesizer AI.`;
               const researchHistory = [{ role: 'system', content: sysPrompt } as MessageForAPI, ...enhancedHistory.slice(-2)]; // only send context + last msg
               
               let insights = "";
               if (secondaryProvider === 'gemini') {
-                insights = await streamGemini(secondaryKey, pConfig.defaultModel, researchHistory, [], () => {});
+                insights = await streamGemini(secondaryKey, pConfig.defaultModel, researchHistory, [], () => {}, false, streamSignal);
               } else {
-                insights = await streamOpenAICompat(secondaryKey, pConfig.baseURL ?? "https://api.openai.com/v1", pConfig.defaultModel, researchHistory, [], () => {});
+                insights = await streamOpenAICompat(secondaryKey, pConfig.baseURL ?? "https://api.openai.com/v1", pConfig.defaultModel, researchHistory, [], () => {}, false, undefined, streamSignal);
               }
               
               // Inject insights into the primary provider's prompt
@@ -1071,115 +1169,252 @@ ${systemPrompt}`;
 
         let finalContent = "";
 
-        const onChunk = (accumulated: string) => {
-          if (abortRef.current) return;
+        // ─── RAF-batched streaming (max 1 state update per frame) ───
+        streamingActiveRef.current = true;
+        const flushToState = () => {
+          rafIdRef.current = 0;
+          const content = pendingContentRef.current;
+          if (!content) return;
           setThreads(prev => {
             const updated = prev.map(t => t.id === threadId
-              ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: accumulated } : m) }
+              ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content } : m) }
               : t
             );
-            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
             return updated;
           });
         };
-
-        if (!apiKey) {
-          // Use site's API if no BYOK key
-          const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: content,
-              conversationHistory: historyForAPI.slice(0, -1),
-              images: files.filter(f => f.mimeType.startsWith("image/")),
-              pdfs: files.filter(f => f.mimeType === "application/pdf"),
-              provider: effectiveProvider,
-              specializedModel: effectiveProvider === activeProvider ? activeModel : PROVIDER_CONFIGS[effectiveProvider].defaultModel,
-              web_search: webSearch ?? false,
-              stream: true,
-            }),
-          });
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || "API error");
+        const onChunk = (accumulated: string) => {
+          if (abortRef.current) return;
+          pendingContentRef.current = accumulated;
+          if (!rafIdRef.current) {
+            rafIdRef.current = requestAnimationFrame(flushToState);
           }
-          const data = await res.json();
-          if (data.reply) {
-            // Simulate a smooth typing effect since the backend doesn't stream natively
-            const replyText = data.reply as string;
-            const chunkSize = Math.max(1, Math.floor(replyText.length / 20));
-            for (let i = 0; i < replyText.length; i += chunkSize) {
-              if (abortRef.current) break;
-              finalContent = replyText.slice(0, i + chunkSize);
-              onChunk(finalContent);
-              await new Promise(r => setTimeout(r, 20));
+        };
+
+        // ─── SUPER EXPERT MODE ───
+        const geminiKeySE = getFirstKey(byokKeys, "gemini");
+        const geminiModelSE = getFirstModel(activeModels, "gemini");
+
+        if (settings.superExpertEnabled && geminiKeySE) {
+          // Find workers (non-Gemini providers with keys + active models)
+          const workerProviders = (Object.keys(byokKeys) as AIProvider[])
+            .filter(p => p !== "gemini" && getFirstKey(byokKeys, p) && getActiveModels(activeModels, p).length > 0);
+
+          if (workerProviders.length >= 1) {
+            const workers = workerProviders.map(p => ({
+              provider: p,
+              apiKey: getFirstKey(byokKeys, p)!,
+              model: getFirstModel(activeModels, p),
+              baseURL: PROVIDER_CONFIGS[p]?.baseURL ?? "https://api.openai.com/v1",
+              skipAuth: PROVIDER_CONFIGS[p]?.needsKey === false,
+            }));
+
+            const assignments = assignRoles(workers);
+            const steps = assignments.map(a => createStep(a.role, a.provider));
+            const progressSteps: SuperExpertStep[] = [...steps];
+            const updateProgress = (phase: SuperExpertProgress["phase"], stepUpdates?: (s: SuperExpertStep[]) => SuperExpertStep[]) => {
+              const next = stepUpdates ? stepUpdates(progressSteps) : progressSteps;
+              setSuperExpertStatus({ phase, steps: next });
+            };
+
+            // Track output content per step for expandable results
+            const stepOutputs = new Map<string, string>();
+            const stepTimings = new Map<string, number>();
+
+            updateProgress("analyzing");
+
+            // Phase 1: Gemini analyzes the full context
+            const analyzerMessages: MessageForAPI[] = [
+              { role: "system", content: getAnalyzerPrompt(content, currentMessages.slice(-12).map(m => `${m.role}: ${m.content.slice(0, 500)}`).join("\n"), files.map(f => f.name).join(", "), workers.length) },
+              { role: "user", content: content },
+            ];
+            const analysis = await streamGemini(geminiKeySE, geminiModelSE, analyzerMessages, [], () => {}, false, streamSignal);
+            if (abortRef.current) throw new Error("_ABORTED_");
+            updateProgress("generating", steps => steps.map(s => s.role === "generator" ? { ...s, status: "active" } : s));
+
+            // Phase 2: Run roles sequentially
+            let generatorOutput = "";
+            let criticOutput = "";
+            let formatterOutput = "";
+            const taskDescription = analysis.trim() || content;
+
+            // Phase 2a: Generator(s) — run in parallel
+            const genAssignments = assignments.filter(a => a.role === "generator");
+            const genResults = await Promise.allSettled(
+              genAssignments.map(async (a) => {
+                const genPrompt = getRolePrompt("generator", taskDescription, "");
+                const genMessages: MessageForAPI[] = [
+                  { role: "system", content: genPrompt },
+                  { role: "user", content },
+                ];
+                if (a.provider === "gemini") {
+                  return await streamGemini(a.apiKey, a.model, genMessages, files, () => {}, false, streamSignal);
+                }
+                return await streamOpenAICompat(a.apiKey, a.baseURL, a.model, genMessages, files, () => {}, false, a.skipAuth, streamSignal);
+              })
+            );
+            const genTexts = genResults.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<string>).value);
+            generatorOutput = genTexts.join("\n\n---\n\n");
+            if (!generatorOutput) throw new Error("Generator produced no output");
+            if (abortRef.current) throw new Error("_ABORTED_");
+            updateProgress("generating", steps => steps.map(s =>
+              s.role === "generator" ? { ...s, status: "completed", content: generatorOutput.slice(0, 1000) } : s
+            ));
+
+            // Phase 2b: Critic(s) — run in parallel
+            const critAssignments = assignments.filter(a => a.role === "critic");
+            if (critAssignments.length > 0) {
+              updateProgress("critiquing", steps => steps.map(s => s.role === "critic" ? { ...s, status: "active" } : s));
+              const critResults = await Promise.allSettled(
+                critAssignments.map(async (a) => {
+                  const critPrompt = getRolePrompt("critic", taskDescription, "", generatorOutput);
+                  const critMessages: MessageForAPI[] = [
+                    { role: "system", content: critPrompt },
+                    { role: "user", content: "Please review the draft above." },
+                  ];
+                  if (a.provider === "gemini") {
+                    return await streamGemini(a.apiKey, a.model, critMessages, [], () => {}, false, streamSignal);
+                  }
+                  return await streamOpenAICompat(a.apiKey, a.baseURL, a.model, critMessages, [], () => {}, false, a.skipAuth, streamSignal);
+                })
+              );
+              const critTexts = critResults.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<string>).value);
+              criticOutput = critTexts.join("\n\n---\n\n");
+              if (abortRef.current) throw new Error("_ABORTED_");
+              updateProgress("critiquing", steps => steps.map(s =>
+                s.role === "critic" ? { ...s, status: "completed", content: criticOutput.slice(0, 1000) } : s
+              ));
             }
-            finalContent = replyText;
-            onChunk(finalContent);
+
+            // Phase 2c: Formatter(s) — run in parallel
+            const fmtAssignments = assignments.filter(a => a.role === "formatter");
+            if (fmtAssignments.length > 0) {
+              updateProgress("formatting", steps => steps.map(s => s.role === "formatter" ? { ...s, status: "active" } : s));
+              const fmtResults = await Promise.allSettled(
+                fmtAssignments.map(async (a) => {
+                  const fmtPrompt = getRolePrompt("formatter", taskDescription, "", generatorOutput, criticOutput);
+                  const fmtMessages: MessageForAPI[] = [
+                    { role: "system", content: fmtPrompt },
+                    { role: "user", content: "Please format the reviewed content." },
+                  ];
+                  if (a.provider === "gemini") {
+                    return await streamGemini(a.apiKey, a.model, fmtMessages, [], () => {}, false, streamSignal);
+                  }
+                  return await streamOpenAICompat(a.apiKey, a.baseURL, a.model, fmtMessages, [], () => {}, false, a.skipAuth, streamSignal);
+                })
+              );
+              const fmtTexts = fmtResults.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<string>).value);
+              formatterOutput = fmtTexts.join("\n\n---\n\n");
+              if (abortRef.current) throw new Error("_ABORTED_");
+              updateProgress("formatting", steps => steps.map(s =>
+                s.role === "formatter" ? { ...s, status: "completed", content: formatterOutput.slice(0, 1000) } : s
+              ));
+            }
+
+            // Phase 3: Gemini synthesizes → stream to chat
+            updateProgress("synthesizing");
+            const synthesisPrompt = getSynthesisPrompt(taskDescription, generatorOutput, criticOutput, formatterOutput);
+            const synthMessages: MessageForAPI[] = [
+              { role: "system", content: synthesisPrompt },
+              { role: "user", content: `Please synthesize and format the final response for: ${content}` },
+            ];
+            finalContent = await streamGemini(geminiKeySE, geminiModelSE, synthMessages, files, onChunk, webSearch, streamSignal);
+            updateProgress("done");
+
+            // Record rate usage for each provider used
+            for (const a of assignments) recordProviderRequest(a.provider);
+            recordProviderRequest("gemini"); // for analysis + synthesis
           } else {
-            throw new Error(data.error || "Invalid response format");
+            // Super Expert enabled but no workers → fall back to normal
+            toast.error("Super Expert needs at least one non-Gemini provider configured.");
+            throw new Error("No worker providers available");
           }
         } else {
-          const smartModel = selectSmartModel(effectiveProvider as AIProvider, content, activePersona, currentMessages.length);
-          const useModel = (effectiveProvider === "openrouter" && !activeModel.includes(":free") && !activeModel.includes("/free"))
-            ? "openrouter/free"
-            : (effectiveProvider === activeProvider ? activeModel : PROVIDER_CONFIGS[effectiveProvider].defaultModel);
-          const finalModel = smartModel || useModel;
-          try {
-            if (effectiveProvider === "gemini") {
-              finalContent = await streamGemini(apiKey, finalModel, historyForAPI, files, onChunk, webSearch);
-            } else {
-              const baseURL = PROVIDER_CONFIGS[effectiveProvider].baseURL ?? "https://api.openai.com/v1";
-              const skipAuth = PROVIDER_CONFIGS[effectiveProvider]?.needsKey === false;
-              finalContent = await streamOpenAICompat(apiKey, baseURL, finalModel, historyForAPI, files, onChunk, webSearch, skipAuth);
+          // ─── NORMAL MODE ───
+          if (!apiKey) {
+            const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                message: content,
+                conversationHistory: historyForAPI.slice(0, -1),
+                images: files.filter(f => f.mimeType.startsWith("image/")),
+                pdfs: files.filter(f => f.mimeType === "application/pdf"),
+                provider: effectiveProvider,
+                specializedModel: effectiveProvider === activeProvider ? getFirstModel(activeModels, activeProvider) : PROVIDER_CONFIGS[effectiveProvider].defaultModel,
+                web_search: webSearch ?? false,
+                stream: true,
+              }),
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.error || "API error");
             }
-          } catch (byokErr: any) {
-            // ─── BYOK failed: retry via server API (which uses env keys) ───
-            const byokMsg = byokErr.message || "";
-            if ((byokMsg.includes("429") || byokMsg.includes("quota") || byokMsg.includes("Quota") || byokMsg.includes("exhausted") || byokMsg.includes("rate_limit")) && effectiveProvider === "gemini") {
-              // Retry via server API (uses env keys — GEMINI_API_KEY_5 has fresh quota)
-              const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  message: content,
-                  conversationHistory: historyForAPI.slice(0, -1),
-                  images: files.filter(f => f.mimeType.startsWith("image/")),
-                  pdfs: files.filter(f => f.mimeType === "application/pdf"),
-                  provider: "gemini",
-                  specializedModel: finalModel,
-                  web_search: webSearch ?? false,
-                  stream: true,
-                }),
-              });
-              if (res.ok) {
-                const data = await res.json();
-                if (data.reply) {
-                  const replyText = data.reply as string;
-                  const chunkSize = Math.max(1, Math.floor(replyText.length / 20));
-                  for (let i = 0; i < replyText.length; i += chunkSize) {
-                    if (abortRef.current) break;
-                    onChunk(replyText.slice(0, i + chunkSize));
-                    await new Promise(r => setTimeout(r, 20));
-                  }
-                  finalContent = replyText;
-                  onChunk(finalContent);
-                } else {
-                  throw byokErr; // fall through to auto-fallback
-                }
-              } else {
-                throw byokErr;
+            const data = await res.json();
+            if (data.reply) {
+              const replyText = data.reply as string;
+              const chunkSize = Math.max(1, Math.floor(replyText.length / 20));
+              for (let i = 0; i < replyText.length; i += chunkSize) {
+                if (abortRef.current) break;
+                finalContent = replyText.slice(0, i + chunkSize);
+                onChunk(finalContent);
+                await new Promise(r => setTimeout(r, 20));
               }
+              finalContent = replyText;
+              onChunk(finalContent);
             } else {
-              throw byokErr;
+              throw new Error(data.error || "Invalid response format");
+            }
+          } else {
+            const rawKeys = byokKeys[effectiveProvider];
+            const keysArray = Array.isArray(rawKeys) ? rawKeys.filter(k => k) : (rawKeys ? [rawKeys] : [apiKey].filter(k => k));
+            const modelsArray = getActiveModels(activeModels, effectiveProvider as AIProvider);
+
+            let lastError: any = null;
+            let success = false;
+
+            for (const currentKey of keysArray) {
+              if (success) break;
+              for (const currentModel of modelsArray) {
+                if (success) break;
+                try {
+                  const smartModel = selectSmartModel(effectiveProvider as AIProvider, content, activePersona, currentMessages.length);
+                  const finalModel = smartModel || currentModel;
+
+                  if (effectiveProvider === "gemini") {
+                    finalContent = await streamGemini(currentKey, finalModel, historyForAPI, files, onChunk, webSearch, streamSignal);
+                  } else {
+                    const baseURL = PROVIDER_CONFIGS[effectiveProvider].baseURL ?? "https://api.openai.com/v1";
+                    const skipAuth = PROVIDER_CONFIGS[effectiveProvider]?.needsKey === false;
+                    finalContent = await streamOpenAICompat(currentKey, baseURL, finalModel, historyForAPI, files, onChunk, webSearch, skipAuth, streamSignal);
+                  }
+                  success = true;
+                } catch (byokErr: any) {
+                  lastError = byokErr;
+                  const msg = byokErr.message || "";
+                  if (msg.includes("401") || msg.includes("403") || msg.includes("API_KEY_INVALID")) {
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (!success) {
+              throw lastError || new Error(`All keys/models failed for ${PROVIDER_CONFIGS[effectiveProvider]?.label || effectiveProvider}`);
             }
           }
         }
 
-        // Mark streaming done
+        // ─── Streaming done: flush final content + persist ───
+        streamingActiveRef.current = false;
+        if (rafIdRef.current) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = 0;
+        }
+        const finalContentForStorage = pendingContentRef.current || finalContent;
         setThreads(prev => {
           const updated = prev.map(t => t.id === threadId
-            ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: finalContent, isStreaming: false } : m) }
+            ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: finalContentForStorage, isStreaming: false } : m) }
             : t
           );
           localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
@@ -1188,46 +1423,50 @@ ${systemPrompt}`;
 
         // ─── Cache the response ───
         if (finalContent && !replyToId && !webSearch) {
-          setCachedResponse(content, activePersona, activeModel, finalContent).catch(() => {});
+          setCachedResponse(content, activePersona, getFirstModel(activeModels, activeProvider), finalContent).catch(() => {});
         }
 
         fetchLimits();
       } catch (err: any) {
         const msg = err.message || "";
-        const failedProvider: AIProvider = effectiveProvider || activeProvider;
-        let friendly = "";
-        if (msg.includes("429") || msg.includes("quota") || msg.includes("Quota") || msg.includes("exhausted") || msg.includes("rate_limit")) {
-          friendly = `${PROVIDER_CONFIGS[failedProvider].label}: ${msg}`;
-        } else if (msg.includes("401") || msg.includes("403") || msg.includes("API_KEY_INVALID") || msg.includes("not valid") || msg.includes("unauthorized")) {
-          friendly = `Invalid ${PROVIDER_CONFIGS[failedProvider].label} API key. Update it in Settings.`;
-        } else if (msg.includes("fetch") || msg.includes("network") || msg.includes("Network") || msg.includes("ENOTFOUND")) {
-          friendly = `Network error connecting to ${PROVIDER_CONFIGS[failedProvider].label}. Check your connection.`;
-        } else if (msg.includes("500") || msg.includes("502") || msg.includes("503")) {
-          friendly = `${PROVIDER_CONFIGS[failedProvider].label} server error. Try again later.`;
-        } else {
-          friendly = msg.split(". ").slice(0, 2).join(". ") || `${PROVIDER_CONFIGS[failedProvider].label} error. Try again.`;
-        }
+        const isAborted = abortRef.current || msg === "_ABORTED_" || err.name === "AbortError";
 
-        // ─── Auto-Fallback on Provider Error ───
-        const fallback = findFallbackProvider(byokKeys, failedProvider);
-        if (fallback) {
-          const label = PROVIDER_CONFIGS[fallback].label;
-          const failedLabel = PROVIDER_CONFIGS[failedProvider].label;
-          toast.success(`🔄 Auto-switched to ${label}: ${failedLabel} failed — ${friendly}`);
-          updateSettings({ activeProvider: fallback, activeModel: PROVIDER_CONFIGS[fallback].defaultModel });
+        if (isAborted) {
+          // Flush partial content and mark as not streaming
+          streamingActiveRef.current = false;
+          if (rafIdRef.current) {
+            cancelAnimationFrame(rafIdRef.current);
+            rafIdRef.current = 0;
+          }
+          const partialContent = pendingContentRef.current || "";
+          if (aiMsgId) {
+            setThreads(prev => {
+              const updated = prev.map(t => t.id === threadId
+                ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: partialContent, isStreaming: false } : m) }
+                : t
+              );
+              localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+              return updated;
+            });
+          }
         } else {
+          const failedProvider: AIProvider = effectiveProvider || activeProvider;
+          const friendly = msg || `${PROVIDER_CONFIGS[failedProvider]?.label ?? failedProvider} error.`;
           toast.error(friendly);
+
+          // Remove the empty AI message
+          setThreads(prev => {
+            const updated = prev.map(t => t.id === threadId
+              ? { ...t, messages: t.messages.filter(m => m.id !== aiMsgId) }
+              : t
+            );
+            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
+            return updated;
+          });
         }
 
-        // Remove the empty AI message
-        setThreads(prev => {
-          const updated = prev.map(t => t.id === threadId
-            ? { ...t, messages: t.messages.filter(m => m.id !== aiMsgId) }
-            : t
-          );
-          localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
-          return updated;
-        });
+        // Reset super expert status on any error/abort
+        setSuperExpertStatus(null);
       } finally {
         setLoading(false);
         setStreamingId(null);
@@ -1238,6 +1477,7 @@ ${systemPrompt}`;
 
   const stopGeneration = useCallback(() => {
     abortRef.current = true;
+    abortControllerRef.current?.abort();
     setLoading(false);
     setStreamingId(null);
   }, []);
@@ -1274,6 +1514,7 @@ ${systemPrompt}`;
     streamingId,
     settings,
     limits,
+    superExpertStatus,
     // thread actions
     newThread,
     switchThread,

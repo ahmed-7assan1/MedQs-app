@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider } from "@/hooks/useDrQChat";
+import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider, getFirstModel } from "@/hooks/useDrQChat";
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import {
   Plus,
@@ -297,7 +297,7 @@ export function DrQFuturisticChat() {
                     updateSettings({
                       activePersona: ws.personaId,
                       activeProvider: ws.defaultProvider,
-                      activeModel: ws.defaultModel,
+                      activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] },
                     });
                     toast.success(`Switched to ${ws.name}`);
                   }}
@@ -574,7 +574,7 @@ export function DrQFuturisticChat() {
                     }}
                       className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-semibold uppercase tracking-wider text-white/50 hover:text-indigo-300 transition-all whitespace-nowrap">
                       <span className="text-[10px]">{PROVIDER_CONFIGS[settings.activeProvider].icon}</span>
-                      <span className="hidden sm:inline max-w-[100px] truncate">{settings.activeModel}</span>
+                      <span className="hidden sm:inline max-w-[100px] truncate">{getFirstModel(settings.activeModels, settings.activeProvider)}</span>
                       <span className="sm:hidden">{PROVIDER_CONFIGS[settings.activeProvider].label}</span>
                       <CaretDown size={8} className="text-white/20 ml-0.5" />
                     </button>
@@ -610,17 +610,17 @@ export function DrQFuturisticChat() {
                                       {PROVIDER_CONFIGS[p].models.map((m) => (
                                         <button key={m}
                                           onClick={() => {
-                                            updateSettings({ activeProvider: p, activeModel: m });
+                                            updateSettings({ activeProvider: p, activeModels: { ...settings.activeModels, [p]: [m] } });
                                             setShowModelPicker(false);
                                             setExpandedProvider(null);
                                           }}
                                           className={cn("w-full text-left px-3 py-1.5 rounded-xl text-[10px] font-medium transition-all",
-                                            settings.activeProvider === p && settings.activeModel === m
+                                            settings.activeProvider === p && getFirstModel(settings.activeModels, p) === m
                                               ? "bg-indigo-500/10 text-indigo-300"
                                               : "text-white/30 hover:text-white/70 hover:bg-white/5")}>
                                           <div className="flex items-center gap-2">
                                             <span className="truncate">{m}</span>
-                                            {settings.activeProvider === p && settings.activeModel === m && (
+                                            {settings.activeProvider === p && getFirstModel(settings.activeModels, p) === m && (
                                               <Check size={10} weight="bold" className="text-indigo-400 flex-shrink-0" />
                                             )}
                                           </div>
@@ -719,7 +719,7 @@ export function DrQFuturisticChat() {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-white/80">{PROVIDER_CONFIGS[settings.activeProvider].label}</p>
-                      <p className="text-[9px] text-white/30">{settings.activeModel}</p>
+                      <p className="text-[9px] text-white/30">{getFirstModel(settings.activeModels, settings.activeProvider)}</p>
                     </div>
                   </div>
                 </div>

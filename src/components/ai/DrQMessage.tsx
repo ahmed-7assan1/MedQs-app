@@ -20,6 +20,7 @@ import {
   BookmarkSimple,
   CaretLeft,
   CaretRight,
+  User,
   X as XIcon
 } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
@@ -120,20 +121,31 @@ const DrQMessageInner: React.FC<MessageProps> = ({
            </div>
         )}
 
-        {/* Persona Header for AI (hidden in flat mode — rendered by parent) */}
-        {isAI && variant !== "flat" && (
-          <div className="flex items-center gap-3 px-1 mb-1">
-             <div className={cn(
-               "w-8 h-8 rounded-xl flex items-center justify-center shadow-md",
-               `bg-gradient-to-br ${(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).gradient}`
-             )}>
+        {/* Identity Header */}
+        {variant !== "flat" && (
+          isAI ? (
+            <div className="flex items-center gap-3 px-1 mb-1">
+              <div className={cn(
+                "w-8 h-8 rounded-xl flex items-center justify-center shadow-md",
+                `bg-gradient-to-br ${(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).gradient}`
+              )}>
                 {React.cloneElement((DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement, { size: 16, weight: "fill", className: "text-white" })}
-             </div>
-             <div className="flex flex-col">
+              </div>
+              <div className="flex flex-col">
                 <span className="text-[12px] font-black text-slate-800 dark:text-white tracking-tight">{(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}</span>
                 <span className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest">Medical Assistant</span>
-             </div>
-          </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 px-1 mb-1 justify-end">
+              <div className="flex flex-col items-end">
+                <span className="text-[12px] font-black text-slate-800 dark:text-slate-100 tracking-tight">You</span>
+              </div>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm bg-gradient-to-br from-slate-400 to-slate-500 dark:from-slate-500 dark:to-slate-600">
+                <User size={14} weight="fill" className="text-white" />
+              </div>
+            </div>
+          )
         )}
 
         {message.isStreaming && !message.content ? (
@@ -157,13 +169,12 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                   ? "rounded-3xl rounded-tl-sm border border-slate-200/60 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none" 
                   : "",
                 !isAI 
-                  ? "rounded-2xl text-white shadow-sm"
+                  ? "rounded-2xl bg-black/[0.06] dark:bg-white/[0.04] text-gray-900 dark:text-white shadow-sm border border-black/[0.08] dark:border-white/[0.06]"
                   : ""
               )}
               style={{ 
                 fontSize: `${fontSize}px`,
-                backgroundColor: isAI && variant !== "flat" ? aiBubbleColor : !isAI ? userBubbleColor : undefined,
-                borderColor: isAI && variant !== "flat" ? undefined : undefined,
+                backgroundColor: isAI && variant !== "flat" ? aiBubbleColor : undefined,
               }}
             >
               {/* File/Image Inline Display */}
@@ -179,12 +190,12 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-xs", isAI ? "bg-slate-50 dark:bg-[#1f222f]/80 border-slate-200 dark:border-white/10" : "bg-white/10 border-white/20")}>
+                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-xs", isAI ? "bg-slate-50 dark:bg-[#1f222f]/80 border-slate-200 dark:border-white/10" : "bg-black/[0.06] border-black/[0.1] dark:bg-white/10 dark:border-white/20")}>
                         <div className="w-10 h-10 rounded-lg bg-white/20 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
                           <FileText size={20} className={isAI ? "text-rose-500" : "text-white"} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold truncate text-slate-800 dark:text-white">{f.name}</p>
+                          <p className="text-xs font-bold truncate text-gray-900 dark:text-white">{f.name}</p>
                           <p className="text-[10px] font-semibold text-slate-500 dark:text-white/50">{isImg ? "Image File" : "PDF Document"}</p>
                         </div>
                       </div>
@@ -214,7 +225,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
               {/* Markdown Content (images stripped) */}
               <div dir="auto" className={cn(
                 "prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
-                isAI ? "prose-slate dark:prose-invert prose-pre:bg-slate-50 dark:prose-pre:bg-black/30 prose-pre:border-slate-200 dark:prose-pre:border-white/5 prose-table:border-slate-200 dark:prose-table:border-white/10 prose-th:bg-slate-50 dark:prose-th:bg-white/5" : "text-white prose-invert prose-p:text-white prose-headings:text-white prose-strong:text-white"
+                isAI ? "prose-slate dark:prose-invert prose-pre:bg-slate-50 dark:prose-pre:bg-black/30 prose-pre:border-slate-200 dark:prose-pre:border-white/5 prose-table:border-slate-200 dark:prose-table:border-white/10 prose-th:bg-slate-50 dark:prose-th:bg-white/5" : "text-gray-900 dark:text-white prose-p:text-gray-900 dark:prose-p:text-white prose-headings:text-gray-900 dark:prose-headings:text-white prose-strong:text-gray-900 dark:prose-strong:text-white prose-code:text-gray-900 dark:prose-code:text-white"
               )}>
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
@@ -275,7 +286,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                            </div>
                          );
                       }
-                      return <code className={cn("px-1.5 py-0.5 rounded font-bold text-[0.9em]", isAI ? "bg-slate-100 dark:bg-white/10 text-indigo-600 dark:text-purple-300" : "bg-white/20 text-white")} {...props}>{children}</code>;
+                      return <code className={cn("px-1.5 py-0.5 rounded font-bold text-[0.9em]", isAI ? "bg-slate-100 dark:bg-white/10 text-indigo-600 dark:text-purple-300" : "bg-black/[0.08] dark:bg-white/20 text-gray-900 dark:text-white")} {...props}>{children}</code>;
                     }
                   }}
                 >
