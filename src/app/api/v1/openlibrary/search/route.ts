@@ -9,6 +9,7 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 const CACHE_TTL = 10 * 60 * 1000;
+const MAX_ENTRIES = 200;
 
 function getCached(key: string): any | null {
   const entry = cache.get(key);
@@ -21,6 +22,10 @@ function getCached(key: string): any | null {
 }
 
 function setCache(key: string, data: any): void {
+  if (cache.size >= MAX_ENTRIES) {
+    const oldest = cache.entries().next().value;
+    if (oldest) cache.delete(oldest[0]);
+  }
   cache.set(key, { data, expiry: Date.now() + CACHE_TTL });
 }
 

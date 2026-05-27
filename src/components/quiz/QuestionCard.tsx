@@ -200,13 +200,13 @@ export function QuestionCard({
                 type="button"
                 onClick={onToggleFlag}
                 className={cn(
-                  "rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   flagged ? "bg-amber-500/15 text-amber-600 dark:text-amber-400" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 aria-pressed={flagged}
                 aria-label={flagged ? "Unflag question" : "Flag question for review"}
               >
-                <Flag className={cn("h-4 w-4", flagged && "fill-current")} aria-hidden />
+                <Flag className={cn("h-5 w-5", flagged && "fill-current")} aria-hidden />
               </button>
             )}
             {onToggleBookmark && (
@@ -214,32 +214,32 @@ export function QuestionCard({
                 type="button"
                 onClick={onToggleBookmark}
                 className={cn(
-                  "rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   bookmarked ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 aria-pressed={bookmarked}
                 aria-label={bookmarked ? "Remove bookmark" : "Bookmark question"}
               >
-                {bookmarked ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
+                {bookmarked ? <BookmarkCheck className="h-5 w-5" aria-hidden /> : <Bookmark className="h-5 w-5" aria-hidden />}
               </button>
             )}
             {onReport && (
               <button
                 type="button"
                 onClick={onReport}
-                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Report question"
               >
-                <MessageSquareWarning className="h-4 w-4" aria-hidden />
+                <MessageSquareWarning className="h-5 w-5" aria-hidden />
               </button>
             )}
             <button
               type="button"
               onClick={handleOpenShare}
-              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               title="Share to community"
             >
-              <ShareNetwork size={18} weight="bold" />
+              <ShareNetwork size={20} weight="bold" />
             </button>
           </div>
         </div>

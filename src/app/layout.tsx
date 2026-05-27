@@ -219,13 +219,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning>
       <head>
-        {process.env.NODE_ENV === "development" ? (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){try{if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister();});});}if(typeof caches!=='undefined'&&caches.keys)caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);});});}catch(e){}})();`,
-            }}
-          />
-        ) : null}
         {/* No-flicker theme + lang script — runs before first paint */}
         <script
           dangerouslySetInnerHTML={{
@@ -252,10 +245,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   document.documentElement.setAttribute('lang', lang);
                   if (lang === 'ar') {
                     document.documentElement.setAttribute('dir', 'rtl');
-                    document.documentElement.classList.add('font-arabic');
+                    document.documentElement.style.setProperty('--font-geist-sans', 'var(--font-tajawal)');
                   } else {
                     document.documentElement.setAttribute('dir', 'ltr');
-                    document.documentElement.classList.remove('font-arabic');
+                    document.documentElement.style.removeProperty('--font-geist-sans');
                   }
                 } catch(e) {}
               })();

@@ -168,3 +168,19 @@
 }
 /* Override Tailwind arbitrary white border utilities for cleaner UI */
 [class*="border-white/"] { border-color: transparent !important; }
+
+/* Reduced motion support for users who prefer reduced animation */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* RTL alignment support */
+html[dir="rtl"] [dir="auto"] { text-align: right; }
+html[dir="rtl"] .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}

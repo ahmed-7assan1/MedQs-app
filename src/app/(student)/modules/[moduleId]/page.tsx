@@ -242,7 +242,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                     </div>
                     {subjQ > 0 && (
                       <div className={cn(
-                        "hidden sm:inline-block px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-black tracking-widest uppercase border",
+                        "hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase border",
                         subjPct >= 70 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
                         : subjPct > 0 ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                         : "bg-muted text-muted-foreground border-border"
@@ -323,7 +323,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
                         <FileText className="h-5 w-5" />
                       </div>
                       {paper.isInteractive && (
-                        <span className="px-2 py-0.5 rounded-md bg-violet-500/10 text-[8px] font-black uppercase text-violet-400 border border-violet-500/20">
+                        <span className="px-2 py-0.5 rounded-md bg-violet-500/10 text-[10px] font-black uppercase text-violet-400 border border-violet-500/20">
                           Interactive
                         </span>
                       )}

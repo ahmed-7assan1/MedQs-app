@@ -132,6 +132,8 @@ export async function GET(
             subjectName: v.lecture.subject.name
          };
       })
+    }, {
+      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
     });
   } catch (error) {
     console.error("Instructor Profile API Error:", error);

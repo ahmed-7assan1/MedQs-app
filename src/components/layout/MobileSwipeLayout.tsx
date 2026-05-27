@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 import {
   MOBILE_SWIPE_ROUTES,
@@ -18,6 +18,7 @@ export function MobileSwipeLayout({ children }: MobileSwipeLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -49,19 +50,21 @@ export function MobileSwipeLayout({ children }: MobileSwipeLayoutProps) {
   return (
     <motion.div
       className="flex-1 flex flex-col w-full h-full relative overflow-hidden touch-pan-y"
-      drag="x"
+      drag={prefersReducedMotion ? false : "x"}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
       onDragEnd={handleDragEnd}
+      style={{ willChange: "transform", transform: "translateZ(0)" }}
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={pathname}
-          initial={{ opacity: 0, x: 20 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          exit={prefersReducedMotion ? false : { opacity: 0, x: -20 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 30 }}
           className="flex-1 flex flex-col w-full min-h-0"
+          style={{ willChange: "transform", transform: "translateZ(0)" }}
         >
           {children}
         </motion.div>

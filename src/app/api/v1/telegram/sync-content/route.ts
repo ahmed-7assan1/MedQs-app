@@ -41,7 +41,9 @@ export async function GET(req: Request) {
       }
     });
 
-    return NextResponse.json({ modules });
+    return NextResponse.json({ modules }, {
+      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
+    });
   } catch (error: any) {
     console.error("Sync Content Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

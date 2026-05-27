@@ -669,7 +669,7 @@ export function QuizClient({
                       setNavigatorOpen(false);
                     }}
                     className={cn(
-                      "flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "flex h-11 min-w-[2.75rem] items-center justify-center rounded-lg border text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       i === currentIndex && "border-primary ring-2 ring-primary/30",
                       isFlagged && "border-amber-400 bg-amber-400/30 text-amber-800 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400",
                       !done && !isFlagged && "border-border bg-muted/30 text-muted-foreground",
@@ -714,7 +714,7 @@ export function QuizClient({
                     setNavigatorOpen(false);
                   }}
                   className={cn(
-                    "flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "flex h-11 min-w-[2.75rem] items-center justify-center rounded-lg border text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     i === currentIndex && "border-primary ring-2 ring-primary/30",
                     isFlagged && "border-amber-400 bg-amber-400/30 text-amber-800 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400",
                     !done && !isFlagged && "border-border bg-muted/30 text-muted-foreground",

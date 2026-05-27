@@ -61,6 +61,9 @@ const MeshGradient = () => (
         background-image: linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
                           linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
       }
+      @media (max-width: 767px) {
+        .grid-bg { background-image: none; }
+      }
     `}</style>
     <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-cyan-600/5 blur-[120px] rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
     <div className="absolute top-[40%] -right-[10%] w-[40%] h-[60%] bg-teal-600/5 blur-[120px] rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '12s', animationDelay: '1s' }} />
@@ -105,7 +108,7 @@ export function DrQChat() {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    endRef.current?.scrollIntoView({ behavior: streamingId ? "auto" : "smooth" });
   }, [messages, streamingId]);
 
   const handleShareToForum = (text: string) => {
@@ -137,12 +140,12 @@ export function DrQChat() {
         {/* Middle: Main Platform Navigation */}
         <div className="flex flex-col gap-5">
           {navItems.map((item, idx) => (
-            <a 
-              key={idx}
-              href={item.href}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white/40 hover:text-cyan-400 hover:bg-white/5 transition-all group relative border border-transparent"
-              title={item.label}
-            >
+              <a 
+                key={idx}
+                href={item.href}
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-white/40 hover:text-cyan-400 hover:bg-white/5 transition-all group relative border border-transparent"
+                title={item.label}
+              >
               {item.icon}
               {/* Tooltip */}
               <div className="absolute left-14 px-2.5 py-1 rounded bg-[#0d0d12] border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider scale-0 group-hover:scale-100 transition-all origin-left whitespace-nowrap shadow-xl z-50">
@@ -158,7 +161,7 @@ export function DrQChat() {
           <button 
             onClick={() => setShowHistorySidebar(!showHistorySidebar)}
             className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center transition-all group relative border",
+              "w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center transition-all group relative border",
               showHistorySidebar 
                 ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" 
                 : "text-white/40 hover:text-cyan-400 hover:bg-white/5 border-transparent"
@@ -174,12 +177,12 @@ export function DrQChat() {
 
         {/* Bottom: Settings / Help */}
         <div className="flex flex-col gap-4">
-          <button 
-            onClick={() => setShowConfig(true)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/40 hover:text-cyan-400 hover:bg-white/5 transition-all group relative border border-transparent"
-            title="MedOneX Expert Settings"
-          >
-            <Gear size={22} />
+              <button 
+                onClick={() => setShowConfig(true)}
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-white/40 hover:text-cyan-400 hover:bg-white/5 transition-all group relative border border-transparent"
+                title="MedOneX Expert Settings"
+              >
+                <Gear size={22} />
             <div className="absolute left-14 px-2.5 py-1 rounded bg-[#0d0d12] border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider scale-0 group-hover:scale-100 transition-all origin-left whitespace-nowrap shadow-xl z-50">
               AI Settings
             </div>
@@ -235,12 +238,12 @@ export function DrQChat() {
                       <span className="text-xs font-medium truncate">{t.title || "New Chat"}</span>
                     </button>
                     
-                    <button 
+                      <button 
                       onClick={(e) => { e.stopPropagation(); deleteThread(t.id); }}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded text-white/40 hover:text-red-400 transition-all ml-1"
+                      className="opacity-0 group-hover:opacity-100 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded text-white/40 hover:text-red-400 transition-all ml-1"
                       title="Delete conversation"
                     >
-                      <Trash size={13} />
+                      <Trash size={18} />
                     </button>
                   </div>
                 ))
@@ -255,7 +258,7 @@ export function DrQChat() {
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[10px] font-bold text-white truncate">MedOneX Expert: {activePersonaObj.name}</span>
-                  <span className="text-[8px] text-cyan-400 uppercase tracking-widest font-semibold">{activePersonaObj.shortName}</span>
+                  <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-semibold">{activePersonaObj.shortName}</span>
                 </div>
               </div>
             </div>
@@ -309,7 +312,7 @@ export function DrQChat() {
              {/* Settings Action Gear */}
              <button 
                onClick={() => setShowConfig(true)}
-               className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all shadow-sm hover:shadow-md group"
+               className="h-11 w-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all shadow-sm hover:shadow-md group"
                title="AI Configuration"
              >
                 <Gear size={18} weight="fill" className="text-white/40 group-hover:text-cyan-400 transition-colors" />
@@ -318,7 +321,7 @@ export function DrQChat() {
              {/* Export Action */}
              <button 
                onClick={() => exportThread("markdown")}
-               className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all shadow-sm hover:shadow-md group"
+               className="h-11 w-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all shadow-sm hover:shadow-md group"
                title="Export Chat"
              >
                <Export size={18} weight="bold" className="text-white/40 group-hover:text-cyan-400 transition-colors" />
@@ -334,7 +337,7 @@ export function DrQChat() {
                />
                <div className="flex flex-col min-w-0">
                  <span className="text-[11px] font-bold text-white leading-none truncate max-w-[80px]">{userName.split(" ")[0]}</span>
-                 <span className="text-[8px] text-cyan-400 font-semibold tracking-wider uppercase leading-none mt-0.5">Student</span>
+                  <span className="text-[10px] text-cyan-400 font-semibold tracking-wider uppercase leading-none mt-0.5">Student</span>
                </div>
              </div>
 
@@ -471,7 +474,7 @@ export function DrQChat() {
         </div>
 
         {/* Composer Bar */}
-        <div className="absolute bottom-0 left-0 w-full z-40 bg-gradient-to-t from-[#09090b] via-[#09090b]/90 to-transparent pt-16 pb-6 px-4 md:px-8 pointer-events-none">
+        <div className="absolute bottom-0 left-0 w-full z-40 bg-gradient-to-t from-[#09090b] via-[#09090b]/90 to-transparent pt-16 px-4 md:px-8 pointer-events-none" style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}>
            <div className="max-w-4xl mx-auto pointer-events-auto">
              <DrQComposer 
                input={input}
@@ -559,7 +562,7 @@ export function DrQChat() {
               </div>
 
               {/* Bottom Profile Area */}
-              <div className="p-4 border-t border-white/5 flex items-center justify-between bg-[#09090b] pb-8">
+              <div className="p-4 border-t border-white/5 flex items-center justify-between bg-[#09090b]" style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom, 0px))" }}>
                  <div className="flex items-center gap-3">
                     <div className="relative">
                        <img src={userAvatar || "/avatars/default.png"} alt="User" className="w-9 h-9 rounded-full border-2 border-white/10 object-cover" onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=06b6d4&color=000000&bold=true`; }} />

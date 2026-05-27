@@ -150,7 +150,9 @@ export async function GET(req: NextRequest) {
 
     brandedUnified.sort((a, b) => (a.isFollowing === b.isFollowing ? a.name.localeCompare(b.name) : a.isFollowing ? -1 : 1));
 
-    return NextResponse.json(brandedUnified);
+    return NextResponse.json(brandedUnified, {
+      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
+    });
   } catch (error) {
     console.error("Instructors API Error:", error);
     return NextResponse.json({ error: "Operation failed" }, { status: 500 });

@@ -101,76 +101,87 @@ export function DrawMedClient() {
       document.querySelector(".excalidraw .App-toolbar-container");
 
     let cleanup: (() => void) | null = null;
-    const interval = setInterval(() => {
+
+    const setupToolbar = (toolbar: HTMLElement) => {
+      // Force toolbar visible — Excalidraw hides it on mobile
+      toolbar.style.display = "flex";
+      toolbar.style.visibility = "visible";
+
+      if (toolbar.getBoundingClientRect().width === 0) return false;
+
+      const rect = toolbar.getBoundingClientRect();
+
+      toolbar.style.position = "fixed";
+      toolbar.style.left = `${rect.left}px`;
+      toolbar.style.top = `${rect.top}px`;
+      toolbar.style.cursor = "grab";
+      toolbar.style.zIndex = "50";
+      toolbar.style.touchAction = "none";
+
+      let dragging = false;
+      let startX = 0, startY = 0;
+      let origLeft = 0, origTop = 0;
+
+      const onDown = (clientX: number, clientY: number) => {
+        dragging = true;
+        toolbar.style.cursor = "grabbing";
+        startX = clientX;
+        startY = clientY;
+        const currentRect = toolbar.getBoundingClientRect();
+        origLeft = currentRect.left;
+        origTop = currentRect.top;
+      };
+      const onMove = (clientX: number, clientY: number) => {
+        if (!dragging) return;
+        toolbar.style.left = `${origLeft + clientX - startX}px`;
+        toolbar.style.top = `${origTop + clientY - startY}px`;
+      };
+      const onUp = () => {
+        dragging = false;
+        toolbar.style.cursor = "grab";
+      };
+
+      const handleMouseDown = (e: MouseEvent) => { e.preventDefault(); onDown(e.clientX, e.clientY); };
+      const handleMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
+      const handleMouseUp = () => onUp();
+      const handleTouchStart = (e: TouchEvent) => { if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY); };
+      const handleTouchMove = (e: TouchEvent) => { if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); };
+      const handleTouchEnd = () => onUp();
+
+      toolbar.addEventListener("mousedown", handleMouseDown);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      toolbar.addEventListener("touchstart", handleTouchStart, { passive: true });
+      document.addEventListener("touchmove", handleTouchMove, { passive: true });
+      document.addEventListener("touchend", handleTouchEnd);
+
+      cleanup = () => {
+        toolbar.removeEventListener("mousedown", handleMouseDown);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        toolbar.removeEventListener("touchstart", handleTouchStart);
+        document.removeEventListener("touchmove", handleTouchMove);
+        document.removeEventListener("touchend", handleTouchEnd);
+      };
+
+      return true;
+    };
+
+    // Try immediately
+    const existing = findToolbar();
+    if (existing && setupToolbar(existing)) return cleanup;
+
+    // Use MutationObserver as a more efficient alternative to polling
+    const observer = new MutationObserver(() => {
       const toolbar = findToolbar();
-      if (toolbar) {
-        // Force toolbar visible — Excalidraw hides it on mobile
-        toolbar.style.display = "flex";
-        toolbar.style.visibility = "visible";
-
-        if (toolbar.getBoundingClientRect().width > 0) {
-          clearInterval(interval);
-
-          const rect = toolbar.getBoundingClientRect();
-
-          toolbar.style.position = "fixed";
-          toolbar.style.left = `${rect.left}px`;
-          toolbar.style.top = `${rect.top}px`;
-          toolbar.style.cursor = "grab";
-          toolbar.style.zIndex = "50";
-          toolbar.style.touchAction = "none";
-
-          let dragging = false;
-          let startX = 0, startY = 0;
-          let origLeft = 0, origTop = 0;
-
-          const onDown = (clientX: number, clientY: number) => {
-            dragging = true;
-            toolbar.style.cursor = "grabbing";
-            startX = clientX;
-            startY = clientY;
-            const currentRect = toolbar.getBoundingClientRect();
-            origLeft = currentRect.left;
-            origTop = currentRect.top;
-          };
-          const onMove = (clientX: number, clientY: number) => {
-            if (!dragging) return;
-            toolbar.style.left = `${origLeft + clientX - startX}px`;
-            toolbar.style.top = `${origTop + clientY - startY}px`;
-          };
-          const onUp = () => {
-            dragging = false;
-            toolbar.style.cursor = "grab";
-          };
-
-          const handleMouseDown = (e: MouseEvent) => { e.preventDefault(); onDown(e.clientX, e.clientY); };
-          const handleMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
-          const handleMouseUp = () => onUp();
-          const handleTouchStart = (e: TouchEvent) => { if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY); };
-          const handleTouchMove = (e: TouchEvent) => { if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); };
-          const handleTouchEnd = () => onUp();
-
-          toolbar.addEventListener("mousedown", handleMouseDown);
-          document.addEventListener("mousemove", handleMouseMove);
-          document.addEventListener("mouseup", handleMouseUp);
-          toolbar.addEventListener("touchstart", handleTouchStart, { passive: true });
-          document.addEventListener("touchmove", handleTouchMove, { passive: true });
-          document.addEventListener("touchend", handleTouchEnd);
-
-          cleanup = () => {
-            toolbar.removeEventListener("mousedown", handleMouseDown);
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-            toolbar.removeEventListener("touchstart", handleTouchStart);
-            document.removeEventListener("touchmove", handleTouchMove);
-            document.removeEventListener("touchend", handleTouchEnd);
-          };
-        }
+      if (toolbar && setupToolbar(toolbar)) {
+        observer.disconnect();
       }
-    }, 500);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      clearInterval(interval);
+      observer.disconnect();
       cleanup?.();
     };
   }, [apiReady]);
@@ -561,8 +572,8 @@ export function DrawMedClient() {
               >
                 <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20 text-primary border border-primary/20">
-                      <Settings className="h-4 w-4" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-primary border border-primary/20">
+                      <Settings className="h-5 w-5" />
                     </div>
                     <div>
                       <h3 className="text-sm font-bold text-white/90">Scene Settings</h3>
@@ -571,9 +582,9 @@ export function DrawMedClient() {
                   </div>
                   <button
                     onClick={() => setLeftMenuOpen(false)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:bg-white/5 hover:text-white transition-all active:scale-95 border border-white/[0.05]"
+                    className="flex h-10 w-10 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/40 hover:bg-white/5 hover:text-white transition-all active:scale-95 border border-white/[0.05]"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
 
@@ -673,10 +684,10 @@ export function DrawMedClient() {
                         <span className="text-[10px] font-bold uppercase tracking-wider">Presets</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <button onClick={() => handleSetBgColor("#ffffff")} className="h-6 w-6 rounded-lg bg-white border border-white/20 active:scale-90 transition-transform shadow" title="White" />
-                        <button onClick={() => handleSetBgColor("#f3f4f6")} className="h-6 w-6 rounded-lg bg-gray-100 border border-black/10 active:scale-90 transition-transform shadow" title="Light Gray" />
-                        <button onClick={() => handleSetBgColor("#0d0c16")} className="h-6 w-6 rounded-lg bg-[#0d0c16] border border-white/10 active:scale-90 transition-transform shadow" title="Dark" />
-                        <button onClick={() => handleSetBgColor("#05070f")} className="h-6 w-6 rounded-lg bg-[#05070f] border border-white/10 active:scale-90 transition-transform shadow" title="Cinema" />
+                        <button onClick={() => handleSetBgColor("#ffffff")} className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-lg bg-white border border-white/20 active:scale-90 transition-transform shadow" title="White" />
+                        <button onClick={() => handleSetBgColor("#f3f4f6")} className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-lg bg-gray-100 border border-black/10 active:scale-90 transition-transform shadow" title="Light Gray" />
+                        <button onClick={() => handleSetBgColor("#0d0c16")} className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-lg bg-[#0d0c16] border border-white/10 active:scale-90 transition-transform shadow" title="Dark" />
+                        <button onClick={() => handleSetBgColor("#05070f")} className="h-11 w-11 min-h-[44px] min-w-[44px] rounded-lg bg-[#05070f] border border-white/10 active:scale-90 transition-transform shadow" title="Cinema" />
                       </div>
                     </div>
                   </div>

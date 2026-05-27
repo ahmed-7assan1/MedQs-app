@@ -10,7 +10,15 @@ import "vidstack/styles/ui/menus.css";
 import "vidstack/styles/ui/tooltips.css";
 import "vidstack/styles/ui/buffering.css";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, Component } from "react";
+
+class VidStackErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    return this.state.hasError ? null : this.props.children;
+  }
+}
 import {
   MediaPlayer, MediaOutlet, MediaCommunitySkin,
   MediaGesture, MediaCaptions, MediaPIPButton,
@@ -65,41 +73,43 @@ function VidStackNative({ url, title, poster, playing, muted, startTime, onMini 
   startTime?: number; onMini: () => void;
 }) {
   return (
-    <MediaPlayer
-      src={url}
-      poster={poster}
-      title={title}
-      autoplay={playing}
-      muted={muted}
-      currentTime={startTime ?? 0}
-      load="visible"
-      streamType="on-demand"
-      viewType="video"
-      style={{ width: "100%", height: "100%" }}
-    >
-      <MediaOutlet />
+    <VidStackErrorBoundary>
+      <MediaPlayer
+        src={url}
+        poster={poster}
+        title={title}
+        autoplay={playing}
+        muted={muted}
+        currentTime={startTime ?? 0}
+        load="visible"
+        streamType="on-demand"
+        viewType="video"
+        style={{ width: "100%", height: "100%" }}
+      >
+        <MediaOutlet />
 
-      {/* Gestures */}
-      <MediaGesture event="dblclick" action="togglePaused" />
-      <MediaGesture event="tap" action="togglePaused" />
+        {/* Gestures */}
+        <MediaGesture event="dblclick" action="togglePaused" />
+        <MediaGesture event="tap" action="togglePaused" />
 
-      {/* Subtitles */}
-      <MediaCaptions className="absolute bottom-16 left-0 right-0 text-center text-white/90 text-sm font-medium [&>span]:bg-black/60 [&>span]:px-3 [&>span]:py-1 [&>span]:rounded-xl [&>span]:backdrop-blur-md" />
+        {/* Subtitles */}
+        <MediaCaptions className="absolute bottom-16 left-0 right-0 text-center text-white/90 text-sm font-medium [&>span]:bg-black/60 [&>span]:px-3 [&>span]:py-1 [&>span]:rounded-xl [&>span]:backdrop-blur-md" />
 
-      {/* PiP + Mini buttons */}
-      <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={onMini}
-          className="w-7 h-7 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center"
-          title="Mini player">
-          <Shrink size={12} />
-        </button>
-        <MediaPIPButton className="w-7 h-7 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center data-[active]:text-indigo-400" title="Picture-in-Picture">
-          <PictureInPicture2 size={12} />
-        </MediaPIPButton>
-      </div>
+        {/* PiP + Mini buttons */}
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={onMini}
+            className="w-7 h-7 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center"
+            title="Mini player">
+            <Shrink size={12} />
+          </button>
+          <MediaPIPButton className="w-7 h-7 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center data-[active]:text-indigo-400" title="Picture-in-Picture">
+            <PictureInPicture2 size={12} />
+          </MediaPIPButton>
+        </div>
 
-      <MediaCommunitySkin />
-    </MediaPlayer>
+        <MediaCommunitySkin />
+      </MediaPlayer>
+    </VidStackErrorBoundary>
   );
 }
 
@@ -140,13 +150,15 @@ function MiniPlayer({ url, videoId, title, poster, muted, onExpand }: {
             allow="autoplay"
           />
         ) : (
-          <MediaPlayer
-            src={url} poster={poster} title={title} autoplay muted={muted}
-            load="visible" streamType="on-demand" viewType="video"
-            style={{ width: "100%", height: "100%" }}
-          >
-            <MediaOutlet />
-          </MediaPlayer>
+          <VidStackErrorBoundary>
+            <MediaPlayer
+              src={url} poster={poster} title={title} autoplay muted={muted}
+              load="visible" streamType="on-demand" viewType="video"
+              style={{ width: "100%", height: "100%" }}
+            >
+              <MediaOutlet />
+            </MediaPlayer>
+          </VidStackErrorBoundary>
         )}
         <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 z-20">
           <button onClick={onExpand} className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white/70 hover:bg-white/20 transition-all">

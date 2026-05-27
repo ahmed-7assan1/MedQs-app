@@ -39,9 +39,11 @@ export function MedqsSelect({
   Children.forEach(children, (child) => {
     if (isValidElement(child) && child.type === "option") {
       const props = child.props as { value?: string; children?: React.ReactNode };
+      const val = String(props.value ?? "");
+      if (val === "") return;
       options.push({
-        value: String(props.value ?? ""),
-        label: String(props.children ?? props.value ?? ""),
+        value: val,
+        label: String(props.children ?? val),
       });
     }
   });

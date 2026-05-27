@@ -229,7 +229,7 @@ export function DashboardShell({
           <h2 className="text-[10px] md:text-xs font-black uppercase tracking-[0.25em] md:tracking-[0.3em] text-muted-foreground mb-3 md:mb-6">
             Rapid Response Tools
           </h2>
-          <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 md:pb-4 no-scrollbar">
+          <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 md:pb-4 no-scrollbar snap-x snap-mandatory scroll-smooth">
             <QuickActionCard label="Video Hub" iconName="PlayCircle" color="bg-rose-500" href="/videos" />
             <QuickActionCard label="Mock Exams" iconName="Zap" color="bg-emerald-500" href="/past-papers" />
             <QuickActionCard label="Collaborate" iconName="Users" color="bg-blue-500" href="/social" />

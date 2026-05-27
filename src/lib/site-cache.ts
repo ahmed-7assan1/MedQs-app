@@ -53,7 +53,7 @@ export interface CachedSiteData {
 
 const g = globalThis as unknown as { __siteCache?: CachedSiteData };
 
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 function isCacheStale(): boolean {
   if (!g.__siteCache) return true;

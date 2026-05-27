@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import dynamic from "next/dynamic";
 const Sidebar = dynamic(() => import("@/components/layout/Sidebar").then(m => m.Sidebar), { ssr: false });
+const AmbientGlow = dynamic(() => import("@/components/ui/AmbientGlow").then(m => m.AmbientGlow), { ssr: false });
 import { NotificationsLoader } from "@/components/notifications/NotificationsLoader";
 import { AdBannerModal } from "@/components/ads/AdBannerModal";
 import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
@@ -83,7 +84,8 @@ export default async function StudentLayout({ children }: { children: React.Reac
             logoUrl: siteConfig?.logoUrl ?? null,
           }}
         >
-          <div className={cn("app-shell app-shell--tabbar min-h-screen flex flex-col dark:bg-[#09080F] bg-white")}>
+          <AmbientGlow />
+          <div className={cn("app-shell app-shell--tabbar min-h-screen flex flex-col bg-white/80 dark:bg-[#09080F]/80")}>
             <MobileChromeController />
             <a href="#main-content" className="skip-link sr-only">
               Skip to main content

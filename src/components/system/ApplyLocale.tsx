@@ -1,19 +1,28 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 export function ApplyLocale() {
-  useEffect(() => {
+  const apply = useCallback(() => {
     try {
       const lang = localStorage.getItem("medqs-lang") || "en";
       document.documentElement.setAttribute("lang", lang);
       if (lang === "ar") {
         document.documentElement.setAttribute("dir", "rtl");
-        document.body.classList.add("font-arabic");
+        document.documentElement.style.setProperty("--font-geist-sans", "var(--font-tajawal)");
       } else {
         document.documentElement.setAttribute("dir", "ltr");
-        document.body.classList.remove("font-arabic");
+        document.documentElement.style.removeProperty("--font-geist-sans");
       }
     } catch {}
   }, []);
+
+  useEffect(() => { apply(); }, [apply]);
+
+  useEffect(() => {
+    const handler = (e: StorageEvent) => { if (e.key === "medqs-lang") apply(); };
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, [apply]);
+
   return null;
 }

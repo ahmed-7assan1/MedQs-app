@@ -1,10 +1,34 @@
 const RATE_LIMIT_COOLDOWN_MS = 65_000;
 const DAILY_QUOTA_COOLDOWN_MS = 86_400_000; // 24 hours
+const STORAGE_KEY = "medqs-gemini-cooldown-v1";
 
 const geminiQuotaExhaustedAt = new Map<string, { at: number; reason: "rate" | "daily" }>();
 
+// Restore from localStorage on module load
+try {
+  const stored = typeof localStorage !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+  if (stored) {
+    const parsed = JSON.parse(stored) as [string, { at: number; reason: "rate" | "daily" }][];
+    for (const [key, val] of parsed) {
+      // Skip entries past their cooldown
+      const cooldown = val.reason === "daily" ? DAILY_QUOTA_COOLDOWN_MS : RATE_LIMIT_COOLDOWN_MS;
+      if (Date.now() - val.at < cooldown) {
+        geminiQuotaExhaustedAt.set(key, val);
+      }
+    }
+  }
+} catch {}
+
+function persistCooldown(): void {
+  try {
+    const entries = Array.from(geminiQuotaExhaustedAt.entries());
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  } catch {}
+}
+
 export function markKeyExhausted(key: string, reason: "rate" | "daily" = "rate"): void {
   geminiQuotaExhaustedAt.set(key, { at: Date.now(), reason });
+  persistCooldown();
 }
 
 function isKeyFresh(key: string): boolean {
@@ -13,6 +37,7 @@ function isKeyFresh(key: string): boolean {
   const cooldown = entry.reason === "daily" ? DAILY_QUOTA_COOLDOWN_MS : RATE_LIMIT_COOLDOWN_MS;
   if (Date.now() - entry.at > cooldown) {
     geminiQuotaExhaustedAt.delete(key);
+    persistCooldown();
     return true;
   }
   return false;

@@ -18,8 +18,11 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
           ease: "easeOut",
         }}
         className="w-full flex-1 flex flex-col"
+        style={{ willChange: "transform", transform: "translateZ(0)" }}
       >
-        {children}
+        <div className="flex-1 flex flex-col">
+          {children}
+        </div>
       </motion.div>
     </AnimatePresence>
   );

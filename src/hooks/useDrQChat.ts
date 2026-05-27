@@ -97,6 +97,7 @@ const SETTINGS_KEY = "medqs-drq-settings-v4";
 const THREADS_KEY  = "medqs-drq-threads-v4";
 const ACTIVE_THREAD_KEY = "medqs-drq-active-thread";
 const STREAM_TIMEOUT = 60000;
+const MAX_THREADS = 50;
 
 export const PROVIDER_CONFIGS: Record<AIProvider, {
   label: string;
@@ -604,6 +605,10 @@ async function streamOpenAICompat(
 
 // ─── Main Hook ────────────────────────────────────────────────────────────────
 
+// In-memory response cache for same-conversation reuse (bypasses IndexedDB latency)
+const lastResponseCache = new Map<string, { response: string; ts: number }>();
+const MEMO_CACHE_TTL = 30 * 60 * 1000;
+
 export function useDrQChat() {
   const { user: authUser } = useAuth();
   const userId = authUser?.id;
@@ -620,6 +625,8 @@ export function useDrQChat() {
   const [syllabusContext, setSyllabusContext] = useState<string>("");
   const [superExpertStatus, setSuperExpertStatus] = useState<SuperExpertProgress | null>(null);
 
+  const threadsRef = useRef<Thread[]>(threads);
+  threadsRef.current = threads;
   const abortRef = useRef<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const superExpertControllersRef = useRef<AbortController[]>([]);
@@ -628,6 +635,17 @@ export function useDrQChat() {
   const pendingContentRef = useRef<string>("");
   const rafIdRef = useRef<number>(0);
   const streamingActiveRef = useRef<boolean>(false);
+
+  // ─── Debounced localStorage save (single effect for all state updates) ───
+  const persistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (threads.length === 0) return;
+    if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
+    persistTimerRef.current = setTimeout(() => {
+      localStorage.setItem(THREADS_KEY, JSON.stringify(threads));
+    }, 1500);
+  }, [threads]);
 
   // Load syllabus context — user-specific modules
   useEffect(() => {
@@ -761,7 +779,6 @@ export function useDrQChat() {
 
         if (changed) {
           merged.sort((a, b) => b.updatedAt - a.updatedAt);
-          localStorage.setItem(THREADS_KEY, JSON.stringify(merged));
           return merged;
         }
         return prev;
@@ -770,10 +787,12 @@ export function useDrQChat() {
     return () => unsubscribe();
   }, [userId, deletedThreadIds]);
 
-  // Save threads to localStorage & Debounced sync to Firestore
+  // Save threads (trims to max 50; the effect persists to localStorage)
   const saveThreads = useCallback((newThreads: Thread[]) => {
-    setThreads(newThreads);
-    localStorage.setItem(THREADS_KEY, JSON.stringify(newThreads));
+    const trimmed = newThreads.length > MAX_THREADS
+      ? newThreads.sort((a, b) => b.updatedAt - a.updatedAt).slice(0, MAX_THREADS)
+      : newThreads;
+    setThreads(trimmed);
   }, []);
 
   useEffect(() => {
@@ -784,11 +803,15 @@ export function useDrQChat() {
     return () => clearTimeout(timeoutId);
   }, [threads, userId, loading]);
 
-  // Abort any in-flight generation on unmount
+  // Abort any in-flight generation + flush threads to localStorage on unmount
   useEffect(() => {
     return () => {
       abortRef.current = true;
       abortControllerRef.current?.abort();
+      if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
+      if (threadsRef.current.length > 0) {
+        localStorage.setItem(THREADS_KEY, JSON.stringify(threadsRef.current));
+      }
     };
   }, []);
 
@@ -959,7 +982,6 @@ export function useDrQChat() {
               }
             : t
           );
-          localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
           return updated;
         });
       };
@@ -973,6 +995,39 @@ export function useDrQChat() {
 
       const { activeProvider, activeModels, byokKeys, activePersona } = settings;
 
+      // ─── In-memory cache check (instant, no IndexedDB latency) ───
+      if (!files.length && !replyToId && !webSearch) {
+        const memoKey = `${activePersona}|${getFirstModel(activeModels, activeProvider)}|${content}`;
+        const memo = lastResponseCache.get(memoKey);
+        if (memo && Date.now() - memo.ts < MEMO_CACHE_TTL) {
+          const cachedAiMsg: ChatMessage = {
+            id: `ai-${Date.now() + 1}`,
+            role: "assistant",
+            content: memo.response,
+            isStreaming: false,
+            timestamp: Date.now() + 1,
+          };
+          const cachedUserMsg: ChatMessage = {
+            id: `user-${Date.now()}`,
+            role: "user",
+            content,
+            files: files.length > 0 ? files : undefined,
+            replyTo: replyToId,
+            timestamp: Date.now(),
+          };
+          setThreads(prev => {
+            const existing = prev.find(t => t.id === threadId);
+            const updated = prev.map(t => t.id === threadId
+              ? { ...t, messages: [...(existing?.messages ?? []), cachedUserMsg, cachedAiMsg], updatedAt: Date.now() }
+              : t
+            );
+            return updated;
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
       // ─── Direct Reply for Greetings ───
       if (!files.length && !replyToId) {
         const directReply = getDirectReply(content);
@@ -982,7 +1037,6 @@ export function useDrQChat() {
               ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: directReply, isStreaming: false } : m) }
               : t
             );
-            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
             return updated;
           });
           setLoading(false);
@@ -998,7 +1052,6 @@ export function useDrQChat() {
               ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: cached, isStreaming: false } : m) }
               : t
             );
-            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
             return updated;
           });
           setLoading(false);
@@ -1031,7 +1084,6 @@ export function useDrQChat() {
                 ? { ...t, messages: t.messages.filter(m => m.id !== aiMsgId) }
                 : t
               );
-              localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
               return updated;
             });
             setLoading(false);
@@ -1417,12 +1469,13 @@ ${systemPrompt}`;
             ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: finalContentForStorage, isStreaming: false } : m) }
             : t
           );
-          localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
           return updated;
         });
 
         // ─── Cache the response ───
         if (finalContent && !replyToId && !webSearch) {
+          const memoKey = `${activePersona}|${getFirstModel(activeModels, activeProvider)}|${content}`;
+          lastResponseCache.set(memoKey, { response: finalContent, ts: Date.now() });
           setCachedResponse(content, activePersona, getFirstModel(activeModels, activeProvider), finalContent).catch(() => {});
         }
 
@@ -1445,7 +1498,6 @@ ${systemPrompt}`;
                 ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: partialContent, isStreaming: false } : m) }
                 : t
               );
-              localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
               return updated;
             });
           }
@@ -1460,7 +1512,6 @@ ${systemPrompt}`;
               ? { ...t, messages: t.messages.filter(m => m.id !== aiMsgId) }
               : t
             );
-            localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
             return updated;
           });
         }
@@ -1498,7 +1549,6 @@ ${systemPrompt}`;
         ? { ...t, messages: trimmed }
         : t
       );
-      localStorage.setItem(THREADS_KEY, JSON.stringify(updated));
       return updated;
     });
 

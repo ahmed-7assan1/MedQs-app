@@ -231,7 +231,10 @@ export function AIAssistantPanel({
   const [attachImages, setAttachImages] = useState<ChatImage[]>([]);
   const [attachPdf, setAttachPdf] = useState<PendingPdf | null>(null);
   const [attachTexts, setAttachTexts] = useState<PendingText[]>([]);
-  const [lang, setLang] = useState<"en" | "ar">("ar"); // Default to Arabic as requested
+  const [lang, setLang] = useState<"en" | "ar">(() => {
+    try { return (typeof localStorage !== "undefined" && localStorage.getItem("medqs-lang") === "ar") ? "ar" : "en"; }
+    catch { return "en"; }
+  });
   
   // Customization & Admin State
   const [showSettings, setShowSettings] = useState(false);
@@ -380,7 +383,7 @@ export function AIAssistantPanel({
   }, [open, usage]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: loading ? "auto" : "smooth" });
   }, [messages, loading]);
 
   const persistCurrentThread = useCallback(
@@ -654,7 +657,14 @@ export function AIAssistantPanel({
               </p>
             )}
             <button
-              onClick={() => setLang(l => l === "en" ? "ar" : "en")}
+              onClick={() => setLang(l => {
+                const next = l === "en" ? "ar" : "en";
+                try {
+                  localStorage.setItem("medqs-lang", next);
+                  window.dispatchEvent(new StorageEvent("storage", { key: "medqs-lang" }));
+                } catch {}
+                return next;
+              })}
               className="text-[9px] font-bold text-primary hover:underline uppercase"
             >
               {lang === "en" ? "العربية" : "English"}
@@ -674,8 +684,8 @@ export function AIAssistantPanel({
         
         <button
           type="button"
-          onClick={() => setShowSettings(!showSettings)}
-          className={cn("rounded-lg p-1.5 transition-colors hover:bg-primary/10", showSettings ? "bg-primary/20 text-primary" : "text-muted-foreground")}
+                  onClick={() => setShowSettings(!showSettings)}
+                  className={cn("rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors hover:bg-primary/10", showSettings ? "bg-primary/20 text-primary" : "text-muted-foreground")}
           aria-label="Settings"
         >
           <Settings className="h-4 w-4" aria-hidden />
@@ -729,7 +739,7 @@ export function AIAssistantPanel({
                   <button
                     key={col}
                     onClick={() => handleSetColor(col)}
-                    className={cn("w-5 h-5 rounded-full border border-white/20", col, userBubbleColor === col && "ring-2 ring-white")}
+                    className={cn("w-10 h-10 min-w-[44px] min-h-[44px] rounded-full border-2 border-white/30", col, userBubbleColor === col && "ring-2 ring-white")}
                   />
                 ))}
               </div>

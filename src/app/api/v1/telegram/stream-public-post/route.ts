@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 // ... (cache definitions unchanged)
 const urlCache = new Map<string, { cdnUrl: string; resolvedAt: number }>();
 const CACHE_TTL_MS = 45 * 60 * 1000; // 45 minutes
+const MAX_URL_CACHE = 500;
 
 function extractMediaUrl(html: string): string | null {
   const patterns = [
@@ -83,6 +84,10 @@ async function resolveTelegramUrl(targetUrl: string): Promise<string | NextRespo
       const mediaUrl = extractMediaUrl(html);
 
       if (mediaUrl) {
+        if (urlCache.size >= MAX_URL_CACHE) {
+          const first = urlCache.keys().next().value;
+          if (first) urlCache.delete(first);
+        }
         urlCache.set(targetUrl, { cdnUrl: mediaUrl, resolvedAt: Date.now() });
         return mediaUrl;
       }

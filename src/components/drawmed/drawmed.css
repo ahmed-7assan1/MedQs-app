@@ -125,6 +125,14 @@
   animation: orbPulse 8s ease-in-out infinite;
 }
 
+@media (max-width: 767px) {
+  .drawmed-orb { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawmed-orb { display: none; }
+}
+
 @keyframes orbFloat1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(60px, -40px) scale(1.05); }
@@ -275,8 +283,10 @@
 
 /* --- Topbar Icon Button --- */
 .drawmed-topbar__btn {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -298,7 +308,7 @@
   transform: scale(0.92);
 }
 
-.drawmed-topbar__btn svg { width: 16px; height: 16px; }
+.drawmed-topbar__btn svg { width: 18px; height: 18px; }
 
 .drawmed-topbar__btn--primary {
   background: linear-gradient(135deg, rgba(124, 92, 252, 0.15), rgba(79, 95, 255, 0.1));
@@ -318,6 +328,7 @@
 .drawmed-bottom-bar {
   position: absolute;
   bottom: 24px;
+  bottom: max(24px, env(safe-area-inset-bottom, 24px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 60;
@@ -344,9 +355,11 @@
 }
 
 .drawmed-bottom-bar__btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -363,7 +376,7 @@
 }
 
 .drawmed-bottom-bar__btn:active { transform: scale(0.88); }
-.drawmed-bottom-bar__btn svg { width: 14px; height: 14px; }
+.drawmed-bottom-bar__btn svg { width: 18px; height: 18px; }
 
 .drawmed-bottom-bar__zoom {
   font-size: 11px;
@@ -380,7 +393,7 @@
    ============================================================ */
 .drawmed-ai-assistant {
   position: fixed;
-  bottom: 88px;
+  bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 88px));
   right: 24px;
   z-index: 60;
   display: flex;
@@ -538,9 +551,11 @@
 }
 
 .drawmed-ai-assistant__send {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -559,7 +574,7 @@
 }
 
 .drawmed-ai-assistant__send:active { transform: scale(0.9); }
-.drawmed-ai-assistant__send svg { width: 14px; height: 14px; }
+.drawmed-ai-assistant__send svg { width: 18px; height: 18px; }
 
 /* ============================================================
    Excalidraw Canvas Overrides — Glassmorphism

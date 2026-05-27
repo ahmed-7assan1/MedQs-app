@@ -731,7 +731,7 @@ function TimeWidget() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight">{timeStr}</p>
-            <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Active</span>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">Active</span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-white/30 font-black uppercase tracking-widest">{dateStr}</p>
         </div>

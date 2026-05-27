@@ -6,7 +6,7 @@ const DB_NAME = "medqs-chat-cache";
 const STORE_NAME = "responses";
 const DB_VERSION = 1;
 const MAX_ENTRIES = 500;
-const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
 
 type CacheEntry = {
   key: string;

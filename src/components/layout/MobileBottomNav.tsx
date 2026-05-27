@@ -62,7 +62,7 @@ function TabItem({ tab, pathname, idx }: { tab: TabDef; pathname: string; idx: n
       href={tab.href}
       className={cn(
         "relative flex flex-col items-center justify-center gap-0.5",
-        "h-full flex-1 transition-all duration-300",
+        "h-full flex-1 min-h-[48px] min-w-[44px] transition-all duration-300",
         "active:scale-90"
       )}
     >
@@ -71,7 +71,7 @@ function TabItem({ tab, pathname, idx }: { tab: TabDef; pathname: string; idx: n
           weight={active ? "fill" : "regular"}
           className={cn(
             "transition-all duration-300",
-            active ? "h-5 w-5" : "h-5 w-5 opacity-50"
+            active ? "h-6 w-6" : "h-6 w-6 opacity-70"
           )}
         />
         {/* Glow dot for active tab */}
@@ -85,8 +85,8 @@ function TabItem({ tab, pathname, idx }: { tab: TabDef; pathname: string; idx: n
       </div>
       <span
         className={cn(
-          "text-[8px] font-black tracking-wider transition-all duration-300",
-          active ? "text-white opacity-100" : "text-white/30 opacity-60"
+          "text-[10px] font-black tracking-wider transition-all duration-300",
+          active ? "text-white opacity-100" : "text-white/50 opacity-80"
         )}
       >
         {tab.label}
