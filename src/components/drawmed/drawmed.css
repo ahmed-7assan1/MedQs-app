@@ -876,7 +876,7 @@
    ------------------------------------------------------------
    Font is controlled by Excalidraw dynamically based on the
    selected font-family.  @font-face aliases (injected in JS)
-   map each Excalidraw font to Tajawal for Arabic Unicode range,
+    map each Excalidraw font to Cairo for Arabic Unicode range,
    so Arabic characters render correctly regardless of font.
    ============================================================ */
 

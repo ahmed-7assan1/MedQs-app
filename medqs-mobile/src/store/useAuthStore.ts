@@ -27,6 +27,7 @@ interface AuthState {
   user: AuthUser | null;
   isLoading: boolean;
   login: (user: AuthUser) => Promise<void>;
+  guestLogin: () => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   updateUser: (partial: Partial<AuthUser>) => void;
@@ -39,6 +40,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (user) => {
     await storage.setItem('user', JSON.stringify(user));
     set({ user, isLoading: false });
+  },
+
+  guestLogin: async () => {
+    const guest: AuthUser = {
+      id: 'guest',
+      name: 'Guest',
+      nickname: 'Guest User',
+      email: '',
+      role: 'STUDENT',
+      points: 0,
+      theme: 'DARK',
+    };
+    await storage.setItem('user', JSON.stringify(guest));
+    set({ user: guest, isLoading: false });
   },
 
   logout: async () => {

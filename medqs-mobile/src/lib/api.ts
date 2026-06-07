@@ -36,7 +36,7 @@ class ApiClient {
     const url = `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
     const headers = await this.getHeaders(options.headers);
 
-    const config: RequestInit = { ...options, headers, credentials: 'include' };
+    const config: RequestInit = { ...options, headers };
     if (options.data) config.body = JSON.stringify(options.data);
 
     try {

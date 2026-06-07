@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>MedOneX — AI-Powered Medical Study Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #6C5FF0;
+  --primary-light: #8B7FF5;
+  --primary-dark: #4D3FD8;
+  --primary-glow: rgba(108, 95, 240, 0.25);
+  --bg: #07080F;
+  --bg2: #0A0B16;
+  --surface: #0E1028;
+  --card: rgba(255,255,255,0.03);
+  --card-hover: rgba(108, 95, 240, 0.08);
+  --text: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #475569;
+  --border: rgba(108, 95, 240, 0.12);
+  --border-hover: rgba(108, 95, 240, 0.3);
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --gradient: linear-gradient(135deg, #6C5FF0, #3B82F6);
+  --gradient-text: linear-gradient(135deg, #6C5FF0, #8B7FF5, #3B82F6);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', 'Noto Kufi Arabic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* RTL overrides */
+body.rtl { font-family: 'Noto Kufi Arabic', 'Inter', sans-serif; text-align: start; }
+body.rtl .en-only { display: none !important; }
+body:not(.rtl) .ar-only { display: none !important; }
+body.rtl .ltr-flip { transform: scaleX(-1); }
+
+/* Icons base */
+.icon-wrap { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.icon-wrap svg { width: 100%; height: 100%; }
+body:not(.rtl) .mirror-rtl { transform: none; }
+body.rtl .mirror-rtl { transform: scaleX(-1); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+/* ===== NAV ===== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  padding: 12px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: all var(--transition); min-height: 60px;
+}
+nav.scrolled {
+  background: rgba(7, 8, 15, 0.88);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+.nav-brand-icon {
+  width: 34px; height: 34px;
+  background: var(--gradient); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 16px;
+}
+.nav-brand-text {
+  font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 18px;
+  background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+body.rtl .nav-brand-text { font-family: 'Noto Kufi Arabic', 'Outfit', sans-serif; }
+
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a {
+  color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500;
+  transition: color 0.3s ease; position: relative; white-space: nowrap;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; inset-inline-start: 0;
+  width: 0; height: 2px; background: var(--gradient); border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+.lang-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s ease; font-family: inherit;
+}
+.lang-toggle:hover { background: rgba(108,95,240,0.1); border-color: var(--border-hover); color: var(--text); }
+
+.nav-cta {
+  padding: 8px 18px; background: var(--gradient); color: white !important;
+  border-radius: 8px; font-weight: 600 !important; font-size: 13px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 20px rgba(108, 95, 240, 0.25);
+}
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 30px rgba(108, 95, 240, 0.35); }
+
+.nav-mobile-btn { display: none; flex-direction: column; gap: 4px; cursor: pointer; background: none; border: none; padding: 4px; }
+.nav-mobile-btn span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s ease; }
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 100px 24px 60px; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(108, 95, 240, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 20% 60%, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(108, 95, 240, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 95, 240, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events: none;
+  mask-image: radial-gradient(ellipse 60% 50% at center, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at center, black 20%, transparent 70%);
+}
+.hero-orb {
+  position: absolute;
+  width: min(400px, 80vw); height: min(400px, 80vw);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(108, 95, 240, 0.15) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: orb-float 8s ease-in-out infinite;
+  pointer-events: none; transition: transform 0.1s ease;
+}
+@keyframes orb-float {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  33% { transform: translate(-40%, -55%) scale(1.05); }
+  66% { transform: translate(-55%, -45%) scale(0.95); }
+}
+.hero-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.particle {
+  position: absolute;
+  width: 3px; height: 3px; background: var(--primary-light); border-radius: 50%;
+  opacity: 0; animation: particle-float linear infinite;
+}
+@keyframes particle-float {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.5; } 90% { opacity: 0.5; }
+  100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+.hero-content { position: relative; z-index: 2; text-align: center; max-width: 880px; width: 100%; margin-inline: auto; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 16px;
+  background: rgba(108, 95, 240, 0.1);
+  border: 1px solid rgba(108, 95, 240, 0.2);
+  border-radius: 100px;
+  font-size: 12px; color: var(--primary-light); font-weight: 500;
+  margin-bottom: 20px;
+  opacity: 0; transform: translateY(20px);
+  animation: fade-up 0.6s ease 0.2s forwards;
+}
+.hero-badge .pulse-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--primary-light);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-family: 'Outfit', sans-serif; font-weight: 900;
+  font-size: clamp(32px, 7vw, 72px); line-height: 1.08; margin-bottom: 16px;
+  opacity: 0; transform: translateY(30px);
+  animation: fade-up 0.7s ease 0.4s forwards;
+}
+body.rtl .hero h1 { font-family: 'Noto Kufi Arabic', 'Outfit', sans-serif; }
+.hero h1 .gradient-text { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero h1 .typewriter::after {
+  content: '|'; position: absolute; inset-inline-end: -4px; color: var(--primary-light);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.hero-sub {
+  font-size: clamp(14px, 1.3vw, 18px); color: var(--text-secondary);
+  max-width: 640px; margin-inline: auto; margin-bottom: 28px; line-height: 1.8;
+  opacity: 0; transform: translateY(20px);
+  animation: fade-up 0.6s ease 0.6s forwards;
+}
+
+.hero-actions {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  opacity: 0; transform: translateY(20px);
+  animation: fade-up 0.6s ease 0.8s forwards;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: var(--radius-sm);
+  font-family: inherit; font-weight: 600; font-size: 14px;
+  text-decoration: none; cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none; position: relative; overflow: hidden;
+}
+.btn .btn-arrow { transition: transform 0.3s ease; display: inline-flex; align-items: center; }
+body:not(.rtl) .btn:hover .btn-arrow { transform: translateX(4px); }
+body.rtl .btn:hover .btn-arrow { transform: translateX(-4px); }
+
+.btn-primary { background: var(--gradient); color: white; box-shadow: 0 4px 24px rgba(108, 95, 240, 0.3); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(108, 95, 240, 0.4); }
+.btn-glass { background: rgba(255,255,255,0.04); color: var(--text); border: 1px solid var(--border); }
+.btn-glass:hover { background: rgba(255,255,255,0.08); border-color: var(--border-hover); transform: translateY(-2px); }
+
+.hero-stats {
+  display: flex; gap: clamp(16px, 4vw, 48px); justify-content: center;
+  margin-top: 40px; flex-wrap: wrap;
+  opacity: 0; transform: translateY(20px);
+  animation: fade-up 0.6s ease 1s forwards;
+}
+.hero-stat { text-align: center; }
+.hero-stat .num {
+  font-family: 'Outfit', sans-serif; font-weight: 900;
+  font-size: clamp(24px, 3vw, 36px);
+  background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-stat .label { font-size: clamp(11px, 1vw, 13px); color: var(--text-muted); margin-top: 2px; }
+
+/* ===== SECTIONS ===== */
+section { padding: clamp(48px, 6vw, 100px) 24px; position: relative; }
+
+.section-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px;
+  background: rgba(108, 95, 240, 0.08);
+  border: 1px solid rgba(108, 95, 240, 0.15);
+  border-radius: 100px;
+  font-size: 11px; color: var(--primary-light); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+
+.section-title {
+  font-family: 'Outfit', sans-serif; font-weight: 700;
+  font-size: clamp(24px, 3.5vw, 44px); margin-bottom: 12px; line-height: 1.15;
+}
+body.rtl .section-title { font-family: 'Noto Kufi Arabic', 'Outfit', sans-serif; }
+.section-title .highlight { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.section-sub {
+  font-size: clamp(13px, 1.1vw, 16px); color: var(--text-secondary); max-width: 580px; line-height: 1.8;
+}
+.section-sub-wide { max-width: 720px; }
+
+.container { max-width: 1200px; margin-inline: auto; position: relative; z-index: 1; }
+
+.reveal { opacity: 0; transform: translateY(30px); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-left { opacity: 0; transform: translateX(-30px); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right { opacity: 0; transform: translateX(30px); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+body.rtl .reveal-left { transform: translateX(30px); }
+body.rtl .reveal-left.visible { transform: translateX(0); }
+body.rtl .reveal-right { transform: translateX(-30px); }
+body.rtl .reveal-right.visible { transform: translateX(0); }
+
+@keyframes fade-up { to { opacity: 1; transform: translateY(0); } }
+
+.stagger > * { opacity: 0; transform: translateY(20px); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.stagger.visible > * { opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(1) { transition-delay: 0s; }
+.stagger.visible > *:nth-child(2) { transition-delay: 0.08s; }
+.stagger.visible > *:nth-child(3) { transition-delay: 0.16s; }
+.stagger.visible > *:nth-child(4) { transition-delay: 0.24s; }
+.stagger.visible > *:nth-child(5) { transition-delay: 0.32s; }
+.stagger.visible > *:nth-child(6) { transition-delay: 0.4s; }
+.stagger.visible > *:nth-child(7) { transition-delay: 0.48s; }
+.stagger.visible > *:nth-child(8) { transition-delay: 0.56s; }
+
+/* ===== PROBLEM ===== */
+#problem { background: var(--bg2); }
+.problem-glow {
+  position: absolute; top: -20%; inset-inline-end: -10%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(248, 113, 113, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.problem-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 2vw, 24px); margin-top: 36px;
+}
+.problem-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: clamp(20px, 3vw, 36px) clamp(20px, 3vw, 28px);
+  transition: all 0.4s ease;
+}
+.problem-card:hover { background: var(--card-hover); border-color: var(--border-hover); transform: translateY(-4px); }
+.problem-icon {
+  width: clamp(40px, 4vw, 52px); height: clamp(40px, 4vw, 52px);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.problem-icon.red { background: rgba(248, 113, 113, 0.12); }
+.problem-icon.amber { background: rgba(251, 191, 36, 0.12); }
+.problem-icon.purple { background: rgba(108, 95, 240, 0.12); }
+.problem-card h3 { font-size: clamp(15px, 1.3vw, 18px); font-weight: 600; margin-bottom: 6px; }
+.problem-card p { font-size: clamp(13px, 1vw, 14px); color: var(--text-secondary); line-height: 1.7; }
+
+/* ===== FEATURES GRID ===== */
+#features { background: var(--bg); }
+.features-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: clamp(12px, 1.5vw, 20px); margin-top: 36px;
+}
+.feature-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 20px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: default;
+  position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--gradient); transform: scaleX(0);
+  transition: transform 0.5s ease;
+}
+body:not(.rtl) .feature-card::before { transform-origin: left; }
+body.rtl .feature-card::before { transform-origin: right; }
+.feature-card:hover::before { transform: scaleX(1); }
+.feature-card:hover { background: var(--card-hover); border-color: var(--border-hover); transform: translateY(-4px); box-shadow: 0 12px 48px rgba(108, 95, 240, 0.06); }
+
+.feature-icon-wrap {
+  width: clamp(40px, 4vw, 48px); height: clamp(40px, 4vw, 48px);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.feature-icon-wrap.purple { background: rgba(108, 95, 240, 0.15); }
+.feature-icon-wrap.blue { background: rgba(59, 130, 246, 0.15); }
+.feature-icon-wrap.green { background: rgba(52, 211, 153, 0.15); }
+.feature-icon-wrap.cyan { background: rgba(6, 182, 212, 0.15); }
+.feature-icon-wrap.pink { background: rgba(236, 72, 153, 0.15); }
+.feature-icon-wrap.amber { background: rgba(251, 191, 36, 0.15); }
+.feature-icon-wrap.indigo { background: rgba(99, 102, 241, 0.15); }
+.feature-icon-wrap.red { background: rgba(248, 113, 113, 0.15); }
+
+.feature-card h3 { font-size: clamp(14px, 1.2vw, 16px); font-weight: 600; margin-bottom: 6px; }
+.feature-card p { font-size: clamp(12px, 1vw, 14px); color: var(--text-secondary); line-height: 1.7; }
+.feature-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+.feature-tag {
+  padding: 3px 8px; border-radius: 5px; font-size: 10px; font-weight: 500;
+  background: rgba(108, 95, 240, 0.06); color: var(--text-muted);
+  border: 1px solid rgba(108, 95, 240, 0.06);
+}
+
+/* ===== FEATURE SPLIT ===== */
+.feature-split {
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 48px);
+  padding: clamp(48px, 6vw, 100px) 24px; align-items: center; position: relative;
+}
+.feature-split:nth-child(even) { background: var(--bg2); }
+.feature-split:nth-child(odd) { background: var(--bg); }
+.feature-split .fs-content { max-width: 560px; }
+.feature-split .section-title { font-size: clamp(20px, 2.5vw, 36px); }
+
+.fs-specs { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.fs-spec {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  background: var(--card); border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+.fs-spec:hover { background: var(--card-hover); border-color: var(--border-hover); }
+.fs-spec .check-icon {
+  width: 22px; height: 22px; min-width: 22px; border-radius: 50%;
+  background: rgba(52, 211, 153, 0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--success);
+}
+.fs-spec h4 { font-size: 13px; font-weight: 600; }
+.fs-spec p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+/* Mock UI */
+.mock-screen {
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, rgba(108, 95, 240, 0.05), rgba(59, 130, 246, 0.03));
+  border-radius: 12px; border: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 14px; gap: 8px;
+  overflow: hidden;
+}
+.mock-header-ui {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.mock-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.mock-chat { display: flex; gap: 8px; align-items: flex-start; }
+body.rtl .mock-chat.user { justify-content: flex-start !important; }
+.mock-avatar {
+  width: 26px; height: 26px; min-width: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.mock-bubble {
+  padding: 8px 12px; border-radius: 10px; max-width: 80%;
+  font-size: clamp(11px, 0.9vw, 12px); line-height: 1.5;
+}
+.mock-bubble.ai { background: rgba(108, 95, 240, 0.1); color: var(--text-secondary); }
+.mock-bubble.user { background: rgba(255,255,255,0.04); color: var(--text-secondary); }
+
+.feature-visual {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: clamp(16px, 2vw, 24px);
+  aspect-ratio: 3/4; max-height: 480px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.feature-visual::before {
+  content: ''; position: absolute; top: -30%; inset-inline-end: -20%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(108, 95, 240, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ===== STATS ===== */
+#stats { background: var(--bg2); padding: clamp(48px, 6vw, 80px) 24px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(12px, 2vw, 24px); }
+.stat-card {
+  text-align: center; padding: clamp(20px, 3vw, 32px) 16px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); transition: all 0.4s ease;
+}
+.stat-card:hover { background: var(--card-hover); border-color: var(--border-hover); transform: translateY(-3px); }
+.stat-num {
+  font-family: 'Outfit', sans-serif; font-weight: 900;
+  font-size: clamp(28px, 3.5vw, 40px);
+  background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stat-label { font-size: clamp(11px, 1vw, 13px); color: var(--text-secondary); margin-top: 2px; }
+
+/* ===== TELEGRAM ===== */
+#telegram { background: var(--bg); }
+.telegram-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: clamp(12px, 2vw, 24px); margin-top: 36px;
+}
+.telegram-card {
+  text-align: center; padding: clamp(24px, 3vw, 36px) 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); transition: all 0.4s ease;
+}
+.telegram-card:hover { background: var(--card-hover); border-color: var(--border-hover); transform: translateY(-4px); }
+.telegram-card h3 { font-size: clamp(15px, 1.3vw, 17px); font-weight: 600; margin-bottom: 8px; }
+.telegram-card p { font-size: clamp(12px, 1vw, 14px); color: var(--text-secondary); line-height: 1.7; }
+
+/* ===== USP ===== */
+#usp { background: var(--bg2); }
+.usp-grid { display: grid; gap: 12px; margin-top: 32px; }
+.usp-item {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: clamp(16px, 2vw, 22px) clamp(18px, 2.5vw, 26px);
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); transition: all 0.4s ease;
+}
+.usp-item:hover { background: var(--card-hover); border-color: var(--border-hover); }
+body:not(.rtl) .usp-item:hover { transform: translateX(-4px); }
+body.rtl .usp-item:hover { transform: translateX(4px); }
+.usp-sparkle {
+  width: 32px; height: 32px; min-width: 32px; border-radius: 50%;
+  background: rgba(52, 211, 153, 0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--success);
+}
+.usp-item h4 { font-size: clamp(14px, 1.1vw, 16px); font-weight: 600; margin-bottom: 2px; }
+.usp-item p { font-size: clamp(12px, 1vw, 14px); color: var(--text-secondary); }
+
+/* ===== TECH ===== */
+#tech { background: var(--bg); }
+.tech-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: clamp(12px, 1.5vw, 20px); margin-top: 36px;
+}
+.tech-category {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 20px;
+  transition: all 0.4s ease;
+}
+.tech-category:hover { background: var(--card-hover); border-color: var(--border-hover); transform: translateY(-3px); }
+.tech-category h4 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--primary-light); margin-bottom: 14px; font-weight: 600;
+}
+.tech-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.tech-tag {
+  padding: 4px 10px; background: rgba(108, 95, 240, 0.06);
+  border: 1px solid rgba(108, 95, 240, 0.1);
+  border-radius: 6px; font-size: 11px; color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+.tech-tag:hover { background: rgba(108, 95, 240, 0.1); color: var(--text-secondary); }
+
+/* ===== CTA ===== */
+#cta {
+  background: var(--bg2); padding: clamp(60px, 8vw, 120px) 24px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.cta-glow {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(500px, 90vw); height: min(500px, 90vw);
+  background: radial-gradient(circle, rgba(108, 95, 240, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.cta-content { position: relative; z-index: 1; max-width: 620px; margin-inline: auto; }
+.cta-content .section-title { font-size: clamp(26px, 3.5vw, 48px); }
+.cta-content .section-sub { margin-inline: auto; margin-bottom: 28px; }
+.cta-social { display: flex; gap: 12px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+.cta-social a {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all 0.3s ease;
+}
+.cta-social a:hover { background: var(--card-hover); border-color: var(--border-hover); transform: translateY(-3px); }
+.cta-social a svg { color: var(--text-secondary); }
+
+/* ===== FOOTER ===== */
+footer { padding: 32px 24px; border-top: 1px solid var(--border); text-align: center; }
+footer .copy { font-size: 12px; color: var(--text-muted); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 820px) {
+  .nav-links {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(7, 8, 15, 0.97); backdrop-filter: blur(24px);
+    flex-direction: column; justify-content: center; gap: 28px; z-index: 998;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { font-size: 18px; }
+  .nav-mobile-btn { display: flex; z-index: 999; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .feature-split { grid-template-columns: 1fr; }
+  .feature-visual { max-height: 360px; }
+}
+@media (max-width: 480px) {
+  .hero-actions .btn { width: 100%; justify-content: center; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { padding: 16px 12px; }
+  .feature-visual { max-height: 300px; }
+}
+
+@media print {
+  .hero-bg, .hero-grid, .hero-orb, .hero-particles, .cta-glow, .problem-glow,
+  .particle, .lang-toggle, .nav-cta, .nav-mobile-btn { display: none !important; }
+  .feature-card, .problem-card, .usp-item, .tech-category, .stat-card, .telegram-card {
+    background: #f8f8ff !important; border-color: #ddd !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  section { padding: 32px 20px; }
+  .btn { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="navbar">
+  <a href="#" class="nav-brand">
+    <div class="nav-brand-icon">M</div>
+    <span class="nav-brand-text">MedOneX</span>
+  </a>
+
+  <div class="nav-links" id="navLinks">
+    <a href="#problem" data-en="Problem" data-ar="المشكلة">Problem</a>
+    <a href="#features" data-en="Features" data-ar="المميزات">Features</a>
+    <a href="#usp" data-en="Why Us" data-ar="لماذا نحن">Why Us</a>
+    <a href="#tech" data-en="Tech" data-ar="التقنيات">Tech</a>
+    <a href="#cta" class="nav-cta" data-en="Get Started" data-ar="ابدأ الآن">Get Started</a>
+  </div>
+
+  <div class="nav-actions">
+    <button class="lang-toggle" id="langToggle" aria-label="Toggle language">
+      <span class="icon-wrap" style="width:18px;height:18px;"><i data-lucide="languages" style="width:18px;height:18px;"></i></span>
+      <span id="langLabel">عربي</span>
+    </button>
+    <button class="nav-mobile-btn" id="mobileBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-particles" id="particles"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="pulse-dot"></span>
+      <span data-en="AI-Powered Medical Study Platform" data-ar="منصة الدراسة الطبية الذكية">AI-Powered Medical Study Platform</span>
+    </div>
+
+    <h1>
+      <span data-en="The Future of" data-ar="مستقبل">The Future of</span><br>
+      <span class="gradient-text" data-en="Medical Study" data-ar="الدراسة الطبية">Medical Study</span><br>
+      <span class="typewriter-wrap"><span class="typewriter" id="typewriter">All in One Place</span></span>
+    </h1>
+
+    <p class="hero-sub"
+       data-en="The first all-in-one platform built for medical students — integrating AI tutoring, curriculum-aligned learning, social community, gamification, and Telegram delivery into a single unified experience."
+       data-ar="المنصة الأولى المتكاملة لطلاب الطب — تجمع الذكاء الاصطناعي، المناهج الدراسية، الاختبارات الذكية، المجتمع الطبي، والمحتوى التفاعلي في تجربة واحدة موحدة.">
+      The first all-in-one platform built for medical students — integrating AI tutoring, curriculum-aligned learning, social community, gamification, and Telegram delivery into a single unified experience.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#features" class="btn btn-primary">
+        <span data-en="Explore Features" data-ar="اكتشف المميزات">Explore Features</span>
+        <span class="btn-arrow icon-wrap mirror-rtl" style="width:16px;height:16px;"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+      </a>
+      <a href="#usp" class="btn btn-glass">
+        <span data-en="Why MedOneX?" data-ar="لماذا MedOneX؟">Why MedOneX?</span>
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">12+</div><div class="label" data-en="Integrated Features" data-ar="ميزة متكاملة">Integrated Features</div></div>
+      <div class="hero-stat"><div class="num">6</div><div class="label" data-en="AI Models" data-ar="نموذج ذكاء اصطناعي">AI Models</div></div>
+      <div class="hero-stat"><div class="num">3</div><div class="label" data-en="Platforms" data-ar="منصات تشغيل">Platforms</div></div>
+      <div class="hero-stat"><div class="num">50K+</div><div class="label" data-en="Target Students" data-ar="طلاب مستهدفين">Target Students</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROBLEM ===== -->
+<section id="problem">
+  <div class="problem-glow"></div>
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label" data-en="The Challenge" data-ar="التحدي">The Challenge</div>
+      <h2 class="section-title">
+        <span data-en="Medical education is" data-ar="التعليم الطبي">Medical education is</span>
+        <span class="highlight" data-en="fragmented" data-ar="مبعثر">fragmented</span>
+      </h2>
+      <p class="section-sub" data-en="Medical students today juggle 5+ disconnected tools — lecture portals, quiz apps, note-taking tools, social platforms, and general AI chatbots that aren't tuned for medical curricula."
+         data-ar="طالب الطب اليوم يحتاج 5+ أدوات منفصلة — محاضرات، اختبارات، ملاحظات، مجتمع، وذكاء اصطناعي غير مخصص للمناهج الطبية.">
+        Medical students today juggle 5+ disconnected tools — lecture portals, quiz apps, note-taking tools, social platforms, and general AI chatbots that aren't tuned for medical curricula.
+      </p>
+    </div>
+    <div class="problem-grid stagger">
+      <div class="problem-card">
+        <div class="problem-icon red"><i data-lucide="x" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Disconnected Tools" data-ar="أدوات منفصلة">Disconnected Tools</h3>
+        <p data-en="Students switch between 5+ platforms for lectures, quizzes, notes, and community — losing context and wasting precious study time."
+           data-ar="يضطر الطالب للتنقل بين منصات متعددة مما يشتت التركيز ويهدر الوقت الثمين في الدراسة.">
+          Students switch between 5+ platforms for lectures, quizzes, notes, and community — losing context and wasting precious study time.
+        </p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon amber"><i data-lucide="bot" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="No Medical-Specific AI" data-ar="ذكاء اصطناعي غير طبي">No Medical-Specific AI</h3>
+        <p data-en="General AI tools hallucinate on medical content. No curriculum alignment, no trusted medical knowledge base."
+           data-ar="المساعدات العامة تفتقر للمعرفة الطبية المتخصصة وتتداخل مع المناهج الدراسية المعتمدة.">
+          General AI tools hallucinate on medical content. No curriculum alignment, no trusted medical knowledge base.
+        </p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon purple"><i data-lucide="message-square" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Limited Engagement" data-ar="تفاعل محدود">Limited Engagement</h3>
+        <p data-en="Traditional LMS platforms lack gamification, social features, and modern content formats like short-form video."
+           data-ar="منصات التعليم التقليدية تفتقر عناصر التحفيز، التفاعل الاجتماعي، والمحتوى العصري.">
+          Traditional LMS platforms lack gamification, social features, and modern content formats like short-form video.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section id="features">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label" style="margin-inline:auto;margin-bottom:12px;" data-en="Features" data-ar="المميزات">Features</div>
+      <h2 class="section-title">
+        <span data-en="Everything a medical student" data-ar="كل ما يحتاجه">Everything a medical student</span>
+        <span class="highlight" data-en="needs" data-ar="طالب الطب">needs</span>
+      </h2>
+      <p class="section-sub" style="margin-inline:auto;margin-bottom:36px;"
+         data-en="MedOneX brings together 12+ features in one beautifully designed platform."
+         data-ar="MedOneX تجمع 12+ ميزة في منصة واحدة بتصميم أنيق وتجربة مستخدم استثنائية.">
+        MedOneX brings together 12+ features in one beautifully designed platform.
+      </p>
+    </div>
+    <div class="features-grid stagger">
+      <div class="feature-card">
+        <div class="feature-icon-wrap purple"><i data-lucide="brain" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Dr. Q AI Assistant" data-ar="المساعد الذكي Dr. Q">Dr. Q AI Assistant</h3>
+        <p data-en="6 AI models (Gemini, GPT-4o, Claude, DeepSeek, Llama) with medical-context awareness and anti-hallucination safeguards."
+           data-ar="6 نماذج ذكاء اصطناعي (Gemini، GPT-4o، Claude، DeepSeek، Llama) بمعرفة طبية متخصصة ومقاومة للهلوسة.">
+          6 AI models with medical-context awareness and anti-hallucination safeguards.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">AI</span><span class="feature-tag">Chat</span><span class="feature-tag">Multi-Model</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap blue"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Curriculum LMS" data-ar="المناهج الدراسية">Curriculum LMS</h3>
+        <p data-en="Hierarchical structure from University to Lecture with semester filtering, progress bars, and AI-generated notes."
+           data-ar="هيكل هرمي من الجامعة حتى المحاضرة مع تصفية حسب الفصل الدراسي ورسوم تقدم وملخصات ذكية.">
+          Hierarchical structure from University to Lecture with semester filtering and AI notes.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">LMS</span><span class="feature-tag">Curriculum</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap green"><i data-lucide="file-question" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Smart Quiz Engine" data-ar="الاختبارات الذكية">Smart Quiz Engine</h3>
+        <p data-en="Timed MCQs with anti-cheat focus tracking, flag-for-review, text-to-speech, and AI answer explanations."
+           data-ar="أسئلة اختيار متعدد مع مؤقت، تتبع الغش، شرح بالذكاء الاصطناعي، وتحويل النص إلى كلام.">
+          Timed MCQs with anti-cheat tracking, TTS, and AI-powered explanations.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">Quizzes</span><span class="feature-tag">MCQ</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap cyan"><i data-lucide="heart" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="3D Anatomy Atlas" data-ar="الأطلس ثلاثي الأبعاد">3D Anatomy Atlas</h3>
+        <p data-en="Interactive 3D anatomical models with skeletal, muscular, and circulatory layers. Bilingual Arabic/English."
+           data-ar="نماذج تشريح تفاعلية ثلاثية الأبعاد مع طبقات (عظمي، عضلي، دوري) وواجهة عربية/إنجليزية.">
+          Interactive 3D anatomical models with layer toggles and bilingual interface.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">3D</span><span class="feature-tag">Anatomy</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap pink"><i data-lucide="film" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="MediTok Video Hub" data-ar="MediTok فيديوهات">MediTok Video Hub</h3>
+        <p data-en="TikTok-style vertical video feed for medical lectures with likes, comments, shares, and creator follow."
+           data-ar="محتوى فيديو قصير رأسي بأسلوب TikTok مع إعجاب، تعليق، مشاركة، ومتابعة المحاضرين.">
+          TikTok-style vertical video feed for medical lectures with social interactions.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">Video</span><span class="feature-tag">Reels</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap amber"><i data-lucide="message-circle" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Medical Community" data-ar="المجتمع الطبي">Medical Community</h3>
+        <p data-en="Instagram-style social feed with categories: Clinical Cases, Exam Prep, Medical News, and Q&A."
+           data-ar="فيسبوك إنستقرام طبي — منشورات، إعجابات، تعليقات، وفئات (حالات سريرية، نقاشات، أسئلة).">
+          Instagram-style social feed for medical discussions and peer learning.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">Social</span><span class="feature-tag">Feed</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap indigo"><i data-lucide="trophy" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Gamification" data-ar="نظام التحديات">Gamification</h3>
+        <p data-en="XP points, 5 rank tiers (Newbie to Elite), leaderboard, and higher ranks unlock more daily AI access."
+           data-ar="نقاط، 5 رتب (من Newbie لـ Elite)، لوحة متصدرين، ورتب أعلى = ذكاء اصطناعي أكثر يوميًا.">
+          XP points, 5 rank tiers, leaderboard, and rank-gated AI access.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">Gamification</span><span class="feature-tag">Ranks</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap red"><i data-lucide="mic" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Podcast Player" data-ar="البودكاست">Podcast Player</h3>
+        <p data-en="Full audio player with play/pause, seekable progress, album art, and instructor attribution for on-the-go study."
+           data-ar="مشغل صوتي متكامل مع تحكم بالتقديم والإيقاف، شريط تقدم، صورة الألبوم، وعزو المحاضر.">
+          Full audio player for on-the-go medical lecture review.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">Audio</span><span class="feature-tag">Podcast</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap purple"><i data-lucide="check-square" style="width:22px;height:22px;"></i></div>
+        <h3 data-en="Taskat — Task Manager" data-ar="مهامي — Taskat">Taskat — Task Manager</h3>
+        <p data-en="Daily to-do list with progress tracking, inline task creation, and strike-through for completed items."
+           data-ar="قائمة مهام يومية مع متابعة التقدم، إضافة مهام سريعة، وإظهار المهام المنجزة بشطب واضح.">
+          Daily to-do list with progress tracking and completion states.
+        </p>
+        <div class="feature-tags"><span class="feature-tag">Tasks</span><span class="feature-tag">Productivity</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURE SPLIT: AI ===== -->
+<div class="feature-split" id="ai-deep">
+  <div class="fs-content container" style="margin-inline:unset;">
+    <div class="reveal-left">
+      <div class="section-label" data-en="Core Feature" data-ar="الميزة الأساسية">Core Feature</div>
+      <h2 class="section-title">
+        <span data-en="AI Study Assistant" data-ar="المساعد الذكي">AI Study Assistant</span><br>
+        <span class="highlight" data-en='"Dr. Q"' data-ar='"د. ق"'>"Dr. Q"</span>
+      </h2>
+      <p class="section-sub" style="font-size:clamp(13px,1.1vw,15px);"
+         data-en="A medical-context AI tutor that understands your curriculum, adapts to your weak areas, and helps you prepare for exams — with zero dependency on paid API credits."
+         data-ar="مساعد دراسي طبي ذكي يفهم منهجك، يتكيف مع نقاط ضعفك، ويساعدك في التحضير للامتحانات — بدون أي تكلفة على رصيد API.">
+        A medical-context AI tutor that understands your curriculum, adapts to your weak areas, and helps you prepare for exams — with zero dependency on paid API credits.
+      </p>
+    </div>
+    <div class="reveal fs-specs" style="margin-top:16px;">
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="Multi-Model Backend" data-ar="نماذج متعددة">Multi-Model Backend</h4><p data-en="Gemini 2.0 Flash (5 free keys) + GPT-4o, Claude 3.7, DeepSeek, Llama 3.3, Groq" data-ar="Gemini 2.0 Flash (5 مفاتيح مجانية) + GPT-4o, Claude 3.7, DeepSeek, Llama 3.3, Groq">Gemini 2.0 Flash + GPT-4o, Claude 3.7, DeepSeek, Llama</p></div></div>
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="Anti-Hallucination" data-ar="مقاومة الهلوسة">Anti-Hallucination</h4><p data-en="Medical-context prompting, curriculum-aligned responses, source-attributed answers" data-ar="إجابات مبنية على المنهج مع references طبية و prompt مهيأ طبياً">Medical-context prompting with source-attributed answers</p></div></div>
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="Smart Study Tools" data-ar="أدوات ذكية">Smart Study Tools</h4><p data-en="Study plan generator, progress analyzer, quiz explanations, quick prompts" data-ar="مخطط دراسي، تحليل التقدم، شرح الاختبارات، اقتراحات سريعة">Study plan generator, progress analyzer, quiz explanations</p></div></div>
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="Curriculum Integration" data-ar="تكامل مع المنهج">Curriculum Integration</h4><p data-en="Per-lecture smart quizzes, weak area identification from quiz history" data-ar="أسئلة ذكية لكل محاضرة وتحليل نقاط الضعف من سجل الاختبارات">Per-lecture smart quizzes & weak area analysis</p></div></div>
+    </div>
+  </div>
+  <div class="reveal-right">
+    <div class="feature-visual">
+      <div class="mock-screen">
+        <div class="mock-header-ui">
+          <div class="icon-wrap" style="gap:5px;"><span class="icon-wrap" style="width:7px;height:7px;border-radius:50%;background:var(--primary);"></span><span class="icon-wrap" style="width:7px;height:7px;border-radius:50%;background:var(--text-muted);"></span></div>
+          <div style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><i data-lucide="bot" style="width:12px;height:12px;"></i><span data-en="Dr. Q · AI Assistant" data-ar="د. ق · المساعد الذكي">Dr. Q · AI Assistant</span></div>
+        </div>
+        <div class="mock-body" style="gap:10px;">
+          <div class="mock-chat" style="justify-content:flex-start;">
+            <div class="mock-avatar" style="background:var(--primary);color:white;font-size:10px;">Q</div>
+            <div class="mock-bubble ai" data-en="Explain the cardiac cycle, focusing on pressure changes in the left ventricle during systole."
+                 data-ar="اشرح لي الدورة القلبية مع التركيز على تغيرات الضغط في البطين الأيسر.">
+                 Explain the cardiac cycle, focusing on pressure changes in the left ventricle during systole.</div>
+          </div>
+          <div class="mock-chat" style="justify-content:flex-end;">
+            <div class="mock-bubble user" data-en="The cardiac cycle begins with atrial systole..." data-ar="الدورة القلبية تبدأ بانقباض الأذينين...">The cardiac cycle begins with atrial systole...</div>
+            <div class="mock-avatar" style="background:rgba(255,255,255,0.1);"><i data-lucide="user" style="width:12px;height:12px;color:var(--text-secondary);"></i></div>
+          </div>
+          <div class="mock-chat" style="justify-content:flex-start;">
+            <div class="mock-avatar" style="background:var(--primary);color:white;font-size:10px;">Q</div>
+            <div class="mock-bubble ai" style="max-width:85%;">
+              <span data-en="During the first phase (atrial systole), pressure rises within the atria..."
+                    data-ar="في المرحلة الأولى (الانقباض الأذيني) يرتفع الضغط داخل الأذينين...">During the first phase (atrial systole), pressure rises within the atria...</span>
+              <div style="margin-top:4px;padding:4px 8px;background:rgba(108,95,240,0.08);border-radius:4px;font-size:10px;color:var(--primary-light);display:flex;align-items:center;gap:4px;">
+                <i data-lucide="book-open" style="width:10px;height:10px;"></i>
+                <span data-en="Reference: Cardiology Textbook, Ch. 3" data-ar="المرجع: كتاب أمراض القلب، الفصل 3">Reference: Cardiology Textbook, Ch. 3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FEATURE SPLIT: QUIZ ===== -->
+<div class="feature-split">
+  <div class="reveal-left" style="order:2;">
+    <div class="feature-visual">
+      <div class="mock-screen">
+        <div class="mock-header-ui">
+          <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);"><i data-lucide="file-question" style="width:12px;height:12px;"></i><span data-en="Quiz · Cardiology" data-ar="اختبار · أمراض القلب">Quiz · Cardiology</span></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:var(--text-muted);">12:34</span>
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--danger);"></div>
+          </div>
+        </div>
+        <div class="mock-body" style="gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;" dir="ltr"><div style="width:45%;height:100%;background:var(--gradient);border-radius:3px;"></div></div>
+            <div style="font-size:10px;color:var(--text-muted);white-space:nowrap;">4 / 20</div>
+          </div>
+          <div style="font-size:clamp(12px,1vw,13px);font-weight:600;line-height:1.5;padding:6px 0;" data-en="Which of the following is the primary pacemaker of the heart?"
+               data-ar="أي من التالي هو الناظمة القلبية الأساسية؟">Which of the following is the primary pacemaker of the heart?</div>
+          <div class="feature-tags"><span class="feature-tag" style="background:rgba(251,191,36,0.1);color:var(--warning);border-color:rgba(251,191,36,0.15);display:flex;align-items:center;gap:4px;"><i data-lucide="clock" style="width:10px;height:10px;"></i> 60s</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:clamp(11px,0.9vw,12px);color:var(--text-secondary);">
+              <div style="width:16px;height:16px;min-width:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;"></div>
+              <span data-en="SA Node" data-ar="العقدة الجيبية">SA Node</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.2);font-size:clamp(11px,0.9vw,12px);color:var(--success);">
+              <div style="width:16px;height:16px;min-width:16px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="check" style="width:9px;height:9px;color:white;"></i></div>
+              <span data-en="AV Node ✓" data-ar="العقدة الأذينية البطينية ✓">AV Node ✓</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:clamp(11px,0.9vw,12px);color:var(--text-secondary);">
+              <div style="width:16px;height:16px;min-width:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;"></div>
+              <span data-en="Purkinje Fibers" data-ar="ألياف بوركنجي">Purkinje Fibers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fs-content container" style="margin-inline:unset;order:1;">
+    <div class="reveal-right">
+      <div class="section-label" data-en="Assessment Engine" data-ar="التقييم">Assessment Engine</div>
+      <h2 class="section-title">
+        <span data-en="Smart Quiz" data-ar="نظام اختبارات">Smart Quiz</span><br>
+        <span class="highlight" data-en="& Assessment Suite" data-ar="ذكي ومتكامل">& Assessment Suite</span>
+      </h2>
+      <p class="section-sub" style="font-size:clamp(13px,1.1vw,15px);"
+         data-en="A full-featured timed MCQ engine designed for medical exams with anti-cheat measures, accessibility features, and AI-powered learning tools."
+         data-ar="محرك اختبارات زمني مصمم للامتحانات الطبية مع ميزات مضادة للغش وإمكانية وصول وأدوات تعليمية بالذكاء الاصطناعي.">
+        A full-featured timed MCQ engine designed for medical exams with anti-cheat measures and AI-powered learning tools.
+      </p>
+    </div>
+    <div class="reveal fs-specs" style="margin-top:16px;">
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="Timed Exams" data-ar="مؤقت زمني">Timed Exams</h4><p data-en="Configurable timers with auto-submit and focus-loss tracking" data-ar="توقيت قابل للتعديل مع تسليم تلقائي وتتبع فقدان التركيز">Configurable timers with auto-submit & focus-loss tracking</p></div></div>
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="AI Explanations" data-ar="شرح بالذكاء الاصطناعي">AI Explanations</h4><p data-en="Post-quiz AI breakdown of each question with detailed medical reasoning" data-ar="تحليل كل سؤال بعد الاختبار مع شرح طبي مفصل">Post-quiz AI breakdown of each question</p></div></div>
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="Text-to-Speech" data-ar="تحويل النص لكلام">Text-to-Speech</h4><p data-en="Questions read aloud via expo-speech for auditory learners" data-ar="قراءة الأسئلة بصوت عالٍ للمتعلمين السمعيين">Questions read aloud for auditory learners</p></div></div>
+      <div class="fs-spec"><div class="check-icon"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div><h4 data-en="Results & History" data-ar="النتائج والتاريخ">Results & History</h4><p data-en="Animated score charts, question review, past attempt tracking" data-ar="رسوم بيانية متحركة ومراجعة الأسئلة وتتبع المحاولات السابقة">Animated score charts & full attempt history</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATS ===== -->
+<section id="stats">
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:36px;">
+      <div class="section-label" style="margin-inline:auto;margin-bottom:12px;" data-en="By the Numbers" data-ar="الأرقام">By the Numbers</div>
+      <h2 class="section-title"><span class="highlight" data-en="Platform" data-ar="منصة">Platform</span> <span data-en="at a Glance" data-ar="بأرقام">at a Glance</span></h2>
+    </div>
+    <div class="stats-grid stagger">
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--primary-light);"><i data-lucide="smartphone" style="width:28px;height:28px;"></i></div>
+        <div class="stat-num" data-target="3">0</div>
+        <div class="stat-label" data-en="Platforms (Mobile, Web, Telegram)" data-ar="منصات تشغيل">Platforms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--primary-light);"><i data-lucide="brain" style="width:28px;height:28px;"></i></div>
+        <div class="stat-num" data-target="6">0</div>
+        <div class="stat-label" data-en="AI Models" data-ar="نماذج ذكاء اصطناعي">AI Models</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--primary-light);"><i data-lucide="database" style="width:28px;height:28px;"></i></div>
+        <div class="stat-num" data-target="22">0</div>
+        <div class="stat-label" data-en="Database Models" data-ar="نموذج قاعدة بيانات">Database Models</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--primary-light);"><i data-lucide="target" style="width:28px;height:28px;"></i></div>
+        <div class="stat-num" data-target="12">0</div>
+        <div class="stat-label" data-en="Integrated Features" data-ar="ميزة متكاملة">Integrated Features</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TELEGRAM ===== -->
+<section id="telegram">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label" style="margin-inline:auto;margin-bottom:12px;" data-en="Telegram Integration" data-ar="تلغرام">Telegram Integration</div>
+      <h2 class="section-title"><span class="highlight" data-en="Full Telegram" data-ar="التكامل الكامل مع">Full Telegram</span> <span data-en="Ecosystem" data-ar="تلغرام">Ecosystem</span></h2>
+      <p class="section-sub" style="margin-inline:auto;margin-bottom:36px;max-width:620px;"
+         data-en="Deep integration with Telegram — the dominant messaging platform in MENA — providing seamless access, content delivery, and community engagement."
+         data-ar="تكامل عميق مع تلغرام — المنصة الأكثر انتشاراً في الشرق الأوسط — لتوفير وصول سلس، توصيل محتوى، وتفاعل مجتمعي.">
+        Deep integration with Telegram — the dominant messaging platform in MENA — providing seamless access, content delivery, and community engagement.
+      </p>
+    </div>
+    <div class="telegram-grid stagger">
+      <div class="telegram-card">
+        <div class="icon-wrap" style="margin-bottom:16px;"><i data-lucide="bot" style="width:40px;height:40px;color:var(--primary-light);"></i></div>
+        <h3 data-en="Telegram Bot" data-ar="بوت تلغرام">Telegram Bot</h3>
+        <p data-en="Automated student linking, broadcast system, resource delivery, and group forum sync via Telegram ID."
+           data-ar="ربط تلقائي للطلاب، نظام بث، توصيل موارد، ومزامنة المجموعات عبر ID تلغرام.">
+           Automated student linking, broadcast system, and group forum sync.
+        </p>
+      </div>
+      <div class="telegram-card">
+        <div class="icon-wrap" style="margin-bottom:16px;"><i data-lucide="smartphone" style="width:40px;height:40px;color:var(--primary-light);"></i></div>
+        <h3 data-en="Telegram Mini App" data-ar="التطبيق المصغر">Telegram Mini App</h3>
+        <p data-en="Standalone zero-login Mini App with Bento dashboard. Automatic student identification via Telegram ID."
+           data-ar="تطبيق مستقل بدون تسجيل بواجهة Bento. تعريف تلقائي للطلاب عبر تلغرام.">
+           Standalone zero-login Mini App with automatic student identification.
+        </p>
+      </div>
+      <div class="telegram-card">
+        <div class="icon-wrap" style="margin-bottom:16px;"><i data-lucide="cloud" style="width:40px;height:40px;color:var(--primary-light);"></i></div>
+        <h3 data-en="Storage CDN" data-ar="تخزين CDN">Storage CDN</h3>
+        <p data-en="Telegram serves as a CDN for images and files. Google Colab integration for YouTube-to-Telegram content transfer."
+           data-ar="تلغرام يعمل كـ CDN للصور والملفات. تكامل مع Google Colab لنقل المحتوى من يوتيوب.">
+           Telegram as CDN for images/files with YouTube-to-Telegram sync.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== USP ===== -->
+<section id="usp">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label" style="margin-inline:auto;margin-bottom:12px;" data-en="Why MedOneX" data-ar="لماذا MedOneX">Why MedOneX</div>
+      <h2 class="section-title"><span data-en="What sets us" data-ar="ما يميزنا">What sets us</span> <span class="highlight" data-en="apart" data-ar="عن الآخرين">apart</span></h2>
+    </div>
+    <div class="usp-grid stagger">
+      <div class="usp-item">
+        <div class="usp-sparkle"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></div>
+        <div>
+          <h4 data-en="Zero OpenAI Dependency — Free AI Tier" data-ar="ذكاء اصطناعي مجاني بالكامل">Zero OpenAI Dependency — Free AI Tier</h4>
+          <p data-en="Runs entirely on Google Gemini's free API tier with 5-key failover. No credit card required for AI features."
+             data-ar="يعمل على Google Gemini API المجاني مع 5 مفاتيح. لا حاجة لبطاقة ائتمان لميزات الذكاء الاصطناعي.">Runs entirely on Google Gemini's free API tier.</p>
+        </div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-sparkle"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></div>
+        <div>
+          <h4 data-en="All-in-One Platform" data-ar="منصة واحدة متكاملة">All-in-One Platform</h4>
+          <p data-en="Replaces 5+ separate tools (LMS, quiz, AI tutor, social, 3D anatomy, podcast, tasks, video) in one unified experience."
+             data-ar="يستبدل 5+ أدوات منفصلة في منصة واحدة.">Replaces 5+ separate tools in one unified experience.</p>
+        </div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-sparkle"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></div>
+        <div>
+          <h4 data-en="Medical-Specific AI" data-ar="ذكاء اصطناعي طبي متخصص">Medical-Specific AI</h4>
+          <p data-en="Not a generic chatbot — Dr. Q understands medical curricula with anti-hallucination safeguards."
+             data-ar="ليس مجرد chatbot عام — Dr. Q يفهم المناهج الطبية بمقاومة الهلوسة.">Dr. Q understands medical curricula with anti-hallucination safeguards.</p>
+        </div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-sparkle"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></div>
+        <div>
+          <h4 data-en="Full Arabic Support" data-ar="واجهة عربية كاملة">Full Arabic Support</h4>
+          <p data-en="Complete Arabic language support in admin interface, 3D Anatomy Atlas, and all key features."
+             data-ar="دعم كامل للغة العربية في لوحة الإدارة، أطلس التشريح، وجميع الميزات.">Complete Arabic support throughout the platform.</p>
+        </div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-sparkle"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></div>
+        <div>
+          <h4 data-en="Serverless-Ready Architecture" data-ar="معمارية Serverless">Serverless-Ready Architecture</h4>
+          <p data-en="Prisma + Supabase + Upstash Redis + Vercel — zero-ops hosting, minimal infrastructure costs."
+             data-ar="Prisma + Supabase + Upstash Redis + Vercel — تشغيل بدون صيانة بأقل تكاليف.">Zero-ops serverless hosting with minimal infrastructure costs.</p>
+        </div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-sparkle"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></div>
+        <div>
+          <h4 data-en="Complete Telegram Ecosystem" data-ar="نظام تلغرام كامل">Complete Telegram Ecosystem</h4>
+          <p data-en="Bot, Mini App, CDN, YouTube sync, forums, and automatic student identification."
+             data-ar="بوت، تطبيق مصغر، CDN، مزامنة يوتيوب، منتديات، وتعريف تلقائي للطلاب.">Bot, Mini App, CDN, YouTube sync, forums, auto student ID.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TECH ===== -->
+<section id="tech">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label" style="margin-inline:auto;margin-bottom:12px;" data-en="Technology" data-ar="التقنيات">Technology</div>
+      <h2 class="section-title"><span class="highlight" data-en="Modern" data-ar="تقنيات">Modern</span> <span data-en="Tech Stack" data-ar="حديثة ومعتمدة">Tech Stack</span></h2>
+      <p class="section-sub" style="margin-inline:auto;margin-bottom:36px;" data-en="Built on cutting-edge technologies for performance, security, and scalability."
+         data-ar="مبنية على أحدث التقنيات لضمان الأداء، الأمان، وقابلية التوسع.">Built on cutting-edge technologies for performance, security, and scalability.</p>
+    </div>
+    <div class="tech-grid stagger">
+      <div class="tech-category">
+        <h4><span class="icon-wrap" style="margin-inline-end:4px;"><i data-lucide="smartphone" style="width:14px;height:14px;"></i></span> <span data-en="Mobile App" data-ar="التطبيق الجوال">Mobile App</span></h4>
+        <div class="tech-list"><span class="tech-tag">Expo SDK 54</span><span class="tech-tag">React Native 0.81</span><span class="tech-tag">TypeScript</span><span class="tech-tag">React Navigation 7</span><span class="tech-tag">Reanimated 4</span><span class="tech-tag">Zustand</span><span class="tech-tag">TanStack Query</span><span class="tech-tag">R3F / Three.js</span></div>
+      </div>
+      <div class="tech-category">
+        <h4><span class="icon-wrap" style="margin-inline-end:4px;"><i data-lucide="monitor" style="width:14px;height:14px;"></i></span> <span data-en="Web" data-ar="الويب">Web</span></h4>
+        <div class="tech-list"><span class="tech-tag">Next.js 14</span><span class="tech-tag">TypeScript</span><span class="tech-tag">Tailwind CSS 3</span><span class="tech-tag">shadcn/ui</span><span class="tech-tag">Framer Motion</span><span class="tech-tag">PWA</span></div>
+      </div>
+      <div class="tech-category">
+        <h4><span class="icon-wrap" style="margin-inline-end:4px;"><i data-lucide="settings" style="width:14px;height:14px;"></i></span> <span data-en="Backend" data-ar="الخلفية">Backend</span></h4>
+        <div class="tech-list"><span class="tech-tag">Next.js API Routes</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">Prisma ORM</span><span class="tech-tag">Redis (Upstash)</span><span class="tech-tag">NextAuth v5</span><span class="tech-tag">R2 / S3</span></div>
+      </div>
+      <div class="tech-category">
+        <h4><span class="icon-wrap" style="margin-inline-end:4px;"><i data-lucide="bot" style="width:14px;height:14px;"></i></span> <span data-en="AI & Infrastructure" data-ar="الذكاء والبنية">AI & Infrastructure</span></h4>
+        <div class="tech-list"><span class="tech-tag">Gemini 2.0 Flash</span><span class="tech-tag">GPT-4o / Claude 3.7</span><span class="tech-tag">DeepSeek / Llama</span><span class="tech-tag">Vercel</span><span class="tech-tag">EAS Build</span><span class="tech-tag">expo-updates</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="cta-content reveal">
+    <div class="icon-wrap" style="margin-bottom:16px;"><i data-lucide="stethoscope" style="width:56px;height:56px;color:var(--primary-light);"></i></div>
+    <h2 class="section-title">
+      <span data-en="Ready to experience" data-ar="استعد لتجربة">Ready to experience</span><br>
+      <span class="highlight" data-en="the future of medical education" data-ar="مستقبل التعليم الطبي">the future of medical education</span>
+    </h2>
+    <p class="section-sub" data-en="One platform. AI-powered, curriculum-aligned, community-driven. Built for the next generation of medical students."
+       data-ar="منصة واحدة. ذكاء اصطناعي متخصص، مناهج دراسية متكاملة، ومجتمع طبي تفاعلي.">
+       One platform. AI-powered, curriculum-aligned, community-driven.
+    </p>
+    <div class="hero-actions" style="margin-top:24px;">
+      <a href="#features" class="btn btn-primary">
+        <span data-en="Get Started Free" data-ar="ابدأ مجاناً">Get Started Free</span>
+        <span class="btn-arrow icon-wrap mirror-rtl" style="width:16px;height:16px;"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+      </a>
+      <a href="#usp" class="btn btn-glass">
+        <span data-en="Learn More" data-ar="تعرف أكثر">Learn More</span>
+      </a>
+    </div>
+    <div class="cta-social">
+      <a href="#" title="Twitter"><i data-lucide="twitter" style="width:18px;height:18px;"></i></a>
+      <a href="#" title="Telegram"><i data-lucide="send" style="width:18px;height:18px;"></i></a>
+      <a href="#" title="YouTube"><i data-lucide="youtube" style="width:18px;height:18px;"></i></a>
+      <a href="#" title="Instagram"><i data-lucide="instagram" style="width:18px;height:18px;"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">
+      <div style="width:28px;height:28px;background:var(--gradient);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:900;font-size:13px;color:white;">M</div>
+      <span style="font-family:'Outfit',sans-serif;font-weight:700;font-size:16px;background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MedOneX</span>
+    </div>
+    <div class="copy">
+      <span data-en="The future of medical study — today." data-ar="مستقبل الدراسة الطبية — اليوم.">
+        The future of medical study — today.
+      </span>
+      <br>
+      <span style="color:var(--text-muted);font-size:11px;">
+        <span data-en="contact@medonex.app · medonex.app" data-ar="contact@medonex.app · medonex.app">contact@medonex.app · medonex.app</span>
+        <br>© 2026 MedOneX.
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script>
+let currentLang = localStorage.getItem('medonex-lang') || 'en';
+
+function switchLang(lang) {
+  currentLang = lang;
+  const root = document.getElementById('htmlRoot');
+  const body = document.body;
+
+  if (lang === 'ar') {
+    root.setAttribute('lang', 'ar');
+    root.setAttribute('dir', 'rtl');
+    body.classList.add('rtl');
+    document.getElementById('langLabel').textContent = 'English';
+  } else {
+    root.setAttribute('lang', 'en');
+    root.setAttribute('dir', 'ltr');
+    body.classList.remove('rtl');
+    document.getElementById('langLabel').textContent = 'عربي';
+  }
+
+  document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + lang);
+  });
+
+  localStorage.setItem('medonex-lang', lang);
+  // Re-init Lucide to re-render icons after potential DOM text changes
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+document.getElementById('langToggle').addEventListener('click', () => {
+  switchLang(currentLang === 'en' ? 'ar' : 'en');
+});
+
+// Init language
+switchLang(currentLang);
+
+// Navbar scroll
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
+
+// Mobile menu
+const mobileBtn = document.getElementById('mobileBtn');
+const navLinks = document.getElementById('navLinks');
+mobileBtn.addEventListener('click', () => navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('open')));
+
+// Scroll reveal
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger').forEach(el => revealObserver.observe(el));
+
+// Counters
+function animateCounter(el, target) {
+  let current = 0;
+  const step = Math.max(1, Math.ceil(target / 120));
+  const update = () => {
+    current += step;
+    if (current >= target) { el.textContent = target + '+'; return; }
+    el.textContent = current;
+    requestAnimationFrame(update);
+  };
+  update();
+}
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateCounter(entry.target, parseInt(entry.target.dataset.target));
+      counterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObserver.observe(el));
+
+// Particles
+(function() {
+  const c = document.getElementById('particles');
+  if (!c) return;
+  const count = Math.min(25, Math.floor(window.innerWidth / 40));
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'p0';
+    p.style.cssText = `left:${Math.random()*100}%;width:${Math.random()*2+1}px;height:${p.style.width};animation-duration:${Math.random()*12+8}s;animation-delay:${Math.random()*8}s;position:absolute;background:var(--primary-light);border-radius:50%;opacity:0;animation:particle-float linear infinite`;
+    c.appendChild(p);
+  }
+})();
+
+// Parallax orb
+const orb = document.querySelector('.hero-orb');
+if (orb) {
+  document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    orb.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1.05)`;
+  });
+}
+
+// Typewriter
+const tw = document.getElementById('typewriter');
+if (tw) {
+  const enP = ['All in One Place', 'AI Powered', 'Built for You'];
+  const arP = ['في مكان واحد', 'بذكاء اصطناعي', 'مصمم لك'];
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx + 1) % 3;
+    tw.textContent = (currentLang === 'en' ? enP : arP)[idx];
+    tw.style.animation = 'none';
+    void tw.offsetWidth;
+    tw.style.animation = '';
+  }, 3500);
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function(e) {
+    const t = document.querySelector(this.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+
+// Close mobile nav on resize
+window.addEventListener('resize', () => { if (window.innerWidth > 820) navLinks.classList.remove('open'); });
+</script>
+</body>
+</html>

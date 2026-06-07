@@ -2,6 +2,7 @@ name = "medqs-bot-worker"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = [ "nodejs_compat" ]
+account_id = "8d80483f64721ace30eb728de1010ea5"
 
 [vars]
 # We will set these via wrangler secrets or in the dashboard

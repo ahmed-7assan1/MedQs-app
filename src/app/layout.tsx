@@ -30,7 +30,7 @@ const getCachedSiteConfig = unstable_cache(
       enableAds: true,
       enableNotifs: true,
       fontSans: "Plus Jakarta Sans",
-      fontArabic: "Tajawal",
+      fontArabic: "Cairo",
     };
 
     try {
@@ -245,7 +245,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   document.documentElement.setAttribute('lang', lang);
                   if (lang === 'ar') {
                     document.documentElement.setAttribute('dir', 'rtl');
-                    document.documentElement.style.setProperty('--font-geist-sans', 'var(--font-tajawal)');
+                    document.documentElement.style.setProperty('--font-geist-sans', 'var(--font-cairo)');
                   } else {
                     document.documentElement.setAttribute('dir', 'ltr');
                     document.documentElement.style.removeProperty('--font-geist-sans');

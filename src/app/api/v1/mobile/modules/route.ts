@@ -55,6 +55,15 @@ export async function GET(req: NextRequest) {
                 title: true,
                 videoUrl: true,
                 order: true,
+                videos: {
+                  select: {
+                    id: true,
+                    telegramMessageId: true,
+                    telegramChatId: true,
+                    telegramFileId: true,
+                  },
+                  orderBy: { sortOrder: 'asc' },
+                },
               }
             }
           }
@@ -62,7 +71,26 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    return NextResponse.json(modules);
+    // 🛰️ Transform Telegram video IDs into proxy URLs for each lecture
+    const transformed = modules.map(mod => ({
+      ...mod,
+      subjects: mod.subjects.map(sub => ({
+        ...sub,
+        lectures: sub.lectures.map(lec => {
+          const tgVideo = lec.videos?.find(v => v.telegramFileId);
+          if (tgVideo) {
+            const fileIdParam = `?fileId=${encodeURIComponent(tgVideo.telegramFileId)}`;
+            return {
+              ...lec,
+              videoUrl: `/api/v1/telegram/video/${tgVideo.telegramChatId}/${tgVideo.telegramMessageId}${fileIdParam}`,
+            };
+          }
+          return lec;
+        })
+      }))
+    }));
+
+    return NextResponse.json(transformed);
   } catch (error) {
     console.error("Mobile Modules Error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -25,6 +25,7 @@ import {
 } from "@phosphor-icons/react";
 import React, { useState, useRef, useMemo } from "react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
+import { PostDetailModal } from "@/components/forum/PostDetailModal";
 
 const REACTION_MAP: Record<string, { emoji: string; label: string; color: string }> = {
   LIKE: { emoji: "👍", label: "Like", color: "text-blue-500" },
@@ -96,6 +97,7 @@ export const PostCard = React.memo(({
   const [postContent, setPostContent] = useState(post.content || "");
   const isEdited = post.updatedAt ? new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime() > 2000 : false;
   const [editedState, setEditedState] = useState(isEdited);
+  const [showPostModal, setShowPostModal] = useState(false);
 
   const myReaction = currentUserId ? reactions.find((r) => r.userId === currentUserId)?.type : null;
   const reactionCounts = reactions.reduce((acc: Record<string, number>, r) => {
@@ -280,7 +282,13 @@ export const PostCard = React.memo(({
       whileInView={{ opacity: 1, y: 0 }} 
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, ease: "easeOut" }} 
-      className="rounded-2xl sm:rounded-[32px] bg-white dark:bg-[#161523] border border-slate-200/80 dark:border-white/[0.08] overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300 transform-gpu" 
+      onClick={(e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest("button, a, textarea, input, [role=\"button\"], [role=\"menuitem\"]")) {
+          setShowPostModal(true);
+        }
+      }}
+      className="rounded-2xl sm:rounded-[32px] bg-white dark:bg-[#161523] border border-slate-200/80 dark:border-white/[0.08] overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300 transform-gpu cursor-pointer" 
     >
       
       {/* Header */}
@@ -757,6 +765,15 @@ export const PostCard = React.memo(({
           onClose={() => setLightboxIndex(null)}
         />
       )}
+
+      <PostDetailModal
+        post={post}
+        currentUserId={currentUserId}
+        currentUserRole={currentUserRole}
+        currentUserUniversityId={currentUserUniversityId}
+        isOpen={showPostModal}
+        onClose={() => setShowPostModal(false)}
+      />
     </motion.div>
   );
 });

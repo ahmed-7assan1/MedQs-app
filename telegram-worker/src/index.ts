@@ -598,5 +598,119 @@ app.post('/api/telegram', async (c) => {
   return c.json({ ok: true });
 });
 
+// ─── File Upload (Proxy to Telegram) ────────────────────────────────────────
+
+app.post('/api/upload', async (c) => {
+  try {
+    const formData = await c.req.formData();
+    const file = formData.get('file') as File | null;
+    if (!file) return c.json({ success: false, error: 'No file provided' }, 400);
+
+    const mime = file.type || 'application/octet-stream';
+    let method = 'sendDocument';
+    let field = 'document';
+    if (mime.startsWith('video/')) { method = 'sendVideo'; field = 'video'; }
+    else if (mime.startsWith('audio/')) { method = 'sendAudio'; field = 'audio'; }
+
+    const tgForm = new FormData();
+    tgForm.append('chat_id', c.env.TELEGRAM_STORAGE_GROUP_ID);
+    tgForm.append(field, file);
+
+    const res = await fetch(`https://api.telegram.org/bot${c.env.TELEGRAM_BOT_TOKEN}/${method}`, {
+      method: 'POST',
+      body: tgForm,
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => 'Unknown error');
+      return c.json({ success: false, error: errText }, 502);
+    }
+
+    const data = await res.json() as any;
+    if (!data.ok) return c.json({ success: false, error: data.description }, 502);
+
+    const msg = data.result;
+    let fileId = '';
+    if (msg.document) fileId = msg.document.file_id;
+    else if (msg.video) fileId = msg.video.file_id;
+    else if (msg.audio) fileId = msg.audio.file_id;
+    else if (msg.photo?.[0]) fileId = msg.photo[0].file_id;
+
+    return c.json({ success: true, fileId, type: mime, fileName: file.name });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message || 'Upload failed' }, 500);
+  }
+});
+
+// ─── File Preview (Proxy from Telegram, no token exposure) ──────────────────
+
+app.get('/api/files/preview', async (c) => {
+  const fileId = c.req.query('fileId');
+  const type = c.req.query('type') || 'image';
+  const download = c.req.query('download') === 'true';
+  if (!fileId) return c.json({ error: 'Missing fileId' }, 400);
+
+  try {
+    const getFileRes = await fetch(
+      `https://api.telegram.org/bot${c.env.TELEGRAM_BOT_TOKEN}/getFile?file_id=${encodeURIComponent(fileId)}`
+    );
+    if (!getFileRes.ok) return c.json({ error: 'Failed to get file info' }, 502);
+
+    const getFileData = await getFileRes.json() as any;
+    if (!getFileData.ok) return c.json({ error: getFileData.description || 'File not found' }, 404);
+
+    const filePath = getFileData.result.file_path;
+    const fileUrl = `https://api.telegram.org/file/bot${c.env.TELEGRAM_BOT_TOKEN}/${filePath}`;
+
+    const fileRes = await fetch(fileUrl);
+    if (!fileRes.ok) return c.json({ error: 'Failed to fetch file' }, 502);
+
+    const contentType = type === 'video' ? 'video/mp4'
+      : type === 'audio' ? 'audio/mpeg'
+      : fileRes.headers.get('content-type') || 'application/octet-stream';
+
+    const headers = new Headers({
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': '*',
+    });
+
+    if (download) {
+      const fileName = filePath.split('/').pop() || 'file';
+      headers.set('Content-Disposition', `attachment; filename="${fileName}"`);
+    }
+
+    return new Response(fileRes.body, { headers });
+  } catch (err: any) {
+    return c.json({ error: err.message || 'Preview failed' }, 500);
+  }
+});
+
+// ─── CORS preflight ──────────────────────────────────────────────────────────
+
+app.options('/api/upload', (c) => {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+});
+
+app.options('/api/files/preview', (c) => {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+});
+
 export default app;
 

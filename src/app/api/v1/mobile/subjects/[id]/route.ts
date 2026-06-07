@@ -38,6 +38,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             videoUrl: true,
             order: true,
             notesMarkdown: true,
+            videos: {
+              select: {
+                id: true,
+                telegramMessageId: true,
+                telegramChatId: true,
+                telegramFileId: true,
+              },
+              orderBy: { sortOrder: 'asc' },
+            },
           }
         }
       }
@@ -47,7 +56,23 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: "Subject not found" }, { status: 404 });
     }
 
-    return NextResponse.json(subject);
+    // 🛰️ Transform Telegram video IDs into proxy URLs
+    const transformed = {
+      ...subject,
+      lectures: subject.lectures.map(lec => {
+        const tgVideo = lec.videos?.find(v => v.telegramFileId);
+        if (tgVideo) {
+          const fileIdParam = `?fileId=${encodeURIComponent(tgVideo.telegramFileId)}`;
+          return {
+            ...lec,
+            videoUrl: `/api/v1/telegram/video/${tgVideo.telegramChatId}/${tgVideo.telegramMessageId}${fileIdParam}`,
+          };
+        }
+        return lec;
+      })
+    };
+
+    return NextResponse.json(transformed);
   } catch (error) {
     console.error("Mobile Subject Error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

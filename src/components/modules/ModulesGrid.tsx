@@ -217,58 +217,39 @@ export default function ModulesGrid({ modules, totalMastered, isGuest, currentSt
             </div>
           </div>
 
-          {/* Mobile: compact single row with progress bar */}
-          <div className="flex md:hidden gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.04] bg-[#0d0e1b]/70 p-4 shadow-2xl backdrop-blur-xl flex items-center gap-4 w-[250px] shrink-0">
-              <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
-              <div className="relative shrink-0 flex items-center justify-center h-12 w-12">
+          {/* Mobile: compact 3-column stats (inspired by Img 2) */}
+          <div className="flex md:hidden gap-2">
+            <div className="mobile-card p-3 flex-1 flex flex-col items-center gap-1.5">
+              <div className="relative h-10 w-10">
                 <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="24" cy="24" r="20" className="stroke-white/[0.04] fill-none" strokeWidth="4" />
-                  <circle cx="24" cy="24" r="20" className="stroke-primary fill-none transition-all duration-1000" strokeWidth="4"
-                    strokeDasharray={`${2 * Math.PI * 20}`}
-                    strokeDashoffset={`${2 * Math.PI * 20 * (1 - avgMastery / 100)}`}
+                  <circle cx="20" cy="20" r="17" className="stroke-white/[0.04] fill-none" strokeWidth="3" />
+                  <circle cx="20" cy="20" r="17" className="stroke-purple-500 fill-none" strokeWidth="3"
+                    strokeDasharray={`${2 * Math.PI * 17}`}
+                    strokeDashoffset={`${2 * Math.PI * 17 * (1 - avgMastery / 100)}`}
                     strokeLinecap="round" />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-[11px] font-black text-white">{avgMastery}%</span>
+                  <span className="text-[9px] font-black text-white">{avgMastery}%</span>
                 </div>
               </div>
-              <div>
-                <span className="text-[8px] font-black uppercase tracking-widest text-primary-400/80">Mastery</span>
-                <h3 className="text-sm font-black text-white">{avgMastery === 0 ? "Start practicing!" : "Curriculum Health"}</h3>
-              </div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/40">Mastery</span>
             </div>
-
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.04] bg-[#0d0e1b]/70 p-4 shadow-2xl backdrop-blur-xl flex items-center gap-4 w-[220px] shrink-0">
-              <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-violet-500/15 blur-2xl pointer-events-none" />
-              <div className="h-10 w-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
-                <Award className="h-5 w-5 text-violet-400" />
-              </div>
-              <div>
-                <span className="text-[8px] font-black uppercase tracking-widest text-violet-400">Level {levelInfo.level}</span>
-                <h3 className="text-sm font-black text-white">{levelInfo.currentProgress} XP</h3>
-                <div className="h-1.5 w-full bg-white/[0.05] rounded-full overflow-hidden mt-1">
-                  <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-400 rounded-full" style={{ width: `${levelInfo.pct}%` }} />
-                </div>
-              </div>
+            <div className="mobile-card p-3 flex-1 flex flex-col items-center gap-1.5">
+              <Award className="h-5 w-5 text-violet-400" />
+              <span className="text-xs font-black text-white">Lv.{levelInfo.level}</span>
+              <span className="text-[8px] font-black text-white/40">{levelInfo.currentProgress} XP</span>
             </div>
-
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.04] bg-[#0d0e1b]/70 p-4 shadow-2xl backdrop-blur-xl flex items-center gap-4 w-[200px] shrink-0">
-              <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl pointer-events-none" />
-              <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-                <Flame className="h-5 w-5 text-amber-500" />
-              </div>
-              <div>
-                <span className="text-[8px] font-black uppercase tracking-widest text-amber-400">Streak</span>
-                <h3 className="text-sm font-black text-white">{currentStreak} Day{currentStreak !== 1 ? "s" : ""}</h3>
-              </div>
+            <div className="mobile-card p-3 flex-1 flex flex-col items-center gap-1.5">
+              <Flame className="h-5 w-5 text-amber-400" />
+              <span className="text-xs font-black text-white">{currentStreak}d</span>
+              <span className="text-[8px] font-black text-white/40">Streak</span>
             </div>
           </div>
         </>
       )}
 
       {/* ── SEARCH & FILTER CONTROLS ── */}
-      <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between p-3 md:p-4 rounded-2xl md:rounded-[28px] border border-white/[0.03] bg-white/[0.01] backdrop-blur-md">
+      <div className="flex flex-col gap-2 md:gap-4 md:flex-row md:items-center justify-between p-2.5 md:p-4 rounded-2xl md:rounded-[28px] border border-white/[0.03] bg-white/[0.01] backdrop-blur-md">
         {/* Category Tabs (Horizontal Scrollable) */}
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5" role="tablist" aria-label="Filter modules by category">
           {categories.map((cat) => (
@@ -291,19 +272,19 @@ export default function ModulesGrid({ modules, totalMastered, isGuest, currentSt
           ))}
         </div>
 
-        {/* Search & Sort Panel */}
-        <div className="flex items-center gap-2 md:gap-3">
-          {/* Search Box */}
-          <div className="relative flex-1 md:w-60">
-            <Search className="absolute left-3 md:left-4 top-1/2 h-3.5 w-3.5 md:h-4 md:w-4 -translate-y-1/2 text-white/30" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchInput}
-              onChange={(e) => handleSearch(e.target.value)}
-              aria-label="Search modules"
-              className="w-full pl-9 md:pl-11 pr-3 md:pr-4 py-2 md:py-2.5 rounded-full text-xs font-semibold text-white bg-white/[0.02] border border-white/5 placeholder-white/20 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all"
-            />
+          {/* Search & Sort Panel */}
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Search Box — larger on mobile */}
+            <div className="relative flex-1 md:w-60">
+              <Search className="absolute left-3 md:left-4 top-1/2 h-4 w-4 md:h-4 md:w-4 -translate-y-1/2 text-white/30" />
+              <input
+                type="text"
+                placeholder="Search modules..."
+                value={searchInput}
+                onChange={(e) => handleSearch(e.target.value)}
+                aria-label="Search modules"
+                className="w-full pl-10 md:pl-11 pr-4 py-3 md:py-2.5 rounded-full text-sm md:text-xs font-semibold text-white bg-white/[0.04] border border-white/[0.06] placeholder-white/20 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
+              />
           </div>
 
           {/* Sort Controls */}
@@ -317,9 +298,9 @@ export default function ModulesGrid({ modules, totalMastered, isGuest, currentSt
               aria-label={`Sort by ${sortBy}, currently ${sortLabel}`}
               className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-l-full text-[10px] md:text-xs font-black uppercase tracking-widest text-white/60 bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:text-white active:bg-white/[0.08] transition-all"
             >
-              <ArrowUpDown className="h-3 w-3 md:h-3.5 md:w-3.5" />
+              <ArrowUpDown className="h-3.5 w-3.5 md:h-3.5 md:w-3.5" />
               <span className="hidden md:inline">Sort: </span>
-              <span>{sortBy === "name" ? "Name" : sortBy === "mastery" ? "Mastery" : "Lectures"}</span>
+              <span className="text-[9px] md:text-xs">{sortBy === "name" ? "Name" : sortBy === "mastery" ? "Mastery" : "Lectures"}</span>
             </button>
             <button
               onClick={() => setSortDir((d) => d === "asc" ? "desc" : "asc")}
@@ -453,10 +434,10 @@ export default function ModulesGrid({ modules, totalMastered, isGuest, currentSt
                             </div>
                           </div>
 
-                          {/* Enter module — always visible, stronger on mobile */}
-                          <div className="pt-1 md:pt-2 flex items-center justify-between text-[10px] md:text-xs font-black text-white/60 md:text-white/40 md:group-hover:text-primary uppercase tracking-widest transition-colors duration-200">
-                            <span>Enter</span>
-                            <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4 transform group-hover:translate-x-1 transition-transform" />
+                          {/* Enter module — hidden label on mobile (card is tappable), visible chevron */}
+                          <div className="pt-1 md:pt-2 flex items-center justify-end text-[10px] md:text-xs font-black text-white/60 md:text-white/40 md:group-hover:text-primary uppercase tracking-widest transition-colors duration-200">
+                            <span className="hidden md:inline mr-2">Enter</span>
+                            <ChevronRight className="h-4 w-4 md:h-4 md:w-4 transform md:group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>
                       </div>
@@ -473,7 +454,7 @@ export default function ModulesGrid({ modules, totalMastered, isGuest, currentSt
               <button
                 onClick={() => setVisibleCount((c) => c + 9)}
                 aria-label="Load more modules"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/[0.02] border border-white/5 text-xs font-black text-white/60 uppercase tracking-widest hover:bg-white/[0.05] hover:text-white active:scale-95 transition-all"
+                className="inline-flex items-center gap-2 px-8 py-3.5 md:px-6 md:py-3 rounded-full bg-white/[0.03] border border-white/[0.06] text-xs font-black text-white/60 uppercase tracking-widest hover:bg-white/[0.06] hover:text-white active:scale-95 transition-all"
               >
                 Show More
                 <ChevronRight className="h-3.5 w-3.5 transform rotate-90" />

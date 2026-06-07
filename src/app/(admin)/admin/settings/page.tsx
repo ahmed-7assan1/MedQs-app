@@ -44,7 +44,7 @@ const DEFAULTS: SiteConfig = {
   enableAI: true, enableForum: true, enableAds: true, enableNotifs: true, enableLeaderboard: true,
   enableCreativeStudio: false,
   aiPreferredProvider: "auto",
-  fontSans: "Plus Jakarta Sans", fontArabic: "Tajawal",
+  fontSans: "Plus Jakarta Sans", fontArabic: "Cairo",
   facebookUrl: "", twitterUrl: "", youtubeUrl: "",
   instagramUrl: "", telegramUrl: "", whatsappUrl: "", hulkLogoUrl: "",
 };

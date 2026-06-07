@@ -1,21 +1,13 @@
-import React, { Suspense, useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, TextInput, ScrollView, StatusBar, ActivityIndicator } from 'react-native';
 import tw from 'twrnc';
 import { useThemeStore } from '../store/useThemeStore';
 import { ChevronLeft, Search, Layers, Info, RotateCw, ZoomIn, ZoomOut, Heart, Activity } from 'lucide-react-native';
-import Animated, { FadeInRight, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { EliteButton } from '../components/ui/EliteButton';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, ContactShadows } from '@react-three/drei/native';
 
-// ─── Human Model Component ──────────────────────────────────────────────────
-function Model({ url, visible }: { url: string; visible: boolean }) {
-  const { scene } = useGLTF(url);
-  if (!visible) return null;
-  return <primitive object={scene} scale={2} position={[0, -2, 0]} />;
-}
+const Atlas3DCanvas = lazy(() => import('../components/3d/Atlas3DCanvas'));
 
-// ─── Categories ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
   { id: 'skeletal', label: 'الهيكل العظمي', icon: Layers, color: '#F8FAFC', url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/skeleton/model.gltf' },
   { id: 'muscular', label: 'الجهاز العضلي', icon: Activity, color: '#EF4444', url: '' },
@@ -27,7 +19,6 @@ export function Atlas3DScreen({ navigation }: any) {
   const theme = getTheme();
   const [search, setSearch] = useState('');
   const [activeLayers, setActiveLayers] = useState(['skeletal']);
-  const [loading, setLoading] = useState(true);
 
   const toggleLayer = (id: string) => {
     if (activeLayers.includes(id)) {
@@ -49,21 +40,7 @@ export function Atlas3DScreen({ navigation }: any) {
             <Text style={tw`text-white mt-4 font-bold`}>جاري تحميل النموذج التشريحي...</Text>
           </View>
         }>
-          <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
-            <color attach="background" args={['#07090F']} />
-            <ambientLight intensity={0.5} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-            <pointLight position={[-10, -10, -10]} />
-            
-            <Model 
-              url={CATEGORIES[0].url} 
-              visible={activeLayers.includes('skeletal')} 
-            />
-            
-            <OrbitControls enablePan={false} />
-            <Environment preset="city" />
-            <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={10} blur={2.5} far={4} />
-          </Canvas>
+          <Atlas3DCanvas url={CATEGORIES[0].url} visible={activeLayers.includes('skeletal')} />
         </Suspense>
 
         {/* 3D Floating Controls */}

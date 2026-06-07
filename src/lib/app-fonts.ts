@@ -1,9 +1,9 @@
 import localFont from "next/font/local";
-import { Tajawal, DM_Sans, Syne } from "next/font/google";
+import { Cairo, DM_Sans, Syne } from "next/font/google";
 
 /**
- * UI pair: **Geist** (Latin / UI) + **Tajawal** (Arabic).
- * Variables on `<html>`: `--font-geist-sans`, `--font-tajawal`.
+ * UI pair: **Geist** (Latin / UI) + **Cairo** (Arabic).
+ * Variables on `<html>`: `--font-geist-sans`, `--font-cairo`.
  * For RTL use `font-arabic` or `dir="rtl"` / `:lang(ar)` (globals.css).
  */
 export const fontGeist = localFont({
@@ -17,10 +17,10 @@ export const fontGeist = localFont({
   display: "swap",
 });
 
-export const fontArabic = Tajawal({
+export const fontArabic = Cairo({
   subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "700", "800"],
-  variable: "--font-tajawal",
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-cairo",
   display: "swap",
 });
 

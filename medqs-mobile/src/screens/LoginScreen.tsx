@@ -14,7 +14,7 @@ import { EliteButton } from '../components/ui/EliteButton';
 import { EliteInput } from '../components/ui/EliteInput';
 
 export function LoginScreen({ navigation }: any) {
-  const { login } = useAuthStore();
+  const { login, guestLogin } = useAuthStore();
   const { getTheme, primaryColor, isDarkMode, loadConfig } = useThemeStore();
   const theme = getTheme();
 
@@ -136,6 +136,17 @@ export function LoginScreen({ navigation }: any) {
                 onPress={() => navigation.navigate('Register')}
                 style={{ height: 'auto', paddingVertical: 2, paddingHorizontal: 4, borderWidth: 0 }}
                 textStyle={{ color: primaryColor, fontWeight: '800' }}
+              />
+            </Animated.View>
+
+            {/* Skip Login */}
+            <Animated.View entering={FadeInDown.delay(600)} style={{ marginTop: 24, alignItems: 'center' }}>
+              <EliteButton
+                title="Skip & Browse as Guest"
+                variant="outline"
+                onPress={async () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); await guestLogin(); }}
+                style={{ borderColor: theme.colors.textMuted + '30' }}
+                textStyle={{ color: theme.colors.textMuted, fontWeight: '600', fontSize: 13 }}
               />
             </Animated.View>
           </ScrollView>

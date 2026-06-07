@@ -26,6 +26,7 @@
       },
       "userInterfaceStyle": "dark",
       "edgeToEdgeEnabled": true,
+      "usesCleartextTraffic": true,
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",

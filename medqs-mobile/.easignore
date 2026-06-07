@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+android/
+ios/
+.git/
+.export-test/
+.idea/
+dist/
+*.tsbuildinfo

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
 import {
   Heart,
@@ -23,6 +23,7 @@ import { PostGallery } from "./PostGallery";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SharedQuestionBlock } from "../quiz/SharedQuestionBlock";
 import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
+import { PostDetailModal } from "./PostDetailModal";
 
 interface Props {
   post: any;
@@ -111,6 +112,7 @@ export function PostCardRedesigned({
   const [postContent, setPostContent] = useState(post.content || "");
   const isEdited = post.updatedAt ? new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime() > 2000 : false;
   const [editedState, setEditedState] = useState(isEdited);
+  const [showPostModal, setShowPostModal] = useState(false);
 
   if (isDeleted) return null;
 
@@ -281,7 +283,13 @@ export function PostCardRedesigned({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-[20px] sm:rounded-[24px] bg-[#16152A]/70 border border-white/[0.06] backdrop-blur-xl overflow-hidden shadow-xl hover:border-white/[0.1] transition-colors duration-300"
+      onClick={(e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest("button, a, textarea, input, [role=\"button\"], [role=\"menuitem\"]")) {
+          setShowPostModal(true);
+        }
+      }}
+      className="rounded-[20px] sm:rounded-[24px] bg-[#16152A]/70 border border-white/[0.06] backdrop-blur-xl overflow-hidden shadow-xl hover:border-white/[0.1] transition-colors duration-300 cursor-pointer"
     >
       {/* ── Header ── */}
       <div className="flex items-center gap-3 p-4 pb-0">
@@ -654,6 +662,15 @@ export function PostCardRedesigned({
         message="This post will be permanently deleted."
         confirmText={deleting ? "Deleting..." : "Delete"}
         variant="danger"
+      />
+
+      <PostDetailModal
+        post={post}
+        currentUserId={currentUserId}
+        currentUserRole={currentUserRole}
+        currentUserUniversityId={currentUserUniversityId}
+        isOpen={showPostModal}
+        onClose={() => setShowPostModal(false)}
       />
     </motion.div>
   );

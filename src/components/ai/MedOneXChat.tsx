@@ -403,19 +403,19 @@ export function MedOneXChat() {
               <span className="hidden sm:inline">Modules</span>
             </button>
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-1.5">
-              {/* Provider Selector — single button opens picker */}
-              <button
-                onClick={() => setShowProviderPicker(true)}
-                className={cn(
-                  "flex items-center gap-1 px-2 py-1.5 rounded-xl text-xs font-medium transition-all",
-                  isDark ? "bg-white/10 text-white shadow-sm hover:bg-white/15" : "bg-black/5 text-gray-900 shadow-sm hover:bg-black/10"
-                )}
-                title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
-              >
-                <span className="text-[11px] font-bold">{PROVIDER_CONFIGS[settings.activeProvider]?.icon}</span>
-              </button>
+              {/* Right: Actions */}
+              <div className="flex items-center gap-1.5">
+                {/* Provider Selector — single button opens picker */}
+                <button
+                  onClick={() => setShowProviderPicker(true)}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1.5 rounded-xl text-xs font-medium transition-all",
+                    isDark ? "bg-white/10 text-white shadow-sm hover:bg-white/15" : "bg-black/5 text-gray-900 shadow-sm hover:bg-black/10"
+                  )}
+                  title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
+                >
+                  <span className="text-[13px] md:text-[11px] font-bold">{PROVIDER_CONFIGS[settings.activeProvider]?.icon}</span>
+                </button>
 
               <div className={cn("w-px h-5", isDark ? "bg-white/10" : "bg-gray-200")} />
 
@@ -439,26 +439,30 @@ export function MedOneXChat() {
         </div>
       </div>
 
-      {/* ─── Threads Container ─── */}
+      {/* ─── Threads Container — bottom sheet on mobile ─── */}
       <AnimatePresence>
         {showThreads && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-30 flex items-center justify-center p-4"
+            className="fixed inset-0 z-30 flex items-end md:items-center justify-center"
           >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowThreads(false)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 32 }}
               className={cn(
-                "relative w-full max-w-lg h-[70vh] rounded-3xl overflow-hidden border shadow-2xl",
+                "relative w-full md:max-w-lg h-[70vh] md:h-[70vh] rounded-t-3xl md:rounded-3xl overflow-hidden border shadow-2xl md:mx-4 pt-2",
                 isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200"
               )}
             >
+              {/* Drag handle */}
+              <div className="flex justify-center md:hidden pt-1 pb-2">
+                <div className="w-8 h-1 rounded-full bg-white/20" />
+              </div>
               <div className={cn("flex items-center justify-between p-4 border-b", isDark ? "border-white/10" : "border-gray-200")}>
                 <div className="flex items-center gap-3">
                   <ChatCircle size={18} weight="fill" className="text-indigo-500" />
@@ -530,26 +534,30 @@ export function MedOneXChat() {
         )}
       </AnimatePresence>
 
-      {/* ─── Modules Widget ─── */}
+      {/* ─── Modules Widget — bottom sheet on mobile ─── */}
       <AnimatePresence>
         {showModules && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-30 flex items-center justify-center p-4"
+            className="fixed inset-0 z-30 flex items-end md:items-center justify-center"
           >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModules(false)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 32 }}
               className={cn(
-                "relative w-full max-w-lg h-[75vh] rounded-3xl overflow-hidden border shadow-2xl flex flex-col",
+                "relative w-full md:max-w-lg h-[70vh] md:h-[75vh] rounded-t-3xl md:rounded-3xl overflow-hidden border shadow-2xl md:mx-4 flex flex-col pt-2",
                 isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200"
               )}
             >
+              {/* Drag handle */}
+              <div className="flex justify-center md:hidden pt-1 pb-2">
+                <div className="w-8 h-1 rounded-full bg-white/20" />
+              </div>
               {/* Header */}
               <div className={cn("flex items-center justify-between p-4 border-b flex-shrink-0", isDark ? "border-white/10" : "border-gray-200")}>
                 <div className="flex items-center gap-3">
@@ -911,8 +919,8 @@ export function MedOneXChat() {
           </div>
         )}
 
-        {/* Floating Input Island - Fixed Bottom */}
-        <div className={cn("flex-shrink-0 pb-2 md:pb-3 pt-4 flex justify-center relative z-10", isDark ? "bg-black" : "bg-white")}>
+        {/* Floating Input Island - Fixed Bottom (pb-20 for MobileBottomNav) */}
+        <div className={cn("flex-shrink-0 pb-20 md:pb-3 pt-4 flex justify-center relative z-10", isDark ? "bg-black" : "bg-white")}>
           <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
             <div
               className={cn(
@@ -1049,34 +1057,39 @@ export function MedOneXChat() {
 
       <DrQConfigPanel isOpen={showConfig} settings={settings} onUpdate={updateSettings} onClose={() => setShowConfig(false)} />
 
-      {/* ─── Provider Picker Modal ─── */}
+      {/* ─── Provider Picker — bottom sheet on mobile (Img 4), modal on desktop ─── */}
       <AnimatePresence>
         {showProviderPicker && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] flex items-end md:items-center justify-center"
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowProviderPicker(false)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 32 }}
               className={cn(
-                "relative w-full max-w-sm rounded-3xl overflow-hidden border shadow-2xl",
+                "relative w-full md:max-w-sm md:rounded-3xl rounded-t-3xl overflow-hidden border md:border shadow-2xl",
+                "md:mx-4 pt-2",
                 isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200"
               )}
             >
-              <div className={cn("flex items-center justify-between p-5 border-b", isDark ? "border-white/10" : "border-gray-200")}>
+              {/* Drag handle */}
+              <div className="flex justify-center md:hidden pt-1 pb-2">
+                <div className="w-8 h-1 rounded-full bg-white/20" />
+              </div>
+              <div className={cn("flex items-center justify-between px-5 pb-4 md:pt-5", isDark ? "" : "")}>
                 <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-gray-900")}>Select Provider</h2>
                 <button onClick={() => setShowProviderPicker(false)} className={cn("p-2 rounded-xl transition-all", isDark ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500 hover:text-gray-800")}>
                   <X size={18} weight="bold" />
                 </button>
               </div>
-              <div className="p-3 max-h-[60vh] overflow-y-auto no-scrollbar">
-                <div className="grid grid-cols-3 gap-2">
+              <div className="px-3 pb-4 max-h-[60vh] md:max-h-[60vh] overflow-y-auto no-scrollbar">
+                <div className="grid grid-cols-3 md:grid-cols-3 gap-2">
                   {(Object.keys(PROVIDER_CONFIGS) as AIProvider[]).map(p => {
                     const isActive = settings.activeProvider === p;
                     const config = PROVIDER_CONFIGS[p];
@@ -1085,7 +1098,7 @@ export function MedOneXChat() {
                         key={p}
                         onClick={() => { updateSettings({ activeProvider: p }); setShowProviderPicker(false); }}
                         className={cn(
-                          "flex flex-col items-center gap-1.5 px-2 py-4 rounded-2xl text-center transition-all",
+                          "flex flex-col items-center gap-1.5 px-2 py-4 rounded-2xl text-center transition-all active:scale-95",
                           isActive
                             ? isDark ? "bg-white/10 text-white shadow-sm ring-1 ring-indigo-500/40" : "bg-gray-100 text-gray-900 shadow-sm ring-1 ring-indigo-400/30"
                             : isDark ? "text-white/50 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"

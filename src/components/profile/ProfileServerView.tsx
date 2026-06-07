@@ -77,10 +77,10 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
   const avatarUrl = user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name ?? "User")}&backgroundColor=c0aede,d1d4f9,b6e3f4`;
 
   return (
-    <div className="min-h-screen dark:bg-[#07080f] bg-[#f8fafc] dark:text-white text-slate-900 pb-20">
+    <div className="min-h-screen dark:bg-[#07080f] bg-[#f8fafc] dark:text-white text-slate-900 max-md:!pb-[var(--mobile-main-pad-bottom)]">
       
-      {/* Cover Photo */}
-      <div className="h-48 md:h-64 lg:h-80 w-full relative border-b dark:border-white/5 border-black/5 overflow-hidden">
+      {/* Cover Photo — shorter on mobile */}
+      <div className="h-36 md:h-64 lg:h-80 w-full relative border-b dark:border-white/5 border-black/5 overflow-hidden">
          {user.coverImage ? (
            <img src={user.coverImage} className="absolute inset-0 w-full h-full object-cover" alt="Cover" />
          ) : (
@@ -89,15 +89,15 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
            </div>
          )}
          {/* Seamless fade into background to ensure name readability */}
-         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#f8fafc] dark:from-[#07080f] to-transparent pointer-events-none" />
+         <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-[#f8fafc] dark:from-[#07080f] to-transparent pointer-events-none" />
       </div>
 
       <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-16 md:-mt-20 mb-8">
         
-        {/* Profile Header (Avatar + Info) */}
-        <div className="flex flex-col md:flex-row gap-6 md:items-end relative z-10">
+        {/* Profile Header (Avatar + Info) — smaller on mobile */}
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6 md:items-end relative z-10">
           {/* Avatar */}
-          <div className="h-32 w-32 md:h-40 md:w-40 rounded-3xl dark:bg-black bg-white border-4 dark:border-[#07080f] border-slate-50 shadow-2xl overflow-hidden shrink-0">
+          <div className="h-24 w-24 md:h-40 md:w-40 rounded-2xl md:rounded-3xl dark:bg-black bg-white border-4 dark:border-[#07080f] border-slate-50 shadow-2xl overflow-hidden shrink-0">
              <img
                src={avatarUrl}
                alt={user.name}
@@ -109,15 +109,15 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
           {/* Info & Actions */}
           <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2 md:mt-0 md:pb-4">
              <div>
-                <h1 className="text-3xl md:text-4xl font-black tracking-tight dark:text-white text-slate-800 flex items-center gap-2">
+                 <h1 className="text-xl md:text-4xl font-black tracking-tight dark:text-white text-slate-800 flex items-center gap-2">
                   {user.name ?? "Member"}
                 </h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="dark:text-white/50 text-slate-500 font-bold tracking-widest text-[13px] uppercase">
+                 <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-0.5 md:mt-1">
+                  <span className="dark:text-white/50 text-slate-500 font-bold tracking-widest text-[10px] md:text-[13px] uppercase">
                     @{user.handle || user.nickname || user.studentId || "user"}
                   </span>
                   {user.rank && (
-                    <span className="rounded-full bg-orange-500/10 px-3 py-1 text-[11px] font-bold text-orange-500 border border-orange-500/20 uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="rounded-full bg-orange-500/10 px-2 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[11px] font-bold text-orange-500 border border-orange-500/20 uppercase tracking-widest flex items-center gap-1">
                       <span className="text-sm leading-none">{user.rank.badge}</span>
                       {user.rank.label}
                     </span>
@@ -138,15 +138,16 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                {!isOwn && (
                  <FollowButton userId={targetId} />
                )}
-               {isOwn && (
-                 <Link
-                   href="/profile/edit"
-                   className="px-6 py-2.5 flex items-center justify-center gap-2 rounded-full dark:bg-white/5 bg-slate-100 text-sm font-bold dark:text-white text-slate-800 dark:border-white/10 border-slate-200 hover:bg-slate-200 transition-all shadow-sm"
-                 >
-                   <Pencil className="h-4 w-4 opacity-50" />
-                   Edit Profile
-                 </Link>
-               )}
+                {isOwn && (
+                  <Link
+                    href="/profile/edit"
+                    className="px-4 md:px-6 py-2 md:py-2.5 flex items-center justify-center gap-1.5 md:gap-2 rounded-full dark:bg-white/5 bg-slate-100 text-[11px] md:text-sm font-bold dark:text-white text-slate-800 dark:border-white/10 border-slate-200 hover:bg-slate-200 transition-all shadow-sm"
+                  >
+                    <Pencil className="h-3.5 w-3.5 md:h-4 md:w-4 opacity-50" />
+                    <span className="hidden md:inline">Edit Profile</span>
+                    <span className="md:hidden">Edit</span>
+                  </Link>
+                )}
              </div>
           </div>
         </div>
@@ -210,31 +211,33 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
              )}
            </div>
 
-           {/* Right Column (Sidebar) */}
-           <div className="space-y-6">
-              
-              {/* Stats Card */}
-              {!isPrivateForViewer && (
-                 <div className="rounded-[24px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-6 shadow-xl space-y-4">
-                    <h3 className="text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-4">User Stats</h3>
-                    
-                    {[
-                      { label: "Points", value: user.points, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
-                      { label: "Quizzes", value: user._count.quizAttempts, icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
-                      { label: "Posts", value: user._count.posts, icon: MessageSquare, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                    ].map(({ label, value, icon: Icon, color, bg }) => (
-                      <div key={label} className="flex items-center justify-between">
-                         <div className="flex items-center gap-3">
-                            <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", bg)}>
-                               <Icon className={cn("h-5 w-5", color)} />
-                            </div>
-                            <span className="font-bold dark:text-white/80 text-slate-700">{label}</span>
-                         </div>
-                         <span className="font-black dark:text-white text-slate-800">{value}</span>
-                      </div>
-                    ))}
-                 </div>
-              )}
+            {/* Right Column (Sidebar) */}
+            <div className="space-y-6">
+               
+               {/* Stats Card — compact 3-col on mobile (Img 7), vertical list on desktop */}
+               {!isPrivateForViewer && (
+                  <div className="rounded-[24px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-4 md:p-6 shadow-xl">
+                     <h3 className="text-[10px] md:text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-3 md:mb-4">User Stats</h3>
+                     
+                     <div className="grid grid-cols-3 md:grid-cols-1 gap-2 md:gap-4">
+                     {[
+                       { label: "Points", value: user.points, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+                       { label: "Quizzes", value: user._count.quizAttempts, icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
+                       { label: "Posts", value: user._count.posts, icon: MessageSquare, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                     ].map(({ label, value, icon: Icon, color, bg }) => (
+                       <div key={label} className="flex flex-col md:flex-row md:items-center md:justify-between items-center gap-1 text-center md:text-left">
+                          <div className="flex flex-col md:flex-row md:items-center md:gap-3 items-center gap-1">
+                             <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center", bg)}>
+                                <Icon className={cn("h-4 w-4 md:h-5 md:w-5", color)} />
+                             </div>
+                             <span className="text-[9px] md:text-sm font-bold dark:text-white/80 text-slate-700">{label}</span>
+                          </div>
+                          <span className="text-sm md:text-base font-black dark:text-white text-slate-800">{value}</span>
+                       </div>
+                     ))}
+                     </div>
+                  </div>
+               )}
 
               {/* Rank Progress */}
               {!isPrivateForViewer && rankInfo && (

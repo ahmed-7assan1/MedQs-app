@@ -1,0 +1,14 @@
+# Exclude everything at monorepo root except medqs-mobile
+/*
+!/medqs-mobile
+
+# Exclude unnecessary files within medqs-mobile
+medqs-mobile/node_modules
+medqs-mobile/.expo
+medqs-mobile/android
+medqs-mobile/ios
+medqs-mobile/.export-test
+medqs-mobile/.idea
+medqs-mobile/dist
+medqs-mobile/*.tsbuildinfo
+medqs-mobile/*.webp

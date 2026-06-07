@@ -24,11 +24,10 @@ export function mobileSwipeRouteIndex(pathname: string): number {
   return MOBILE_SWIPE_ROUTES.findIndex((route) => matchMobileSwipeRoute(pathname, route));
 }
 
-/** Routes where bottom tab bar is hidden (full-width chrome). */
+/** Routes where bottom tab bar and header are hidden (full-width chrome). */
 export function isImmersiveMobileRoute(pathname: string): boolean {
   const p = pathname ?? "";
   return (
-    p.startsWith("/ai-chat") ||
     p.startsWith("/quiz") ||
     p.startsWith("/past-papers") ||
     p.startsWith("/guest/quiz") ||

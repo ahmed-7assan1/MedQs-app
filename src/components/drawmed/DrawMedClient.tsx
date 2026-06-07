@@ -484,8 +484,8 @@ export function DrawMedClient() {
 
   useEffect(() => {
     const aliasArabicFonts = async () => {
-      const tajawalFamily = getComputedStyle(document.documentElement).getPropertyValue("--font-tajawal").trim();
-      if (!tajawalFamily) return;
+      const cairoFamily = getComputedStyle(document.documentElement).getPropertyValue("--font-cairo").trim();
+      if (!cairoFamily) return;
 
       const arabicRange = "U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF";
       const excalidrawFonts = [
@@ -501,7 +501,7 @@ export function DrawMedClient() {
             const rule = rules[j];
             if (!(rule instanceof CSSFontFaceRule)) continue;
             const ff = rule.style.getPropertyValue("font-family").replace(/["']/g, "");
-            if (ff === tajawalFamily) {
+            if (ff === cairoFamily) {
               fontSrc = rule.style.getPropertyValue("src") || "";
               break;
             }
@@ -512,7 +512,7 @@ export function DrawMedClient() {
 
       if (!fontSrc) {
         try {
-          const res = await fetch("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap");
+          const res = await fetch("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap");
           const css = await res.text();
           const m = css.match(/url\(([^)]+)\)/);
           if (m) fontSrc = `url(${m[1]})`;

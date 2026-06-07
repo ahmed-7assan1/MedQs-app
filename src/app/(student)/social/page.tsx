@@ -2,14 +2,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSessionScope, isAdminRole } from "@/lib/tenant";
 import { redirect } from "next/navigation";
-import { SocialClient } from "@/components/social/SocialClient";
+import OneXCommunity from "@/components/social/OneXCommunity";
 import { unstable_cache } from "next/cache";
 
 // Keep page dynamic since it reads auth cookies per user
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Social • MedOneX",
+  title: "OneX Community",
   description: "Connect, discuss, and learn together with your university community.",
 };
 
@@ -83,7 +83,7 @@ export default async function SocialPage() {
   }));
 
   return (
-    <SocialClient
+    <OneXCommunity
       circles={forums as any}
       rooms={roomsWithMeta as any}
       currentUserId={userId}

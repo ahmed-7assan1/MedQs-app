@@ -72,7 +72,7 @@ export default async function PastPapersPage() {
         </div>
       </div>
 
-      {/* ── STATS ROW ── */}
+      {/* ── STATS ROW — compact on mobile like Img 2 ── */}
       {papers.length > 0 && (
         <div className="mb-6 sm:mb-8 grid grid-cols-3 gap-2 sm:gap-4">
           {[
@@ -80,12 +80,13 @@ export default async function PastPapersPage() {
             { label: "Completed", value: completedPapers, icon: Trophy, color: "#059669", bg: "rgba(5,150,105,.08)", border: "rgba(5,150,105,.25)" },
             { label: "Avg Score", value: avgScore > 0 ? `${avgScore}%` : "—", icon: TrendingUp, color: "#8b5cf6", bg: "rgba(139,92,246,.08)", border: "rgba(139,92,246,.25)" },
           ].map(({ label, value, icon: Icon, color, bg, border }) => (
-            <div key={label} className="relative overflow-hidden rounded-xl sm:rounded-2xl border p-3 sm:p-4"
+            <div key={label}
+              className="mobile-card p-3 sm:p-4 sm:relative sm:overflow-hidden sm:rounded-2xl sm:border"
               style={{ borderColor: border, borderLeft: `3px solid ${color}`, background: `linear-gradient(135deg, ${bg} 0%, transparent 70%)` }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
-                  <p className="mt-1 font-display text-xl sm:text-2xl font-extrabold tabular-nums text-foreground lg:text-3xl">{value}</p>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between items-center gap-1">
+                <div className="text-center sm:text-left">
+                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-white/40">{label}</p>
+                  <p className="font-display text-lg sm:text-2xl font-extrabold tabular-nums text-white lg:text-3xl">{value}</p>
                 </div>
                 <div className="hidden sm:flex rounded-xl p-2" style={{ background: bg }}>
                   <Icon className="h-5 w-5 lg:h-6 lg:w-6" style={{ color }} />
@@ -98,15 +99,15 @@ export default async function PastPapersPage() {
 
       {/* ── PAPERS LIST ── */}
       {papers.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-20 text-center">
+        <div className="mobile-card flex flex-col items-center py-16 sm:py-20 text-center">
           <div className="mb-4 rounded-2xl bg-blue-500/10 p-5">
             <FileText className="h-10 w-10 text-blue-500" />
           </div>
-          <p className="font-semibold text-foreground">No quizzes yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">Check back soon — your admin will publish quizzes here.</p>
+          <p className="font-bold text-white">No quizzes yet</p>
+          <p className="mt-1 text-xs text-white/40">Check back soon — your admin will publish quizzes here.</p>
           {isAdmin && (
             <Link href="/admin/quiz-creator"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white">
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white">
               <Plus className="h-4 w-4" /> Create First Quiz
             </Link>
           )}
@@ -126,97 +127,91 @@ export default async function PastPapersPage() {
 
             return (
               <div key={paper.id}
-                className="overflow-hidden rounded-2xl border border-white/[0.02] bg-card transition-all hover:border-blue-500/30 hover:shadow-lg dark:bg-slate-900/50"
-                style={{ borderLeft: `3px solid ${done ? scoreColor : "#1A6BCC"}` }}>
+                className="mobile-card overflow-hidden">
 
-                {/* Main row */}
-                <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4">
-                  <div className="flex items-start gap-3 min-w-0">
-                    {/* Icon */}
-                    <div className="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-xl"
-                      style={{ background: done ? scoreBg : "rgba(26,107,204,.08)" }}>
-                      {done
-                        ? <Trophy className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: scoreColor }} />
-                        : <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                      }
-                    </div>
-
-                    {/* Info */}
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-foreground">{paper.title}</h3>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-xs text-muted-foreground">
-                        <span className="rounded-full bg-muted/60 px-2 py-0.5 font-medium">{paper.module.name}</span>
-                        {paper.timeLimitMin && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> {paper.timeLimitMin} min
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <BarChart3 className="h-3 w-3" /> {paper._count.attempts} attempts
-                        </span>
-                        {paper.isInteractive && (
-                          <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-500">
-                            Interactive
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Score bar if attempted */}
-                      {bestScore !== undefined && (
-                        <div className="mt-2.5 flex items-center gap-2">
-                          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-muted">
-                            <div className="h-full rounded-full transition-all"
-                              style={{ width: `${bestScore}%`, background: scoreColor }} />
-                          </div>
-                          <span className="text-[11px] font-bold" style={{ color: scoreColor }}>
-                            Best: {bestScore}%
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-shrink-0 items-center gap-2">
-                    {isAdmin && (
-                      <Link href={`/admin/quiz-creator?paperId=${paper.id}`}
-                        className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-white/[0.02] bg-background/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                        title="Manage quiz">
-                        <Settings2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      </Link>
-                    )}
-                    <Link href={`/quiz/${paper.id}`}
-                      className="inline-flex items-center gap-1 sm:gap-1.5 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]"
-                      style={{ background: `linear-gradient(135deg, ${done ? scoreColor : "#1A6BCC"}, ${done ? scoreColor + "dd" : "#4f46e5"})` }}>
-                      {bestAttempt ? "Retry" : "Start"}
-                      <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    </Link>
-                  </div>
+                {/* Status dot + title row */}
+                <div className="flex items-center gap-3 px-4 sm:px-5 pt-4 sm:pt-4 pb-2 sm:pb-2">
+                  <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: done ? scoreColor : "#1A6BCC" }} />
+                  <h3 className="text-sm sm:text-base font-bold text-white truncate">{paper.title}</h3>
                 </div>
 
-                {/* Previous attempts */}
-                {paper.attempts.length > 0 && (
-                  <div className="border-t border-white/[0.05] bg-muted/20 px-5 py-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] font-medium text-muted-foreground">Previous:</span>
-                      {paper.attempts.map((attempt: any) => (
-                        <Link key={attempt.id} href={`/quiz/attempt/${attempt.id}`}
-                          className="flex items-center gap-1.5 rounded-lg border border-white/[0.02] bg-background/60 px-2.5 py-1 text-[11px] transition-colors hover:border-primary/30 hover:bg-muted">
-                          <Eye className="h-3 w-3 text-muted-foreground" />
-                          <span className="font-bold" style={{
-                            color: attempt.score >= 70 ? "#059669" : attempt.score >= 50 ? "#d97706" : "#dc2626"
-                          }}>
-                            {attempt.score}%
-                          </span>
-                          <span className="text-muted-foreground">
-                            {new Date(attempt.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
-                          </span>
-                        </Link>
-                      ))}
-                      {paper._count.attempts > 3 && (
-                        <span className="text-[11px] text-muted-foreground">+{paper._count.attempts - 3} more</span>
-                      )}
+                {/* Meta row */}
+                <div className="flex items-center gap-2 px-4 sm:px-5 pb-2">
+                  <span className="rounded-full bg-white/[0.04] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-white/50 truncate">{paper.module.name}</span>
+                  {paper.timeLimitMin && (
+                    <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-white/40 shrink-0">
+                      <Clock className="h-2.5 w-2.5" /> {paper.timeLimitMin}m
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-white/40 shrink-0">
+                    <BarChart3 className="h-2.5 w-2.5" /> {paper._count.attempts}
+                  </span>
+                  {paper.isInteractive && (
+                    <span className="rounded-full bg-violet-500/10 px-1.5 py-0.5 text-[8px] font-bold text-violet-400">AI</span>
+                  )}
+                </div>
+
+                {/* Score bar if attempted */}
+                {bestScore !== undefined && (
+                  <div className="flex items-center gap-2 px-4 sm:px-5 pb-2">
+                    <div className="h-1.5 flex-1 max-w-[120px] overflow-hidden rounded-full bg-white/[0.05]">
+                      <div className="h-full rounded-full" style={{ width: `${bestScore}%`, background: scoreColor }} />
                     </div>
+                    <span className="text-[10px] font-bold" style={{ color: scoreColor }}>Best: {bestScore}%</span>
+                  </div>
+                )}
+
+                {/* Full-width CTA on mobile + admin manage */}
+                <div className="flex items-center justify-between px-4 sm:px-5 pb-4 sm:pb-4 pt-1">
+                  <div className="flex items-center gap-1.5">
+                    {isAdmin && (
+                      <Link href={`/admin/quiz-creator?paperId=${paper.id}`}
+                        className="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-xl border border-white/[0.04] bg-white/[0.02] text-white/40 transition-colors hover:bg-white/[0.06] hover:text-white"
+                        title="Manage quiz">
+                        <Settings2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </Link>
+                    )}
+                    {/* Previous attempts — 1 on mobile */}
+                    {paper.attempts.length > 0 && (
+                      <div className="hidden sm:flex items-center gap-1.5">
+                        <span className="text-[10px] text-white/30">Prev:</span>
+                        {paper.attempts.slice(0, 3).map((attempt: any) => (
+                          <Link key={attempt.id} href={`/quiz/attempt/${attempt.id}`}
+                            className="flex items-center gap-1 rounded-md border border-white/[0.03] bg-white/[0.02] px-1.5 py-0.5 text-[10px] transition-colors hover:bg-white/[0.05]">
+                            <span className="font-bold" style={{ color: attempt.score >= 70 ? "#059669" : attempt.score >= 50 ? "#d97706" : "#dc2626" }}>
+                              {attempt.score}%
+                            </span>
+                            <span className="text-white/30">{new Date(attempt.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span>
+                          </Link>
+                        ))}
+                        {paper._count.attempts > 3 && (
+                          <span className="text-[10px] text-white/30">+{paper._count.attempts - 3}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <Link href={`/quiz/${paper.id}`}
+                    className="flex-1 sm:flex-none text-center rounded-lg sm:rounded-xl py-2.5 sm:py-2 text-xs sm:text-sm font-bold text-white transition-all active:scale-[0.97]"
+                    style={{ background: `linear-gradient(135deg, ${done ? scoreColor : "#1A6BCC"}, ${done ? scoreColor + "dd" : "#4f46e5"})` }}>
+                    {bestAttempt ? "Retry" : "Start"}
+                  </Link>
+                </div>
+
+                {/* Previous attempts on mobile — inline chips */}
+                {paper.attempts.length > 0 && (
+                  <div className="flex sm:hidden items-center gap-1.5 px-4 pb-4 pt-0 border-t border-white/[0.03]">
+                    <span className="text-[9px] text-white/30">Previous:</span>
+                    {paper.attempts.slice(0, 2).map((attempt: any) => (
+                      <Link key={attempt.id} href={`/quiz/attempt/${attempt.id}`}
+                        className="flex items-center gap-1 rounded-md border border-white/[0.03] bg-white/[0.02] px-1.5 py-0.5 text-[9px]">
+                        <span className="font-bold" style={{ color: attempt.score >= 70 ? "#059669" : attempt.score >= 50 ? "#d97706" : "#dc2626" }}>
+                          {attempt.score}%
+                        </span>
+                      </Link>
+                    ))}
+                    {paper._count.attempts > 2 && (
+                      <Link href={`/quiz/${paper.id}`} className="text-[9px] text-white/30">+{paper._count.attempts - 2}</Link>
+                    )}
                   </div>
                 )}
               </div>

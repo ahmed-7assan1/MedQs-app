@@ -21,18 +21,18 @@ const config: Config = {
   		fontFamily: {
   			sans: [
   				'var(--font-geist-sans)',
-  				'var(--font-tajawal)',
+  				'var(--font-cairo)',
   				'system-ui',
   				'sans-serif'
   			],
   			display: [
   				'var(--font-geist-sans)',
-  				'var(--font-tajawal)',
+  				'var(--font-cairo)',
   				'system-ui',
   				'sans-serif'
   			],
   			arabic: [
-  				'var(--font-tajawal)',
+  				'var(--font-cairo)',
   				'var(--font-geist-sans)',
   				'system-ui',
   				'sans-serif'

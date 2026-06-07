@@ -55,6 +55,8 @@ function VideoItem({ item, isActive }: { item: any; isActive: boolean }) {
   const videoRef = useRef<Video>(null);
   const [muted, setMuted] = useState(false);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
+  const [videoError, setVideoError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -68,27 +70,48 @@ function VideoItem({ item, isActive }: { item: any; isActive: boolean }) {
 
   const isPlaying = status?.isLoaded ? status.isPlaying : false;
   const togglePlay = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || videoError) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     isPlaying ? videoRef.current.pauseAsync() : videoRef.current.playAsync();
   };
 
+  const handleRetry = () => {
+    setVideoError(false);
+    setRetryCount(c => c + 1);
+  };
+
+  // Append a cache-busting query param on retry
+  const videoUri = item.videoUrl
+    ? retryCount > 0
+      ? `${item.videoUrl}${item.videoUrl.includes('?') ? '&' : '?'}_=${Date.now()}`
+      : item.videoUrl
+    : null;
+
   return (
     <View style={{ height: SCREEN_HEIGHT, width }}>
       {/* Video */}
-      {item.videoUrl ? (
+      {videoUri && !videoError ? (
         <Video
+          key={retryCount}
           ref={videoRef}
-          source={{ uri: item.videoUrl }}
+          source={{ uri: videoUri }}
           style={tw`absolute inset-0`}
           resizeMode={ResizeMode.COVER}
           shouldPlay={isActive}
           isLooping
           isMuted={muted}
           onPlaybackStatusUpdate={s => setStatus(s)}
+          onError={err => { setVideoError(true); console.warn('Video error:', err); }}
           posterSource={item.thumbnail ? { uri: item.thumbnail } : undefined}
           usePoster
         />
+      ) : videoError ? (
+        <TouchableOpacity onPress={handleRetry} style={tw`absolute inset-0 items-center justify-center bg-black`}>
+          <View style={tw`items-center`}>
+            <Play color={primaryColor} size={48} />
+            <Text style={tw`text-white/60 text-sm font-semibold mt-3`}>Retry Video</Text>
+          </View>
+        </TouchableOpacity>
       ) : (
         <View style={[tw`absolute inset-0`, { backgroundColor: '#0D1117' }]}>
           <View style={tw`flex-1 items-center justify-center`}>

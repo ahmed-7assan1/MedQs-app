@@ -3,8 +3,10 @@
 import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { House, Books, Brain, Sparkle, ChatTeardropDots, User } from "@phosphor-icons/react/dist/ssr";
+import { motion } from "framer-motion";
+import {
+  House, Books, Brain, Sparkle, User,
+} from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { isImmersiveMobileRoute } from "@/lib/mobile-chrome";
 
@@ -26,25 +28,19 @@ const TABS: TabDef[] = [
     href: "/modules",
     label: "Learn",
     icon: Books,
-    match: (p: string) => p.startsWith("/modules") || p.startsWith("/videos"),
+    match: (p: string) => p.startsWith("/modules") || p.startsWith("/videos") || p.startsWith("/study-tools"),
+  },
+  {
+    href: "/ai-chat",
+    label: "Dr. Q",
+    icon: Sparkle,
+    match: (p: string) => p.startsWith("/ai-chat") || p.startsWith("/atlas"),
   },
   {
     href: "/past-papers",
     label: "QBank",
     icon: Brain,
     match: (p: string) => p.startsWith("/past-papers") || p.startsWith("/quiz"),
-  },
-  {
-    href: "/ai-chat",
-    label: "AI",
-    icon: Sparkle,
-    match: (p: string) => p.startsWith("/ai-chat") || p.startsWith("/atlas"),
-  },
-  {
-    href: "/social",
-    label: "Community",
-    icon: ChatTeardropDots,
-    match: (p: string) => p.startsWith("/social") || p.startsWith("/community"),
   },
   {
     href: "/profile/me",
@@ -54,7 +50,7 @@ const TABS: TabDef[] = [
   },
 ];
 
-function TabItem({ tab, pathname, idx }: { tab: TabDef; pathname: string; idx: number }) {
+function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
   const active = tab.match(pathname);
 
   return (
@@ -66,31 +62,30 @@ function TabItem({ tab, pathname, idx }: { tab: TabDef; pathname: string; idx: n
         "active:scale-90"
       )}
     >
-      <div className="relative flex items-center justify-center">
+      <div className="relative flex items-center justify-center h-6 w-6">
         <tab.icon
           weight={active ? "fill" : "regular"}
           className={cn(
             "transition-all duration-300",
-            active ? "h-6 w-6" : "h-6 w-6 opacity-70"
+            active ? "h-5 w-5" : "h-5 w-5"
           )}
         />
-        {/* Glow dot for active tab */}
-        {active && (
-          <motion.div
-            layoutId="navGlow"
-            className="absolute -bottom-2 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary"
-            transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-          />
-        )}
       </div>
       <span
         className={cn(
-          "text-[10px] font-black tracking-wider transition-all duration-300",
-          active ? "text-white opacity-100" : "text-white/50 opacity-80"
+          "text-[9px] font-black tracking-wider transition-all duration-300",
+          active ? "text-white" : "text-white/35"
         )}
       >
         {tab.label}
       </span>
+      {active && (
+        <motion.div
+          layoutId="blogNavDot"
+          className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+          transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+        />
+      )}
     </Link>
   );
 }
@@ -101,20 +96,26 @@ export function MobileBottomNav() {
   if (isImmersiveMobileRoute(pathname)) return null;
 
   return (
-    <nav
+    <div
       className={cn(
-        "md:hidden fixed bottom-0 left-0 right-0 z-[100]",
-        "pb-[env(safe-area-inset-bottom,0px)]",
-        "bg-[#0C0B17]/90 backdrop-blur-3xl",
-        "border-t border-white/[0.04]",
-        "shadow-[0_-12px_40px_rgba(0,0,0,0.3)]"
+        "md:hidden fixed bottom-0 left-0 right-0 z-[100] pointer-events-none",
+        "pb-[env(safe-area-inset-bottom,0px)]"
       )}
     >
-      <div className="flex items-center justify-around h-16 px-2">
-        {TABS.map((tab, idx) => (
-          <TabItem key={tab.href} tab={tab} pathname={pathname} idx={idx} />
-        ))}
-      </div>
-    </nav>
+      <nav
+        className={cn(
+          "pointer-events-auto mx-4 mb-3 rounded-2xl",
+          "bg-[#0d0d14]/85 backdrop-blur-2xl",
+          "border border-white/[0.06]",
+          "shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+        )}
+      >
+        <div className="flex items-center justify-around h-[60px] px-1 relative">
+          {TABS.map((tab) => (
+            <TabItem key={tab.href} tab={tab} pathname={pathname} />
+          ))}
+        </div>
+      </nav>
+    </div>
   );
 }

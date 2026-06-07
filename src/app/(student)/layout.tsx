@@ -10,6 +10,7 @@ import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
 import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { MobileHeader } from "@/components/layout/MobileHeader";
@@ -102,24 +103,28 @@ export default async function StudentLayout({ children }: { children: React.Reac
               userImage={userImage}
               userName={isGuest ? undefined : displayName}
               userId={isGuest ? "" : sessionUserId}
-            />
-
-            <Sidebar
-              userName={isGuest ? "Guest" : displayName}
-              userImage={userImage}
-              userId={isGuest ? "" : sessionUserId}
-              isAdmin={isAdmin ?? false}
-              siteName={siteConfig?.siteName ?? "MedOneX"}
-              logoUrl={siteConfig?.logoUrl ?? undefined}
-              unreadCount={unreadCount}
+              isAdmin={isAdmin}
               isGuest={isGuest}
             />
+
+            <div className="hidden md:block">
+              <Sidebar
+                userName={isGuest ? "Guest" : displayName}
+                userImage={userImage}
+                userId={isGuest ? "" : sessionUserId}
+                isAdmin={isAdmin ?? false}
+                siteName={siteConfig?.siteName ?? "MedOneX"}
+                logoUrl={siteConfig?.logoUrl ?? undefined}
+                unreadCount={unreadCount}
+                isGuest={isGuest}
+              />
+            </div>
 
             <div className="main-content flex-1 flex flex-col min-w-0">
               {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
               {!isGuest && <AdBannerModal semesterId={userSemesterId ?? undefined} />}
 
-              <main id="main-content" className="flex-1 flex flex-col outline-none w-full min-h-0 md:pb-8">
+              <main id="main-content" className="flex-1 flex flex-col outline-none w-full min-h-0 md:pb-8 max-md:pb-[var(--mobile-main-pad-bottom)]">
                 <MobileSwipeLayout>
                   <PageTransitionProvider>
                     {children}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { decode } from "next-auth/jwt";
 
 export const maxDuration = 300; // Allow long-lived streams on Vercel Pro
 export const dynamic = "force-dynamic";
@@ -24,15 +25,34 @@ export async function GET(
   { params }: { params: { chatId: string; messageId: string } }
 ) {
   try {
-    // ── 1. Authentication Check ──────────────────────────────────────────────
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { chatId, messageId } = params;
-    // Optional: if the DB stored the fileId directly, use it to skip the forward step
     const directFileId = new URL(req.url).searchParams.get("fileId");
+
+    // ── 1. Authentication Check ──────────────────────────────────────────────
+    // If directFileId is provided, skip auth — the fileId itself is an opaque
+    // Telegram-internal identifier that can't be guessed, and it came from our DB.
+    // This also allows public/embedded video playback on web and mobile.
+    if (!directFileId) {
+      // 1a. Try Supabase session (web, cookies)
+      const session = await auth();
+      if (session?.user) {
+        // authenticated via Supabase — proceed
+      } else {
+        // 1b. Try Bearer JWT (mobile app)
+        const authHeader = req.headers.get("authorization");
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+          const token = authHeader.substring(7);
+          const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "";
+          const decoded = await decode({ token, secret, salt: "authjs.session-token" }).catch(() => null);
+          if (!decoded?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+          }
+        } else {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+      }
+    }
+    // If directFileId is present, auth is skipped (public access)
 
     if (!BOT_TOKEN) {
       return NextResponse.json(

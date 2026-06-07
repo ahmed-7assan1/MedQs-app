@@ -10,11 +10,43 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+async function generateToken(user: any) {
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new Error("Missing AUTH_SECRET environment variable");
+
+  const token = await encode({
+    token: {
+      id: user.id,
+      sub: user.id,
+      role: user.role,
+      semesterId: user.semesterId,
+      universityId: user.universityId,
+      nickname: user.nickname,
+      studentId: user.studentId,
+    },
+    secret,
+    salt: "authjs.session-token",
+  });
+
+  return NextResponse.json({
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+      universityId: user.universityId,
+      semesterId: user.semesterId,
+    },
+  });
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
@@ -29,49 +61,49 @@ export async function POST(req: Request) {
       where: email ? { email } : { studentId },
     });
 
-    if (!user || !user.password) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    // Try 1: bcrypt — fast path for mobile-registered users
+    if (user?.password) {
+      const valid = await bcrypt.compare(password, user.password);
+      if (valid) return generateToken(user);
     }
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
+    // Try 2: Supabase Auth — for web-registered users
+    if (email) {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
 
-    // Generate JWT via NextAuth
-    const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
-    if (!secret) {
-      throw new Error("Missing AUTH_SECRET environment variable");
-    }
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    const tokenPayload = {
-      id: user.id,
-      sub: user.id,
-      role: user.role,
-      semesterId: user.semesterId,
-      universityId: user.universityId,
-      nickname: user.nickname,
-      studentId: user.studentId,
-    };
+      if (!authError && authData.user) {
+        const hashed = await bcrypt.hash(password, 10);
+        const prismaUser = await prisma.user.upsert({
+          where: { id: authData.user.id },
+          create: {
+            id: authData.user.id,
+            email,
+            name: authData.user.user_metadata?.name || email.split("@")[0],
+            password: hashed,
+            role: "STUDENT",
+          },
+          update: { password: hashed },
+          select: {
+            id: true, name: true, email: true, role: true,
+            image: true, universityId: true, semesterId: true,
+            nickname: true, studentId: true,
+          },
+        });
 
-    const token = await encode({
-      token: tokenPayload,
-      secret,
-      salt: "authjs.session-token", 
-    });
-
-    return NextResponse.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        image: user.image,
-        universityId: user.universityId,
-        semesterId: user.semesterId,
+        return generateToken(prismaUser);
       }
-    });
+    }
+
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
   } catch (error) {
     console.error("Mobile Login Error:", error);
