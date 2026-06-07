@@ -71,4 +71,3 @@ public/downloads/
 public/uploads/**
 !public/uploads/.gitkeep
 
-.vercel
