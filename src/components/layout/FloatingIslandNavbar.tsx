@@ -37,7 +37,7 @@ export function FloatingIslandNavbar({
   userId?: string 
 }) {
   const pathname = usePathname();
-  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed"))) return null;
+  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social"))) return null;
   const router = useRouter();
   const { siteName, logoUrl } = useSiteConfig();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -117,7 +117,7 @@ export function FloatingIslandNavbar({
           "pointer-events-auto relative flex flex-col items-center overflow-hidden",
           "rounded-b-[32px] rounded-t-none border-x border-b dark:border-white/10 border-black/5 border-t-0",
           "dark:bg-black/80 bg-white/90 backdrop-blur-[40px]",
-          "shadow-[0_25px_60px_rgba(0,0,0,0.25)]",
+          pathname === "/social" ? "shadow-none" : "shadow-[0_25px_60px_rgba(0,0,0,0.25)]",
           "transition-all duration-300 ease-out",
           isExpanded
             ? "w-full p-6"
