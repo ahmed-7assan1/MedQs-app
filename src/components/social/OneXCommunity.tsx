@@ -479,7 +479,8 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
               if (ytId) return showYtVideo ? (
                 <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
                   <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                  <div style={{ position: "absolute", inset: 0, zIndex: 10, cursor: "default" }} />
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 55, zIndex: 10, cursor: "default" }} />
+                  <div style={{ position: "absolute", bottom: 0, right: 0, width: 150, height: 55, zIndex: 10, cursor: "default" }} />
                 </div>
               ) : (
                 <div onClick={e => { e.stopPropagation(); setShowYtVideo(true); }}
@@ -1028,7 +1029,8 @@ function PostModal({ post, onClose, currentUserId }: { post: any; onClose: () =>
               if (ytId) return showYtVideo ? (
                 <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
                   <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                  <div style={{ position: "absolute", inset: 0, zIndex: 10, cursor: "default" }} />
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 55, zIndex: 10, cursor: "default" }} />
+                  <div style={{ position: "absolute", bottom: 0, right: 0, width: 150, height: 55, zIndex: 10, cursor: "default" }} />
                 </div>
               ) : (
                 <div onClick={() => setShowYtVideo(true)}
@@ -1835,7 +1837,8 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
                   if (ytId) return showYtVideo ? (
                     <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
                       <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                      <div style={{ position: "absolute", inset: 0, zIndex: 10, cursor: "default" }} />
+                      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 55, zIndex: 10, cursor: "default" }} />
+                      <div style={{ position: "absolute", bottom: 0, right: 0, width: 150, height: 55, zIndex: 10, cursor: "default" }} />
                     </div>
                   ) : (
                     <div onClick={() => setShowYtVideo(true)}
