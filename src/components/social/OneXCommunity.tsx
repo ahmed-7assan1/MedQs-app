@@ -272,6 +272,7 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
   const [showReactionDetail, setShowReactionDetail] = useState(false);
   const [reactionUsers, setReactionUsers] = useState<{ type: string; user: { name: string; image?: string } }[]>([]);
   const [loadingReactions, setLoadingReactions] = useState(false);
+  const [showYtVideo, setShowYtVideo] = useState(false);
 
   useEffect(() => {
     if (post._count?.comments > 0 && !topComLoaded) {
@@ -475,8 +476,12 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
             {(() => {
               const ytCandidate = post.link || post.content;
               const ytId = getYouTubeId(ytCandidate);
-              if (ytId) return (
-                <div onClick={e => { e.stopPropagation(); window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank', 'noopener'); }}
+              if (ytId) return showYtVideo ? (
+                <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
+                  <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+              ) : (
+                <div onClick={e => { e.stopPropagation(); setShowYtVideo(true); }}
                   style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 300 }}>
                   <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                     onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
@@ -768,6 +773,7 @@ function PostModal({ post, onClose, currentUserId }: { post: any; onClose: () =>
   const [deleting, setDeleting] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [showYtVideo, setShowYtVideo] = useState(false);
   const commentBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1018,8 +1024,12 @@ function PostModal({ post, onClose, currentUserId }: { post: any; onClose: () =>
             {(() => {
               const ytCandidate = post.link || post.content;
               const ytId = getYouTubeId(ytCandidate);
-              if (ytId) return (
-                <div onClick={() => window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank', 'noopener')}
+              if (ytId) return showYtVideo ? (
+                <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
+                  <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+              ) : (
+                <div onClick={() => setShowYtVideo(true)}
                   style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 350 }}>
                   <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                     onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
@@ -1714,6 +1724,7 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
   const reelsPageRef = useRef(1);
   const reelsHasMoreRef = useRef(true);
   const post = reelsPosts[index];
+  const [showYtVideo, setShowYtVideo] = useState(false);
   const prevShowCreate = useRef(showCreate);
 
   // Refresh from page 1 when the create sheet closes (post was just created)
@@ -1819,8 +1830,12 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
                 {(() => {
                   const ytCandidate = post?.link || post?.content || "";
                   const ytId = getYouTubeId(ytCandidate);
-                  if (ytId) return (
-                    <div onClick={() => window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank', 'noopener')}
+                  if (ytId) return showYtVideo ? (
+                    <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
+                      <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    </div>
+                  ) : (
+                    <div onClick={() => setShowYtVideo(true)}
                       style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 300 }}>
                       <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                         onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
