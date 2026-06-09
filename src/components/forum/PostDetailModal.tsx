@@ -737,29 +737,29 @@ export function PostDetailModal({
                 )}
               </div>
 
-            </div>
-
-            {/* Comment input */}
-            <div style={{ padding: "12px 20px 16px", borderTop: `1px solid ${T.border}`, flexShrink: 0, background: T.bg }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-                <div style={{ flex: 1, position: "relative", background: T.surface, border: `1.5px solid ${T.border2}`, borderRadius: 16, padding: "2px", transition: "border 0.2s" }}
-                  onFocusCapture={e => { if (e.target.closest('[style]')) (e.currentTarget as HTMLElement).style.borderColor = T.primary }}
-                  onBlurCapture={e => { if (e.target.closest('[style]')) (e.currentTarget as HTMLElement).style.borderColor = T.border2 }}
-                >
-                  <textarea dir="auto"
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
-                    placeholder="Broadcast your thoughts..."
-                    rows={1}
-                    style={{ width: "100%", background: "transparent", border: "none", padding: "10px 14px", fontSize: 14, resize: "none", outline: "none", boxSizing: "border-box", lineHeight: 1.6, color: T.text }}
-                  />
+              {/* Comment input — inside flex container, stays at bottom */}
+              <div style={{ padding: "12px 20px 16px", borderTop: `1px solid ${T.border}`, flexShrink: 0, background: T.bg }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                  <div style={{ flex: 1, position: "relative", background: isDark ? "rgba(255,255,255,0.06)" : "#fff", border: `1.5px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)"}`, borderRadius: 16, padding: "2px", transition: "border 0.2s", boxShadow: isDark ? "none" : "0 1px 3px rgba(0,0,0,0.04)" }}
+                    onFocusCapture={e => { if (e.target.closest('[style]')) (e.currentTarget as HTMLElement).style.borderColor = T.primary }}
+                    onBlurCapture={e => { if (e.target.closest('[style]')) (e.currentTarget as HTMLElement).style.borderColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)" }}
+                  >
+                    <textarea dir="auto"
+                      value={newComment}
+                      onChange={e => setNewComment(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
+                      placeholder="Broadcast your thoughts..."
+                      rows={1}
+                      style={{ width: "100%", background: "transparent", border: "none", padding: "10px 14px", fontSize: 14, resize: "none", outline: "none", boxSizing: "border-box", lineHeight: 1.6, color: T.text }}
+                    />
+                  </div>
+                  <button onClick={handleSubmitComment}
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: newComment.trim() ? T.primary : (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"), border: "none", cursor: newComment.trim() ? "pointer" : "default", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", flexShrink: 0 }}>
+                    {ICONS.send}
+                  </button>
                 </div>
-                <button onClick={handleSubmitComment}
-                  style={{ width: 44, height: 44, borderRadius: "50%", background: newComment.trim() ? T.primary : T.border2, border: "none", cursor: newComment.trim() ? "pointer" : "default", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", flexShrink: 0 }}>
-                  {ICONS.send}
-                </button>
               </div>
+
             </div>
 
             <ReportModal open={showReportModal} onClose={() => setShowReportModal(false)} targetType="POST" targetId={post.id} />
