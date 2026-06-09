@@ -400,7 +400,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                 <div className="absolute inset-0 bg-black/45 z-0" />
               )}
 
-              <textarea
+              <textarea dir="auto"
                 ref={textareaRef}
                 value={content}
                 onChange={(e) => {

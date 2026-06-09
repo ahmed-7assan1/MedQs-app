@@ -402,7 +402,7 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                 <div className="absolute inset-0 bg-black/45 z-0" />
               )}
               
-              <textarea
+              <textarea dir="auto"
                 ref={textareaRef}
                 value={content}
                 onChange={(e) => {

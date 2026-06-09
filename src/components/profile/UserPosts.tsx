@@ -60,10 +60,10 @@ export function UserPosts({ posts, isOwn }: { posts: Item[]; isOwn: boolean }) {
             )}
           </div>
           {post.content?.trim() ? (
-            <div className="prose prose-sm prose-invert max-w-none text-white/90 prose-img:my-3">
-              <ReactMarkdown components={markdownComponentsWithImages}>
-                {enhancePlainImageUrls(post.content)}
-              </ReactMarkdown>
+          <div dir="auto" className="prose prose-sm prose-invert max-w-none text-white/90 prose-img:my-3">
+            <ReactMarkdown components={markdownComponentsWithImages}>
+              {enhancePlainImageUrls(post.content)}
+            </ReactMarkdown>
             </div>
           ) : null}
           {post.imageUrl ? (

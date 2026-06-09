@@ -27,10 +27,23 @@ function loadYouTubeAPI(cb: () => void) {
   document.head.appendChild(tag);
 }
 
+function pauseOtherPlayers(exceptVideoId: string) {
+  window.dispatchEvent(new CustomEvent("yt-pause-others", { detail: exceptVideoId }));
+}
+
 export default function YouTubePlayer({ videoId }: YouTubePlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
-  const playingRef = useRef(true);
+  const intentionalPauseRef = useRef(false);
+  const videoIdRef = useRef(videoId);
+  videoIdRef.current = videoId;
+
+  const pause = useCallback(() => {
+    intentionalPauseRef.current = true;
+    if (playerRef.current && playerRef.current.pauseVideo) {
+      playerRef.current.pauseVideo();
+    }
+  }, []);
 
   const initPlayer = useCallback(() => {
     if (!containerRef.current || !(window as any).YT?.Player) return;
@@ -49,15 +62,20 @@ export default function YouTubePlayer({ videoId }: YouTubePlayerProps) {
       events: {
         onReady: (event: any) => {
           event.target.playVideo();
+          pauseOtherPlayers(videoId);
         },
         onStateChange: (event: any) => {
           const YT = (window as any).YT;
-          if (event.data === YT.PlayerState.PAUSED && playingRef.current) {
+          if (event.data === YT.PlayerState.PAUSED && !intentionalPauseRef.current) {
             setTimeout(() => {
               if (playerRef.current && playerRef.current.getPlayerState?.() === YT.PlayerState.PAUSED) {
                 playerRef.current.playVideo();
               }
             }, 50);
+          }
+          if (event.data === YT.PlayerState.PLAYING) {
+            intentionalPauseRef.current = false;
+            pauseOtherPlayers(videoId);
           }
         },
       },
@@ -68,13 +86,34 @@ export default function YouTubePlayer({ videoId }: YouTubePlayerProps) {
     loadYouTubeAPI(() => {
       setTimeout(initPlayer, 100);
     });
+
+    const handlePauseOthers = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail !== videoIdRef.current) {
+        pause();
+      }
+    };
+    window.addEventListener("yt-pause-others", handlePauseOthers);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          pause();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (containerRef.current) observer.observe(containerRef.current);
+
     return () => {
       if (playerRef.current) {
         playerRef.current.destroy();
         playerRef.current = null;
       }
+      window.removeEventListener("yt-pause-others", handlePauseOthers);
+      observer.disconnect();
     };
-  }, [initPlayer]);
+  }, [initPlayer, pause]);
 
   return (
     <div

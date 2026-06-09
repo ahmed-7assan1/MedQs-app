@@ -16,8 +16,9 @@ import { ReportModal } from "./ReportModal";
 import { PullToRefresh } from "./PullToRefresh";
 import { Avatar } from "./Avatar";
 import { ActionBtn } from "./ActionBtn";
-import { getYouTubeId, getYouTubeThumbnail } from "@/lib/video-utils";
+import { getYouTubeId, getYouTubeThumbnail, extractYouTubeIds, stripYouTubeLinks, fetchYouTubeTitle } from "@/lib/video-utils";
 import YouTubePlayer from "./YouTubePlayer";
+import { PostDetailModal } from "@/components/forum/PostDetailModal";
 
 // ─── Portal ─────────────────────────────────────────────────────────────────
 
@@ -274,6 +275,19 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
   const [reactionUsers, setReactionUsers] = useState<{ type: string; user: { name: string; image?: string } }[]>([]);
   const [loadingReactions, setLoadingReactions] = useState(false);
   const [showYtVideo, setShowYtVideo] = useState(false);
+  const [activeYtIndex, setActiveYtIndex] = useState(0);
+  const [ytTitles, setYtTitles] = useState<Record<string, string>>({});
+
+  const ytIds = extractYouTubeIds(post.content);
+
+  useEffect(() => {
+    ytIds.forEach(async (id) => {
+      if (!ytTitles[id]) {
+        const title = await fetchYouTubeTitle(id);
+        setYtTitles(prev => ({ ...prev, [id]: title }));
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (post._count?.comments > 0 && !topComLoaded) {
@@ -460,7 +474,7 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
       <div style={{ padding: "0 18px 14px", display: "flex", flexDirection: "column", gap: 12 }}>
         {editing ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <textarea value={editText} onChange={e => setEditText(e.target.value)}
+            <textarea dir="auto" value={editText} onChange={e => setEditText(e.target.value)}
               style={{ width: "100%", minHeight: 80, padding: 12, background: T.bg, border: `1px solid ${T.border}`, borderRadius: 12, color: T.text1, fontSize: 14, fontFamily: FONT, resize: "vertical", outline: "none" }} />
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
               <button onClick={e => { e.stopPropagation(); setEditing(false); setEditText(post.content); }}
@@ -473,18 +487,25 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
           </div>
         ) : (
           <>
-            <div style={{ margin: 0, fontSize: 14, color: T.text2, lineHeight: 1.75 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }} />
+            <div dir="auto" style={{ margin: 0, fontSize: 14, color: T.text2, lineHeight: 1.75 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(stripYouTubeLinks(post.content)) }} />
             {(() => {
-              const ytCandidate = post.link || post.content;
-              const ytId = getYouTubeId(ytCandidate);
-              if (ytId) return showYtVideo ? (
+              if (ytIds.length === 0) {
+                if (post.link) return (
+                  <a href={post.link} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 13, color: T.accentL, textDecoration: "none", fontWeight: 600, wordBreak: "break-all" }}>{post.link}</a>
+                );
+                return null;
+              }
+              const activeId = ytIds[activeYtIndex];
+              if (showYtVideo) return (
                 <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
-                  <YouTubePlayer videoId={ytId} />
+                  <YouTubePlayer videoId={activeId} />
                 </div>
-              ) : (
+              );
+              return (
                 <div onClick={() => setShowYtVideo(true)}
                   style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 350 }}>
-                  <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  <img src={getYouTubeThumbnail(activeId)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                     onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
                   <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.3)" }}
                     onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.45)"; }}
@@ -493,13 +514,18 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     </div>
                   </div>
+                  {ytIds.length > 1 && (
+                    <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {ytIds.map((id, i) => (
+                        <button key={id} onClick={e => { e.stopPropagation(); setActiveYtIndex(i); }}
+                          style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", transition: "all .15s", background: i === activeYtIndex ? "rgba(255,0,0,0.9)" : "rgba(0,0,0,0.6)", color: "#fff", whiteSpace: "nowrap" }}>
+                          {i === activeYtIndex ? "▶ " : ""}{ytTitles[id] || `Video ${i + 1}`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
-              if (post.link) return (
-                <a href={post.link} target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: 13, color: T.accentL, textDecoration: "none", fontWeight: 600, wordBreak: "break-all" }}>{post.link}</a>
-              );
-              return null;
             })()}
             {(() => {
               const mediaUrls = collectMediaUrls(post);
@@ -572,59 +598,19 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
             })()}
             <div style={{ display: "flex", gap: 16, fontSize: 12, color: T.text3 }}>
               <span>{likeCount.toLocaleString()} likes</span>
-              <span>{comments.length} comments</span>
+              <span>{post._count?.comments || 0} comments</span>
               <span>{post._count?.shares || 0} shares</span>
             </div>
-            </div>
-        )}
-
-        {tab === "comments" && (
-          <div ref={commentBodyRef} style={{ maxHeight: 320, overflowY: "auto", display: "flex", flexDirection: "column", gap: 14, paddingRight: 4 }}>
-            {comLoading ? (
-              <div style={{ textAlign: "center", padding: 40, color: T.text3, fontSize: 13 }}>Loading comments...</div>
-            ) : comments.length === 0 ? (
-              <div style={{ textAlign: "center", padding: 40, color: T.text3, fontSize: 13 }}>No comments yet. Be the first!</div>
-            ) : comments.map(c => (
-              <div key={c.id} style={{ display: "flex", gap: 10 }}>
-                <Avatar initials={getInitials(c.author?.name || "U")} color={getColor(c.author?.name || "U")} size={34} image={c.author?.image} />
-                <div style={{ flex: 1, background: T.hover, borderRadius: "0 14px 14px 14px", padding: "10px 14px" }}>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: T.text1, fontFamily: FONT }}>{c.author?.name || "User"}</span>
-                    <span style={{ fontSize: 10, color: T.text4, marginLeft: "auto" }}>{timeAgo(c.createdAt)}</span>
-                  </div>
-                  <p style={{ margin: "4px 0 0", fontSize: 13, color: T.text2, lineHeight: 1.65, fontFamily: FONT }}>{c.text}</p>
-                  <button onClick={() => toggleCommentLike(c.id)}
-                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: commentLikes[c.id] ? T.red : T.text3, background: "none", border: "none", cursor: "pointer", fontFamily: FONT, marginTop: 6, transition: "color .15s" }}>
-                    {IC.heart(!!commentLikes[c.id])} {c.likes}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          </>
         )}
       </div>
 
       {/* Footer actions */}
       <div style={{ display: "flex", padding: "10px 18px", borderTop: `1px solid ${T.border}`, gap: 4, flexShrink: 0 }}>
         <ActionBtn icon={IC.heart(liked)} label={liked ? "Liked" : "Like"} active={liked} activeColor={T.red} activeBg="rgba(232,64,64,.1)" onClick={handleLike} />
-      </div>
-
-      {/* Comment input — pinned below body */}
-      <div style={{ display: "flex", gap: 10, alignItems: "flex-end", padding: "12px 20px 16px", borderTop: `1px solid ${T.border}`, flexShrink: 0, background: "hsl(var(--card)/0.95)", boxShadow: "0 -4px 12px hsl(var(--card)/0.5)", position: "relative", zIndex: 2 }}>
-        <Avatar initials="ME" color="hsl(var(--primary))" size={34} />
-        <div style={{ flex: 1, background: T.surface, borderRadius: 16, border: `1px solid ${T.border2}`, padding: "10px 14px", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)", transition: "border-color .15s" }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = T.border2; }}>
-          <textarea value={newComment} onChange={e => setNewComment(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
-            placeholder="Add a comment..."
-            rows={1}
-            style={{ width: "100%", background: "none", border: "none", outline: "none", fontSize: 13, color: T.text1, fontFamily: FONT, resize: "none", lineHeight: 1.5 }} />
-        </div>
-        <button onClick={submitComment} disabled={!newComment.trim() || submitting}
-          style={{ width: 38, height: 38, borderRadius: "50%", border: "none", background: newComment.trim() ? "hsl(var(--primary))" : T.border, display: "flex", alignItems: "center", justifyContent: "center", cursor: newComment.trim() ? "pointer" : "default", flexShrink: 0, transition: "all .2s", transform: newComment.trim() ? "scale(1)" : "scale(0.95)", opacity: newComment.trim() ? 1 : 0.6 }}>
-          {IC.send}
-        </button>
+        <ActionBtn icon={IC.comment} label="Comment" onClick={(e) => { e.stopPropagation(); onOpen(post); }} />
+        <ActionBtn icon={IC.share} label="Share" onClick={(e) => { e.stopPropagation(); onOpen(post); }} />
+        <ActionBtn icon={IC.bookmark(saved)} label={saved ? "Saved" : "Save"} active={saved} activeColor={T.accent} onClick={handleSave} />
       </div>
 
       {/* ReportModal */}
@@ -648,7 +634,7 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
                 <p style={{ fontSize: 12, color: T.text3, margin: "0 0 20px" }}>They won&apos;t be able to see or interact with your posts.</p>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => setShowBlockConfirm(false)} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "var(--ox-glass-input)", color: T.text2, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Cancel</button>
-                  <button onClick={handleBlockUserPost} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: T.red, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Block</button>
+                  <button onClick={handleBlockUser} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: T.red, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Block</button>
                 </div>
               </div>
             </div>
@@ -1178,6 +1164,8 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
   const reelsHasMoreRef = useRef(true);
   const post = reelsPosts[index];
   const [showYtVideo, setShowYtVideo] = useState(false);
+  const [reelsYtIndex, setReelsYtIndex] = useState(0);
+  const [reelsYtTitles, setReelsYtTitles] = useState<Record<string, string>>({});
   const prevShowCreate = useRef(showCreate);
 
   // Refresh from page 1 when the create sheet closes (post was just created)
@@ -1190,6 +1178,16 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
     }
     prevShowCreate.current = showCreate;
   }, [showCreate]);
+
+  useEffect(() => {
+    const ids = extractYouTubeIds(post?.content || "");
+    ids.forEach(async (id) => {
+      if (!reelsYtTitles[id]) {
+        const title = await fetchYouTubeTitle(id);
+        setReelsYtTitles(prev => ({ ...prev, [id]: title }));
+      }
+    });
+  }, [post?.id]);
 
   const fetchReelsPosts = async (isLoadMore = false) => {
     if (!activeCircle) return;
@@ -1279,27 +1277,38 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
                   </div>
                 </div>
                 {/* Content */}
-                {post?.content && <div style={{ margin: 0, fontSize: 15, color: T.text2, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }} />}
+                {post?.content && <div dir="auto" style={{ margin: 0, fontSize: 15, color: T.text2, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(stripYouTubeLinks(post.content)) }} />}
                 {(() => {
-                  const ytCandidate = post?.link || post?.content || "";
-                  const ytId = getYouTubeId(ytCandidate);
-                  if (ytId) return showYtVideo ? (
+                  const reelsYtIds = extractYouTubeIds(post?.content || "");
+                  if (reelsYtIds.length === 0) return null;
+                  const reelsActiveId = reelsYtIds[reelsYtIndex];
+                  if (showYtVideo) return (
                     <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
-                      <YouTubePlayer videoId={ytId} />
+                      <YouTubePlayer videoId={reelsActiveId} />
                     </div>
-                  ) : (
+                  );
+                  return (
                     <div onClick={() => setShowYtVideo(true)}
                       style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 300 }}>
-                      <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      <img src={getYouTubeThumbnail(reelsActiveId)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                         onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
                       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.3)" }}>
                         <div style={{ width: 50, height: 50, borderRadius: "50%", background: "rgba(255,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px rgba(255,0,0,0.4)" }}>
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         </div>
                       </div>
+                      {reelsYtIds.length > 1 && (
+                        <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {reelsYtIds.map((id, i) => (
+                            <button key={id} onClick={e => { e.stopPropagation(); setReelsYtIndex(i); }}
+                              style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", transition: "all .15s", background: i === reelsYtIndex ? "rgba(255,0,0,0.9)" : "rgba(0,0,0,0.6)", color: "#fff", whiteSpace: "nowrap" }}>
+                              {i === reelsYtIndex ? "▶ " : ""}{reelsYtTitles[id] || `Video ${i + 1}`}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
-                  return null;
                 })()}
                 {/* Media & attachments: images, video, audio, files, link */}
                 {(() => {
@@ -1361,7 +1370,7 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
                 {/* Quiz / Q&A */}
                 {post?.quizData && post.quizData.options?.length > 0 && (
                   <div style={{ marginTop: 12, background: T.hover, borderRadius: 16, padding: "14px 16px" }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: T.text1, marginBottom: 10, lineHeight: 1.5 }}>{post.content}</div>
+                    <div dir="auto" style={{ fontSize: 13, fontWeight: 700, color: T.text1, marginBottom: 10, lineHeight: 1.5 }}>{post.content}</div>
                     <div style={{ fontSize: 10, color: T.text4, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>{post.quizData.correctAnswer ? "Quiz" : "Q&A"}</div>
                     {post.quizData.options.map((opt: string, i: number) => (
                       <div key={i} style={{ padding: "10px 14px", borderRadius: 10, background: T.surface, marginBottom: 6, fontSize: 13, color: T.text2 }}>
@@ -1572,7 +1581,7 @@ function ReelsCommentSheet({ post, currentUserId, onClose }: {
                   <span style={{ fontSize: 12, fontWeight: 700, color: T.text1 }}>{c.author?.name || "User"}</span>
                   <span style={{ fontSize: 10, color: T.text4 }}>{timeAgo(c.createdAt)}</span>
                 </div>
-                <p style={{ margin: "2px 0 4px", fontSize: 13, color: T.text2, lineHeight: 1.5 }}>{c.text}</p>
+                <p dir="auto" style={{ margin: "2px 0 4px", fontSize: 13, color: T.text2, lineHeight: 1.5 }}>{c.text}</p>
                 <button onClick={() => toggleLike(c.id)}
                   style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: commentLikes[c.id] ? T.red : T.text3, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                   {IC.heart(!!commentLikes[c.id])} {c.likes}
@@ -1582,7 +1591,7 @@ function ReelsCommentSheet({ post, currentUserId, onClose }: {
           ))}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "flex-end", padding: "12px 16px 20px", borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
-          <textarea value={text} onChange={e => setText(e.target.value)} placeholder="Add a comment..." rows={1}
+          <textarea dir="auto" value={text} onChange={e => setText(e.target.value)} placeholder="Add a comment..." rows={1}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
             style={{ flex: 1, padding: "10px 14px", borderRadius: 14, border: `1px solid ${T.border2}`, background: T.bg, fontSize: 13, color: T.text1, fontFamily: FONT, outline: "none", resize: "none", lineHeight: 1.5 }} />
           <button onClick={submit} disabled={!text.trim() || submitting}
@@ -2187,43 +2196,44 @@ export default function OneXCommunity({
           circles={circles} activeCircle={activeCircle} onPost={handlePost} onLike={handleLike} onSave={handleSave} />
       ) : (
       <div className="ox-container" style={{ width: "100%", height: "100%", margin: "0 auto", position: "relative", zIndex: 1, display: "flex", flexDirection: "column", boxSizing: "border-box", padding: "12px 16px 0" }}>
-        <div className="ox-grid" style={{ display: "grid", gridTemplateColumns: "64px 1fr 320px", gap: 16, flex: 1, minHeight: 0 }}>
+        <div className="ox-grid" style={{ display: "grid", gridTemplateColumns: "200px 1fr 320px", gap: 16, flex: 1, minHeight: 0 }}>
 
-          {/* ── LEFT SIDEBAR — icons-only rail ── */}
+          {/* ── LEFT SIDEBAR — icon + label rail ── */}
           <aside className="ox-sidebar" style={{ position: "sticky", top: 10, alignSelf: "flex-start", display: "flex", flexDirection: "column", gap: 8 }}>
-            {/* Fullscreen toggle */}
-            <button onClick={() => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen().catch(() => {}); }}
-              style={{ width: 48, height: 40, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 12, border: `1px solid ${T.border}`, background: T.surface, color: T.text3, cursor: "pointer", transition: "all .15s" }}
-              onMouseEnter={e => { e.currentTarget.style.background = T.hover; e.currentTarget.style.color = T.accentL; }}
-              onMouseLeave={e => { e.currentTarget.style.background = T.surface; e.currentTarget.style.color = T.text3; }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-            </button>
+            {/* Utility buttons row */}
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen().catch(() => {}); }}
+                style={{ width: 44, height: 38, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 12, border: `1px solid ${T.border}`, background: T.surface, color: T.text3, cursor: "pointer", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = T.hover; e.currentTarget.style.color = T.accentL; }}
+                onMouseLeave={e => { e.currentTarget.style.background = T.surface; e.currentTarget.style.color = T.text3; }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+              </button>
+              <button onClick={async () => { const { theme, setTheme } = useThemeStore.getState(); setTheme(theme === "dark" ? "light" : "dark"); }}
+                style={{ width: 44, height: 38, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 12, border: `1px solid ${T.border}`, background: T.surface, color: T.text3, cursor: "pointer", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = T.hover; e.currentTarget.style.color = T.accentL; }}
+                onMouseLeave={e => { e.currentTarget.style.background = T.surface; e.currentTarget.style.color = T.text3; }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </button>
+            </div>
 
-            {/* Dark Mode Toggle — below fullscreen */}
-            <button onClick={async () => { const { theme, setTheme } = useThemeStore.getState(); setTheme(theme === "dark" ? "light" : "dark"); }}
-              style={{ width: 48, height: 40, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 12, border: `1px solid ${T.border}`, background: T.surface, color: T.text3, cursor: "pointer", transition: "all .15s" }}
-              onMouseEnter={e => { e.currentTarget.style.background = T.hover; e.currentTarget.style.color = T.accentL; }}
-              onMouseLeave={e => { e.currentTarget.style.background = T.surface; e.currentTarget.style.color = T.text3; }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </button>
-
-            {/* Nav icons */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: "6px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            {/* Nav items — icon + label */}
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: "6px", display: "flex", flexDirection: "column", gap: 2 }}>
               {[
-                { id: "home", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-                { id: "explore", icon: IC.explore },
-                { id: "rooms", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-                { id: "notifications", icon: IC.notification },
-                { id: "saved", icon: IC.bookmark(false) },
+                { id: "home", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>, label: "Home" },
+                { id: "explore", icon: IC.explore, label: "Explore" },
+                { id: "rooms", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, label: "Rooms" },
+                { id: "notifications", icon: IC.notification, label: "Activity" },
+                { id: "saved", icon: IC.bookmark(false), label: "Saved" },
               ].map(nav => (
                 <button key={nav.id} onClick={() => setActivePage(nav.id as any)}
-                  style={{ width: 48, height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 14, border: "none", cursor: "pointer", background: activePage === nav.id ? T.hover : "none", color: activePage === nav.id ? T.accentL : T.text3, transition: "all .15s" }}>
+                  style={{ width: "100%", height: 44, display: "flex", alignItems: "center", gap: 10, padding: "0 14px", borderRadius: 14, border: "none", cursor: "pointer", background: activePage === nav.id ? T.hover : "none", color: activePage === nav.id ? T.accentL : T.text3, transition: "all .15s" }}>
                   {nav.icon}
+                  <span style={{ fontSize: 13, fontWeight: activePage === nav.id ? 600 : 400, whiteSpace: "nowrap" }}>{nav.label}</span>
                 </button>
               ))}
             </div>
 
-            {/* Circles rail — moved to bottom */}
+            {/* Circles rail */}
             <div style={{ flex: 1 }} />
             <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: "6px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
               {sortedCircles.slice(0, 6).map(c => (
@@ -2727,16 +2737,10 @@ export default function OneXCommunity({
       <InlineJoinRoomModal isOpen={showJoinRoom} onClose={() => setShowJoinRoom(false)} />
       <InlineCreateGroupModal isOpen={showCreateGroup} onClose={() => setShowCreateGroup(false)} onSuccess={handleGroupCreated} />
 
-      {/* Post Detail Modal */}
+      {/* Post Detail Modal — PostDetailModal handles its own overlay + container + animations */}
       {modalPost && (
         <Portal>
-        <div onClick={() => { setModalPost(null); }}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 20, backdropFilter: "blur(20px)", animation: "fadeIn .2s ease" }}>
-          <div onClick={e => e.stopPropagation()}
-            style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(40px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 28, width: "100%", maxWidth: 520, maxHeight: "80vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 32px 100px rgba(0,0,0,0.5)", animation: "modalIn .25s ease", fontFamily: FONT }}>
-            <PostModal post={modalPost} onClose={() => { setModalPost(null); }} currentUserId={currentUserId} />
-          </div>
-        </div>
+          <PostDetailModal post={modalPost} isOpen={true} onClose={() => setModalPost(null)} currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserUniversityId={currentUserUniversityId} />
         </Portal>
       )}
 

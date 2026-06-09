@@ -149,7 +149,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
                 : "border-white/[0.02] bg-muted/60 dark:bg-muted/25"
             )}
           >
-            <div
+            <div dir="auto"
               className={cn(
                 "prose prose-sm max-w-none text-sm leading-relaxed prose-p:my-1 prose-headings:my-2 prose-img:my-2 prose-img:rounded-lg",
                 isOwn ? "prose-invert" : "dark:prose-invert"
@@ -313,7 +313,7 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
 
       {/* Content */}
       <div className="px-5 pb-4">
-        <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed prose-img:my-3">
+        <div dir="auto" className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed prose-img:my-3">
           <ReactMarkdown components={markdownComponentsWithImages}>
             {enhancePlainImageUrls(post.content)}
           </ReactMarkdown>
@@ -322,11 +322,9 @@ export function PostCard({ post, currentUserId, forumName, variant = "card" }: P
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={normalizeImageUrl(post.imageUrl)}
-            alt=""
-            className="mt-3 max-h-80 w-full rounded-lg border border-white/[0.02] bg-muted/20 object-contain"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-          />
+                className="w-full h-auto mt-3 rounded-2xl"
+                alt=""
+              />
         ) : null}
 
         {/* Telegram Video Attachments — Premium Player */}

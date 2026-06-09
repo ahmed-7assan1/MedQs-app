@@ -100,7 +100,7 @@ export function InstagramPostCard({ post, currentUserId }: Props) {
         ) : (
           <div className="h-full w-full flex items-center justify-center p-8 text-center text-white/10 italic text-sm">
             {/* If no image, we just show the content text here or nothing if it's below */}
-            {post.content.slice(0, 100)}...
+            <span dir="auto">{post.content.slice(0, 100)}...</span>
           </div>
         )}
       </div>
@@ -139,7 +139,7 @@ export function InstagramPostCard({ post, currentUserId }: Props) {
         {/* Caption */}
         <div className="text-[13px] leading-relaxed text-white/90">
           <span className="font-bold mr-2">{post.author.name}</span>
-          <div className="inline prose prose-invert prose-sm max-w-none text-[13px]">
+          <div dir="auto" className="inline prose prose-invert prose-sm max-w-none text-[13px]">
             <ReactMarkdown>
               {post.content.length > 150 ? post.content.slice(0, 150) + "..." : post.content}
             </ReactMarkdown>

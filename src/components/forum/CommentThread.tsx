@@ -122,7 +122,7 @@ function CommentItem({
               </span>
             </div>
             {comment.content && (
-              <p className="text-[12.5px] leading-relaxed text-white/80 font-medium whitespace-pre-wrap break-words">
+              <p dir="auto" className="text-[12.5px] leading-relaxed text-white/80 font-medium whitespace-pre-wrap break-words">
                 {renderMentions(comment.content)}
               </p>
             )}
@@ -508,7 +508,7 @@ export function CommentThread({ postId, currentUserId, initialCount }: CommentTh
 
         <div className="flex items-end gap-3">
           <div className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-2xl p-2 focus-within:bg-white/[0.06] focus-within:border-primary/30 transition-all duration-300">
-            <textarea
+            <textarea dir="auto"
               ref={inputRef}
               value={text}
               onChange={handleTextChange}

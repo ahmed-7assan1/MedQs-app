@@ -108,7 +108,7 @@ export function CommentSection({ postId, isRoomPost, roomId, currentUserId, init
       {/* Input Section */}
       <div className="relative rounded-[28px] bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 p-3 shadow-inner group focus-within:ring-2 ring-primary/20 transition-all">
         <div className="flex items-center gap-3">
-          <input 
+          <input dir="auto"
             value={content} 
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
@@ -208,7 +208,7 @@ function CommentItem({ comment, isRoomPost, roomId, postId, currentUserId, onRep
               </div>
               <p className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tabular-nums">{formatDistanceToNow(new Date(comment.createdAt))} ago</p>
             </div>
-            <p className="text-[14px] text-slate-700 dark:text-white/80 leading-relaxed font-medium">{comment.content}</p>
+            <p dir="auto" className="text-[14px] text-slate-700 dark:text-white/80 leading-relaxed font-medium">{comment.content}</p>
             
             {attachments.map((att, i) => (
               <div key={i} className="mt-3">
@@ -252,7 +252,7 @@ function CommentItem({ comment, isRoomPost, roomId, postId, currentUserId, onRep
             {showReply && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-3 px-2 overflow-hidden">
                 <div className="flex items-center gap-2 p-2 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus-within:ring-1 ring-primary/20">
-                  <input 
+                  <input dir="auto"
                     value={replyContent} 
                     onChange={(e) => setReplyContent(e.target.value)} 
                     placeholder={`Reply to ${comment.author.name.split(' ')[0]}...`} 

@@ -11,7 +11,17 @@ import {
   PencilSimple,
   CircleNotch,
   Flag,
-  Prohibit
+  Prohibit,
+  PushPin,
+  DotsThreeOutline,
+  FileText,
+  ShieldCheck,
+  ChartBar,
+  Pause,
+  Play,
+  X,
+  ArrowLeft,
+  ArrowRight
 } from "@phosphor-icons/react";
 import React, { useState, useRef, useMemo } from "react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
@@ -395,7 +405,7 @@ const PostCardInner = ({
                 {post.backgroundStyle && (!isClassName(post.backgroundStyle) || post.backgroundStyle.includes("url")) && (
                   <div className="absolute inset-0 bg-black/45 z-0" />
                 )}
-                <textarea
+                <textarea dir="auto"
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   className={cn(
@@ -441,7 +451,7 @@ const PostCardInner = ({
               <div className="absolute inset-0 bg-black/45 z-0" />
             )}
             
-            <div className={cn("prose prose-slate dark:prose-invert prose-sm max-w-none prose-p:my-1", post.backgroundStyle && "relative z-10")}>
+            <div dir="auto" className={cn("prose prose-slate dark:prose-invert prose-sm max-w-none prose-p:my-1", post.backgroundStyle && "relative z-10")}>
               <ReactMarkdown components={postComponents} className={cn(post.backgroundStyle && "text-white prose-p:text-white prose-p:text-base sm:prose-p:text-xl prose-p:font-extrabold select-none pointer-events-none")}>
                 {enhancePlainImageUrls(postContent)}
               </ReactMarkdown>
@@ -950,7 +960,7 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
         onClick={onClose}
         className="absolute top-5 right-5 h-11 w-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-all z-10"
       >
-        <XIcon size={20} weight="bold" />
+        <X size={20} weight="bold" />
       </button>
 
       <div className="absolute top-5 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest">

@@ -420,7 +420,7 @@ export function PostCardRedesigned({
             {post.backgroundStyle && (!isClassName(post.backgroundStyle) || post.backgroundStyle.includes("url")) && (
               <div className="absolute inset-0 bg-black/45 z-0" />
             )}
-            <textarea
+            <textarea dir="auto"
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               className={cn(
@@ -467,11 +467,11 @@ export function PostCardRedesigned({
             
             <div className={cn("w-full relative z-10", post.backgroundStyle && "text-white select-none pointer-events-none")}>
               {hasHashtags ? (
-                <p className="whitespace-pre-wrap break-words">
+                <p dir="auto" className="whitespace-pre-wrap break-words">
                   {renderContentAndMentions(postContent)}
                 </p>
               ) : (
-                <div className={cn("prose prose-invert prose-sm max-w-none prose-p:my-0.5", post.backgroundStyle && "text-white prose-p:text-white prose-p:text-xl prose-p:font-extrabold")}>
+                <div dir="auto" className={cn("prose prose-invert prose-sm max-w-none prose-p:my-0.5", post.backgroundStyle && "text-white prose-p:text-white prose-p:text-xl prose-p:font-extrabold")}>
                   <ReactMarkdown components={postComponents}>
                     {enhancePlainImageUrls(postContent)}
                   </ReactMarkdown>

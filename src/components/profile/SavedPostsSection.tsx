@@ -64,7 +64,7 @@ export function SavedPostsSection() {
               {p.forumName ? <span>· {p.forumName}</span> : null}
               <span>· {new Date(p.createdAt).toLocaleDateString()}</span>
             </div>
-            <p className="mt-2 text-sm leading-relaxed text-foreground/90">{snippet(p.content)}</p>
+            <p dir="auto" className="mt-2 text-sm leading-relaxed text-foreground/90">{snippet(p.content)}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link
                 href={`/forum/post/${p.id}`}

@@ -14,6 +14,8 @@ import {
 } from "@phosphor-icons/react";
 import { useThemeStore } from "@/lib/store";
 import { ReportModal } from "../social/ReportModal";
+import { getYouTubeId, getYouTubeThumbnail, extractYouTubeIds, stripYouTubeLinks, fetchYouTubeTitle } from "@/lib/video-utils";
+import YouTubePlayer from "../social/YouTubePlayer";
 
 const ICONS = {
   heart: (filled: boolean) => filled
@@ -56,8 +58,8 @@ function getTimeAgo(date: string) {
     const d = new Date(date);
     const str = formatDistanceToNow(d).toLowerCase();
     const parts = str.split(" ");
-    if (parts[0] === "just") return "الآن";
-    return "منذ " + parts[0] + " " + (parts[1] || "");
+    if (parts[0] === "just") return "just now";
+    return str;
   } catch { return ""; }
 }
 
@@ -77,7 +79,7 @@ function Avatar({ initials, color, size = 40 }: { initials: string; color: strin
       background: color, display: "flex", alignItems: "center",
       justifyContent: "center", color: "#fff",
       fontSize: size * 0.35, fontWeight: "600",
-      flexShrink: 0, fontFamily: "'Cairo', sans-serif",
+      flexShrink: 0,
     }}>{initials}</div>
   );
 }
@@ -113,7 +115,7 @@ const REACTIONS_UI = [
   { key: "💯", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="#10b981" stroke="none"><circle cx="12" cy="12" r="10" fill="#10b981"/><polyline points="7 13 10 16 17 8" stroke="#fff" strokeWidth="2" fill="none"/></svg>, color: "#10b981" },
 ];
 
-function ReactionBar({ reactions, onReact }: { reactions: Record<string, number>; onReact: (emoji: string) => void }) {
+function ReactionBar({ reactions, onReact, T }: { reactions: Record<string, number>; onReact: (emoji: string) => void; T: Record<string, string> }) {
   const total = Object.values(reactions).reduce((a, b) => a + b, 0);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
@@ -121,63 +123,63 @@ function ReactionBar({ reactions, onReact }: { reactions: Record<string, number>
         const count = reactions[key] || 0;
         return (
           <button key={key} onClick={() => onReact(key)}
-            style={{ background: `${color}12`, border: `1.5px solid ${color}30`, borderRadius: 20, padding: "4px 10px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, transition: "all 0.15s", fontFamily: "'Cairo',sans-serif" }}>
-            {icon} <span style={{ color, fontWeight: 700 }}>{count.toLocaleString("ar-EG")}</span>
+            style={{ background: `${color}12`, border: `1.5px solid ${color}30`, borderRadius: 20, padding: "4px 10px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, transition: "all 0.15s" }}>
+            {icon} <span style={{ color, fontWeight: 700 }}>{count.toLocaleString()}</span>
           </button>
         );
       })}
-      <span style={{ fontSize: 12, color: "#9ca3af", marginRight: 4 }}>{total.toLocaleString("ar-EG")} تفاعل</span>
+      <span style={{ fontSize: 12, color: T.text3, marginRight: 4 }}>{total.toLocaleString()} reactions</span>
     </div>
   );
 }
 
-function ShareSheet({ postUrl, onClose }: { postUrl: string; onClose: () => void }) {
+function ShareSheet({ postUrl, onClose, isDark, T }: { postUrl: string; onClose: () => void; isDark: boolean; T: Record<string, string> }) {
   const [copied, setCopied] = useState(false);
   const platforms = [
-    { name: "تويتر / X", icon: ICONS.twitter, color: "#000" },
-    { name: "واتساب", icon: ICONS.whatsapp, color: "#25D366" },
-    { name: "فيسبوك", icon: ICONS.facebook, color: "#1877F2" },
+    { name: "Twitter / X", icon: ICONS.twitter, color: "#000" },
+    { name: "WhatsApp", icon: ICONS.whatsapp, color: "#25D366" },
+    { name: "Facebook", icon: ICONS.facebook, color: "#1877F2" },
   ];
   return (
     <div style={{ padding: "4px 0" }}>
-      <p style={{ margin: "0 0 12px", fontSize: 14, color: "#6b7280", fontWeight: 500 }}>مشاركة عبر</p>
+      <p style={{ margin: "0 0 12px", fontSize: 14, color: T.text2, fontWeight: 500 }}>Share via</p>
       <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
         {platforms.map(p => (
-          <button key={p.name} onClick={() => window.open(p.name === "تويتر / X" ? `https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}` : p.name === "واتساب" ? `https://wa.me/?text=${encodeURIComponent(postUrl)}` : `https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`, "_blank")}
-            style={{ flex: 1, padding: "10px 8px", border: "1.5px solid #e5e7eb", borderRadius: 12, background: "#fff", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, transition: "all 0.15s" }}
+          <button key={p.name} onClick={() => window.open(p.name === "Twitter / X" ? `https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}` : p.name === "WhatsApp" ? `https://wa.me/?text=${encodeURIComponent(postUrl)}` : `https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`, "_blank")}
+            style={{ flex: 1, padding: "10px 8px", border: `1.5px solid ${T.border2}`, borderRadius: 12, background: T.surface, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, transition: "all 0.15s" }}
             onMouseEnter={e => e.currentTarget.style.borderColor = p.color}
-            onMouseLeave={e => e.currentTarget.style.borderColor = "#e5e7eb"}>
+            onMouseLeave={e => (e.currentTarget.style as any).borderColor = T.border2}>
             <span style={{ color: p.color }}>{p.icon}</span>
-            <span style={{ fontSize: 11, color: "#374151", fontFamily: "'Cairo',sans-serif" }}>{p.name}</span>
+            <span style={{ fontSize: 11, color: T.text }}>{p.name}</span>
           </button>
         ))}
       </div>
       <div style={{ display: "flex", gap: 8 }}>
-        <div style={{ flex: 1, background: "#f3f4f6", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", direction: "ltr" }}>
+        <div style={{ flex: 1, background: T.surface, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: T.text2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", direction: "ltr" }}>
           {postUrl}
         </div>
         <button onClick={() => { navigator.clipboard.writeText(postUrl); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-          style={{ padding: "8px 14px", background: copied ? "#10a37f" : "#5b5ef7", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 6, fontFamily: "'Cairo',sans-serif", transition: "background 0.2s" }}>
-          {copied ? "✓ تم" : <>{ICONS.link} نسخ</>}
+          style={{ padding: "8px 14px", background: copied ? "#10a37f" : T.primary, color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 6, transition: "background 0.2s" }}>
+          {copied ? "✓ Copied" : <>{ICONS.link} Copy</>}
         </button>
       </div>
     </div>
   );
 }
 
-function DeleteConfirm({ onConfirm, onCancel, deleting }: { onConfirm: () => void; onCancel: () => void; deleting?: boolean }) {
+function DeleteConfirm({ onConfirm, onCancel, deleting, isDark, T }: { onConfirm: () => void; onCancel: () => void; deleting?: boolean; isDark: boolean; T: Record<string, string> }) {
   return (
     <div style={{ textAlign: "center", padding: "8px 0" }}>
-      <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#e84040" }}>
+      <div style={{ width: 56, height: 56, borderRadius: "50%", background: isDark ? "rgba(239,68,68,0.2)" : "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#e84040" }}>
         {ICONS.trash}
       </div>
-      <p style={{ fontWeight: 700, fontSize: 16, margin: "0 0 6px", color: "#111" }}>حذف المنشور؟</p>
-      <p style={{ fontSize: 14, color: "#6b7280", margin: "0 0 20px" }}>لا يمكن التراجع عن هذا الإجراء</p>
+      <p style={{ fontWeight: 700, fontSize: 16, margin: "0 0 6px", color: T.text }}>Delete post?</p>
+      <p style={{ fontSize: 14, color: T.text2, margin: "0 0 20px" }}>This action cannot be undone</p>
       <div style={{ display: "flex", gap: 10 }}>
-        <button onClick={onCancel} disabled={deleting} style={{ flex: 1, padding: "10px", border: "1.5px solid #e5e7eb", borderRadius: 10, background: "#fff", cursor: deleting ? "default" : "pointer", fontSize: 14, fontFamily: "'Cairo',sans-serif", color: "#374151", opacity: deleting ? 0.5 : 1 }}>إلغاء</button>
-        <button onClick={onConfirm} disabled={deleting} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: "#e84040", color: "#fff", cursor: deleting ? "default" : "pointer", fontSize: 14, fontFamily: "'Cairo',sans-serif", fontWeight: 600, opacity: deleting ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+        <button onClick={onCancel} disabled={deleting} style={{ flex: 1, padding: "10px", border: `1.5px solid ${T.border2}`, borderRadius: 10, background: T.bg, cursor: deleting ? "default" : "pointer", fontSize: 14, color: T.text, opacity: deleting ? 0.5 : 1 }}>Cancel</button>
+        <button onClick={onConfirm} disabled={deleting} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: "#e84040", color: "#fff", cursor: deleting ? "default" : "pointer", fontSize: 14, fontWeight: 600, opacity: deleting ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
           {deleting ? <CircleNotch size={16} weight="bold" className="animate-spin" /> : null}
-          {deleting ? "جاري الحذف..." : "حذف"}
+          {deleting ? "Deleting..." : "Delete"}
         </button>
       </div>
     </div>
@@ -205,6 +207,9 @@ export function PostDetailModal({
   const [commentCount, setCommentCount] = useState(post._count?.comments ?? post.comments ?? 0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [showLikePicker, setShowLikePicker] = useState(false);
+  const [showYtVideo, setShowYtVideo] = useState(false);
+  const [activeYtIndex, setActiveYtIndex] = useState(0);
+  const [ytTitles, setYtTitles] = useState<Record<string, string>>({});
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [showOptions, setShowOptions] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -215,18 +220,18 @@ export function PostDetailModal({
   );
 
   const T = {
-    bg: isDark ? "#0d0d15" : "#fff",
-    surface: isDark ? "#161523" : "#f8f9fa",
-    border: isDark ? "rgba(255,255,255,0.08)" : "#f1f3f5",
-    border2: isDark ? "rgba(255,255,255,0.06)" : "#e5e7eb",
-    text: isDark ? "#d4d7ec" : "#111",
-    text2: isDark ? "rgba(255,255,255,0.5)" : "#6b7280",
-    text3: isDark ? "rgba(255,255,255,0.3)" : "#9ca3af",
+    bg: isDark ? "rgba(0,0,0,0.94)" : "rgba(255,255,255,0.85)",
+    surface: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.035)",
+    border: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+    border2: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)",
+    text: isDark ? "#e8ebf4" : "#111",
+    text2: isDark ? "rgba(255,255,255,0.55)" : "#6b7280",
+    text3: isDark ? "rgba(255,255,255,0.35)" : "#9ca3af",
     overlay: "rgba(0,0,0,0.6)",
     primary: "#5b5ef7",
     tabActive: isDark ? "#8b8eff" : "#5b5ef7",
     tabInactive: isDark ? "rgba(255,255,255,0.4)" : "#6b7280",
-    accentBg: isDark ? "rgba(91,94,247,0.15)" : "#eef0ff",
+    accentBg: isDark ? "rgba(91,94,247,0.2)" : "#eef0ff",
   };
 
   const REACTION_ITEMS = [
@@ -255,6 +260,8 @@ export function PostDetailModal({
       setMyReaction(currentUserId ? post.reactions?.find((r: any) => r.userId === currentUserId)?.type || null : null);
       setCommentCount(post._count?.comments ?? post.comments ?? 0);
       setDeleted(false);
+      setShowYtVideo(false);
+      setActiveYtIndex(0);
       setActiveTab("post");
       setSheet(null);
       setNewComment("");
@@ -262,6 +269,15 @@ export function PostDetailModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, post.id]);
+
+  useEffect(() => {
+    ytIds.forEach(async (id) => {
+      if (!ytTitles[id]) {
+        const title = await fetchYouTubeTitle(id);
+        setYtTitles(prev => ({ ...prev, [id]: title }));
+      }
+    });
+  }, []);
 
   const handleReact = async (type: string | null) => {
     if (!currentUserId) return toast.error("Sign in to react");
@@ -352,14 +368,14 @@ export function PostDetailModal({
     try {
       const res = await fetch(`/api/v1/posts/${post.id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("تم حذف المنشور");
+        toast.success("Post deleted");
         onClose();
       } else {
         const data = await res.json();
-        toast.error(data.error || "فشل الحذف");
+        toast.error(data.error || "Delete failed");
       }
     } catch {
-      toast.error("خطأ في الشبكة");
+      toast.error("Network error");
     } finally {
       setDeleting(false);
       setSheet(null);
@@ -374,6 +390,8 @@ export function PostDetailModal({
 
   const postText = post.content || post.text || "";
   const hashtags = post.hashtags || (postText.match(/#[a-zA-Z0-9_]+/g) || []);
+  const ytIds = extractYouTubeIds(post.content || post.text || "");
+  const ytId = ytIds[activeYtIndex] || null;
 
   const attachments = useMemo(() => {
     function detectType(url: string): "image" | "video" | "audio" | "file" {
@@ -428,19 +446,20 @@ export function PostDetailModal({
             onClick={onClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 20 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed inset-4 md:inset-x-auto md:top-8 md:bottom-8 md:left-1/2 md:-translate-x-1/2 z-[401] max-w-[560px] w-full overflow-hidden"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed bottom-0 left-0 right-0 md:left-[calc(200px+16px+20px)] md:right-[calc(320px+16px+20px)] z-[401] overflow-hidden"
+            style={{ height: "85vh", width: "auto" }}
           >
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16, fontFamily: "'Cairo',sans-serif", background: T.bg, borderRadius: 24 }}>
-              <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", color: "#e84040" }}>{ICONS.trash}</div>
-              <p style={{ fontSize: 18, fontWeight: 700, color: T.text }}>تم حذف المنشور</p>
-              <p style={{ color: T.text2 }}>لقد قمت بحذف هذا المنشور بنجاح</p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 16, background: T.bg, borderRadius: "20px 20px 0 0", border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`, borderBottom: "none", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}>
+              <div style={{ width: 64, height: 64, borderRadius: "50%", background: isDark ? "rgba(239,68,68,0.2)" : "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", color: "#e84040" }}>{ICONS.trash}</div>
+              <p style={{ fontSize: 18, fontWeight: 700, color: T.text }}>Post deleted</p>
+              <p style={{ color: T.text2 }}>Post has been deleted successfully</p>
               <button onClick={() => { setDeleted(false); setSheet(null); }}
-                style={{ padding: "10px 28px", background: T.primary, color: "#fff", border: "none", borderRadius: 12, cursor: "pointer", fontSize: 14, fontFamily: "'Cairo',sans-serif", fontWeight: 600 }}>
-                استعادة المعاينة
+                style={{ padding: "10px 28px", background: T.primary, color: "#fff", border: "none", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: 600 }}>
+                Restore preview
               </button>
             </div>
           </motion.div>
@@ -462,17 +481,32 @@ export function PostDetailModal({
             onClick={onClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 20 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed inset-4 md:inset-x-auto md:top-8 md:bottom-8 md:left-1/2 md:-translate-x-1/2 z-[401] max-w-[560px] w-full overflow-hidden"
-            style={{ fontFamily: "'Cairo', 'Segoe UI', sans-serif" }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed bottom-0 left-0 right-0 md:left-[calc(200px+16px+20px)] md:right-[calc(320px+16px+20px)] z-[401] overflow-hidden"
+            style={{ height: "85vh", width: "auto" }}
           >
-            <div dir="rtl" style={{ width: "100%", maxWidth: 560, background: T.bg, borderRadius: 24, boxShadow: isDark ? "0 8px 48px rgba(0,0,0,0.4)" : "0 8px 48px rgba(0,0,0,0.12)", position: "relative", maxHeight: "100%", display: "flex", flexDirection: "column" }}>
+            <div style={{ width: "100%", background: T.bg, borderRadius: "20px 20px 0 0", border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`, borderBottom: "none", boxShadow: isDark ? "0 -8px 48px rgba(0,0,0,0.5)" : "0 -8px 48px rgba(0,0,0,0.08)", position: "relative", height: "100%", display: "flex", flexDirection: "column", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", overflow: "hidden" }}>
+
+              {/* Animated ambient layer */}
+              {isDark && (
+                <div style={{
+                  position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+                  background: "linear-gradient(135deg, #1a0533 0%, #0d0a2e 20%, #0a1628 50%, #0d0a2e 80%, #1a0533 100%)",
+                  backgroundSize: "200% 200%", animation: "ambientShift 12s ease infinite",
+                  mixBlendMode: "overlay" as any, opacity: 0.15
+                }} />
+              )}
+
+              {/* Drag handle */}
+              <div style={{ padding: "10px 0 2px", display: "flex", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: T.text3 }} />
+              </div>
 
               {/* Header */}
-              <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: T.bg, zIndex: 10, flexShrink: 0, borderRadius: "24px 24px 0 0" }}>
+              <div style={{ padding: "4px 20px 14px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: T.bg, zIndex: 10, flexShrink: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   {post.author?.image ? (
                     <Image
@@ -493,7 +527,7 @@ export function PostDetailModal({
                 <div style={{ display: "flex", gap: 6, position: "relative" }}>
                   {canDelete && (
                     <button onClick={() => setSheet(s => s === "delete" ? null : "delete")}
-                      style={{ background: sheet === "delete" ? "#fee2e2" : "none", border: "none", borderRadius: 10, padding: "8px", cursor: "pointer", color: "#e84040", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
+                      style={{ background: sheet === "delete" ? (isDark ? "rgba(239,68,68,0.2)" : "#fee2e2") : "none", border: "none", borderRadius: 10, padding: "8px", cursor: "pointer", color: "#e84040", display: "flex", alignItems: "center", transition: "all 0.15s" }}>
                       {ICONS.trash}
                     </button>
                   )}
@@ -513,13 +547,13 @@ export function PostDetailModal({
                             overflow: "hidden", padding: "4px",
                           }}>
                             <button onClick={() => { setShowOptions(false); setShowReportModal(true); }}
-                              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#d97706", borderRadius: 8, transition: "all 0.15s", fontFamily: "'Cairo',sans-serif", fontWeight: 600 }}
+                              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#d97706", borderRadius: 8, transition: "all 0.15s", fontWeight: 600 }}
                               onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(217,119,6,0.15)" : "#fef3c7"}
                               onMouseLeave={e => e.currentTarget.style.background = "none"}>
                               <Flag size={16} weight="bold" /> Report post
                             </button>
                             <button onClick={() => { setShowOptions(false); setShowBlockConfirm(true); }}
-                              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#ef4444", borderRadius: 8, transition: "all 0.15s", fontFamily: "'Cairo',sans-serif", fontWeight: 600 }}
+                              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#ef4444", borderRadius: 8, transition: "all 0.15s", fontWeight: 600 }}
                               onMouseEnter={e => e.currentTarget.style.background = isDark ? "rgba(239,68,68,0.15)" : "#fef2f2"}
                               onMouseLeave={e => e.currentTarget.style.background = "none"}>
                               <Prohibit size={16} weight="bold" /> Block @{post.author?.name}
@@ -536,16 +570,16 @@ export function PostDetailModal({
               {/* Inline panels */}
               {sheet === "delete" && (
                 <div style={{ margin: "0 20px 0", background: isDark ? "rgba(239,68,68,0.1)" : "#fff5f5", border: `1.5px solid ${isDark ? "rgba(239,68,68,0.3)" : "#fecaca"}`, borderRadius: 14, padding: "16px", animation: "fadeIn 0.2s ease" }}>
-                  <DeleteConfirm onConfirm={handleDelete} onCancel={() => setSheet(null)} deleting={deleting} />
+                  <DeleteConfirm isDark={isDark} T={T} onConfirm={handleDelete} onCancel={() => setSheet(null)} deleting={deleting} />
                 </div>
               )}
               {sheet === "share" && (
                 <div style={{ margin: "0 20px 4px", background: isDark ? "rgba(91,94,247,0.1)" : "#f8f9ff", border: `1.5px solid ${isDark ? "rgba(91,94,247,0.3)" : "#e0e7ff"}`, borderRadius: 14, padding: "16px", animation: "fadeIn 0.2s ease" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <span style={{ fontWeight: 600, fontSize: 14, color: T.text }}>مشاركة المنشور</span>
+                    <span style={{ fontWeight: 600, fontSize: 14, color: T.text }}>Share Post</span>
                     <button onClick={() => setSheet(null)} style={{ background: "none", border: "none", cursor: "pointer", color: T.text2, display: "flex" }}>{ICONS.close}</button>
                   </div>
-                  <ShareSheet postUrl={postUrl} onClose={() => setSheet(null)} />
+                  <ShareSheet isDark={isDark} T={T} postUrl={postUrl} onClose={() => setSheet(null)} />
                 </div>
               )}
 
@@ -553,8 +587,8 @@ export function PostDetailModal({
               <div style={{ display: "flex", borderBottom: `1px solid ${T.border}`, padding: "0 20px", flexShrink: 0 }}>
                 {["post", "comments"].map(tab => (
                   <button key={tab} onClick={() => setActiveTab(tab as "post" | "comments")}
-                    style={{ padding: "12px 20px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: activeTab === tab ? 700 : 400, color: activeTab === tab ? T.tabActive : T.tabInactive, borderBottom: activeTab === tab ? `2.5px solid ${T.primary}` : "2.5px solid transparent", fontFamily: "'Cairo',sans-serif", transition: "all 0.2s" }}>
-                    {tab === "post" ? "المنشور" : `التعليقات (${commentCount})`}
+                    style={{ padding: "12px 20px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: activeTab === tab ? 700 : 400, color: activeTab === tab ? T.tabActive : T.tabInactive, borderBottom: activeTab === tab ? `2.5px solid ${T.primary}` : "2.5px solid transparent", transition: "all 0.2s" }}>
+                    {tab === "post" ? "Post" : `Comments (${commentCount})`}
                   </button>
                 ))}
               </div>
@@ -565,7 +599,7 @@ export function PostDetailModal({
                   <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                     {postText && (
                       <div>
-                        <p style={{ margin: 0, fontSize: 15, color: T.text, lineHeight: 1.8, whiteSpace: "pre-line" }}>{postText}</p>
+                        <p dir="auto" style={{ margin: 0, fontSize: 15, color: T.text, lineHeight: 1.8, whiteSpace: "pre-line" }}>{stripYouTubeLinks(postText)}</p>
                         {hashtags.length > 0 && (
                           <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                             {hashtags.map((h: string) => (
@@ -575,19 +609,51 @@ export function PostDetailModal({
                         )}
                       </div>
                     )}
-                    {inlineTelegramVideo && (
+                    {ytIds.length > 0 && (
+                      <>
+                        {showYtVideo ? (
+                          <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
+                            <YouTubePlayer videoId={ytIds[activeYtIndex]} />
+                          </div>
+                        ) : (
+                          <div onClick={() => setShowYtVideo(true)}
+                            style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 350 }}>
+                            <img src={getYouTubeThumbnail(ytIds[activeYtIndex])} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                              onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
+                            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.3)" }}
+                              onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.45)"; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,0,0,0.3)"; }}>
+                              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px rgba(255,0,0,0.4)" }}>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                              </div>
+                            </div>
+                            {ytIds.length > 1 && (
+                              <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                {ytIds.map((id, i) => (
+                                  <button key={id} onClick={e => { e.stopPropagation(); setActiveYtIndex(i); }}
+                                    style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", transition: "all .15s", background: i === activeYtIndex ? "rgba(255,0,0,0.9)" : "rgba(0,0,0,0.6)", color: "#fff", whiteSpace: "nowrap" }}>
+                                    {i === activeYtIndex ? "▶ " : ""}{ytTitles[id] || `Video ${i + 1}`}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {!ytId && inlineTelegramVideo && (
                       <div style={{ borderRadius: 16, overflow: "hidden", background: "#000" }}>
                         <ProfessionalVideoPlayer src={inlineTelegramVideo} className="w-full max-h-[400px]" />
                       </div>
                     )}
-                    {!inlineTelegramVideo && mediaUrls.length > 0 && (
+                    {!ytId && !inlineTelegramVideo && mediaUrls.length > 0 && (
                       <PostGallery attachments={mediaUrls.map((a: any) => ({
                         url: a.url,
                         type: getMediaType(a.url) || a.type || "image",
                         fileId: a.fileId,
                       }))} />
                     )}
-                    {!inlineTelegramVideo && mediaUrls.length === 0 && post.imageUrl && (() => {
+                    {!ytId && !inlineTelegramVideo && mediaUrls.length === 0 && post.imageUrl && (() => {
                       const fallbackUrl = sanitizeUrl(post.imageUrl);
                       const isActualImage = fallbackUrl.includes("type=image") || /\.(png|jpe?g|gif|webp|svg|avif|bmp|ico)(\?|$)/i.test(fallbackUrl);
                       if (!isActualImage) return null;
@@ -601,13 +667,13 @@ export function PostDetailModal({
                     {post.mediaCaption && <p style={{ margin: 0, fontSize: 12, color: T.text2, textAlign: "center" }}>{post.mediaCaption}</p>}
 
                     {/* Reactions bar */}
-                    <ReactionBar reactions={reactionCounts} onReact={(emoji) => handleReact(emoji)} />
+                    <ReactionBar reactions={reactionCounts} onReact={(emoji) => handleReact(emoji)} T={T} />
 
                     {/* Stats */}
                     <div style={{ display: "flex", gap: 16, paddingTop: 4, borderTop: `1px solid ${T.border}` }}>
-                      <span style={{ fontSize: 13, color: T.text2 }}>{reactions.length} إعجاب</span>
-                      <span style={{ fontSize: 13, color: T.text2 }}>{commentCount} تعليق</span>
-                      <span style={{ fontSize: 13, color: T.text2 }}>0 مشاركة</span>
+                      <span style={{ fontSize: 13, color: T.text2 }}>{reactions.length} Likes</span>
+                      <span style={{ fontSize: 13, color: T.text2 }}>{commentCount} Comments</span>
+                      <span style={{ fontSize: 13, color: T.text2 }}>0 Shares</span>
                     </div>
                   </div>
                 )}
@@ -633,9 +699,9 @@ export function PostDetailModal({
                     if (coarse) { e.preventDefault(); setShowLikePicker(s => !s); return; }
                     handleReact(myReaction ? null : "LIKE");
                   }}
-                    style={{ width: "100%", padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: myReaction ? T.accentBg : T.surface, color: myReaction ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, fontFamily: "'Cairo',sans-serif", transition: "all 0.15s", fontWeight: myReaction ? 700 : 400 }}>
+                    style={{ width: "100%", padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: myReaction ? T.accentBg : T.surface, color: myReaction ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s", fontWeight: myReaction ? 700 : 400 }}>
                     {myReaction ? (REACTION_ITEMS.find(r => r.type === myReaction)?.icon || ICONS.heart(false)) : ICONS.heart(false)}
-                    {myReaction ? (REACTION_ITEMS.find(r => r.type === myReaction)?.label || "Like") : "إعجاب"}
+                    {myReaction ? (REACTION_ITEMS.find(r => r.type === myReaction)?.label || "Like") : "Like"}
                   </button>
                   <AnimatePresence>
                     {showLikePicker && (
@@ -659,51 +725,34 @@ export function PostDetailModal({
                   </AnimatePresence>
                 </div>
                 <button onClick={() => setActiveTab("comments")}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: T.surface, color: T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, fontFamily: "'Cairo',sans-serif", transition: "all 0.15s" }}>
-                  {ICONS.comment} تعليق
+                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: T.surface, color: T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s" }}>
+                  {ICONS.comment} Comment
                 </button>
                 <button onClick={() => setSheet(s => s === "share" ? null : "share")}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: sheet === "share" ? T.accentBg : T.surface, color: sheet === "share" ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, fontFamily: "'Cairo',sans-serif", transition: "all 0.15s" }}>
-                  {ICONS.share} مشاركة
+                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: sheet === "share" ? T.accentBg : T.surface, color: sheet === "share" ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s" }}>
+                  {ICONS.share} Share
                 </button>
                 <button onClick={() => setSaved(s => !s)}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: saved ? T.accentBg : T.surface, color: saved ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, fontFamily: "'Cairo',sans-serif", transition: "all 0.15s", fontWeight: saved ? 700 : 400 }}>
-                  {ICONS.bookmark(saved)} {saved ? "محفوظ" : "حفظ"}
+                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: saved ? T.accentBg : T.surface, color: saved ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s", fontWeight: saved ? 700 : 400 }}>
+                  {ICONS.bookmark(saved)} {saved ? "Saved" : "Save"}
                 </button>
               </div>
 
               {/* Comment Input */}
-              <div style={{ padding: "12px 20px 16px", borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
+              <div style={{ padding: "12px 20px 16px", borderTop: `1px solid ${T.border}`, flexShrink: 0, background: T.bg }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-                  <Avatar initials="أن" color="#5b5ef7" size={36} />
+                  <Avatar initials={avatarInitials} color={avatarColor} size={36} />
                   <div style={{ flex: 1, position: "relative" }}>
-                    <textarea
+                    <textarea dir="auto"
                       value={newComment}
                       onChange={e => setNewComment(e.target.value)}
                       onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
-                      placeholder="أضف تعليقاً..."
+                      placeholder="Add a comment..."
                       rows={1}
-                      style={{ width: "100%", borderRadius: 14, border: `1.5px solid ${T.border2}`, padding: "10px 44px 10px 14px", fontSize: 14, fontFamily: "'Cairo',sans-serif", resize: "none", outline: "none", boxSizing: "border-box", lineHeight: 1.6, transition: "border 0.2s", background: T.surface, color: T.text }}
+                      style={{ width: "100%", borderRadius: 14, border: `1.5px solid ${T.border2}`, padding: "10px 14px", fontSize: 14, resize: "none", outline: "none", boxSizing: "border-box", lineHeight: 1.6, transition: "border 0.2s", background: T.surface, color: T.text }}
                       onFocus={e => e.target.style.borderColor = T.primary}
                       onBlur={e => e.target.style.borderColor = T.border2}
                     />
-                    <div style={{ position: "absolute", left: 10, bottom: 10, display: "flex", gap: 4 }}>
-                      <button onClick={() => setShowEmojis(s => !s)} style={{ background: "none", border: "none", cursor: "pointer", color: T.text3, padding: 2, display: "flex" }}>{ICONS.emoji}</button>
-                    </div>
-                    {showEmojis && (
-                      <div style={{ position: "absolute", bottom: "110%", left: 0, background: T.bg, border: `1.5px solid ${T.border2}`, borderRadius: 12, padding: "6px 8px", display: "flex", gap: 4, boxShadow: "0 8px 24px rgba(0,0,0,0.1)", zIndex: 20 }}>
-                        {EMOJIS.map(em => {
-                          const icon = REACTION_ICONS[em];
-                          return (
-                          <button key={em} onClick={() => { setNewComment(c => c + em); setShowEmojis(false); }}
-                            style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 8, transition: "background 0.1s", color: T.text, display: "flex" }}
-                            onMouseEnter={e => (e.target as HTMLElement).style.background = T.surface}
-                            onMouseLeave={e => (e.target as HTMLElement).style.background = "none"}>
-                            {icon || em}
-                          </button>
-                        );})}
-                      </div>
-                    )}
                   </div>
                   <button onClick={handleSubmitComment}
                     style={{ width: 40, height: 40, borderRadius: "50%", background: newComment.trim() ? T.primary : T.border2, border: "none", cursor: newComment.trim() ? "pointer" : "default", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", flexShrink: 0 }}>
@@ -711,6 +760,7 @@ export function PostDetailModal({
                   </button>
                 </div>
               </div>
+
             </div>
 
             <ReportModal open={showReportModal} onClose={() => setShowReportModal(false)} targetType="POST" targetId={post.id} />
@@ -724,7 +774,7 @@ export function PostDetailModal({
                 <div style={{
                   background: T.bg, borderRadius: 16, padding: 24, width: 320,
                   boxShadow: "0 16px 48px rgba(0,0,0,0.2)", position: "relative", zIndex: 1,
-                  textAlign: "center", fontFamily: "'Cairo',sans-serif",
+                  textAlign: "center",
                 }}>
                   <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", color: "#ef4444" }}>
                     <Prohibit size={24} weight="bold" />
@@ -733,11 +783,11 @@ export function PostDetailModal({
                   <p style={{ fontSize: 13, color: T.text2, margin: "0 0 20px" }}>Their posts will be hidden from you.</p>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button onClick={() => setShowBlockConfirm(false)}
-                      style={{ flex: 1, padding: "10px", border: `1.5px solid ${T.border2}`, borderRadius: 10, background: T.bg, cursor: "pointer", fontSize: 13, fontFamily: "'Cairo',sans-serif", color: T.text }}>
+                      style={{ flex: 1, padding: "10px", border: `1.5px solid ${T.border2}`, borderRadius: 10, background: T.bg, cursor: "pointer", fontSize: 13, color: T.text }}>
                       Cancel
                     </button>
                     <button onClick={handleBlockUser}
-                      style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: "#ef4444", color: "#fff", cursor: "pointer", fontSize: 13, fontFamily: "'Cairo',sans-serif", fontWeight: 600 }}>
+                      style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: "#ef4444", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
                       Block
                     </button>
                   </div>
@@ -750,7 +800,12 @@ export function PostDetailModal({
               * { box-sizing: border-box; }
               ::-webkit-scrollbar { width: 4px; }
               ::-webkit-scrollbar-track { background: transparent; }
-              ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+              ::-webkit-scrollbar-thumb { background: ${isDark ? "rgba(255,255,255,0.15)" : "#c4c7cc"}; border-radius: 4px; }
+              @keyframes ambientShift {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+              }
             `}</style>
           </motion.div>
         </>
@@ -768,7 +823,7 @@ function QuestionCarousel({ questions }: { questions: any[] }) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: "0.05em" }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" style={{ verticalAlign: "middle", marginLeft: 6 }}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          سؤال {qIdx + 1}/{questions.length}
+          Question {qIdx + 1}/{questions.length}
         </span>
         {questions.length > 1 && (
           <div style={{ display: "flex", gap: 4 }}>
