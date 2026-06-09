@@ -18,7 +18,7 @@ export function getYouTubeThumbnail(id: string): string {
 }
 
 export function getYouTubeEmbedUrl(id: string): string {
-  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&controls=1`;
 }
 
 export function extractYouTubeLinks(text: string): string[] {
