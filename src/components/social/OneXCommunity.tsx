@@ -16,6 +16,7 @@ import { ReportModal } from "./ReportModal";
 import { PullToRefresh } from "./PullToRefresh";
 import { Avatar } from "./Avatar";
 import { ActionBtn } from "./ActionBtn";
+import { getYouTubeId, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-utils";
 
 // ─── Portal ─────────────────────────────────────────────────────────────────
 
@@ -471,10 +472,31 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
         ) : (
           <>
             <div style={{ margin: 0, fontSize: 14, color: T.text2, lineHeight: 1.75 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }} />
-            {post.link && (
-              <a href={post.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-                style={{ fontSize: 13, color: T.accentL, textDecoration: "none", fontWeight: 600, wordBreak: "break-all" }}>{post.link}</a>
-            )}
+            {(() => {
+              const ytCandidate = post.link || post.content;
+              const ytId = getYouTubeId(ytCandidate);
+              if (ytId) return (
+                <div onClick={e => { e.stopPropagation(); window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank', 'noopener'); }}
+                  style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 300 }}>
+                  <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.3)", transition: "background .2s" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.45)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,0,0,0.3)"; }}>
+                    <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", transition: "transform .2s", boxShadow: "0 4px 20px rgba(255,0,0,0.4)" }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.1)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                  </div>
+                </div>
+              );
+              if (post.link) return (
+                <a href={post.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                  style={{ fontSize: 13, color: T.accentL, textDecoration: "none", fontWeight: 600, wordBreak: "break-all", marginTop: 8 }}>{post.link}</a>
+              );
+              return null;
+            })()}
             {(() => {
               const mediaUrls = collectMediaUrls(post);
               const fileAttachments = collectFiles(post);
@@ -993,10 +1015,29 @@ function PostModal({ post, onClose, currentUserId }: { post: any; onClose: () =>
         {tab === "post" && (
           <div style={{ flex: 1, overflowY: "auto" }}>
             <div style={{ margin: 0, fontSize: 14, color: T.text2, lineHeight: 1.8, fontFamily: FONT }} dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }} />
-            {post.link && (
-              <a href={post.link} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 13, color: T.accentL, textDecoration: "none", fontWeight: 600, wordBreak: "break-all" }}>{post.link}</a>
-            )}
+            {(() => {
+              const ytCandidate = post.link || post.content;
+              const ytId = getYouTubeId(ytCandidate);
+              if (ytId) return (
+                <div onClick={() => window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank', 'noopener')}
+                  style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 350 }}>
+                  <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.3)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.45)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,0,0,0.3)"; }}>
+                    <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px rgba(255,0,0,0.4)" }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                  </div>
+                </div>
+              );
+              if (post.link) return (
+                <a href={post.link} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 13, color: T.accentL, textDecoration: "none", fontWeight: 600, wordBreak: "break-all" }}>{post.link}</a>
+              );
+              return null;
+            })()}
             {(() => {
               const mediaUrls = collectMediaUrls(post);
               const fileAttachments = collectFiles(post);
@@ -1775,6 +1816,23 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
                 </div>
                 {/* Content */}
                 {post?.content && <div style={{ margin: 0, fontSize: 15, color: T.text2, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }} />}
+                {(() => {
+                  const ytCandidate = post?.link || post?.content || "";
+                  const ytId = getYouTubeId(ytCandidate);
+                  if (ytId) return (
+                    <div onClick={() => window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank', 'noopener')}
+                      style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer", marginTop: 8, background: T.bg, aspectRatio: "16/9", maxHeight: 300 }}>
+                      <img src={getYouTubeThumbnail(ytId)} alt="YouTube" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                        onError={e => { (e.currentTarget as HTMLElement).style.display = "none"; }} />
+                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.3)" }}>
+                        <div style={{ width: 50, height: 50, borderRadius: "50%", background: "rgba(255,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px rgba(255,0,0,0.4)" }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                  return null;
+                })()}
                 {/* Media & attachments: images, video, audio, files, link */}
                 {(() => {
                   const mediaUrls = collectMediaUrls(post);
