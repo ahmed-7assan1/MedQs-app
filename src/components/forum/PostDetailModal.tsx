@@ -199,7 +199,8 @@ export function PostDetailModal({
   const [saved, setSaved] = useState(false);
   const [sheet, setSheet] = useState<"share" | "delete" | null>(null);
   const [newComment, setNewComment] = useState("");
-  const [showEmojis, setShowEmojis] = useState(false);
+
+
   const [deleted, setDeleted] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<"post" | "comments">("post");
@@ -265,7 +266,6 @@ export function PostDetailModal({
       setActiveTab("post");
       setSheet(null);
       setNewComment("");
-      setShowEmojis(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, post.id]);
@@ -315,6 +315,24 @@ export function PostDetailModal({
     }
   };
 
+  const handleBlockUser = async () => {
+    try {
+      const res = await fetch("/api/v1/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blockedId: post.authorId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.blocked ? "User blocked" : "User unblocked");
+        setShowBlockConfirm(false);
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed");
+      }
+    } catch { toast.error("Network error"); }
+  };
+
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !currentUserId) return;
     const text = newComment.trim();
@@ -339,24 +357,6 @@ export function PostDetailModal({
       toast.error("Network error");
       setNewComment(text);
     }
-  };
-
-  const handleBlockUser = async () => {
-    try {
-      const res = await fetch("/api/v1/block", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blockedId: post.authorId }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.blocked ? "User blocked" : "User unblocked");
-        setShowBlockConfirm(false);
-      } else {
-        const err = await res.json();
-        toast.error(err.error || "Failed");
-      }
-    } catch { toast.error("Network error"); }
   };
 
   const canDelete = post.authorId === currentUserId ||
@@ -737,29 +737,29 @@ export function PostDetailModal({
                 )}
               </div>
 
-              {/* Comment Input */}
-              <div style={{ padding: "12px 20px 16px", borderTop: `1px solid ${T.border}`, flexShrink: 0, background: T.bg }}>
-                <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-                  <Avatar initials={avatarInitials} color={avatarColor} size={36} />
-                  <div style={{ flex: 1, position: "relative" }}>
-                    <textarea dir="auto"
-                      value={newComment}
-                      onChange={e => setNewComment(e.target.value)}
-                      onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
-                      placeholder="Add a comment..."
-                      rows={1}
-                      style={{ width: "100%", borderRadius: 14, border: `1.5px solid ${T.border2}`, padding: "10px 14px", fontSize: 14, resize: "none", outline: "none", boxSizing: "border-box", lineHeight: 1.6, transition: "border 0.2s", background: T.surface, color: T.text }}
-                      onFocus={e => e.target.style.borderColor = T.primary}
-                      onBlur={e => e.target.style.borderColor = T.border2}
-                    />
-                  </div>
-                  <button onClick={handleSubmitComment}
-                    style={{ width: 40, height: 40, borderRadius: "50%", background: newComment.trim() ? T.primary : T.border2, border: "none", cursor: newComment.trim() ? "pointer" : "default", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", flexShrink: 0 }}>
-                    {ICONS.send}
-                  </button>
-                </div>
-              </div>
+            </div>
 
+            {/* Comment input */}
+            <div style={{ padding: "12px 20px 16px", borderTop: `1px solid ${T.border}`, flexShrink: 0, background: T.bg }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                <div style={{ flex: 1, position: "relative", background: T.surface, border: `1.5px solid ${T.border2}`, borderRadius: 16, padding: "2px", transition: "border 0.2s" }}
+                  onFocusCapture={e => { if (e.target.closest('[style]')) (e.currentTarget as HTMLElement).style.borderColor = T.primary }}
+                  onBlurCapture={e => { if (e.target.closest('[style]')) (e.currentTarget as HTMLElement).style.borderColor = T.border2 }}
+                >
+                  <textarea dir="auto"
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
+                    placeholder="Broadcast your thoughts..."
+                    rows={1}
+                    style={{ width: "100%", background: "transparent", border: "none", padding: "10px 14px", fontSize: 14, resize: "none", outline: "none", boxSizing: "border-box", lineHeight: 1.6, color: T.text }}
+                  />
+                </div>
+                <button onClick={handleSubmitComment}
+                  style={{ width: 44, height: 44, borderRadius: "50%", background: newComment.trim() ? T.primary : T.border2, border: "none", cursor: newComment.trim() ? "pointer" : "default", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", flexShrink: 0 }}>
+                  {ICONS.send}
+                </button>
+              </div>
             </div>
 
             <ReportModal open={showReportModal} onClose={() => setShowReportModal(false)} targetType="POST" targetId={post.id} />
