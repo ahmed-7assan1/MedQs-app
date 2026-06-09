@@ -481,7 +481,7 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
                   <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 55, zIndex: 10, cursor: "default" }} />
                   <div style={{ position: "absolute", top: 0, left: 0, width: "60%", height: 55, zIndex: 10, cursor: "default" }} />
-                  <div style={{ position: "absolute", top: 55, right: 0, width: 320, bottom: 55, zIndex: 10, cursor: "default" }} />
+                  <div style={{ position: "absolute", top: 55, left: 0, right: 0, bottom: 55, zIndex: 10, cursor: "default" }} />
                   <div style={{ position: "absolute", bottom: 0, right: 0, width: 60, height: 55, zIndex: 10, cursor: "default" }} />
                 </div>
               ) : (
@@ -684,7 +684,7 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
                 </div>
                 <p style={{ fontSize: 16, fontWeight: 700, color: T.text1, margin: "0 0 4px" }}>Block @{post.author?.name}?</p>
-                <p style={{ fontSize: 12, color: T.text3, margin: "0 0 20px" }}>They won't be able to see or interact with your posts.</p>
+                <p style={{ fontSize: 12, color: T.text3, margin: "0 0 20px" }}>They won&apos;t be able to see or interact with your posts.</p>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => setShowBlockConfirm(false)} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "var(--ox-glass-input)", color: T.text2, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Cancel</button>
                   <button onClick={handleBlockUser} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: T.red, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Block</button>
@@ -1032,7 +1032,7 @@ function PostModal({ post, onClose, currentUserId }: { post: any; onClose: () =>
                 <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
                   <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                   <div style={{ position: "absolute", top: 0, left: 0, width: "60%", height: 55, zIndex: 10, cursor: "default" }} />
-                  <div style={{ position: "absolute", top: 55, right: 0, width: 320, bottom: 55, zIndex: 10, cursor: "default" }} />
+                  <div style={{ position: "absolute", top: 55, left: 0, right: 0, bottom: 55, zIndex: 10, cursor: "default" }} />
                   <div style={{ position: "absolute", bottom: 0, right: 0, width: 60, height: 55, zIndex: 10, cursor: "default" }} />
                 </div>
               ) : (
@@ -1199,7 +1199,7 @@ function PostModal({ post, onClose, currentUserId }: { post: any; onClose: () =>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
                 </div>
                 <p style={{ fontSize: 16, fontWeight: 700, color: T.text1, margin: "0 0 4px" }}>Block @{post.author?.name}?</p>
-                <p style={{ fontSize: 12, color: T.text3, margin: "0 0 20px" }}>They won't be able to see or interact with your posts.</p>
+                <p style={{ fontSize: 12, color: T.text3, margin: "0 0 20px" }}>They won&apos;t be able to see or interact with your posts.</p>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => setShowBlockConfirm(false)} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "var(--ox-glass-input)", color: T.text2, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Cancel</button>
                   <button onClick={handleBlockUserPost} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: T.red, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Block</button>
@@ -1841,7 +1841,7 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
                     <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", marginTop: 8, background: T.bg, aspectRatio: "16/9" }}>
                       <iframe src={getYouTubeEmbedUrl(ytId)} title="YouTube" style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                       <div style={{ position: "absolute", top: 0, left: 0, width: "60%", height: 55, zIndex: 10, cursor: "default" }} />
-                      <div style={{ position: "absolute", top: 55, right: 0, width: 320, bottom: 55, zIndex: 10, cursor: "default" }} />
+                      <div style={{ position: "absolute", top: 55, left: 0, right: 0, bottom: 55, zIndex: 10, cursor: "default" }} />
                       <div style={{ position: "absolute", bottom: 0, right: 0, width: 60, height: 55, zIndex: 10, cursor: "default" }} />
                     </div>
                   ) : (
@@ -2823,7 +2823,7 @@ export default function OneXCommunity({
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = T.accent; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = T.border; }}>
                     <span style={{ width: 30, height: 30, borderRadius: "50%", background: T.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 11, flexShrink: 0 }}>{getInitials(currentUserName || "You")}</span>
-                    <span>What's on your mind?</span>
+                    <span>What&apos;s on your mind?</span>
                     <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.text4} strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.text4} strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
@@ -2861,7 +2861,7 @@ export default function OneXCommunity({
                       className="flex flex-col gap-4"
                       endComponent={
                         <div style={{ padding: "40px 20px", textAlign: "center", opacity: 0.4 }}>
-                          <p style={{ fontSize: 12, fontWeight: 700, marginTop: 8, textTransform: "uppercase", letterSpacing: "0.05em", color: T.text3 }}>You've reached the end</p>
+                          <p style={{ fontSize: 12, fontWeight: 700, marginTop: 8, textTransform: "uppercase", letterSpacing: "0.05em", color: T.text3 }}>You&apos;ve reached the end</p>
                         </div>
                       }
                     >
