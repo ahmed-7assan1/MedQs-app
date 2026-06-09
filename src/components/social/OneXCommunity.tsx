@@ -2697,27 +2697,17 @@ export default function OneXCommunity({
               ))}
             </div>
 
-            {/* Circles — dots with first letter */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: "8px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+            {/* Circles rail — moved to bottom */}
+            <div style={{ flex: 1 }} />
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: "6px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
               {sortedCircles.slice(0, 6).map(c => (
                 <button key={c.id} onClick={() => setActiveCircle(c)}
-                  style={{ width: 30, height: 30, borderRadius: 10, cursor: "pointer", padding: 0, border: activeCircle?.id === c.id ? "none" : `2px solid ${T.text3}`, background: activeCircle?.id === c.id ? T.accentL : T.hover, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }}>
-                  <span style={{ fontSize: 10, color: "#fff", fontWeight: 700 }}>{c.name.charAt(0).toUpperCase()}</span>
+                  style={{ width: 28, height: 28, borderRadius: 10, cursor: "pointer", padding: 0, border: activeCircle?.id === c.id ? "none" : `2px solid ${T.text3}`, background: activeCircle?.id === c.id ? T.accentL : T.hover, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }}>
+                  <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>{c.name.charAt(0).toUpperCase()}</span>
                 </button>
               ))}
             </div>
 
-            {/* Buttons — compact */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <button onClick={() => setShowJoinRoom(true)}
-                style={{ width: 50, height: 36, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 12, border: `1px dashed ${T.border}`, background: "none", color: T.text3, cursor: "pointer" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              </button>
-              <button onClick={() => setShowCreateRoom(true)}
-                style={{ width: 50, height: 36, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 12, border: "none", background: T.accent, color: "#fff", cursor: "pointer" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </button>
-            </div>
           </aside>
 
           {/* ── CENTER FEED ── */}
@@ -2953,7 +2943,7 @@ export default function OneXCommunity({
           </main>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <aside className="ox-sidebar ox-right-sidebar" style={{ position: "sticky", top: 0, alignSelf: "flex-start", display: "flex", flexDirection: "column", gap: 20, maxHeight: "100%", overflowY: "auto", overflowX: "hidden", zIndex: 1, padding: "4px 0 24px 0", scrollbarWidth: "thin" }}>
+          <aside className="ox-sidebar ox-right-sidebar" style={{ position: "sticky", top: 0, alignSelf: "flex-start", display: "flex", flexDirection: "column", gap: 16, maxHeight: "calc(100vh - 100px)", overflowY: "auto", overflowX: "hidden", zIndex: 1, padding: "4px 0 4px 0", scrollbarWidth: "thin" }}>
             {/* Search Bar */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", background: T.surface, border: `1px solid ${T.border}`, borderRadius: 14, transition: "border-color .15s" }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = T.accent}
@@ -2968,9 +2958,9 @@ export default function OneXCommunity({
             </div>
 
             {/* Trending */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 30, position: "relative", overflow: "hidden" }}>
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 20, position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: "-40%", right: "-20%", width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, hsl(0 100% 50% / 0.04), transparent 70%)", pointerEvents: "none" }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, position: "relative" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, position: "relative" }}>
                 <div style={{ width: 26, height: 26, borderRadius: 10, background: "linear-gradient(135deg, rgba(232,64,64,.15), rgba(232,64,64,.05))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84040" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg></div>
                 <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", color: T.text3, textTransform: "uppercase" }}>Trending Now</span>
                 <div style={{ marginLeft: "auto", display: "flex", gap: 3 }}>
@@ -2980,24 +2970,31 @@ export default function OneXCommunity({
                 </div>
               </div>
               {trendingTags.length === 0 ? (
-                <p style={{ fontSize: 12, color: T.text3, textAlign: "center", padding: "16px 0" }}>No trends yet</p>
-              ) : trendingTags.slice(0, 5).map((tag: any, i: number) => (
-                <div key={tag.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderRadius: 12, cursor: "pointer", transition: "background .15s", border: "1px solid transparent" }}
+                <p style={{ fontSize: 12, color: T.text3, textAlign: "center", padding: "24px 0" }}>No trends yet</p>
+              ) : trendingTags.slice(0, 6).map((tag: any, i: number) => (
+                <div key={tag.id} onClick={() => { setSearchQuery(`#${tag.name}`); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderRadius: 12, cursor: "pointer", transition: "all .15s", border: "1px solid transparent", marginBottom: 4 }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.hover; (e.currentTarget as HTMLElement).style.borderColor = T.border; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "none"; (e.currentTarget as HTMLElement).style.borderColor = "transparent"; }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: T.text1 }}>#{tag.name}</div>
-                    <div style={{ fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: ".06em" }}>{tag.count || tag.posts || "0"} DISCUSSION{i > 0 ? "S" : ""}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: T.text4, minWidth: 16 }}>#{i + 1}</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: T.text1 }}>#{tag.name}</div>
+                      <div style={{ fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: ".06em" }}>{tag.count || tag.posts || "0"} DISCUSSION{Number(tag.count || tag.posts || 0) !== 1 ? "S" : ""}</div>
+                    </div>
                   </div>
-                  <span style={{ color: T.text4, fontSize: 16 }}>›</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {tag.hot && <span style={{ fontSize: 9, fontWeight: 700, color: "#e84040", letterSpacing: ".06em" }}>HOT</span>}
+                    <span style={{ color: T.text4, fontSize: 16 }}>›</span>
+                  </div>
                 </div>
               ))}
             </div>
 
             {/* Study Rooms */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 30, position: "relative", overflow: "hidden" }}>
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 20, position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", bottom: "-30%", left: "-20%", width: 140, height: 140, borderRadius: "50%", background: "radial-gradient(circle, hsl(var(--primary) / 0.04), transparent 70%)", pointerEvents: "none" }} />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, position: "relative" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, position: "relative" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 26, height: 26, borderRadius: 10, background: "hsl(var(--primary) / 0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", color: T.text3, textTransform: "uppercase" }}>My Study Rooms</span>
@@ -3012,31 +3009,31 @@ export default function OneXCommunity({
                   <div style={{ fontSize: 10, color: T.text4, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 8 }}>{myJoinedRooms.length} ACTIVE ROOM{myJoinedRooms.length !== 1 ? "S" : ""}</div>
                   {myJoinedRooms.slice(0, 4).map(room => (
                     <Link key={room.id} href={`/rooms/${room.id}`} style={{ textDecoration: "none" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", background: T.bg, borderRadius: 12, cursor: "pointer", border: `1px solid ${T.border}`, transition: "border-color .15s", marginBottom: 12 }}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", background: T.bg, borderRadius: 12, cursor: "pointer", border: `1px solid ${T.border}`, transition: "border-color .15s", marginBottom: 10 }}
                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = T.border2}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = T.border}>
                         <div>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: T.text1, display: "flex", alignItems: "center", gap: 6 }}>{room.isPublic ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>} {room.name}</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: T.text1, display: "flex", alignItems: "center", gap: 6 }}>{room.isPublic ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>} {room.name}</div>
                           <div style={{ fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: ".06em" }}>{room._count.members} MEMBER{room._count.members !== 1 ? "S" : ""}</div>
                         </div>
-                        <div style={{ width: 26, height: 26, borderRadius: 8, background: T.hover, display: "flex", alignItems: "center", justifyContent: "center", color: T.accent, fontSize: 14 }}>›</div>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: T.hover, display: "flex", alignItems: "center", justifyContent: "center", color: T.accent, fontSize: 14 }}>›</div>
                       </div>
                     </Link>
                   ))}
                 </>
               ) : (
-                <p style={{ fontSize: 12, color: T.text3, textAlign: "center", padding: "16px 0" }}>No rooms joined yet</p>
+                <p style={{ fontSize: 12, color: T.text3, textAlign: "center", padding: "24px 0" }}>No rooms joined yet</p>
               )}
               <button onClick={() => setShowJoinRoom(true)}
-                style={{ width: "100%", marginTop: 10, padding: "8px", borderRadius: 12, border: `1px dashed ${T.border}`, background: "none", color: T.accent, fontFamily: FONT, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                style={{ width: "100%", marginTop: 10, padding: "10px", borderRadius: 12, border: `1px dashed ${T.border}`, background: "none", color: T.accent, fontFamily: FONT, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                 + Join a Room
               </button>
             </div>
 
             {/* My Groups */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 30, position: "relative", overflow: "hidden" }}>
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 20, position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: "-20%", left: "-10%", width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle, hsl(var(--success) / 0.04), transparent 70%)", pointerEvents: "none" }} />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, position: "relative" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, position: "relative" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 26, height: 26, borderRadius: 10, background: "hsl(var(--success) / 0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success))" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", color: T.text3, textTransform: "uppercase" }}>My Groups</span>
@@ -3053,7 +3050,7 @@ export default function OneXCommunity({
                     const isOwner = gm.role === "OWNER" || gm.group.ownerId === currentUserId;
                     return (
                       <div key={gm.id}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", background: T.bg, borderRadius: 12, cursor: "pointer", border: `1px solid ${T.border}`, transition: "border-color .15s", marginBottom: 12 }}>
+                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", background: T.bg, borderRadius: 12, cursor: "pointer", border: `1px solid ${T.border}`, transition: "border-color .15s", marginBottom: 10 }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 12, fontWeight: 600, color: T.text1, display: "flex", alignItems: "center", gap: 6 }}>
                             {gm.group.isPublic
@@ -3081,20 +3078,20 @@ export default function OneXCommunity({
                   })}
                 </>
               ) : (
-                <p style={{ fontSize: 12, color: T.text3, textAlign: "center", padding: "16px 0" }}>No groups yet. Create one!</p>
+                <p style={{ fontSize: 12, color: T.text3, textAlign: "center", padding: "24px 0" }}>No groups yet. Create one!</p>
               )}
             </div>
 
             {/* Suggested Friends */}
             {suggestedUsers.length > 0 && (
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 30, maxHeight: 520, minHeight: 200, overflowY: "auto" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 20, maxHeight: 520, minHeight: 200, overflowY: "auto" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                   <div style={{ width: 24, height: 24, borderRadius: 8, background: "rgba(245,166,35,.15)", display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", color: T.text3, textTransform: "uppercase" }}>Suggested Friends</span>
                 </div>
                 {suggestedUsers.slice(0, 5).map((u: any) => (
                   <div key={u.id}
-                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", borderRadius: 12, marginBottom: 6 }}>
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, marginBottom: 4 }}>
                     <div style={{ position: "relative" }}>
                       <Avatar initials={getInitials(u.name)} color={getColor(u.name)} size={36} image={u.image} />
                       {u.isOnline && <div style={{ position: "absolute", bottom: 0, right: 0, width: 10, height: 10, borderRadius: "50%", background: "#22c55e", border: `2px solid ${T.surface}` }} />}
@@ -3107,14 +3104,14 @@ export default function OneXCommunity({
 
             {/* Suggested Groups */}
             {groups.publicGroups.length > 0 && (
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 30, maxHeight: 520, minHeight: 200, overflowY: "auto" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 20, maxHeight: 520, minHeight: 200, overflowY: "auto" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                   <div style={{ width: 24, height: 24, borderRadius: 8, background: "rgba(91,94,247,.15)", display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", color: T.text3, textTransform: "uppercase" }}>Suggested Groups</span>
                 </div>
                 {groups.publicGroups.slice(0, 5).map((g: any) => (
                   <div key={g.id}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 18px", borderRadius: 12, marginBottom: 6 }}>
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, marginBottom: 4 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: T.text1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{g.name}</div>
                       <div style={{ fontSize: 10, color: T.text3 }}>{g._count.members} members</div>
