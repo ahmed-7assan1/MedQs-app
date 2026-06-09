@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BookOpen, HelpCircle, Layers, Zap,
   MessageSquare, Users, Settings, Megaphone, Video, Youtube,
-  FileText, GraduationCap, Copy, Library, ArrowRightLeft, Sparkles, Wand2
+  FileText, GraduationCap, Copy, Library, ArrowRightLeft, Sparkles, Wand2, Flag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +48,7 @@ const NAV_GROUPS: {
       { href: "/admin/founders",   label: "Founders",   icon: GraduationCap },
       { href: "/admin/forum",      label: "Community",  icon: MessageSquare },
       { href: "/admin/ads",        label: "Ads",        icon: Megaphone },
+      { href: "/admin/social-reports", label: "Reports", icon: Flag, badge: "NEW" },
       { href: "/admin/settings",   label: "Settings", icon: Settings },
       { href: "/admin/audit-logs", label: "Audit Logs", icon: Copy, badge: "SEC" },
       { href: "/admin/telegram",   label: "Telegram Bot", icon: MessageSquare },

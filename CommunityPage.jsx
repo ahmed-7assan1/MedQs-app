@@ -384,38 +384,6 @@ function Modal({ post, onClose }) {
   );
 }
 
-// ─── CLOCK WIDGET ─────────────────────────────────────────────────────────────
-function ClockWidget() {
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
-  useEffect(() => {
-    const tick = () => {
-      const n = new Date();
-      let h = n.getHours(), m = n.getMinutes(), ampm = h >= 12 ? "PM" : "AM";
-      h = h % 12 || 12;
-      setTime(`${h < 10 ? "0" + h : h}:${m < 10 ? "0" + m : m} ${ampm}`);
-      const days = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
-      const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-      setDate(`${days[n.getDay()]} ${n.getDate()} ${months[n.getMonth()]}`);
-    };
-    tick(); const id = setInterval(tick, 1000); return () => clearInterval(id);
-  }, []);
-  return (
-    <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 18 }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ fontSize: 32, fontWeight: 700, color: T.text1, letterSpacing: "-.02em", lineHeight: 1 }}>{time}</div>
-            <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, letterSpacing: ".08em", background: "rgba(16,163,127,.15)", color: "#34d399" }}>ACTIVE</span>
-          </div>
-          <div style={{ fontSize: 11, color: T.text3, fontWeight: 600, letterSpacing: ".1em", marginTop: 6 }}>{date}</div>
-        </div>
-        <div style={{ fontSize: 28 }}>🔥</div>
-      </div>
-    </div>
-  );
-}
-
 // ─── COMMUNITY PAGE ───────────────────────────────────────────────────────────
 export default function CommunityPage() {
   const [activeCircle, setActiveCircle] = useState("general");
@@ -556,8 +524,6 @@ export default function CommunityPage() {
 
         {/* ── RIGHT SIDEBAR ── */}
         <aside style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <ClockWidget />
-
           {/* Trending */}
           <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: 18 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>

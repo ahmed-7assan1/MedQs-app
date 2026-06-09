@@ -5,6 +5,6 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 
 export function ConditionalFooter() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/ai-chat") || pathname?.startsWith("/drawmed")) return null;
+  if (pathname?.startsWith("/ai-chat") || pathname?.startsWith("/drawmed") || pathname?.startsWith("/social")) return null;
   return <SiteFooter />;
 }

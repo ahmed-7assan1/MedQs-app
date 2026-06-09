@@ -33,12 +33,19 @@ export async function GET(req: NextRequest) {
     followingIds = Array.from(new Set([scope.userId, ...rows.map((r) => r.followingId)]));
   }
 
+  const blockedIds = await prisma.blockedUser.findMany({
+    where: { userId: scope.userId },
+    select: { blockedId: true },
+  });
+  const blockedSet = new Set(blockedIds.map(b => b.blockedId));
+
   const posts = await prisma.post.findMany({
     where: {
       forumId,
       universityId: scope.universityId,
       // isForumPost: true, // Removed due to temporary type mismatch
       ...(followingIds ? { authorId: { in: followingIds } } : {}),
+      authorId: blockedSet.size > 0 ? { notIn: [...blockedSet] } : undefined,
       OR: [
         { audience: "UNIVERSITY" },
         {

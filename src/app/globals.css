@@ -28,6 +28,17 @@
 
     --success: 162 100% 45%; /* #00e5a0 */
     --warning: 36 100% 64%; /* #ffb547 */
+
+    /* Mobile Specific — same as light mode vars */
+    --mob-bg: #f0f2ff;
+    --mob-card: #ffffff;
+    --mob-elevated: #f7f8ff;
+    --mob-primary: #4f5fff;
+    --mob-secondary: #7b5fff;
+    --mob-cyan: #00d4ff;
+    --mob-text: #0d0f1a;
+    --mob-muted: #5a5f7a;
+    --mob-very-muted: #b0b4cc;
   }
 
   .dark {
@@ -167,7 +178,7 @@
   scrollbar-width: none;
 }
 /* Override Tailwind arbitrary white border utilities for cleaner UI */
-[class*="border-white/"] { border-color: transparent !important; }
+/* [class*="border-white/"] { border-color: transparent !important; } — REMOVED: kills all white borders globally */
 
 /* Reduced motion support for users who prefer reduced animation */
 @media (prefers-reduced-motion: reduce) {
