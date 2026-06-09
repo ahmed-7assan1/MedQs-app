@@ -670,10 +670,59 @@ export function PostDetailModal({
                     <ReactionBar reactions={reactionCounts} onReact={(emoji) => handleReact(emoji)} T={T} />
 
                     {/* Stats */}
-                    <div style={{ display: "flex", gap: 16, paddingTop: 4, borderTop: `1px solid ${T.border}` }}>
-                      <span style={{ fontSize: 13, color: T.text2 }}>{reactions.length} Likes</span>
-                      <span style={{ fontSize: 13, color: T.text2 }}>{commentCount} Comments</span>
-                      <span style={{ fontSize: 13, color: T.text2 }}>0 Shares</span>
+                    <div style={{ display: "flex", gap: 16, paddingTop: 4, borderTop: `1px solid ${T.border}`, fontSize: 13, color: T.text2 }}>
+                      <span>{reactions.length} Likes</span>
+                      <span>{commentCount} Comments</span>
+                      <span>0 Shares</span>
+                    </div>
+
+                    {/* Action bar — icons only */}
+                    <div style={{ display: "flex", gap: 2, paddingTop: 2 }}>
+                      <div style={{ position: "relative" }}
+                        onMouseEnter={() => { if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) setShowLikePicker(true); }}
+                        onMouseLeave={() => { if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) setShowLikePicker(false); }}
+                      >
+                        <button onClick={(e) => {
+                          const coarse = typeof window !== "undefined" && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+                          if (coarse) { e.preventDefault(); setShowLikePicker(s => !s); return; }
+                          handleReact(myReaction ? null : "LIKE");
+                        }}
+                          style={{ width: 42, height: 38, border: "none", borderRadius: 10, cursor: "pointer", background: myReaction ? T.accentBg : "transparent", color: myReaction ? T.primary : T.text3, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
+                          {myReaction ? (REACTION_ITEMS.find(r => r.type === myReaction)?.icon || ICONS.heart(false)) : ICONS.heart(false)}
+                        </button>
+                        <AnimatePresence>
+                          {showLikePicker && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                              style={{ position: "absolute", bottom: "100%", left: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 4, background: T.bg, border: `1px solid ${T.border2}`, borderRadius: 20, padding: "6px 10px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 20 }}
+                            >
+                              {REACTION_ITEMS.map(item => (
+                                <button key={item.type} onClick={() => handleReact(item.type)}
+                                  style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: "50%", transition: "all 0.15s", color: item.color, display: "flex", alignItems: "center", justifyContent: "center" }}
+                                  onMouseEnter={e => (e.target as HTMLElement).style.transform = "scale(1.25)"}
+                                  onMouseLeave={e => (e.target as HTMLElement).style.transform = "scale(1)"}
+                                >
+                                  {item.icon}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                      <button onClick={() => setActiveTab("comments")}
+                        style={{ width: 42, height: 38, border: "none", borderRadius: 10, cursor: "pointer", background: "transparent", color: T.text3, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
+                        {ICONS.comment}
+                      </button>
+                      <button onClick={() => setSheet(s => s === "share" ? null : "share")}
+                        style={{ width: 42, height: 38, border: "none", borderRadius: 10, cursor: "pointer", background: "transparent", color: sheet === "share" ? T.primary : T.text3, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
+                        {ICONS.share}
+                      </button>
+                      <button onClick={() => setSaved(s => !s)}
+                        style={{ width: 42, height: 38, border: "none", borderRadius: 10, cursor: "pointer", background: "transparent", color: saved ? T.primary : T.text3, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
+                        {ICONS.bookmark(saved)}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -686,56 +735,6 @@ export function PostDetailModal({
                     initialCount={commentCount}
                   />
                 )}
-              </div>
-
-              {/* Action Bar */}
-              <div style={{ padding: "12px 20px", borderTop: `1px solid ${T.border}`, display: "flex", gap: 4, flexShrink: 0, position: "sticky", bottom: 0, background: T.bg, zIndex: 10 }}>
-                <div style={{ flex: 1, position: "relative" }}
-                  onMouseEnter={() => { if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) setShowLikePicker(true); }}
-                  onMouseLeave={() => { if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) setShowLikePicker(false); }}
-                >
-                  <button onClick={(e) => {
-                    const coarse = typeof window !== "undefined" && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-                    if (coarse) { e.preventDefault(); setShowLikePicker(s => !s); return; }
-                    handleReact(myReaction ? null : "LIKE");
-                  }}
-                    style={{ width: "100%", padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: myReaction ? T.accentBg : T.surface, color: myReaction ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s", fontWeight: myReaction ? 700 : 400 }}>
-                    {myReaction ? (REACTION_ITEMS.find(r => r.type === myReaction)?.icon || ICONS.heart(false)) : ICONS.heart(false)}
-                    {myReaction ? (REACTION_ITEMS.find(r => r.type === myReaction)?.label || "Like") : "Like"}
-                  </button>
-                  <AnimatePresence>
-                    {showLikePicker && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        style={{ position: "absolute", bottom: "100%", left: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 4, background: T.bg, border: `1px solid ${T.border2}`, borderRadius: 20, padding: "6px 10px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 20 }}
-                      >
-                        {REACTION_ITEMS.map(item => (
-                          <button key={item.type} onClick={() => handleReact(item.type)}
-                            style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: "50%", transition: "all 0.15s", color: item.color, display: "flex", alignItems: "center", justifyContent: "center" }}
-                            onMouseEnter={e => (e.target as HTMLElement).style.transform = "scale(1.25)"}
-                            onMouseLeave={e => (e.target as HTMLElement).style.transform = "scale(1)"}
-                          >
-                            {item.icon}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <button onClick={() => setActiveTab("comments")}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: T.surface, color: T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s" }}>
-                  {ICONS.comment} Comment
-                </button>
-                <button onClick={() => setSheet(s => s === "share" ? null : "share")}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: sheet === "share" ? T.accentBg : T.surface, color: sheet === "share" ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s" }}>
-                  {ICONS.share} Share
-                </button>
-                <button onClick={() => setSaved(s => !s)}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 12, cursor: "pointer", background: saved ? T.accentBg : T.surface, color: saved ? T.primary : T.text2, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, transition: "all 0.15s", fontWeight: saved ? 700 : 400 }}>
-                  {ICONS.bookmark(saved)} {saved ? "Saved" : "Save"}
-                </button>
               </div>
 
               {/* Comment Input */}
