@@ -51,7 +51,7 @@ export function CreateRoomModal({ isOpen, onClose, onSuccess }: CreateRoomModalP
       });
       const data = await res.json();
       if (!res.ok) return toast.error(data.error || "Failed to create room");
-      toast.success("Room created successfully! 🎉");
+      toast.success("Room created successfully!");
       onSuccess(data);
       onClose();
       reset();

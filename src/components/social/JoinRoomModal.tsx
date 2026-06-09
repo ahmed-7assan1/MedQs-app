@@ -28,7 +28,7 @@ export function JoinRoomModal({ isOpen, onClose, onSuccess }: JoinRoomModalProps
       });
       const data = await res.json();
       if (!res.ok) return toast.error(data.error || "فشل الانضمام");
-      toast.success("انضممت للروم بنجاح! 🎉");
+      toast.success("انضممت للروم بنجاح!");
       onSuccess?.(data.roomId);
       onClose();
       router.push(`/rooms/${data.roomId}`);
