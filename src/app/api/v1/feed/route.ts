@@ -33,11 +33,14 @@ export async function GET(req: NextRequest) {
     followingIds = Array.from(new Set([scope.userId, ...rows.map((r) => r.followingId)]));
   }
 
-  const blockedIds = await prisma.blockedUser.findMany({
-    where: { userId: scope.userId },
-    select: { blockedId: true },
-  });
-  const blockedSet = new Set(blockedIds.map(b => b.blockedId));
+  let blockedSet = new Set<string>();
+  try {
+    const blockedIds = await prisma.blockedUser.findMany({
+      where: { userId: scope.userId },
+      select: { blockedId: true },
+    });
+    blockedSet = new Set(blockedIds.map(b => b.blockedId));
+  } catch { /* table may not exist yet */ }
 
   const posts = await prisma.post.findMany({
     where: {

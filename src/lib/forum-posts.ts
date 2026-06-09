@@ -97,11 +97,14 @@ export async function loadForumPostsForUser(options: {
 
     const skip = (Math.max(1, page) - 1) * limit;
 
-    const blockedIds = await prisma.blockedUser.findMany({
-      where: { userId },
-      select: { blockedId: true },
-    });
-    const blockedSet = new Set(blockedIds.map(b => b.blockedId));
+    let blockedSet = new Set<string>();
+    try {
+      const blockedIds = await prisma.blockedUser.findMany({
+        where: { userId },
+        select: { blockedId: true },
+      });
+      blockedSet = new Set(blockedIds.map(b => b.blockedId));
+    } catch { /* table may not exist yet */ }
 
     let posts: PostRow[];
 
