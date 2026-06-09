@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const result = await generateAIReplyWithFallback(
       `Please enhance this post content:\n\n${content}`,
       systemPrompt,
-      { preferredProvider: "proxy" }
+      { preferredProvider: "siliconflow" }
     );
 
     return NextResponse.json({ enhanced: result.text.trim() });

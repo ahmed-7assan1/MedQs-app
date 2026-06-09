@@ -97,6 +97,12 @@ export async function loadForumPostsForUser(options: {
 
     const skip = (Math.max(1, page) - 1) * limit;
 
+    const blockedIds = await prisma.blockedUser.findMany({
+      where: { userId },
+      select: { blockedId: true },
+    });
+    const blockedSet = new Set(blockedIds.map(b => b.blockedId));
+
     let posts: PostRow[];
 
     try {
@@ -106,6 +112,7 @@ export async function loadForumPostsForUser(options: {
           universityId: viewer.universityId,
           isChatMessage,
           isForumPost,
+          authorId: { notIn: [...blockedSet] },
           OR: [
             { audience: "UNIVERSITY" },
             {

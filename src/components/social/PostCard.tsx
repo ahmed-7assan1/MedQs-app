@@ -2,38 +2,23 @@
 
 import Link from "next/link";
 import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
-import { 
-  Heart, 
-  ChatCircle, 
-  ShareNetwork, 
-  DotsThreeOutline, 
-  PushPin, 
-  Trash, 
-  BookmarkSimple, 
-  ShieldCheck, 
-  Crown, 
-  FileText, 
-  ChartBar, 
-  Microphone, 
-  Play, 
-  Pause, 
-  ArrowLeft, 
-  ArrowRight, 
-  X as XIcon,
-  Video as VideoIcon,
-  PencilSimple
+import {
+  Heart,
+  ChatCircle,
+  BookmarkSimple,
+  ShareNetwork,
+  Trash,
+  PencilSimple,
+  CircleNotch,
+  Flag,
+  Prohibit
 } from "@phosphor-icons/react";
 import React, { useState, useRef, useMemo } from "react";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import { PostDetailModal } from "@/components/forum/PostDetailModal";
 
-const REACTION_MAP: Record<string, { emoji: string; label: string; color: string }> = {
-  LIKE: { emoji: "👍", label: "Like", color: "text-blue-500" },
-  LOVE: { emoji: "❤️", label: "Love", color: "text-red-500" },
-  SUPPORT: { emoji: "🤝", label: "Support", color: "text-emerald-500" },
-  SMART: { emoji: "🧠", label: "Smart", color: "text-indigo-500" },
-  CONFUSED: { emoji: "❓", label: "Confused", color: "text-amber-500" },
-  IDEA: { emoji: "💡", label: "Idea", color: "text-yellow-500" },
+const REACTION_MAP: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
+  LIKE: { icon: <Heart size={18} weight="fill" />, label: "Like", color: "text-red-500" },
 };
 
 function renderContentAndMentions(text: string) {
@@ -60,6 +45,7 @@ import { CommentSection } from "./CommentSection";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { ReportModal } from "./ReportModal";
 
 interface Props {
   post: any;
@@ -69,7 +55,7 @@ interface Props {
   isRoomPost?: boolean;
 }
 
-export const PostCard = React.memo(({
+const PostCardInner = ({
   post,
   currentUserId,
   currentUserRole,
@@ -90,6 +76,13 @@ export const PostCard = React.memo(({
 
   const [reactions, setReactions] = useState<{ type: string; userId: string }[]>(post.reactions || []);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+
+  const [showReactionDetail, setShowReactionDetail] = useState(false);
+  const [reactionUsers, setReactionUsers] = useState<{ type: string; user: { name: string; image?: string } }[]>([]);
+  const [loadingReactions, setLoadingReactions] = useState(false);
+
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content || "");
@@ -178,8 +171,6 @@ export const PostCard = React.memo(({
     }
   };
 
-  if (isDeleted) return null;
-
   const avatarUrl = post.author?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author?.name || "user")}`;
 
   const attachments = (() => {
@@ -216,6 +207,8 @@ export const PostCard = React.memo(({
     const match = postContent.match(/https?:\/\/(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]+)\/(\d+)/i);
     return match ? match[0] : null;
   }, [postContent, attachments]);
+
+  if (isDeleted) return null;
 
   const canDelete =
     post.authorId === currentUserId ||
@@ -274,6 +267,24 @@ export const PostCard = React.memo(({
       await navigator.clipboard.writeText(url);
       toast.success("Link copied!");
     } catch { toast.error("Could not copy link"); }
+  };
+
+  const handleBlockUser = async () => {
+    try {
+      const res = await fetch("/api/v1/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blockedId: post.authorId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.blocked ? "User blocked" : "User unblocked");
+        setShowBlockConfirm(false);
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed");
+      }
+    } catch { toast.error("Network error"); }
   };
 
   return (
@@ -335,6 +346,12 @@ export const PostCard = React.memo(({
                     <button onClick={() => { setShowOptions(false); setIsEditing(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-500 dark:text-white/50 hover:bg-primary/5 hover:text-primary transition-all text-[13px] font-bold"><PencilSimple size={18} weight="bold" /> Edit post</button>
                   )}
                   {canDelete && <button onClick={() => { setShowOptions(false); setShowDeleteConfirm(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-500/10 transition-all text-[13px] font-bold"><Trash size={18} weight="bold" /> Delete post</button>}
+                  {post.authorId !== currentUserId && (
+                    <>
+                      <button onClick={() => { setShowOptions(false); setShowReportModal(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-amber-500 hover:bg-amber-500/10 transition-all text-[13px] font-bold"><Flag size={18} weight="bold" /> Report post</button>
+                      <button onClick={() => { setShowOptions(false); setShowBlockConfirm(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-500/10 transition-all text-[13px] font-bold"><Prohibit size={18} weight="bold" /> Block @{post.author?.name}</button>
+                    </>
+                  )}
                 </motion.div>
               </>
             )}
@@ -516,7 +533,7 @@ export const PostCard = React.memo(({
                   </div>
                   {selectedQaIdx !== null && (
                     <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-[10px] text-slate-400 dark:text-white/20 font-black uppercase tracking-widest mt-5 text-center">
-                      {options[selectedQaIdx] === data.correctAnswer ? "✨ Signal Verified - Correct!" : "📡 Signal Jammed - Incorrect"}
+                      {options[selectedQaIdx] === data.correctAnswer ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{marginRight:4}}><polyline points="20 6 9 17 4 12"/></svg> Signal Verified - Correct!</> : <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight:4}}><circle cx="12" cy="12" r="10"/><line x1="22" y1="2" x2="2" y2="22"/></svg> Signal Jammed - Incorrect</>}
                     </motion.p>
                   )}
                 </div>
@@ -641,12 +658,22 @@ export const PostCard = React.memo(({
                   {Object.keys(reactionCounts)
                     .slice(0, 3)
                     .map((type) => (
-                      <span key={type} className="text-[14px]">
-                        {REACTION_MAP[type]?.emoji}
+                      <span key={type} className="flex">
+                        {REACTION_MAP[type]?.icon}
                       </span>
                     ))}
                 </div>
-                <span className="font-bold text-slate-600 dark:text-white/50">{reactions.length}</span>
+                <button onClick={async () => {
+                  setShowReactionDetail(true);
+                  setLoadingReactions(true);
+                  try {
+                    const res = await fetch(`/api/v1/posts/${post.id}/reactions`);
+                    if (res.ok) setReactionUsers(await res.json());
+                  } catch {}
+                  setLoadingReactions(false);
+                }} className="font-bold text-slate-600 dark:text-white/50 hover:text-primary transition-colors">
+                  {reactions.length}
+                </button>
               </>
             )}
           </div>
@@ -691,7 +718,7 @@ export const PostCard = React.memo(({
             )}
           >
             {myReaction ? (
-              <span className="text-base sm:text-[18px]">{REACTION_MAP[myReaction]?.emoji}</span>
+              <span className="flex">{REACTION_MAP[myReaction]?.icon}</span>
             ) : (
               <Heart className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" />
             )}
@@ -714,10 +741,10 @@ export const PostCard = React.memo(({
                     <button
                       key={type}
                       onClick={() => handleReact(type)}
-                      className="text-xl sm:text-2xl transition-all hover:scale-125 active:scale-95 duration-200"
+                      className="transition-all hover:scale-125 active:scale-95 duration-200 p-1 text-slate-600 dark:text-white/70"
                       title={info.label}
                     >
-                      {info.emoji}
+                      {info.icon}
                     </button>
                   ))}
                 </motion.div>
@@ -755,7 +782,51 @@ export const PostCard = React.memo(({
         )}
       </AnimatePresence>
 
+      {/* Reaction Detail Modal */}
+      <AnimatePresence>
+        {showReactionDetail && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm" onClick={() => setShowReactionDetail(false)} />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-4 md:inset-x-auto md:top-1/4 md:bottom-auto md:left-1/2 md:-translate-x-1/2 z-[9999] max-w-[380px] w-full bg-white dark:bg-[#161523] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl max-h-[60vh] flex flex-col">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/[0.04]">
+                <span className="text-[13px] font-black text-slate-800 dark:text-white/90">Reactions ({reactions.length})</span>
+                <button onClick={() => setShowReactionDetail(false)} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {loadingReactions ? (
+                  <div className="flex justify-center py-10"><motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}><CircleNotch size={24} className="text-primary/40" /></motion.div></div>
+                ) : reactionUsers.length === 0 ? (
+                  <p className="text-center py-10 text-xs font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">No reactions yet</p>
+                ) : (
+                  reactionUsers.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                      <img src={item.user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(item.user.name)}`} className="h-8 w-8 rounded-full border border-slate-200 dark:border-white/10 object-cover" alt="" />
+                      <span className="flex-1 text-[13px] font-bold text-slate-700 dark:text-white/80">{item.user.name}</span>
+                      <span className="flex">{REACTION_MAP[item.type]?.icon}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <ConfirmModal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} onConfirm={handleDelete} title="Delete Post?" message="This action cannot be undone." confirmText={deleting ? "Deleting..." : "Delete"} variant="danger" />
+
+      <ReportModal open={showReportModal} onClose={() => setShowReportModal(false)} targetType="POST" targetId={post.id} />
+
+      <ConfirmModal
+        isOpen={showBlockConfirm}
+        onClose={() => setShowBlockConfirm(false)}
+        onConfirm={handleBlockUser}
+        title="Block user?"
+        message={`Are you sure you want to block @${post.author?.name}? Their posts and comments will be hidden from you.`}
+        confirmText="Block"
+        variant="danger"
+      />
 
       {/* Image Lightbox */}
       {lightboxIndex !== null && (
@@ -776,7 +847,9 @@ export const PostCard = React.memo(({
       />
     </motion.div>
   );
-});
+};
+
+export const PostCard = React.memo(PostCardInner);
 
 function InteractiveAudioPlayer({ url, duration }: { url: string; duration?: number }) {
   const [playing, setPlaying] = useState(false);

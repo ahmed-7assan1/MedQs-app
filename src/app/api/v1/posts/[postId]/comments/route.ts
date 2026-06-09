@@ -17,10 +17,24 @@ export async function GET(req: NextRequest, { params }: { params: { postId: stri
   const session = await auth();
   const userId = session?.user?.id;
 
+  const { searchParams } = new URL(req.url);
+  const top = searchParams.get("top");
+
+  const blockedIds = userId ? await prisma.blockedUser.findMany({
+    where: { userId },
+    select: { blockedId: true },
+  }) : [];
+  const blockedSet = new Set(blockedIds.map(b => b.blockedId));
+
   // Only top-level comments (parentId = null)
   const comments = await prisma.comment.findMany({
-    where: { postId: params.postId, parentId: null },
-    orderBy: { createdAt: "asc" },
+    where: {
+      postId: params.postId,
+      parentId: null,
+      ...(blockedSet.size > 0 ? { authorId: { notIn: [...blockedSet] } } : {}),
+    },
+    orderBy: top ? { likes: { _count: "desc" } } : { createdAt: "asc" },
+    take: top ? parseInt(top) : undefined,
     include: {
       author: {
         select: { id: true, name: true, nickname: true, image: true, hideRank: true,
@@ -46,11 +60,13 @@ export async function GET(req: NextRequest, { params }: { params: { postId: stri
     ...c,
     likedByMe: userId ? c.likes.length > 0 : false,
     likes: undefined,
-    replies: c.replies.map(r => ({
-      ...r,
-      likedByMe: userId ? (r.likes as any[]).length > 0 : false,
-      likes: undefined,
-    })),
+    replies: c.replies
+      .filter(r => !blockedSet.has(r.authorId))
+      .map(r => ({
+        ...r,
+        likedByMe: userId ? (r.likes as any[]).length > 0 : false,
+        likes: undefined,
+      })),
   }));
 
   return NextResponse.json(formatted);

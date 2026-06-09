@@ -24,6 +24,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SharedQuestionBlock } from "../quiz/SharedQuestionBlock";
 import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
 import { PostDetailModal } from "./PostDetailModal";
+import { CommentPreview } from "./CommentPreview";
 
 interface Props {
   post: any;
@@ -43,11 +44,10 @@ const REACTION_MAP: Record<string, { emoji: string; label: string; color: string
 
 function parseAttachments(raw: any): any[] {
   if (!raw) return [];
-  if (typeof raw === "string") {
-    try { return JSON.parse(raw); } catch { return []; }
-  }
+  if (typeof raw === "string") { try { const p = JSON.parse(raw); return Array.isArray(p) ? p : p ? [p] : []; } catch { return []; } }
   if (Array.isArray(raw)) return raw;
-  if (typeof raw === "object") return Object.values(raw);
+  if (typeof raw === "object" && raw.url) return [raw];
+  if (typeof raw === "object") return Object.values(raw).filter((v: any) => v && typeof v === "object");
   return [];
 }
 
@@ -122,13 +122,24 @@ export function PostCardRedesigned({
 
   // Merge legacy imageUrl + new attachments array
   const attachments = (() => {
-    const list = parseAttachments(post.attachments).map((a: any) => ({
-      ...a,
-      url: sanitizeUrl(a.url),
-    }));
+    function detectType(url: string): "image" | "video" | "audio" | "file" {
+      if (url.includes("type=image")) return "image";
+      if (url.includes("type=video")) return "video";
+      if (url.includes("type=audio")) return "audio";
+      if (/\.(png|jpe?g|gif|webp|svg|avif|bmp|ico)(\?|$)/i.test(url)) return "image";
+      if (/\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url)) return "video";
+      if (/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i.test(url)) return "audio";
+      return "file";
+    }
+    const list = parseAttachments(post.attachments).map((a: any) => {
+      const url = sanitizeUrl(a.url);
+      return { url, type: detectType(url), fileId: a.fileId, name: a.name, size: a.size };
+    });
     const img = sanitizeUrl(post.imageUrl);
     if (img && !list.some((a: any) => a.url === img)) {
-      list.unshift({ url: img, type: "image" });
+      const t = detectType(img);
+      if (t === "image") list.unshift({ url: img, type: "image" });
+      else list.push({ url: img, type: t || "file" });
     }
     return list;
   })();
@@ -550,6 +561,16 @@ export function PostCardRedesigned({
             </button>
           )}
         </div>
+      )}
+
+      {/* ── Top Comments Preview ── */}
+      {!showComments && commentCount > 0 && (
+        <CommentPreview
+          postId={post.id}
+          totalComments={commentCount}
+          currentUserId={currentUserId}
+          onViewAll={() => setShowComments(true)}
+        />
       )}
 
       {/* ── Action Bar ── */}

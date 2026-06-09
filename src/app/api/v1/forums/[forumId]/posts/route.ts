@@ -12,8 +12,8 @@ export const dynamic = "force-dynamic";
 // ─── Cached historical posts loader ──────────────────────────────────────────
 // Each forumId+page combo is cached for 30s in Vercel Data Cache.
 // Real-time NEW posts come instantly via Firestore WebSockets (no DB needed).
-const getCachedPosts = (forumId: string, userId: string, page: number) =>
-  loadForumPostsForUser({ forumId, userId, page, limit: 20 });
+const getCachedPosts = (forumId: string, userId: string, page: number, limit: number) =>
+  loadForumPostsForUser({ forumId, userId, page, limit });
 /*
   unstable_cache(
     () => loadForumPostsForUser({ forumId, userId, page, limit: 20 }),
@@ -89,10 +89,10 @@ export async function GET(
 
   const { searchParams } = new URL(req.url);
   const page = Math.max(1, Number(searchParams.get("page") ?? 1));
-  const limit = 20;
+  const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") ?? 20)));
 
   // Use cached loader for historical posts. Firebase handles real-time updates.
-  const result = await getCachedPosts(forumId, session.user.id, page);
+  const result = await getCachedPosts(forumId, session.user.id, page, limit);
 
   if (!result.ok) {
     return NextResponse.json(

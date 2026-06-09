@@ -765,7 +765,8 @@ function ScheduleTab({ roomId, isMember, isOwner }: { roomId: string; isMember: 
 // ── Leaderboard Tab (Modernized) ─────────────────────────────
 function LeaderboardTab({ members, currentUserId }: { members: RoomMember[]; currentUserId: string }) {
   const sorted = [...members].sort((a, b) => (b.user.points ?? 0) - (a.user.points ?? 0));
-  const medals = ["🥇", "🥈", "🥉"];
+  const medalSvg = (color: string) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M8 21l4-4 4 4-1-5.5-3-2.5-3 2.5z"/></svg>;
+  const medals = [medalSvg("#FFD700"), medalSvg("#C0C0C0"), medalSvg("#CD7F32")];
 
   return (
     <div className="space-y-3 max-w-2xl mx-auto">

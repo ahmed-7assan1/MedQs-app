@@ -574,7 +574,7 @@ export async function generateAIReplyWithFallback(
   }
 
   // Standard Fallback Chain (free providers only — BYOK handled separately)
-  const order: AIProviderId[] = ["siliconflow", "huggingface", "duckduckgo"];
+  const order: AIProviderId[] = ["siliconflow", "proxy", "huggingface", "duckduckgo"];
   
   // Dynamically prioritize preferred provider if valid
   const preferred = options?.preferredProvider as AIProviderId | undefined;
@@ -590,6 +590,7 @@ export async function generateAIReplyWithFallback(
     id,
     run: id === "siliconflow" ? () => callSiliconFlow(message, systemPrompt)
        : id === "huggingface" ? () => callHuggingFace(message, systemPrompt)
+       : id === "proxy" ? () => callProxy(message, systemPrompt)
        : () => callDuckDuckGo(message, systemPrompt)
   }));
 
