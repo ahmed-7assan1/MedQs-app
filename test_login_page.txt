@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<META HTTP-EQUIV="pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>&#90;&#88;&#72;&#78;&#32;&#72;&#49;&#48;&#56;&#78;&#32;&#86;&#50;&#46;&#53;</title>
+<LINK REL="stylesheet" HREF="css/login.css" TYPE="text/css" />
+<LINK REL="stylesheet" HREF="css/styleen.css" TYPE="text/css" />
+<script>
+
+function getObj(id)
+{
+return(document.getElementById(id));
+}
+var SetTFlag = 0;
+var maxtime;
+var interval;
+function setTime()
+{
+if(window.name>=60 || window.name<0 || window.name=="")
+{
+maxtime = Math.min(60, 5910 + 60 - 5930);
+}
+else
+{
+maxtime = window.name;
+}
+if(maxtime>=0)
+{
+seconds = maxtime;
+getObj("time").innerHTML=seconds+" secs";
+if (maxtime == 0)
+{
+setDisable();
+SetTFlag =0;
+window.name="";
+if(interval)
+{
+clearInterval(interval);
+interval = 0;
+}
+}
+else
+{
+--maxtime;
+SetTFlag = 1;
+window.name = maxtime;
+}
+}
+}
+function setinner(type)
+{
+if (SetTFlag ==0)
+{
+getObj("myLayer").style.visibility = type ;
+}
+}
+function Transfer_meaning(id,value)
+{
+getObj(id).value=value;
+}
+function ChangeLang()
+{
+var lang = "English";
+getObj("_lang").disabled = false;
+getObj("Frm_Username").disabled = true;
+getObj("Frm_Password").disabled = true;
+if(true != getObj("TestLang01").disabled)
+{
+if ("English" == lang)
+{
+getObj("_lang").value = "Chinese";
+}
+else if ("Chinese" == lang)
+{
+getObj("_lang").value = "English";
+}
+getObj("action").value = "setlang";
+getObj("Frm_Username").disabled = true;
+getObj("Frm_Password").disabled = true;
+getObj("LoginId").disabled = true;
+document.fLogin.submit();
+}
+}
+</script>
+</head>
+
+<body>
+<div id="container">
+<div id="myLayer" onmousedown="setinner('hidden')" style="position:absolute; width:185px; height:91px; z-index:9; right: 50px; top: 140px; background: url(img/pop_up.gif) no-repeat; border: 1px none #000000; visibility: hidden;">
+<div id="Layer1" style="position:absolute; width:180px; height:45px; z-index:10; left: 2px; top: 28px;">
+<table width="183" border="0">
+<tr>
+<td width="183">&nbsp;&nbsp;<font id="errmsg" class="notecontent" ></font><span id="time" style="color:red;display:none;"></span></td>
+</tr>
+</table>
+</div>
+<div id="Layer3" style="position:absolute; width:140px; height:10px; z-index:11; left: 34px; top: 9px; font-size: 8pt;">
+<font  class="note" id="errnote">&nbsp;Error</font>
+</div>
+</div>
+<!--head���ֿ�ʼ-->
+<div id="head">
+<div class="type"><font id="">&#90;&#88;&#72;&#78;&#32;&#72;&#49;&#48;&#56;&#78;&#32;&#86;&#50;&#46;&#53;</font></div>
+<div id="banner" style="background-image:url(img/banner.gif); background-repeat:no-repeat"></div>
+</div>
+<!--head���ֽ���-->
+<!--content���ֿ�ʼ-->
+<div id="loginArea">
+<form name="fLogin" id="fLogin" method="post"  onsubmit="return false;" action="">
+<input type="hidden" name="_lang" id="_lang" value="" disabled>
+<input type="hidden" name="frashnum" id="frashnum" value="">
+<input type="hidden" name="action" id="action" value="login">
+<input type="hidden" name="Frm_Logintoken" id="Frm_Logintoken" value="">
+<!--���ݿ�ʼ-->
+<div class="login_frame">
+<ul class="login_title">
+<li class="login_title_left"></li>
+<li class="login_title_center">Please login to continue...</li>
+
+<li class="login_title_right"></li>
+</ul>
+<div class="content login_content">
+<ul class="login_blank"></ul>
+<ul class="login_ul_1">
+<li class="login_li_1"><span>Username</span></li>
+<li class="login_li_2">
+<input type="text" class="username" name="Username" id="Frm_Username">
+</li>
+</ul>
+<ul class="login_blank"></ul>
+<ul class="login_ul_1">
+<li class="login_li_1"><span>Password</span></li>
+<li class="login_li_2">
+<input type="password" class="password" name="Password"  id="Frm_Password">
+</li>
+<li class="login_li_3">
+<input class="login" type="submit"  id="LoginId"  value="Login"  onclick="dosubmit()">
+</li>
+</ul>
+</div>
+</div>
+<!--���ݽ���-->
+</form>
+</div>
+<!--bottom���ֿ�ʼ-->
+
+<div style="font-family: Arial;font-size: 12px;text-align:center;"> &copy; 2008-2017 ZTE Corporation. All rights reserved </div>
+
+<div class="bottom_line"></div>
+<div id="bottomx"></div>
+<!--bottom���ֽ���-->
+</div>
+</body>
+</html>
+<script>
+
+window.name="";
+
+function SetDisabled()
+{
+getObj("errmsg").innerHTML = "You have input the wrong username or password for three times. Please try again a minute later.";
+getObj("Frm_Username").disabled = true;
+getObj("Frm_Password").disabled = true;
+getObj("LoginId").disabled = true;
+
+getObj("myLayer").style.visibility = "visible" ;
+getObj("time").style.display = "" ;
+interval = setInterval("setTime()",1000);
+}
+function setDisable()
+{
+if (SetTFlag == 1)
+{
+getObj("Frm_Username").disabled = false;
+getObj("Frm_Password").disabled = false;
+getObj("LoginId").disabled = false;
+
+getObj("time").style.display = "none";
+getObj("myLayer").style.visibility = "hidden";
+}
+}
+function dosubmit()
+{
+if (getObj("Frm_Username").value == "")
+{
+getObj("errmsg").innerHTML = "Username cannot be empty.";
+getObj("myLayer").style.visibility = "visible" ;
+return;
+}
+else
+{
+getObj("LoginId").disabled = true;
+getObj("Frm_Logintoken").value = "1";
+document.fLogin.submit();
+}
+}
+</script>

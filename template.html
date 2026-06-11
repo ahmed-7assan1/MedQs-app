@@ -1,0 +1,1519 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<META HTTP-EQUIV="pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>ZXHN H108N V2.5</title>
+
+<style>
+* {
+    margin: 0 0 0 0;
+    padding: 0;
+}
+#container {
+    margin: 0 auto;
+    width: 778px;
+    text-align: left;
+    position: relative;
+    min-height: 100%; /* For Modern Browsers */
+    height: auto !important; /* For Modern Browsers */
+    height: 100%; /* For IE */ 
+}
+#head {
+    width:778px; 
+}
+#banner {
+    width:778px; 
+    height:60px; 
+}
+.langenglish { width:72px;height:28px;background:url(../img/english.gif) no-repeat left top;}
+.langchinese { width:72px;height:28px;background:url(../img/chinese.gif) no-repeat left top;}
+
+#h1 {
+    height:28px;
+    padding-top:3px;
+}
+#h1 ul {
+    list-style:none;
+    margin:0 0 0 0;
+}
+#h1 li {
+    float:left;
+}
+#h1 li a {
+    display:block;
+}
+.h1_left { width:172px; height:28px; background-color:#69ce28;padding-left:10px;}
+.h1_right { width:73px;height:26px; background-color:#80D549; position:absolute;left:700px; top:63px; padding-left:5px;padding-top:2px;}
+.space { width:2px; height:28px;}
+
+
+.h1_new {
+    width:180px;
+    min-height:270px;
+    height:100%;
+    padding:0 1px 0 1px;
+    float:left;
+    border:1px solid #c7c7c7;
+}
+.h1_new a:link { color: #000000;    text-decoration: none; }
+.h1_new a:visited { color: #000000;    text-decoration: none; }
+.h1_new a:active { color: #000000;    text-decoration: none; }
+.h1_new a:hover { color: #000000;    text-decoration: none; }
+
+table.menu { width:180px;}
+table.menu tr {}
+table.menu tr td.h1_top { height:1px;}
+table.menu tr td.h1_mid {  }
+table.menu tr td.h1_bottom { height:1px;}
+
+.h1 { color:#000000; font-weight: bold;}
+table.menu_table tr.h1 { color:#000000; font-weight: bold;} 
+table.menu_table tr.h1 td.left { width:3px;height:25px;}
+table.menu_table tr.h1 td.add { height:25px; border-bottom: 1px solid #dcdcdc;}
+table.menu_table tr.h1 td.mid { padding-top:2px; border-bottom: 1px solid #dcdcdc;}
+table.menu_table tr.h1 td.right { width:3px;}
+
+.h1_s {color: white; font-weight: bold;}
+table.menu_table tr.h1_s { color: white; font-weight: bold;} 
+table.menu_table tr.h1_s td.left { width:3px;height:25px; background-color:#a7a7a7;}
+table.menu_table tr.h1_s td.add { height:25px; background-color:#a7a7a7;}
+table.menu_table tr.h1_s td.mid { background-color:#a7a7a7; padding-top:2px;}
+table.menu_table tr.h1_s td.right { width:3px; background-color:#a7a7a7;}
+
+table.menu_table tr.h1_s td.add_ta { height:25px; background-color:#a7a7a7;}
+table.menu_table tr.h1_s td.mid_ta { background-color:#B9C0C3; padding-top:2px;}
+
+table.menu_table { width:180px;}
+table.menu_table tr.h2_content { }
+table.menu_table tr.h2_content td.left { width:3px;height:25px;border-bottom: 1px solid #dcdcdc;}
+table.menu_table tr.h2_content td.add { width:10px; height:25px; border-bottom: 1px solid #dcdcdc;}
+table.menu_table tr.h2_content td.mid { padding:2px 0 0 12px; border-bottom: 1px solid #dcdcdc;}
+table.menu_table tr.h2_content td.right { width:3px;border-bottom: 1px solid #dcdcdc;}
+
+table.menu_table tr.h2_s {} 
+table.menu_table tr.h2_s td.left { width:3px;height:25px; background-color:#dcdcdc;}
+table.menu_table tr.h2_s td.add { height:25px; background-color:#dcdcdc;}
+table.menu_table tr.h2_s td.mid { background-color:#dcdcdc; padding:2px 0 0 12px;}
+table.menu_table tr.h2_s td.right { width:3px; background-color:#dcdcdc;}
+
+table.menu_table tr.h2_s td.add_ta { height:25px; background-color:#DCDCDC;}
+table.menu_table tr.h2_s td.mid_ta { background-color:#DCDCDC; padding:2px 0 0 12px;}
+
+table.menu_table tr.h3 { color: black; height:18px;} 
+table.menu_table tr.h3 td.left { width:3px; border-bottom:1px solid #dcdcdc;}
+table.menu_table tr.h3 td.add { border-bottom:1px solid #dcdcdc;}
+table.menu_table tr.h3 td.mid { height:20px; padding-left:30px; border-bottom:1px solid #dcdcdc;}
+table.menu_table tr.h3 td.right { width:3px; border-bottom:1px solid #dcdcdc;}
+
+table.menu_table tr.h3_s { height:18px;} 
+table.menu_table tr.h3_s td.left { width:3px;background-color:#dcdcdc; border-top:1px solid #dcdcdc;}
+table.menu_table tr.h3_s td.add { background-color:#dcdcdc; border-top:1px solid #dcdcdc;}
+table.menu_table tr.h3_s td.mid { height:20px; padding:2px 0 0 30px; background-color:#dcdcdc; border-top:1px solid #dcdcdc;}
+table.menu_table tr.h3_s td.right { width:3px;background-color:#dcdcdc; border-top:1px solid #dcdcdc;}
+
+table.menu_table tr.h2_space { height:30px;} 
+
+table.menu_table tr.h2_help { height:20px;} 
+table.menu_table tr.h2_help td.left { width:3px;}
+table.menu_table tr.h2_help td.add { }
+table.menu_table tr.h2_help td.mid_right { height:20px; text-align:right;}
+table.menu_table tr.h2_help td.right { width:3px;}
+
+table.menu_table tr.bghover, table.menu_table tr.bghover td { background-color:#ffc !important; COLOR: #a7a7a7 !important;} 
+table.menu_table tr.bghover_ta, table.menu_table tr.bghover_ta td { background-color:#ffc !important; COLOR: #03A1DD !important;} 
+
+.title { width:592px;height:26px;background-color:#dcdcdc;float:right;text-align:right;}
+.title_left { width:452px;height:21px;float:left;text-align:left;}
+.title_left { padding:5px 0 0 10px; /* FF */ }
+*html .title_left { padding:7px 0 0 10px; /* IE6 */ }
+*+html .title_left { padding:7px 0 0 10px; /* IE7 */ }
+
+.title_left_ta { width:480px;height:21px;float:left;text-align:left;}
+.title_left_ta { padding:5px 0 0 10px; /* FF */ }
+*html .title_left_ta { padding:7px 0 0 10px; /* IE6 */ }
+*+html .title_left_ta { padding:7px 0 0 10px; /* IE7 */ }
+
+
+.title_lang {width:70px;height:21px;padding-top:2px;float:left;text-align:right;}
+.title_log {width:60px;height:21px;float:left;text-align:right;position:absolute;top:0px;right:15px;}
+.title_log { padding-top:5px; /* FF */ }
+*html .title_log { padding-top:7px; /* IE6 */ }
+*+html .title_log { padding-top:7px; /* IE7 */ }
+
+
+.title a:link { color: #000000;    text-decoration: underline; }
+.title a:visited { color: #000000;    text-decoration: underline; }
+.title a:active { color: #000000;    text-decoration: underline; }
+.title a:hover { color: #000000;    text-decoration: underline; }
+
+.help { height:25px;}
+.help_a { width:66px; height:20px;}
+.help ul { list-style:none;}
+.h1 li {}
+
+#content {
+    width:776px;
+    padding-bottom:0px;
+    min-height: 270px; /* For Modern Browsers */
+    height: auto !important; /* For Modern Browsers */
+    height: 50%; /* For IE */ 	
+    border-left:1px solid #B1B1B1;
+    border-right:1px solid #B1B1B1;
+}
+#content:after {
+    clear: both;
+    display: block;
+    font: 1px/0px serif;
+    content: ".";
+    height: 0;
+    visibility: hidden;
+}
+#content li {
+    list-style:none;
+    display:block;
+}
+#line {
+    position:absolute; 
+    width:430px; 
+    height:15px; 
+    left:188px;
+    border-bottom:1px solid #336699;
+}
+#div1 {
+    width:534px;
+    float:left;
+    margin-top:20px;
+}
+#div1 { margin-left:20px; /* FF */ }
+*html #div1 { margin-left:20px; /* IE6 */ }
+*+html #div1 { margin-left:20px; /* IE7 */ }
+
+.space_0 {
+padding-left:40px!important; /* IE7+FF */
+    padding-left:20px;
+}
+
+#div1_1 {
+    width:524px;
+    float:left;
+    margin-left:40px;
+    margin-top:40px;
+}
+#div2 {
+    padding-left:179px;
+    padding-top:10px;
+}
+#div3 {
+    padding-left:179px;
+    padding-top:30px;
+}
+#div4 {
+     height:30px;
+     width:450px;    
+}
+
+.pvc_0{
+      position:relative;
+}
+.pvc_1{
+     margin-left:100px;
+     width:18px;
+     overflow:hidden;
+} 
+
+.pvc_2{
+     width:85px;
+     margin-left:-100px
+}
+
+.pvc_3{
+    width:65px;
+    position:absolute;
+    left:2px;
+    top:2px;
+    height:18px
+} 
+
+
+table.item {
+  width:450px;
+}
+table.item_1 {
+     position:absolute;
+     padding-left:50px;
+}
+.title_1 {
+    background-color:#a7a7a7;
+    text-align:center;
+    height:18px;
+}
+
+.title_1_ta {
+    background-color:#DCDCDC;
+    text-align:center;
+    height:18px;
+}
+table.item tr.title_2 {
+    background-color:#FFFFFF;
+    text-align:center;
+    height:18px;
+}
+table.item tr.title_3 {
+    background-color:#EEF7FF;
+    text-align:center;
+    height:18px;
+}
+table.item td.button_td {
+    text-align:right;
+}
+.white {
+    background-color:#FFFFFF; 
+    text-align:center;   
+    height:25px;
+}
+.blue {
+    background-color:#f7f7f7; 
+    text-align:center;   
+    height:25px;
+}
+table.item_2 {
+     width:530px;
+}
+table.item_3 {
+     width:550px;
+}
+table.item_4 {
+     width:508px;
+}
+
+
+.bottom_div { float:left;padding-top:30px;height:28px; }
+.bottom_table { width: 774px; height: 28px;}
+.bottom_td1 { width:156px;height:28px;}
+.bottom_td2 { width:53px;}
+.bottom_td3 { width:563px;background-color:#dcdcdc;margin-right:2px;text-align:right;}
+
+.copyright {font-size:12px;font-family:Arial;float:left;display:block;height:16px;width:776px; padding-top:10px; border-left:1px solid #B1B1B1; border-right:1px solid #B1B1B1; text-align:center;}
+.bottom_line {float:left;display:block;background-color:#a7a7a7;height:8px; width:778px;}
+.copyright_ta {font-size:12px;font-family:Arial;float:left;display:block; padding-top:20px; text-align:center;margin-left:20px;}
+.bottom_arnet {float:left;display:block;margin-left:120px;}
+.bottom_telecom {float:left;display:block;margin-left:10px;}
+.bottom_line_ta {float:left;display:block;padding-top:50px;height:54px;width:776px;border-bottom:1px solid #b1b1b1;border-left:1px solid #b1b1b1;border-right:1px solid #b1b1b1;}
+
+
+.submit {padding-top:2px;}
+#bottomx {
+    width: 100%;
+    position: absolute;
+    bottom: 0 !important;
+    bottom: -1px; /* For Certain IE widths */
+    height: 1px;
+}
+.hand { cursor:pointer }
+
+a:link { text-decoration: none; }
+a:visited { text-decoration: none; }
+a:active { text-decoration: none; }
+a:hover { text-decoration:none; }
+
+.h1 a:link { color: #005207;font-weight: bold;    text-decoration: none; }
+.h1 a:visited { color: #005207;font-weight: bold;    text-decoration: none; }
+.h1 a:active { color: #FFFFFF;font-weight: bold;    text-decoration: none; }
+.h1 a:hover { color: #005207;font-weight: bold;    text-decoration: none; }
+
+.h2 a:link { color: #000000;    text-decoration: none; }
+.h2 a:visited { color: #000000;    text-decoration: none; }
+.h2 a:active { color: #000000;    text-decoration: none; }
+.h2 a:hover { color: #000000;    text-decoration: none; }
+
+.h3 a:link { color: #000000;    text-decoration: none; }
+.h3 a:visited { color: #000000;    text-decoration: none; }
+.h3 a:active { color: #000000;    text-decoration: none; }
+.h3 a:hover { color: #000000;    text-decoration: none; }
+
+
+.h3_s { color: #000000;    } 
+
+
+.p {
+    padding-top:3px;
+    line-height:1.2em;
+}
+.hand { 
+    cursor:pointer
+}
+
+.type{ position:absolute;top:32px;right:25px;font:20px Arial,sans-serif;color:#1e1e1e;z-index:999; }
+
+.notewlan { 
+    position:absolute;
+    left:250px;
+    height:30px;
+    margin-top:8px;
+}
+.notewlan1 { 
+    margin-top:18px;
+    text-align:left;
+    margin-left:60px;
+}
+
+.hreftext a:link { color: #0000ff;    text-decoration: underline; }
+.hreftext a:visited { color: #0000ff;    text-decoration: underline; }
+.hreftext a:active { color: #0000ff;    text-decoration: underline; }
+.hreftext a:hover { color: #ff0000;    text-decoration: underline; }
+.dragAble {position:relative;cursor:move;}
+
+html, body {
+    height: 100%; /* Required */
+    font-size: 12px;
+    background-color:#fff; /* 613000551662 - style unifys in case window color changes */
+}
+
+.content {
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.note{
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+color:#FFFF00;
+}
+.notecontent{
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+color:#000000;
+}
+.button {
+height:23px;
+width:73px;
+vertical-align:middle;
+text-align:center;
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+.button2,.button3,.button4 {
+    height:20px;
+    vertical-align:middle;
+    text-align:center;
+    font-size: 12px;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.button2 {
+    width:61px;
+}
+.button3 {
+    width:80px;
+}
+.button4 {
+    width:110px;
+}
+
+.help_button {
+    height:23px;
+    width:47px;
+    vertical-align:middle;
+    text-align:center;
+}
+
+.inputId,.inputId2,.inputId3,.inputId4,.inputId5,.inputId6,.inputId7,.inputId8,.inputId9 {
+height:17px;
+border:1px solid #7F9DB7;
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+vertical-align:middle;
+text-align:left;
+}
+.inputId {
+    width:120px;
+}
+.inputId2 {
+    width:85px;
+}
+.inputId3 {
+    width:17px;
+}
+.inputId4 {
+    width:100px;
+}
+.inputId5 {
+    width:105px;
+}
+.inputId6 {
+    width:230px;
+}
+.inputId7 {
+    width:30px;
+}
+.inputId8 {
+    width:160px;
+}
+.inputId9 {
+    width:65px;
+}
+
+.list_3,.list_5,.list_6,.list_7,.list_9,.list_10,.list_11,.list_12 {
+    height:19px;
+    border:1px solid #7F9DB7;
+    font-size: 12px;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    vertical-align:middle;
+    text-align:left;
+}
+.list_3 {
+    width:370px;
+}
+.list_5 {
+    width:55px;
+}
+.list_6 {
+    width:120px;
+}
+.list_7 {
+    width:65px;
+}
+.list_9 {
+    width:235px;
+}
+.list_10 {
+    width:140px;	
+}
+.list_11{
+    width:190px;
+}
+.list_12 {
+    width:75px;
+}
+
+.textarea_1 {
+height:200px;
+width:440px;
+border:1px solid #7F9DB7;
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+text-align:left;
+resize: none; /* to fix border for google safari */
+}
+.uiNoBorder {
+BORDER-RIGHT: 0px;
+BORDER-TOP: 0px;
+BORDER-LEFT: 0px;
+BORDER-BOTTOM: 0px;
+background:transparent;
+TEXT-ALIGN: center;
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+table.infor tr.white_1 {
+    background-color:#FFFFFF;
+}
+
+table.infor td.tdright {
+    padding-left:5px;
+    text-align:left;
+}
+table.infor tr.blue_1 {
+    background-color:#f7f7f7;    
+}
+table.table {
+}
+table.table td.td1 {
+    width:40%;
+    height:24px;
+    text-align:right;	
+}
+table.table td.td1_1 {
+    width:40%;
+    height:18px;
+    text-align:right;	
+}
+table.table td.td2 {
+    text-align:left;
+    padding-left:5px;
+}
+table.table td.td3 {
+    height:36px;
+    text-align:center;
+}
+
+table.table td.td5 {
+    width:10%;
+    height:24px;
+    text-align:right;	
+}
+table.table td.td6 {
+    width:40%;
+    height:20px;
+    text-align:right;	
+}
+table.table td.td7 {
+    width:25%;
+    height:24px;
+    text-align: center;	
+}
+table.table td.td8 {
+    width:15%;
+    height:24px;
+    text-align: center;	
+}
+table.table td.td9 {
+    width:50%;
+    height:24px;
+    text-align: right;	
+}
+table.table td.td10 {
+    text-align:left;
+    padding-left:5px;
+}
+
+
+table.table td.td12 {
+    text-align:right;	
+}
+table.table td.td13 {
+    text-align:left;	
+}
+table.table td.td14 {
+    text-align:left;
+    padding-left:5px;
+}
+table.table td.td15 {
+    text-align:center;
+}
+table.table td.td16{
+    width:60%;
+    height:24px;
+    text-align: right;	
+}
+#div5 {
+    width:550px;
+    text-align:center;
+    margin-top:40px;
+}
+
+.green { color:green;}
+.red { color:red;}
+/*help page xumei*/
+.div1 {
+    width:629px;
+    float:right;
+    padding-top:15px;
+    margin-left:24px;
+}
+
+.p {
+    padding-top:3px;
+    line-height:1.2em;
+}
+
+.CNLTreeMenu img.s {cursor:pointer;vertical-align:middle;}
+.CNLTreeMenu ul {padding:0;}
+.CNLTreeMenu li {list-style:none;padding:0;}
+.Closed ul {display:none;}
+.Child img.s {background:none;cursor:default;}
+#CNLTreeMenu1 ul {margin:0 0 0 17px;}
+#CNLTreeMenu1 img.s {width:20px;height:15px;}
+#CNLTreeMenu1 .Opened img.s {background:url(../img/opened.gif) no-repeat 0 0;}
+#CNLTreeMenu1 .Closed img.s {background:url(../img/closed.gif) no-repeat 0 0;}
+#CNLTreeMenu1 .Child img.s {background:url(../img/child.gif) no-repeat 3px 5px;}
+#CNLTreeMenu1{float:left;width:249px;border:1px solid #FFFFFF;background:#FFFFFF;color:inherit;margin:3px;padding:3px;}
+#CNLTreeMenu1 {padding-bottom:15px;}
+
+.word-break-all{
+  word-wrap:break-word;
+}
+
+.dmsPopUpDiv {
+  position:absolute;
+  z-index:9999;
+  width:500px;
+  height:200px;
+  top:250px;
+  left:225px;
+  background-color:#EFEFEF;
+  border: 2px solid #009900;
+  padding:5px;
+  overflow:auto;
+  line-height:18px;
+}
+
+.msgtb {
+    width:355px; 
+    height:127px; 
+    border:2px solid #FDFCF3; 
+    font:14px Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+.msgtr1{
+    background-color:#DDDDDD;
+    padding-left:10px;
+    padding-top:2px;
+    font-weight:bold;
+}
+
+.msgtr2{
+    background-color:#F1F1F1;
+    padding-left:10px;
+    padding-right:2px;
+    padding-bottom:10px;
+    vertical-align:middle;
+}
+
+.msgtr3{
+    background-color:#F1F1F1;
+}
+
+.msgtr4{
+    background-color:#F1F1F1;
+}
+
+.msgbutton{
+    background-color:#F1F1F1;
+    width:60px;
+    font-size:12px;
+}
+
+li.titleleft{
+    padding-top:8px;
+    text-align:left;
+}
+
+.titleline{
+    width:450px;
+    height:10px;
+    border-top:2px solid #E4E4E4;
+}
+.hr{
+    color: #fff;
+    height: 1px;
+    margin-bottom: 15px;
+    margin-left: 50px;
+    margin-top: 15px;
+    width: 300px;
+    float:left;
+}
+.w95{
+    width:95px;
+}body {
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+.button5,.button6,.button7 {
+    height:20px;
+    vertical-align:middle;
+    text-align:center;
+    font-size: 12px;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.button5 {
+    width:80px;
+}
+.button6 {
+    width:160px;
+}
+.button7 {
+    width:120px;
+}
+
+.inputId10 {
+height:17px;
+border:1px solid #7F9DB7;
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+vertical-align:middle;
+text-align:left;
+}
+.inputId10 {
+    width:120px;
+}
+.list_1,.list_2,.list_4,.list_8, {
+height:19px;
+border:1px solid #7F9DB7;
+font-size: 12px;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+vertical-align:middle;
+text-align:left;
+}
+.list_1 {
+    width:130px;	
+}
+.list_2 {
+    width:180px;
+}
+.list_4 {
+    width:185px;
+}
+.list_8 {
+    width:140px;	
+}
+
+
+table.infor {
+ width:460px;
+}
+table.infor tr.white_1 {
+    background-color:#FFFFFF;
+}
+table.infor td.tdleft {
+    padding-right:5px;
+    width:50%;
+    height:27px;
+    text-align:right;
+}
+table.table td.td4 {
+    width:10%;
+    height:24px;
+    text-align:right;	
+}
+table.table td.td11 {
+    width:50%;
+    height:24px;
+    text-align: right;	
+}
+
+
+
+</style>
+<SCRIPT LANGUAGE="javascript">
+var g_errorInfo = "Error";
+var timeid;
+function getObj(id){return(document.getElementById(id));}function jslSetValue(dst, src, action){var src_o = getObj(src);var dst_o = getObj(dst);dst_o.value= String(src_o.value);switch (action){case "GET":if (dst_o.setAttribute){dst_o.setAttribute("_initValue", dst_o.value)}break;case "SET":if (src_o.getAttribute){var initValue = src_o.getAttribute("_initValue");if (initValue == src_o.value){dst_o.value = "NULL";}}break;default:break;}}function setValue(id,value){getObj(id).value = value;}function getValue(id){return(getObj(id).value);}function setHTML(id, html){getObj(id).innerHTML = html;}function getHTML(id){return (getObj(id).innerHTML);}function getDisabled(id){return(getObj(id).disabled);}function getDisplay(id){if(getObj(id).style.display == "none")return false;else return true;}function getChecked(id){return(getObj(id).checked);}function setChecked(id,value){getObj(id).checked = value;}function jslDiDisplay(id){var i;var num=arguments.length;if(num==0) return;for(i=0;i < num; i++){getObj(arguments[i]).style.display = "none";}}function jslEnDisplay(id){var i;var num=arguments.length;if(num==0) return;for(i=0;i < num; i++){getObj(arguments[i]).style.display = "";}}function jslDisable(id){var i;var num=arguments.length;if(num==0) return;for(i=0;i < num; i++){getObj(arguments[i]).disabled=true;}}function jslEnable(id){var i = 0;var num=arguments.length;if(num==0)return;for(i=0;i < num; i++){getObj(arguments[i]).disabled=false;}}function jslViewToPostCheckBox(PostId, ViewId){if (getObj(ViewId).checked)getObj(PostId).value = "1";else getObj(PostId).value = "0";}function jslPostToViewCheckBox(ViewId, PostId){if (getObj(PostId).value == "1")getObj(ViewId).checked = true;else getObj(ViewId).checked = false;}function jslGetRadioValue(radioObject){if (radioObject){if (radioObject.length){for (var i = 0; i < radioObject.length; i++){if (radioObject[i].checked){return radioObject[i].value;}}}else if (radioObject.checked){return radioObject.value;}}return -1;}function jslSetRadioValue(radioObject, value){if(radioObject){if(radioObject.length){for(var i=0;i<radioObject.length; i++){if(radioObject[i].value == value){radioObject[i].checked = true;return true;}}}else if (radioObject.value == value){radioObject.checked = true;}}return false;}function jslDoShowComboBox(viewid,postid){var i;var selector = getObj(viewid);var value=getObj(postid).value;if(selector==null) return;for(i=0; i < selector.length; i++){if(selector.options[i].value == value){selector.selectedIndex = i;return;}}selector.selectedIndex = -1;}function addSelectOption(id, val, txt){var f = 0;var o = getObj(id);for (var i=0; i<o.options.length; i++){var v = o.options[i].value;if (val == v){f = 1;break;}}if (f == 0){var op = document.createElement('option');op.text = txt;op.value = val;try{o.add(op,null); }catch(ex){o.add(op); }}}function deleteSelectOption(id, val){var o = getObj(id);for (var i=0; i<o.options.length; i++){var v = o.options[i].value;if (val == v){o.remove(i);break;}}}function clearSelect(id){var o = getObj(id);while(o.options.length > 0){o.remove(0);}}function isValInSelect(val, sid){var sObj = getObj(sid);for ( var i=0; i<sObj.length; i++ ){if ( val == sObj.options[i].value ){return 1;}}return 0;}function getOptionIndexByValue(sid, val){var sObj = getObj(sid);for ( var i=0; i<sObj.length; i++ ){if ( val == sObj.options[i].value ){return i;}}return -1;}function colorizeInfoTbl(id){var objTrSet = getObj(id).getElementsByTagName("tr");var j = 0;var clasName;for (var i=0; i<objTrSet.length; i++){if ( objTrSet[i].style.display != "none"){j++;if ( j%2 == 1 ){clasName = "white_1";}else {clasName = "blue_1";}objTrSet[i].setAttribute("class", clasName);objTrSet[i].setAttribute("className", clasName);}}}function RmZero(str){while(str.indexOf("0") == 0 && str.length > 1){str = str.substr(1);}return str;}function IpRmZero(IpAddrValue){var IpAddr = IpAddrValue;var addrParts = IpAddr.split('.');IpAddr = "";for (var i = 0; i < 4; i++){addrParts[i]=RmZero(addrParts[i]);IpAddr = addrParts.join(".");}return IpAddr;}function ReSetIpRmZero(ID){var num = arguments.length;var re = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;var obj;if(num == 0) return;for(i = 0;i < num; i++){obj = getObj(arguments[i]);if((obj != null && obj.value != ""&& obj.value != null )&&(re.test(obj.value) == true)){obj.value = IpRmZero(obj.value);}}}function ReSetValueRmZero(ID){var num = arguments.length;var obj;for(i = 0;i < num; i++){obj = getObj(arguments[i]);if(obj != null && obj.value != null && obj.value != ""){obj.value = RmZero(obj.value);}}}function Transfer_meaning(id,value){getObj(id).value=value;}function HiddenParaInit(arr){var val;for(var i=0; i<arr.length; i++){val = arr[i];arr[i] = "NULL";setValue(val, "NULL");}}function HiddenMultiInstParaInit(arr, index){var val;for(var i=0; i<arr.length; i++){val = arr[i];setValue(val+index, "NULL");}}function setNULLToSepPort(Port, Val){var portvalue=Port;if(portvalue==""){portvalue = Val;}return portvalue;}function getSepPortToNULL(Port, Val){var portvalue=Port;if(portvalue==Val){portvalue="";}return portvalue;}function setNULLToPort(Port){var portvalue=Port;if(portvalue==""){portvalue = "-1";}return portvalue;}function getPortToNULL(Port){var portvalue=Port;if(portvalue=="-1"){portvalue="";}return portvalue;}function setNULLToMAC(MAC){var macaddr=MAC;if(macaddr==""){macaddr="00:00:00:00:00:00";}return macaddr;}function getMACToNULL(MAC){var macaddr=MAC;if(macaddr=="00:00:00:00:00:00"){macaddr="";}return macaddr;}function setNULLToIP(IP){var ipvalue=IP;if(ipvalue==""){ipvalue="0.0.0.0";}return ipvalue;}function getIPToNULL(IP){var ipvalue=IP;if(ipvalue=="0.0.0.0"){ipvalue="";}return ipvalue;}function encode64(input){var keyStr = "ABCDEFGHIJKLMNOP"+ "QRSTUVWXYZabcdef"+ "ghijklmnopqrstuv"+ "wxyz0123456789+/"+ "=";input = escape(input);var output = "";var chr1, chr2, chr3 = "";var enc1, enc2, enc3, enc4 = "";var i = 0;do {chr1 = input.charCodeAt(i++);chr2 = input.charCodeAt(i++);chr3 = input.charCodeAt(i++);enc1 = chr1 >> 2;enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);enc4 = chr3 & 63;if (isNaN(chr2)){enc3 = enc4 = 64;}else if (isNaN(chr3)){enc4 = 64;}output = output +keyStr.charAt(enc1) +keyStr.charAt(enc2) +keyStr.charAt(enc3) +keyStr.charAt(enc4);chr1 = chr2 = chr3 = "";enc1 = enc2 = enc3 = enc4 = "";} while (i < input.length);return output;}function decode64(input){var output = "";var chr1, chr2, chr3 = "";var enc1, enc2, enc3, enc4 = "";var i = 0;var base64test = /[^A-Za-z0-9\+\/\=]/g;var keyStr = "ABCDEFGHIJKLMNOP"+ "QRSTUVWXYZabcdef"+ "ghijklmnopqrstuv"+ "wxyz0123456789+/"+ "=";if (base64test.exec(input)) {alert("There were invalid base64 characters in the input text.\n"+"Valid base64 characters are A-Z, a-z, 0-9, '+', '/', and '='\n"+"Expect errors in decoding.");}input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");do {enc1 = keyStr.indexOf(input.charAt(i++));enc2 = keyStr.indexOf(input.charAt(i++));enc3 = keyStr.indexOf(input.charAt(i++));enc4 = keyStr.indexOf(input.charAt(i++));chr1 = (enc1 << 2) | (enc2 >> 4);chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);chr3 = ((enc3 & 3) << 6) | enc4;output = output + String.fromCharCode(chr1);if (enc3 != 64) {output = output + String.fromCharCode(chr2);}if (enc4 != 64) {output = output + String.fromCharCode(chr3);}chr1 = chr2 = chr3 = "";enc1 = enc2 = enc3 = enc4 = "";} while (i < input.length);return unescape(output);}function HtmlShowSpace(value,id){var temp="";for(var i=0;i<value.length;i++){var part=value.substring(i,i+1);if(" "== part){temp=temp+"&nbsp;";}else {temp=temp+part;}}getObj(id).innerHTML=temp;}function trimLSpaces(str){return str.replace(/(^\s*)/g, "");}function trimRSpaces(str){return str.replace(/(\s*$)/g, "");}function trimAllSpaces(str){for(var i = 0; i < str.length; i++){if(str.charAt(i) == " "){str = str.substring(0, i) + str.substring(i+1, str.length);i--;}}return str;}function trimLRSpaces(str){str = str.replace(/(^\s*)|(\s*$)/g, "");return str;}function fnBreakWordAll(o) {var o = o || {},iWord = o.word || 13,iRe = o.re || '[a-zA-Z0-9]',bAll = o.all || false,sClassName = o.className || 'word-break-all',aEls = o.els || ( function() {var aEls = [],aAllEls = document.getElementsByTagName( '*' ),re = new RegExp( '(?:^|\\s+)' + sClassName + '(?:\\s+|$)' );for ( var i = 0, iLen = aAllEls.length; i < iLen; ++i ) {if ( re.test( aAllEls[i].className ) ) {aEls[aEls.length] = aAllEls[i];}}return aEls;} )() || [],fnBreakWord = function( oEl ) {if( !oEl || oEl.nodeType !== 1 ) {return false;} else if ( oEl.currentStyle && typeof(oEl.currentStyle.wordWrap) === 'string' ) {breakWord = function( oEl ) {if (oEl.runtimeStyle){oEl.runtimeStyle.wordWrap = 'break-word';}return true;};return breakWord( oEl );} else if ( document.createTreeWalker ) {var trim = function ( str ) {str = str.replace( /^\s\s*/, '' );var ws = /\s/,i = str.length;while ( ws.test( str.charAt( --i ) ) );return str.slice(0, i + 1);};breakWord = function( oEl ) {var dWalker = document.createTreeWalker( oEl, NodeFilter.SHOW_TEXT, null, false );var node, s, c = String.fromCharCode( '8203' ),re = new RegExp( '(' + iRe + '{0,' + iWord + '})' );while ( dWalker.nextNode() ) {node = dWalker.currentNode;s = trim( node.nodeValue ).split( re ).join( c );node.nodeValue = s;}return true;};return breakWord( oEl );}};for( var i=0, n=aEls.length; i<n; ++i ) {var sUa = navigator.userAgent, sTn = aEls[i].tagName.toLowerCase();if ( ( /Opera/ ).test( sUa ) || ( /Firefox/ ).test( sUa ) || ( ( /KHTML/ ).test( sUa ) && ( sTn === 'td' || sTn === 'th') ) || bAll ) {fnBreakWord(aEls[i]);}}}function DisableALL(){var txtArrs = document.getElementsByTagName('input');for(var i=0; i<txtArrs.length; i++){if("hidden"!=txtArrs[i].type){txtArrs[i].disabled = true;}}var selectArrs = document.getElementsByTagName('select');for(var i=0; i<selectArrs.length; i++){selectArrs[i].disabled = true;}}function showIsEnableImage(isEnable, cellId){var strId = "";if(""!= cellId){strId = "id="+ cellId;}if("1"== isEnable){return ("<input type=\"image\" src=\"img/enable.gif\" style=\"cursor:default\" "+ strId + ">");}else {return ("<input type=\"image\" src=\"img/disable.gif\" style=\"cursor:default\" "+ strId + ">");}}function EnableALL(){var txtArrs = document.getElementsByTagName('input');for(var i=0; i<txtArrs.length; i++){if("hidden"!=txtArrs[i].type){txtArrs[i].disabled = false;}}var selectArrs = document.getElementsByTagName('select');for(var i=0; i<selectArrs.length; i++){selectArrs[i].disabled = false;}}function getXMLHTTPObj(){var xmlHttp = null;try{xmlHttp=new XMLHttpRequest();}catch (e){try{xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");}catch (e){try{xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");}catch (e){}}}return xmlHttp;}var xmlHTTPStatus = new Array();xmlHTTPStatus['Uninitialized'] = 0;xmlHTTPStatus['Open'] = 1;xmlHTTPStatus['Sent'] = 2;xmlHTTPStatus['Receiving'] = 3;xmlHTTPStatus['Loaded'] = 4;function AJAXObj(){this.obj = getXMLHTTPObj();this.postStr = "";this.addPostItem = function(name, value){this.postStr += name + "="+ value + "&";};this.post = function(requestURL, responseFunc){this.obj.open("POST", requestURL, true);this.obj.onreadystatechange = responseFunc;this.obj.send(this.postStr);this.postStr = "";};this.getResponseText = function(){return this.obj.responseText;};this.getReadyState = function(){return this.obj.readyState;};this.getStatus = function(){return this.obj.status;};}function getXMLDoc(xmlStr){var xmlDoc;try {xmlDoc=new ActiveXObject("Microsoft.XMLDOM");xmlDoc.async="false";xmlDoc.loadXML(xmlStr);return(xmlDoc);}catch(e){try {parser=new DOMParser();xmlDoc=parser.parseFromString(xmlStr,"text/xml");return(xmlDoc);}catch(e){}}return(null);}function getAJAXResponseXMLDoc(xmlStr){if (xmlStr.match(/^\s*<ajax_response_xml_root>/m) != null){return getXMLDoc(xmlStr);}return null;}function XMLDocObj(xmlStr){this.xmlDoc = getAJAXResponseXMLDoc(xmlStr);this.getXMLNodeValue = function(nodeName){var nodeValue = "";try{nodeValue = this.xmlDoc.getElementsByTagName(nodeName)[0].childNodes[0].nodeValue;}catch(e){}return nodeValue;};this.getXMLNode = function(nodeName){return this.xmlDoc.getElementsByTagName(nodeName)[0];};this.getCMAPIParaValue = function(OBJNAME, instID, paraName){var paraValue = "";var instObj = null;var o = this.getXMLNode(OBJNAME);var insts = o.childNodes;for (var i=0; i<insts.length; i++){var attrs = insts[i].childNodes;for (var j=0; j<attrs.length; j++){if (attrs[j].nodeName=="ID"&& instID==attrs[j].childNodes[0].nodeValue){instObj = insts[i];break;}}}if (null != instObj){var attrs = instObj.childNodes;for (var j=0; j<attrs.length; j++){if (attrs[j].nodeName == "Parameters"){var paras = attrs[j].childNodes;for (var k=0; k<paras.length; k++){if (paras[k].nodeName == paraName){try{paraValue = paras[k].childNodes[0].nodeValue;}catch(e){}break;}}}}}return paraValue;};this.getMIIDListArr = function(OBJNAME){var idListArr = new Array();var arrIndex = 0;var o = this.getXMLNode(OBJNAME);var insts = o.childNodes;for (var i=0; i<insts.length; i++){var attrs = insts[i].childNodes;for (var j=0; j<attrs.length; j++){if (attrs[j].nodeName=="ID"){idListArr[arrIndex++] = attrs[j].childNodes[0].nodeValue;}}}return idListArr;};}function appendHiddenInput(fid, id, value){var o = getObj(fid);var i = document.createElement("input");i.type = "hidden";i.id = id;i.name = id;i.value = value;o.appendChild(i);}function deleteHiddenInput(fid, id){var o = getObj(fid);var t = getObj(id);o.removeChild(t);}function clearfSubmit(fid){var o = getObj(fid);var clds = o.childNodes;while (clds.length > 0){o.removeChild(clds[0]);}}function checkSameInput(fid){var o = getObj(fid);if (o != null){var is = o.getElementsByTagName("input"); var il = is.length;for (var i=0; i<il-1; i++){var sid = is[i].id; for (var j=i+1; j<il; j++){if (sid == is[j].id){alert(fid+" has Same Inputs, ID:"+sid);}}}}}function getCookie(c_name){if (document.cookie.length>0){var c_start=document.cookie.indexOf(c_name + "=");if ( -1 != c_start ){c_start = c_start + c_name.length + 1;var c_end=document.cookie.indexOf(";", c_start);if ( c_end == -1 ){c_end=document.cookie.length;}return unescape( document.cookie.substring(c_start, c_end) );}}return null;}function setCookie(c_name,value,expiredays){var exdate = new Date();exdate.setDate( exdate.getDate() + expiredays );var cookieContent = c_name + "="+ escape(value);if ( null != expiredays ){cookieContent += "; expires="+ exdate.toGMTString();}document.cookie = cookieContent;}function HTMLEnCode(str){var s = "";if (typeof(str) != "string"){return str;}if(str.length == 0){return "";}s = str.replace(/&/g, "&#38;");s = s.replace(/</g, "&#60;");s = s.replace(/>/g, "&#62;");s = s.replace(/ /g, "&#32;");s = s.replace(/\'/g, "&#39;");s = s.replace(/\"/g, "&#34;");
+return s;
+}
+function HTMLDeCode(str)
+{
+str = str.replace(/&lt;/g, "<");
+str = str.replace(/&gt;/g, ">");
+str = str.replace(/&nbsp;/g, "");
+str = str.replace(/&quot;/g, "\"");str = str.replace(/&amp;/g, "&");return str;}function HTMLAddBr(str, wdth){var str1 = "";for (var i=0; i<Math.ceil(str.length/wdth); i++){str1 += HTMLEnCode( str.substr(i*wdth, wdth) );if ( Math.ceil(str.length/wdth) != i+1 ){str1 += "<br>";}}return str1;}function jslDelSelectOptionByValue(id){var o = getObj(id);var num = arguments.length;var j = 1;var r = 0;var t = "";for (var i = 0; i < o.options.length; i++){t = o.options[i].value;r = 0;for (j = 1; j < num; j++){if (t == arguments[j]){r = 1;}}if (r == 1){o.remove(i);i--;}}}function deleteSelectOptions(selectID, keyWord){var obj = getObj(selectID);for ( var i=0; i<obj.options.length; ){if ( obj.options[i].value.match(keyWord) != null ){obj.remove(i);}else {i++;}}}function jslDelSelectOptionByValue(id){var o = getObj(id);var num = arguments.length;var j = 1;var r = 0;var t = "";for (var i = 0; i < o.options.length; i++){t = o.options[i].value;r = 0;for (j = 1; j < num; j++){if (t == arguments[j]){r = 1;}}if (r == 1){o.remove(i);i--;}}}function myTrim(str, chr){var pos = str.lastIndexOf(chr);while(pos != -1){if(pos + chr.length == str.length){str = str.substring(0, pos);pos = str.lastIndexOf(chr);}else {pos = -1;}}return str;}function calcSubNet(ipaddr, netmask){var ips = ipaddr.split(".");var ns = netmask.split(".");var sub = "";if(ips.length != 4 || ns.length != 4)return "0.0.0.0";for(var i = 0; i < 4; i++){sub += ips[i] & ns[i];sub += ".";}sub = myTrim(sub, ".");return sub;}function checkNull(value){if(value == ""|| value == null)return false;else return true;}function checkGenString(sz){if(checkNull(sz) == false)return -1;if (sz.match("[^0-9a-zA-Z_-]") != null)return false;return true;}function checkGenStringForASC(value){var length = value.length;for(var j = 0 ;j < length; j++){var xx = value.charCodeAt(j);if (xx > 0 && xx <= 255){}else {return false;}}return true;}function in_array(needle, haystack){for(var key in haystack){if(needle === haystack[key]){return true;}}return false;}function checkStrLengthRange(value, min, max){if(checkNull(value) == false){return -1;}var len = value.length;if((len < min) || (len > max)){return -3;}return true;}function checkInteger(str){if(str.charAt(0) == '-')str = str.substr(1);if(str.match("^[0-9]+\$"))return true;return false;}function checkIntegerRange(value, minValue, maxValue){if(checkNull(value) == false){return -1;}if(checkInteger(value) != true)return -2;if (value < minValue || value > maxValue){return -3;}return true;}function checkGenInt(str){if(checkIntegerRange(str, -2147483648, 2147483647) != true)return false;return true;}function checkUnSingleInt(str){if(checkIntegerRange(str, 0, 4294967295) != true)return false;return true;}function checkHostName(HostName){var len = HostName.length;var firstChar = HostName.substr(0,1);var lastChar = HostName.substr(len-1,1);var leftChar = "";var rightChar = "";var iDotCount = 0;var i = 0;var preDotPos = 0;var statu = checkStrLengthRange(HostName, 1, 256);if(statu != true){return statu;}if (HostName.match("[^0-9a-zA-Z.-]") != null){return false;}if(firstChar.match("[^0-9a-zA-Z]") != null){return false;}if(lastChar.match("[^0-9a-zA-Z]") != null){return false;}var pos = HostName.lastIndexOf(".");if(pos == -1) {var str = HostName;var len = HostName.length;for(var i=0;i<len;i++){var value = str.substring(i,i+1);if(isNaN(parseInt(value))){return true;}}return false;}else {var str = HostName.substr(pos+1);var len = HostName.length - (pos + 1);for(var i=0;i<len;i++){var value = str.substring(i,i+1);if(isNaN(parseInt(value))){return true;}}return false;}return true;}function checkDomainName(domain_name){var len = domain_name.length;var firstChar = domain_name.substr(0,1);var lastChar = domain_name.substr(len-1,1);var leftChar = "";var rightChar = "";var iDotCount = 0;var i = 0;var preDotPos = 0;var statu = checkStrLengthRange(domain_name, 1, 64);if(statu != true){return statu;}if (domain_name.match("[^0-9a-zA-Z.-]") != null){return false;}if(firstChar.match("[^0-9a-zA-Z]") != null){return false;}if(lastChar.match("[^0-9a-zA-Z]") != null){return false;}var pos = domain_name.lastIndexOf(".");if(pos == -1) {var str = domain_name;var len = domain_name.length;for(var i=0;i<len;i++){var value = str.substring(i,i+1);if(isNaN(parseInt(value))){return true;}}return false;}else {var str = domain_name.substr(pos+1);var len = domain_name.length - (pos + 1);for(var i=0;i<len;i++){var value = str.substring(i,i+1);if(isNaN(parseInt(value))){return true;}}return false;}return true;}function checkEssid(value){var statu = checkStrLengthRange(value, 1, 32);if(statu != true){return statu;}var length = value.length;for(var j = 0 ;j < length; j++){var xx = value.charCodeAt(j);if (xx > 0 && xx <= 255){}else {return false;}}return true;}function checkURL(url){var statu = checkStrLengthRange(url, 1, 256);if(statu != true){return statu;}if (url.match("[^0-9a-zA-Z.:;,!@%#?_/&=+*'$()\\[\\]-]") != null){return false;}return true;}function checkIpAddress(value, num){var ipaddr = value;var c = false;var re = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;if(re.test(ipaddr) == true){var parts = ipaddr.split(".");for(var i=0; i<parts.length; i++){if(parts[i].indexOf("0") == 0 && parts[i].length > 1)return false;if (parseInt((parts[i]),10) > 255 || parseInt((parts[i]),10) < 0){return false;}}if(num == 2){if(parseInt(parts[0],10) == 0 || parseInt(parts[3],10)==0){return false ;}if( parseInt(parts[0],10) == 255 || parseInt(parts[3],10)==255){return false ;}if (parseInt(parts[0],10) > 223)return false ;}if(num == 3){for(var i=0; i<parts.length; i++){if (parseInt((parts[i]),10) == 0)break;}if(i == parts.length){if ( (parseInt(parts[1],10) == 255)&&(parseInt(parts[2],10) == 255)&&(parseInt(parts[3],10) == 255)){c = true;}else {c = false;return c;}}for(var j=i; j < parts.length; j++){if (parseInt((parts[j]),10) == 0)c = true;else {c = false;break;}}return c;}return true;}else {return false;}}function checkIPV6Address(str){if (str.match("[^0-9a-fA-F:.]") != null)return false;addrParts = str.split(':');Doublecolon = str.split('::');ipv4Parts = str.split('.');if(addrParts.length<3||addrParts.length>8){return false;}else if(Doublecolon.length==1&&ipv4Parts.length==1&&addrParts.length!=8){return false;}else if(Doublecolon.length==1&&ipv4Parts.length>1&&addrParts.length!=6){return false;}else if(Doublecolon.length>1&&ipv4Parts.length>1&&addrParts.length>6){return false;}else if(Doublecolon.length>2||str.split(':::').length>1){return false;}else {if(addrParts[0]==""&&addrParts[1]!=""){return false;}for(var i=0;i<addrParts.length;i++){if(i==addrParts.length-1&&addrParts[i]==""&&addrParts[i-1]!=""){return false;}if(addrParts[i].length>4 && addrParts[i].split('.').length<2){return false;}}}var pos = str.lastIndexOf(":");var ipv4Parts = str.split('.');if(ipv4Parts.length>1){var ipv4=str.substring(pos+1,str.length);if(true != checkIpAddress(ipv4,"")){return false;}}return true;}function checkGateway(Address){var address = Address.match("^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$");var digits;var i;if(address == null){return false;}digits = address[0].split(".");if (digits.length != 4 ){return false;}for(i=0; i < 4; i++){if((Number(digits[i]) > 255 ) || (Number(digits[i]) < 0 ) || (Number(digits[0]) > 223)){return false;}}return true;}function checkMACAddress(Addr){var c = '';var i = 0, j = 0;if(Addr=="00:00:00:00:00:00"){return false;}var addrParts = Addr.split(':');if ( addrParts.length != 6 )return false;for (i = 0; i < 6; i++){if (addrParts[i].length != 2)return false;for ( j = 0; j < addrParts[i].length; j++ ){c = addrParts[i].toLowerCase().charAt(j);if ( (c >= '0' && c <= '9') ||(c >= 'a' && c <= 'f') )continue;else return false;}}return true;}function checkMaskAddress(MaskAddr){var mask = MaskAddr.match("^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$");var digits;var bMask = 0;var watch = false;var i;var error=null;if(mask == null){return false;}digits = mask[0].split(".");if (digits.length != 4 ){return false;}for(i=0; i < 4; i++){if((Number(digits[i]) > 255 ) || (Number(digits[i]) < 0 ) ||(digits[i].indexOf("0") == 0 && digits[i].length > 1)){return false;}bMask = (bMask << 8) | Number(digits[i]);}bMask = bMask & 0x0FFFFFFFF;if((bMask & 0x01) == 1)watch = true;for(i=0; i<32; i++){if((watch == true) && ((bMask & 0x1)==0)){return false;}bMask = bMask >> 1;if((bMask & 0x01) == 1)watch=true;}return true;}function checkIPNet(ipaddr, netmask){var ret = checkIpAddress(ipaddr);if(ret != true)return ret;if (netmask == null)return null;ret = checkMaskAddress(netmask);if(ret != null)return ret;var ips = ipaddr.split(".");var subnet = calcSubNet(ipaddr, netmask);var subs = subnet.split(".");var s = "";for(var i = 0; i < 4; i++){s += parseInt(ips[i]) ^ parseInt(subs[i]);s += ".";}if (s == "0.0.0.0.")return true;return false;}function checkPort(port){var value=port;if(port=="-1")return false;else return true;}function valIpMask(ipaddr, netmask){var ss = netmask.split(".");var mac = 0;for(var i = 0; i < 4; i++){mac = mac << 8;mac = mac + parseInt(ss[i]);}var ip = 0;var as=ipaddr.split(".");for(var i = 0; i < 4; i++){ip = ip << 8;ip = ip + parseInt(as[i]);}if(mac && ((ip & mac) == ip)){return false;}if(mac && ((ip & (~mac)) == ~mac)){return false;}return true;}function moveErrLayer(left,top){document.getElementById("myLayer").style.left = left + "px";document.getElementById("myLayer").style.top = top + "px";}function ShowNote(notetitle, msg){document.getElementById("errnote").innerHTML = notetitle;document.getElementById("errmsg").innerHTML = msg;document.getElementById("myLayer").style.visibility = "visible";}function ShowNoteNew(ctl, notetitle, msg){document.getElementById("errnote").innerHTML = notetitle;document.getElementById("errmsg").innerHTML = msg;document.getElementById("myLayer").style.visibility = "visible";if(ctl != null && ctl.disabled == false){try{ctl.focus();}catch(e){}}}function ShowNoteForCom(frmid, fntid, msg){var fntmsg;var strmsg;if(document.getElementById(fntid) == null){if(fntid == null)fntmsg = "";else fntmsg = fntid;}else {fntmsg = document.getElementById(fntid).innerHTML;}strmsg = fntmsg + msg;ShowNoteNew(document.getElementById(frmid), "Note", strmsg);}function ShowError(ctl, msg){var tmpStr = g_errorInfo;if(tmpStr == "undefined"){tmpStr = "Error";}document.getElementById("errnote").innerHTML = tmpStr;document.getElementById("errmsg").innerHTML = msg;document.getElementById("myLayer").style.visibility = "visible";if(ctl != null && ctl.disabled == false){try{ctl.focus();}catch(e){}}}function ShowErrorForCom(frmid, fntid, msg){var fntmsg;var strmsg;if(document.getElementById(fntid) == null){if(fntid == null)fntmsg = "";else fntmsg = fntid;}else {fntmsg = document.getElementById(fntid).innerHTML;}strmsg = fntmsg + msg;ShowError(document.getElementById(frmid),strmsg );}function getMsgFormArray(str, arg){var errid = 0;var min = 0;var max = 0;var param = -1;var msg = "";var num = arg.length;if(num == 1){errid = arg[0];}else if(num == 3){errid = arg[0];min = arg[1];max = arg[2];}else if(num == 2){errid = arg[0];param = arg[1];}else {return null;}for(var i = 0; i < str.length; i ++){if(typeof(str[i]) == "undefined"){alert("Initializing array error, please check your code£¡i = "+ i);return null;}if(errid == str[i][0]){if(min == max && min == 0){if(param == -1){msg = str[i][1];}else {msg = str[i][1] + param + str[i+1][1];}}else {msg = str[i][1] + min + "~"+ max + str[i+1][1];}return msg;}}return null;}function getEvent(event) {var ev = event || window.event;if (!ev){var c = this.getEvent.caller;while (c){ev = c.arguments[0];if (ev &&(Event == ev.constructor || MouseEvent == ev.constructor)){break;}c = c.caller;}}return ev;}function setTextFocusEnd(){var evt = getEvent();if (evt.srcElement){var elm = evt.srcElement;var textRange = elm.createTextRange();textRange.moveStart('character', elm.value.length);textRange.collapse(true);textRange.select();}}function get_width(){return (document.body.clientWidth+document.body.scrollLeft);}function get_height(){return (document.body.clientHeight+document.body.scrollTop);}function get_left(w){var bw=document.body.clientWidth;w=parseFloat(w);return (bw/2-w/2+document.body.scrollLeft);}function get_top(h){var bh=document.body.clientHeight;h=parseFloat(h);return 100;}function create_mask(){var mask=document.createElement("div");mask.id="mask";mask.style.position="absolute";mask.style.filter="progid:DXImageTransform.Microsoft.Alpha(style=4,opacity=25)";mask.style.opacity=0.4;mask.style.zIndex=1000;document.body.appendChild(mask);re_mask();}function create_msgbox(w,h,t){var box=document.createElement("div");box.id="msgbox";box.style.position="absolute";box.style.width=w+"px";box.style.height=h+"px";box.style.overflow="visible";box.innerHTML=t;box.style.zIndex=1001;document.body.appendChild(box);re_pos();}function re_mask(){var mask=document.getElementById("mask");if(null==mask){return;}mask.style.background="black";mask.style.top="0px";mask.style.left="0px";mask.style.width=get_width()+"px";mask.style.height=get_height()+"px";}function re_pos(){window.document.onkeydown=showKeyDown;var box=document.getElementById("msgbox");if(null!=box){var w=box.style.width;var h=box.style.height;box.style.left=get_left(w)+"px";box.style.top=get_top(h)+"px";}}function remove_msgbox(){var mask=document.getElementById("mask");var msgbox=document.getElementById("msgbox");if(null==mask&&null==msgbox)return;document.body.removeChild(mask);document.body.removeChild(msgbox);}function msgbox(msgJSONData){window.parent.scrollTo(0,0);create_mask();var temp="<table id=\"Tbl_msgbox\" cellpadding=\"0\" cellspacing=\"0\" class=\"msgtb\">";temp+="<tr><td width=\"355\" height=\"22\" class=\"msgtr1\" colspan=2>"+msgJSONData.title+"</td></tr>";temp+="<tr><td width=\"30\" height=\"75\" class=\"msgtr2\">&nbsp;<img src=\"img/infomsg.gif\">&nbsp;&nbsp;</td><td width=\"325\" class=\"msgtr2\"><font face=\"ËÎÌå\" size=\"2\">"+msgJSONData.content+"</font></td>";temp+="</tr><tr><td width=\"355\" height=\"22\" align=\"center\" class=\"msgtr3\" colspan=2><input name=\"msgconfirmb\" type=\"button\" class=\"msgbutton\" id=\"msgconfirmb\" value=\"" + msgJSONData.confirmLabel + "\" onclick=\"remove_msgbox();"+msgJSONData.confirmCallback+";\">";if("yes"==msgJSONData.cancelDisplay){temp+="&nbsp;&nbsp;<input name=\"msgcancelb\" type=\"button\" class=\"msgbutton\" id=\"msgcancelb\" value=\"" + msgJSONData.cancelLabel + "\" onclick=\"remove_msgbox();\"></td>";}temp+="</tr><tr><td class=\"msgtr4\" width=\"355\" height=\"8\" colspan=2></td></tr></table>";create_msgbox(400,200,temp);if(msgJSONData.focusButtun=="Confirm"){document.getElementById("msgconfirmb").focus();}else {document.getElementById("msgcancelb").focus();}}function showKeyDown(e){e=(e)?e:window.event;var box=document.getElementById("msgbox");if(null!=box){if(e.keyCode == 37){document.getElementById("msgconfirmb").focus();}if(e.keyCode == 39){document.getElementById("msgcancelb").focus();}}}function getURL(){var ret = "getpage.gch?pid=1002&nextpage=";var len = arguments.length;if ( 0 != (len-1)%2 ){ShowErrorForCom(null, null, "arguments len err of getURL!");return;}for (var i=0; i<len; i++){if ( i%2 == 1 ){ret += "&"+ arguments[i] + "=";}else {ret += arguments[i];}}return ret;}function menuURLGen(){for ( var supId in meta_menu ){meta_menu[supId]['URL'] = getURL(meta_menu[supId]['page']);for ( var midId in menu_items[supId] ){menu_items[supId][midId]['URL'] = getURL(menu_items[supId][midId]['page']);for ( var subId in menu_subitems[supId][midId] ){menu_subitems[supId][midId][subId]['URL'] = getURL(menu_subitems[supId][midId][subId]['page']);}}}}function menuURLGen_Top(){for ( var supId in meta_menu ){meta_menu[supId]['URL'] = getURL(meta_menu[supId]['page']);}}function menuDisp(){menuURLGen();menuUpdate();}function ReplaceDemo(ss){var r, re; re = / /g; r = ss.replace(re, "&nbsp;"); return r;}function openLink(pageurl){var replaceurl = ReplaceDemo(pageurl);var tag = getObj("IF_UPLOADING").value;if (tag == "1"){top.mainFrame.location.href = "#";}else {top.mainFrame.location.href = replaceurl;}}function getMenuStat(supId){var len = 0;for ( var i in menu_items[supId]){len++;}if ( 0 == len ){return "single";}return "more";}function getMidMenuStat(supId, midId){var len = 0;for ( var i in menu_subitems[supId][midId] ){len++;}if ( 0 == len ){return "single";}for (var subId in menu_subitems[supId][midId] ){if ( selectPage == menu_subitems[supId][midId][subId]['page'] ){return "open";}}return "closed";}function OnMenuItemClick(supId, midId){selectPage = menu_items[supId][midId]['page'];selectSupId = supId;menuUpdate();}function addEvent(element, type, handler) {if (element.addEventListener) {element.addEventListener(type, handler, false);} else {if (!handler.$$guid) handler.$$guid = addEvent.guid++;if (!element.events) element.events = {};var handlers = element.events[type];if (!handlers) {handlers = element.events[type] = {};if (element["on"+ type]) {handlers[0] = element["on"+ type];}}handlers[handler.$$guid] = handler;element["on"+ type] = handleEvent;}};addEvent.guid = 1;function removeEvent(element, type, handler) {if (element.removeEventListener) {element.removeEventListener(type, handler, false);} else {if (element.events && element.events[type]) {delete element.events[type][handler.$$guid];}}};function handleEvent(event) {var returnValue = true;event = event || fixEvent(((this.ownerDocument || this.document || this).parentWindow || window).event);var handlers = this.events[event.type];for (var i in handlers) {this.$$handleEvent = handlers[i];if (this.$$handleEvent(event) === false) {returnValue = false;}}return returnValue;};function fixEvent(event) {event.preventDefault = fixEvent.preventDefault;event.stopPropagation = fixEvent.stopPropagation;return event;};fixEvent.preventDefault = function() {this.returnValue = false;};fixEvent.stopPropagation = function() {this.cancelBubble = true;};timeid = setTimeout("relogin\x28\x29", 300 * 1000 + 5000);function callbackfuncReset(){clearTimeout(timeid);timeid = setTimeout("relogin\x28\x29", 300 * 1000 + 5000);}
+function relogin()
+{
+alert("Session timeout, please login again.");
+setValue("logout",1);
+document.flogout.submit();
+}
+
+function onClickLogout()
+{
+setValue("logout",1);
+document.flogout.submit();
+}
+function setenter(e)
+{
+e = window.event?window.event:e;
+if( e == "[object]")
+{
+if (event.keyCode == 13 && event.srcElement.type == "text")
+{
+event.keyCode = 9;
+}
+}
+}
+</SCRIPT>
+</head>
+<!--Ôö¼ÓiframeÊ¹´íÎóÌáÊ¾¿ò²»±»²»±»ÏÂÀ­²Ëµ¥¸øÕÚ¸Ç-->
+<body id="htmlBody">
+<div id="myLayer" onmousedown="setinner('hidden')" style="position:absolute; width:185px; height:91px; z-index:9; left: 506px; top: 140px; background: url(img/pop_up.gif) no-repeat; border: 1px none #000000; visibility: hidden;">
+<iframe id="myiframe" style="position: absolute; width: 179px; height: 88px; border: 1px none #000000; z-index: -1; filter:alpha(opacity=0); -moz-opacity:0">
+</iframe>
+<div id="Layer3" style="position:absolute; width:30px; height:10px; z-index:11; left: 34px; top: 9px; font-size: 8pt;">
+<table  width="140" border="0">
+<tr>
+<td><font  class="note" id="errnote">&nbsp;Error</font></td>
+</tr>
+</table>
+</div>
+<div id="Layer1" style="position:absolute; width:180px; height:45px; z-index:999; left: 2px; top: 28px;">
+<table width="183" border="0" height="60">
+<tr>
+<td width="183" Height="60px" valign="top">&nbsp;<font id="errmsg" class="notecontent" ></font></td>
+</tr>
+</table>
+</div>
+</div>
+<!--help²¿·Ö¿ªÊ¼-->
+
+<div id="alertFram" align="center" style="position:absolute; width:314px; height:auto; z-index:999; left: 380px; top: 9px; font-size: 9pt; display:none;">
+<div style='width:220px; position: absolute;' align=left id='dragAble' class='dragAble'>
+<div id='helpTextWrapper' style='position: relative'>
+<iframe id="helpiframe" style="position: absolute; width: 100%; display: block; border: 0px 0px; z-index: -1;"></iframe>
+<div>
+<table style='width:220px;background-color:#fff; border:1px solid #358238;' cellpadding='0' cellspacing='0'>
+<tr align='center'>
+<td style='height:23px;width:197px;background-color:#358238;'>
+<font align='left' color='#FFFFFF'><b>&nbsp;Help</b></font>
+</td>
+<td onclick='hideHelp();' style='height:23px;width:23px;background-color:#358238;cursor:pointer;'>
+<img src='img/close.gif' border='0'>
+</td>
+</tr>
+<tr>
+<td colspan='2' height='200px' width='220px' valign='top' align='left' class='word-break-all' style='padding:5px 0 0 10px;'>
+This page displays basic information of WAN connection, IPv4 connection correlative: type, IP version, connection name, NAT, IP, DNS, WAN MAC, connection status, online duration, etc. IPv6 connection correlative: type, IP version, connection name, LLA, GUA, prefix delegation for allocation address, connection status, WAN MAC, online duration, etc.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!--help²¿·Ö½áÊø-->
+<div id="container">
+<!--content²¿·Ö¿ªÊ¼-->
+<div class="content" id="content">
+<!--Ò»¡¢¶þ¡¢Èý¼¶²Ëµ¥¿ªÊ¼-->
+<div class="h1_new" id="menu0">
+</div>
+<!--Ò»¡¢¶þ¡¢Èý¼¶²Ëµ¥½áÊø-->
+<!--ÄÚÈÝ¿ªÊ¼-->
+<!--µ¼º½Ìõ¿ªÊ¼-->
+<form name="fLogin" id="fLogin" method="post"  onsubmit="return false;" action="">
+<input type="hidden" name="_toplang" ID="_toplang" value="" disabled>
+</form>
+<form name="flogout" id="flogout" method="post"  onsubmit="return false;" action="/" target="_top">
+<input type="hidden" name="logout" id="logout" value="" >
+</form>
+<div class="title">
+<div class="title_left" id="title_path">
+</div>
+
+<div class="title_log">
+<a href="#" onclick="onClickLogout()">Logout</a>
+</div>
+</div>
+<!--µ¼º½Ìõ½áÊø-->
+<div id="div1">
+
+<!--PPPoE±íµ¥ÐÅÏ¢¿ªÊ¼-->
+<div class="space_0">
+<table id="TestContent0" class="infor" width="410" border="0" cellpadding="0" cellspacing="1" bgcolor="#979797">
+<tr class="white_1">
+<td class="tdleft">Type</td>
+<td class="tdright"><Input type="text" id="TextPPPMode0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">Connection Name</td>
+<td class="tdright"><Input type="text" id="TextWANCName0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextPPPMode0").value="PPPoE";
+getObj("TextWANCName0").value="PVC0";
+</script>
+
+<tr class="white_1">
+<td class="tdleft">ADSL Transfer Mode</td>
+<td class="tdright">ATM</td>
+</tr>
+
+<tr class="white_1">
+<td class="tdleft">PVC</td>
+<td class="tdright">0/35</td>
+</tr>
+
+<tr class="blue_1">
+<td class="tdleft">IP Version</td>
+<td class="tdright"><Input type="text" id="TextPPPIpMode0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextPPPIpMode0").value="IPv4";
+</script>
+
+<tr class="white_1">
+<td class="tdleft">NAT</td>
+<td class="tdright"><Input type="text" id="TextPPPIsNAT0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">IP</td>
+<td class="tdright"><Input type="text" id="TextPPPIPAddress0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="white_1">
+<td class="tdleft">DNS</td>
+<td class="tdright"><Input type="text" id="TextPPPDNS0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">IPv4 Connection Status</td>
+<td class="tdright"><Input type="text" id="TextPPPConStatus0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="white_1">
+<td class="tdleft">IPv4 Online Duration</td>
+<td class="tdright"><Input type="text" id="TextPPPUpTime0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">Disconnect Reason</td>
+<td class="tdright"></td>
+</tr>
+<script>
+getObj("TextPPPIsNAT0").value="Enabled";
+getObj("TextPPPIPAddress0").value="100.69.198.158";
+getObj("TextPPPDNS0").value="163.121.128.134/163.121.128.135/0.0.0.0";
+getObj("TextPPPConStatus0").value="Connected";
+getObj("TextPPPUpTime0").value="437 sec";
+</script>
+
+
+<tr class="blue_1">
+<td class="tdleft">WAN MAC</td>
+<td class="tdright"><Input type="text" id="TextPPPWorkIFMac0" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextPPPWorkIFMac0").value="30:99:35:a9:bd:c8";
+</script>
+
+</table>
+</div>
+<!--PPPoE±íµ¥ÐÅÏ¢½áÊø-->
+<div id="div4"></div>
+
+<!--PPPoE±íµ¥ÐÅÏ¢¿ªÊ¼-->
+<div class="space_0">
+<table id="TestContent1" class="infor" width="410" border="0" cellpadding="0" cellspacing="1" bgcolor="#979797">
+<tr class="white_1">
+<td class="tdleft">Type</td>
+<td class="tdright"><Input type="text" id="TextPPPMode1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">Connection Name</td>
+<td class="tdright"><Input type="text" id="TextWANCName1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextPPPMode1").value="PPPoE";
+getObj("TextWANCName1").value="PVC1";
+</script>
+
+<tr class="white_1">
+<td class="tdleft">ADSL Transfer Mode</td>
+<td class="tdright">ATM</td>
+</tr>
+
+<tr class="white_1">
+<td class="tdleft">PVC</td>
+<td class="tdright">0/40</td>
+</tr>
+
+<tr class="blue_1">
+<td class="tdleft">IP Version</td>
+<td class="tdright"><Input type="text" id="TextPPPIpMode1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextPPPIpMode1").value="IPv4";
+</script>
+
+<tr class="white_1">
+<td class="tdleft">NAT</td>
+<td class="tdright"><Input type="text" id="TextPPPIsNAT1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">IP</td>
+<td class="tdright"><Input type="text" id="TextPPPIPAddress1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="white_1">
+<td class="tdleft">DNS</td>
+<td class="tdright"><Input type="text" id="TextPPPDNS1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">IPv4 Connection Status</td>
+<td class="tdright"><Input type="text" id="TextPPPConStatus1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="white_1">
+<td class="tdleft">IPv4 Online Duration</td>
+<td class="tdright"><Input type="text" id="TextPPPUpTime1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="blue_1">
+<td class="tdleft">Disconnect Reason</td>
+<td class="tdright">WAN CONNECTION DISABLED</td>
+</tr>
+<script>
+getObj("TextPPPIsNAT1").value="Enabled";
+getObj("TextPPPIPAddress1").value="0.0.0.0";
+getObj("TextPPPDNS1").value="0.0.0.0/0.0.0.0/0.0.0.0";
+getObj("TextPPPConStatus1").value="Unconfigured";
+getObj("TextPPPUpTime1").value="0 sec";
+</script>
+
+
+<tr class="blue_1">
+<td class="tdleft">WAN MAC</td>
+<td class="tdright"><Input type="text" id="TextPPPWorkIFMac1" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextPPPWorkIFMac1").value="00:00:00:00:00:00";
+</script>
+
+</table>
+</div>
+<!--PPPoE±íµ¥ÐÅÏ¢½áÊø-->
+<div id="div4"></div>
+
+<!--static ºÍ dhcp-->
+
+<!--bridge-->
+
+<!--ÇÅ½Ó±íµ¥ÐÅÏ¢¿ªÊ¼-->
+<div class="space_0">
+<table id="TestContent2"  class="infor" width="410" border="0" cellpadding="0" cellspacing="1" bgcolor="#979797">
+<tr class="white_1">
+<td class="tdleft">Type</td>
+<td class="tdright"><Input type="text" id ="TextBridgeMode2" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="white_1">
+<td class="tdleft">Connection Name</td>
+<td class="tdright"><Input type="text" id="TextWANCName2" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextBridgeMode2").value="Bridge Connection";
+getObj("TextWANCName2").value="PVC2";
+</script>
+
+<tr class="white_1">
+<td class="tdleft">ADSL Transfer Mode</td>
+<td class="tdright">ATM</td>
+</tr>
+
+<tr class="white_1">
+<td class="tdleft">PVC</td>
+<td class="tdright">0/50</td>
+</tr>
+
+</table>
+</div>
+<!--ÇÅ½Ó±íµ¥ÐÅÏ¢½áÊø-->
+<div id="div4"></div>
+
+<!--ÇÅ½Ó±íµ¥ÐÅÏ¢¿ªÊ¼-->
+<div class="space_0">
+<table id="TestContent3"  class="infor" width="410" border="0" cellpadding="0" cellspacing="1" bgcolor="#979797">
+<tr class="white_1">
+<td class="tdleft">Type</td>
+<td class="tdright"><Input type="text" id ="TextBridgeMode3" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<tr class="white_1">
+<td class="tdleft">Connection Name</td>
+<td class="tdright"><Input type="text" id="TextWANCName3" class="uiNoBorder" style="text-align:left;" size=33 readonly></td>
+</tr>
+<script>
+getObj("TextBridgeMode3").value="Bridge Connection";
+getObj("TextWANCName3").value="PVC3";
+</script>
+
+<tr class="white_1">
+<td class="tdleft">ADSL Transfer Mode</td>
+<td class="tdright">ATM</td>
+</tr>
+
+<tr class="white_1">
+<td class="tdleft">PVC</td>
+<td class="tdright">0/60</td>
+</tr>
+
+</table>
+</div>
+<!--ÇÅ½Ó±íµ¥ÐÅÏ¢½áÊø-->
+<div id="div4"></div>
+
+<form id="fSubmit" method="post" action="">
+</form>
+<script language="javascript">
+function pageLoad(url)
+{
+getObj("fSubmit").action = url;
+}
+function pageReFresh()
+{
+jslDisable("Btn_ReFresh");
+getObj("fSubmit").submit();
+}
+var totalnum = "4"; 
+var tem = new Array();
+for(var i = 0 ; i<totalnum;i++)
+{
+tem[i] = document.getElementById("TestContent"+i);
+if(tem[i] != '' && tem[i] != null)
+{
+for(var j = 0;j<tem[i].rows.length;j++)
+{
+if(j%2 ==0)
+{
+tem[i].rows[j].className="blue_1";
+}
+else
+{
+tem[i].rows[j].className="white_1";
+}
+}
+}
+}
+</script>
+</div>
+<!--ÄÚÈÝ½áÊø-->
+<div class="bottom_div" id="bottom">&nbsp;
+</div>
+</div>
+<!--content²¿·Ö½áÊø-->
+<!--bottom²¿·Ö¿ªÊ¼-->
+<div class="copyright"> &copy; 2008-2017 ZTE Corporation. All rights reserved</div>
+<div class="bottom_line"></div>
+<div id="bottomx"></div>
+<!--bottom²¿·Ö½áÊø-->
+<input type="hidden" id="IF_UPLOADING" name="IF_UPLOADING" value="N/A">
+<script language="javascript">
+var x,y,z,obj;var down=false;var browser=navigator.appName;var b_version=navigator.appVersion;var version=b_version.split(";");var trim_Version = "";if(null != version[1]){trim_Version=version[1].replace(/[ ]/g,"");}function setinner(type){if(browser=="Microsoft Internet Explorer"&& trim_Version=="MSIE6.0"){document.getElementById("myLayer").style.visibility = type;}else {document.getElementById("myLayer").style.visibility = type ;}}function setinnerHidden(){if(browser=="Microsoft Internet Explorer"&& trim_Version=="MSIE6.0"){document.getElementById("myLayer").style.visibility = "hidden";}else {document.getElementById("myLayer").style.visibility = "hidden";}}function init(){if(browser=="Microsoft Internet Explorer"&& trim_Version=="MSIE6.0"){obj=event.srcElement;obj.setCapture();z=obj.style.zIndex;obj.style.zIndex=100 ;x=event.offsetX;y=event.offsetY ;down=true;}}function moveit(){if(browser=="Microsoft Internet Explorer"&& trim_Version=="MSIE6.0"){if(down&&event.srcElement==obj){with(obj.style){posLeft=document.body.scrollLeft+event.x-x;posTop=document.body.scrollTop+event.y-y;}}}}function stopdrag(){if(browser=="Microsoft Internet Explorer"&& trim_Version=="MSIE6.0"){down=false;obj.style.zIndex=z ;obj.releaseCapture();}}function framedispalay(id){if(browser=="Microsoft Internet Explorer"&& trim_Version=="MSIE6.0"){}else {getObj(id).style.display="none";}}function hideHelp(){getObj("alertFram").style.display = "none";};var ie=document.all;var nn6=document.getElementById&&!document.all;var isdrag=false;var y,x;var oDragObj;function moveMouse(e){if (isdrag){oDragObj.style.top = (nn6 ? nTY + e.clientY - y : nTY + event.clientY - y)+"px";oDragObj.style.left = (nn6 ? nTX + e.clientX - x : nTX + event.clientX - x)+"px";return false;}}function initDrag2(o,s){if (typeof(o) == "string") o = document.getElementById(o);o.orig_x = parseInt(o.style.left) - document.body.scrollLeft;o.orig_y = parseInt(o.style.top) - document.body.scrollTop;o.orig_index = o.style.zIndex;o.onmousedown = function(evt){this.style.cursor = "move";var d=document;evt = evt || window.event;var x = evt.clientX+d.body.scrollLeft-o.offsetLeft;var y = evt.clientY+d.body.scrollTop-o.offsetTop;d.ondragstart = "return false;";d.onselectstart = "return false;";d.onselect = "document.selection.empty();";if(o.setCapture){o.setCapture();}else if(window.captureEvents){window.captureEvents(Event.MOUSEMOVE|Event.MOUSEUP);}d.onmousemove = function(evt){evt = evt || window.event;o.style.left = evt.clientX+document.body.scrollLeft-x +"px";o.style.top = evt.clientY+document.body.scrollTop-y +"px";o.orig_x = parseInt(o.style.left) - document.body.scrollLeft;o.orig_y = parseInt(o.style.top) - document.body.scrollTop;};d.onmouseup = function(){if(o.releaseCapture)o.releaseCapture();else if(window.captureEvents)window.captureEvents(Event.MOUSEMOVE|Event.MOUSEUP);d.onmousemove = null;d.onmouseup = null;d.ondragstart = null;d.onselectstart = null;d.onselect = null;o.style.cursor = "normal";o.style.zIndex = o.orig_index;};};if (s){var orig_scroll = window.onscroll?window.onscroll:function (){};window.onscroll = function (){orig_scroll();o.style.left = o.orig_x + document.body.scrollLeft;o.style.top = o.orig_y + document.body.scrollTop;};}}function initDrag(e){var oDragHandle = nn6 ? e.target : event.srcElement;var topElement = "HTML";if( oDragHandle.tagName ){while (oDragHandle.tagName != topElement && oDragHandle.className != "dragAble"){oDragHandle = nn6 ? oDragHandle.parentNode : oDragHandle.parentElement;}if (oDragHandle.className=="dragAble"){isdrag = true;oDragObj = oDragHandle;nTY = parseInt(oDragObj.style.top+0);y = nn6 ? e.clientY : event.clientY;nTX = parseInt(oDragObj.style.left+0);x = nn6 ? e.clientX : event.clientX;document.onmousemove=moveMouse;return false;}}}function showHelp(){getObj("alertFram").style.display = "block";var helpiframe = document.getElementById('helpiframe');helpiframe.setAttribute('height', document.getElementById('dragAble').scrollHeight);framedispalay("helpiframe");initDrag2('dragAble');}function jump(){top.location.href = "/";}function AutoRelogin(type){var timeout;if ((type == "restart") || (type == "upgconfig")){timeout = 3;}else if (type == "restore"){timeout = 3;}else if (type == "upgversion"){timeout = 5;}else {return;}setTimeout("jump()", timeout*60*1000+5000);}function OldProcessRet(errstr, errpara){if("Current operation is ineffective, please check whether "== errstr && "SUCC"== errpara){errstr = "FAIL";}ProcessRet(errstr, errpara);}function ProcessRet(errstr, errpara){var errtype=getValue("IF_ERRORTYPE");if (errstr != "SUCC"){if(errpara != "SUCC"){var param = document.getElementById("Fnt_"+errpara);if ( param== null){ShowErrorForCom(null, null, "Current operation is ineffective, please check configuration parameters.");}else {msg = "Current operation is ineffective, please check whether "+ param.innerHTML + " is legal.";ShowErrorForCom("Frm_"+errpara, null, msg);}}else {if (errstr == "FAIL"){errstr = "Current operation is ineffective, please check configuration parameters.";}if ((errtype&1) == 1){ShowNote("Notice", errstr);}else if((errtype&2) == 2){ShowErrorForCom(null, null, errstr);}else if((errtype&4) == 4){}else {ShowErrorForCom(null, null, errstr);}}}}
+text  = "<table class='bottom_table' border='0' cellpadding='0' cellspacing='0'>"
++"<tbody><tr>"
++"<td class='bottom_td1'></td>"
++"<td class='bottom_td2' style='background:url(img/bottom_left.gif) no-repeat left top;'></td>"
++"<td class='bottom_td3'>"
+
++"<input name='Submit' type='button'id='Btn_ReFresh' onclick=pageReFresh() class='button' value=' Refresh ' />&nbsp;&nbsp;&nbsp;"
+
++"</td></tr></tbody>"
++"</table>";
+getObj("bottom").innerHTML=text;
+meta_menu        = new Array();
+menu_items       = new Array();
+menu_subitems    = new Array();
+meta_menu['mmStatu'] = new Array();
+meta_menu['mmStatu']['langName'] = 'Status';
+meta_menu['mmStatu']['page']     = 'status_dev_info_t.gch';
+
+menu_items['mmStatu']      = new Array();
+menu_subitems['mmStatu']   = new Array();
+menu_items['mmStatu']['smDevStatu'] = new Array();
+menu_items['mmStatu']['smDevStatu']['langName'] = 'Device\x20Information\x20';
+menu_items['mmStatu']['smDevStatu']['page']     = 'status_dev_info_t.gch';
+
+menu_items['mmStatu']['smWanStatu'] = new Array();
+menu_items['mmStatu']['smWanStatu']['langName'] = 'Network\x20Interface';
+menu_items['mmStatu']['smWanStatu']['page']     = 'IPv46_status_wan_if_t.gch';
+
+menu_subitems['mmStatu']['smWanStatu'] = new Array();
+menu_subitems['mmStatu']['smWanStatu']['ssmDSLWANv46Conn'] = new Array();
+menu_subitems['mmStatu']['smWanStatu']['ssmDSLWANv46Conn']['langName'] = 'WAN\x20Connection';
+menu_subitems['mmStatu']['smWanStatu']['ssmDSLWANv46Conn']['page']     = 'IPv46_status_wan_if_t.gch';
+
+menu_subitems['mmStatu']['smWanStatu']['ssmADSL'] = new Array();
+menu_subitems['mmStatu']['smWanStatu']['ssmADSL']['langName'] = 'ADSL';
+menu_subitems['mmStatu']['smWanStatu']['ssmADSL']['page']     = 'status_dsl_info_t.gch';
+
+menu_items['mmStatu']['smLanStatu'] = new Array();
+menu_items['mmStatu']['smLanStatu']['langName'] = 'User\x20Interface';
+menu_items['mmStatu']['smLanStatu']['page']     = 'status_wlan_info_t.gch';
+
+menu_subitems['mmStatu']['smLanStatu'] = new Array();
+menu_subitems['mmStatu']['smLanStatu']['ssmWLAN'] = new Array();
+menu_subitems['mmStatu']['smLanStatu']['ssmWLAN']['langName'] = 'WLAN';
+menu_subitems['mmStatu']['smLanStatu']['ssmWLAN']['page']     = 'status_wlan_info_t.gch';
+
+menu_subitems['mmStatu']['smLanStatu']['ssmLAN'] = new Array();
+menu_subitems['mmStatu']['smLanStatu']['ssmLAN']['langName'] = 'Ethernet';
+menu_subitems['mmStatu']['smLanStatu']['ssmLAN']['page']     = 'status_lan_info_t.gch';
+
+meta_menu['mmQuickSet'] = new Array();
+meta_menu['mmQuickSet']['langName'] = 'Quick\x20Setup';
+meta_menu['mmQuickSet']['page']     = 'quicksetup_adsl_wan_conf_t.gch';
+
+meta_menu['mmNet'] = new Array();
+meta_menu['mmNet']['langName'] = 'Network';
+meta_menu['mmNet']['page']     = 'IPv46_net_wan_conf_t.gch';
+
+meta_menu['mmSec'] = new Array();
+meta_menu['mmSec']['langName'] = 'Security';
+meta_menu['mmSec']['page']     = 'sec_firewall_conf_t.gch';
+
+meta_menu['mmApp'] = new Array();
+meta_menu['mmApp']['langName'] = 'Application';
+meta_menu['mmApp']['page']     = 'app_ddns_conf_t.gch';
+
+meta_menu['mmManager'] = new Array();
+meta_menu['mmManager']['langName'] = 'Administration';
+meta_menu['mmManager']['page']     = 'net_tr069_basic_t.gch';
+
+meta_menu['mmHelp'] = new Array();
+meta_menu['mmHelp']['langName'] = 'Help';
+meta_menu['mmHelp']['page']     = 'help_t.gch';
+
+
+var selectPage  = "IPv46_status_wan_if_t.gch";
+var selectSupId = "mmStatu";
+function menuUpdate()
+{
+text = "<table class='menu' border='0' cellpadding='0' cellspacing='0'>"
++ "<tbody>"
++ "<tr>"
++ "<td class='h1_mid'><a name='top'></a>"
++ "<table class='menu_table' border='0' cellpadding='0' cellspacing='0'>"
++ "<tbody>";
+for (var supId in meta_menu)
+{
+text = text + "<tr class='";
+var temp = "' style='cursor:pointer' onclick=\"javascript:openLink('" + meta_menu[supId]['URL'] + "')\" onmouseover=\"altMenuClass(this,true)\" onmouseout=\"altMenuClass(this,false)\">"
++ "<td class='add'>&nbsp;</td>"
++ "<td class='mid'  id='"+supId+"'>"
++ meta_menu[supId]['langName']
++ "</td>"
++ "</tr>";
+if( supId != selectSupId )
+{
+text = text + "h1" + temp;
+continue;
+}
+else
+{
+text = text + "h1_s" + temp;
+}
+for ( var midId in menu_items[supId] )
+{
+var stat = getMidMenuStat(supId, midId);
+if ( stat == "single" )
+{
+if (menu_items[supId][midId]['page'] == selectPage)
+{
+text = text
++ "<tr class='h2_s' onmouseover=\"altMenuClass(this,true)\" onmouseout=\"altMenuClass(this,false)\">"
++ "<td class='add'>&nbsp;</td>"
++ "<td class='mid'>"
++ "<font id='"+midId+"'>"
++ menu_items[supId][midId]['langName']
++ "</font></td>"
++ "</tr>";
+getObj("title_path").innerHTML="Path:"+meta_menu[supId]['langName']+"-"+menu_items[supId][midId]['langName'];
+}
+else
+{
+text = text
++ "<tr class='h2_content' style='cursor:pointer'  onclick='javascript:openLink(\"" + menu_items[supId][midId]['URL'] + "\")' onmouseover=\"altMenuClass(this,true)\" onmouseout=\"altMenuClass(this,false)\">"
++ "<td class='add'>&nbsp;</td>"
++ "<td class='mid'>"
++ "<font id='"+midId+"'>"
++ menu_items[supId][midId]['langName']
++ "</font></td>"
++ "</tr>";
+}
+}
+else if ( stat == "closed" )
+{
+text = text
++ "<tr class='h2_content' style='cursor:pointer' onclick='javascript:OnMenuItemClick(\"" + supId + "\",\"" + midId + "\"); openLink(\""
++ menu_items[supId][midId]['URL'] + "\")' onmouseover=\"altMenuClass(this,true)\" onmouseout=\"altMenuClass(this,false)\">"
++ "<td class='add'>&nbsp;</td>"
++ "<td class='mid'>"
++ "<span style='color:green; font-size:12.0pt; font-family:Arial'></span> "
++ "<font id='"+midId+"'>"
++ menu_items[supId][midId]['langName']
++ "</font></td>"
++ "</tr>";
+}
+else if ( stat == "open" )
+{
+text = text
++ "<tr class='h2_s' onmouseover=\"altMenuClass(this,true)\" onmouseout=\"altMenuClass(this,false)\">"
++ "<td class='add'>&nbsp;</td>"
++ "<td class='mid'>"
++ "<span style='font-size:12.0pt; font-family:Arial'></span>"
++ "<font id='"+midId+"'>"
++ menu_items[supId][midId]['langName']
++ "</font></td>"
++ "</tr>";
+for (var subId in menu_subitems[supId][midId])
+{
+if (menu_subitems[supId][midId][subId]['page'] == selectPage)
+{
+text = text
++ "<tr class='h3_s' onmouseover=\"altMenuClass(this,true)\" onmouseout=\"altMenuClass(this,false)\">"
++ "<td class='add'>&nbsp;</td>"
++ "<td class='mid'>"
++ "<font id='"+subId+"'>"
++ menu_subitems[supId][midId][subId]['langName']
++ "</font></td>"
++ "</tr>";
+getObj("title_path").innerHTML="Path:"+meta_menu[supId]['langName']+"-"+menu_items[supId][midId]['langName']+"-"+menu_subitems[supId][midId][subId]['langName'];
+}
+else
+{
+text = text
++ "<tr class='h3' style='cursor:pointer' onclick=\"javascript:openLink('" + menu_subitems[supId][midId][subId]['URL'] + "' )\" onmouseover=\"altMenuClass(this,true)\" onmouseout=\"altMenuClass(this,false)\">"
++ "<td class='add'>&nbsp;</td>"
++ "<td class='mid' colspan='2'>"
++ "<font id='"+subId+"'>"
++ menu_subitems[supId][midId][subId]['langName']
++ "</font></td>"
++ "</tr>";
+}
+}
+}
+}
+}
+
+text = text
++ "<tr class='h2_space'>"
++ "<td colspan='3'></td>"
++ "</tr>"
++ "<tr class='h2_help'>"
++ "<td class='add'></td>"
++ "<td class='mid_right'>"
++ "<div>"
++ "<ul>"
++ "<li class='help'>"
++ "<span  style=\"cursor:pointer\" onclick=\"showHelp();\"><img id=\"sss\" src=\"img/help.gif\" border='0'><b style=\"color:rgb(62,62,62);padding-bottom:5px;padding-right:5px;\">"+"Help"+"</b></span>"
++ "</li>"
++ "</ul>"
++ "</div>"
++ "</td>"
++ "</tr>";
+
+text = text
++ "</tbody>"
++ "</table>"
++ "</td>"
++ "</tr>"
++ "</tbody>"
++ "</table>";
+getObj("menu0").innerHTML=text;
+}
+function altMenuClass(ele)
+{
+var map = {"h1":"h1 bghover","h1 bghover":"h1","h1_s":"h1_s bghover h1_s_bgfix","h1_s bghover h1_s_bgfix":"h1_s","h2":"h2 bghover","h2 bghover":"h2","h2_s":"h2_s bghover","h2_s bghover":"h2_s","h2_content":"h2_content bghover","h2_content bghover":"h2_content","h3":"h3 bghover","h3 bghover":"h3","h3_s":"h3_s bghover","h3_s bghover":"h3_s"};
+ele.className = map[ele.className] || ele.className;
+}
+function myOnLoad()
+{
+menuDisp();
+addEvent(getObj("htmlBody"), "keydown", setenter);
+addEvent(getObj("htmlBody"), "keyup", setinnerHidden);
+addEvent(getObj("htmlBody"), "mousedown", setinnerHidden);
+fnBreakWordAll({word:15,re:'[\\w]'});
+framedispalay('myiframe');
+
+getObj("myLayer").style.left = "580px";
+getObj("myLayer").style.top  = "59px";
+
+pageLoad(getURL("IPv46_status_wan_if_t.gch"));
+
+}
+function setWindowScrollTop(win, e, nowHelpTag, lastHelpTag)
+{
+topHeight = getTop(e);
+if(win.document.documentElement)
+{
+win.document.documentElement.scrollTop = topHeight;
+}
+if(win.document.body){
+win.document.body.scrollTop = topHeight;
+}
+changeHelpColor(nowHelpTag, lastHelpTag);
+}
+function getTop(e)
+{
+var offset=e.offsetTop;
+if(e.offsetParent!=null)
+{
+offset+=getTop(e.offsetParent);
+}
+return offset;
+}
+function changeHelpColor(nowHelpTag, lastHelpTag)
+{
+if(nowHelpTag != lastHelpTag)
+{
+if(nowHelpTag == "gotop")
+{
+cancleColor(lastHelpTag);
+}
+else
+{
+cancleColor(lastHelpTag);
+confirmColor(nowHelpTag);
+}
+}
+else
+{
+confirmColor(nowHelpTag);
+}
+}
+function nextnode(node)
+{
+if(node.nodeType == 1)
+{
+return node;
+}
+if(node.nextSibling)
+{
+return nextnode(node.nextSibling);
+}
+}
+function fathernode(node)
+{
+if(node.nodeType == 1)
+{
+return node;
+}
+if(node.parentnode)
+{
+return fathernode(node.parentnode)
+}
+}
+function confirmColor(nowHelpTag)
+{
+var parentnodea = fathernode(document.getElementsByName(nowHelpTag)[0].parentNode);
+var helpTitle = fathernode(parentnodea.parentNode);
+helpTitle.bgColor="#B4E639";
+var helpText = nextnode(helpTitle.nextSibling);
+helpText.bgColor="#FFFFCC";
+getObj("helpTagValue").value = nowHelpTag;
+}
+function cancleColor(lastHelpTag)
+{
+if(lastHelpTag != "")
+{
+var parentnodea = fathernode(document.getElementsByName(lastHelpTag)[0].parentNode);
+var helpTitle = fathernode(parentnodea.parentNode);
+helpTitle.bgColor="";
+var helpText = nextnode(helpTitle.nextSibling);
+helpText.bgColor="";
+}
+}
+myOnLoad();
+
+function addToken2AllForms()
+{
+function doAddLogic()
+{
+var session_token = "5017132425944272";
+var forms = document.getElementsByTagName("form");
+for ( var i=0; i<forms.length; i++ )
+{
+var tempform = forms[i];
+var sEnctype = tempform.getAttribute("enctype");
+if ( sEnctype != null &&
+"multipart/form-data" == sEnctype.toLowerCase() )
+{
+continue;
+}
+var tokenInput = document.createElement("input");
+tokenInput.setAttribute("id", "_SESSION_TOKEN");
+tokenInput.setAttribute("name", "_SESSION_TOKEN");
+tokenInput.setAttribute("type", "hidden");
+tokenInput.setAttribute("value", session_token);
+tempform.appendChild(tokenInput);
+}
+}
+if( window.onload == null )
+{
+window.onload=function(){
+doAddLogic();
+}
+}
+else
+{
+var tempfunction = window.onload;
+window.onload=function(){
+tempfunction();
+doAddLogic();
+}
+}
+}
+addToken2AllForms();
+</script>
+</body>
+</html>
