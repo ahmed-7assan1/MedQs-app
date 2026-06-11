@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 import { getSiteConfig } from "@/lib/get-site-config";
 
 const DEFAULT_PRIMARY = "#0d9488";
-const DEFAULT_BG = "#f5f6fa";
 
 function safeThemeColor(hex: string | null | undefined): string {
   const t = (hex ?? "").trim();
@@ -18,7 +17,19 @@ function iconMime(src: string): string {
   return "image/png";
 }
 
-export default async function manifest(): Promise<MetadataRoute.Manifest> {
+function parseThemeFromCookie(cookie: string | null): "light" | "dark" {
+  if (!cookie) return "dark";
+  const match = cookie.match(/(?:^|;\s*)medqs-theme=([^;]+)/);
+  if (!match) return "dark";
+  const val = match[1].toLowerCase();
+  if (val === "light") return "light";
+  return "dark";
+}
+
+const BG_DARK = "#0F0F13";
+const BG_LIGHT = "#F5F5FA";
+
+export default async function manifest(request: Request): Promise<MetadataRoute.Manifest> {
   let siteName = "MedOneX";
   let themeColor = DEFAULT_PRIMARY;
 
@@ -33,6 +44,9 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     /* DB unavailable — defaults */
   }
 
+  const theme = parseThemeFromCookie(request.headers.get("cookie"));
+  const bgColor = theme === "light" ? BG_LIGHT : BG_DARK;
+
   const fullName = `${siteName} — Medical Education`;
   const icon192 = pwaIcon ?? "/icons/icon-192.png";
   const icon512 = pwaIcon ?? "/icons/icon-512.png";
@@ -43,11 +57,11 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     name: fullName,
     short_name: siteName,
     description: "Medical quizzes, lectures, community, and AI study tools for university students.",
-    start_url: "/",
+    start_url: "/splash",
     scope: "/",
     display: "standalone",
     orientation: "any",
-    background_color: DEFAULT_BG,
+    background_color: bgColor,
     theme_color: themeColor,
     icons: [
       {
