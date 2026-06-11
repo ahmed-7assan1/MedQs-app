@@ -94,7 +94,7 @@ export default function SocialReportsPage() {
             onClick={() => setTab(t.key)}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-bold transition-all ${
               tab === t.key
-                ? "bg-white dark:bg-[#1f1e36] shadow-sm text-foreground"
+                ? "bg-card shadow-sm text-foreground"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >

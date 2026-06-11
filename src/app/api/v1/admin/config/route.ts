@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSiteConfig, invalidateSiteConfigCache } from "@/lib/get-site-config";
 import { requireAdminWriter } from "@/lib/admin-scope";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const config = await prisma.siteConfig.findFirst();
+  const config = await getSiteConfig();
   return NextResponse.json(config ?? {});
 }
 
@@ -82,6 +83,7 @@ export async function PUT(req: NextRequest) {
         hulkLogoUrl: merged.hulkLogoUrl === null || typeof merged.hulkLogoUrl === "string" ? merged.hulkLogoUrl : existing.hulkLogoUrl,
       },
     });
+    invalidateSiteConfigCache();
     return NextResponse.json(config);
   }
 
@@ -91,5 +93,6 @@ export async function PUT(req: NextRequest) {
     update: data as any,
   });
 
+  invalidateSiteConfigCache();
   return NextResponse.json(config);
 }

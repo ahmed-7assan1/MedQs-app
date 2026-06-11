@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { prisma } from "@/lib/prisma";
+import { getSiteConfig } from "@/lib/get-site-config";
 
 const DEFAULT_PRIMARY = "#0d9488";
 const DEFAULT_BG = "#f5f6fa";
@@ -24,9 +24,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
 
   let pwaIcon: string | null = null;
   try {
-    const row = await prisma.siteConfig.findFirst({
-      select: { siteName: true, primaryColor: true, faviconUrl: true, pwaIconUrl: true },
-    });
+    const row = await getSiteConfig();
     if (row?.siteName?.trim()) siteName = row.siteName.trim();
     themeColor = safeThemeColor(row?.primaryColor);
     const u = row?.pwaIconUrl?.trim() || row?.faviconUrl?.trim();

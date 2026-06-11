@@ -125,7 +125,7 @@ export default function AdminAIAgentsPage() {
                   </div>
                   
                   {showProviders && (
-                    <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1e1d24] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-2">
+                    <div className="absolute z-50 w-full mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-2">
                       {[
                         { id: 'gemini', name: 'Google Gemini' },
                         { id: 'openai', name: 'OpenAI (ChatGPT)' },
@@ -177,7 +177,7 @@ export default function AdminAIAgentsPage() {
       {/* Agents Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {agents.map((agent) => (
-          <div key={agent.id} className="group relative bg-white dark:bg-[#111] border border-gray-200 dark:border-white/5 rounded-3xl p-6 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer overflow-hidden">
+          <div key={agent.id} className="group relative bg-card border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer overflow-hidden">
             <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${agent.bg.replace('/10', '/30')} blur-3xl opacity-20 rounded-full translate-x-10 -translate-y-10 group-hover:opacity-50 transition-opacity`} />
             
             <div className={`w-16 h-16 rounded-2xl ${agent.bg} flex items-center justify-center mb-6`}>

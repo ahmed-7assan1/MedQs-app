@@ -35,7 +35,7 @@ function ModuleCardSkeleton() {
 
 export default function ModulesLoading() {
   return (
-    <div className="min-h-screen bg-slate-950 dark:bg-[#07080f] pb-32">
+    <div className="min-h-screen bg-background pb-32">
       {/* Hero Skeleton */}
       <div className="relative w-full overflow-hidden">
         <div className="md:hidden absolute inset-0 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent h-[200px] pointer-events-none" />

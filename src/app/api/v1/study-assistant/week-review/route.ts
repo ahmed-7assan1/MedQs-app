@@ -8,7 +8,8 @@ export async function POST() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
+  const { getSiteConfig: getCfg } = await import("@/lib/get-site-config");
+  const site = await getCfg().catch(() => null);
   const aiOpts = aiOptionsFromSiteProvider(site?.aiPreferredProvider);
 
   const profile = await prisma.studyAssistantProfile.findUnique({

@@ -72,7 +72,7 @@ function ResetPasswordContent() {
         </p>
       </div>
 
-      <div className="w-full bg-white/60 dark:bg-[#05070f]/60 backdrop-blur-3xl border border-slate-200 dark:border-white/10 rounded-[32px] p-8 shadow-2xl">
+      <div className="w-full bg-card/60 backdrop-blur-3xl border border-border rounded-[32px] p-8 shadow-2xl">
         {sessionReady === null ? (
           <div className="py-12 flex justify-center">
             <CircleNotch className="animate-spin text-blue-500" size={32} />
@@ -184,7 +184,7 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="relative min-h-screen flex flex-col bg-slate-50 dark:bg-[#05070f] selection:bg-blue-500/30">
+    <div className="relative min-h-screen flex flex-col bg-background selection:bg-blue-500/30">
       <CinematicBackground />
       <Suspense fallback={
         <div className="flex-1 flex items-center justify-center">

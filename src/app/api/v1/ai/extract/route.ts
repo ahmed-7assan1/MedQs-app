@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { extractQuestionsFromTextByModeWithMeta, validateQuestionsWithMeta } from "@/lib/gemini";
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
@@ -41,7 +40,8 @@ export async function POST(req: NextRequest) {
   const customApiKey = String(formData.get("customApiKey") ?? "").trim() || undefined;
   const customModel = String(formData.get("customModel") ?? "").trim() || undefined;
 
-  const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
+  const { getSiteConfig: getCfg } = await import("@/lib/get-site-config");
+  const site = await getCfg().catch(() => null);
   const effectiveProvider =
     normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
   if (!file) return NextResponse.json({ error: "No file uploaded" }, { status: 400 });

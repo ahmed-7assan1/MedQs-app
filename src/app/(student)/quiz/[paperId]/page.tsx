@@ -36,7 +36,7 @@ const getCachedPaper = (paperId: string) =>
   )();
 
 const getCachedSiteConfig = unstable_cache(
-  () => prisma.siteConfig.findFirst({ select: { enableAI: true } }),
+  async () => { const { getSiteConfig: getCfg } = await import("@/lib/get-site-config"); return getCfg(); },
   ["site-config-quiz"],
   { revalidate: 3600 }
 );

@@ -373,7 +373,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
 
   return (
     <div className={cn(
-      "relative rounded-2xl sm:rounded-[32px] bg-white/70 dark:bg-[#161523]/70 backdrop-blur-3xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xl transition-all duration-500 overflow-hidden"
+      "relative rounded-2xl sm:rounded-[32px] bg-card/70 backdrop-blur-3xl border border-border shadow-2xl transition-all duration-500 overflow-hidden"
     )}>
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[40px] pointer-events-none" />
 
@@ -430,7 +430,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
             </div>
 
             {suggestedUsers.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-[#19182C] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[60] max-h-48 overflow-y-auto">
+              <div className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-[60] max-h-48 overflow-y-auto">
                 {suggestedUsers.map((u, idx) => (
                   <button
                     key={u.id}
@@ -696,7 +696,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
                     {showBackgroundPicker && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowBackgroundPicker(false)} />
-                        <div className="absolute bottom-full left-0 mb-2 flex bg-white dark:bg-[#1C1B22] border border-slate-200 dark:border-white/10 rounded-2xl p-2.5 gap-2.5 shadow-2xl z-50 flex-wrap w-[220px]">
+                        <div className="absolute bottom-full left-0 mb-2 flex bg-card border border-border rounded-2xl p-2.5 gap-2.5 shadow-2xl z-50 flex-wrap w-[220px]">
                           <input type="file" accept="image/*" ref={bgUploadRef} onChange={handleBgUpload} className="hidden" />
                           <button type="button" onClick={() => bgUploadRef.current?.click()} title="Upload Custom Image Background"
                             className="h-8 w-8 rounded-full border-2 border-dashed border-slate-300 dark:border-white/20 hover:border-primary flex items-center justify-center text-slate-400 hover:text-primary transition-all shrink-0"
@@ -802,7 +802,7 @@ export function FloatingPostIsland({ user, onPost, circles, rooms }: Props) {
           >
             <div className="pointer-events-auto max-w-[min(540px,calc(100vw-48px))] w-full px-4 flex justify-center">
               <button onClick={() => setIsExpanded(true)}
-                className="flex items-center gap-3 pr-6 pl-2.5 py-2.5 rounded-[24px] bg-white/70 dark:bg-[#161523]/70 backdrop-blur-3xl text-slate-800 dark:text-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:scale-105 active:scale-95 transition-all border border-slate-200/80 dark:border-white/[0.08] group hover:border-primary/30"
+                className="flex items-center gap-3 pr-6 pl-2.5 py-2.5 rounded-[24px] bg-card/70 backdrop-blur-3xl text-foreground shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:scale-105 active:scale-95 transition-all border border-border group hover:border-primary/30"
               >
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
                   <Plus size={18} weight="bold" className="group-hover:rotate-90 transition-transform duration-300" />

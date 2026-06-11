@@ -65,24 +65,24 @@ export function ReportModal({ open, onClose, targetType, targetId }: Props) {
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white dark:bg-[#161523] rounded-2xl shadow-2xl border border-slate-200 dark:border-white/[0.08] w-full max-w-md overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/[0.08]">
+            <div className="bg-card rounded-2xl shadow-2xl border border-border w-full max-w-md overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b border-border">
                 <div className="flex items-center gap-2">
                   <Flag size={20} weight="bold" className="text-red-500" />
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">Report {targetType.toLowerCase()}</h2>
+                  <h2 className="text-lg font-bold text-foreground">Report {targetType.toLowerCase()}</h2>
                 </div>
-                <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 transition-all">
+                <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all">
                   <X size={18} weight="bold" />
                 </button>
               </div>
 
               <div className="p-4 space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-white/70 mb-1.5">Reason</label>
+                  <label className="block text-sm font-bold text-foreground/70 mb-1.5">Reason</label>
                   <select
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#1f1e36] text-slate-800 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2.5 rounded-xl border border-border bg-muted/30 text-foreground text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="">Select a reason...</option>
                     {REPORT_REASONS.map((r) => (
@@ -92,7 +92,7 @@ export function ReportModal({ open, onClose, targetType, targetId }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-white/70 mb-1.5">Additional details (optional)</label>
+                  <label className="block text-sm font-bold text-foreground/70 mb-1.5">Additional details (optional)</label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}

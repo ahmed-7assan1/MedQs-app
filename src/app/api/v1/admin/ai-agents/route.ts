@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { invalidateSiteConfigCache } from "@/lib/get-site-config";
 import { requireAdminWriter } from "@/lib/admin-scope";
 
 export const dynamic = "force-dynamic";
@@ -103,9 +104,11 @@ export async function PUT(req: NextRequest) {
       where: { id: existing.id },
       data: data as any,
     });
+    invalidateSiteConfigCache();
     return NextResponse.json(config);
   } else {
     const config = await prisma.siteConfig.create({ data: data as any });
+    invalidateSiteConfigCache();
     return NextResponse.json(config);
   }
 }

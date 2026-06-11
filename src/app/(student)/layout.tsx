@@ -86,7 +86,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
           }}
         >
           <AmbientGlow />
-          <div className={cn("app-shell app-shell--tabbar min-h-screen flex flex-col bg-white/80 dark:bg-[#09080F]/80")}>
+          <div className={cn("app-shell app-shell--tabbar min-h-screen flex flex-col bg-background/80")}>
             <MobileChromeController />
             <a href="#main-content" className="skip-link sr-only">
               Skip to main content
@@ -124,7 +124,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
               {!isGuest && <AdBannerModal semesterId={userSemesterId ?? undefined} />}
 
-              <main id="main-content" className="flex-1 flex flex-col outline-none w-full min-h-0 md:pb-8 max-md:pb-[var(--mobile-main-pad-bottom)]">
+              <main id="main-content" className="flex-1 flex flex-col outline-none w-full min-h-0 md:pb-8">
                 <MobileSwipeLayout>
                   <PageTransitionProvider>
                     {children}

@@ -54,19 +54,19 @@ export function SpacedRepetitionCards() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-border/50 bg-card p-5 shadow-sm">
+      <div>
         <div className="flex items-center gap-3 mb-4">
           <div className="h-4 w-4 rounded-full bg-muted/30 animate-pulse" />
           <div className="h-3 w-24 rounded bg-muted/30 animate-pulse" />
         </div>
-        <div className="h-40 rounded-2xl bg-muted/20 animate-pulse" />
+        <div className="h-[180px] rounded-2xl bg-muted/20 animate-pulse" />
       </div>
     );
   }
 
   if (cards.length === 0) {
     return (
-      <div className="rounded-2xl border border-border/50 bg-card p-5 shadow-sm">
+      <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <ArrowPathIcon className="h-4 w-4 text-indigo-500" />
@@ -78,24 +78,63 @@ export function SpacedRepetitionCards() {
             Refresh
           </button>
         </div>
-        <Link href="/modules" className="block">
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors">
-            <div className="h-14 w-14 rounded-2xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center">
-              <ArrowPathIcon className="h-7 w-7 text-indigo-500/60" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-black text-foreground">No flashcards yet</h3>
-              <p className="text-xs font-medium text-muted-foreground mt-0.5">Browse modules to find study cards</p>
-            </div>
-            <ArrowRightIcon className="h-5 w-5 text-muted-foreground/40" />
-          </div>
-        </Link>
+
+        <div className="relative">
+          <button onClick={() => setFlipped(!flipped)} className="w-full text-left focus:outline-none">
+            <motion.div
+              animate={{ rotateY: flipped ? 180 : 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="relative w-full"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              {/* Front: MedOnex branding */}
+              <div
+                className={cn(
+                  "rounded-2xl p-5 min-h-[160px] flex flex-col items-center justify-center text-center",
+                  flipped ? "hidden" : ""
+                )}
+                style={{ backfaceVisibility: "hidden" }}
+              >
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-3 shadow-lg shadow-indigo-500/20">
+                  <span className="text-white font-black text-lg">M</span>
+                </div>
+                <p className="text-xl font-black text-foreground tracking-tight">
+                  Med<span className="text-indigo-500">Onex</span>
+                </p>
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] mt-1">
+                  Your AI Medical Companion
+                </p>
+                <p className="text-[10px] text-muted-foreground/40 mt-3">Tap to discover</p>
+              </div>
+
+              {/* Back: Platform definition */}
+              <div
+                className={cn(
+                  "rounded-2xl p-5 min-h-[160px] flex flex-col",
+                  !flipped ? "hidden" : ""
+                )}
+                style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+              >
+                <p className="text-xs font-bold text-foreground leading-relaxed flex-1">
+                  MedOnex is an AI-powered medical education platform that helps students master medical knowledge through spaced repetition, interactive flashcards, and personalized learning paths.
+                </p>
+                <Link
+                  href="/modules"
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl bg-indigo-500/10 text-indigo-500 font-bold text-[10px] uppercase tracking-widest active:scale-[0.97] transition-all"
+                >
+                  Start Learning
+                  <ArrowRightIcon className="h-3 w-3" />
+                </Link>
+              </div>
+            </motion.div>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-5 shadow-sm">
+    <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

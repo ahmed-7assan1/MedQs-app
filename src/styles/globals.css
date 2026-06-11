@@ -173,23 +173,31 @@
 
   --shadow-clr: rgba(0, 0, 0, 0.05);
 
-  --primary: 0 0% 10%; /* near-black accent */
+  --background: 240 33% 97%;        /* #F5F5FA page bg */
+  --foreground: 240 28% 14%;        /* #1A1A2E headings */
+  --card: 0 0% 100%;                /* #FFFFFF surfaces */
+  --card-foreground: 240 28% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 28% 14%;
+  --primary: 246 89% 70%;           /* #7C6FF7 brand purple */
   --primary-foreground: 0 0% 100%;
-  
-  --background: 0 0% 97%;
-  --foreground: 0 0% 8%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 8%;
-  --muted: 0 0% 93%;
-  --muted-foreground: 0 0% 48%;
   --secondary: 0 0% 0% / 0.04;
-  --secondary-foreground: 0 0% 8%;
-  --accent: 0 0% 0% / 0.06;
-  --accent-foreground: 0 0% 0%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 0 0% 50%;
+  --secondary-foreground: 240 18% 35%;  /* #4A4A6A */
+  --muted: 240 33% 96%;             /* #F0F0F8 surface-dim */
+  --muted-foreground: 240 10% 59%;  /* #8E8EA0 */
+  --accent: 0 0% 0% / 0.04;         /* subtle overlay for hover */
+  --accent-foreground: 240 28% 14%;
+  --destructive: 0 100% 71%;        /* #FF6B6B */
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 14% 93%;            /* #EBEBF0 */
+  --input: 240 14% 93%;
+  --ring: 246 89% 70%;              /* #7C6FF7 */
   --radius: 12px;
+
+  --success: 157 58% 49%;           /* #34C48B */
+  --success-foreground: 0 0% 100%;
+  --warning: 35 100% 62%;           /* #FFB23F */
+  --warning-foreground: 0 0% 100%;
 
   --glass-bg: rgba(0,0,0,0.02);
   --glass-border: rgba(0,0,0,0.06);
@@ -203,11 +211,11 @@
 
   /* ── Surface bridge vars ── 
      Used to make hardcoded dark hex values theme-aware via global CSS below */
-  --surface-bg: 220 20% 97%;   /* replaces #09080F in light mode */
-  --surface-card: 0 0% 100%;   /* replaces #131220 in light mode */
-  --surface-text: 230 15% 12%; /* white text → dark in light mode */
-  --surface-text-muted: 230 8% 48%;
-  --surface-border: 220 13% 88%;
+  --surface-bg: 240 33% 97%;        /* matches --background */
+  --surface-card: 0 0% 100%;        /* matches --card */
+  --surface-text: 240 28% 14%;      /* matches --foreground */
+  --surface-text-muted: 240 10% 59%;/* matches --muted-foreground */
+  --surface-border: 240 14% 93%;    /* matches --border */
   --surface-white-10: rgba(0,0,0,0.06);
   --surface-white-5: rgba(0,0,0,0.04);
   --surface-white-20: rgba(0,0,0,0.1);
@@ -256,27 +264,37 @@
 
 .dark {
   --shadow-clr: rgba(0, 0, 0, 0.5);
-  --background: 0 0% 0%;
-  --foreground: 0 0% 100%;
-  --primary: 0 0% 100%;
-  --primary-foreground: 0 0% 0%;
-  --card: 0 0% 0%;
-  --card-foreground: 0 0% 100%;
-  --muted: 0 0% 7%;
-  --muted-foreground: 0 0% 45%;
+  --background: 240 12% 7%;         /* #0F0F13 page bg */
+  --foreground: 250 33% 95%;        /* #F0EFF8 headings */
+  --card: 240 16% 12%;              /* #1A1A24 surfaces */
+  --card-foreground: 250 33% 95%;
+  --popover: 240 16% 12%;
+  --popover-foreground: 250 33% 95%;
+  --primary: 246 89% 70%;           /* #7C6FF7 brand purple (same as light) */
+  --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 100% / 0.03;
-  --secondary-foreground: 0 0% 100%;
-  --accent: 0 0% 100% / 0.06;
-  --accent-foreground: 0 0% 100%;
-  --border: 0 0% 12%;
-  --input: 0 0% 12%;
-  --ring: 0 0% 100%;
+  --secondary-foreground: 246 18% 70%;  /* #A8A6C0 */
+  --muted: 240 19% 16%;             /* #222232 surface-raised */
+  --muted-foreground: 246 14% 42%;  /* #5E5C7A */
+  --accent: 0 0% 100% / 0.04;       /* subtle overlay for hover */
+  --accent-foreground: 250 33% 95%;
+  --destructive: 0 100% 74%;        /* #FF7B7B */
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 20% 22%;            /* #2C2C42 */
+  --input: 240 20% 22%;
+  --ring: 246 89% 70%;              /* #7C6FF7 */
+  --radius: 12px;
 
-  --surface-bg: 0 0% 0%;
-  --surface-card: 0 0% 0%;
-  --surface-text: 0 0% 100%;
-  --surface-text-muted: 0 0% 45%;
-  --surface-border: 0 0% 12%;
+  --success: 157 65% 50%;           /* #2FCF92 */
+  --success-foreground: 0 0% 100%;
+  --warning: 38 100% 65%;           /* #FFB84D */
+  --warning-foreground: 0 0% 100%;
+
+  --surface-bg: 240 12% 7%;         /* matches --background */
+  --surface-card: 240 16% 12%;      /* matches --card */
+  --surface-text: 250 33% 95%;      /* matches --foreground */
+  --surface-text-muted: 246 14% 42%;/* matches --muted-foreground */
+  --surface-border: 240 20% 22%;    /* matches --border */
   --surface-white-10: rgba(255,255,255,0.08);
   --surface-white-5: rgba(255,255,255,0.03);
   --surface-white-20: rgba(255,255,255,0.15);
@@ -298,13 +316,6 @@
   --cinema-glow: 0 0 60px rgba(255,255,255,0.04);
   --cinema-shadow: 0 8px 32px rgba(0,0,0,0.4);
 
-  /* ── shadcn/ui Integration Variables (Dark) ── */
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --success: 142 76% 36%;
-  --success-foreground: 0 0% 98%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 98%;
   --info: 204 100% 50%;
   --info-foreground: 0 0% 98%;
   

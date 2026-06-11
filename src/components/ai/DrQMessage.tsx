@@ -190,7 +190,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-xs", isAI ? "bg-slate-50 dark:bg-[#1f222f]/80 border-slate-200 dark:border-white/10" : "bg-black/[0.06] border-black/[0.1] dark:bg-white/10 dark:border-white/20")}>
+                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-xs", isAI ? "bg-muted/30 border-border" : "bg-black/[0.06] border-black/[0.1] dark:bg-white/10 dark:border-white/20")}>
                         <div className="w-10 h-10 rounded-lg bg-white/20 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
                           <FileText size={20} className={isAI ? "text-rose-500" : "text-white"} />
                         </div>
@@ -604,7 +604,7 @@ function ChecklistCard({ c }: { c: { title: string, items: { text: string, compl
   const progress = Math.round((items.filter(i => i.completed).length / items.length) * 100);
 
   return (
-    <div className="my-6 p-6 rounded-[24px] bg-white dark:bg-[#0d0c18] border border-emerald-500/20 shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="my-6 p-6 rounded-[24px] bg-card border border-emerald-500/20 shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-inner border border-emerald-100 dark:border-transparent">
@@ -662,7 +662,7 @@ function QuestionCard({ q, onSave, onShare }: { q: { question: string, options: 
   const isCorrect = selected === q.answer;
 
   return (
-    <div className="my-6 p-6 rounded-[24px] bg-white dark:bg-[#161523] border border-indigo-200 dark:border-indigo-500/20 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
+    <div className="my-6 p-6 rounded-[24px] bg-card border border-indigo-200 dark:border-indigo-500/20 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 shadow-inner border border-indigo-100 dark:border-transparent">

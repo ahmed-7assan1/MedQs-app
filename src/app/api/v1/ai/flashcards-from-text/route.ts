@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { generateFlashcardsFromPastedTextWithMeta } from "@/lib/gemini";
 
 const MIN_CHARS = 80;
@@ -19,7 +18,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const site = await prisma.siteConfig.findFirst({ select: { enableAI: true, aiPreferredProvider: true } }).catch(() => null);
+  const { getSiteConfig: getCfg } = await import("@/lib/get-site-config");
+  const site = await getCfg().catch(() => null);
   if (site?.enableAI === false) {
     return NextResponse.json({ error: "AI features are disabled on this site" }, { status: 403 });
   }

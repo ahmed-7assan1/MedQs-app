@@ -51,7 +51,7 @@ export function DrQSidebar({
   return (
     <div 
       className={cn(
-        "h-full flex flex-col bg-white/80 dark:bg-[#0d0c16]/80 backdrop-blur-3xl border-r border-slate-200/50 dark:border-white/5 transition-all duration-500 relative z-40 group/sidebar w-16 hover:w-72 shadow-lg shadow-slate-200/20 dark:shadow-none"
+        "h-full flex flex-col bg-background/80 backdrop-blur-3xl border-r border-border transition-all duration-500 relative z-40 group/sidebar w-16 hover:w-72 shadow-lg"
       )}
     >
       {/* Top Section */}
@@ -145,7 +145,7 @@ export function DrQSidebar({
           </button>
           
           {/* Export Dropdown */}
-          <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-[#1e1d24] border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all p-2 z-[60]">
+          <div className="absolute bottom-full left-0 mb-2 w-48 bg-card border border-border rounded-2xl shadow-xl invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all p-2 z-[60]">
              <button onClick={() => onExport("markdown")} className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 text-[12px] font-bold text-slate-600 dark:text-white/70 hover:text-indigo-600 dark:hover:text-white transition-all flex items-center gap-2">
                 Markdown (.md)
              </button>

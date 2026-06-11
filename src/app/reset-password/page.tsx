@@ -8,7 +8,7 @@ import { Lock, Eye, EyeSlash, Warning, CheckCircle } from "@phosphor-icons/react
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const GLASS = "bg-white/70 dark:bg-[#161523]/70 backdrop-blur-[40px] border border-slate-200/80 dark:border-white/[0.08] shadow-2xl";
+const GLASS = "bg-card/70 backdrop-blur-[40px] border border-border shadow-2xl";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");

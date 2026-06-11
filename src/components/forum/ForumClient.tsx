@@ -215,7 +215,7 @@ export function ForumClient({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white selection:bg-primary/30 transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 transition-colors duration-300">
       {/* ── Background Elements ── */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full" />
@@ -227,9 +227,9 @@ export function ForumClient({
           
           {/* ── Left Column: Channels ── */}
           <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)]">
-            <div className="bg-[#161523]/60 backdrop-blur-xl border border-white/[0.05] rounded-[32px] overflow-hidden flex flex-col h-full">
-              <div className="p-6 border-b border-white/[0.05]">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/30 mb-4">Public Rooms</h3>
+            <div className="bg-card/60 backdrop-blur-xl border border-border rounded-[32px] overflow-hidden flex flex-col h-full">
+              <div className="p-6 border-b border-border">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4">Public Rooms</h3>
                 <div className="relative">
                   <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                   <input 
@@ -245,7 +245,7 @@ export function ForumClient({
                 {filteredForums.map(f => <SidebarItem key={f.id} forum={f} />)}
               </div>
 
-              <div className="p-4 border-t border-white/[0.05] bg-white/[0.02]">
+              <div className="p-4 border-t border-border bg-white/[0.02]">
                 <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 border border-white/5 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 hover:text-white transition-all">
                   <Plus size={16} weight="bold" />
                   Join New Classroom
@@ -257,7 +257,7 @@ export function ForumClient({
           {/* ── Center Column: Feed ── */}
           <main className="flex flex-col gap-8 min-w-0">
             {/* Mobile Header / Channel Toggle */}
-            <div className="lg:hidden flex items-center justify-between bg-[#161523]/60 backdrop-blur-xl border border-white/[0.05] rounded-2xl p-4">
+            <div className="lg:hidden flex items-center justify-between bg-card/60 backdrop-blur-xl border border-border rounded-2xl p-4">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
                   <List size={20} weight="bold" />
@@ -283,7 +283,7 @@ export function ForumClient({
             />
 
             {/* Tab Navigation */}
-            <div className="flex items-center gap-2 p-1.5 bg-[#161523]/60 backdrop-blur-xl border border-white/[0.05] rounded-2xl self-start">
+            <div className="flex items-center gap-2 p-1.5 bg-card/60 backdrop-blur-xl border border-border rounded-2xl self-start">
               <button 
                 onClick={() => setTab("feed")}
                 className={cn(
@@ -333,11 +333,11 @@ export function ForumClient({
           {/* ── Right Column: Widgets ── */}
           <aside className="hidden lg:flex flex-col gap-8 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar">
             {/* Widget: Schedule (Mock) */}
-            <div className="bg-white/70 dark:bg-[#161523]/60 backdrop-blur-xl border border-slate-200 dark:border-white/[0.05] rounded-[32px] p-6">
+            <div className="bg-card/70 backdrop-blur-xl border border-border rounded-[32px] p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-white">Academic Pulse</h3>
-                  <p className="text-[10px] font-bold text-slate-500 dark:text-white/30 uppercase tracking-widest">Sunday, 25 June</p>
+                  <h3 className="text-sm font-black text-foreground">Academic Pulse</h3>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sunday, 25 June</p>
                 </div>
                 <CalendarBlank size={24} className="text-primary" />
               </div>
@@ -349,32 +349,32 @@ export function ForumClient({
                 ].map((item, i) => (
                   <div key={i} className={cn(
                     "p-4 rounded-2xl border transition-all",
-                    item.active ? "bg-primary/5 dark:bg-primary/10 border-primary/20 shadow-lg shadow-primary/5" : "bg-slate-50 dark:bg-white/[0.02] border-slate-100 dark:border-white/[0.05]"
+                    item.active ? "bg-primary/5 dark:bg-primary/10 border-primary/20 shadow-lg shadow-primary/5" : "bg-muted/30 border-border"
                   )}>
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="text-xs font-black text-slate-800 dark:text-white">{item.title}</h4>
+                      <h4 className="text-xs font-black text-foreground">{item.title}</h4>
                       {item.active && <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />}
                     </div>
-                    <p className="text-[10px] font-bold text-slate-500 dark:text-white/40">{item.time}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground">{item.time}</p>
                     <p className="text-[9px] font-black text-primary/80 dark:text-primary/60 uppercase tracking-widest mt-2">Room {item.room}</p>
                   </div>
                 ))}
               </div>
-              <button className="w-full mt-6 py-3 rounded-xl bg-slate-100 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-white/30 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all flex items-center justify-center gap-2">
+              <button className="w-full mt-6 py-3 rounded-xl bg-muted/30 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all flex items-center justify-center gap-2">
                 Full Schedule <ArrowRight size={14} />
               </button>
             </div>
 
             {/* Widget: Study Groups */}
-            <div className="bg-white/70 dark:bg-[#161523]/60 backdrop-blur-xl border border-slate-200 dark:border-white/[0.05] rounded-[32px] p-6">
+            <div className="bg-card/70 backdrop-blur-xl border border-border rounded-[32px] p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-white">Study Groups</h3>
-                  <p className="text-[10px] font-bold text-slate-500 dark:text-white/30 uppercase tracking-widest">{teams.length} Groups</p>
+                  <h3 className="text-sm font-black text-foreground">Study Groups</h3>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{teams.length} Groups</p>
                 </div>
                 <button 
                   onClick={() => setIsTeamModalOpen(true)}
-                  className="h-8 w-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white/40 hover:bg-slate-200 dark:hover:bg-white/10 transition-all hover:scale-110"
+                  className="h-8 w-8 rounded-full bg-muted/30 border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-all hover:scale-110"
                 >
                   <Plus size={16} weight="bold" />
                 </button>
@@ -383,7 +383,7 @@ export function ForumClient({
                 {teams.length > 0 ? (
                   teams.map((team, i) => (
                     <Link href={`/teams/${team.id}`} key={i} className="block group cursor-pointer">
-                      <div className="flex flex-col gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.05] hover:border-primary/30 dark:hover:border-primary/30 transition-all">
+                      <div className="flex flex-col gap-2 p-3 rounded-2xl bg-muted/30 border border-border hover:border-primary/30 transition-all">
                         <div className="flex -space-x-2">
                           {team.members.map((m: any, idx: number) => (
                             <img 
@@ -394,18 +394,18 @@ export function ForumClient({
                             />
                           ))}
                           {team._count.members > 4 && (
-                            <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/10 border-2 border-white dark:border-[#161523] flex items-center justify-center text-[9px] font-black z-0 relative text-slate-700 dark:text-white">
+                            <div className="h-8 w-8 rounded-full bg-muted/30 border-2 border-card flex items-center justify-center text-[9px] font-black z-0 relative text-muted-foreground">
                               +{team._count.members - 4}
                             </div>
                           )}
                         </div>
-                        <p className="text-[11px] font-black text-slate-700 dark:text-white/80 group-hover:text-primary transition-colors line-clamp-1">{team.name}</p>
+                        <p className="text-[11px] font-black text-foreground/80 group-hover:text-primary transition-colors line-clamp-1">{team.name}</p>
                       </div>
                     </Link>
                   ))
                 ) : (
                   <div className="text-center py-4 opacity-50">
-                    <p className="text-xs font-bold text-slate-600 dark:text-white">No groups joined yet.</p>
+                    <p className="text-xs font-bold text-muted-foreground">No groups joined yet.</p>
                   </div>
                 )}
               </div>

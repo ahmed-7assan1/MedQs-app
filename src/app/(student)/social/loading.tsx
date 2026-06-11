@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-slate-100/50 dark:bg-grid-white/[0.02] bg-[length:32px_32px]" />
       
       <div className="relative z-10 flex flex-col items-center gap-6">

@@ -201,7 +201,7 @@ export const MobileContinueCard = ({ module, subject, progress, href }: any) => 
     <Link href={href || "/modules"} className="block">
       <motion.div
         whileTap={{ scale: 0.98 }}
-        className="flex items-center justify-between p-5 rounded-[24px] border border-slate-200/70 dark:border-white/[0.04] bg-white dark:bg-[#161523]/60 shadow-sm hover:shadow-md dark:shadow-none transition-all relative overflow-hidden group"
+        className="flex items-center justify-between p-5 rounded-[24px] border border-border bg-card/60 shadow-sm hover:shadow-md  transition-all relative overflow-hidden group"
       >
         <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-primary to-violet-500" />
         
@@ -241,7 +241,7 @@ interface MobileListedStatsProps {
 
 export const MobileListedStats = ({ stats }: MobileListedStatsProps) => {
   return (
-    <div className="rounded-[24px] border border-slate-200/70 dark:border-white/[0.04] bg-white dark:bg-[#161523]/40 p-5 space-y-4 shadow-sm dark:shadow-none">
+    <div className="rounded-[24px] border border-border bg-card/40 p-5 space-y-4 shadow-sm ">
       {stats.map((stat, idx) => {
         const Icon = (Icons as any)[stat.iconName] || Icons.Circle;
         return (
@@ -318,7 +318,7 @@ export const MobileSpecCard = ({ name, iconName, progress, delay }: any) => {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
-      className="flex items-center justify-between p-4 rounded-[22px] border border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-[#161523]/30 mb-2.5 relative overflow-hidden group shadow-sm dark:shadow-none"
+      className="flex items-center justify-between p-4 rounded-[22px] border border-border bg-card/30 mb-2.5 relative overflow-hidden group shadow-sm "
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <div className={cn("w-8.5 h-8.5 rounded-xl flex items-center justify-center shrink-0 border border-slate-100 dark:border-white/[0.02]", theme.bg)}>
@@ -355,7 +355,7 @@ export const MobileDrQCard = () => {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="rounded-[24px] border border-slate-200/60 dark:border-white/[0.03] bg-white dark:bg-[#161523]/80 p-5 shadow-sm dark:shadow-none relative overflow-hidden"
+      className="rounded-[24px] border border-border bg-card/80 p-5 shadow-sm relative overflow-hidden"
     >
       <div className="flex items-center gap-2.5 mb-3.5">
         <div className="h-8 w-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">

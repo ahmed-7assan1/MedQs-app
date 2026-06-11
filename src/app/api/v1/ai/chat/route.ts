@@ -278,7 +278,7 @@ export async function POST(req: NextRequest) {
 
   // ── Use cached site config instead of DB call every request ────────────────
   const siteData = await getCachedSiteData().catch(() => null);
-  const site = siteData?.siteConfig ?? await prisma.siteConfig.findFirst({ select: { enableAI: true, aiPreferredProvider: true } }).catch(() => null);
+  const site = siteData?.siteConfig ?? null;
   if (site?.enableAI === false) {
     return NextResponse.json({ error: "AI chat is disabled for this site in admin settings." }, { status: 403 });
   }

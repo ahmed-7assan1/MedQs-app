@@ -4,7 +4,6 @@ import { requireAdminWriter } from "@/lib/admin-scope";
 import { generateStudyNotesWithMeta } from "@/lib/gemini";
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
 import { redisIncrWithExpire } from "@/lib/redis";
-import { prisma } from "@/lib/prisma";
 
 export const maxDuration = 60; // 60 seconds max duration for Vercel Hobby
 
@@ -38,7 +37,8 @@ export async function POST(req: NextRequest) {
   const instructions = String(formData.get("instructions") ?? "").trim();
   const preferredProvider = String(formData.get("preferredProvider") ?? "").trim() || undefined;
 
-  const site = await prisma.siteConfig.findFirst({ select: { aiPreferredProvider: true } }).catch(() => null);
+  const { getSiteConfig: getCfg } = await import("@/lib/get-site-config");
+  const site = await getCfg().catch(() => null);
   const effectiveProvider = normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
 
   if (!file) return NextResponse.json({ error: "No file uploaded" }, { status: 400 });

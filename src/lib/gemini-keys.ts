@@ -45,8 +45,8 @@ function isKeyFresh(key: string): boolean {
 
 export async function getSiteConfigOverrides() {
   try {
-    const { prisma } = await import("@/lib/prisma");
-    return await prisma.siteConfig.findFirst();
+    const { getSiteConfig } = await import("@/lib/get-site-config");
+    return await getSiteConfig();
   } catch (e) {
     console.error("Failed to load site config overrides:", e);
     return null;

@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useThemeStore } from "@/lib/store";
+import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
+import { NotificationsSheet } from "@/components/layout/NotificationsSheet";
 import { cn } from "@/lib/utils";
 import {
-  SunIcon, MoonIcon, MagnifyingGlassIcon, Square2StackIcon,
+  SunIcon, MoonIcon, MagnifyingGlassIcon, BellIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 
@@ -24,6 +25,8 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [navSheetOpen, setNavSheetOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const unread = useNotificationStore((s) => s.unread);
   const [visible, setVisible] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastScrollY = useRef(0);
@@ -65,7 +68,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
           visible || searchOpen ? "translate-y-0" : "-translate-y-full"
         )}
       >
-        <div className="rounded-b-2xl px-4 py-3 bg-white/80 dark:bg-[#0d0d14]/90 backdrop-blur-3xl saturate-[1.8] border-b border-white/30 dark:border-white/[0.07] shadow-lg dark:shadow-none">
+        <div className="rounded-b-2xl px-4 py-3 bg-background/80 backdrop-blur-3xl saturate-[1.8] border-b border-border shadow-lg">
           <AnimatePresence mode="wait">
             {searchOpen ? (
               <motion.div
@@ -107,21 +110,29 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                 transition={{ duration: 0.15 }}
                 className="flex items-center justify-between"
               >
-                <button
-                  onClick={() => setNavSheetOpen(true)}
-                  className="shrink-0 p-1.5 -ml-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-black dark:text-white"
-                  aria-label="Open navigation menu"
-                >
-                  <Square2StackIcon className="h-5 w-5" />
-                </button>
-
-                <div className="flex items-center gap-2 flex-1 justify-center">
-                  <img
-                    src="/medonex-logo.svg"
-                    alt="Medonex"
-                    className="h-6 w-auto object-contain"
-                  />
-                  <span className="font-black text-sm tracking-tight text-gray-900 dark:text-white">
+                <div className="flex items-center gap-[1px]">
+                  <button
+                    onClick={() => setNavSheetOpen(true)}
+                    className="shrink-0 p-1.5 -ml-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-indigo-500 dark:text-white"
+                    aria-label="Open navigation menu"
+                  >
+                    <motion.span
+                      className="block h-7 w-7 bg-indigo-500 dark:bg-white"
+                      animate={{ rotate: navSheetOpen ? -90 : 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                      style={{
+                        maskImage: "url(/medonex-logo.svg)",
+                        maskSize: "contain",
+                        maskRepeat: "no-repeat",
+                        maskPosition: "center",
+                        WebkitMaskImage: "url(/medonex-logo.svg)",
+                        WebkitMaskSize: "contain",
+                        WebkitMaskRepeat: "no-repeat",
+                        WebkitMaskPosition: "center",
+                      }}
+                    />
+                  </button>
+                  <span className="font-black text-sm tracking-tight text-indigo-500 dark:text-white -ml-1.5">
                     MedOneX
                   </span>
                 </div>
@@ -132,16 +143,29 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                       setSearchOpen(true);
                       setTimeout(() => inputRef.current?.focus(), 100);
                     }}
-                    className="shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-black dark:text-white"
+                    className="shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-400 dark:text-white/40"
                     aria-label="Search"
                   >
                     <MagnifyingGlassIcon className="h-5 w-5" />
                   </button>
 
+                  <button
+                    onClick={() => setNotifOpen(true)}
+                    className="relative shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-400 dark:text-white/40"
+                    aria-label="Notifications"
+                  >
+                    <BellIcon className="h-5 w-5" />
+                    {unread > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[14px] items-center justify-center rounded-full bg-indigo-500 px-1 text-[9px] font-bold leading-none text-white">
+                        {unread > 9 ? "9+" : unread}
+                      </span>
+                    )}
+                  </button>
+
                   {mounted && (
                     <button
                       onClick={toggleTheme}
-                      className="shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-black dark:text-white"
+                      className="shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-400 dark:text-white/40"
                       aria-label="Toggle theme"
                     >
                       {theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
@@ -162,6 +186,11 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
         userId={userId}
         isAdmin={isAdmin}
         isGuest={isGuest}
+      />
+
+      <NotificationsSheet
+        isOpen={notifOpen}
+        onClose={() => setNotifOpen(false)}
       />
     </>
   );

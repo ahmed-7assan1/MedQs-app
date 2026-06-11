@@ -11,7 +11,7 @@ export const prisma =
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 
-// Set connection timeouts at the client level if supported, 
-// but most are handled via the connection string params.
+// Graceful shutdown — release connections on hot reload / server stop
+process.on("beforeExit", () => prisma.$disconnect());
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

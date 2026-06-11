@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
     const w = await requireAdminWriter(session);
     if (!w.ok) return w.response;
 
-    const site = await prisma.siteConfig.findFirst({ select: { enableAI: true } });
+    const { getSiteConfig } = await import("@/lib/get-site-config");
+    const site = await getSiteConfig();
     if (site && site.enableAI === false) {
       return NextResponse.json({ error: "AI is disabled in Site Settings" }, { status: 400 });
     }

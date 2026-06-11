@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   // Check if leaderboard is enabled
-  const config = await prisma.siteConfig.findFirst({ select: { enableLeaderboard: true } });
+  const { getSiteConfig } = await import("@/lib/get-site-config");
+  const config = await getSiteConfig();
   if (!config?.enableLeaderboard) {
     return NextResponse.json({ disabled: true, users: [] });
   }

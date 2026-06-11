@@ -6,13 +6,10 @@ import {
   FireIcon, TrophyIcon, BookOpenIcon, ArrowRightIcon,
   ChevronRightIcon, ExclamationCircleIcon,
   AcademicCapIcon, ChartBarIcon, SparklesIcon,
-  PlayCircleIcon, BoltIcon, UsersIcon, MicrophoneIcon, MagnifyingGlassIcon,
-  VideoCameraIcon, ClipboardDocumentCheckIcon, UserGroupIcon,
-  GlobeAltIcon, Square2StackIcon, LightBulbIcon,
 } from "@heroicons/react/24/solid";
 import { cn } from "@/lib/utils";
 import {
-  StatCard, StatCardMini, QuickActionCard, QuickLinkCompact, AskDrQFeatured,
+  StatCard, StatCardMini, QuickLinkCompact, AskDrQFeatured,
   AnimatedProgressBar, AnimatedRing, ActivityBar,
 } from "@/components/dashboard/RedesignedComponents";
 import { SpacedRepetitionCards } from "@/components/dashboard/SpacedRepetitionCards";
@@ -86,9 +83,9 @@ export function DashboardShell({
           MOBILE VIEW (md:hidden)
           ════════════════════════════════════════════════ */}
       <div className="md:hidden scroll-smooth">
-        <div className="pb-2 space-y-5">
+        <div className="pb-4 space-y-4">
           {/* ── Hero ── */}
-          <div className="px-4 pt-[58px]">
+          <div className="px-4 pt-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[11px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-[0.2em]">{greeting}</p>
@@ -116,27 +113,7 @@ export function DashboardShell({
           {/* ── Community Posts Carousel ── */}
           <CommunityPostsCarousel />
 
-          {/* ── Quick Tags ── */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar scroll-smooth px-4">
-            <Link href="/videos" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-rose-100 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/25 text-rose-600 dark:text-rose-300 text-[11px] font-bold whitespace-nowrap active:scale-95 transition-all">
-              <VideoCameraIcon className="h-3.5 w-3.5" /> Videos
-            </Link>
-            <Link href="/past-papers" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/25 text-emerald-600 dark:text-emerald-300 text-[11px] font-bold whitespace-nowrap active:scale-95 transition-all">
-              <ClipboardDocumentCheckIcon className="h-3.5 w-3.5" /> Exams
-            </Link>
-            <Link href="/social" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/25 text-blue-600 dark:text-blue-300 text-[11px] font-bold whitespace-nowrap active:scale-95 transition-all">
-              <UserGroupIcon className="h-3.5 w-3.5" /> Community
-            </Link>
-            <Link href="/podcasts" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/25 text-amber-600 dark:text-amber-300 text-[11px] font-bold whitespace-nowrap active:scale-95 transition-all">
-              <MicrophoneIcon className="h-3.5 w-3.5" /> Podcasts
-            </Link>
-            <Link href="/atlas" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-indigo-100 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/25 text-indigo-600 dark:text-indigo-300 text-[11px] font-bold whitespace-nowrap active:scale-95 transition-all">
-              <GlobeAltIcon className="h-3.5 w-3.5" /> Atlas
-            </Link>
-            <Link href="/study-tools/flashcards-from-text" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-500/15 border border-purple-200 dark:border-purple-500/25 text-purple-600 dark:text-purple-300 text-[11px] font-bold whitespace-nowrap active:scale-95 transition-all">
-              <Square2StackIcon className="h-3.5 w-3.5" /> Flashcards
-            </Link>
-          </div>
+
 
           {/* ── Specializations ── */}
           <div className="px-4">
@@ -197,7 +174,8 @@ export function DashboardShell({
           </div>
 
           {/* ── Weekly Activity ── */}
-          <div className="mx-4 rounded-2xl border border-border/50 bg-card p-4 shadow-sm transition-colors duration-150">
+          <div className="px-4">
+            <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm transition-colors duration-150">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <ChartBarIcon className="h-4 w-4 text-indigo-500" />
@@ -229,9 +207,11 @@ export function DashboardShell({
               })}
             </div>
           </div>
+          </div>
 
           {/* ── Dr. Q AI ── */}
-          <Link href="/ai-chat" className="mx-4 rounded-2xl border border-border/50 bg-card p-5 shadow-sm flex items-center gap-4 active:scale-[0.98] transition-all duration-150 relative overflow-hidden">
+          <div className="px-4">
+          <Link href="/ai-chat" className="block rounded-2xl border border-border/50 bg-card p-4 shadow-sm flex items-center gap-4 active:scale-[0.98] transition-all duration-150 relative overflow-hidden">
             <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-indigo-500/10 blur-3xl" />
             <div className="relative h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
               <SparklesIcon className="h-7 w-7 text-white" />
@@ -243,9 +223,11 @@ export function DashboardShell({
             </div>
             <ChevronRightIcon className="relative h-5 w-5 text-muted-foreground/40 shrink-0" />
           </Link>
+          </div>
 
           {/* ── Rank ── */}
-          <div className="mx-4 rounded-2xl border border-border/50 bg-card p-5 shadow-sm flex items-center gap-4 transition-colors duration-150">
+          <div className="px-4">
+          <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm flex items-center gap-4 transition-colors duration-150">
             <div className="relative h-14 w-14 shrink-0">
               <svg className="h-full w-full" viewBox="0 0 100 100">
                 <circle className="text-muted-foreground/15" strokeWidth="6" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50" />
@@ -274,6 +256,7 @@ export function DashboardShell({
             <Link href="/leaderboard" className="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-muted/30 border border-border active:scale-90 transition-all">
               <ChevronRightIcon className="h-4 w-4 text-muted-foreground/50" />
             </Link>
+          </div>
           </div>
         </div>
       </div>
@@ -412,21 +395,7 @@ export function DashboardShell({
                   )}
                 </motion.div>
 
-                {/* Quick Action Tools */}
-                <motion.div variants={itemAnim} className="mb-6 md:mb-10">
-                  <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-3 md:mb-4">
-                    Rapid Response Tools
-                  </h2>
-                  <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 md:pb-4 no-scrollbar snap-x snap-mandatory scroll-smooth">
-                    <QuickActionCard label="Video Hub" iconName="PlayCircle" color="bg-rose-500" href="/videos" />
-                    <QuickActionCard label="Mock Exams" iconName="Zap" color="bg-emerald-500" href="/past-papers" />
-                    <QuickActionCard label="Collaborate" iconName="Users" color="bg-blue-500" href="/social" />
-                    <QuickActionCard label="Flashcards" iconName="Brain" color="bg-purple-500" href="/study-tools/flashcards-from-text" />
-                    <QuickActionCard label="Audio Lab" iconName="Mic" color="bg-amber-500" href="/podcasts" />
-                    <QuickActionCard label="Atlas" iconName="Search" color="bg-indigo-500" href="/atlas" />
-                    <QuickActionCard label="Medical Books" iconName="BookOpen" color="bg-sky-500" href="/medical-books" />
-                  </div>
-                </motion.div>
+
 
                 {/* Rank / Prestige */}
                 <motion.div variants={itemAnim} className="p-6 rounded-2xl border border-border bg-card/50 backdrop-blur flex flex-col md:flex-row items-center gap-6 md:gap-8 transition-[background-color,border-color] duration-150">

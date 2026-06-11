@@ -14,7 +14,8 @@ export async function GET(req: NextRequest) {
     
     // 1. Get Site Config (can be public or scoped to user's uni)
     const universityId = req.nextUrl.searchParams.get('universityId');
-    const config = await prisma.siteConfig.findFirst();
+    const { getSiteConfig: getCfg } = await import("@/lib/get-site-config");
+    const config = await getCfg();
 
     if (!userId) {
       // Unauthenticated bootstrap (only config)

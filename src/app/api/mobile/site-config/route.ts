@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSiteConfig } from '@/lib/get-site-config';
 import { NextRequest } from 'next/server';
 
 export const dynamic = "force-dynamic";
@@ -11,15 +12,7 @@ export async function GET(req: NextRequest) {
     const universityId = searchParams.get('universityId');
 
     const [siteConfig, featureFlags] = await Promise.all([
-      prisma.siteConfig.findFirst({
-        select: {
-          siteName: true, logoUrl: true, primaryColor: true,
-          enableAI: true, enableForum: true, enableAds: true,
-          enableNotifs: true, enableLeaderboard: true, fontArabic: true, fontSans: true,
-          pwaIconUrl: true, facebookUrl: true, instagramUrl: true, youtubeUrl: true,
-          telegramUrl: true, whatsappUrl: true, twitterUrl: true,
-        },
-      }),
+      getSiteConfig(),
       universityId ? prisma.featureFlag.findMany({
         where: { universityId },
         select: { key: true, enabled: true, payload: true },

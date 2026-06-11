@@ -55,7 +55,7 @@ export function TeamCreateModal({ isOpen, onClose, onSuccess, universityId }: Te
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="w-full max-w-md bg-white dark:bg-[#161523] border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+          className="w-full max-w-md bg-card border border-border rounded-3xl overflow-hidden shadow-2xl"
         >
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50 dark:bg-white/[0.02]">

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export const CinematicBackground = () => {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-slate-50 dark:bg-[#05070f] transition-colors duration-500">
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-background transition-colors duration-500">
       {/* High-Performance Gradient Glows (No Blur Filters) */}
       <div className="absolute inset-0 overflow-hidden opacity-30 dark:opacity-20 pointer-events-none">
         <div 

@@ -60,7 +60,7 @@ export default async function CleanStudentLayout({ children }: { children: React
           logoUrl: siteConfig?.logoUrl ?? null,
         }}
       >
-        <div className="app-shell app-shell--tabbar min-h-screen dark:bg-[#07080f] bg-white flex flex-col">
+        <div className="app-shell app-shell--tabbar min-h-screen bg-background flex flex-col">
           <MobileChromeController />
           {/* Desktop Navigation */}
           <FloatingIslandNavbar

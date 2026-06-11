@@ -127,7 +127,7 @@ export function MobileBottomNav() {
     <div
       className={cn(
         "md:hidden fixed bottom-0 left-0 right-0 z-[10000]",
-        "bg-white/70 dark:bg-[#0d0d14]/80",
+        "bg-background/80",
         "backdrop-blur-3xl saturate-[1.8]",
         "rounded-t-2xl",
         "border-t border-gray-200/50 dark:border-white/[0.05]",

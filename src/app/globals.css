@@ -44,33 +44,33 @@
   .dark {
     --background: 233 37% 5%; /* #07080f */
     --foreground: 0 0% 100%;
-    --card: 233 36% 10%; /* #0f1120 */
-    --card-elevated: 233 31% 14%; /* #181a2e */
+    --card: 233 30% 20%; /* #25284a — noticeably lighter than background */
+    --card-elevated: 233 26% 24%; /* #2d3052 */
     --card-foreground: 0 0% 100%;
-    --popover: 233 36% 10%;
+    --popover: 233 30% 20%;
     --popover-foreground: 0 0% 100%;
     --primary: 234 100% 66%; /* #4f5fff */
     --primary-foreground: 0 0% 100%;
     --secondary: 232 15% 60%; /* #8b8fa8 */
     --secondary-foreground: 0 0% 100%;
-    --muted: 233 20% 30%; /* #3d3f5c */
+    --muted: 233 16% 42%; /* #5a5d7a */
     --muted-foreground: 232 15% 60%;
     --accent: 190 100% 50%; /* #00d4ff */
     --accent-foreground: 0 0% 100%;
-    --border: 233 20% 15%; /* rgba(255,255,255,0.06) */
-    --input: 233 20% 15%;
+    --border: 233 20% 28%; /* #393d58 */
+    --input: 233 20% 28%;
     --ring: 234 100% 66%;
 
     /* Mobile Specific */
     --mob-bg: #07080f;
-    --mob-card: #0f1120;
-    --mob-elevated: #181a2e;
+    --mob-card: #25284a;
+    --mob-elevated: #2d3052;
     --mob-primary: #4f5fff;
     --mob-secondary: #7b5fff;
     --mob-cyan: #00d4ff;
     --mob-text: #ffffff;
     --mob-muted: #8b8fa8;
-    --mob-very-muted: #3d3f5c;
+    --mob-very-muted: #5a5d7a;
   }
 }
 

@@ -357,7 +357,7 @@ export default function ModulesGrid({ modules, totalMastered, isGuest, currentSt
                       aria-label={`Open module: ${mod.name}`}
                     >
                       <div className={cn(
-                        "relative flex flex-col bg-card/45 dark:bg-[#0c0d18]/45 border border-white/[0.03] rounded-2xl md:rounded-[32px] p-4 md:p-6 transition-all duration-300 cursor-pointer shadow-xl hover:-translate-y-1 active:scale-[0.98] hover:bg-white/[0.01] border-t-2",
+                        "relative flex flex-col bg-card/45 border border-white/[0.03] rounded-2xl md:rounded-[32px] p-4 md:p-6 transition-all duration-300 cursor-pointer shadow-xl hover:-translate-y-1 active:scale-[0.98] hover:bg-white/[0.01] border-t-2",
                         modStyle.theme,
                         modStyle.glow
                       )}>

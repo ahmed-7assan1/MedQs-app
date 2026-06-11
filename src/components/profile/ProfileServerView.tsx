@@ -77,7 +77,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
   const avatarUrl = user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name ?? "User")}&backgroundColor=c0aede,d1d4f9,b6e3f4`;
 
   return (
-    <div className="min-h-screen dark:bg-[#07080f] bg-[#f8fafc] dark:text-white text-slate-900 max-md:!pb-[var(--mobile-main-pad-bottom)]">
+    <div className="min-h-screen bg-background text-foreground">
       
       {/* Cover Photo — shorter on mobile */}
       <div className="h-36 md:h-64 lg:h-80 w-full relative border-b dark:border-white/5 border-black/5 overflow-hidden">
@@ -160,7 +160,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
              
              {/* Bio Section */}
              {(!isPrivateForViewer && (user.bio || user.university || user.semester)) && (
-               <div className="rounded-[24px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-6 shadow-xl">
+               <div className="rounded-[24px] border border-border bg-card p-6 shadow-xl">
                  <h3 className="text-lg font-black dark:text-white text-slate-800 mb-3">About</h3>
                  {user.bio && (
                    <p className="dark:text-white/60 text-slate-600 font-medium leading-relaxed mb-6">
@@ -196,7 +196,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
 
              {/* Recent Activity */}
              {!isPrivateForViewer && (
-               <div className="rounded-[24px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-6 lg:p-8 shadow-xl">
+               <div className="rounded-[24px] border border-border bg-card p-6 lg:p-8 shadow-xl">
                  <h2 className="mb-6 font-display text-lg font-black dark:text-white text-slate-800">Recent Activity</h2>
                  <UserPosts posts={posts} isOwn={isOwn} />
                </div>
@@ -204,7 +204,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
 
              {/* Saved Posts (Only visible to owner) */}
              {isOwn && (
-               <div className="rounded-[24px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-6 lg:p-8 shadow-xl">
+               <div className="rounded-[24px] border border-border bg-card p-6 lg:p-8 shadow-xl">
                  <h2 className="mb-6 font-display text-lg font-black dark:text-white text-slate-800">Saved Posts</h2>
                  <SavedPostsSection />
                </div>
@@ -216,7 +216,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                
                {/* Stats Card — compact 3-col on mobile (Img 7), vertical list on desktop */}
                {!isPrivateForViewer && (
-                  <div className="rounded-[24px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-4 md:p-6 shadow-xl">
+                  <div className="rounded-[24px] border border-border bg-card p-4 md:p-6 shadow-xl">
                      <h3 className="text-[10px] md:text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-3 md:mb-4">User Stats</h3>
                      
                      <div className="grid grid-cols-3 md:grid-cols-1 gap-2 md:gap-4">
@@ -241,7 +241,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
 
               {/* Rank Progress */}
               {!isPrivateForViewer && rankInfo && (
-                 <div className="rounded-[24px] border dark:border-white/5 border-slate-200 dark:bg-[#131220] bg-white p-6 shadow-xl">
+                 <div className="rounded-[24px] border border-border bg-card p-6 shadow-xl">
                     <h3 className="text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-4">Rank</h3>
                     <div className="flex items-center gap-4 mb-5">
                        <div className="flex h-12 w-12 items-center justify-center rounded-[16px] dark:bg-white/5 bg-slate-100 text-2xl border dark:border-white/10 border-slate-200 shadow-inner">
@@ -259,7 +259,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                              <span>Next: {rankInfo.nextRank.label}</span>
                              <span className="text-primary">{rankInfo.progress}%</span>
                           </div>
-                          <div className="h-3 overflow-hidden rounded-full dark:bg-white/5 bg-slate-100 border dark:border-white/5 border-slate-200">
+                          <div className="h-3 overflow-hidden rounded-full dark:bg-white/5 bg-slate-100 border border-border">
                              <div
                                 className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                                 style={{ width: `${rankInfo.progress}%` }}

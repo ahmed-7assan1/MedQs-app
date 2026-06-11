@@ -309,7 +309,7 @@ const PostCardInner = ({
           setShowPostModal(true);
         }
       }}
-      className="rounded-2xl sm:rounded-[32px] bg-white dark:bg-[#161523] border border-slate-200/80 dark:border-white/[0.08] overflow-hidden shadow-xl hover:border-primary/20 dark:hover:border-primary/20 transition-all duration-300 transform-gpu cursor-pointer" 
+      className="rounded-2xl sm:rounded-[32px] bg-card border border-border overflow-hidden shadow-xl hover:border-primary/20 transition-all duration-300 transform-gpu cursor-pointer" 
     >
       
       {/* Header */}
@@ -350,7 +350,7 @@ const PostCardInner = ({
             {showOptions && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowOptions(false)} />
-                <motion.div initial={{ opacity: 0, scale: 0.95, y: -8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -8 }} className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1f1e36] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden py-1.5">
+                <motion.div initial={{ opacity: 0, scale: 0.95, y: -8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -8 }} className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden py-1.5">
                   <button onClick={() => { setShowOptions(false); handleShare(); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-500 dark:text-white/50 hover:bg-primary/5 hover:text-primary transition-all text-[13px] font-bold"><ShareNetwork size={18} weight="bold" /> Copy link</button>
                   {post.authorId === currentUserId && (
                     <button onClick={() => { setShowOptions(false); setIsEditing(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-500 dark:text-white/50 hover:bg-primary/5 hover:text-primary transition-all text-[13px] font-bold"><PencilSimple size={18} weight="bold" /> Edit post</button>
@@ -745,7 +745,7 @@ const PostCardInner = ({
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute bottom-full left-0 mb-2 flex items-center gap-1.5 bg-white dark:bg-[#19182C] border border-slate-200 dark:border-white/10 rounded-full px-2.5 py-1.5 shadow-2xl z-50"
+                  className="absolute bottom-full left-0 mb-2 flex items-center gap-1.5 bg-card border border-border rounded-full px-2.5 py-1.5 shadow-2xl z-50"
                 >
                   {Object.entries(REACTION_MAP).map(([type, info]) => (
                     <button
@@ -797,7 +797,7 @@ const PostCardInner = ({
         {showReactionDetail && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm" onClick={() => setShowReactionDetail(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-4 md:inset-x-auto md:top-1/4 md:bottom-auto md:left-1/2 md:-translate-x-1/2 z-[9999] max-w-[380px] w-full bg-white dark:bg-[#161523] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl max-h-[60vh] flex flex-col">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-4 md:inset-x-auto md:top-1/4 md:bottom-auto md:left-1/2 md:-translate-x-1/2 z-[9999] max-w-[380px] w-full bg-card rounded-2xl border border-border overflow-hidden shadow-2xl max-h-[60vh] flex flex-col">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/[0.04]">
                 <span className="text-[13px] font-black text-slate-800 dark:text-white/90">Reactions ({reactions.length})</span>
                 <button onClick={() => setShowReactionDetail(false)} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all">

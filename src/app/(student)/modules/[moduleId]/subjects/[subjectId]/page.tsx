@@ -88,7 +88,7 @@ export default async function SubjectLecturesPage({
   const IconComp = accent.icon;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#07080f] pb-32 pt-0">
+    <div className="min-h-screen bg-background pb-32 pt-0">
       {/* ── Immersive Subject Hero ── */}
       <div className="relative hidden md:flex h-[380px] w-full overflow-hidden items-center">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#07080f] z-10" />
@@ -215,7 +215,7 @@ export default async function SubjectLecturesPage({
                   <Link
                     key={lecture.id}
                     href={`/modules/${params.moduleId}/lectures/${lecture.id}`}
-                    className="group relative flex flex-col dark:bg-[#131220] bg-white dark:border-white/5 border-black/5 rounded-xl md:rounded-2xl p-3 md:p-4.5 transition-all active:scale-[0.98] shadow-md overflow-hidden"
+                    className="group relative flex flex-col bg-card border border-border/50 rounded-xl md:rounded-2xl p-3 md:p-4.5 transition-all active:scale-[0.98] shadow-md overflow-hidden"
                   >
                   <div className="flex-1 flex gap-3 md:gap-4.5">
                     <div className={cn(

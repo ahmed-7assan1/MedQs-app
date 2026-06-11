@@ -159,7 +159,7 @@ export default async function ModulesPage() {
   const ringCirc = 2 * Math.PI * ringR;
 
   return (
-    <div className="min-h-screen pb-32 pt-0 relative overflow-hidden bg-slate-950 dark:bg-[#07080f]">
+    <div className="min-h-screen pb-32 pt-0 relative overflow-hidden bg-background">
       {/* Background ambient glow — desktop only */}
       <div className="hidden md:block absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="hidden md:block absolute top-40 right-1/4 h-[400px] w-[400px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />

@@ -347,7 +347,7 @@ function EditProfileContent() {
           {/* TAB: IDENTITY */}
           {activeTab === "identity" && (
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-               <section className="space-y-6 rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-8 shadow-xl">
+               <section className="space-y-6 rounded-[2.5rem] border border-border bg-card p-8 shadow-xl">
                   <div className="flex items-center gap-3 mb-2">
                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                         <User className="h-6 w-6" />
@@ -408,7 +408,7 @@ function EditProfileContent() {
           {activeTab === "branding" && (
             <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
                {/* Cover Image Section */}
-               <section className="relative overflow-hidden rounded-[3rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-4 shadow-xl">
+               <section className="relative overflow-hidden rounded-[3rem] border border-border bg-card p-4 shadow-xl">
                   <ImageUploadWithCrop
                     value={coverUrl || ""}
                     onChange={handleCoverUpdate}
@@ -453,7 +453,7 @@ function EditProfileContent() {
                   </div>
                </section>
 
-               <section className="rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-8 shadow-xl">
+               <section className="rounded-[2.5rem] border border-border bg-card p-8 shadow-xl">
                   <div className="flex items-center gap-3 mb-6">
                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-500">
                         <Palette className="h-5 w-5" />
@@ -487,7 +487,7 @@ function EditProfileContent() {
           {/* TAB: ACADEMIC */}
           {activeTab === "academic" && (
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-               <section className="space-y-8 rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-8 shadow-xl">
+               <section className="space-y-8 rounded-[2.5rem] border border-border bg-card p-8 shadow-xl">
                   <div className="flex items-center gap-3 mb-2">
                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500">
                         <BookOpen className="h-6 w-6" />
@@ -666,7 +666,7 @@ function EditProfileContent() {
           {/* TAB: PRIVACY */}
           {activeTab === "privacy" && (
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-               <section className="space-y-8 rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-8 shadow-xl">
+               <section className="space-y-8 rounded-[2.5rem] border border-border bg-card p-8 shadow-xl">
                   <div className="flex items-center gap-3 mb-2">
                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500">
                         <ShieldCheck className="h-6 w-6" />
@@ -807,7 +807,7 @@ function EditProfileContent() {
           {/* TAB: AI & BYOK */}
           {activeTab === "ai_agents" && (
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-               <section className="space-y-8 rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-8 shadow-xl">
+               <section className="space-y-8 rounded-[2.5rem] border border-border bg-card p-8 shadow-xl">
                   <div className="flex items-center gap-3 mb-2">
                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500">
                         <Cpu className="h-6 w-6" />

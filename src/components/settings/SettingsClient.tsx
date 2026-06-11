@@ -169,7 +169,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
   return (
     <div className="space-y-6 max-w-md mx-auto pb-12">
       {/* ── User Profile Header Card (Mockup Right Side) ── */}
-      <div className="p-6 rounded-[28px] border border-slate-200/70 dark:border-white/[0.04] bg-white dark:bg-[#161523]/80 shadow-sm dark:shadow-none space-y-5">
+      <div className="p-6 rounded-[28px] border border-border bg-card shadow-sm space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* User Avatar */}
@@ -212,7 +212,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
       </div>
 
       {/* ── Password Change Card ── */}
-      <div className="p-5 rounded-[28px] border border-slate-200/70 dark:border-white/[0.04] bg-white dark:bg-[#161523]/80 shadow-sm dark:shadow-none space-y-4">
+      <div className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-rose-50 dark:bg-rose-500/10 text-rose-500 shrink-0">
             <Lock className="h-5 w-5" />
@@ -270,7 +270,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
       </div>
 
       {/* ── Interactive Theme Mode Preferences Card ── */}
-      <div className="p-5 rounded-[28px] border border-slate-200/70 dark:border-white/[0.04] bg-white dark:bg-[#161523]/80 shadow-sm dark:shadow-none space-y-4">
+      <div className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 px-1">
           App Customization
         </h4>
@@ -306,7 +306,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
 
       {/* ── Settings Groups ── */}
       {SETTINGS_GROUPS.map((group) => (
-        <div key={group.title} className="p-5 rounded-[28px] border border-slate-200/70 dark:border-white/[0.04] bg-white dark:bg-[#161523]/80 shadow-sm dark:shadow-none space-y-4">
+        <div key={group.title} className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
           <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 px-1">
             {group.title}
           </h4>

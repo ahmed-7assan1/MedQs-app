@@ -141,7 +141,7 @@ export default function VideosHubPage() {
   }, [displayVideos, posts]);
 
   return (
-    <div className="min-h-screen dark:bg-[#07080f] bg-slate-50 dark:text-white text-slate-900 pt-0 pb-32">
+    <div className="min-h-screen bg-background text-foreground pt-0 pb-32">
       {/* Hero */}
       <div className="relative h-[240px] md:h-[320px] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-red-600/20 via-transparent to-[#07080f] z-10 hidden dark:block" />
@@ -173,7 +173,7 @@ export default function VideosHubPage() {
               value={globalQuery}
               onChange={(e) => setGlobalQuery(e.target.value)}
               placeholder="Search lectures, topics, educators..." 
-              className="w-full h-14 dark:bg-[#1a1a1a] bg-white border dark:border-white/5 border-slate-200 rounded-2xl pl-12 pr-12 text-base font-bold focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all dark:placeholder:text-white/20 placeholder:text-slate-400 shadow-sm dark:shadow-none dark:text-white text-slate-800"
+              className="w-full h-14 bg-muted/30 border border-border rounded-2xl pl-12 pr-12 text-base font-bold focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all placeholder:text-muted-foreground text-foreground"
             />
             <AnimatePresence>
               {globalQuery && (
@@ -200,7 +200,7 @@ export default function VideosHubPage() {
                   "px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 border",
                   activeSubject === mod 
                     ? "bg-red-500 border-red-500 text-white shadow-xl shadow-red-500/20" 
-                    : "dark:bg-[#1a1a1a] bg-white dark:border-white/5 border-slate-200 dark:text-white/40 text-slate-500 hover:border-red-400/50 hover:text-red-500"
+                    : "bg-muted/30 border-border text-muted-foreground hover:border-red-400/50 hover:text-red-500"
                 )}
               >
                 {mod}

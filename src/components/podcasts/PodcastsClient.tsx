@@ -84,7 +84,7 @@ export function PodcastsClient({
   const categories = ["Anatomy", "Physiology", "Biochemistry", "Pathology", "Pharma", "Micro"];
 
   return (
-    <div className="min-h-screen dark:bg-[#07080f] bg-slate-50 dark:text-white text-slate-900 pb-36">
+    <div className="min-h-screen bg-background text-foreground pb-36">
       {/* Hero */}
       <div className="relative h-[360px] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/30 via-primary/10 to-[#07080f] dark:block hidden z-10" />
@@ -115,7 +115,7 @@ export function PodcastsClient({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search lectures, subjects, topics..." 
-              className="w-full h-14 dark:bg-[#1a1a1a] bg-white border dark:border-white/5 border-slate-200 rounded-2xl pl-12 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all dark:placeholder:text-white/20 placeholder:text-slate-400 shadow-sm dark:text-white text-slate-800"
+              className="w-full h-14 bg-muted/30 border border-border rounded-2xl pl-12 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all dark:placeholder:text-white/20 placeholder:text-slate-400 shadow-sm dark:text-white text-slate-800"
             />
             <AnimatePresence>
               {search && (
@@ -133,7 +133,7 @@ export function PodcastsClient({
           </div>
 
           {/* View mode toggle */}
-          <div className="flex items-center gap-1.5 p-1.5 rounded-xl dark:bg-[#1a1a1a] bg-white border dark:border-white/5 border-slate-200 shadow-sm ml-auto">
+          <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-muted/30 border border-border shadow-sm ml-auto">
             <button 
               onClick={() => setViewMode("grid")}
               className={cn(
@@ -165,7 +165,7 @@ export function PodcastsClient({
                 "h-16 flex items-center justify-center rounded-2xl border transition-all font-bold text-sm",
                 search === cat
                   ? "bg-primary/10 border-primary/30 text-primary"
-                  : "dark:bg-[#1a1a1a] bg-white dark:border-white/5 border-slate-200 dark:text-white/50 text-slate-500 hover:border-primary/40 hover:text-primary shadow-sm"
+                  : "bg-muted/30 border-border text-muted-foreground hover:border-primary/40 hover:text-primary shadow-sm"
               )}
             >
               {cat}
@@ -287,7 +287,7 @@ function RecordCard({ record, onClick, isActive }: { record: RecordItem, onClick
         "group relative flex flex-col p-4 rounded-[28px] transition-all cursor-pointer border shadow-sm dark:shadow-none",
         isActive 
           ? "bg-primary/10 dark:border-primary/20 border-primary/30" 
-          : "dark:bg-[#161523]/80 bg-white dark:hover:bg-white/[0.04] hover:bg-slate-50 border-slate-200/60 dark:border-white/[0.04] hover:border-primary/30"
+          : "bg-card/80 hover:bg-card border-border/60 hover:border-primary/30"
       )}
     >
       <div className="aspect-square w-full rounded-xl overflow-hidden mb-3 relative">
