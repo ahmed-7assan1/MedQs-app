@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
-import { MobileHeader } from "@/components/layout/MobileHeader";
+import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
@@ -70,7 +70,7 @@ export default async function CleanStudentLayout({ children }: { children: React
           />
 
           {/* Floating Mobile Header */}
-          <MobileHeader
+          <GlobalTopBar
             userImage={userImage}
             userName={isGuest ? undefined : displayName}
             userId={isGuest ? "" : sessionUserId}

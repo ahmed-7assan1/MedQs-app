@@ -2,7 +2,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSessionScope, isAdminRole } from "@/lib/tenant";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import OneXCommunity from "@/components/social/OneXCommunity";
+import { SocialMobileWrapper } from "@/components/community-mobile/SocialMobileWrapper";
 import { unstable_cache } from "next/cache";
 
 // Keep page dynamic since it reads auth cookies per user
@@ -13,11 +15,11 @@ export const metadata = {
   description: "Connect, discuss, and learn together with your university community.",
 };
 
-// ─── Cached DB Queries (60s TTL) ─────────────────────────────────────────────
-// These queries are shared across ALL students of the same university.
-// Instead of hitting the DB for every student, the result is cached in
-// Vercel's Data Cache for 60 seconds. Firebase handles real-time updates.
+function isMobileUserAgent(ua: string): boolean {
+  return /android|iphone|ipad|ipod|webos|blackberry|iemobile|opera mini|mobile/i.test(ua);
+}
 
+// ─── Cached DB Queries (60s TTL) ─────────────────────────────────────────────
 const getCachedForums = unstable_cache(
   async (universityId: string, semesterId: string | null, userId: string, isAdmin: boolean) => {
     const forumWhere = isAdmin
@@ -69,13 +71,40 @@ export default async function SocialPage() {
   if (!scope?.universityId) redirect("/profile?error=university_required");
 
   const { universityId, semesterId, userId, role } = scope;
+  const userName = session.user.name ?? "Student";
+  const userImage = session.user.image ?? null;
+
+  // Detect mobile server-side to skip expensive queries
+  const headersList = await headers();
+  const ua = headersList.get("user-agent") || "";
+  const isMobile = isMobileUserAgent(ua);
+
+  // Only fetch forum/room data on desktop (CommunityFeed fetches its own on mobile)
+  if (isMobile) {
+    return (
+      <SocialMobileWrapper
+        currentUserId={userId}
+        currentUserName={userName}
+        currentUserImage={userImage}
+      >
+        <OneXCommunity
+          circles={[]}
+          rooms={[]}
+          currentUserId={userId}
+          currentUserName={userName}
+          currentUserImage={userImage}
+          currentUserRole={role}
+          currentUserUniversityId={universityId}
+        />
+      </SocialMobileWrapper>
+    );
+  }
 
   const [forums, rooms] = await Promise.all([
     getCachedForums(universityId, semesterId ?? null, userId, isAdminRole(role)),
     getCachedRooms(universityId, userId),
   ]);
 
-  // Mark isMember and isOwner
   const roomsWithMeta = rooms.map((r: any) => ({
     ...r,
     isMember: r.members.length > 0,
@@ -83,14 +112,20 @@ export default async function SocialPage() {
   }));
 
   return (
-    <OneXCommunity
-      circles={forums as any}
-      rooms={roomsWithMeta as any}
+    <SocialMobileWrapper
       currentUserId={userId}
-      currentUserName={session.user.name ?? undefined}
-      currentUserImage={session.user.image ?? undefined}
-      currentUserRole={role}
-      currentUserUniversityId={universityId}
-    />
+      currentUserName={userName}
+      currentUserImage={userImage}
+    >
+      <OneXCommunity
+        circles={forums as any}
+        rooms={roomsWithMeta as any}
+        currentUserId={userId}
+        currentUserName={userName}
+        currentUserImage={userImage}
+        currentUserRole={role}
+        currentUserUniversityId={universityId}
+      />
+    </SocialMobileWrapper>
   );
 }

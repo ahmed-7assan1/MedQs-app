@@ -1,0 +1,108 @@
+:root {
+  --community-bg: #0a0a0f;
+  --community-bg-secondary: #111118;
+  --community-bg-card: rgba(22, 22, 32, 0.7);
+  --community-bg-glass: rgba(18, 18, 28, 0.6);
+  --community-border-glass: rgba(255, 255, 255, 0.07);
+  --community-text-primary: #f0f0f8;
+  --community-text-secondary: #9898b8;
+  --community-text-muted: #5c5c7a;
+  --community-brand: #8b66ff;
+  --community-brand-soft: rgba(139, 102, 255, 0.15);
+  --community-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --community-shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.community-mobile {
+  --bg-primary: var(--community-bg);
+  --bg-secondary: var(--community-bg-secondary);
+  --bg-card: var(--community-bg-card);
+  --bg-glass: var(--community-bg-glass);
+  --border-glass: var(--community-border-glass);
+  --text-primary: var(--community-text-primary);
+  --text-secondary: var(--community-text-secondary);
+  --text-muted: var(--community-text-muted);
+  --brand: var(--community-brand);
+  --brand-soft: var(--community-brand-soft);
+  --shadow-card: var(--community-shadow-card);
+  --shadow-glass: var(--community-shadow-glass);
+}
+
+.community-mobile.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5fa;
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-glass: rgba(255, 255, 255, 0.55);
+  --border-glass: rgba(255, 255, 255, 0.45);
+  --text-primary: #0a0a14;
+  --text-secondary: #5c5c7a;
+  --text-muted: #9898b8;
+  --brand: #6e40ff;
+  --brand-soft: rgba(110, 64, 255, 0.12);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.07);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.community-glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+}
+
+.community-glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-card);
+}
+
+.community-ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  pointer-events: none;
+  animation: community-pulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes community-pulse {
+  0% { transform: scale(1) translate(0); opacity: 0.3; }
+  100% { transform: scale(1.15) translate(5%, 5%); opacity: 0.45; }
+}
+
+.community-swipe-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 0;
+}
+
+.community-swipe-container::-webkit-scrollbar {
+  display: none;
+}
+
+.community-swipe-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.community-recording-ring {
+  animation: community-ring-pulse 1s ease-in-out infinite;
+}
+
+@keyframes community-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+}
+
+.community-wave-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--brand);
+  transition: height 80ms ease;
+}

@@ -169,7 +169,7 @@ function collectFiles(post: PostData): { url: string; name?: string; type?: stri
 
 // ─── Design Tokens + Font ───────────────────────────────────────
 
-const FONT = "var(--font-cairo), var(--font-geist-sans), system-ui, sans-serif";
+const FONT = "var(--font-nunito), var(--font-cairo), system-ui, sans-serif";
 
 const T = {
   bg: "var(--ox-bg)", surface: "var(--ox-surface)", hover: "var(--ox-hover)",

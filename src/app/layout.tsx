@@ -6,7 +6,7 @@ import { ChunkLoadRecovery } from "@/components/system/ChunkLoadRecovery";
 import { DevServiceWorkerCleanup } from "@/components/system/DevServiceWorkerCleanup";
 import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
-import { appFontVariableClassName } from "@/lib/app-fonts";
+import { appFontVariableClassName, fontEnglish } from "@/lib/app-fonts";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
 import { FirebaseProvider } from "@/components/providers/FirebaseProvider";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
@@ -248,7 +248,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     document.documentElement.style.setProperty('--font-geist-sans', 'var(--font-cairo)');
                   } else {
                     document.documentElement.setAttribute('dir', 'ltr');
-                    document.documentElement.style.removeProperty('--font-geist-sans');
+                    document.documentElement.style.setProperty('--font-geist-sans', 'var(--font-nunito)');
                   }
                 } catch(e) {}
               })();
@@ -313,7 +313,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
         <script src="https://js.puter.com/v2/" defer></script>
       </head>
-      <body className="font-sans antialiased">
+      <body className={`${fontEnglish.className} font-sans antialiased`}>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <DevServiceWorkerCleanup />
         <ChunkLoadRecovery />

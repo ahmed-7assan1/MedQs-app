@@ -20,30 +20,26 @@ const config: Config = {
   		},
   		fontFamily: {
   			sans: [
-  				'var(--font-geist-sans)',
+  				'var(--font-nunito)',
   				'var(--font-cairo)',
   				'system-ui',
   				'sans-serif'
   			],
   			display: [
-  				'var(--font-geist-sans)',
+  				'var(--font-nunito)',
   				'var(--font-cairo)',
   				'system-ui',
   				'sans-serif'
   			],
   			arabic: [
   				'var(--font-cairo)',
-  				'var(--font-geist-sans)',
+  				'var(--font-nunito)',
   				'system-ui',
   				'sans-serif'
   			],
   			mono: [
   				'var(--font-mono)',
   				'monospace'
-  			],
-  			'dm-sans': [
-  				'var(--font-dm-sans)',
-  				'sans-serif'
   			],
   			syne: [
   				'var(--font-syne)',

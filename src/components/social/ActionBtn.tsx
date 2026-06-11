@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const FONT = "var(--font-cairo), var(--font-geist-sans), system-ui, sans-serif";
+const FONT = "var(--font-nunito), var(--font-cairo), system-ui, sans-serif";
 
 export function ActionBtn({ icon, label, active, activeColor, activeBg, onClick }: {
   icon: React.ReactNode; label: string; active?: boolean; activeColor?: string; activeBg?: string; onClick: (e: React.MouseEvent) => void;

@@ -3,12 +3,43 @@
 import React, { useEffect } from "react";
 import { motion, useSpring, useTransform, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
-import * as Icons from "lucide-react";
+import {
+  AcademicCapIcon, ShieldCheckIcon, FireIcon, PlayCircleIcon,
+  BoltIcon, UsersIcon, MicrophoneIcon, MagnifyingGlassIcon,
+  BookOpenIcon, LightBulbIcon, ChartBarSquareIcon,
+  SparklesIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, QuestionMarkCircleIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
 
-const IconRenderer = ({ name, className, size = 24 }: { name: string, className?: string, size?: number }) => {
-  const IconComponent = (Icons as any)[name] || Icons.HelpCircle;
-  return <IconComponent className={className} size={size} />;
+const iconRegistry: Record<string, React.ComponentType<{ className?: string }>> = {
+  Target: ChartBarSquareIcon,
+  Brain: LightBulbIcon,
+  ShieldCheck: ShieldCheckIcon,
+  GraduationCap: AcademicCapIcon,
+  Flame: FireIcon,
+  PlayCircle: PlayCircleIcon,
+  Zap: BoltIcon,
+  Users: UsersIcon,
+  Mic: MicrophoneIcon,
+  Search: MagnifyingGlassIcon,
+  BookOpen: BookOpenIcon,
+};
+
+const sizeMap: Record<number, string> = {
+  12: "h-3 w-3",
+  14: "h-3.5 w-3.5",
+  16: "h-4 w-4",
+  18: "h-[18px] w-[18px]",
+  20: "h-5 w-5",
+  24: "h-6 w-6",
+  28: "h-7 w-7",
+  32: "h-8 w-8",
+};
+
+const IconRenderer = ({ name, className, size = 20 }: { name: string, className?: string, size?: number }) => {
+  const IconComponent = iconRegistry[name] || QuestionMarkCircleIcon;
+  const sizeClass = sizeMap[size] || "";
+  return <IconComponent className={cn(sizeClass, className)} />;
 };
 
 interface StatCardProps {
@@ -50,7 +81,7 @@ export const StatCard = ({
         </div>
         {trend && (
           <div className={cn("flex items-center gap-1 text-[10px] font-bold", trend === "up" ? "text-emerald-500" : "text-rose-500")}>
-            {trend === "up" ? <Icons.TrendingUp size={12} /> : <Icons.TrendingDown size={12} />}
+            {trend === "up" ? <ArrowTrendingUpIcon className="h-3 w-3" /> : <ArrowTrendingDownIcon className="h-3 w-3" />}
             {trend === "up" ? "+12%" : "-4%"}
           </div>
         )}
@@ -155,7 +186,7 @@ export const AskDrQFeatured = () => {
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-xl blur-lg animate-glow-pulse" />
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow">
-              <Icons.Sparkles size={20} />
+              <SparklesIcon className="h-5 w-5" />
             </div>
           </div>
           <div>

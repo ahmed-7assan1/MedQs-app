@@ -388,40 +388,9 @@ export default function AdminSettingsPage() {
                        </button>
                     </div>
                  </div>
-              </div>
+               </div>
 
-              <div className="rounded-2xl border border-white/[0.02] bg-card p-5 space-y-4 shadow-sm">
-                 <div className="flex items-center gap-2 mb-2">
-                    <Globe className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-bold tracking-tight">Typography</span>
-                 </div>
-                 <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Interface Font (Sans)</label>
-                    <MedqsSelect
-                      value={config.fontSans}
-                      onChange={(e) => setConfig((c) => ({ ...c, fontSans: e.target.value }))}
-                      className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50"
-                    >
-                      {["Plus Jakarta Sans", "Inter", "Outfit", "Lexend", "Space Grotesk"].map(f => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </MedqsSelect>
-                 </div>
-                 <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Arabic Typeface</label>
-                    <MedqsSelect
-                      value={config.fontArabic}
-                      onChange={(e) => setConfig((c) => ({ ...c, fontArabic: e.target.value }))}
-                      className="w-full h-11 rounded-xl border-white/[0.02] bg-background/50"
-                    >
-                      {["Cairo", "Tajawal", "Noto Sans Arabic", "Almarai", "Beirut"].map(f => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </MedqsSelect>
-                 </div>
-              </div>
-
-              {/* Logo Settings */}
+               {/* Logo Settings */}
               <div className="sm:col-span-2 rounded-2xl border border-white/[0.02] bg-card p-6 space-y-6 shadow-sm">
                  <div className="flex items-center gap-2 mb-2">
                     <Layers className="h-4 w-4 text-blue-500" />

@@ -1,19 +1,21 @@
 "use client";
 
-import type { ElementType } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import {
-  House, Books, Brain, Sparkle, User,
-} from "@phosphor-icons/react/dist/ssr";
+  HomeIcon,
+  BookOpenIcon,
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/solid";
 import { cn } from "@/lib/utils";
 import { isImmersiveMobileRoute } from "@/lib/mobile-chrome";
 
 interface TabDef {
   href: string;
   label: string;
-  icon: ElementType;
+  icon: typeof HomeIcon;
   match: (p: string) => boolean;
 }
 
@@ -21,101 +23,125 @@ const TABS: TabDef[] = [
   {
     href: "/dashboard-app",
     label: "Home",
-    icon: House,
+    icon: HomeIcon,
     match: (p: string) => p === "/dashboard-app" || p === "/dashboard",
   },
   {
     href: "/modules",
-    label: "Learn",
-    icon: Books,
-    match: (p: string) => p.startsWith("/modules") || p.startsWith("/videos") || p.startsWith("/study-tools"),
+    label: "Modules",
+    icon: BookOpenIcon,
+    match: (p: string) => p.startsWith("/modules"),
   },
   {
-    href: "/ai-chat",
-    label: "Dr. Q",
-    icon: Sparkle,
-    match: (p: string) => p.startsWith("/ai-chat") || p.startsWith("/atlas"),
+    href: "/community",
+    label: "Social",
+    icon: UserGroupIcon,
+    match: (p: string) => p.startsWith("/community") || p === "/social",
   },
   {
     href: "/past-papers",
     label: "QBank",
-    icon: Brain,
+    icon: ClipboardDocumentListIcon,
     match: (p: string) => p.startsWith("/past-papers") || p.startsWith("/quiz"),
-  },
-  {
-    href: "/profile/me",
-    label: "Profile",
-    icon: User,
-    match: (p: string) => p.startsWith("/profile") || p.startsWith("/settings") || p.startsWith("/notifications"),
   },
 ];
 
 function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
   const active = tab.match(pathname);
+  const Icon = tab.icon;
 
   return (
     <Link
       href={tab.href}
       className={cn(
         "relative flex flex-col items-center justify-center gap-0.5",
-        "h-full flex-1 min-h-[48px] min-w-[44px] transition-all duration-300",
+        "h-full flex-1 min-h-[48px] min-w-[44px] transition-all duration-200",
         "active:scale-90"
       )}
     >
-      <div className="relative flex items-center justify-center h-6 w-6">
-        <tab.icon
-          weight={active ? "fill" : "regular"}
-          className={cn(
-            "transition-all duration-300",
-            active ? "h-5 w-5" : "h-5 w-5"
-          )}
-        />
-      </div>
+      <Icon
+        className={cn(
+          "h-6 w-6 transition-colors duration-200",
+          active
+            ? "text-indigo-500 dark:text-indigo-400"
+            : "text-gray-400 dark:text-white/40"
+        )}
+      />
       <span
         className={cn(
-          "text-[9px] font-black tracking-wider transition-all duration-300",
-          active ? "text-white" : "text-white/35"
+          "text-[10px] font-semibold tracking-wide transition-colors duration-200",
+          active
+            ? "text-indigo-500 dark:text-indigo-400"
+            : "text-gray-400 dark:text-white/35"
         )}
       >
         {tab.label}
       </span>
-      {active && (
-        <motion.div
-          layoutId="blogNavDot"
-          className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
-          transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-        />
-      )}
     </Link>
   );
 }
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const [visible, setVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const SCROLL_THRESHOLD = 8;
+    const BOTTOM_THRESHOLD = 50;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const diff = currentScrollY - lastScrollY.current;
+
+      // At bottom of page → always show
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      if (docHeight - scrollBottom < BOTTOM_THRESHOLD) {
+        setVisible(true);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      if (Math.abs(diff) < SCROLL_THRESHOLD) {
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      if (diff > 0 && currentScrollY > 60) {
+        setVisible(false);
+      } else if (diff < 0) {
+        setVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   if (isImmersiveMobileRoute(pathname)) return null;
 
   return (
     <div
       className={cn(
-        "md:hidden fixed bottom-0 left-0 right-0 z-[100] pointer-events-none",
-        "pb-[env(safe-area-inset-bottom,0px)]"
+        "md:hidden fixed bottom-0 left-0 right-0 z-[10000]",
+        "bg-white/70 dark:bg-[#0d0d14]/80",
+        "backdrop-blur-3xl saturate-[1.8]",
+        "rounded-t-2xl",
+        "border-t border-gray-200/50 dark:border-white/[0.05]",
+        "shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]",
+        "pb-[env(safe-area-inset-bottom,0px)]",
+        "transition-transform duration-300 will-change-transform",
+        visible ? "translate-y-0" : "translate-y-full"
       )}
     >
-      <nav
-        className={cn(
-          "pointer-events-auto mx-4 mb-3 rounded-2xl",
-          "bg-[#0d0d14]/85 backdrop-blur-2xl",
-          "border border-white/[0.06]",
-          "shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-        )}
-      >
-        <div className="flex items-center justify-around h-[60px] px-1 relative">
-          {TABS.map((tab) => (
-            <TabItem key={tab.href} tab={tab} pathname={pathname} />
-          ))}
-        </div>
-      </nav>
+      <div className="flex items-center justify-around h-[62px] px-1">
+        {TABS.map((tab) => (
+          <TabItem key={tab.href} tab={tab} pathname={pathname} />
+        ))}
+      </div>
     </div>
   );
 }

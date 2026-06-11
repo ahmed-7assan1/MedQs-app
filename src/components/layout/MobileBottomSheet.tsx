@@ -60,7 +60,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: "Interactive",
     items: [
       { href: "/drawmed", label: "DrawMed", icon: Pen, desc: "Sketch & learn" },
-      { href: "/social", label: "Community", icon: MessageSquare, desc: "Discuss with peers" },
+      { href: "/community", label: "Community", icon: MessageSquare, desc: "Discuss with peers" },
       { href: "/ai-chat", label: "Dr. Q AI", icon: Sparkles, desc: "AI medical tutor" },
     ],
   },

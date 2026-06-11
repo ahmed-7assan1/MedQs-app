@@ -1,17 +1,29 @@
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { getSessionScope } from "@/lib/tenant";
-import { redirect } from "next/navigation";
-import { CommunityChatClient } from "@/components/forum/CommunityChatClient";
+import { createClient } from "@/lib/supabase/server";
+import { CommunityPageClient } from "./CommunityPageClient";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Discussion Group • MedOneX",
+  title: "MedOneX Community",
   description: "Real-time community discussion for all students in your university.",
 };
 
 export default async function CommunityPage() {
-  redirect("/social");
+  const session = await auth();
+  const supabase = createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+
+  const userId = authUser?.id || session?.user?.id || "";
+  const userName = authUser?.user_metadata?.name || session?.user?.name || "Student";
+  const userImage = authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.image || session?.user?.image || null;
+
+  return (
+    <CommunityPageClient
+      currentUserId={userId}
+      currentUserName={userName}
+      currentUserImage={userImage}
+    />
+  );
 }

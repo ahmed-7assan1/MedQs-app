@@ -13,7 +13,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
 import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
-import { MobileHeader } from "@/components/layout/MobileHeader";
+import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
 import { MobileSwipeLayout } from "@/components/layout/MobileSwipeLayout";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { PremiumNotificationPrompt } from "@/components/notifications/PremiumNotificationPrompt";
@@ -99,7 +99,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               userId={isGuest ? "" : sessionUserId}
             />
 
-            <MobileHeader
+            <GlobalTopBar
               userImage={userImage}
               userName={isGuest ? undefined : displayName}
               userId={isGuest ? "" : sessionUserId}

@@ -28,10 +28,6 @@ export function mobileSwipeRouteIndex(pathname: string): number {
 export function isImmersiveMobileRoute(pathname: string): boolean {
   const p = pathname ?? "";
   return (
-    p.startsWith("/quiz") ||
-    p.startsWith("/past-papers") ||
-    p.startsWith("/guest/quiz") ||
-    p.startsWith("/guest/past-papers") ||
     p.startsWith("/drawmed")
   );
 }

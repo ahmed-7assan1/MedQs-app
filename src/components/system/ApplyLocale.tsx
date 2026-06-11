@@ -11,7 +11,7 @@ export function ApplyLocale() {
         document.documentElement.style.setProperty("--font-geist-sans", "var(--font-cairo)");
       } else {
         document.documentElement.setAttribute("dir", "ltr");
-        document.documentElement.style.removeProperty("--font-geist-sans");
+        document.documentElement.style.setProperty("--font-geist-sans", "var(--font-nunito)");
       }
     } catch {}
   }, []);
