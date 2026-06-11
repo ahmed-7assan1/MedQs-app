@@ -3,11 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import {
-  Sparkle,
-  Image as ImageIcon,
-  X,
-} from "@phosphor-icons/react";
+import { PhotoIcon } from "@heroicons/react/24/solid";
 import type { Post } from "./types";
 import { cn } from "./utils";
 
@@ -106,7 +102,7 @@ export function PostComposer({ currentUser, onSubmit, onClose }: PostComposerPro
           }}
         >
           <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors" style={{ color: "var(--text-secondary)" }}>
-            <ImageIcon size={18} />
+            <PhotoIcon className="h-[18px] w-[18px]" />
           </button>
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>Add to your post</span>
         </div>

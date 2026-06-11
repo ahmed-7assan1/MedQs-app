@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Heart,
-  ChatCircleDots,
-  ShareNetwork,
-  BookmarkSimple,
-  DotsThreeVertical,
-  Trash,
-  PushPin,
-  User,
-} from "@phosphor-icons/react";
+  HeartIcon,
+  ChatBubbleOvalLeftIcon,
+  ShareIcon,
+  BookmarkIcon,
+  EllipsisVerticalIcon,
+  TrashIcon,
+  MapPinIcon,
+  UserIcon,
+} from "@heroicons/react/24/solid";
 import type { Post } from "./types";
 import { RichText } from "./RichText";
 import { ImageCarousel } from "./ImageCarousel";
@@ -80,7 +80,7 @@ export function PostCard({ post, onLike, onReact, onComment, onSave, onShare, on
             {post.pinned && (
               <>
                 <span>&middot;</span>
-                <PushPin size={10} weight="fill" style={{ color: "var(--brand)" }} />
+                <MapPinIcon className="h-[10px] w-[10px]" style={{ color: "var(--brand)" }} />
                 <span style={{ color: "var(--brand)" }}>Pinned</span>
               </>
             )}
@@ -91,7 +91,7 @@ export function PostCard({ post, onLike, onReact, onComment, onSave, onShare, on
             onClick={() => setMenuOpen(!menuOpen)}
             className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors"
           >
-            <DotsThreeVertical size={16} style={{ color: "var(--text-muted)" }} />
+            <EllipsisVerticalIcon className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
           </button>
           <AnimatePresence>
             {menuOpen && (
@@ -108,7 +108,7 @@ export function PostCard({ post, onLike, onReact, onComment, onSave, onShare, on
                     className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/5 transition-colors"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    <PushPin size={14} /> {post.pinned ? "Unpin" : "Pin"}
+                    <MapPinIcon className="h-3.5 w-3.5" /> {post.pinned ? "Unpin" : "Pin"}
                   </button>
                 )}
                 {post.isOwner && onDelete && (
@@ -117,7 +117,7 @@ export function PostCard({ post, onLike, onReact, onComment, onSave, onShare, on
                     className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/5 transition-colors"
                     style={{ color: "#ef4444" }}
                   >
-                    <Trash size={14} /> Delete
+                    <TrashIcon className="h-3.5 w-3.5" /> Delete
                   </button>
                 )}
                 <button
@@ -125,7 +125,7 @@ export function PostCard({ post, onLike, onReact, onComment, onSave, onShare, on
                   className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/5 transition-colors"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  <ShareNetwork size={14} /> Share
+                  <ShareIcon className="h-3.5 w-3.5" /> Share
                 </button>
               </motion.div>
             )}
@@ -197,25 +197,25 @@ export function PostCard({ post, onLike, onReact, onComment, onSave, onShare, on
       {/* Actions */}
       <div className="flex items-center justify-around border-t px-2 py-1" style={{ borderColor: "var(--border-glass)" }}>
         <ActionBtn
-          icon={<Heart size={18} weight="regular" />}
-          activeIcon={<Heart size={18} weight="fill" style={{ color: "#ef4444" }} />}
+          icon={<HeartIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
+          activeIcon={<HeartIcon className="h-[18px] w-[18px] text-red-500" />}
           active={false}
           label="Like"
           onClick={() => onLike(post.id)}
         />
         <ActionBtn
-          icon={<ChatCircleDots size={18} />}
+          icon={<ChatBubbleOvalLeftIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
           label="Comment"
           onClick={() => onComment(post.id)}
         />
         <ActionBtn
-          icon={<ShareNetwork size={18} />}
+          icon={<ShareIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
           label="Share"
           onClick={() => onShare(post.id)}
         />
         <ActionBtn
-          icon={<BookmarkSimple size={18} weight="regular" />}
-          activeIcon={<BookmarkSimple size={18} weight="fill" style={{ color: "var(--brand)" }} />}
+          icon={<BookmarkIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
+          activeIcon={<BookmarkIcon className="h-[18px] w-[18px]" style={{ color: "var(--brand)" }} />}
           active={post.saved || false}
           label="Save"
           onClick={() => onSave(post.id)}

@@ -11,6 +11,7 @@ import { PostComposer } from "./PostComposer";
 import { FilterPills } from "./FilterPills";
 import type { Post, Comment } from "./types";
 import { cn } from "./utils";
+import { SparklesIcon } from "@heroicons/react/24/solid";
 
 interface CommunityFeedProps {
   currentUserId: string;
@@ -292,8 +293,7 @@ export function CommunityFeed({
         display: "flex",
         flexDirection: "column",
         fontFamily: "'Nunito', 'Cairo', sans-serif",
-        paddingTop: "env(safe-area-inset-top, 0px)",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)",
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 3rem)",
       }}
     >
       {/* Ambient blobs */}
@@ -331,7 +331,7 @@ export function CommunityFeed({
             </div>
           ) : posts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <SparkleIcon />
+              <SparklesIcon className="h-12 w-12" style={{ color: "var(--brand)" }} />
               <p className="text-base font-semibold mt-4" style={{ color: "var(--text-primary)" }}>
                 No posts yet
               </p>
@@ -396,15 +396,6 @@ export function CommunityFeed({
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-function SparkleIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.5">
-      <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z" />
-      <path d="M18 17l1 3 3-1-3-1-1-3-1 3-3 1 3 1 1 3z" />
-    </svg>
   );
 }
 

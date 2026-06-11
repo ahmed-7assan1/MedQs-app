@@ -3,12 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  PaperPlaneTilt,
-  Heart,
-  X,
-  FileArrowDown,
-} from "@phosphor-icons/react";
+  PaperAirplaneIcon,
+  HeartIcon,
+  XMarkIcon,
+  ArrowDownTrayIcon,
+} from "@heroicons/react/24/solid";
 import type { Comment } from "./types";
+import { cn } from "./utils";
 
 interface CommentsSheetProps {
   postId: string;
@@ -92,7 +93,7 @@ export function CommentsSheet({
             Comments {comments.length > 0 && `(${comments.length})`}
           </span>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
-            <X size={16} style={{ color: "var(--text-muted)" }} />
+            <XMarkIcon className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
           </button>
         </div>
 
@@ -146,7 +147,7 @@ export function CommentsSheet({
                       </div>
                     ) : c.attachment ? (
                       <div className="flex items-center gap-2 mt-1 rounded-lg p-2" style={{ background: "var(--bg-secondary)" }}>
-                        <FileArrowDown size={14} style={{ color: c.attachment.color }} />
+                        <ArrowDownTrayIcon className="h-3.5 w-3.5" style={{ color: c.attachment.color }} />
                         <span className="text-xs truncate flex-1" style={{ color: "var(--text-primary)" }}>
                           {c.attachment.name}
                         </span>
@@ -158,7 +159,7 @@ export function CommentsSheet({
                       className="flex items-center gap-1 mt-1 text-xs"
                       style={{ color: c.liked ? "#ef4444" : "var(--text-muted)" }}
                     >
-                      <Heart size={12} weight={c.liked ? "fill" : "regular"} />
+                      <HeartIcon className={cn("h-3 w-3", c.liked ? "text-red-500" : "text-gray-400 dark:text-white/40")} />
                       <span>{c.likes > 0 ? c.likes : ""}</span>
                     </button>
                     {c.replies && c.replies.length > 0 && (
@@ -224,7 +225,7 @@ export function CommentsSheet({
             className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-40"
             style={{ background: "var(--brand)" }}
           >
-            <PaperPlaneTilt size={16} weight="fill" className="text-white" />
+            <PaperAirplaneIcon className="h-4 w-4 text-white" />
           </button>
         </div>
       </motion.div>
