@@ -29,7 +29,7 @@ function parseThemeFromCookie(cookie: string | null): "light" | "dark" {
 const BG_DARK = "#0F0F13";
 const BG_LIGHT = "#F5F5FA";
 
-export default async function manifest(request: Request): Promise<MetadataRoute.Manifest> {
+export default async function manifest(request?: Request): Promise<MetadataRoute.Manifest> {
   let siteName = "MedOneX";
   let themeColor = DEFAULT_PRIMARY;
 
@@ -44,7 +44,7 @@ export default async function manifest(request: Request): Promise<MetadataRoute.
     /* DB unavailable — defaults */
   }
 
-  const theme = parseThemeFromCookie(request.headers.get("cookie"));
+  const theme = parseThemeFromCookie(request?.headers?.get("cookie") ?? null);
   const bgColor = theme === "light" ? BG_LIGHT : BG_DARK;
 
   const fullName = `${siteName} — Medical Education`;
