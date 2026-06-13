@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
 import { NotificationsSheet } from "@/components/layout/NotificationsSheet";
+import { SearchResultsPanel } from "@/components/layout/SearchResultsPanel";
 import { cn } from "@/lib/utils";
 import {
   SunIcon, MoonIcon, MagnifyingGlassIcon, BellIcon,
@@ -68,7 +69,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
           visible || searchOpen ? "translate-y-0" : "-translate-y-full"
         )}
       >
-        <div className="rounded-b-2xl px-4 py-3 bg-background/80 backdrop-blur-3xl saturate-[1.8] border-b border-border shadow-lg">
+        <div className="rounded-b-2xl px-4 py-3 bg-gradient-to-b from-background via-background/70 to-transparent backdrop-blur-3xl saturate-[1.8] border-b border-border shadow-lg">
           <AnimatePresence mode="wait">
             {searchOpen ? (
               <motion.div
@@ -177,6 +178,12 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
           </AnimatePresence>
         </div>
       </header>
+
+      <SearchResultsPanel
+        query={searchQuery}
+        isOpen={searchOpen}
+        onClose={() => { setSearchOpen(false); setSearchQuery(""); }}
+      />
 
       <MobileBottomSheet
         isOpen={navSheetOpen}

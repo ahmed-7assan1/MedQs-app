@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, animate } from "framer-motion";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ArrowRightIcon, ArrowLeftIcon, InformationCircleIcon, ArrowPathIcon, XCircleIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowPathIcon, XMarkIcon, BookmarkIcon,
+  CheckCircleIcon, XCircleIcon,
+} from "@heroicons/react/24/solid";
 
 interface ReviewedCard {
   id: string;
@@ -27,7 +30,9 @@ export function SpacedRepetitionCards() {
   const [loading, setLoading] = useState(true);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [exiting, setExiting] = useState<string | null>(null);
+  const [saved, setSaved] = useState<Set<string>>(new Set());
 
   const fetchCards = (isRetry = false) => {
     if (!isRetry) setLoading(true);
@@ -35,6 +40,8 @@ export function SpacedRepetitionCards() {
       .then((r) => r.json())
       .then((data) => {
         setCards(Array.isArray(data) ? data : []);
+        setCurrentIdx(0);
+        setFlipped(false);
       })
       .catch(() => { setCards([]); })
       .finally(() => setLoading(false));
@@ -42,15 +49,102 @@ export function SpacedRepetitionCards() {
 
   useEffect(() => { fetchCards(); }, []);
 
-  // Separate wrong cards for priority display
   const wrongCards = cards.filter((c) => c.wrong);
   const reviewCards = cards.filter((c) => !c.wrong);
-  // Show wrong cards first
   const orderedCards = [...wrongCards, ...reviewCards];
   const isRandomCards = cards.length > 0 && cards.every((c) => c.from === "random");
 
   const current = orderedCards[currentIdx];
   const hasMultiple = orderedCards.length > 1;
+  const remainingCards = orderedCards.slice(currentIdx + 1, currentIdx + 4);
+
+  const handleRate = async (quality: "again" | "good") => {
+    if (!current || exiting) return;
+    const cardId = current.id;
+    setExiting(cardId);
+    try {
+      await fetch(`/api/v1/flashcards/${cardId}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quality }),
+      });
+    } catch { /* ignore */ }
+    setTimeout(() => {
+      setExiting(null);
+      setFlipped(false);
+      if (currentIdx < orderedCards.length - 1) {
+        setCurrentIdx((p) => p + 1);
+      } else {
+        fetchCards(true);
+      }
+    }, 300);
+  };
+
+  const toggleSave = () => {
+    if (!current) return;
+    const id = current.id;
+    setSaved((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const loadNext = () => {
+    if (exiting) return;
+    setFlipped(false);
+    if (currentIdx < orderedCards.length - 1) {
+      setCurrentIdx((p) => p + 1);
+    } else {
+      fetchCards(true);
+    }
+  };
+
+  const loadPrev = () => {
+    if (exiting) return;
+    setFlipped(false);
+    if (currentIdx > 0) setCurrentIdx((p) => p - 1);
+  };
+
+  const dismissAll = () => setCollapsed(true);
+
+  // ─── MANUAL SWIPE ───
+  const swipeRef = useRef<{ startX: number; currentX: number; el: HTMLDivElement | null }>({
+    startX: 0, currentX: 0, el: null,
+  });
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    const target = e.currentTarget as HTMLDivElement;
+    target.setPointerCapture(e.pointerId);
+    swipeRef.current = { startX: e.clientX, currentX: e.clientX, el: target };
+    target.style.transition = "none";
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!swipeRef.current.el) return;
+    const dx = e.clientX - swipeRef.current.startX;
+    swipeRef.current.currentX = e.clientX;
+    const rotate = Math.max(-12, Math.min(12, dx * 0.04));
+    swipeRef.current.el.style.transform = `translateX(${dx}px) rotate(${rotate}deg)`;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const el = swipeRef.current.el;
+    if (!el) return;
+    const dx = e.clientX - swipeRef.current.startX;
+    el.style.transition = "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)";
+    if (dx > 80) {
+      el.style.transform = `translateX(500px) rotate(12deg)`;
+      setTimeout(() => handleRate("good"), 180);
+    } else if (dx < -80) {
+      el.style.transform = `translateX(-500px) rotate(-12deg)`;
+      setTimeout(() => handleRate("again"), 180);
+    } else {
+      el.style.transform = `translateX(0) rotate(0deg)`;
+    }
+    swipeRef.current = { startX: 0, currentX: 0, el: null };
+  };
 
   if (loading) {
     return (
@@ -59,11 +153,183 @@ export function SpacedRepetitionCards() {
           <div className="h-4 w-4 rounded-full bg-muted/30 animate-pulse" />
           <div className="h-3 w-24 rounded bg-muted/30 animate-pulse" />
         </div>
-        <div className="h-[180px] rounded-2xl bg-muted/20 animate-pulse" />
+        <div className="h-[200px] rounded-2xl bg-muted/20 animate-pulse" />
       </div>
     );
   }
 
+  if (collapsed) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <ArrowPathIcon className="h-4 w-4 text-indigo-500" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+              Spaced Repetition
+            </span>
+          </div>
+          <button onClick={() => setCollapsed(false)} className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+            Show
+          </button>
+        </div>
+        <div className="h-[60px] rounded-2xl border border-dashed border-border bg-card/20 flex items-center justify-center">
+          <p className="text-[11px] font-bold text-muted-foreground/50">Dismissed. Tap Show to reveal.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── CARD STACK ───
+  const CardStack = ({ currentId }: { currentId: string }) => (
+    <div className="relative">
+      {/* Cards behind */}
+      {remainingCards.map((card, i) => (
+        <div
+          key={card.id}
+          className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden mb-1"
+          style={{
+            marginTop: i === 0 ? 0 : -8,
+            transform: `scale(${1 - (i + 1) * 0.04})`,
+            zIndex: -i - 1,
+            opacity: 0.5 - i * 0.14,
+            pointerEvents: "none",
+          }}
+        >
+          <div className="p-4 min-h-[56px]">
+            <p className="text-xs font-bold text-foreground/40 line-clamp-1">{card.front}</p>
+          </div>
+        </div>
+      ))}
+
+      {/* Current card */}
+      <div style={{ marginTop: remainingCards.length > 0 ? -8 : 0, position: "relative", zIndex: 10 }}>
+        {/* Floating save button */}
+        <button
+          onClick={toggleSave}
+          className={cn(
+            "absolute -top-2 -right-2 z-20 h-8 w-8 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-90",
+            saved.has(currentId)
+              ? "bg-indigo-500 text-white shadow-indigo-500/30"
+              : "bg-background border border-border text-muted-foreground/60 hover:text-indigo-500 hover:border-indigo-300"
+          )}
+        >
+          <BookmarkIcon className={cn("h-4 w-4", saved.has(currentId) ? "fill-current" : "")} />
+        </button>
+
+        {/* Swipeable card */}
+        <div
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          style={{ touchAction: "pan-y", cursor: "grab" }}
+          className="select-none"
+        >
+          <div
+            onClick={() => setFlipped((p) => !p)}
+            className="w-full text-left focus:outline-none cursor-pointer"
+          >
+            <motion.div
+              animate={{ rotateY: flipped ? 180 : 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              {/* ─── FRONT ─── */}
+              <div
+                className={cn(
+                  "rounded-2xl border border-border bg-card shadow-lg",
+                  flipped ? "hidden" : ""
+                )}
+                style={{ backfaceVisibility: "hidden" }}
+              >
+                <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                  <div className="flex items-center gap-1.5">
+                    {current.wrong && <XCircleIcon className="h-3.5 w-3.5 text-rose-500" />}
+                    <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+                      {current.from === "random" ? "Explore" : current.subjectName}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">
+                    {currentIdx + 1}/{orderedCards.length}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center px-5 py-4 text-center" style={{ minHeight: 100 }}>
+                  <p className="text-sm font-black text-foreground leading-relaxed">
+                    {current.front}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground/40 mt-3">Tap to reveal</p>
+                </div>
+              </div>
+
+              {/* ─── BACK ─── */}
+              <div
+                className={cn(
+                  "rounded-2xl border border-border bg-card shadow-lg",
+                  !flipped ? "hidden" : ""
+                )}
+                style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+              >
+                <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Answer</span>
+                  </div>
+                  <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">
+                    {currentIdx + 1}/{orderedCards.length}
+                  </span>
+                </div>
+                <div className="flex flex-col px-5 py-3" style={{ minHeight: 80 }}>
+                  <p className="text-sm font-bold text-foreground leading-relaxed flex-1">
+                    {current.back}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground/40 mt-1">
+                    {current.lectureTitle}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Rating buttons — shown after flip */}
+        {flipped && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: 0.15 }}
+            className="flex gap-2 px-1 pt-3"
+          >
+            <button
+              onClick={() => handleRate("again")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-[0.97]",
+                exiting === current.id
+                  ? "bg-red-100 dark:bg-red-500/10 text-red-400"
+                  : "bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/20"
+              )}
+            >
+              <XCircleIcon className="h-4 w-4" />
+              Got It Wrong
+            </button>
+            <button
+              onClick={() => handleRate("good")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-[0.97]",
+                exiting === current.id
+                  ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-400"
+                  : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500/20"
+              )}
+            >
+              <CheckCircleIcon className="h-4 w-4" />
+              Got It
+            </button>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ─── EMPTY STATE ───
   if (cards.length === 0) {
     return (
       <div>
@@ -74,23 +340,27 @@ export function SpacedRepetitionCards() {
               Spaced Repetition
             </span>
           </div>
-          <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+              Refresh
+            </button>
+            <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+              <XMarkIcon className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         <div className="relative">
-          <button onClick={() => setFlipped(!flipped)} className="w-full text-left focus:outline-none">
+          <div onClick={() => setFlipped(!flipped)} className="w-full text-left focus:outline-none cursor-pointer">
             <motion.div
               animate={{ rotateY: flipped ? 180 : 0 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="relative w-full"
               style={{ transformStyle: "preserve-3d" }}
             >
-              {/* Front: MedOnex branding */}
               <div
                 className={cn(
-                  "rounded-2xl p-5 min-h-[160px] flex flex-col items-center justify-center text-center",
+                  "rounded-2xl p-5 min-h-[160px] flex flex-col items-center justify-center text-center border border-border bg-card shadow-lg",
                   flipped ? "hidden" : ""
                 )}
                 style={{ backfaceVisibility: "hidden" }}
@@ -106,11 +376,9 @@ export function SpacedRepetitionCards() {
                 </p>
                 <p className="text-[10px] text-muted-foreground/40 mt-3">Tap to discover</p>
               </div>
-
-              {/* Back: Platform definition */}
               <div
                 className={cn(
-                  "rounded-2xl p-5 min-h-[160px] flex flex-col",
+                  "rounded-2xl p-5 min-h-[160px] flex flex-col border border-border bg-card shadow-lg",
                   !flipped ? "hidden" : ""
                 )}
                 style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
@@ -123,11 +391,10 @@ export function SpacedRepetitionCards() {
                   className="mt-3 inline-flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl bg-indigo-500/10 text-indigo-500 font-bold text-[10px] uppercase tracking-widest active:scale-[0.97] transition-all"
                 >
                   Start Learning
-                  <ArrowRightIcon className="h-3 w-3" />
                 </Link>
               </div>
             </motion.div>
-          </button>
+          </div>
         </div>
       </div>
     );
@@ -144,183 +411,48 @@ export function SpacedRepetitionCards() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => fetchCards(true)}
-            className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest"
-          >
-            Refresh
-          </button>
-          <Link
-            href={`/modules`}
-            className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest"
-          >
-            Study
-          </Link>
           {wrongCards.length > 0 && (
             <span className="text-[9px] font-bold text-rose-500 bg-rose-100 dark:bg-rose-500/10 px-2 py-0.5 rounded-full">
               {wrongCards.length} wrong
             </span>
           )}
+          <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+            Refresh
+          </button>
+          <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors" title="Dismiss">
+            <XMarkIcon className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Card Flip Container */}
-      <div className="relative">
-        <motion.div
-          key={currentIdx}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.2 }}
-        >
+      {/* Card Stack */}
+      {current && <CardStack currentId={current.id} />}
+
+      {/* Bottom nav */}
+      {hasMultiple && (
+        <div className="flex items-center justify-between mt-3">
           <button
-            onClick={() => setFlipped(!flipped)}
-            className="w-full text-left focus:outline-none"
+            onClick={loadPrev}
+            disabled={currentIdx === 0}
+            className={cn("h-8 w-8 rounded-xl flex items-center justify-center transition-all border", currentIdx > 0 ? "border-border bg-muted/30 active:scale-90" : "border-transparent text-muted-foreground/20")}
           >
-            <motion.div
-              animate={{ rotateY: flipped ? 180 : 0 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="relative w-full"
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              {/* Front */}
-              <div
-                className={cn(
-                  "rounded-2xl p-5 min-h-[140px] flex flex-col",
-                  flipped ? "hidden" : ""
-                )}
-                style={{ backfaceVisibility: "hidden" }}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  {current.wrong && (
-                    <XCircleIcon className="h-4 w-4 text-rose-500 shrink-0" />
-                  )}
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                    {current.from === "random" ? "Did you know?" : current.repetitions === 0 ? "Explore" : current.subjectName}
-                  </span>
-                </div>
-                <p className="text-sm font-black text-foreground leading-relaxed flex-1">
-                  {current.front}
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 mt-2">
-                  Tap to reveal
-                </p>
-              </div>
-
-              {/* Back */}
-              <div
-                className={cn(
-                  "rounded-2xl p-5 min-h-[140px] flex flex-col",
-                  !flipped ? "hidden" : ""
-                )}
-                style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  {current.wrong ? (
-                    <XCircleIcon className="h-4 w-4 text-rose-500 shrink-0" />
-                  ) : (
-                    <CheckCircleIcon className="h-4 w-4 text-emerald-500 shrink-0" />
-                  )}
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Answer
-                  </span>
-                </div>
-                <p className="text-sm font-bold text-foreground leading-relaxed flex-1">
-                  {current.back}
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-[10px] text-muted-foreground/50">
-                    {current.lectureTitle}
-                  </p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowInfo(true);
-                    }}
-                    className="h-7 w-7 rounded-full bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-all active:scale-90"
-                  >
-                    <InformationCircleIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </button>
-        </motion.div>
-
-        {/* Navigation arrows */}
-        {hasMultiple && (
-          <div className="flex items-center justify-between mt-3">
-            <button
-              onClick={() => {
-                setCurrentIdx((prev) => (prev > 0 ? prev - 1 : orderedCards.length - 1));
-                setFlipped(false);
-              }}
-              className="h-9 w-9 rounded-xl bg-muted/30 border border-border flex items-center justify-center active:scale-90 transition-all"
-            >
-              <ArrowLeftIcon className="h-4 w-4 text-muted-foreground" />
-            </button>
-            <span className="text-[10px] font-bold text-muted-foreground/60">
-              {currentIdx + 1} / {orderedCards.length}
-            </span>
-            <button
-              onClick={() => {
-                setCurrentIdx((prev) => (prev < orderedCards.length - 1 ? prev + 1 : 0));
-                setFlipped(false);
-              }}
-              className="h-9 w-9 rounded-xl bg-muted/30 border border-border flex items-center justify-center active:scale-90 transition-all"
-            >
-              <ArrowRightIcon className="h-4 w-4 text-muted-foreground" />
-            </button>
+          <div className="flex gap-1.5">
+            {orderedCards.map((_, i) => (
+              <div
+                key={i}
+                className={cn("h-1.5 rounded-full transition-all", i === currentIdx ? "w-4 bg-indigo-500" : "w-1.5 bg-muted-foreground/20")}
+              />
+            ))}
           </div>
-        )}
-      </div>
-
-      {/* Info Modal */}
-      {showInfo && current && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setShowInfo(false)}
-            className="fixed inset-0 z-[300] bg-black/50"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-x-4 bottom-24 z-[301] rounded-2xl bg-card border border-border/50 p-5 shadow-2xl"
+          <button
+            onClick={loadNext}
+            className="h-8 w-8 rounded-xl border border-border bg-muted/30 flex items-center justify-center active:scale-90 transition-all"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500">Details</span>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Lecture</span>
-                <span className="font-bold text-foreground text-right">{current.lectureTitle}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subject</span>
-                <span className="font-bold text-foreground">{current.subjectName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Reviews</span>
-                <span className="font-bold text-foreground">{current.repetitions}x</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Status</span>
-                <span className={cn("font-bold", current.repetitions === 0 ? "text-indigo-500" : current.wrong ? "text-rose-500" : "text-emerald-500")}>
-                  {current.repetitions === 0 ? "New" : current.wrong ? "Needs Review" : "Learning"}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowInfo(false)}
-              className="mt-4 w-full py-2.5 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-widest active:scale-[0.98] transition-all"
-            >
-              Got it
-            </button>
-          </motion.div>
-        </>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
       )}
     </div>
   );

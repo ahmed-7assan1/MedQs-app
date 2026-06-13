@@ -451,14 +451,14 @@ export function CreativeStudioTab() {
                     )}>
                       {currentImgs.map((img, i) => (
                         <div key={i} className="relative group/img rounded-2xl overflow-hidden border border-white/10 bg-white/5 aspect-square">
-                          <img 
-                            src={img.url} 
-                            alt="" 
+                          <img
+                            src={img.url}
+                            alt=""
                             className={cn(
-                              "w-full h-full object-cover transition-transform duration-[20000ms] ease-in-out brightness-[1.05] contrast-[1.05]",
+                              "w-full h-full object-cover transition-transform ease-in-out brightness-[1.05] contrast-[1.05]",
                               motionMode && "scale-150 translate-x-4 -translate-y-4"
-                            )} 
-                            style={{ filter: 'contrast(1.1) brightness(1.05) saturate(1.1) sharp(1px)' }}
+                            )}
+                            style={{ transitionDuration: "20000ms", filter: 'contrast(1.1) brightness(1.05) saturate(1.1) sharp(1px)' }}
                           />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-3">
                             <button onClick={() => downloadImage(img)} className="p-3 rounded-full bg-white text-black hover:scale-110 transition-transform shadow-xl">

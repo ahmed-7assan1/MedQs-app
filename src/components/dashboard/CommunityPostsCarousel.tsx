@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -11,7 +11,6 @@ import { SharedQuestionBlock } from "@/components/quiz/SharedQuestionBlock";
 import { VidStackPlayer } from "@/components/content/VidStackPlayer";
 import {
   ArrowRightIcon,
-  ArrowLeftIcon,
   PaperClipIcon,
   ArrowsPointingOutIcon,
   HeartIcon,
@@ -19,6 +18,8 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  PlayIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import {
   HeartIcon as HeartOutlineIcon,
@@ -238,7 +239,7 @@ function Lightbox({
 ───────────────────────────────────────────── */
 function SkeletonCard() {
   return (
-    <div className="shrink-0 w-[85vw] md:w-[45vw] lg:w-[32vw] h-[420px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
+    <div className="w-full h-[380px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
       <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-border/10">
         <div className="h-9 w-9 rounded-full bg-muted/40" />
         <div className="flex-1 space-y-1.5">
@@ -441,15 +442,22 @@ function PostCard({
   post,
   isActive,
   index,
+  onSwipeLeft,
+  onSwipeRight,
+  onSwiping,
 }: {
   post: PostData;
   isActive: boolean;
   index: number;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  onSwiping?: (dx: number) => void;
 }) {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
+  const [ytPlaying, setYtPlaying] = useState(false);
 
   const contentSrc = enhancePlainImageUrls(stripHandledUrls(post.content || ""));
   const attachments = useMemo(() => parseAttachments(post.attachments), [post.attachments]);
@@ -507,6 +515,59 @@ function PostCard({
     setLikeCount((c) => (liked ? c - 1 : c + 1));
   };
 
+  /* ─── Swipe handlers ─── */
+  const cardRef = useRef<HTMLDivElement>(null);
+  const swipeState = useRef({ startX: 0, dx: 0, el: null as HTMLDivElement | null, active: false });
+
+  const handleSwipeDown = (e: React.PointerEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button,a,input,audio,video,[role='button'],textarea")) return;
+    const el = e.currentTarget as HTMLDivElement;
+    el.setPointerCapture(e.pointerId);
+    el.style.transition = "none";
+    el.style.willChange = "transform";
+    swipeState.current = { startX: e.clientX, dx: 0, el, active: true };
+  };
+
+  const handleSwipeMove = (e: React.PointerEvent) => {
+    const s = swipeState.current;
+    if (!s.active || !s.el) return;
+    s.dx = e.clientX - s.startX;
+    const rotate = s.dx * 0.03;
+    s.el.style.transform = `translateX(${s.dx}px) rotate(${Math.max(-8, Math.min(8, rotate))}deg)`;
+    onSwiping?.(s.dx);
+  };
+
+  const handleSwipeUp = (e: React.PointerEvent) => {
+    const s = swipeState.current;
+    if (!s.active || !s.el) { swipeState.current = { startX: 0, dx: 0, el: null, active: false }; return; }
+    s.active = false;
+    const dx = s.dx;
+    const el = s.el;
+    el.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+    if (dx > 80 && onSwipeRight) {
+      el.style.transform = "translateX(400px) rotate(8deg)";
+      el.style.opacity = "0";
+      setTimeout(() => { onSwipeRight?.(); onSwiping?.(0); }, 200);
+    } else if (dx < -80 && onSwipeLeft) {
+      el.style.transform = "translateX(-400px) rotate(-8deg)";
+      el.style.opacity = "0";
+      setTimeout(() => { onSwipeLeft?.(); onSwiping?.(0); }, 200);
+    } else {
+      el.style.transform = "translateX(0) rotate(0deg)";
+      el.style.opacity = "1";
+      onSwiping?.(0);
+    }
+    swipeState.current = { startX: 0, dx: 0, el: null, active: false };
+  };
+
+  const swipeHandlers = onSwipeLeft || onSwipeRight ? {
+    onPointerDown: handleSwipeDown,
+    onPointerMove: handleSwipeMove,
+    onPointerUp: handleSwipeUp,
+    onPointerCancel: handleSwipeUp,
+  } : {};
+
   return (
     <>
       {lightboxIdx !== null && (
@@ -517,24 +578,36 @@ function PostCard({
         />
       )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{
-          opacity: isActive ? 1 : 0.45,
-          y: 0,
-          scale: isActive ? 1 : 0.96,
+      <div
+        ref={cardRef}
+        className="w-full rounded-2xl border overflow-hidden flex flex-col relative bg-card shadow-lg shadow-black/5 dark:shadow-black/20"
+        {...swipeHandlers}
+        style={{
+          height: "380px",
+          touchAction: "pan-y",
+          cursor: "grab",
+          userSelect: "none",
+          WebkitUserSelect: "none",
         }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className={cn(
-          "snap-start shrink-0 w-[85vw] md:w-[45vw] lg:w-[32vw]",
-          "rounded-2xl border overflow-hidden flex flex-col",
-          "bg-card transition-shadow duration-300",
-          isActive
-            ? "border-border/60 shadow-lg shadow-black/5 dark:shadow-black/20"
-            : "border-border/20"
-        )}
-        style={{ height: "420px" }}
       >
+        {/* Logo watermark — structural part of the card */}
+        <div
+          className="absolute -bottom-24 bg-foreground/[0.06] dark:bg-foreground/[0.04] pointer-events-none select-none"
+            style={{
+              width: 360,
+              height: 360,
+              right: -120,
+            maskImage: "url(/medonex-logo.svg)",
+            maskSize: "contain",
+            maskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskImage: "url(/medonex-logo.svg)",
+            WebkitMaskSize: "contain",
+            WebkitMaskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+          }}
+        />
+
         {/* ── Header ── */}
         <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-border/10 shrink-0">
           {/* Avatar */}
@@ -584,41 +657,64 @@ function PostCard({
         </div>
 
         {/* ── Body ── */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2.5 scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2.5 scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent w-full" style={{ maxWidth: "100%" }}>
           {isActive ? (
             <>
               {/* Text */}
               {contentSrc && (
-                <div className="text-[13px] leading-[1.8] text-foreground/90 [&_img]:max-h-[80px] [&_img]:rounded-lg [&_img]:object-cover [&_img]:mt-1 [&_p]:mb-1.5 [&_p]:leading-relaxed [&_a]:text-indigo-500 [&_a]:font-medium [&_strong]:font-bold">
+                <div className="text-[13px] leading-[1.8] text-foreground/90 break-words overflow-x-hidden [&_img]:max-h-[80px] [&_img]:rounded-lg [&_img]:object-cover [&_img]:mt-1 [&_p]:mb-1.5 [&_p]:leading-relaxed [&_a]:text-indigo-500 [&_a]:font-medium [&_strong]:font-bold">
                   <ReactMarkdown components={markdownComponentsWithImages}>
                     {contentSrc}
                   </ReactMarkdown>
                 </div>
               )}
 
-              {/* YouTube */}
+              {/* YouTube — thumbnail + play overlay */}
               {inlineYouTubeId && (
-                <div className="shrink-0 rounded-xl overflow-hidden aspect-video bg-black/10 ring-1 ring-border/20">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${inlineYouTubeId}`}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    loading="lazy"
-                  />
-                </div>
+                ytPlaying ? (
+                  <div className="shrink-0 rounded-xl overflow-hidden border border-indigo-500/20 bg-gradient-to-br from-indigo-500/[0.04] to-violet-500/[0.04]">
+                    <div className="flex items-center gap-2 px-3 py-2 border-b border-indigo-500/10">
+                      <PlayIcon className="h-3 w-3 text-indigo-500" />
+                      <span className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.15em]">Playing</span>
+                    </div>
+                    <div className="aspect-video bg-black">
+                      <VidStackPlayer url={`https://www.youtube.com/watch?v=${inlineYouTubeId}`} />
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => setYtPlaying(true)}
+                    className="shrink-0 rounded-xl overflow-hidden aspect-video bg-muted/20 ring-1 ring-border/20 relative cursor-pointer group"
+                  >
+                    <img
+                      src={`https://img.youtube.com/vi/${inlineYouTubeId}/maxresdefault.jpg`}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="h-14 w-14 rounded-full bg-white/90 shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <PlayIcon className="h-6 w-6 text-black ml-0.5" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/50 backdrop-blur-sm text-[9px] font-bold text-white/80">
+                      Video
+                    </div>
+                  </div>
+                )
               )}
 
               {/* Telegram */}
               {inlineTelegramUrl && (
-                <div className="shrink-0 rounded-xl overflow-hidden aspect-video bg-black/10 ring-1 ring-border/20">
+                <div className="shrink-0 rounded-xl overflow-hidden aspect-video bg-muted/20 ring-1 ring-border/20">
                   <VidStackPlayer url={inlineTelegramUrl} />
                 </div>
               )}
 
               {/* Video attachment */}
               {mainVideoUrl && (
-                <div className="shrink-0 rounded-xl overflow-hidden aspect-video bg-black/10 ring-1 ring-border/20">
+                <div className="shrink-0 rounded-xl overflow-hidden aspect-video bg-muted/20 ring-1 ring-border/20">
                   <VidStackPlayer url={mainVideoUrl} />
                 </div>
               )}
@@ -734,7 +830,7 @@ function PostCard({
             </Link>
           </div>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }
@@ -747,7 +843,13 @@ export function CommunityPostsCarousel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [swipeDx, setSwipeDx] = useState(0);
+
+  const nextPost = activeIdx < posts.length - 1 ? posts[activeIdx + 1] : null;
+  const prevPost = activeIdx > 0 ? posts[activeIdx - 1] : null;
+
+  const nextProgress = nextPost ? Math.max(0, Math.min(1, -swipeDx / 200)) : 0;
+  const prevProgress = prevPost ? Math.max(0, Math.min(1, swipeDx / 200)) : 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -775,40 +877,19 @@ export function CommunityPostsCarousel() {
     };
   }, []);
 
-  const getCardWidth = useCallback(() => {
-    if (!scrollRef.current) return 0;
-    const firstChild = scrollRef.current.children[0] as HTMLElement | undefined;
-    return firstChild ? firstChild.offsetWidth + 16 : 0;
-  }, []);
-
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current) return;
-    const cardW = getCardWidth();
-    if (!cardW) return;
-    const newIdx = Math.min(
-      Math.max(Math.round(scrollRef.current.scrollLeft / cardW), 0),
-      posts.length - 1
-    );
-    setActiveIdx(newIdx);
-  }, [posts.length, getCardWidth]);
-
-  const scrollTo = useCallback(
-    (idx: number) => {
-      if (!scrollRef.current) return;
-      const cardW = getCardWidth();
-      scrollRef.current.scrollTo({ left: idx * cardW, behavior: "smooth" });
-      setActiveIdx(idx);
-    },
-    [getCardWidth]
-  );
-
   /* ── Loading ── */
   if (loading) {
     return (
-      <div className="flex gap-4 overflow-hidden">
-        {[0, 1, 2].map((i) => (
-          <SkeletonCard key={i} />
-        ))}
+      <div className="px-4 pt-2">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="h-4 w-4 rounded bg-muted/30 animate-pulse" />
+          <div className="h-3 w-16 rounded bg-muted/30 animate-pulse" />
+        </div>
+        <div className="relative" style={{ minHeight: 400 }}>
+          <div className="absolute inset-0 rounded-2xl border border-border/30 bg-card/40 overflow-hidden animate-pulse" style={{ zIndex: 2 }} />
+          <div className="absolute inset-[3px] rounded-2xl border border-border/20 bg-card/30 overflow-hidden animate-pulse" style={{ zIndex: 1, opacity: 0.4 }} />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
@@ -820,41 +901,112 @@ export function CommunityPostsCarousel() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: "easeOut" }}
-      className="px-4"
+      className="px-4 pt-2"
     >
-      {/* Minimal controls */}
-      <div className="flex items-center justify-end gap-1 mb-3">
-        <button
-          onClick={() => scrollTo(activeIdx - 1)}
-          disabled={activeIdx === 0}
-          className="h-7 w-7 rounded-lg bg-muted/30 border border-border/40 flex items-center justify-center active:scale-90 hover:bg-muted/50 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
-        >
-          <ArrowLeftIcon className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
-        <span className="text-[10px] font-bold text-muted-foreground/50 min-w-[28px] text-center tabular-nums">
-          {activeIdx + 1}/{posts.length}
+      {/* Social heading */}
+      <div className="flex items-center gap-2 mb-3">
+        <UserGroupIcon className="h-4 w-4 text-indigo-500" />
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+          Social
         </span>
-        <button
-          onClick={() => scrollTo(activeIdx + 1)}
-          disabled={activeIdx === posts.length - 1}
-          className="h-7 w-7 rounded-lg bg-muted/30 border border-border/40 flex items-center justify-center active:scale-90 hover:bg-muted/50 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
-        >
-          <ArrowRightIcon className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
       </div>
 
-      {/* Cards */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pb-1"
-      >
-        {posts.map((post, idx) => (
+      {/* Card stack */}
+      <div className="relative" style={{ minHeight: 400 }}>
+        {/* Preview card — previous (swipe right reveals previous) */}
+        {prevPost && (
+          <div
+            className="absolute inset-0 rounded-2xl border border-border/30 bg-card overflow-hidden pointer-events-none select-none"
+            style={{
+              zIndex: 1,
+              transform: `scale(${0.92 + prevProgress * 0.08}) translateY(${(1 - prevProgress) * 10}px)`,
+              opacity: 0.3 + prevProgress * 0.7,
+              willChange: "transform, opacity",
+              transition: swipeDx === 0
+                ? "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease"
+                : "none",
+            }}
+          >
+            <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-border/10">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                {getInitials(prevPost.author?.name || "?")}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] font-bold text-foreground/70 truncate">{prevPost.author?.name || "Unknown"}</p>
+                <p className="text-[9px] text-muted-foreground/40">{timeAgo(prevPost.createdAt)}</p>
+              </div>
+            </div>
+            <div className="p-4">
+              <p className="text-[12px] text-foreground/50 leading-relaxed line-clamp-4">
+                {stripHandledUrls(prevPost.content?.replace(/<[^>]*>/g, "") || "").slice(0, 120) || "No content"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Preview card — next (swipe left reveals next) */}
+        {nextPost && (
+          <div
+            className="absolute inset-0 rounded-2xl border border-border/30 bg-card overflow-hidden pointer-events-none select-none"
+            style={{
+              zIndex: 2,
+              transform: `scale(${0.92 + nextProgress * 0.08}) translateY(${(1 - nextProgress) * 10}px)`,
+              opacity: 0.3 + nextProgress * 0.7,
+              willChange: "transform, opacity",
+              transition: swipeDx === 0
+                ? "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease"
+                : "none",
+            }}
+          >
+            <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-border/10">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                {getInitials(nextPost.author?.name || "?")}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] font-bold text-foreground/70 truncate">{nextPost.author?.name || "Unknown"}</p>
+                <p className="text-[9px] text-muted-foreground/40">{timeAgo(nextPost.createdAt)}</p>
+              </div>
+            </div>
+            <div className="p-4">
+              <p className="text-[12px] text-foreground/50 leading-relaxed line-clamp-4">
+                {stripHandledUrls(nextPost.content?.replace(/<[^>]*>/g, "") || "").slice(0, 120) || "No content"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Current post card (swipeable) */}
+        <div style={{ position: "relative", zIndex: 10 }}>
           <PostCard
-            key={post.id}
-            post={post}
-            isActive={idx === activeIdx}
-            index={idx}
+            key={posts[activeIdx].id}
+            post={posts[activeIdx]}
+            isActive={true}
+            index={activeIdx}
+            onSwipeLeft={() => {
+              if (activeIdx < posts.length - 1) setActiveIdx((p) => Math.min(p + 1, posts.length - 1));
+            }}
+            onSwipeRight={() => {
+              if (activeIdx > 0) setActiveIdx((p) => Math.max(p - 1, 0));
+            }}
+            onSwiping={(dx) => setSwipeDx(dx)}
+          />
+        </div>
+      </div>
+
+      {/* Navigation dots */}
+      <div className="flex items-center justify-center gap-1.5 mt-3">
+        {posts.map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "rounded-full transition-all duration-300",
+              i === activeIdx ? "bg-indigo-500" : "bg-border/50"
+            )}
+            style={{
+              height: i === activeIdx ? 6 : 4,
+              width: i === activeIdx ? 6 : 4,
+              opacity: i === activeIdx ? 1 : 0.4,
+            }}
           />
         ))}
       </div>

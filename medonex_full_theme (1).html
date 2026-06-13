@@ -1,0 +1,275 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.root{padding:16px}
+.toggle-row{display:flex;gap:8px;margin-bottom:20px}
+.tgl{flex:1;padding:10px;border-radius:10px;border:.5px solid var(--color-border-tertiary);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;background:var(--color-background-primary);color:var(--color-text-primary)}
+.tgl.active{background:#7C6FF7;color:#fff;border-color:#7C6FF7}
+.section{margin-bottom:24px}
+.sec-label{font-size:10px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;padding-bottom:6px;border-bottom:.5px solid var(--color-border-tertiary)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.swatch{border-radius:10px;overflow:hidden;border:.5px solid var(--color-border-tertiary)}
+.block{height:48px}
+.info{padding:7px 9px;background:var(--color-background-primary)}
+.s-name{font-size:11px;font-weight:500;color:var(--color-text-primary)}
+.s-hex{font-size:10px;font-family:var(--font-mono);color:var(--color-text-secondary);margin-top:1px}
+.s-role{font-size:10px;color:var(--color-text-tertiary);margin-top:1px}
+.preview-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.phone{border-radius:18px;overflow:hidden;border:.5px solid var(--color-border-tertiary)}
+.ph-status{height:28px;display:flex;align-items:center;justify-content:center}
+.ph-nav{padding:9px 14px;display:flex;align-items:center;justify-content:space-between}
+.ph-body{padding:12px 14px}
+.ph-footer{padding:8px 14px;display:flex;justify-content:space-around;align-items:center}
+.ph-tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;font-weight:500}
+.ph-card{border-radius:10px;padding:10px;margin-top:10px}
+.tag{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7C6FF7}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:500}
+.vars{background:var(--color-background-secondary);border-radius:12px;padding:14px;font-family:var(--font-mono);font-size:11px;line-height:1.9;color:var(--color-text-primary);border:.5px solid var(--color-border-tertiary);white-space:pre;overflow-x:auto}
+.var-comment{color:var(--color-text-tertiary)}
+.var-key{color:#9B91FF}
+.var-val-l{color:#2E7D32}
+.var-val-d{color:#66BB6A}
+</style>
+
+<div class="root">
+
+<div class="toggle-row">
+  <button class="tgl active" id="btn-both" onclick="show('both')">المقارنة</button>
+  <button class="tgl" id="btn-light" onclick="show('light')">Light فقط</button>
+  <button class="tgl" id="btn-dark" onclick="show('dark')">Dark فقط</button>
+  <button class="tgl" id="btn-vars" onclick="show('vars')">CSS Variables</button>
+</div>
+
+<div id="view-both">
+<div class="preview-wrap">
+
+  <div class="phone">
+    <div class="ph-status" style="background:#F5F5FA"><span style="font-size:9px;color:#6B6B8A">9:41</span></div>
+    <div class="ph-nav" style="background:#FFFFFF;border-bottom:.5px solid #EBEBF0">
+      <span style="font-size:12px;font-weight:700;color:#1A1A2E">MedOneX</span>
+      <div style="display:flex;gap:8px">
+        <div style="width:16px;height:16px;border-radius:50%;background:#F0F0F5"></div>
+        <div style="width:16px;height:16px;border-radius:50%;background:#F0F0F5"></div>
+        <div style="width:16px;height:16px;border-radius:50%;background:#F0F0F5"></div>
+      </div>
+    </div>
+    <div class="ph-body" style="background:#F5F5FA">
+      <p class="tag">Good Morning</p>
+      <p style="font-size:18px;font-weight:700;color:#1A1A2E;margin:2px 0">Dr. Ahmed</p>
+      <p style="font-size:10px;color:#6B6B8A">0% mastery · Expert</p>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <span class="badge" style="background:#EEF0FF;color:#4B44C2">🔥 0d</span>
+        <span class="badge" style="background:#FFF4E0;color:#9A6000">🏆 809</span>
+      </div>
+      <div class="ph-card" style="background:#FFFFFF;border:.5px solid #EBEBF0">
+        <p style="font-size:9px;font-weight:600;color:#8E8EA0;letter-spacing:.06em;text-transform:uppercase">Spaced Repetition</p>
+        <p style="font-size:11px;color:#1A1A2E;margin-top:4px">What is the function of the thyroid?</p>
+        <div style="margin-top:8px;background:#7C6FF7;border-radius:7px;padding:6px;text-align:center">
+          <span style="font-size:10px;font-weight:600;color:#fff">Start Learning →</span>
+        </div>
+      </div>
+      <div class="ph-card" style="background:#FFFFFF;border:.5px solid #EBEBF0;margin-top:6px">
+        <p style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#7C6FF7">Community Buzz</p>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+          <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#7C6FF7,#5A4FD4);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700">A</div>
+          <div>
+            <p style="font-size:10px;font-weight:600;color:#1A1A2E">Ahmed Hassan</p>
+            <p style="font-size:9px;color:#8E8EA0">2 days ago</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ph-footer" style="background:#FFFFFF;border-top:.5px solid #EBEBF0">
+      <div class="ph-tab" style="color:#7C6FF7"><div style="width:18px;height:18px;background:#EEF0FF;border-radius:5px"></div>Home</div>
+      <div class="ph-tab" style="color:#8E8EA0"><div style="width:18px;height:18px;background:#F0F0F5;border-radius:5px"></div>Modules</div>
+      <div class="ph-tab" style="color:#8E8EA0"><div style="width:18px;height:18px;background:#F0F0F5;border-radius:5px"></div>Social</div>
+      <div class="ph-tab" style="color:#8E8EA0"><div style="width:18px;height:18px;background:#F0F0F5;border-radius:5px"></div>QBank</div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="ph-status" style="background:#0F0F13"><span style="font-size:9px;color:#5E5C7A">9:41</span></div>
+    <div class="ph-nav" style="background:#1A1A24;border-bottom:.5px solid #2C2C42">
+      <span style="font-size:12px;font-weight:700;color:#F0EFF8">MedOneX</span>
+      <div style="display:flex;gap:8px">
+        <div style="width:16px;height:16px;border-radius:50%;background:#2A2A3E"></div>
+        <div style="width:16px;height:16px;border-radius:50%;background:#2A2A3E"></div>
+        <div style="width:16px;height:16px;border-radius:50%;background:#2A2A3E"></div>
+      </div>
+    </div>
+    <div class="ph-body" style="background:#0F0F13">
+      <p class="tag">Good Morning</p>
+      <p style="font-size:18px;font-weight:700;color:#F0EFF8;margin:2px 0">Dr. Ahmed</p>
+      <p style="font-size:10px;color:#A8A6C0">0% mastery · Expert</p>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <span class="badge" style="background:#2E2660;color:#9B91FF">🔥 0d</span>
+        <span class="badge" style="background:#3A2800;color:#F5A623">🏆 809</span>
+      </div>
+      <div class="ph-card" style="background:#1A1A24;border:.5px solid #2C2C42">
+        <p style="font-size:9px;font-weight:600;color:#5E5C7A;letter-spacing:.06em;text-transform:uppercase">Spaced Repetition</p>
+        <p style="font-size:11px;color:#F0EFF8;margin-top:4px">What is the function of the thyroid?</p>
+        <div style="margin-top:8px;background:#7C6FF7;border-radius:7px;padding:6px;text-align:center">
+          <span style="font-size:10px;font-weight:600;color:#fff">Start Learning →</span>
+        </div>
+      </div>
+      <div class="ph-card" style="background:#1A1A24;border:.5px solid #2C2C42;margin-top:6px">
+        <p style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#9B91FF">Community Buzz</p>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+          <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#7C6FF7,#5A4FD4);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700">A</div>
+          <div>
+            <p style="font-size:10px;font-weight:600;color:#F0EFF8">Ahmed Hassan</p>
+            <p style="font-size:9px;color:#5E5C7A">2 days ago</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ph-footer" style="background:#181824;border-top:.5px solid #2C2C42">
+      <div class="ph-tab" style="color:#9B91FF"><div style="width:18px;height:18px;background:#2E2660;border-radius:5px"></div>Home</div>
+      <div class="ph-tab" style="color:#5E5C7A"><div style="width:18px;height:18px;background:#222232;border-radius:5px"></div>Modules</div>
+      <div class="ph-tab" style="color:#5E5C7A"><div style="width:18px;height:18px;background:#222232;border-radius:5px"></div>Social</div>
+      <div class="ph-tab" style="color:#5E5C7A"><div style="width:18px;height:18px;background:#222232;border-radius:5px"></div>QBank</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div id="view-light" style="display:none">
+<div class="section">
+  <div class="sec-label">Backgrounds</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#F5F5FA"></div><div class="info"><p class="s-name">Page BG</p><p class="s-hex">#F5F5FA</p><p class="s-role">خلفية الصفحة</p></div></div>
+    <div class="swatch"><div class="block" style="background:#FFFFFF;border-bottom:.5px solid #EBEBF0"></div><div class="info"><p class="s-name">Surface</p><p class="s-hex">#FFFFFF</p><p class="s-role">الكروت</p></div></div>
+    <div class="swatch"><div class="block" style="background:#F0F0F8"></div><div class="info"><p class="s-name">Surface Dim</p><p class="s-hex">#F0F0F8</p><p class="s-role">مدخلات / hover</p></div></div>
+    <div class="swatch"><div class="block" style="background:#EEF0FF"></div><div class="info"><p class="s-name">Primary Tint</p><p class="s-hex">#EEF0FF</p><p class="s-role">badges بنفسجي</p></div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="sec-label">Text</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#1A1A2E"></div><div class="info"><p class="s-name">Primary</p><p class="s-hex">#1A1A2E</p><p class="s-role">عناوين</p></div></div>
+    <div class="swatch"><div class="block" style="background:#4A4A6A"></div><div class="info"><p class="s-name">Secondary</p><p class="s-hex">#4A4A6A</p><p class="s-role">نصوص فرعية</p></div></div>
+    <div class="swatch"><div class="block" style="background:#8E8EA0"></div><div class="info"><p class="s-name">Muted</p><p class="s-hex">#8E8EA0</p><p class="s-role">placeholder</p></div></div>
+    <div class="swatch"><div class="block" style="background:#B8B8CC"></div><div class="info"><p class="s-name">Disabled</p><p class="s-hex">#B8B8CC</p><p class="s-role">غير مفعّل</p></div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="sec-label">Borders</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#EBEBF0"></div><div class="info"><p class="s-name">Default</p><p class="s-hex">#EBEBF0</p><p class="s-role">borders عامة</p></div></div>
+    <div class="swatch"><div class="block" style="background:#D8D8E8"></div><div class="info"><p class="s-name">Strong</p><p class="s-hex">#D8D8E8</p><p class="s-role">dividers</p></div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="sec-label">Accent Colors</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#7C6FF7"></div><div class="info"><p class="s-name">Primary</p><p class="s-hex">#7C6FF7</p><p class="s-role">أزرار رئيسية</p></div></div>
+    <div class="swatch"><div class="block" style="background:#5A4FD4"></div><div class="info"><p class="s-name">Primary Dark</p><p class="s-hex">#5A4FD4</p><p class="s-role">pressed state</p></div></div>
+    <div class="swatch"><div class="block" style="background:#F5A623"></div><div class="info"><p class="s-name">Gold</p><p class="s-hex">#F5A623</p><p class="s-role">streak / prestige</p></div></div>
+    <div class="swatch"><div class="block" style="background:#34C48B"></div><div class="info"><p class="s-name">Success</p><p class="s-hex">#34C48B</p><p class="s-role">صح / نجاح</p></div></div>
+    <div class="swatch"><div class="block" style="background:#FF6B6B"></div><div class="info"><p class="s-name">Danger</p><p class="s-hex">#FF6B6B</p><p class="s-role">خطأ / حذر</p></div></div>
+    <div class="swatch"><div class="block" style="background:#FFB23F"></div><div class="info"><p class="s-name">Warning</p><p class="s-hex">#FFB23F</p><p class="s-role">تنبيه</p></div></div>
+  </div>
+</div>
+</div>
+
+<div id="view-dark" style="display:none">
+<div class="section">
+  <div class="sec-label">Backgrounds</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#0F0F13"></div><div class="info"><p class="s-name">Page BG</p><p class="s-hex">#0F0F13</p><p class="s-role">خلفية الصفحة</p></div></div>
+    <div class="swatch"><div class="block" style="background:#1A1A24"></div><div class="info"><p class="s-name">Surface</p><p class="s-hex">#1A1A24</p><p class="s-role">الكروت</p></div></div>
+    <div class="swatch"><div class="block" style="background:#222232"></div><div class="info"><p class="s-name">Surface Raised</p><p class="s-hex">#222232</p><p class="s-role">كروت مرفوعة</p></div></div>
+    <div class="swatch"><div class="block" style="background:#2A2A3E"></div><div class="info"><p class="s-name">Surface High</p><p class="s-hex">#2A2A3E</p><p class="s-role">hover / active</p></div></div>
+    <div class="swatch"><div class="block" style="background:#181824"></div><div class="info"><p class="s-name">Nav Bar</p><p class="s-hex">#181824</p><p class="s-role">bottom tab bar</p></div></div>
+    <div class="swatch"><div class="block" style="background:#2E2660"></div><div class="info"><p class="s-name">Primary Tint</p><p class="s-hex">#2E2660</p><p class="s-role">badges بنفسجي</p></div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="sec-label">Text</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#F0EFF8"></div><div class="info"><p class="s-name">Primary</p><p class="s-hex">#F0EFF8</p><p class="s-role">عناوين</p></div></div>
+    <div class="swatch"><div class="block" style="background:#A8A6C0"></div><div class="info"><p class="s-name">Secondary</p><p class="s-hex">#A8A6C0</p><p class="s-role">نصوص فرعية</p></div></div>
+    <div class="swatch"><div class="block" style="background:#5E5C7A"></div><div class="info"><p class="s-name">Muted</p><p class="s-hex">#5E5C7A</p><p class="s-role">placeholder</p></div></div>
+    <div class="swatch"><div class="block" style="background:#3A3856"></div><div class="info"><p class="s-name">Disabled</p><p class="s-hex">#3A3856</p><p class="s-role">غير مفعّل</p></div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="sec-label">Borders</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#2C2C42"></div><div class="info"><p class="s-name">Default</p><p class="s-hex">#2C2C42</p><p class="s-role">borders عامة</p></div></div>
+    <div class="swatch"><div class="block" style="background:#3A3A58"></div><div class="info"><p class="s-name">Strong</p><p class="s-hex">#3A3A58</p><p class="s-role">dividers</p></div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="sec-label">Accent Colors</div>
+  <div class="grid">
+    <div class="swatch"><div class="block" style="background:#7C6FF7"></div><div class="info"><p class="s-name">Primary</p><p class="s-hex">#7C6FF7</p><p class="s-role">أزرار رئيسية</p></div></div>
+    <div class="swatch"><div class="block" style="background:#9B91FF"></div><div class="info"><p class="s-name">Primary Light</p><p class="s-hex">#9B91FF</p><p class="s-role">hover في الداكن</p></div></div>
+    <div class="swatch"><div class="block" style="background:#F5A623"></div><div class="info"><p class="s-name">Gold</p><p class="s-hex">#F5A623</p><p class="s-role">streak / prestige</p></div></div>
+    <div class="swatch"><div class="block" style="background:#2FCF92"></div><div class="info"><p class="s-name">Success</p><p class="s-hex">#2FCF92</p><p class="s-role">صح / نجاح</p></div></div>
+    <div class="swatch"><div class="block" style="background:#FF7B7B"></div><div class="info"><p class="s-name">Danger</p><p class="s-hex">#FF7B7B</p><p class="s-role">خطأ / حذر</p></div></div>
+    <div class="swatch"><div class="block" style="background:#FFB84D"></div><div class="info"><p class="s-name">Warning</p><p class="s-hex">#FFB84D</p><p class="s-role">تنبيه</p></div></div>
+  </div>
+</div>
+</div>
+
+<div id="view-vars" style="display:none">
+<div class="vars"><span class="var-comment">/* ── Light Mode ── */</span>
+<span class="var-comment">:root {</span>
+<span class="var-key">  --color-bg</span>:          <span class="var-val-l">#F5F5FA</span>;
+<span class="var-key">  --color-surface</span>:     <span class="var-val-l">#FFFFFF</span>;
+<span class="var-key">  --color-surface-dim</span>: <span class="var-val-l">#F0F0F8</span>;
+<span class="var-key">  --color-border</span>:      <span class="var-val-l">#EBEBF0</span>;
+<span class="var-key">  --color-border-str</span>:  <span class="var-val-l">#D8D8E8</span>;
+<span class="var-key">  --color-text-1</span>:      <span class="var-val-l">#1A1A2E</span>;
+<span class="var-key">  --color-text-2</span>:      <span class="var-val-l">#4A4A6A</span>;
+<span class="var-key">  --color-text-3</span>:      <span class="var-val-l">#8E8EA0</span>;
+<span class="var-key">  --color-text-dis</span>:    <span class="var-val-l">#B8B8CC</span>;
+<span class="var-key">  --color-primary</span>:     <span class="var-val-l">#7C6FF7</span>;
+<span class="var-key">  --color-primary-pr</span>:  <span class="var-val-l">#5A4FD4</span>;
+<span class="var-key">  --color-primary-bg</span>:  <span class="var-val-l">#EEF0FF</span>;
+<span class="var-key">  --color-primary-txt</span>: <span class="var-val-l">#4B44C2</span>;
+<span class="var-key">  --color-gold</span>:        <span class="var-val-l">#F5A623</span>;
+<span class="var-key">  --color-gold-bg</span>:     <span class="var-val-l">#FFF4E0</span>;
+<span class="var-key">  --color-success</span>:     <span class="var-val-l">#34C48B</span>;
+<span class="var-key">  --color-danger</span>:      <span class="var-val-l">#FF6B6B</span>;
+<span class="var-key">  --color-warning</span>:     <span class="var-val-l">#FFB23F</span>;
+<span class="var-key">  --color-navbar</span>:      <span class="var-val-l">#FFFFFF</span>;
+<span class="var-comment">}</span>
+
+<span class="var-comment">/* ── Dark Mode ── */</span>
+<span class="var-comment">.dark {</span>
+<span class="var-key">  --color-bg</span>:          <span class="var-val-d">#0F0F13</span>;
+<span class="var-key">  --color-surface</span>:     <span class="var-val-d">#1A1A24</span>;
+<span class="var-key">  --color-surface-dim</span>: <span class="var-val-d">#222232</span>;
+<span class="var-key">  --color-border</span>:      <span class="var-val-d">#2C2C42</span>;
+<span class="var-key">  --color-border-str</span>:  <span class="var-val-d">#3A3A58</span>;
+<span class="var-key">  --color-text-1</span>:      <span class="var-val-d">#F0EFF8</span>;
+<span class="var-key">  --color-text-2</span>:      <span class="var-val-d">#A8A6C0</span>;
+<span class="var-key">  --color-text-3</span>:      <span class="var-val-d">#5E5C7A</span>;
+<span class="var-key">  --color-text-dis</span>:    <span class="var-val-d">#3A3856</span>;
+<span class="var-key">  --color-primary</span>:     <span class="var-val-d">#7C6FF7</span>;
+<span class="var-key">  --color-primary-pr</span>:  <span class="var-val-d">#9B91FF</span>;
+<span class="var-key">  --color-primary-bg</span>:  <span class="var-val-d">#2E2660</span>;
+<span class="var-key">  --color-primary-txt</span>: <span class="var-val-d">#C4BEFF</span>;
+<span class="var-key">  --color-gold</span>:        <span class="var-val-d">#F5A623</span>;
+<span class="var-key">  --color-gold-bg</span>:     <span class="var-val-d">#3A2800</span>;
+<span class="var-key">  --color-success</span>:     <span class="var-val-d">#2FCF92</span>;
+<span class="var-key">  --color-danger</span>:      <span class="var-val-d">#FF7B7B</span>;
+<span class="var-key">  --color-warning</span>:     <span class="var-val-d">#FFB84D</span>;
+<span class="var-key">  --color-navbar</span>:      <span class="var-val-d">#181824</span>;
+<span class="var-comment">}</span></div>
+</div>
+
+</div>
+
+<script>
+function show(v){
+  ['both','light','dark','vars'].forEach(x=>{
+    document.getElementById('view-'+x).style.display = x===v?'block':'none';
+    document.getElementById('btn-'+x).classList.toggle('active', x===v);
+  });
+}
+</script>

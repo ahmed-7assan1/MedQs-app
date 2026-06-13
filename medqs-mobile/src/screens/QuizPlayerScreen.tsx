@@ -101,7 +101,15 @@ export function QuizPlayerScreen({ route, navigation }: any) {
       try {
         quiz.reset();
         const data = await mobileApi.getPastPaperQuestions(pastPaperId);
-        quiz.setQuestions(data.questions);
+        const transformed = (data.questions || []).map((q: any) => ({
+          id: q.id,
+          questionText: q.body || '',
+          options: parseChoicesText(q.choices),
+          correctAnswer: letterToIndex(q.answer),
+          explanation: q.explanation || q.aiExplanation || '',
+          image: q.imageUrl || undefined,
+        }));
+        quiz.setQuestions(transformed);
         quiz.setPastPaperId(pastPaperId);
         useQuizStore.setState({ timeRemaining: (data.pastPaper.timeLimitMin || 20) * 60 });
         setLoading(false);
@@ -121,7 +129,7 @@ export function QuizPlayerScreen({ route, navigation }: any) {
     try {
       const answersArray = Object.entries(quiz.answers).map(([qid, val]) => ({
         questionId: qid,
-        selectedOption: val
+        chosen: indexToLetter(val as number),
       }));
 
       const res = await mobileApi.submitQuiz({
@@ -151,6 +159,17 @@ export function QuizPlayerScreen({ route, navigation }: any) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  // ─── Helpers ────────────────────────────────────────────────────────────────
+  function parseChoicesText(choices: any): string[] {
+    if (!choices) return [];
+    if (Array.isArray(choices)) return choices.map((c: any) => (typeof c === 'string' ? c : c.text || ''));
+    if (typeof choices === 'object') return Object.values(choices).map((v: any) => String(v));
+    if (typeof choices === 'string') return choices.split(/[A-D]\)\s*/).filter(Boolean).map((s: string) => s.trim());
+    return [];
+  }
+  function letterToIndex(letter: string): number { return letter ? letter.toUpperCase().charCodeAt(0) - 65 : -1; }
+  function indexToLetter(index: number): string { return String.fromCharCode(65 + index); }
+
   if (loading) {
     return (
       <View style={tw`flex-1 bg-black justify-center items-center`}>
@@ -174,9 +193,9 @@ export function QuizPlayerScreen({ route, navigation }: any) {
 
   // ─── RESULT VIEW ────────────────────────────────────────────────────────────
   if (quiz.isCompleted && result) {
-    const score = result.score || 0;
-    const total = quiz.questions.length;
-    const percent = (score / total) * 100;
+    const correctCount = result.correct ?? 0;
+    const total = result.totalQuestions ?? quiz.questions.length;
+    const percent = result.score ?? (total > 0 ? (correctCount / total) * 100 : 0);
 
     return (
       <SafeAreaView style={tw`flex-1 bg-black`}>
@@ -198,14 +217,14 @@ export function QuizPlayerScreen({ route, navigation }: any) {
                  <View style={tw`w-2 h-2 rounded-full bg-green-500 mr-2`} />
                  <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>Correct</Text>
               </View>
-              <Text style={tw`text-white text-3xl font-black`}>{score}</Text>
+               <Text style={tw`text-white text-3xl font-black`}>{correctCount}</Text>
             </Animated.View>
             <Animated.View entering={FadeInUp.delay(600)} style={tw`flex-1 bg-[#0D1117] p-5 rounded-[32px] border border-[#1E2D4D]`}>
                <View style={tw`flex-row items-center mb-1`}>
                  <View style={tw`w-2 h-2 rounded-full bg-red-500 mr-2`} />
                  <Text style={tw`text-slate-500 text-[10px] font-black uppercase`}>Mistakes</Text>
               </View>
-              <Text style={tw`text-white text-3xl font-black`}>{total - score}</Text>
+              <Text style={tw`text-white text-3xl font-black`}>{total - correctCount}</Text>
             </Animated.View>
           </View>
 

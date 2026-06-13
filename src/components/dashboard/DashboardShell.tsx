@@ -12,6 +12,7 @@ import {
   StatCard, StatCardMini, QuickLinkCompact, AskDrQFeatured,
   AnimatedProgressBar, AnimatedRing, ActivityBar,
 } from "@/components/dashboard/RedesignedComponents";
+import { MobileDashboardHero } from "@/components/dashboard/MobileDashboardHero";
 import { SpacedRepetitionCards } from "@/components/dashboard/SpacedRepetitionCards";
 import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
 import { DailyQuote } from "@/components/dashboard/DailyQuote";
@@ -85,25 +86,14 @@ export function DashboardShell({
       <div className="md:hidden scroll-smooth">
         <div className="pb-4 space-y-4">
           {/* ── Hero ── */}
-          <div className="px-4 pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-[0.2em]">{greeting}</p>
-                <h1 className="text-2xl font-black tracking-tighter text-foreground mt-0.5">Dr. {firstName}</h1>
-                <p className="text-xs font-semibold text-muted-foreground mt-0.5">{overallPct}% mastery &middot; {rankLabel}</p>
-              </div>
-              <div className="flex gap-2">
-                <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full", currentStreak > 0 ? "bg-orange-100 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/25" : "bg-muted/30 border border-border")}>
-                  <FireIcon className={cn("h-3 w-3", currentStreak > 0 ? "text-orange-500" : "text-muted-foreground")} />
-                  <span className="text-xs font-black text-foreground">{currentStreak}d</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/25">
-                  <TrophyIcon className="h-3 w-3 text-amber-500" />
-                  <span className="text-xs font-black text-foreground">{(rankPoints || 0).toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <MobileDashboardHero
+            greeting={greeting}
+            firstName={firstName}
+            overallPct={overallPct}
+            currentStreak={currentStreak}
+            rankPoints={rankPoints}
+            totalQuestions={totalQuestions}
+          />
 
           {/* ── Spaced Repetition Cards ── */}
           <div className="px-4">
