@@ -216,7 +216,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
                 />
               </div>
             ) : (
-              <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-white">
+              <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-white dark:bg-[#1A1A24]">
                 <iframe 
                   src={attachments[viewIndex].url} 
                   className="w-full h-full border-none"

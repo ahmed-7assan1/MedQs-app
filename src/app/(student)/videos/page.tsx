@@ -354,7 +354,7 @@ function VideoCard({ video, href }: { video: VideoResult, href: string }) {
       
       <div className="px-2 space-y-3">
         <div className="flex items-start gap-3.5">
-          <div className="h-11 w-11 rounded-2xl overflow-hidden dark:border-white/10 border-slate-200 border shrink-0 bg-slate-100">
+          <div className="h-11 w-11 rounded-2xl overflow-hidden dark:border-white/10 border-slate-200 border shrink-0 bg-slate-100 dark:bg-white/5">
             <img 
               src={video.channelThumbnail || `https://ui-avatars.com/api/?name=${video.channelTitle}&background=6c5ff0&color=fff`} 
               className="h-full w-full object-cover" 
