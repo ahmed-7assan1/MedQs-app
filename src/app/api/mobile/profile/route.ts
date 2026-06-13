@@ -4,6 +4,8 @@ import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const ProfileUpdateSchema = z.object({
   name: z.string().min(2).max(80).optional(),
   nickname: z.string().max(30).regex(/^[a-zA-Z0-9._-]+$/).optional().nullable(),

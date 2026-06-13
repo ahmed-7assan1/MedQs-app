@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from "react";
 import { ReelsContainer } from "@/components/videos/ReelsContainer";
 import { useSearchParams } from "next/navigation";

@@ -13,8 +13,6 @@ import "vidstack/styles/ui/buffering.css";
 import "plyr/dist/plyr.css";
 
 import React, { useState, useRef, useCallback, useEffect, Component } from "react";
-// @ts-expect-error — plyr types are ambient declarations; runtime exports default
-import Plyr from "plyr";
 
 class VidStackErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -63,45 +61,52 @@ function PlyrYouTubePlayer({ videoId, title, playing, startTime }: {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    let cancelled = false;
+    (async () => {
+      const container = containerRef.current;
+      if (!container) return;
 
-    const video = document.createElement("video");
-    video.className = "plyr-react plyr";
-    container.appendChild(video);
+      const Plyr = (await import("plyr")).default;
 
-    // Create Heroicons sprite as blob URL
-    const blob = new Blob([createHeroiconSprite()], { type: "image/svg+xml" });
-    const iconUrl = URL.createObjectURL(blob);
+      if (cancelled) return;
 
-    const player = new Plyr(video, {
-      controls: ["play-large", "play", "progress", "mute", "volume", "fullscreen"],
-      autoplay: playing ?? false,
-      invertTime: false,
-      disableContextMenu: true,
-      clickToPlay: true,
-      iconUrl,
-      youtube: {
-        rel: 0,
-        iv_load_policy: 3,
-        modestbranding: 1,
-        customControls: true,
-        noCookie: true,
-        ...(startTime ? { start: Math.floor(startTime) } : {}),
-      },
-    });
+      const video = document.createElement("video");
+      video.className = "plyr-react plyr";
+      container.appendChild(video);
 
-    player.source = {
-      type: "video",
-      sources: [{ src: videoId, provider: "youtube" }],
-      title,
-    };
+      const blob = new Blob([createHeroiconSprite()], { type: "image/svg+xml" });
+      const iconUrl = URL.createObjectURL(blob);
 
-    plyrRef.current = player;
-    setReady(true);
+      const player = new Plyr(video, {
+        controls: ["play-large", "play", "progress", "mute", "volume", "fullscreen"],
+        autoplay: playing ?? false,
+        invertTime: false,
+        disableContextMenu: true,
+        clickToPlay: true,
+        iconUrl,
+        youtube: {
+          rel: 0,
+          iv_load_policy: 3,
+          modestbranding: 1,
+          customControls: true,
+          noCookie: true,
+          ...(startTime ? { start: Math.floor(startTime) } : {}),
+        },
+      });
+
+      player.source = {
+        type: "video",
+        sources: [{ src: videoId, provider: "youtube" }],
+        title,
+      };
+
+      plyrRef.current = player;
+      setReady(true);
+    })();
 
     return () => {
-      URL.revokeObjectURL(iconUrl);
+      cancelled = true;
+      URL.revokeObjectURL("");
       if (plyrRef.current) {
         try { plyrRef.current.destroy(); } catch {}
         plyrRef.current = null;

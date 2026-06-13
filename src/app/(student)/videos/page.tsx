@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useMemo, useRef } from "react";
 import { 
   Search, Play, Loader2, X, Clapperboard,
