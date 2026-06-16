@@ -29,7 +29,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
   };
 
   return (
-    <div className="flex items-center gap-2 border-t border-gray-200 px-4 py-3 bg-white">
+    <div className="flex items-center gap-2 border-t border-border px-4 py-3 bg-background">
       <input
         ref={inputRef}
         type="text"
@@ -38,7 +38,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         disabled={disabled}
-        className="flex-1 px-4 py-2 bg-gray-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all disabled:opacity-50"
+        className="flex-1 px-4 py-2 bg-muted rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/30 dark:focus:bg-card transition-all disabled:opacity-50"
       />
       <button
         onClick={handleSend}

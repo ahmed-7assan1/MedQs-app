@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🏔️ Theme 13 — Nordic Slate
+   رمادي/أزرق محايد ومهني جداً
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F8FAFC;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #F1F5F9;
+  --color-border:       #E2E8F0;
+  --color-border-str:   #CBD5E1;
+  --color-text-1:       #0F172A;
+  --color-text-2:       #334155;
+  --color-text-3:       #94A3B8;
+  --color-text-dis:     #CBD5E1;
+  --color-primary:      #64748B;
+  --color-primary-pr:   #475569;
+  --color-primary-bg:   #F1F5F9;
+  --color-primary-txt:  #334155;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #FFFBEB;
+  --color-success:      #22C55E;
+  --color-danger:       #EF4444;
+  --color-warning:      #F59E0B;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #060810;
+  --color-surface:      #0C1020;
+  --color-surface-dim:  #12182E;
+  --color-border:       #202840;
+  --color-border-str:   #2C3858;
+  --color-text-1:       #E8ECF8;
+  --color-text-2:       #7888AA;
+  --color-text-3:       #334060;
+  --color-text-dis:     #202840;
+  --color-primary:      #64748B;
+  --color-primary-pr:   #94A3B8;
+  --color-primary-bg:   #1A2030;
+  --color-primary-txt:  #CBD5E1;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #2D1F00;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #040610;
+}

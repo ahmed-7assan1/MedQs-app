@@ -1804,19 +1804,15 @@ const THEME_CSS = `
     --ox-text4: hsl(var(--muted));
     --ox-red: hsl(var(--destructive));
     --ox-green: hsl(var(--success));
-    --ox-text1: #0f0f0f;
-    --ox-text2: #1f1f1f;
-    --ox-text3: #555555;
-    --ox-text4: #888888;
     --ox-glass-bg: rgba(255,255,255,0.97);
     --ox-glass-border: rgba(0,0,0,0.08);
     --ox-glass-input: rgba(0,0,0,0.04);
   }
   .dark {
-    --ox-text1: #f0f0f0;
-    --ox-text2: #d0d0d0;
-    --ox-text3: #b0b0b0;
-    --ox-text4: #888888;
+    --ox-text1: hsl(var(--foreground));
+    --ox-text2: hsl(var(--muted-foreground));
+    --ox-text3: hsl(var(--muted-foreground));
+    --ox-text4: hsl(var(--muted));
     --ox-glass-bg: rgba(255,255,255,0.03);
     --ox-glass-border: rgba(255,255,255,0.08);
     --ox-glass-input: rgba(255,255,255,0.04);

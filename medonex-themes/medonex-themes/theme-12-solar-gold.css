@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   ☀️ Theme 12 — Solar Gold
+   ذهبي/أصفر دافئ وفريد
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #FFFDF0;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #FEFCE0;
+  --color-border:       #FEF08A;
+  --color-border-str:   #FDE047;
+  --color-text-1:       #1C1000;
+  --color-text-2:       #3D2800;
+  --color-text-3:       #9A7020;
+  --color-text-dis:     #C8A860;
+  --color-primary:      #CA8A04;
+  --color-primary-pr:   #A16207;
+  --color-primary-bg:   #FEFCE8;
+  --color-primary-txt:  #854D0E;
+  --color-gold:         #F97316;
+  --color-gold-bg:      #FFF7ED;
+  --color-success:      #16A34A;
+  --color-danger:       #DC2626;
+  --color-warning:      #EA580C;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #0A0800;
+  --color-surface:      #160F00;
+  --color-surface-dim:  #201600;
+  --color-border:       #382600;
+  --color-border-str:   #4A3200;
+  --color-text-1:       #FFFDE0;
+  --color-text-2:       #C8A030;
+  --color-text-3:       #6A5010;
+  --color-text-dis:     #382600;
+  --color-primary:      #CA8A04;
+  --color-primary-pr:   #FCD34D;
+  --color-primary-bg:   #2D1800;
+  --color-primary-txt:  #FDE68A;
+  --color-gold:         #F97316;
+  --color-gold-bg:      #2D0F00;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FB923C;
+  --color-navbar:       #070500;
+}

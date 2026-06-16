@@ -19,3 +19,45 @@
 ## السكيلز المتاحة (37)
 
 موجودة في `.opencode/skills/` — استخدم `skill` tool باسم المجلد.
+
+---
+
+## نظام الثيم (Light/Dark Mode) — القواعد
+
+### ألوان Tailwind المسموحة (استخدمها دايمًا بدل الـ hardcoded):
+
+| الاستخدام | الألوان |
+|-----------|---------|
+| خلفية الصفحة | `bg-background` |
+| خلفية الكارد | `bg-card` |
+| خلفية muted (inputs, secondary) | `bg-muted` |
+| النص الأساسي | `text-foreground` |
+| النص الثانوي | `text-muted-foreground` |
+| البوردر | `border-border` |
+| البوردر في الـ inputs | `border-input` |
+| لون الـ ring (focus) | `ring-ring` |
+| الألوان الأساسية | `bg-primary`, `text-primary-foreground` |
+| الألوان الثانوية | `bg-secondary`, `text-secondary-foreground` |
+| الألوان المائلة | `bg-accent`, `text-accent-foreground` |
+| ألوان التدمير | `bg-destructive`, `text-destructive-foreground` |
+| ألوان النجاح | `text-success`, `bg-success/10` |
+| ألوان التحذير | `text-warning`, `bg-warning/10` |
+
+### ممنوعات:
+- ❌ **`bg-white`**, **`bg-black`**, **`text-black`**, **`text-white`** بدون `dark:` variant
+- ❌ **inline styles** للألوان (ممنوع `style={{ color: "#..." }}`)
+- ❌ ألوان hex/hex مكتوبة مباشرة (زي `#f8f9ff`, `#e5e7eb`, إلخ)
+
+### الاستثناءات المسموحة:
+- أيقونات SVG بـ `stroke="currentColor"` / `fill="currentColor"` (تأخذ لون النص تلقائيًا)
+- Media overlays زي `bg-black/40` على الصور (يجب أن تظل سوداء)
+- `bg-white/10` ونظائرها كـ glass effects مع `dark:` variant
+- ألوان الـ gradient: `bg-gradient-to-r from-primary to-accent`
+- ألوان الـ badge/role زي `bg-yellow-100 text-yellow-700` بشرط وجود `dark:` مضاف
+- الـ landing page (`src/app/page.tsx`) له تصميمه المستقل
+
+### المتغيرات (CSS custom properties):
+معرفة في `src/styles/globals.css` — لا تعيد تعريفها. لو محتاج قيمة جديدة استخدم `hsl(var(--x))`.
+
+### تبديل الثيم:
+يتم عبر إضافة `data-theme="dark"` أو `.dark` class على `<html>` — ممنوع آليات تبديل متعددة.

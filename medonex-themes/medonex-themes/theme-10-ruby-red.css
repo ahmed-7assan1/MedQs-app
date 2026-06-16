@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   💎 Theme 10 — Ruby Red
+   أحمر كلاسيكي جريء وقوي
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #FDF2F4;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #FAE8EC;
+  --color-border:       #FECDD3;
+  --color-border-str:   #FDA4AF;
+  --color-text-1:       #1C0208;
+  --color-text-2:       #5C1428;
+  --color-text-3:       #B06070;
+  --color-text-dis:     #D4A0A8;
+  --color-primary:      #E11D48;
+  --color-primary-pr:   #BE123C;
+  --color-primary-bg:   #FFF1F2;
+  --color-primary-txt:  #9F1239;
+  --color-gold:         #D97706;
+  --color-gold-bg:      #FFFBEB;
+  --color-success:      #16A34A;
+  --color-danger:       #DC2626;
+  --color-warning:      #D97706;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #0D0005;
+  --color-surface:      #1A0008;
+  --color-surface-dim:  #250010;
+  --color-border:       #3D0015;
+  --color-border-str:   #550020;
+  --color-text-1:       #FFEEF1;
+  --color-text-2:       #CC7080;
+  --color-text-3:       #6A2030;
+  --color-text-dis:     #3D0015;
+  --color-primary:      #E11D48;
+  --color-primary-pr:   #FB7185;
+  --color-primary-bg:   #3B0A1A;
+  --color-primary-txt:  #FDA4AF;
+  --color-gold:         #D97706;
+  --color-gold-bg:      #2D1800;
+  --color-success:      #4ADE80;
+  --color-danger:       #FB7185;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #080003;
+}

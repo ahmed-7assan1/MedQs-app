@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useThemeStore, useNotificationStore } from "@/lib/store";
+import { useNotificationStore } from "@/lib/store";
 import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
 import { NotificationsSheet } from "@/components/layout/NotificationsSheet";
 import { SearchResultsPanel } from "@/components/layout/SearchResultsPanel";
 import { cn } from "@/lib/utils";
 import {
-  SunIcon, MoonIcon, MagnifyingGlassIcon, BellIcon,
+  MagnifyingGlassIcon, BellIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 
@@ -21,8 +22,8 @@ interface GlobalTopBarProps {
 }
 
 export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: GlobalTopBarProps) {
-  const { theme, setTheme } = useThemeStore();
-  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [navSheetOpen, setNavSheetOpen] = useState(false);
@@ -31,8 +32,6 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
   const [visible, setVisible] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastScrollY = useRef(0);
-
-  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const THRESHOLD = 8;
@@ -58,7 +57,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+
 
   return (
     <>
@@ -87,7 +86,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search courses, videos, people..."
-                  className="flex-1 bg-transparent text-sm font-medium text-gray-900 dark:text-white outline-none placeholder:text-gray-400 dark:placeholder:text-white/30"
+                  className="flex-1 bg-transparent text-sm font-medium text-gray-900 dark:text-white outline-none placeholder:text-gray-500 dark:placeholder:text-white/30"
                   onKeyDown={(e) => {
                     if (e.key === "Escape") {
                       setSearchOpen(false);
@@ -114,11 +113,17 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                 <div className="flex items-center gap-[1px]">
                   <button
                     onClick={() => setNavSheetOpen(true)}
-                    className="shrink-0 p-1.5 -ml-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-indigo-500 dark:text-white"
+                    className={cn(
+                      "shrink-0 p-1.5 -ml-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all",
+                      pathname?.includes("/modules") ? "text-gray-500 dark:text-white/60" : "text-primary dark:text-white"
+                    )}
                     aria-label="Open navigation menu"
                   >
                     <motion.span
-                      className="block h-7 w-7 bg-indigo-500 dark:bg-white"
+                      className={cn(
+                        "block h-7 w-7",
+                        pathname?.includes("/modules") ? "bg-gray-500 dark:bg-white/60" : "bg-primary dark:bg-white"
+                      )}
                       animate={{ rotate: navSheetOpen ? -90 : 0 }}
                       transition={{ duration: 0.25, ease: "easeInOut" }}
                       style={{
@@ -133,8 +138,11 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                       }}
                     />
                   </button>
-                  <span className="font-black text-sm tracking-tight text-indigo-500 dark:text-white -ml-1.5">
-                    MedOneX
+                  <span className={cn(
+                    "font-black text-sm tracking-tight -ml-1.5",
+                    pathname?.includes("/modules") ? "text-gray-500 dark:text-white/60" : "text-primary dark:text-white"
+                  )}>
+                    {pathname?.includes("/modules") ? "Modules" : "MedOneX"}
                   </span>
                 </div>
 
@@ -144,7 +152,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                       setSearchOpen(true);
                       setTimeout(() => inputRef.current?.focus(), 100);
                     }}
-                    className="shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-400 dark:text-white/40"
+                    className="shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-500 dark:text-white/60"
                     aria-label="Search"
                   >
                     <MagnifyingGlassIcon className="h-5 w-5" />
@@ -152,26 +160,17 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
 
                   <button
                     onClick={() => setNotifOpen(true)}
-                    className="relative shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-400 dark:text-white/40"
+                    className="relative shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-500 dark:text-white/60"
                     aria-label="Notifications"
                   >
                     <BellIcon className="h-5 w-5" />
                     {unread > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[14px] items-center justify-center rounded-full bg-indigo-500 px-1 text-[9px] font-bold leading-none text-white">
+                      <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[14px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold leading-none text-white">
                         {unread > 9 ? "9+" : unread}
                       </span>
                     )}
                   </button>
 
-                  {mounted && (
-                    <button
-                      onClick={toggleTheme}
-                      className="shrink-0 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all text-gray-400 dark:text-white/40"
-                      aria-label="Toggle theme"
-                    >
-                      {theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-                    </button>
-                  )}
                 </div>
               </motion.div>
             )}

@@ -63,7 +63,7 @@ function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
         className={cn(
           "h-6 w-6 transition-colors duration-200",
           active
-            ? "text-indigo-500 dark:text-indigo-400"
+            ? "text-primary dark:text-primary"
             : "text-gray-400 dark:text-white/40"
         )}
       />
@@ -71,7 +71,7 @@ function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
         className={cn(
           "text-[10px] font-semibold tracking-wide transition-colors duration-200",
           active
-            ? "text-indigo-500 dark:text-indigo-400"
+            ? "text-primary dark:text-primary"
             : "text-gray-400 dark:text-white/35"
         )}
       >

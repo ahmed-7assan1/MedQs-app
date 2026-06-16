@@ -223,16 +223,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
+                (function() {
                 function applyTheme(isDark) {
                   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
                   document.documentElement.classList.toggle('dark', isDark);
+                }
+                function applyVariant(v) {
+                  if (v) document.documentElement.setAttribute('data-theme-variant', v);
                 }
                 try {
                   var theme = localStorage.getItem('medqs-theme') || 'dark';
                   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   var isDark = theme === 'dark' || (theme === 'system' && prefersDark);
                   applyTheme(isDark);
+                  var variant = localStorage.getItem('medqs-theme-variant');
+                  if (variant) applyVariant(variant);
                   window.__MEDQS_CONFIG__ = ${JSON.stringify({ siteName: config.siteName, logoUrl: config.logoUrl })};
                 } catch (e) {
                   applyTheme(false);

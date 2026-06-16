@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🪄 Theme 11 — Emerald Night
+   أخضر زمردي عميق وأنيق
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F0FDF8;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #E0FBF2;
+  --color-border:       #A7F3D0;
+  --color-border-str:   #6EE7B7;
+  --color-text-1:       #022C20;
+  --color-text-2:       #065F46;
+  --color-text-3:       #6EAA90;
+  --color-text-dis:     #A8D4C4;
+  --color-primary:      #059669;
+  --color-primary-pr:   #047857;
+  --color-primary-bg:   #ECFDF5;
+  --color-primary-txt:  #065F46;
+  --color-gold:         #CA8A04;
+  --color-gold-bg:      #FEFCE8;
+  --color-success:      #059669;
+  --color-danger:       #F43F5E;
+  --color-warning:      #D97706;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #010D08;
+  --color-surface:      #041A10;
+  --color-surface-dim:  #072518;
+  --color-border:       #0D3C2A;
+  --color-border-str:   #125038;
+  --color-text-1:       #E0FFF5;
+  --color-text-2:       #4CC49A;
+  --color-text-3:       #1A6645;
+  --color-text-dis:     #0D3C2A;
+  --color-primary:      #059669;
+  --color-primary-pr:   #34D399;
+  --color-primary-bg:   #022C20;
+  --color-primary-txt:  #6EE7B7;
+  --color-gold:         #CA8A04;
+  --color-gold-bg:      #2A1A00;
+  --color-success:      #34D399;
+  --color-danger:       #FB7185;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #010805;
+}

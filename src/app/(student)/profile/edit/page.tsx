@@ -614,14 +614,14 @@ function EditProfileContent() {
                           </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                           <div className="rounded-2xl dark:bg-white/5 bg-white p-5 border dark:border-white/5 border-slate-100">
+                           <div className="rounded-2xl dark:bg-white/5 bg-card p-5 border dark:border-white/5 border-slate-100">
                               <p className="text-xs font-black dark:text-white/30 text-slate-400 uppercase mb-2">Sync Status</p>
                               <div className="flex items-center gap-2">
                                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                                  <span className="text-sm font-bold dark:text-white text-slate-800">Real-time Active</span>
                               </div>
                            </div>
-                           <div className="rounded-2xl dark:bg-white/5 bg-white p-5 border dark:border-white/5 border-slate-100">
+                           <div className="rounded-2xl dark:bg-white/5 bg-card p-5 border dark:border-white/5 border-slate-100">
                               <p className="text-xs font-black dark:text-white/30 text-slate-400 uppercase mb-2">Integration</p>
                               <span className="text-sm font-bold dark:text-white text-slate-800">AI Tutor Enabled</span>
                            </div>
@@ -758,7 +758,7 @@ function EditProfileContent() {
           {/* TAB: APPEARANCE */}
           {activeTab === "appearance" && (
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-               <section className="space-y-10 rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-white p-10 shadow-xl">
+               <section className="space-y-10 rounded-[2.5rem] border dark:border-white/5 border-slate-200 dark:bg-[#131220]/50 bg-card p-10 shadow-xl">
                   <div className="flex items-center gap-3 mb-2 text-center flex-col md:flex-row md:text-left">
                      <div className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-indigo-500/10 text-indigo-500">
                         <Palette className="h-7 w-7" />

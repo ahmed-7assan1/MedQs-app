@@ -178,7 +178,7 @@ export function PersistentAudioPlayer() {
                   {!isMinimized && (
                     <button 
                       onClick={() => setIsPlaying(!isPlaying)}
-                      className="h-10 w-10 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 transition-transform"
+                      className="h-10 w-10 flex items-center justify-center rounded-full bg-white dark:bg-card text-black dark:text-foreground hover:scale-105 transition-transform"
                     >
                       {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
                     </button>

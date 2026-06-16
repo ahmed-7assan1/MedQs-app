@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🌿 Theme 04 — Forest Green
+   أخضر طبيعي، مريح للعين في المذاكرة
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F2FAF4;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #E8F5EC;
+  --color-border:       #C4E8CC;
+  --color-border-str:   #A0D4AC;
+  --color-text-1:       #0C2214;
+  --color-text-2:       #2D5C38;
+  --color-text-3:       #72A87C;
+  --color-text-dis:     #B0D4B8;
+  --color-primary:      #22883A;
+  --color-primary-pr:   #1A6C2D;
+  --color-primary-bg:   #E8F7EC;
+  --color-primary-txt:  #145C26;
+  --color-gold:         #CA8A04;
+  --color-gold-bg:      #FEFCE8;
+  --color-success:      #16A34A;
+  --color-danger:       #EF4444;
+  --color-warning:      #D97706;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #060F08;
+  --color-surface:      #0C1A0E;
+  --color-surface-dim:  #112014;
+  --color-border:       #1A3820;
+  --color-border-str:   #254E2C;
+  --color-text-1:       #E8F5EC;
+  --color-text-2:       #88C494;
+  --color-text-3:       #3E7048;
+  --color-text-dis:     #1A3820;
+  --color-primary:      #22883A;
+  --color-primary-pr:   #35AA50;
+  --color-primary-bg:   #0A2E14;
+  --color-primary-txt:  #7EEAA0;
+  --color-gold:         #CA8A04;
+  --color-gold-bg:      #2D1F00;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #040A05;
+}

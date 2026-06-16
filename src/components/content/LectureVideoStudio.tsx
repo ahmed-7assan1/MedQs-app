@@ -487,7 +487,7 @@ export function LectureVideoStudio({
                  <input value={newVideoUrl} onChange={e => setNewVideoUrl(e.target.value)} placeholder="Source URL" className="w-full bg-[#07080f] border border-[#1a1b2e] rounded-xl px-4 py-3 text-[13px] text-white focus:ring-1 focus:ring-[#4f46e5] outline-none" />
                  <div className="flex gap-2 pt-2">
                    <button onClick={() => setShowAddVideo(false)} className="flex-1 py-3 rounded-xl bg-[#13142a] text-[11px] font-bold text-[#4a4b6a]">Discard</button>
-                   <button onClick={addVideo} disabled={addingVideo} className="flex-1 py-3 rounded-xl bg-white text-black text-[11px] font-black uppercase tracking-wider disabled:opacity-50">Publish</button>
+                   <button onClick={addVideo} disabled={addingVideo} className="flex-1 py-3 rounded-xl bg-white dark:bg-card text-black dark:text-foreground text-[11px] font-black uppercase tracking-wider disabled:opacity-50">Publish</button>
                  </div>
               </div>
             )}

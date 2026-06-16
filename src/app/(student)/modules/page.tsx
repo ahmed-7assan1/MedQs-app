@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { BookOpen, Lock, GraduationCap, Library, Layers, Award, Flame, ChevronRight } from "lucide-react";
+import { BookOpen, Lock, GraduationCap, Library, Layers } from "lucide-react";
 import ModulesGrid, { ModuleWithStats } from "@/components/modules/ModulesGrid";
 import { Prisma } from "@prisma/client";
 
@@ -68,6 +68,7 @@ export default async function ModulesPage() {
       role = dbUser.role || role;
     }
   }
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   // Fetch modules for the user's semester
   const modules = await prisma.module.findMany({
@@ -147,16 +148,6 @@ export default async function ModulesPage() {
   const totalModules = modules.length;
   const totalLectures = modulesWithStats.reduce((a: number, m) => a + m.lecturesCount, 0);
   const totalQuestions = modulesWithStats.reduce((a: number, m) => a + m.questionsCount, 0);
-  const avgMastery = modules.length > 0 ? Math.round(modulesWithStats.reduce((a, m) => a + m.percentage, 0) / modules.length) : 0;
-
-  const pointsPerLevel = 150;
-  const level = Math.floor(totalMastered / pointsPerLevel) + 1;
-  const currentProgress = totalMastered % pointsPerLevel;
-  const levelPct = Math.round((currentProgress / pointsPerLevel) * 100);
-
-  // SVG ring constants
-  const ringR = 14;
-  const ringCirc = 2 * Math.PI * ringR;
 
   return (
     <div className="min-h-screen pb-32 pt-0 relative overflow-hidden bg-background">
@@ -164,106 +155,8 @@ export default async function ModulesPage() {
       <div className="hidden md:block absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="hidden md:block absolute top-40 right-1/4 h-[400px] w-[400px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />
 
-      {/* ── MOBILE HERO ── */}
-      <div className="md:hidden relative cinematic-bg">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent h-[180px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none" />
-
-        <div className="relative container mx-auto px-4 pt-4 pb-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black uppercase tracking-[0.2em] text-primary mb-3">
-            <BookOpen className="h-3 w-3" />
-            Knowledge Repository
-          </div>
-
-          <h1 className="text-[30px] font-black tracking-tighter text-white leading-none mb-2">
-            Medical <span className="text-gradient-primary">Library</span>
-          </h1>
-
-          <p className="text-xs text-white/40 font-bold uppercase tracking-wider max-w-xl mb-4">
-            Master your curriculum through structured clinical modules.
-          </p>
-
-          {modules.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap mb-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-[9px] font-black text-white/50 uppercase tracking-wider">
-                <Library className="h-2.5 w-2.5 text-primary" />
-                {totalModules} Modules
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-[9px] font-black text-white/50 uppercase tracking-wider">
-                <GraduationCap className="h-2.5 w-2.5 text-violet-400" />
-                {totalLectures} Lectures
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-[9px] font-black text-white/50 uppercase tracking-wider">
-                <Layers className="h-2.5 w-2.5 text-amber-400" />
-                {totalQuestions} Qs
-              </div>
-            </div>
-          )}
-
-          {/* Module progress rings — quick-glance overview */}
-          {modulesWithStats.length > 0 && (
-            <div className="overflow-x-auto no-scrollbar -mx-4 px-4 py-1">
-              <div className="flex items-center gap-3">
-                {modulesWithStats.map((mod) => {
-                  const offset = ringCirc * (1 - mod.percentage / 100);
-                  const shortName = mod.name.length > 10 ? mod.name.slice(0, 10) + "…" : mod.name;
-                  return (
-                    <Link key={mod.id} href={isGuest ? "/login" : `/modules/${mod.id}`} className="flex flex-col items-center gap-1 shrink-0 group">
-                      <div className="relative h-10 w-10">
-                        <svg className="w-full h-full transform -rotate-90">
-                          <circle cx="20" cy="20" r={ringR} className="stroke-white/[0.06] fill-none" strokeWidth="3" />
-                          <circle cx="20" cy="20" r={ringR} className="stroke-primary fill-none transition-all duration-700 group-hover:brightness-125" strokeWidth="3"
-                            strokeDasharray={ringCirc}
-                            strokeDashoffset={offset}
-                            strokeLinecap="round" />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-[8px] font-black text-white">{mod.percentage}%</span>
-                        </div>
-                      </div>
-                      <span className="text-[7px] font-bold text-white/40 uppercase tracking-wider truncate max-w-[56px] text-center leading-tight group-hover:text-white/60 transition-colors">
-                        {shortName}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Compact mastery streak row */}
-          {!isGuest && modules.length > 0 && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
-                <div className="relative h-6 w-6">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle cx="12" cy="12" r="9" className="stroke-white/[0.06] fill-none" strokeWidth="2" />
-                    <circle cx="12" cy="12" r="9" className="stroke-primary fill-none" strokeWidth="2"
-                      strokeDasharray={`${2 * Math.PI * 9}`}
-                      strokeDashoffset={`${2 * Math.PI * 9 * (1 - avgMastery / 100)}`}
-                      strokeLinecap="round" />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[6px] font-black text-white">{avgMastery}</span>
-                  </div>
-                </div>
-                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Mastery</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
-                <Award className="h-3 w-3 text-violet-400" />
-                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Lv.{level}</span>
-                <div className="h-1 w-10 bg-white/[0.05] rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-400 rounded-full" style={{ width: `${levelPct}%` }} />
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
-                <Flame className="h-3 w-3 text-amber-500" />
-                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">{currentStreak}d</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Mobile spacer for top nav */}
+      <div className="md:hidden h-16" />
 
       {/* ── DESKTOP HERO ── */}
       <div className="hidden md:block relative w-full overflow-hidden">
@@ -278,26 +171,26 @@ export default async function ModulesPage() {
                 Knowledge Repository
               </div>
 
-              <h1 className="text-7xl font-black tracking-tighter text-white leading-none">
+              <h1 className="text-7xl font-black tracking-tighter dark:text-white text-foreground leading-none">
                 Medical <span className="text-primary">Library</span><span className="text-primary">.</span>
               </h1>
 
-              <p className="text-sm text-white/40 font-bold uppercase tracking-wider max-w-xl">
+              <p className="text-sm dark:text-white/40 text-muted-foreground font-bold uppercase tracking-wider max-w-xl">
                 Master your curriculum through structured clinical modules.
               </p>
             </div>
 
             {modules.length > 0 && (
               <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-xs font-black text-white/50 uppercase tracking-wider shadow-lg shadow-black/10">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full border dark:border-white/[0.06] border-border/30 dark:bg-white/[0.02] bg-card/40 backdrop-blur-xl text-xs font-black dark:text-white/50 text-muted-foreground uppercase tracking-wider shadow-lg shadow-black/10">
                   <Library className="h-3.5 w-3.5 text-primary" />
                   {totalModules} Modules
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-xs font-black text-white/50 uppercase tracking-wider shadow-lg shadow-black/10">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full border dark:border-white/[0.06] border-border/30 dark:bg-white/[0.02] bg-card/40 backdrop-blur-xl text-xs font-black dark:text-white/50 text-muted-foreground uppercase tracking-wider shadow-lg shadow-black/10">
                   <GraduationCap className="h-3.5 w-3.5 text-violet-400" />
                   {totalLectures} Lectures
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl text-xs font-black text-white/50 uppercase tracking-wider shadow-lg shadow-black/10">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full border dark:border-white/[0.06] border-border/30 dark:bg-white/[0.02] bg-card/40 backdrop-blur-xl text-xs font-black dark:text-white/50 text-muted-foreground uppercase tracking-wider shadow-lg shadow-black/10">
                   <Layers className="h-3.5 w-3.5 text-amber-400" />
                   {totalQuestions} Qs
                 </div>
@@ -315,8 +208,8 @@ export default async function ModulesPage() {
               <Lock className="h-5 w-5 md:h-6 md:w-6 text-amber-500" />
             </div>
             <div>
-              <p className="font-black text-white uppercase tracking-widest text-xs md:text-sm">Guest Access</p>
-              <p className="text-white/40 text-[10px] md:text-xs font-medium mt-1">
+              <p className="font-black dark:text-white text-foreground uppercase tracking-widest text-xs md:text-sm">Guest Access</p>
+              <p className="dark:text-white/40 text-muted-foreground text-[10px] md:text-xs font-medium mt-1">
                 Sign in to track your mastery levels and unlock personalized study plans.
                 <Link href="/login" className="ml-2 text-primary hover:underline font-bold">Login Now &rarr;</Link>
               </p>
@@ -325,12 +218,12 @@ export default async function ModulesPage() {
         )}
 
         {modules.length === 0 && !isGuest ? (
-          <div className="flex flex-col items-center justify-center rounded-[40px] border border-dashed border-white/10 bg-white/[0.01] py-16 md:py-32 text-center">
-            <div className="mb-6 md:mb-8 flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-[20px] md:rounded-[24px] bg-white/5">
-              <BookOpen className="h-8 w-8 md:h-10 md:w-10 text-white/20" />
+          <div className="flex flex-col items-center justify-center rounded-[40px] border border-dashed border-border/30 bg-card/20 py-16 md:py-32 text-center">
+            <div className="mb-6 md:mb-8 flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-[20px] md:rounded-[24px] bg-card/40">
+              <BookOpen className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground/40" />
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-widest">Library Empty</h2>
-            <p className="mt-2 text-white/40 font-medium max-w-sm mx-auto text-sm md:text-base">
+            <h2 className="text-xl md:text-2xl font-black text-foreground uppercase tracking-widest">Library Empty</h2>
+            <p className="mt-2 text-muted-foreground font-medium max-w-sm mx-auto text-sm md:text-base">
               {semesterId 
                 ? "Your academic curriculum is currently being updated. Check back soon for new modules." 
                 : "Please complete your profile by selecting your university and semester to view available modules."}
@@ -343,7 +236,7 @@ export default async function ModulesPage() {
             )}
           </div>
         ) : (
-          <ModulesGrid modules={modulesWithStats} totalMastered={totalMastered} isGuest={isGuest} currentStreak={currentStreak} />
+          <ModulesGrid modules={modulesWithStats} isGuest={isGuest} isAdmin={isAdmin} />
         )}
       </div>
     </div>

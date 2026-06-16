@@ -6,13 +6,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { 
   House, Books, Question, Sparkle, MagnifyingGlass, X,
-  Chats, Clock, Sun, Moon, Gear, UsersThree, Pen,
-  PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt, Robot
+  Chats, Clock, Gear, UsersThree, Pen,
+  PlayCircle, Microphone, CornersOut, CaretDown, PaperPlaneTilt, Robot, Palette
 } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
-import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
+import { ThemeVariantPicker } from "@/components/ui/ThemeVariantPicker";
 
 const NAV_ITEMS = [
   { href: "/dashboard-app", label: "Home", icon: House },
@@ -37,7 +37,7 @@ export function FloatingIslandNavbar({
   userId?: string 
 }) {
   const pathname = usePathname();
-  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social"))) return null;
+  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social") || pathname.startsWith("/modules"))) return null;
   const router = useRouter();
   const { siteName, logoUrl } = useSiteConfig();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -45,8 +45,6 @@ export function FloatingIslandNavbar({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const islandRef = useRef<HTMLDivElement>(null);
-  const { theme, setTheme } = useThemeStore();
-  const [mounted, setMounted] = useState(false);
   const lastScrollY = useRef(0);
 
   const handleScroll = useCallback(() => {
@@ -64,7 +62,6 @@ export function FloatingIslandNavbar({
   }, []);
 
   useEffect(() => {
-    setMounted(true);
     window.addEventListener("scroll", handleScroll, { passive: true });
     const handleClickOutside = (e: MouseEvent) => {
       if (islandRef.current && !islandRef.current.contains(e.target as Node)) {
@@ -77,8 +74,6 @@ export function FloatingIslandNavbar({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [handleScroll]);
-
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
   const handleSearchInput = async (val: string) => {
     setSearchQuery(val);
@@ -178,6 +173,14 @@ export function FloatingIslandNavbar({
               <div className="h-8 w-px dark:bg-white/10 bg-black/10 mx-1" />
 
               <button
+                onClick={() => setIsExpanded(true)}
+                className="hidden lg:flex h-10 w-10 items-center justify-center rounded-xl dark:bg-white/5 bg-black/5 hover:bg-primary/10 hover:text-primary transition-all dark:text-white/40 text-black/40"
+                title="Theme"
+              >
+                <Palette className="h-4 w-4" />
+              </button>
+
+              <button
                 onClick={() => {
                   if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
                   else document.exitFullscreen().catch(() => {});
@@ -241,11 +244,6 @@ export function FloatingIslandNavbar({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {mounted && (
-                    <button onClick={toggleTheme} className="rounded-full dark:bg-white/5 bg-black/5 p-3.5 dark:text-white/40 text-black/40 hover:scale-110 transition-all" title={theme === "dark" ? "Light Mode" : "Dark Mode"}>
-                      {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                    </button>
-                  )}
                   <button onClick={() => setIsExpanded(false)} className="rounded-full dark:bg-white/5 bg-black/5 p-3.5 dark:text-white/40 text-black/40 hover:scale-110 transition-all" title="Close">
                     <X className="h-5 w-5" />
                   </button>
@@ -300,6 +298,12 @@ export function FloatingIslandNavbar({
                     <PaperPlaneTilt className="h-4 w-4 text-sky-500" /> Telegram
                   </button>
                 </a>
+              </div>
+
+              {/* Theme Picker */}
+              <div>
+                <p className="text-[10px] font-black dark:text-white/20 text-black/20 uppercase tracking-[0.2em] mb-3">Theme</p>
+                <ThemeVariantPicker onSelect={() => setIsExpanded(false)} />
               </div>
             </motion.div>
           )}

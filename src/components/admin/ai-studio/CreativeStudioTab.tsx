@@ -461,7 +461,7 @@ export function CreativeStudioTab() {
                             style={{ transitionDuration: "20000ms", filter: 'contrast(1.1) brightness(1.05) saturate(1.1) sharp(1px)' }}
                           />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                            <button onClick={() => downloadImage(img)} className="p-3 rounded-full bg-white text-black hover:scale-110 transition-transform shadow-xl">
+                            <button onClick={() => downloadImage(img)} className="p-3 rounded-full bg-card text-foreground hover:scale-110 transition-transform shadow-xl">
                               <Download className="h-5 w-5" />
                             </button>
                             <button onClick={() => window.open(img.url, "_blank")} className="p-3 rounded-full bg-violet-600 text-white hover:scale-110 transition-transform shadow-xl">

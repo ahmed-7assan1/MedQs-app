@@ -160,7 +160,7 @@ export function MedicalLibraryTab() {
                 className="w-full"
               >
                 {Object.entries(FACULTY_CATEGORY_LABELS).map(([val, labels]) => (
-                  <option key={val} value={val} className="text-black">
+                  <option key={val} value={val} className="text-foreground">
                     {labels.ar} ({labels.en})
                   </option>
                 ))}

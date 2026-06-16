@@ -297,7 +297,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
               </div>
             ) : (
               <div className="w-11 h-6 rounded-full bg-slate-200 dark:bg-slate-800 p-0.5 flex justify-start items-center cursor-pointer transition-all duration-300">
-                <div className="w-5 h-5 rounded-full bg-white shadow-md border border-slate-200" />
+                <div className="w-5 h-5 rounded-full bg-white shadow-md border border-border" />
               </div>
             )}
           </button>

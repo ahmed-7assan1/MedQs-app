@@ -1,0 +1,52 @@
+/* ══════════════════════════════════════════
+   ☕ Theme 15 — Espresso
+   مستوحى من طبقات القهوة المحمصة
+══════════════════════════════════════════ */
+
+/* ── Light Roast ── */
+:root {
+  --color-bg:           #FDF6EE;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #F7EDE0;
+  --color-surface-high: #F0E0CC;
+  --color-border:       #EDD8C0;
+  --color-border-str:   #D4B898;
+  --color-text-1:       #1A0A00;
+  --color-text-2:       #4A2510;
+  --color-text-3:       #9A6848;
+  --color-text-dis:     #C8A888;
+  --color-primary:      #A0522D;
+  --color-primary-pr:   #7A3A1A;
+  --color-primary-bg:   #FDF0E8;
+  --color-primary-txt:  #6B2F10;
+  --color-gold:         #C07020;
+  --color-gold-bg:      #FFF8EC;
+  --color-success:      #3D8B37;
+  --color-danger:       #C0392B;
+  --color-warning:      #C07020;
+  --color-navbar:       #FFFAF5;
+}
+
+/* ── Dark Roast ── */
+.dark {
+  --color-bg:           #0D0600;
+  --color-surface:      #1A0C04;
+  --color-surface-dim:  #251508;
+  --color-surface-high: #301C0A;
+  --color-border:       #3D2010;
+  --color-border-str:   #522A14;
+  --color-text-1:       #FFF0E0;
+  --color-text-2:       #C8A070;
+  --color-text-3:       #6A3A20;
+  --color-text-dis:     #3D2010;
+  --color-primary:      #A0522D;
+  --color-primary-pr:   #C8784A;
+  --color-primary-bg:   #2D1005;
+  --color-primary-txt:  #E8A878;
+  --color-gold:         #C07020;
+  --color-gold-bg:      #2A1800;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #0A0400;
+}

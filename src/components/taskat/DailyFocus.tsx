@@ -204,7 +204,7 @@ export function DailyFocus({
                 className={cn(
                   "rounded-xl px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-all",
                   taskType === "general" 
-                    ? "bg-white text-black shadow-xl" 
+                    ? "bg-card text-foreground shadow-xl" 
                     : "bg-white/5 text-white/40 hover:bg-white/10"
                 )}
               >
@@ -215,7 +215,7 @@ export function DailyFocus({
                 className={cn(
                   "rounded-xl px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-all",
                   taskType === "lecture" 
-                    ? "bg-white text-black shadow-xl" 
+                    ? "bg-card text-foreground shadow-xl" 
                     : "bg-white/5 text-white/40 hover:bg-white/10"
                 )}
               >

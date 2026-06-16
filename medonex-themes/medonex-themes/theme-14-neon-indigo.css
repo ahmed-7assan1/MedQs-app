@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🔮 Theme 14 — Neon Indigo
+   نيلي مضيء، حديث وتقني
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F5F5FF;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #EDEDFF;
+  --color-border:       #E0E7FF;
+  --color-border-str:   #C7D2FE;
+  --color-text-1:       #0F0E2A;
+  --color-text-2:       #3730A3;
+  --color-text-3:       #8B8EC8;
+  --color-text-dis:     #C4C6E4;
+  --color-primary:      #6366F1;
+  --color-primary-pr:   #4F46E5;
+  --color-primary-bg:   #EEF2FF;
+  --color-primary-txt:  #3730A3;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #FFFBEB;
+  --color-success:      #22C55E;
+  --color-danger:       #EF4444;
+  --color-warning:      #F59E0B;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #06060F;
+  --color-surface:      #0E0E20;
+  --color-surface-dim:  #14142E;
+  --color-border:       #22224A;
+  --color-border-str:   #2E2E62;
+  --color-text-1:       #EEEEFF;
+  --color-text-2:       #8080C8;
+  --color-text-3:       #36367A;
+  --color-text-dis:     #22224A;
+  --color-primary:      #6366F1;
+  --color-primary-pr:   #818CF8;
+  --color-primary-bg:   #1E1B4B;
+  --color-primary-txt:  #A5B4FC;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #2D1F00;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #04040C;
+}

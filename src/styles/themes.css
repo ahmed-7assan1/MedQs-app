@@ -1,0 +1,1142 @@
+/* ══════════════════════════════════════════════════════════
+   🎨 MedOneX — 16 Theme Variants
+   Auto-generated from medonex-themes/
+   Each theme overrides CSS variables under [data-theme-variant]
+══════════════════════════════════════════════════════════ */
+
+/* ── MedOneX Purple ── */
+[data-theme-variant="medonex-purple"] {
+  --background: 240 33% 97%;
+  --card: 0 0% 100%;
+  --muted: 240 36% 96%;
+  --border: 240 14% 93%;
+  --border-str: 240 26% 88%;
+  --foreground: 240 28% 14%;
+  --secondary-foreground: 240 18% 35%;
+  --muted-foreground: 240 9% 59%;
+  --text-dis: 240 16% 76%;
+  --primary: 246 89% 70%;
+  --primary-pr: 245 61% 57%;
+  --primary-bg: 233 100% 97%;
+  --primary-foreground: 243 51% 51%;
+  --gold: 37 91% 55%;
+  --gold-bg: 39 100% 94%;
+  --success: 156 58% 49%;
+  --destructive: 0 100% 71%;
+  --warning: 36 100% 62%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="medonex-purple"] {
+  --background: 240 12% 7%;
+  --card: 240 16% 12%;
+  --muted: 240 19% 16%;
+  --border: 240 20% 22%;
+  --border-str: 240 21% 29%;
+  --foreground: 247 39% 95%;
+  --secondary-foreground: 245 17% 70%;
+  --muted-foreground: 244 14% 42%;
+  --text-dis: 244 21% 28%;
+  --primary: 246 89% 70%;
+  --primary-pr: 245 100% 78%;
+  --primary-bg: 248 43% 26%;
+  --primary-foreground: 246 100% 87%;
+  --gold: 37 91% 55%;
+  --gold-bg: 41 100% 11%;
+  --success: 157 63% 50%;
+  --destructive: 0 100% 74%;
+  --warning: 36 100% 65%;
+  --navbar: 240 20% 12%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Ocean Teal ── */
+[data-theme-variant="ocean-teal"] {
+  --background: 180 50% 96%;
+  --card: 0 0% 100%;
+  --muted: 180 44% 94%;
+  --border: 177 49% 85%;
+  --border-str: 178 43% 76%;
+  --foreground: 178 54% 11%;
+  --secondary-foreground: 179 35% 28%;
+  --muted-foreground: 178 24% 58%;
+  --text-dis: 178 27% 77%;
+  --primary: 178 84% 35%;
+  --primary-pr: 178 84% 29%;
+  --primary-bg: 177 59% 92%;
+  --primary-foreground: 178 83% 24%;
+  --gold: 38 92% 50%;
+  --gold-bg: 46 100% 94%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="ocean-teal"] {
+  --background: 180 48% 5%;
+  --card: 180 41% 9%;
+  --muted: 180 38% 11%;
+  --border: 180 35% 18%;
+  --border-str: 180 31% 24%;
+  --foreground: 180 44% 94%;
+  --secondary-foreground: 179 29% 65%;
+  --muted-foreground: 179 26% 39%;
+  --text-dis: 180 31% 24%;
+  --primary: 178 84% 35%;
+  --primary-pr: 178 56% 52%;
+  --primary-bg: 179 68% 12%;
+  --primary-foreground: 178 77% 64%;
+  --gold: 38 92% 50%;
+  --gold-bg: 41 100% 11%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 180 25% 5%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Rose Gold ── */
+[data-theme-variant="rose-gold"] {
+  --background: 343 64% 98%;
+  --card: 0 0% 100%;
+  --muted: 342 50% 96%;
+  --border: 345 44% 89%;
+  --border-str: 345 39% 80%;
+  --foreground: 343 50% 11%;
+  --secondary-foreground: 341 35% 31%;
+  --muted-foreground: 340 23% 60%;
+  --text-dis: 342 30% 76%;
+  --primary: 344 73% 66%;
+  --primary-pr: 344 53% 55%;
+  --primary-bg: 344 100% 97%;
+  --primary-foreground: 344 58% 38%;
+  --gold: 32 95% 44%;
+  --gold-bg: 46 100% 94%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="rose-gold"] {
+  --background: 338 100% 4%;
+  --card: 338 58% 7%;
+  --muted: 338 45% 11%;
+  --border: 342 47% 15%;
+  --border-str: 339 42% 22%;
+  --foreground: 343 70% 96%;
+  --secondary-foreground: 342 38% 73%;
+  --muted-foreground: 343 26% 42%;
+  --text-dis: 339 42% 22%;
+  --primary: 344 73% 66%;
+  --primary-pr: 344 76% 75%;
+  --primary-bg: 342 59% 14%;
+  --primary-foreground: 345 100% 85%;
+  --gold: 32 95% 44%;
+  --gold-bg: 33 100% 11%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 337 100% 3%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Forest Green ── */
+[data-theme-variant="forest-green"] {
+  --background: 135 44% 96%;
+  --card: 0 0% 100%;
+  --muted: 138 39% 94%;
+  --border: 133 44% 84%;
+  --border-str: 134 38% 73%;
+  --foreground: 142 48% 9%;
+  --secondary-foreground: 134 34% 27%;
+  --muted-foreground: 131 24% 55%;
+  --text-dis: 133 30% 76%;
+  --primary: 134 60% 33%;
+  --primary-pr: 134 61% 26%;
+  --primary-bg: 136 48% 94%;
+  --primary-foreground: 135 64% 22%;
+  --gold: 41 96% 40%;
+  --gold-bg: 55 92% 95%;
+  --success: 142 76% 36%;
+  --destructive: 0 84% 60%;
+  --warning: 32 95% 44%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="forest-green"] {
+  --background: 133 43% 4%;
+  --card: 129 37% 7%;
+  --muted: 132 31% 10%;
+  --border: 132 37% 16%;
+  --border-str: 130 36% 23%;
+  --foreground: 138 39% 94%;
+  --secondary-foreground: 132 34% 65%;
+  --muted-foreground: 132 29% 34%;
+  --text-dis: 132 37% 16%;
+  --primary: 134 60% 33%;
+  --primary-pr: 134 52% 44%;
+  --primary-bg: 137 64% 11%;
+  --primary-foreground: 139 72% 71%;
+  --gold: 41 96% 40%;
+  --gold-bg: 41 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 130 43% 3%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Midnight Blue ── */
+[data-theme-variant="midnight-blue"] {
+  --background: 224 100% 98%;
+  --card: 0 0% 100%;
+  --muted: 225 100% 96%;
+  --border: 214 95% 93%;
+  --border-str: 213 97% 87%;
+  --foreground: 222 47% 11%;
+  --secondary-foreground: 215 25% 27%;
+  --muted-foreground: 215 20% 65%;
+  --text-dis: 213 27% 84%;
+  --primary: 217 91% 60%;
+  --primary-pr: 221 83% 53%;
+  --primary-bg: 214 100% 97%;
+  --primary-foreground: 224 76% 48%;
+  --gold: 38 92% 50%;
+  --gold-bg: 48 100% 96%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="midnight-blue"] {
+  --background: 227 60% 6%;
+  --card: 223 49% 10%;
+  --muted: 223 51% 15%;
+  --border: 220 48% 23%;
+  --border-str: 219 45% 30%;
+  --foreground: 224 100% 95%;
+  --secondary-foreground: 225 40% 67%;
+  --muted-foreground: 223 38% 36%;
+  --text-dis: 220 48% 23%;
+  --primary: 217 91% 60%;
+  --primary-pr: 213 94% 68%;
+  --primary-bg: 224 66% 17%;
+  --primary-foreground: 212 96% 78%;
+  --gold: 38 92% 50%;
+  --gold-bg: 41 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 220 60% 4%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Amber Noir ── */
+[data-theme-variant="amber-noir"] {
+  --background: 34 64% 98%;
+  --card: 0 0% 100%;
+  --muted: 30 92% 95%;
+  --border: 29 97% 88%;
+  --border-str: 28 96% 80%;
+  --foreground: 21 100% 5%;
+  --secondary-foreground: 17 64% 18%;
+  --muted-foreground: 20 43% 44%;
+  --text-dis: 23 49% 67%;
+  --primary: 25 95% 53%;
+  --primary-pr: 26 92% 48%;
+  --primary-bg: 33 100% 96%;
+  --primary-foreground: 15 79% 34%;
+  --gold: 45 93% 47%;
+  --gold-bg: 46 100% 94%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 45 93% 47%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="amber-noir"] {
+  --background: 30 100% 2%;
+  --card: 30 100% 5%;
+  --muted: 32 100% 7%;
+  --border: 31 100% 11%;
+  --border-str: 30 100% 16%;
+  --foreground: 32 94% 94%;
+  --secondary-foreground: 26 47% 53%;
+  --muted-foreground: 25 63% 25%;
+  --text-dis: 31 100% 11%;
+  --primary: 25 95% 53%;
+  --primary-pr: 27 96% 61%;
+  --primary-bg: 21 100% 11%;
+  --primary-foreground: 31 97% 72%;
+  --gold: 45 93% 47%;
+  --gold-bg: 20 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 30 100% 2%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Cyber Purple ── */
+[data-theme-variant="cyber-purple"] {
+  --background: 262 100% 98%;
+  --card: 0 0% 100%;
+  --muted: 258 100% 97%;
+  --border: 251 91% 95%;
+  --border-str: 251 95% 92%;
+  --foreground: 267 82% 11%;
+  --secondary-foreground: 269 63% 29%;
+  --muted-foreground: 268 35% 62%;
+  --text-dis: 270 34% 77%;
+  --primary: 271 91% 65%;
+  --primary-pr: 271 81% 56%;
+  --primary-bg: 270 100% 98%;
+  --primary-foreground: 272 72% 47%;
+  --gold: 38 92% 50%;
+  --gold-bg: 48 100% 96%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="cyber-purple"] {
+  --background: 263 76% 3%;
+  --card: 264 73% 7%;
+  --muted: 265 70% 11%;
+  --border: 268 67% 19%;
+  --border-str: 268 63% 25%;
+  --foreground: 265 100% 97%;
+  --secondary-foreground: 267 48% 71%;
+  --muted-foreground: 266 42% 38%;
+  --text-dis: 268 67% 19%;
+  --primary: 271 91% 65%;
+  --primary-pr: 270 95% 75%;
+  --primary-bg: 264 71% 21%;
+  --primary-foreground: 269 97% 85%;
+  --gold: 38 92% 50%;
+  --gold-bg: 41 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 266 78% 2%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Arctic Gray ── */
+[data-theme-variant="arctic-gray"] {
+  --background: 210 40% 98%;
+  --card: 0 0% 100%;
+  --muted: 210 40% 96%;
+  --border: 214 32% 91%;
+  --border-str: 213 27% 84%;
+  --foreground: 222 47% 11%;
+  --secondary-foreground: 215 19% 35%;
+  --muted-foreground: 215 20% 65%;
+  --text-dis: 213 27% 84%;
+  --primary: 199 89% 48%;
+  --primary-pr: 200 98% 39%;
+  --primary-bg: 204 100% 97%;
+  --primary-foreground: 201 90% 27%;
+  --gold: 38 92% 50%;
+  --gold-bg: 48 100% 96%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="arctic-gray"] {
+  --background: 213 39% 5%;
+  --card: 215 36% 9%;
+  --muted: 217 37% 14%;
+  --border: 213 38% 19%;
+  --border-str: 214 35% 25%;
+  --foreground: 209 100% 95%;
+  --secondary-foreground: 208 43% 65%;
+  --muted-foreground: 211 35% 35%;
+  --text-dis: 213 38% 19%;
+  --primary: 199 89% 48%;
+  --primary-pr: 198 93% 60%;
+  --primary-bg: 200 71% 13%;
+  --primary-foreground: 199 95% 74%;
+  --gold: 38 92% 50%;
+  --gold-bg: 41 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 220 60% 4%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Sakura Mint ── */
+[data-theme-variant="sakura-mint"] {
+  --background: 173 67% 98%;
+  --card: 0 0% 100%;
+  --muted: 171 58% 95%;
+  --border: 173 52% 87%;
+  --border-str: 172 48% 77%;
+  --foreground: 173 85% 8%;
+  --secondary-foreground: 173 51% 24%;
+  --muted-foreground: 173 29% 55%;
+  --text-dis: 175 34% 75%;
+  --primary: 175 94% 37%;
+  --primary-pr: 192 91% 36%;
+  --primary-bg: 171 76% 97%;
+  --primary-foreground: 174 78% 25%;
+  --gold: 38 92% 50%;
+  --gold-bg: 48 100% 96%;
+  --success: 142 71% 45%;
+  --destructive: 350 89% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="sakura-mint"] {
+  --background: 174 71% 3%;
+  --card: 171 47% 6%;
+  --muted: 174 42% 9%;
+  --border: 170 41% 15%;
+  --border-str: 169 41% 20%;
+  --foreground: 173 72% 93%;
+  --secondary-foreground: 175 46% 57%;
+  --muted-foreground: 172 42% 29%;
+  --text-dis: 170 41% 15%;
+  --primary: 175 94% 37%;
+  --primary-pr: 176 66% 50%;
+  --primary-bg: 177 79% 9%;
+  --primary-foreground: 171 77% 64%;
+  --gold: 38 92% 50%;
+  --gold-bg: 41 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 351 95% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 171 78% 2%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Ruby Red ── */
+[data-theme-variant="ruby-red"] {
+  --background: 349 73% 97%;
+  --card: 0 0% 100%;
+  --muted: 347 64% 95%;
+  --border: 353 96% 90%;
+  --border-str: 353 96% 82%;
+  --foreground: 346 87% 6%;
+  --secondary-foreground: 343 64% 22%;
+  --muted-foreground: 348 34% 53%;
+  --text-dis: 351 38% 73%;
+  --primary: 347 77% 50%;
+  --primary-pr: 345 83% 41%;
+  --primary-bg: 356 100% 97%;
+  --primary-foreground: 343 80% 35%;
+  --gold: 32 95% 44%;
+  --gold-bg: 48 100% 96%;
+  --success: 142 76% 36%;
+  --destructive: 0 72% 51%;
+  --warning: 32 95% 44%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="ruby-red"] {
+  --background: 337 100% 3%;
+  --card: 342 100% 5%;
+  --muted: 334 100% 7%;
+  --border: 339 100% 12%;
+  --border-str: 337 100% 17%;
+  --foreground: 349 100% 97%;
+  --secondary-foreground: 350 47% 62%;
+  --muted-foreground: 347 54% 27%;
+  --text-dis: 339 100% 12%;
+  --primary: 347 77% 50%;
+  --primary-pr: 351 95% 71%;
+  --primary-bg: 340 71% 14%;
+  --primary-foreground: 353 96% 82%;
+  --gold: 32 95% 44%;
+  --gold-bg: 32 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 351 95% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 338 100% 2%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Emerald Night ── */
+[data-theme-variant="emerald-night"] {
+  --background: 157 76% 97%;
+  --card: 0 0% 100%;
+  --muted: 160 77% 93%;
+  --border: 152 76% 80%;
+  --border-str: 156 72% 67%;
+  --foreground: 163 91% 9%;
+  --secondary-foreground: 163 88% 20%;
+  --muted-foreground: 154 26% 55%;
+  --text-dis: 158 34% 75%;
+  --primary: 161 94% 30%;
+  --primary-pr: 163 94% 24%;
+  --primary-bg: 152 81% 96%;
+  --primary-foreground: 163 88% 20%;
+  --gold: 41 96% 40%;
+  --gold-bg: 55 92% 95%;
+  --success: 161 94% 30%;
+  --destructive: 350 89% 60%;
+  --warning: 32 95% 44%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="emerald-night"] {
+  --background: 155 86% 3%;
+  --card: 153 73% 6%;
+  --muted: 154 68% 9%;
+  --border: 157 64% 14%;
+  --border-str: 157 63% 19%;
+  --foreground: 161 100% 94%;
+  --secondary-foreground: 159 50% 53%;
+  --muted-foreground: 154 59% 25%;
+  --text-dis: 157 64% 14%;
+  --primary: 161 94% 30%;
+  --primary-pr: 158 64% 52%;
+  --primary-bg: 163 91% 9%;
+  --primary-foreground: 156 72% 67%;
+  --gold: 41 96% 40%;
+  --gold-bg: 37 100% 8%;
+  --success: 158 64% 52%;
+  --destructive: 351 95% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 154 78% 2%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Solar Gold ── */
+[data-theme-variant="solar-gold"] {
+  --background: 52 100% 97%;
+  --card: 0 0% 100%;
+  --muted: 56 94% 94%;
+  --border: 53 98% 77%;
+  --border-str: 50 98% 64%;
+  --foreground: 34 100% 5%;
+  --secondary-foreground: 39 100% 12%;
+  --muted-foreground: 39 66% 36%;
+  --text-dis: 42 49% 58%;
+  --primary: 41 96% 40%;
+  --primary-pr: 35 92% 33%;
+  --primary-bg: 55 92% 95%;
+  --primary-foreground: 32 81% 29%;
+  --gold: 25 95% 53%;
+  --gold-bg: 33 100% 96%;
+  --success: 142 76% 36%;
+  --destructive: 0 72% 51%;
+  --warning: 21 90% 48%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="solar-gold"] {
+  --background: 48 100% 2%;
+  --card: 41 100% 4%;
+  --muted: 41 100% 6%;
+  --border: 41 100% 11%;
+  --border-str: 41 100% 15%;
+  --foreground: 56 100% 94%;
+  --secondary-foreground: 44 61% 49%;
+  --muted-foreground: 43 74% 24%;
+  --text-dis: 41 100% 11%;
+  --primary: 41 96% 40%;
+  --primary-pr: 46 97% 65%;
+  --primary-bg: 32 100% 9%;
+  --primary-foreground: 48 97% 77%;
+  --gold: 25 95% 53%;
+  --gold-bg: 20 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 27 96% 61%;
+  --navbar: 43 100% 1%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Nordic Slate ── */
+[data-theme-variant="nordic-slate"] {
+  --background: 210 40% 98%;
+  --card: 0 0% 100%;
+  --muted: 210 40% 96%;
+  --border: 214 32% 91%;
+  --border-str: 213 27% 84%;
+  --foreground: 222 47% 11%;
+  --secondary-foreground: 215 25% 27%;
+  --muted-foreground: 215 20% 65%;
+  --text-dis: 213 27% 84%;
+  --primary: 215 16% 47%;
+  --primary-pr: 215 19% 35%;
+  --primary-bg: 210 40% 96%;
+  --primary-foreground: 215 25% 27%;
+  --gold: 38 92% 50%;
+  --gold-bg: 48 100% 96%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="nordic-slate"] {
+  --background: 228 45% 4%;
+  --card: 228 45% 9%;
+  --muted: 227 44% 13%;
+  --border: 225 33% 19%;
+  --border-str: 224 33% 26%;
+  --foreground: 225 53% 94%;
+  --secondary-foreground: 221 23% 57%;
+  --muted-foreground: 223 31% 29%;
+  --text-dis: 225 33% 19%;
+  --primary: 215 16% 47%;
+  --primary-pr: 215 20% 65%;
+  --primary-bg: 224 30% 15%;
+  --primary-foreground: 213 27% 84%;
+  --gold: 38 92% 50%;
+  --gold-bg: 41 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 230 60% 4%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Neon Indigo ── */
+[data-theme-variant="neon-indigo"] {
+  --background: 240 100% 98%;
+  --card: 0 0% 100%;
+  --muted: 240 100% 96%;
+  --border: 226 100% 94%;
+  --border-str: 228 96% 89%;
+  --foreground: 242 50% 11%;
+  --secondary-foreground: 244 55% 41%;
+  --muted-foreground: 237 36% 66%;
+  --text-dis: 236 37% 83%;
+  --primary: 239 84% 67%;
+  --primary-pr: 243 75% 59%;
+  --primary-bg: 226 100% 97%;
+  --primary-foreground: 244 55% 41%;
+  --gold: 38 92% 50%;
+  --gold-bg: 48 100% 96%;
+  --success: 142 71% 45%;
+  --destructive: 0 84% 60%;
+  --warning: 38 92% 50%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="neon-indigo"] {
+  --background: 240 43% 4%;
+  --card: 240 39% 9%;
+  --muted: 240 39% 13%;
+  --border: 240 37% 21%;
+  --border-str: 240 36% 28%;
+  --foreground: 240 100% 97%;
+  --secondary-foreground: 240 40% 64%;
+  --muted-foreground: 240 39% 35%;
+  --text-dis: 240 37% 21%;
+  --primary: 239 84% 67%;
+  --primary-pr: 234 89% 74%;
+  --primary-bg: 244 47% 20%;
+  --primary-foreground: 230 94% 82%;
+  --gold: 38 92% 50%;
+  --gold-bg: 41 100% 9%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 240 50% 3%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Espresso ── */
+[data-theme-variant="espresso"] {
+  --background: 32 79% 96%;
+  --card: 0 0% 100%;
+  --muted: 34 59% 92%;
+  --border: 32 56% 84%;
+  --border-str: 32 41% 71%;
+  --foreground: 23 100% 5%;
+  --secondary-foreground: 22 64% 18%;
+  --muted-foreground: 23 36% 44%;
+  --text-dis: 30 37% 66%;
+  --primary: 19 56% 40%;
+  --primary-pr: 20 65% 29%;
+  --primary-bg: 23 84% 95%;
+  --primary-foreground: 20 74% 24%;
+  --gold: 30 71% 44%;
+  --gold-bg: 38 100% 96%;
+  --success: 116 43% 38%;
+  --destructive: 6 63% 46%;
+  --warning: 30 71% 44%;
+  --navbar: 30 100% 98%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="espresso"] {
+  --background: 28 100% 3%;
+  --card: 22 73% 6%;
+  --muted: 27 64% 9%;
+  --border: 21 58% 15%;
+  --border-str: 21 61% 20%;
+  --foreground: 31 100% 94%;
+  --secondary-foreground: 33 44% 61%;
+  --muted-foreground: 21 54% 27%;
+  --text-dis: 21 58% 15%;
+  --primary: 19 56% 40%;
+  --primary-pr: 22 53% 54%;
+  --primary-bg: 17 80% 10%;
+  --primary-foreground: 26 71% 69%;
+  --gold: 30 71% 44%;
+  --gold-bg: 34 100% 8%;
+  --success: 142 69% 58%;
+  --destructive: 0 91% 71%;
+  --warning: 46 97% 65%;
+  --navbar: 24 100% 2%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+
+/* ── Mono ── */
+[data-theme-variant="mono"] {
+  --background: 0 0% 98%;
+  --card: 0 0% 100%;
+  --muted: 0 0% 95%;
+  --border: 0 0% 91%;
+  --border-str: 0 0% 82%;
+  --foreground: 0 0% 4%;
+  --secondary-foreground: 0 0% 29%;
+  --muted-foreground: 0 0% 60%;
+  --text-dis: 0 0% 78%;
+  --primary: 0 0% 10%;
+  --primary-pr: 0 0% 0%;
+  --primary-bg: 0 0% 94%;
+  --primary-foreground: 0 0% 10%;
+  --gold: 0 0% 53%;
+  --gold-bg: 0 0% 96%;
+  --success: 123 46% 34%;
+  --destructive: 0 66% 47%;
+  --warning: 21 100% 45%;
+  --navbar: 0 0% 100%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 0% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 0% / 0.04;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+.dark[data-theme-variant="mono"] {
+  --background: 0 0% 4%;
+  --card: 0 0% 8%;
+  --muted: 0 0% 12%;
+  --border: 0 0% 14%;
+  --border-str: 0 0% 20%;
+  --foreground: 0 0% 96%;
+  --secondary-foreground: 0 0% 63%;
+  --muted-foreground: 0 0% 31%;
+  --text-dis: 0 0% 18%;
+  --primary: 0 0% 96%;
+  --primary-pr: 0 0% 100%;
+  --primary-bg: 0 0% 16%;
+  --primary-foreground: 0 0% 88%;
+  --gold: 0 0% 53%;
+  --gold-bg: 0 0% 16%;
+  --success: 122 39% 49%;
+  --destructive: 1 83% 63%;
+  --warning: 36 100% 50%;
+  --navbar: 0 0% 3%;
+  --input: var(--border);
+  --ring: var(--primary);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --accent: 0 0% 100% / 0.04;
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 100% / 0.03;
+  --destructive-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 0 0% 100%;
+  --shadow-clr: rgba(0, 0, 0, 0.5);
+  --radius: 12px;
+}
+

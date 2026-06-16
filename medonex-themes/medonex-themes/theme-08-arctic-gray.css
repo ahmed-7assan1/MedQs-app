@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   ❄️ Theme 08 — Arctic Gray
+   رمادي/أزرق بارد، محايد ومهني
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F8FAFC;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #F1F5F9;
+  --color-border:       #E2E8F0;
+  --color-border-str:   #CBD5E1;
+  --color-text-1:       #0F172A;
+  --color-text-2:       #475569;
+  --color-text-3:       #94A3B8;
+  --color-text-dis:     #CBD5E1;
+  --color-primary:      #0EA5E9;
+  --color-primary-pr:   #0284C7;
+  --color-primary-bg:   #F0F9FF;
+  --color-primary-txt:  #075985;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #FFFBEB;
+  --color-success:      #22C55E;
+  --color-danger:       #EF4444;
+  --color-warning:      #F59E0B;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #070B10;
+  --color-surface:      #0F1620;
+  --color-surface-dim:  #162030;
+  --color-border:       #1E2E42;
+  --color-border-str:   #2A3E58;
+  --color-text-1:       #E8F4FF;
+  --color-text-2:       #80A8CC;
+  --color-text-3:       #3A5878;
+  --color-text-dis:     #1E2E42;
+  --color-primary:      #0EA5E9;
+  --color-primary-pr:   #38BDF8;
+  --color-primary-bg:   #0A2A3A;
+  --color-primary-txt:  #7DD3FC;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #2D1F00;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #040810;
+}

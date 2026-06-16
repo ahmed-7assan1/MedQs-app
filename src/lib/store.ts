@@ -1,32 +1,62 @@
 "use client";
 import { create } from "zustand";
 import type { NotificationItem } from "@/types";
-
-// ─── Theme store ──────────────────────────────────────────────────────────────
+import type { ThemeVariant } from "./themes";
 
 interface ThemeStore {
   theme: "light" | "dark" | "system";
   setTheme: (t: "light" | "dark" | "system") => void;
+  themeVariant: ThemeVariant;
+  setThemeVariant: (v: ThemeVariant) => void;
+}
+
+function applyTheme(isDark: boolean) {
+  document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+  document.documentElement.classList.toggle("dark", isDark);
+}
+
+function applyThemeVariant(variant: ThemeVariant) {
+  document.documentElement.setAttribute("data-theme-variant", variant);
+}
+
+function getStoredTheme(): "light" | "dark" | "system" {
+  if (typeof window === "undefined") return "dark";
+  return (localStorage.getItem("medqs-theme") as "light" | "dark" | "system" | null) ?? "dark";
+}
+
+function getStoredThemeVariant(): ThemeVariant {
+  if (typeof window === "undefined") return "medonex-purple";
+  return (localStorage.getItem("medqs-theme-variant") as ThemeVariant | null) ?? "medonex-purple";
 }
 
 export const useThemeStore = create<ThemeStore>((set) => ({
-  theme:
-    (typeof window !== "undefined"
-      ? (localStorage.getItem("medqs-theme") as ThemeStore["theme"] | null)
-      : null) ?? "dark",
+  theme: getStoredTheme(),
+  themeVariant: getStoredThemeVariant(),
   setTheme: (theme) => {
     set({ theme });
     if (typeof window !== "undefined") {
       localStorage.setItem("medqs-theme", theme);
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDark = theme === "dark" || (theme === "system" && prefersDark);
-      
+
       const updateDOM = () => {
-        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-        document.documentElement.classList.toggle("dark", isDark);
+        applyTheme(isDark);
       };
 
-      // Ensure view transition API is available
+      if (document.startViewTransition) {
+        document.startViewTransition(updateDOM);
+      } else {
+        updateDOM();
+      }
+    }
+  },
+  setThemeVariant: (variant) => {
+    set({ themeVariant: variant });
+    if (typeof window !== "undefined") {
+      localStorage.setItem("medqs-theme-variant", variant);
+      const updateDOM = () => {
+        applyThemeVariant(variant);
+      };
       if (document.startViewTransition) {
         document.startViewTransition(updateDOM);
       } else {

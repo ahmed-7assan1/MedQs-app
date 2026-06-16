@@ -14,6 +14,7 @@ import {
 import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
+import { ThemeVariantPicker } from "@/components/ui/ThemeVariantPicker";
 
 interface MobileBottomSheetProps {
   isOpen: boolean;
@@ -142,11 +143,11 @@ export function MobileBottomSheet({
                   onClick={onClose}
                   className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.05] mt-2 active:scale-[0.98] transition-all"
                 >
-                  <div className="h-14 w-14 rounded-2xl overflow-hidden bg-indigo-500/10 ring-2 ring-indigo-500/20 shrink-0 flex items-center justify-center">
+                  <div className="h-14 w-14 rounded-2xl overflow-hidden bg-primary/10 ring-2 ring-primary/20 shrink-0 flex items-center justify-center">
                     {userImage ? (
                       <img src={userImage} alt={userName || "User"} className="h-full w-full object-cover" />
                     ) : (
-                      <span className="text-lg font-black text-indigo-400">{initial}</span>
+                      <span className="text-lg font-black text-primary">{initial}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -161,7 +162,7 @@ export function MobileBottomSheet({
               {NAV_SECTIONS.map((section) => (
                 <div key={section.label}>
                   <div className="flex items-center gap-3 mb-2 px-1">
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-gray-400 dark:text-white/25 border-l-2 border-indigo-500 pl-3">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-gray-400 dark:text-white/25 border-l-2 border-primary pl-3">
                       {section.label}
                     </span>
                   </div>
@@ -176,20 +177,20 @@ export function MobileBottomSheet({
                             className={cn(
                               "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all active:scale-[0.98]",
                               active
-                                ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                                ? "bg-primary/10 dark:bg-primary/10 text-primary dark:text-primary"
                                 : "text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"
                             )}>
                             <div className={cn(
                               "h-8 w-8 rounded-xl flex items-center justify-center shrink-0",
-                              active ? "bg-indigo-100 dark:bg-indigo-500/15" : "bg-gray-100 dark:bg-white/[0.04]"
+                              active ? "bg-primary/15 dark:bg-primary/15" : "bg-gray-100 dark:bg-white/[0.04]"
                             )}>
-                              <Icon className={cn("h-[16px] w-[16px]", active ? "text-indigo-600 dark:text-indigo-400" : "text-gray-500 dark:text-white/40")} />
+                              <Icon className={cn("h-[16px] w-[16px]", active ? "text-primary dark:text-primary" : "text-gray-500 dark:text-white/40")} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <span className="block truncate">{label}</span>
                             {desc && <span className="block text-[10px] text-gray-400 dark:text-white/30 truncate">{desc}</span>}
                           </div>
-                          {active && <span className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />}
+                          {active && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
                         </Link>
                       );
                     })}
@@ -222,7 +223,7 @@ export function MobileBottomSheet({
               {/* Theme Preference */}
               <div>
                 <div className="flex items-center gap-3 mb-2 px-1">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-gray-400 dark:text-white/25 border-l-2 border-indigo-500 pl-3">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-gray-400 dark:text-white/25 border-l-2 border-primary pl-3">
                     Appearance
                   </span>
                 </div>
@@ -238,7 +239,7 @@ export function MobileBottomSheet({
                       className={cn(
                         "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all",
                         theme === value
-                          ? "bg-white dark:bg-indigo-500/20 text-gray-900 dark:text-white shadow-sm dark:shadow-none"
+                          ? "bg-white dark:bg-primary/20 text-gray-900 dark:text-white shadow-sm dark:shadow-none"
                           : "text-gray-500 dark:text-white/30"
                       )}
                     >
@@ -246,6 +247,16 @@ export function MobileBottomSheet({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Theme Variant */}
+              <div>
+                <div className="flex items-center gap-3 mb-2 px-1">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-gray-400 dark:text-white/25 border-l-2 border-primary pl-3">
+                    Theme
+                  </span>
+                </div>
+                <ThemeVariantPicker compact onSelect={onClose} />
               </div>
 
               {/* Bottom Actions */}

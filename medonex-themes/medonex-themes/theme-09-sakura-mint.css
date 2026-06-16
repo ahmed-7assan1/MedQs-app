@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🌺 Theme 09 — Sakura Mint
+   فيروزي/أخضر مائي منعش
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F5FDFC;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #ECFAF8;
+  --color-border:       #CCEFEB;
+  --color-border-str:   #A7E0D8;
+  --color-text-1:       #032420;
+  --color-text-2:       #1E5C55;
+  --color-text-3:       #6AADA5;
+  --color-text-dis:     #A8D4D0;
+  --color-primary:      #06B6A8;
+  --color-primary-pr:   #0891B2;
+  --color-primary-bg:   #F0FDFB;
+  --color-primary-txt:  #0E7268;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #FFFBEB;
+  --color-success:      #22C55E;
+  --color-danger:       #F43F5E;
+  --color-warning:      #F59E0B;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #020C0B;
+  --color-surface:      #081614;
+  --color-surface-dim:  #0D201E;
+  --color-border:       #163530;
+  --color-border-str:   #1E4840;
+  --color-text-1:       #E0FAF7;
+  --color-text-2:       #5EC4BC;
+  --color-text-3:       #2A6860;
+  --color-text-dis:     #163530;
+  --color-primary:      #06B6A8;
+  --color-primary-pr:   #2DD4C8;
+  --color-primary-bg:   #052A28;
+  --color-primary-txt:  #5EEAD4;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #2D1F00;
+  --color-success:      #4ADE80;
+  --color-danger:       #FB7185;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #010807;
+}

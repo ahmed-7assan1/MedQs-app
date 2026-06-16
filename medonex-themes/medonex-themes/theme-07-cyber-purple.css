@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   ⚡ Theme 07 — Cyber Purple
+   بنفسجي نيون حديث وتقني
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #FAF7FF;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #F3EEFF;
+  --color-border:       #EDE9FE;
+  --color-border-str:   #DDD6FE;
+  --color-text-1:       #1A0533;
+  --color-text-2:       #4A1C7A;
+  --color-text-3:       #9C7CC0;
+  --color-text-dis:     #C4B0D8;
+  --color-primary:      #A855F7;
+  --color-primary-pr:   #9333EA;
+  --color-primary-bg:   #FAF5FF;
+  --color-primary-txt:  #7E22CE;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #FFFBEB;
+  --color-success:      #22C55E;
+  --color-danger:       #EF4444;
+  --color-warning:      #F59E0B;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #07020F;
+  --color-surface:      #100520;
+  --color-surface-dim:  #18082E;
+  --color-border:       #2E1050;
+  --color-border-str:   #3E1868;
+  --color-text-1:       #F5EEFF;
+  --color-text-2:       #B090D8;
+  --color-text-3:       #5A3888;
+  --color-text-dis:     #2E1050;
+  --color-primary:      #A855F7;
+  --color-primary-pr:   #C084FC;
+  --color-primary-bg:   #2D0F5A;
+  --color-primary-txt:  #D8B4FE;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #2D1F00;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #040108;
+}

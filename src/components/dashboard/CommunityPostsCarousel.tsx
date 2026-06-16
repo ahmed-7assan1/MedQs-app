@@ -695,7 +695,7 @@ function PostCard({
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="h-14 w-14 rounded-full bg-white/90 shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <PlayIcon className="h-6 w-6 text-black ml-0.5" />
+                        <PlayIcon className="h-6 w-6 text-foreground ml-0.5" />
                       </div>
                     </div>
                     <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/50 backdrop-blur-sm text-[9px] font-bold text-white/80">

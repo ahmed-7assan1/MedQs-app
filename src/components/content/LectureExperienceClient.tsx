@@ -151,7 +151,7 @@ function RecordCard({ record }: { record: { id: string; title: string; url: stri
         <div className={cn(
           "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all",
           open
-            ? "bg-primary text-white"
+            ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
         )}>
           <Play className="h-3 w-3" />
@@ -237,7 +237,7 @@ export function LectureExperienceClient({
       <div className="md:hidden px-4 pb-2 pt-2 space-y-3 shrink-0">
         <Link
           href={`/modules/${moduleId}`}
-          className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Module
         </Link>
@@ -249,12 +249,12 @@ export function LectureExperienceClient({
               {lecture.type === "PRACTICAL" ? "Practical" : (lecture?.subject?.name || "Lecture")}
             </span>
             {lecture?.order != null && (
-              <span className="text-[8.5px] font-bold text-white/40 uppercase tracking-widest">
+              <span className="text-[8.5px] font-bold text-muted-foreground uppercase tracking-widest">
                 #{lecture.order}
               </span>
             )}
           </div>
-          <h1 className="text-[22px] font-black leading-tight tracking-tight text-white capitalize">
+          <h1 className="text-[22px] font-black leading-tight tracking-tight text-foreground capitalize">
             {lecture.title}
           </h1>
         </div>
@@ -427,19 +427,19 @@ export function LectureExperienceClient({
                  title={lecture.title}
                />
                
-               <div className="flex flex-wrap items-center gap-4 p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+               <div className="flex flex-wrap items-center gap-4 p-6 rounded-3xl bg-card/40 border border-border/30">
                   <div className="flex items-center gap-2">
                      <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
                         <PlayCircle className="h-4 w-4 text-sky-500" />
                      </div>
-                     <span className="text-xs font-bold text-white/60">Source Tracking Active</span>
+                     <span className="text-xs font-bold text-muted-foreground">Source Tracking Active</span>
                   </div>
                   {lecture.videos.length > 0 && (
                      <div className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                            <Layers className="h-4 w-4 text-indigo-500" />
                         </div>
-                        <span className="text-xs font-bold text-white/60">{lecture.videos.length} Alternative Streams</span>
+                        <span className="text-xs font-bold text-muted-foreground">{lecture.videos.length} Alternative Streams</span>
                      </div>
                   )}
                </div>
@@ -454,24 +454,24 @@ export function LectureExperienceClient({
                      <ShieldCheck className="h-6 w-6 text-indigo-500" />
                   </div>
                   <div>
-                     <h2 className="text-xl font-black text-white">Procedure Checklist</h2>
-                     <p className="text-xs text-white/40 font-bold uppercase tracking-widest mt-1">Self-Validation for Practical Skills</p>
+                     <h2 className="text-xl font-black text-foreground">Procedure Checklist</h2>
+                     <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Self-Validation for Practical Skills</p>
                   </div>
                </div>
 
                <div className="grid gap-4">
                   {lecture.checklist.items.map((item: any, i: number) => (
-                    <div key={item.id} className="group flex items-start gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 hover:bg-indigo-500/[0.02] transition-all">
-                       <div className="h-6 w-6 rounded-full border-2 border-white/10 flex items-center justify-center shrink-0 mt-1 group-hover:border-indigo-500 transition-colors">
-                          <span className="text-[10px] font-black text-white/30 group-hover:text-indigo-500">{i + 1}</span>
+                    <div key={item.id} className="group flex items-start gap-4 p-5 rounded-2xl bg-card/40 border border-border/30 hover:border-indigo-500/20 hover:bg-indigo-500/[0.02] transition-all">
+                       <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center shrink-0 mt-1 group-hover:border-indigo-500 transition-colors">
+                          <span className="text-[10px] font-black text-muted-foreground/50 group-hover:text-indigo-500">{i + 1}</span>
                        </div>
                        <div className="flex-1">
-                          <p className="text-sm font-bold text-white/80 group-hover:text-white transition-colors">{item.content}</p>
+                          <p className="text-sm font-bold text-card-foreground/80 group-hover:text-card-foreground transition-colors">{item.content}</p>
                           {item.isCritical && (
                             <span className="mt-2 inline-block px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 uppercase tracking-widest">Critical Step</span>
                           )}
                        </div>
-                       <div className="text-[10px] font-black text-white/20 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg">
+                       <div className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest bg-card/60 px-2 py-1 rounded-lg">
                           +{item.points} pts
                        </div>
                     </div>

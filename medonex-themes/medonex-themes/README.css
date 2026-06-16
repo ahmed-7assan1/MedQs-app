@@ -1,0 +1,84 @@
+/* ══════════════════════════════════════════════════════════
+   🎨 MedOneX — Theme Collection
+   16 ثيم كامل، كل واحد بـ Light + Dark Mode
+   
+   الاستخدام: استورد الثيم المطلوب في globals.css
+   ثم أضف class="dark" على الـ root element للداكن
+══════════════════════════════════════════════════════════ */
+
+/*
+  ┌─────────────────────────────────────────────────────┐
+  │  #   اسم الثيم            الـ Accent       الحالة  │
+  ├─────────────────────────────────────────────────────┤
+  │  01  MedOneX Purple   🟣  #7C6FF7          الأصلي  │
+  │  02  Ocean Teal       🌊  #0EA5A0                  │
+  │  03  Rose Gold        🌸  #E8698A                  │
+  │  04  Forest Green     🌿  #22883A                  │
+  │  05  Midnight Blue    🌌  #3B82F6                  │
+  │  06  Amber Noir       🔥  #F97316                  │
+  │  07  Cyber Purple     ⚡  #A855F7                  │
+  │  08  Arctic Gray      ❄️  #0EA5E9                  │
+  │  09  Sakura Mint      🌺  #06B6A8                  │
+  │  10  Ruby Red         💎  #E11D48                  │
+  │  11  Emerald Night    🪄  #059669                  │
+  │  12  Solar Gold       ☀️  #CA8A04                  │
+  │  13  Nordic Slate     🏔️  #64748B                  │
+  │  14  Neon Indigo      🔮  #6366F1                  │
+  │  15  Espresso         ☕  #A0522D                  │
+  │  16  Mono             ◻️  #1A1A1A                  │
+  └─────────────────────────────────────────────────────┘
+*/
+
+/* ── كيفية الاستخدام ── */
+
+/*
+  1. في globals.css أو theme file:
+
+  @import './theme-01-medonex-purple.css';  ← غيّر الرقم
+  
+  2. في الـ root layout أو HTML:
+
+  <html class={isDark ? 'dark' : ''}>
+
+  3. استخدم المتغيرات في الكود:
+
+  backgroundColor: 'var(--color-bg)'
+  color: 'var(--color-text-1)'
+  borderColor: 'var(--color-border)'
+  backgroundColor: 'var(--color-primary)'  ← أزرار
+*/
+
+/* ── المتغيرات المتاحة في كل ثيم ── */
+/*
+  Layout:
+    --color-bg              خلفية الصفحة الرئيسية
+    --color-surface         الكروت والعناصر المرفوعة
+    --color-surface-dim     خلفية المدخلات والـ hover
+    --color-surface-high    حالة الـ active/pressed
+    --color-navbar          خلفية الـ bottom tab bar
+
+  Borders:
+    --color-border          حدود الكروت العامة
+    --color-border-str      الـ dividers الأقوى
+
+  Text:
+    --color-text-1          العناوين الرئيسية
+    --color-text-2          النصوص الثانوية
+    --color-text-3          الـ placeholder والـ muted
+    --color-text-dis        النصوص المعطّلة
+
+  Accent (Primary):
+    --color-primary         اللون الأساسي (أزرار/روابط)
+    --color-primary-pr      الضغط على الزر
+    --color-primary-bg      خلفية الـ badges والـ chips
+    --color-primary-txt     النص فوق خلفية الـ primary-bg
+
+  Gold / Prestige:
+    --color-gold            لون الـ streak والـ prestige
+    --color-gold-bg         خلفية الـ gold badge
+
+  Semantic:
+    --color-success         صح / نجاح
+    --color-danger          خطأ / حذف
+    --color-warning         تنبيه / تحذير
+*/

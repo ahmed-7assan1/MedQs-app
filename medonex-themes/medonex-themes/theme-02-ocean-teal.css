@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🌊 Theme 02 — Ocean Teal
+   تيل/زمردي هادئ، مناسب للتطبيقات الطبية
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F0FAFA;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #E8F6F6;
+  --color-border:       #C8ECEA;
+  --color-border-str:   #A8DCDA;
+  --color-text-1:       #0D2B2A;
+  --color-text-2:       #2E5F5E;
+  --color-text-3:       #7AADAB;
+  --color-text-dis:     #B4D4D3;
+  --color-primary:      #0EA5A0;
+  --color-primary-pr:   #0C8A86;
+  --color-primary-bg:   #E0F7F6;
+  --color-primary-txt:  #0A6E6B;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #FFF8E1;
+  --color-success:      #22C55E;
+  --color-danger:       #EF4444;
+  --color-warning:      #F59E0B;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #071414;
+  --color-surface:      #0D1F1F;
+  --color-surface-dim:  #122828;
+  --color-border:       #1E3F3F;
+  --color-border-str:   #2A5050;
+  --color-text-1:       #E8F6F6;
+  --color-text-2:       #8ABFBE;
+  --color-text-3:       #4A7F7E;
+  --color-text-dis:     #2A5050;
+  --color-primary:      #0EA5A0;
+  --color-primary-pr:   #3EC9C4;
+  --color-primary-bg:   #0A3534;
+  --color-primary-txt:  #5EEAE5;
+  --color-gold:         #F59E0B;
+  --color-gold-bg:      #3A2800;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #090F0F;
+}

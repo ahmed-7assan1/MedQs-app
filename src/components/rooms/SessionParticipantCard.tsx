@@ -24,21 +24,21 @@ export default function SessionParticipantCard({
   };
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border shadow-sm">
       {image ? (
         <img src={image} alt="" className="w-10 h-10 rounded-full object-cover" />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
+        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
           {name.charAt(0).toUpperCase()}
         </div>
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-800 truncate">{name}</span>
-          {isHost && <span className="text-[10px] px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-medium">Host</span>}
+          <span className="text-sm font-semibold text-foreground truncate">{name}</span>
+          {isHost && <span className="text-[10px] px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full font-medium">Host</span>}
           {isOnline && <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Online" />}
         </div>
-        <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
           <span className="flex items-center gap-1">
             <Clock size={12} />
             {fmtFocus(focusSeconds)}
@@ -52,7 +52,7 @@ export default function SessionParticipantCard({
       {showKick && onKick && (
         <button
           onClick={() => onKick(userId)}
-          className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+          className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground hover:text-red-500 transition-colors"
           title="Remove from session"
         >
           <XCircle size={16} />

@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 🎨 MedOneX Theme Variants — 16 themes via data-theme-variant attribute */
+@import "./themes.css";
+
 @layer base {
 
   /* Always paint body (avoids blank white if theme script / data-theme fails) */
@@ -688,7 +691,7 @@ html[data-theme="dark"] body,
 
 /* ── Light Mode Premium Refinement (Milk White) ── */
 html[data-theme="light"] body {
-  background-color: #FFFFFF;
+  background-color: hsl(var(--background));
   background-image: 
     radial-gradient(at 0% 0%, hsla(245, 82%, 66%, 0.03) 0, transparent 50%), 
     radial-gradient(at 50% 100%, hsla(190, 80%, 50%, 0.03) 0, transparent 50%);
@@ -697,7 +700,7 @@ html[data-theme="light"] body {
 
 @media (max-width: 768px) {
   html[data-theme="light"] .surface-card {
-    background-color: #FFFFFF !important;
+    background-color: hsl(var(--card)) !important;
     border-color: rgba(0, 0, 0, 0.04) !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
   }

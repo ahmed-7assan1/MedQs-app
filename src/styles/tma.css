@@ -1,6 +1,6 @@
 /* src/styles/tma.css */
 
-:root {
+.tma-container {
   --tma-bg: var(--tg-theme-bg-color, #ffffff);
   --tma-text: var(--tg-theme-text-color, #000000);
   --tma-hint: var(--tg-theme-hint-color, #999999);
@@ -8,26 +8,23 @@
   --tma-button: var(--tg-theme-button-color, #2481cc);
   --tma-button-text: var(--tg-theme-button-text-color, #ffffff);
   --tma-secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
-  
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
-}
 
-.dark :root {
-  --glass-bg: rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
-}
-
-.tma-container {
   min-height: 100vh;
   background: var(--tma-bg);
   color: var(--tma-text);
   padding: 16px;
   font-family: var(--font-sans), sans-serif;
-  padding-bottom: 80px; /* Safe area for bottom nav if needed */
+  padding-bottom: 80px;
 }
 
-.glass-card {
+.dark .tma-container {
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+.tma-container .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -39,7 +36,7 @@
   transition: transform 0.2s ease;
 }
 
-.glass-card:active {
+.tma-container .glass-card:active {
   transform: scale(0.98);
 }
 
@@ -112,7 +109,7 @@
   padding-left: 4px;
 }
 
-.tma-list-item {
+.tma-container .tma-list-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -120,7 +117,7 @@
   border-bottom: 1px solid var(--glass-border);
 }
 
-.tma-list-item:last-child {
+.tma-container .tma-list-item:last-child {
   border-bottom: none;
 }
 
@@ -134,7 +131,7 @@
   justify-content: center;
 }
 
-.tma-skeleton {
+.tma-container .tma-skeleton {
   background: linear-gradient(90deg, var(--tma-secondary-bg) 25%, var(--glass-border) 50%, var(--tma-secondary-bg) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;

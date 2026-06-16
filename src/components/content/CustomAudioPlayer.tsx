@@ -301,7 +301,7 @@ export function CustomAudioPlayer({ url, title: initialTitle, autoPlay = false }
                     
                     <button 
                       onClick={togglePlay}
-                      className="h-16 w-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl"
+                      className="h-16 w-16 rounded-full bg-white dark:bg-card text-black dark:text-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl"
                     >
                       {playing ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
                     </button>

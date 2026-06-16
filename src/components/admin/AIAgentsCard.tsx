@@ -79,7 +79,7 @@ export function AIAgentsCard() {
 
       <div className="space-y-6">
         {/* Preferred Provider */}
-        <div className="rounded-2xl border border-gray-200/10 bg-card p-6 space-y-4 shadow-sm border-l-4 border-l-blue-500">
+        <div className="rounded-2xl border border-border/10 bg-card p-6 space-y-4 shadow-sm border-l-4 border-l-blue-500">
            <div>
               <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">Intelligence Hub</span>
               <h3 className="font-display text-lg font-bold">Preferred AI Provider</h3>
@@ -87,7 +87,7 @@ export function AIAgentsCard() {
            <select
              value={config.aiPreferredProvider || "auto"}
              onChange={(e) => setConfig((c: any) => ({ ...c, aiPreferredProvider: e.target.value }))}
-             className="w-full h-11 rounded-xl border border-gray-200/10 bg-background/50 px-4 font-semibold outline-none focus:ring-1 focus:ring-blue-500/40"
+             className="w-full h-11 rounded-xl border border-border/10 bg-background/50 px-4 font-semibold outline-none focus:ring-1 focus:ring-blue-500/40"
            >
               <option value="auto">Auto-Select (Optimized)</option>
               <option value="gemini">Google Gemini Pro</option>
@@ -160,7 +160,7 @@ export function AIAgentsCard() {
 
 function AgentConfigGroup({ title, icon: Icon, children }: any) {
   return (
-    <div className="rounded-2xl border border-gray-200/10 bg-white/[0.02] p-5 space-y-4">
+    <div className="rounded-2xl border border-border/10 bg-white/[0.02] p-5 space-y-4">
       <div className="flex items-center gap-3">
               <div className="h-8 w-1.5 rounded-full bg-primary" />
               <div>
@@ -188,7 +188,7 @@ function ConfigRow({ label, value, onChange, isPassword, placeholder }: any) {
          value={value}
          onChange={(e) => onChange(e.target.value)}
          placeholder={placeholder || "Enter value..."}
-         className="w-full h-10 rounded-lg bg-background/50 border border-gray-200/10 px-4 text-xs font-mono outline-none focus:ring-1 focus:ring-primary/40"
+         className="w-full h-10 rounded-lg bg-background/50 border border-border/10 px-4 text-xs font-mono outline-none focus:ring-1 focus:ring-primary/40"
        />
     </div>
   );

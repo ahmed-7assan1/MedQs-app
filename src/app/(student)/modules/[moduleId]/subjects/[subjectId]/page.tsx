@@ -97,10 +97,10 @@ export default async function SubjectLecturesPage({
         <div className="container mx-auto px-6 relative z-20 max-md:pt-2 md:pt-20">
           <div className="flex flex-col gap-4">
             {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 overflow-x-auto whitespace-nowrap no-scrollbar pb-1">
-              <Link href="/modules" className="hover:text-white">Hub</Link>
+            <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 overflow-x-auto whitespace-nowrap no-scrollbar pb-1">
+              <Link href="/modules" className="hover:text-foreground">Hub</Link>
               <ChevronRight className="h-2 w-2" />
-              <Link href={`/modules/${params.moduleId}`} className="hover:text-white">
+              <Link href={`/modules/${params.moduleId}`} className="hover:text-foreground">
                 {subject.module?.name}
               </Link>
               <ChevronRight className="h-2 w-2" />
@@ -129,13 +129,13 @@ export default async function SubjectLecturesPage({
       {/* Mobile Title Row */}
       <div className="md:hidden px-6 pb-2 pt-2 space-y-3">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.15em] text-white/40 overflow-x-auto whitespace-nowrap no-scrollbar">
-          <Link href="/modules" className="hover:text-white">Hub</Link>
-          <ChevronRight className="h-1.5 w-1.5 text-white/20" />
-          <Link href={`/modules/${params.moduleId}`} className="hover:text-white truncate max-w-[80px]">
+        <nav className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.15em] text-muted-foreground/70 overflow-x-auto whitespace-nowrap no-scrollbar">
+          <Link href="/modules" className="hover:text-foreground">Hub</Link>
+          <ChevronRight className="h-1.5 w-1.5 text-muted-foreground/30" />
+          <Link href={`/modules/${params.moduleId}`} className="hover:text-foreground truncate max-w-[80px]">
             {subject.module?.name}
           </Link>
-          <ChevronRight className="h-1.5 w-1.5 text-white/20" />
+          <ChevronRight className="h-1.5 w-1.5 text-muted-foreground/30" />
           <span className="text-primary truncate max-w-[120px]">{subject.name}</span>
         </nav>
 
@@ -144,10 +144,10 @@ export default async function SubjectLecturesPage({
             <IconComp className={cn("h-5.5 w-5.5", accent.iconColor)} />
           </div>
           <div>
-             <h1 className="text-[20px] font-black text-white leading-none tracking-tight">
+             <h1 className="text-[20px] font-black text-foreground leading-none tracking-tight">
                {subject.name}.
              </h1>
-             <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mt-1">
+             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-1">
                {subject.lectures.length} Lectures
              </p>
           </div>
@@ -167,12 +167,12 @@ export default async function SubjectLecturesPage({
         {/* ── Lectures Grid ── */}
         {/* ── Tabs & Filter ── */}
         <div className="mb-8">
-           <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl w-fit">
+           <div className="flex items-center gap-2 p-1.5 bg-card/60 border border-border/30 rounded-2xl w-fit">
               <Link 
                 href={`?tab=lectures`}
                 className={cn(
                   "flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
-                  activeTab === "lectures" ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-white/40 hover:text-white"
+                  activeTab === "lectures" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 <BookOpen className="h-4 w-4" /> Lectures
@@ -182,7 +182,7 @@ export default async function SubjectLecturesPage({
                   href={`?tab=practical`}
                   className={cn(
                     "flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
-                    activeTab === "practical" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-white/40 hover:text-white"
+                    activeTab === "practical" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Microscope className="h-4 w-4" /> Practical
@@ -246,12 +246,12 @@ export default async function SubjectLecturesPage({
           </div>
 
           {subject.lectures.length === 0 && (
-            <div className="py-24 text-center rounded-[40px] border border-dashed border-white/5 bg-white/[0.01]">
+            <div className="py-24 text-center rounded-[40px] border border-dashed border-border/30 bg-card/20">
               <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center mx-auto mb-6 text-primary/30">
                 <BookOpen className="h-8 w-8" />
               </div>
-              <p className="text-white/30 font-black uppercase tracking-widest text-sm">Curriculum is being prepared.</p>
-              <p className="text-white/10 text-xs mt-1">Check back soon for new academic lectures.</p>
+              <p className="text-muted-foreground/70 font-black uppercase tracking-widest text-sm">Curriculum is being prepared.</p>
+              <p className="text-muted-foreground/30 text-xs mt-1">Check back soon for new academic lectures.</p>
             </div>
           )}
         </div>

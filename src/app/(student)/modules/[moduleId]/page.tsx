@@ -183,8 +183,8 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
          </div>
          <div className="space-y-0.5 min-w-0">
             <span className="text-[9px] font-black uppercase tracking-widest text-primary">Academic Module</span>
-            <h1 className="text-[20px] font-black text-white truncate leading-tight tracking-tight">{mod.name}</h1>
-            <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{totalLectures} Lectures • {totalQ} Qs</p>
+             <h1 className="text-[20px] font-black text-foreground truncate leading-tight tracking-tight">{mod.name}</h1>
+             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{totalLectures} Lectures • {totalQ} Qs</p>
          </div>
       </div>
 

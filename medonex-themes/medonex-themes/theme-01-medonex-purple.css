@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🎨 Theme 01 — MedOneX Purple (الأصلي)
+   الثيم الأصلي للتطبيق بالبنفسجي
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #F5F5FA;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #F0F0F8;
+  --color-border:       #EBEBF0;
+  --color-border-str:   #D8D8E8;
+  --color-text-1:       #1A1A2E;
+  --color-text-2:       #4A4A6A;
+  --color-text-3:       #8E8EA0;
+  --color-text-dis:     #B8B8CC;
+  --color-primary:      #7C6FF7;
+  --color-primary-pr:   #5A4FD4;
+  --color-primary-bg:   #EEF0FF;
+  --color-primary-txt:  #4B44C2;
+  --color-gold:         #F5A623;
+  --color-gold-bg:      #FFF4E0;
+  --color-success:      #34C48B;
+  --color-danger:       #FF6B6B;
+  --color-warning:      #FFB23F;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #0F0F13;
+  --color-surface:      #1A1A24;
+  --color-surface-dim:  #222232;
+  --color-border:       #2C2C42;
+  --color-border-str:   #3A3A58;
+  --color-text-1:       #F0EFF8;
+  --color-text-2:       #A8A6C0;
+  --color-text-3:       #5E5C7A;
+  --color-text-dis:     #3A3856;
+  --color-primary:      #7C6FF7;
+  --color-primary-pr:   #9B91FF;
+  --color-primary-bg:   #2E2660;
+  --color-primary-txt:  #C4BEFF;
+  --color-gold:         #F5A623;
+  --color-gold-bg:      #3A2800;
+  --color-success:      #2FCF92;
+  --color-danger:       #FF7B7B;
+  --color-warning:      #FFB84D;
+  --color-navbar:       #181824;
+}

@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════
+   🌸 Theme 03 — Rose Gold
+   وردي/ذهبي دافئ وأنيق
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #FDF6F8;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #FAF0F3;
+  --color-border:       #F0D8DE;
+  --color-border-str:   #E0B8C2;
+  --color-text-1:       #2A0E16;
+  --color-text-2:       #6B3445;
+  --color-text-3:       #B08090;
+  --color-text-dis:     #D4B0BB;
+  --color-primary:      #E8698A;
+  --color-primary-pr:   #C94E6E;
+  --color-primary-bg:   #FFF0F4;
+  --color-primary-txt:  #9B2948;
+  --color-gold:         #D97706;
+  --color-gold-bg:      #FFF8E1;
+  --color-success:      #22C55E;
+  --color-danger:       #EF4444;
+  --color-warning:      #F59E0B;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #130007;
+  --color-surface:      #1E0810;
+  --color-surface-dim:  #280F18;
+  --color-border:       #3A1520;
+  --color-border-str:   #4E2030;
+  --color-text-1:       #FCEEF2;
+  --color-text-2:       #D4A0B0;
+  --color-text-3:       #885060;
+  --color-text-dis:     #4E2030;
+  --color-primary:      #E8698A;
+  --color-primary-pr:   #F090AA;
+  --color-primary-bg:   #3A0F1C;
+  --color-primary-txt:  #FFB3C6;
+  --color-gold:         #D97706;
+  --color-gold-bg:      #3A2000;
+  --color-success:      #4ADE80;
+  --color-danger:       #F87171;
+  --color-warning:      #FCD34D;
+  --color-navbar:       #0D0005;
+}

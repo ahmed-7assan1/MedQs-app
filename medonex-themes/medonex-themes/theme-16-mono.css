@@ -1,0 +1,52 @@
+/* ══════════════════════════════════════════
+   ◻️ Theme 16 — Mono
+   أبيض وأسود سيمبل وهادئ — لا لون زيادة
+══════════════════════════════════════════ */
+
+/* ── Light Mode ── */
+:root {
+  --color-bg:           #FAFAFA;
+  --color-surface:      #FFFFFF;
+  --color-surface-dim:  #F2F2F2;
+  --color-surface-high: #E8E8E8;
+  --color-border:       #E8E8E8;
+  --color-border-str:   #D0D0D0;
+  --color-text-1:       #0A0A0A;
+  --color-text-2:       #4A4A4A;
+  --color-text-3:       #9A9A9A;
+  --color-text-dis:     #C8C8C8;
+  --color-primary:      #1A1A1A;
+  --color-primary-pr:   #000000;
+  --color-primary-bg:   #F0F0F0;
+  --color-primary-txt:  #1A1A1A;
+  --color-gold:         #888888;
+  --color-gold-bg:      #F5F5F5;
+  --color-success:      #2E7D32;
+  --color-danger:       #C62828;
+  --color-warning:      #E65100;
+  --color-navbar:       #FFFFFF;
+}
+
+/* ── Dark Mode ── */
+.dark {
+  --color-bg:           #0A0A0A;
+  --color-surface:      #141414;
+  --color-surface-dim:  #1E1E1E;
+  --color-surface-high: #282828;
+  --color-border:       #242424;
+  --color-border-str:   #323232;
+  --color-text-1:       #F5F5F5;
+  --color-text-2:       #A0A0A0;
+  --color-text-3:       #505050;
+  --color-text-dis:     #2E2E2E;
+  --color-primary:      #F5F5F5;
+  --color-primary-pr:   #FFFFFF;
+  --color-primary-bg:   #2A2A2A;
+  --color-primary-txt:  #E0E0E0;
+  --color-gold:         #888888;
+  --color-gold-bg:      #2A2A2A;
+  --color-success:      #4CAF50;
+  --color-danger:       #EF5350;
+  --color-warning:      #FF9800;
+  --color-navbar:       #080808;
+}
