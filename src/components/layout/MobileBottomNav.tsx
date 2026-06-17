@@ -141,7 +141,7 @@ function AiChatInput() {
         inputFocused
           ? "border-gray-500 dark:border-gray-500"
           : "border-gray-200/80 dark:border-white/10",
-        "bg-white/80 dark:bg-[#0d0d12]/80 backdrop-blur-xl dark:backdrop-blur-2xl"
+        "bg-white/80 backdrop-blur-xl dark:bg-black/60 dark:backdrop-blur-2xl"
       )}
     >
       <button
@@ -262,7 +262,7 @@ export function MobileBottomNav() {
           "md:hidden fixed bottom-0 left-0 right-0 z-[10002]",
           isComposerOpen
             ? "bg-background/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom,0px)]"
-            : "bg-gradient-to-t from-background via-background/90 to-background/85 backdrop-blur-3xl saturate-[1.8] rounded-t-2xl border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom,0px)]",
+            : "bg-white/85 backdrop-blur-3xl saturate-[1.8] dark:bg-black/85 dark:backdrop-blur-3xl dark:saturate-[1.8] rounded-t-2xl border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom,0px)]",
           "transition-transform duration-300 will-change-transform",
           (visible || isComposerOpen) ? "translate-y-0" : "translate-y-full"
         )}
@@ -275,7 +275,7 @@ export function MobileBottomNav() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 260 }}
-              className="absolute left-0 right-0 z-10 overflow-y-auto bg-background/90 backdrop-blur-3xl saturate-[1.8]"
+              className="absolute left-0 right-0 z-10 overflow-y-auto bg-white/90 backdrop-blur-3xl saturate-[1.8] dark:bg-black/90 dark:backdrop-blur-3xl dark:saturate-[1.8]"
               style={{ bottom: "100%", maxHeight: "55vh" }}
             >
               <div className="flex flex-col items-center pt-3 pb-6">
