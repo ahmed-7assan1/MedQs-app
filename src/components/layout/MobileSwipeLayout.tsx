@@ -56,13 +56,13 @@ export function MobileSwipeLayout({ children }: MobileSwipeLayoutProps) {
       dragElastic={0.2}
       onDragEnd={handleDragEnd}
     >
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={pathname}
           initial={prefersReducedMotion ? false : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={prefersReducedMotion ? false : { opacity: 0, x: -20 }}
-          transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 30 }}
+          exit={prefersReducedMotion ? false : { opacity: 0 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { type: "tween", duration: 0.1, ease: "easeOut" }}
           className="flex-1 flex flex-col w-full min-h-0"
         >
           {children}
