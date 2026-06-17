@@ -54,7 +54,6 @@ export function MobileSwipeLayout({ children }: MobileSwipeLayoutProps) {
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
       onDragEnd={handleDragEnd}
-      style={{ willChange: "transform", transform: "translateZ(0)" }}
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
@@ -64,7 +63,6 @@ export function MobileSwipeLayout({ children }: MobileSwipeLayoutProps) {
           exit={prefersReducedMotion ? false : { opacity: 0, x: -20 }}
           transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 30 }}
           className="flex-1 flex flex-col w-full min-h-0"
-          style={{ willChange: "transform", transform: "translateZ(0)" }}
         >
           {children}
         </motion.div>

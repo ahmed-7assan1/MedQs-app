@@ -19,7 +19,7 @@ import { DrQMessage } from "./DrQMessage";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
-import { useThemeStore } from "@/lib/store";
+import { useThemeStore, useChatInputBridge } from "@/lib/store";
 import "./MedOneXChat.css";
 
 const C = {
@@ -55,7 +55,6 @@ export function MedOneXChat() {
   const isAtBottomRef = useRef<boolean>(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [input, setInput] = useState("");
   const [files, setFiles] = useState<FileAttachment[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   const [showProviderPicker, setShowProviderPicker] = useState(false);
@@ -70,6 +69,38 @@ export function MedOneXChat() {
   const [modulesSearch, setModulesSearch] = useState("");
   const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
+
+  // ─── Shared input state via bridge store (synced with nav input) ───
+  const input = useChatInputBridge((s) => s.input);
+  const setInput = useChatInputBridge((s) => s.setInput);
+  const bridgeSetLoading = useChatInputBridge((s) => s.setLoading);
+  const bridgeSetSendMessage = useChatInputBridge((s) => s.setSendMessage);
+  const bridgeSetStopGeneration = useChatInputBridge((s) => s.setStopGeneration);
+  const bridgeSetOpenFilePicker = useChatInputBridge((s) => s.setOpenFilePicker);
+  const bridgeSetSuperExpertEnabled = useChatInputBridge((s) => s.setSuperExpertEnabled);
+  const bridgeSetToggleSuperExpert = useChatInputBridge((s) => s.setToggleSuperExpert);
+
+  // ─── Sync local state → bridge store for nav input ───
+  useEffect(() => { bridgeSetLoading(loading); }, [loading, bridgeSetLoading]);
+  useEffect(() => {
+    bridgeSetSendMessage(() => { if (input.trim()) sendMessage(input); });
+    bridgeSetStopGeneration(() => stopGeneration());
+    bridgeSetOpenFilePicker(() => fileInputRef.current?.click());
+    bridgeSetSuperExpertEnabled(!!settings.superExpertEnabled);
+    bridgeSetToggleSuperExpert(() => {
+      if (!settings.superExpertEnabled) {
+        setShowSuperExpertWarning(true);
+      } else {
+        updateSettings({ superExpertEnabled: false });
+      }
+    });
+    return () => {
+      bridgeSetSendMessage(null);
+      bridgeSetStopGeneration(null);
+      bridgeSetOpenFilePicker(null);
+      bridgeSetToggleSuperExpert(null);
+    };
+  }, [input, sendMessage, stopGeneration, settings.superExpertEnabled, bridgeSetSendMessage, bridgeSetStopGeneration, bridgeSetOpenFilePicker, bridgeSetSuperExpertEnabled, bridgeSetToggleSuperExpert]);
 
   // Fetch user modules when the modal opens
   useEffect(() => {
@@ -918,142 +949,97 @@ export function MedOneXChat() {
             </div>
           </div>
         )}
+      </main>
 
-        {/* Floating Input Island - Fixed Bottom (pb-20 for MobileBottomNav) */}
-        <div className={cn("flex-shrink-0 pb-20 md:pb-3 pt-4 flex justify-center relative z-10", isDark ? "bg-black" : "bg-white")}>
-          <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
-            <div
-              className={cn(
-                files.length > 0 ? "rounded-[28px]" : "rounded-full",
-                "border transition-all duration-200",
-                inputFocused
-                  ? isDark ? "border-gray-500" : "border-gray-300"
-                  : isDark ? "border-white/10" : "border-gray-200/80",
-                isDark ? "bg-[#0d0d12]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl",
-                "shadow-sm"
-              )}
-            >
-              <div className="flex items-center gap-0.5 px-1.5 py-1">
-                {/* ── Left: Attachment ── */}
+      {/* Desktop inline chat input (nav handles mobile) */}
+      <div className="hidden md:flex flex-shrink-0 pt-4 pb-3 justify-center">
+        <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
+          <div
+            className={cn(
+              "rounded-full border transition-all duration-200 shadow-sm",
+              inputFocused
+                ? isDark ? "border-gray-500" : "border-gray-300"
+                : isDark ? "border-white/10" : "border-gray-200/80",
+              isDark ? "bg-[#0d0d12]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
+            )}
+          >
+            <div className="flex items-center gap-0.5 px-1.5 py-1">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+              >
+                {files.some(f => f.loading) ? (
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                ) : (
+                  <Paperclip size={16} />
+                )}
+              </button>
+              <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
+              <textarea
+                ref={inputRef}
+                rows={1}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                placeholder="Message MedOneX Expert..."
+                className={cn(
+                  "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar",
+                  isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
+                )}
+              />
+              <div className="flex items-center gap-1 flex-shrink-0">
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
-                >
-                  {files.some(f => f.loading) ? (
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  ) : (
-                    <Paperclip size={16} />
-                  )}
-                </button>
-                <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
-
-                {/* ── Middle: Text Input ── */}
-                <textarea
-                  ref={inputRef}
-                  rows={1}
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  placeholder="Message MedOneX Expert..."
+                  onClick={() => {
+                    if (!settings.superExpertEnabled) {
+                      setShowSuperExpertWarning(true);
+                    } else {
+                      updateSettings({ superExpertEnabled: false });
+                    }
+                  }}
                   className={cn(
-                    "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar",
-                    isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all select-none",
+                    settings.superExpertEnabled
+                      ? "super-expert-pill-active text-indigo-300"
+                      : isDark
+                        ? "text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                        : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                   )}
-                />
-
-                {/* ── Right: Super Expert Pill + Send ── */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {/* Super Expert Pill */}
-                  <button
-                    onClick={() => {
-                      if (!settings.superExpertEnabled) {
-                        setShowSuperExpertWarning(true);
-                      } else {
-                        updateSettings({ superExpertEnabled: false });
-                      }
-                    }}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all select-none",
-                      settings.superExpertEnabled
-                        ? "super-expert-pill-active text-indigo-300"
-                        : isDark
-                          ? "text-gray-500 hover:text-gray-300 hover:bg-white/5"
-                          : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
-                    )}
-                    title="Super Expert — Multi-provider AI"
-                  >
-                    <Lightning size={12} weight={settings.superExpertEnabled ? "fill" : "regular"} />
-                    <span>Super Expert</span>
+                >
+                  <Lightning size={12} weight={settings.superExpertEnabled ? "fill" : "regular"} />
+                  <span>Super Expert</span>
+                </button>
+                {loading ? (
+                  <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30">
+                    <Stop size={14} weight="fill" />
                   </button>
-
-                  {/* Send / Stop */}
-                  {loading ? (
-                    <button
-                      onClick={stopGeneration}
-                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                    >
-                      <Stop size={14} weight="fill" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleSend}
-                      disabled={!input.trim() && files.length === 0}
-                      className={cn(
-                        "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
-                        input.trim() || files.length > 0
-                          ? isDark
-                            ? "bg-white text-black hover:bg-gray-200 shadow-md"
-                            : "bg-black text-white hover:bg-gray-800 shadow-md"
-                          : isDark
-                            ? "bg-white/5 text-gray-500"
-                            : "bg-black/5 text-gray-300"
-                      )}
-                    >
-                      <ArrowUp size={16} weight="bold" />
-                    </button>
-                  )}
-                </div>
+                ) : (
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim() && files.length === 0}
+                    className={cn(
+                      "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                      input.trim() || files.length > 0
+                        ? isDark ? "bg-white text-black hover:bg-gray-200 shadow-md" : "bg-black text-white hover:bg-gray-800 shadow-md"
+                        : isDark ? "bg-white/5 text-gray-500" : "bg-black/5 text-gray-300"
+                    )}
+                  >
+                    <ArrowUp size={16} weight="bold" />
+                  </button>
+                )}
               </div>
-              {files.length > 0 && (
-                <div className={cn("flex gap-1.5 px-3 pb-2.5 overflow-x-auto no-scrollbar", isDark ? "border-t border-white/5" : "border-t border-gray-100")}>
-                  {files.map((f, i) => (
-                    <div key={i} className="relative flex-shrink-0 mt-2">
-                      <div className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden",
-                        isDark ? "bg-white/5 border border-white/10" : "bg-gray-50 border border-gray-200"
-                      )}>
-                        {f.mimeType.startsWith('image/') ? (
-                          <img src={f.data} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center p-1">
-                            <NoteBlank size={14} className={isDark ? "text-gray-400" : "text-gray-500"} />
-                            <span className={cn("text-[8px] mt-0.5 text-center truncate max-w-[60px]", isDark ? "text-gray-500" : "text-gray-400")}>{f.name}</span>
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => setFiles(files.filter((_, j) => j !== i))}
-                        className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center shadow hover:bg-red-600 transition-colors"
-                      >
-                        <X size={8} weight="bold" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-between mt-1.5 px-1">
-              <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>MedOneX Expert</span>
-              <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{limits.used}/{limits.limit}</span>
             </div>
           </div>
+          <div className="flex items-center justify-between mt-1.5 px-1">
+            <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>MedOneX Expert</span>
+            <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{limits.used}/{limits.limit}</span>
+          </div>
         </div>
-      </main>
+      </div>
 
       <DrQConfigPanel isOpen={showConfig} settings={settings} onUpdate={updateSettings} onClose={() => setShowConfig(false)} />
 

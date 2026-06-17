@@ -80,6 +80,54 @@ export function extractFirstLink(text: string): string | null {
 }
 
 /**
+ * Extracts all video URLs from text (YouTube, Telegram, direct video links).
+ */
+export function extractAllVideoUrls(text: string): string[] {
+  const urls: string[] = [];
+  const urlPattern = /https?:\/\/[^\s]+/g;
+  const matches = text.match(urlPattern);
+  if (!matches) return urls;
+
+  for (const url of matches) {
+    // YouTube
+    const ytId = extractYouTubeId(url);
+    if (ytId) {
+      urls.push(`https://www.youtube.com/watch?v=${ytId}`);
+      continue;
+    }
+    // Telegram
+    if (url.includes('t.me/') || url.includes('telegram.me/')) {
+      urls.push(url);
+      continue;
+    }
+    // Direct video extensions
+    const cleanUrl = url.toLowerCase().split('?')[0].split('#')[0];
+    if (cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.mov') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.avi') || cleanUrl.endsWith('.mkv')) {
+      urls.push(url);
+      continue;
+    }
+    // API video endpoints
+    if (url.includes('/api/v1/telegram/') || url.includes('/api/v1/files/telegram/preview')) {
+      urls.push(url);
+    }
+  }
+  return urls;
+}
+
+/**
+ * Removes all video URLs from text so they don't render as raw links.
+ */
+export function stripVideoUrls(text: string): string {
+  const videoUrls = extractAllVideoUrls(text);
+  if (videoUrls.length === 0) return text;
+  let result = text;
+  for (const url of videoUrls) {
+    result = result.replace(url, "");
+  }
+  return result.replace(/\n{2,}/g, "\n").trim();
+}
+
+/**
  * Extracts hashtags (#word) from text content.
  */
 export function extractHashtags(text: string): string[] {

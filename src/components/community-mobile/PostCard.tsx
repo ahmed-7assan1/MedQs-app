@@ -36,6 +36,8 @@ import {
   totalReactions,
   extractYouTubeId,
   extractFirstLink,
+  extractAllVideoUrls,
+  stripVideoUrls,
   getInitials,
 } from "./utils";
 import { toggleReaction, savePost, sharePost, deletePost, toggleBlock } from "./api";
@@ -43,6 +45,7 @@ import { useCommunityStore } from "./store";
 import { useRouter } from "next/navigation";
 import RichText from "./RichText";
 import ImageCarousel from "./ImageCarousel";
+import VideoCarousel from "./VideoCarousel";
 import YouTubePlayer from "./YouTubePlayer";
 import LinkPreview from "./LinkPreview";
 
@@ -83,7 +86,12 @@ export default function PostCard({
 
   const isOwnPost = post.author?.id === currentUserId;
   const youtubeId = extractYouTubeId(post.content);
-  const linkUrl = !youtubeId ? extractFirstLink(post.content) : null;
+  const videoUrls = extractAllVideoUrls(post.content);
+  const allUrls = post.content.match(/https?:\/\/[^\s]+/g) || [];
+  const videoUrlSet = new Set(videoUrls.map((u) => u.replace(/\/+$/, "")));
+  const remainingLinkUrl = allUrls.find(
+    (u) => !videoUrlSet.has(u.replace(/\/+$/, ""))
+  ) ?? null;
   const total = totalReactions(post.reactionCounts);
   const topReactions = REACTION_ORDER.filter((type) => post.reactionCounts[type] > 0)
     .sort((a, b) => post.reactionCounts[b] - post.reactionCounts[a])
@@ -300,22 +308,22 @@ export default function PostCard({
 
       {/* Content */}
       <div className="mt-3">
-        <RichText content={post.content} onHashtagClick={onHashtagClick} />
+        <RichText content={stripVideoUrls(post.content)} onHashtagClick={onHashtagClick} />
       </div>
 
-      {/* Media */}
-      {youtubeId && (
+      {/* Video carousel — inline embedded videos with swipe */}
+      {videoUrls.length > 0 && <VideoCarousel urls={videoUrls} />}
+
+      {/* Images */}
+      {post.attachments.filter((a) => a.type === "image").length > 0 && (
         <div className="mt-3">
-          <YouTubePlayer videoId={youtubeId} />
+          <ImageCarousel images={post.attachments.filter((a) => a.type === "image").map((a) => a.url)} />
         </div>
       )}
-      {!youtubeId && post.attachments.length > 0 && (
+
+      {/* Audio */}
+      {post.attachments.filter((a) => a.type === "audio").length > 0 && (
         <div className="mt-3 space-y-2">
-          {/* Images */}
-          {post.attachments.filter((a) => a.type === "image").length > 0 && (
-            <ImageCarousel images={post.attachments.filter((a) => a.type === "image").map((a) => a.url)} />
-          )}
-          {/* Audio */}
           {post.attachments.filter((a) => a.type === "audio").map((att) => (
             <div key={att.id} className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -328,7 +336,12 @@ export default function PostCard({
               <audio src={att.url} controls className="flex-1 h-8" />
             </div>
           ))}
-          {/* Files */}
+        </div>
+      )}
+
+      {/* Files */}
+      {post.attachments.filter((a) => a.type === "file").length > 0 && (
+        <div className="mt-3 space-y-2">
           {post.attachments.filter((a) => a.type === "file").map((att) => (
             <a
               key={att.id}
@@ -345,14 +358,18 @@ export default function PostCard({
           ))}
         </div>
       )}
-      {!youtubeId && !post.attachments.length && post.imageUrl && (
+
+      {/* Legacy imageUrl fallback */}
+      {post.attachments.length === 0 && post.imageUrl && (
         <div className="mt-3">
           <ImageCarousel images={[post.imageUrl]} />
         </div>
       )}
-      {linkUrl && (
+
+      {/* Link preview for non-video links only */}
+      {remainingLinkUrl && !videoUrls.length && (
         <div className="mt-3">
-          <LinkPreview url={linkUrl} />
+          <LinkPreview url={remainingLinkUrl} />
         </div>
       )}
 

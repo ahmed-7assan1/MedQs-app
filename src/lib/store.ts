@@ -204,3 +204,43 @@ export const useCommunityShareStore = create<CommunityShareStore>((set) => ({
   sharedQuestion: null,
   setSharedQuestion: (sharedQuestion) => set({ sharedQuestion }),
 }));
+
+// ─── AI Chat Input Bridge (page ↔ bottom nav) ────────────────────────────────
+
+interface ChatInputBridge {
+  input: string;
+  setInput: (v: string) => void;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+  sendMessage: (() => void) | null;
+  setSendMessage: (fn: (() => void) | null) => void;
+  stopGeneration: (() => void) | null;
+  setStopGeneration: (fn: (() => void) | null) => void;
+  inputRef: HTMLTextAreaElement | null;
+  setInputRef: (el: HTMLTextAreaElement | null) => void;
+  openFilePicker: (() => void) | null;
+  setOpenFilePicker: (fn: (() => void) | null) => void;
+  superExpertEnabled: boolean;
+  setSuperExpertEnabled: (v: boolean) => void;
+  toggleSuperExpert: (() => void) | null;
+  setToggleSuperExpert: (fn: (() => void) | null) => void;
+}
+
+export const useChatInputBridge = create<ChatInputBridge>((set) => ({
+  input: "",
+  setInput: (input) => set({ input }),
+  loading: false,
+  setLoading: (loading) => set({ loading }),
+  sendMessage: null,
+  setSendMessage: (sendMessage) => set({ sendMessage }),
+  stopGeneration: null,
+  setStopGeneration: (stopGeneration) => set({ stopGeneration }),
+  inputRef: null,
+  setInputRef: (inputRef) => set({ inputRef }),
+  openFilePicker: null,
+  setOpenFilePicker: (openFilePicker) => set({ openFilePicker }),
+  superExpertEnabled: false,
+  setSuperExpertEnabled: (superExpertEnabled) => set({ superExpertEnabled }),
+  toggleSuperExpert: null,
+  setToggleSuperExpert: (toggleSuperExpert) => set({ toggleSuperExpert }),
+}));
