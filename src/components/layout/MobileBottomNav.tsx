@@ -97,7 +97,7 @@ function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
         className={cn(
           "h-6 w-6 transition-colors duration-200",
           active
-            ? "text-primary dark:text-primary"
+            ? "text-gray-900 dark:text-white"
             : "text-gray-400 dark:text-white/40"
         )}
       />
@@ -105,7 +105,7 @@ function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
         className={cn(
           "text-[10px] font-semibold tracking-wide transition-colors duration-200",
           active
-            ? "text-primary dark:text-primary"
+            ? "text-gray-900 dark:text-white"
             : "text-gray-400 dark:text-white/35"
         )}
       >
@@ -363,7 +363,7 @@ export function MobileBottomNav() {
                   className={cn(
                     "h-6 w-6 transition-colors duration-200",
                     activeExtraPage
-                      ? "text-primary dark:text-primary"
+                      ? "text-gray-900 dark:text-white"
                       : "text-gray-400 dark:text-white/40"
                   )}
                 />
@@ -377,7 +377,7 @@ export function MobileBottomNav() {
                 className={cn(
                   "text-[10px] font-semibold tracking-wide transition-colors duration-200",
                   activeExtraPage
-                    ? "text-primary dark:text-primary"
+                    ? "text-gray-900 dark:text-white"
                     : "text-gray-400 dark:text-white/35"
                 )}
               >
