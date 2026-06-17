@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
@@ -20,6 +21,10 @@ import {
   Trash2,
   Flag,
   EyeOff,
+  FileText,
+  Download,
+  Copy,
+  Ban,
   type LucideIcon,
 } from "lucide-react";
 
@@ -33,8 +38,9 @@ import {
   extractFirstLink,
   getInitials,
 } from "./utils";
-import { toggleReaction, savePost, sharePost, deletePost } from "./api";
+import { toggleReaction, savePost, sharePost, deletePost, toggleBlock } from "./api";
 import { useCommunityStore } from "./store";
+import { useRouter } from "next/navigation";
 import RichText from "./RichText";
 import ImageCarousel from "./ImageCarousel";
 import YouTubePlayer from "./YouTubePlayer";
@@ -67,6 +73,7 @@ export default function PostCard({
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
   const applyReaction = useCommunityStore((s) => s.applyReaction);
   const updatePost = useCommunityStore((s) => s.updatePost);
   const removePost = useCommunityStore((s) => s.removePost);
@@ -128,6 +135,26 @@ export default function PostCard({
     }
   }
 
+  async function handleCopyLink() {
+    setMenuOpen(false);
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/social/post/${post.id}`);
+    } catch {
+      // fallback
+    }
+  }
+
+  async function handleBlockUser() {
+    setMenuOpen(false);
+    if (!post.author?.id) return;
+    try {
+      await toggleBlock(post.author.id);
+      removePost(post.id);
+    } catch {
+      // surface via toast
+    }
+  }
+
   const authorName = post.isAnonymous ? "Anonymous" : post.author?.name ?? "Unknown";
   const backgroundClass =
     post.backgroundStyle && post.backgroundStyle !== "none"
@@ -140,41 +167,53 @@ export default function PostCard({
     >
       {/* Author row */}
       <div className="flex items-start justify-between gap-2">
-        <button
-          type="button"
-          onClick={() => !post.isAnonymous && post.author && onAuthorClick?.(post.author.id)}
-          className="flex items-center gap-2.5 text-left"
-        >
-          <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-muted">
-            {!post.isAnonymous && post.author?.avatarUrl ? (
-              <Image src={post.author.avatarUrl} alt="" fill className="object-cover" />
-            ) : (
+        {post.isAnonymous || !post.author ? (
+          <div className="flex items-center gap-2.5">
+            <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-muted">
               <div className="flex h-full w-full items-center justify-center text-xs font-medium text-muted-foreground">
-                {post.isAnonymous ? <EyeOff className="h-4 w-4" strokeWidth={1.5} /> : getInitials(authorName)}
+                <EyeOff className="h-4 w-4" strokeWidth={1.5} />
               </div>
-            )}
-          </div>
-          <div className="flex min-w-0 flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="truncate text-sm font-semibold text-foreground">{authorName}</span>
-              {!post.isAnonymous && post.author?.rankLabel && (
-                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  {post.author.rankLabel}
-                </span>
-              )}
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              {post.isPinned && <Pin className="h-3 w-3" strokeWidth={1.5} />}
-              <span>{formatRelativeTime(post.createdAt)}</span>
-              {post.forumName && (
-                <>
-                  <span>·</span>
-                  <span className="truncate">{post.forumName}</span>
-                </>
-              )}
+            <div className="flex min-w-0 flex-col">
+              <span className="text-sm font-semibold text-foreground">Anonymous</span>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {post.isPinned && <Pin className="h-3 w-3" strokeWidth={1.5} />}
+                <span>{formatRelativeTime(post.createdAt)}</span>
+                {post.forumName && <><span>·</span><span className="truncate">{post.forumName}</span></>}
+              </div>
             </div>
           </div>
-        </button>
+        ) : (
+          <Link
+            href={`/profile/u/${post.author.id}`}
+            className="flex items-center gap-2.5 text-left"
+          >
+            <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-muted">
+              {post.author.avatarUrl ? (
+                <Image src={post.author.avatarUrl} alt="" fill className="object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xs font-medium text-muted-foreground">
+                  {getInitials(authorName)}
+                </div>
+              )}
+            </div>
+            <div className="flex min-w-0 flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-sm font-semibold text-foreground">{authorName}</span>
+                {post.author.rankLabel && (
+                  <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    {post.author.rankLabel}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {post.isPinned && <Pin className="h-3 w-3" strokeWidth={1.5} />}
+                <span>{formatRelativeTime(post.createdAt)}</span>
+                {post.forumName && <><span>·</span><span className="truncate">{post.forumName}</span></>}
+              </div>
+            </div>
+          </Link>
+        )}
 
         <div className="relative">
           <button
@@ -218,15 +257,30 @@ export default function PostCard({
                       />
                     </>
                   ) : (
-                    <MenuItem
-                      icon={Flag}
-                      label="Report post"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        openReport("post", post.id);
-                      }}
-                    />
+                    <>
+                      <MenuItem
+                        icon={Flag}
+                        label="Report post"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          openReport("post", post.id);
+                        }}
+                      />
+                      {post.author && (
+                        <MenuItem
+                          icon={Ban}
+                          label="Block user"
+                          destructive
+                          onClick={handleBlockUser}
+                        />
+                      )}
+                    </>
                   )}
+                  <MenuItem
+                    icon={Copy}
+                    label="Copy link"
+                    onClick={handleCopyLink}
+                  />
                   {isAdmin && (
                     <MenuItem
                       icon={Pin}
@@ -256,8 +310,39 @@ export default function PostCard({
         </div>
       )}
       {!youtubeId && post.attachments.length > 0 && (
-        <div className="mt-3">
-          <ImageCarousel images={post.attachments.filter((a) => a.type === "image").map((a) => a.url)} />
+        <div className="mt-3 space-y-2">
+          {/* Images */}
+          {post.attachments.filter((a) => a.type === "image").length > 0 && (
+            <ImageCarousel images={post.attachments.filter((a) => a.type === "image").map((a) => a.url)} />
+          )}
+          {/* Audio */}
+          {post.attachments.filter((a) => a.type === "audio").map((att) => (
+            <div key={att.id} className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+              </div>
+              <audio src={att.url} controls className="flex-1 h-8" />
+            </div>
+          ))}
+          {/* Files */}
+          {post.attachments.filter((a) => a.type === "file").map((att) => (
+            <a
+              key={att.id}
+              href={att.url}
+              download={att.name}
+              className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 hover:bg-muted/40 transition-colors"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <FileText className="h-4 w-4" strokeWidth={1.5} />
+              </div>
+              <span className="flex-1 truncate text-sm text-foreground">{att.name ?? "Attachment"}</span>
+              <Download className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
+            </a>
+          ))}
         </div>
       )}
       {!youtubeId && !post.attachments.length && post.imageUrl && (
