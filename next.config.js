@@ -4,13 +4,75 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   register: true,
   scope: "/",
   reloadOnOnline: false,
+  cacheOnFrontendNav: true,
+  aggressiveFrontEndNavCaching: true,
   cacheStartUrl: true,
+  extendDefaultRuntimeCaching: true,
   fallbacks: {
     document: "/offline",
   },
   workboxOptions: {
     disableDevLogs: true,
+    // Don't precache anything — runtimeCaching handles all caching
+    exclude: [/.*/],
     navigateFallbackDenylist: [/^\/_next\//, /^\/api\//],
+    runtimeCaching: [
+      // ─── Tier 1: Core framework — CacheFirst (immutable, content-hashed) ───
+      {
+        urlPattern: /\/_next\/static\/chunks\/(framework|main|webpack|_app-pages-browser)/,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "next-core",
+          expiration: { maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 },
+        },
+      },
+      // ─── Tier 2: Page chunks — StaleWhileRevalidate (instant after first visit) ───
+      {
+        urlPattern: /\/_next\/static\/chunks\/pages\//,
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "next-pages",
+          expiration: { maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 },
+        },
+      },
+      // ─── Tier 3: Other static assets (media, images, fonts) ───
+      {
+        urlPattern: /\/_next\/static\/(media|images)\//,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "next-static",
+          expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 },
+        },
+      },
+      // ─── Tier 4: CSS chunks — CacheFirst ───
+      {
+        urlPattern: /\/_next\/static\/css\//,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "next-css",
+          expiration: { maxEntries: 30, maxAgeSeconds: 30 * 24 * 60 * 60 },
+        },
+      },
+      // ─── Tier 5: Navigation requests (HTML) — NetworkFirst, 3s timeout, fallback cache ───
+      {
+        urlPattern: /^\/(?!_next\/|api\/|favicon|icons\/)/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "next-navigation",
+          networkTimeoutSeconds: 3,
+          expiration: { maxEntries: 30, maxAgeSeconds: 7 * 24 * 60 * 60 },
+        },
+      },
+      // ─── Tier 6: App icons — CacheFirst ───
+      {
+        urlPattern: /\/icons\//,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "next-icons",
+          expiration: { maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 },
+        },
+      },
+    ],
   },
 });
 

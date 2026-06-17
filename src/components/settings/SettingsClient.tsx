@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { 
-  UserCircle2, 
-  GraduationCap, 
-  ChevronRight, 
-  Send, 
-  ShieldCheck, 
+import {
+  UserCircle2,
+  GraduationCap,
+  ChevronRight,
+  Send,
+  ShieldCheck,
   Palette,
   Sparkles,
   Bell,
@@ -21,7 +21,8 @@ import {
   EyeOff,
   CheckCircle2,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/store";
@@ -342,6 +343,38 @@ export function SettingsClient({ user }: SettingsClientProps) {
           </div>
         </div>
       ))}
+
+      {/* ── Clear App Cache ── */}
+      <div className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
+        <button
+          onClick={async () => {
+            if (!("caches" in window)) {
+              toast.error("Cache API not available in this browser.");
+              return;
+            }
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+            toast.success("App cache cleared! Reloading…");
+            setTimeout(() => window.location.reload(), 1200);
+          }}
+          className="flex items-center justify-between w-full group active:scale-[0.98] transition-transform"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-red-50 dark:bg-red-500/10 text-red-500">
+              <Trash2 className="h-5 w-5" />
+            </div>
+            <div className="text-left">
+              <h5 className="text-[13px] font-extrabold text-red-500 group-hover:text-red-400 transition-colors">
+                Clear App Cache
+              </h5>
+              <p className="text-[10px] font-semibold text-slate-400 dark:text-white/30 mt-0.5">
+                Free up storage &amp; reset cached pages
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-red-300 dark:text-red-500/30 transition-transform group-hover:translate-x-1" />
+        </button>
+      </div>
     </div>
   );
 }
