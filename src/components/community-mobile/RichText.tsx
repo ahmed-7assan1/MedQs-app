@@ -1,67 +1,57 @@
+// src/components/community-mobile/RichText.tsx
 "use client";
 
-import React, { useState } from "react";
+import { parseRichText } from "./utils";
 
 interface RichTextProps {
-  text: string;
-  collapsed?: boolean;
-  onExpand?: () => void;
+  content: string;
+  className?: string;
+  onHashtagClick?: (tag: string) => void;
 }
 
-const LIMIT = 200;
-
-function parseBold(text: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = [];
-  const regex = /\*\*(.+?)\*\*/g;
-  let last = 0;
-  let idx = 0;
-
-  text.split("\n").forEach((line, li) => {
-    if (li > 0) parts.push(<br key={`br-${li}`} />);
-    let match: RegExpExecArray | null;
-    let lineLast = 0;
-    while ((match = regex.exec(line)) !== null) {
-      if (match.index > lineLast) {
-        parts.push(<span key={`t-${idx++}`}>{line.slice(lineLast, match.index)}</span>);
-      }
-      parts.push(
-        <strong key={`b-${idx++}`} className="font-semibold">
-          {match[1]}
-        </strong>
-      );
-      lineLast = match.index + match[0].length;
-    }
-    if (lineLast < line.length) {
-      parts.push(<span key={`t-${idx++}`}>{line.slice(lineLast)}</span>);
-    }
-  });
-
-  return parts;
-}
-
-export function RichText({ text, collapsed, onExpand }: RichTextProps) {
-  const [localExpanded, setLocalExpanded] = useState(false);
-  const isCollapsed = collapsed && !localExpanded && text.length > LIMIT;
-  const display = isCollapsed ? text.slice(0, LIMIT) : text;
+export default function RichText({ content, className, onHashtagClick }: RichTextProps) {
+  const segments = parseRichText(content);
 
   return (
-    <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
-      {parseBold(display)}
-      {isCollapsed && (
-        <>
-          ...{" "}
-          <button
-            onClick={() => {
-              setLocalExpanded(true);
-              onExpand?.();
-            }}
-            className="font-semibold text-xs"
-            style={{ color: "var(--brand)" }}
-          >
-            more
-          </button>
-        </>
-      )}
+    <p className={`text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words ${className ?? ""}`}>
+      {segments.map((segment, index) => {
+        switch (segment.type) {
+          case "bold":
+            return (
+              <strong key={index} className="font-semibold">
+                {segment.value}
+              </strong>
+            );
+          case "italic":
+            return (
+              <em key={index} className="italic">
+                {segment.value}
+              </em>
+            );
+          case "code":
+            return (
+              <code
+                key={index}
+                className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[13px]"
+              >
+                {segment.value}
+              </code>
+            );
+          case "hashtag":
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => onHashtagClick?.(segment.value.slice(1))}
+                className="text-primary hover:underline"
+              >
+                {segment.value}
+              </button>
+            );
+          default:
+            return <span key={index}>{segment.value}</span>;
+        }
+      })}
     </p>
   );
 }

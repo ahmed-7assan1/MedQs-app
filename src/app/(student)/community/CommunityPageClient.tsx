@@ -41,8 +41,7 @@ export function CommunityPageClient({
     <CommunityFeed
       currentUserId={currentUserId}
       currentUserName={currentUserName}
-      currentUserImage={currentUserImage}
-      isMobile={true}
+      currentUserAvatarUrl={currentUserImage}
     />
   );
 }

@@ -52,6 +52,8 @@ const nextConfig = {
       { protocol: "https", hostname: "image.pollinations.ai" },
       { protocol: "https", hostname: "*.telegram.org" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "img.youtube.com" },
+      { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
 

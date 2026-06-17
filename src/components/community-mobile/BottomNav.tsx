@@ -1,93 +1,71 @@
+// src/components/community-mobile/BottomNav.tsx
 "use client";
 
-import { motion } from "framer-motion";
-import {
-  House,
-  Compass,
-  Plus,
-  Bell,
-  User,
-} from "@phosphor-icons/react";
-import type { TabType } from "./types";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Compass, Plus, Bell, User } from "lucide-react";
+
+import { useCommunityStore } from "./store";
 
 interface BottomNavProps {
-  active: TabType;
-  onTab: (t: TabType) => void;
+  unreadNotificationCount?: number;
 }
 
-const TABS: { key: TabType; label: string; icon: typeof House }[] = [
-  { key: "home", label: "Home", icon: House },
-  { key: "explore", label: "Explore", icon: Compass },
-    { key: "create", label: "", icon: Plus },
-  { key: "activity", label: "Activity", icon: Bell },
-  { key: "profile", label: "Profile", icon: User },
-];
+export default function BottomNav({ unreadNotificationCount = 0 }: BottomNavProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const openComposer = useCommunityStore((s) => s.openComposer);
 
-export function BottomNav({ active, onTab }: BottomNavProps) {
+  const tabs = [
+    { id: "home", icon: Home, href: "/social", label: "Home" },
+    { id: "explore", icon: Compass, href: "/social/explore", label: "Explore" },
+    { id: "create", icon: Plus, href: null, label: "Create" },
+    { id: "notifications", icon: Bell, href: "/social/notifications", label: "Notifications" },
+    { id: "profile", icon: User, href: "/social/profile", label: "Profile" },
+  ] as const;
+
   return (
-    <div className="px-2 pb-2">
-      <div
-        className="community-glass rounded-2xl px-3 py-2 flex items-center justify-around"
-      >
-        {TABS.map(({ key, label, icon: Icon }) => {
-          const isActive = active === key;
-          const isCreate = key === "create";
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/80 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl">
+      <div className="flex items-center justify-between">
+        {tabs.map((tab) => {
+          const isActive = tab.href ? pathname === tab.href : false;
+          const Icon = tab.icon;
 
-          if (isCreate) {
+          if (tab.id === "create") {
             return (
-              <motion.button
-                key={key}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => onTab(key)}
-                className="flex items-center justify-center rounded-full"
-                style={{
-                  width: 44,
-                  height: 44,
-                  background: "var(--brand)",
-                  boxShadow: "0 4px 16px rgba(110, 64, 255, 0.4)",
-                }}
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => openComposer()}
+                className="flex flex-1 items-center justify-center"
+                aria-label="Create post"
               >
-                <Icon size={20} weight="bold" className="text-white" />
-              </motion.button>
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95">
+                  <Icon className="h-5 w-5" strokeWidth={1.5} />
+                </span>
+              </button>
             );
           }
 
           return (
             <button
-              key={key}
-              onClick={() => onTab(key)}
-              className="flex flex-col items-center gap-0.5 relative px-3 py-1"
-              style={{ minWidth: 48 }}
+              key={tab.id}
+              type="button"
+              onClick={() => tab.href && router.push(tab.href)}
+              className="relative flex flex-1 flex-col items-center gap-0.5 py-1.5"
+              aria-label={tab.label}
             >
               <Icon
-                size={20}
-                weight={isActive ? "fill" : "regular"}
-                style={{
-                  color: isActive ? "var(--brand)" : "var(--text-muted)",
-                  transition: "color 0.2s",
-                }}
+                className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                strokeWidth={1.5}
+                fill={isActive ? "currentColor" : "none"}
               />
-              {label && (
-                <span
-                  className="text-[10px] font-medium"
-                  style={{
-                    color: isActive ? "var(--brand)" : "var(--text-muted)",
-                  }}
-                >
-                  {label}
-                </span>
-              )}
-              {isActive && (
-                <motion.div
-                  layoutId="nav-dot"
-                  className="absolute -bottom-0.5 w-1 h-1 rounded-full"
-                  style={{ background: "var(--brand)" }}
-                />
+              {tab.id === "notifications" && unreadNotificationCount > 0 && (
+                <span className="absolute right-[28%] top-0.5 h-2 w-2 rounded-full bg-primary" />
               )}
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

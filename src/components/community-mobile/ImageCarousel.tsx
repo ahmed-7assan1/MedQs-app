@@ -1,69 +1,114 @@
+// src/components/community-mobile/ImageCarousel.tsx
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { getImageGridLayout } from "./utils";
 
 interface ImageCarouselProps {
-  images: { url: string; caption?: string }[];
+  images: string[];
 }
 
-export function ImageCarousel({ images }: ImageCarouselProps) {
-  const [index, setIndex] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-
-  const handleScroll = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    const idx = Math.round(el.scrollLeft / el.offsetWidth);
-    setIndex(idx);
-  }, []);
+export default function ImageCarousel({ images }: ImageCarouselProps) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   if (images.length === 0) return null;
 
+  const { containerClass, itemClass } = getImageGridLayout(images.length);
+  const visibleImages = images.slice(0, 4);
+  const extraCount = images.length - 4;
+
   return (
-    <div className="relative overflow-hidden rounded-xl" style={{ maxHeight: 360 }}>
-      <div
-        ref={ref}
-        onScroll={handleScroll}
-        className="community-swipe-container"
-      >
-        {images.map((img, i) => (
-          <div key={i} className="community-swipe-slide relative">
-            <img
-              src={img.url}
-              alt={img.caption || ""}
-              className="w-full object-cover select-none pointer-events-none"
-              style={{ maxHeight: 360, minHeight: 200, background: "var(--bg-secondary)" }}
-              draggable={false}
+    <>
+      <div className={`${containerClass} overflow-hidden rounded-xl`}>
+        {visibleImages.map((src, index) => (
+          <button
+            key={src + index}
+            type="button"
+            onClick={() => setLightboxIndex(index)}
+            className={`relative overflow-hidden bg-muted ${itemClass(index)}`}
+          >
+            <Image
+              src={src}
+              alt=""
+              fill
+              sizes="(max-width: 480px) 100vw, 400px"
+              className="object-cover"
             />
-            {img.caption && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                <span className="text-xs text-white/70">{img.caption}</span>
+            {index === 3 && extraCount > 0 && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <span className="text-base font-semibold text-white">+{extraCount}</span>
               </div>
             )}
-          </div>
+          </button>
         ))}
       </div>
 
-      {images.length > 1 && (
-        <>
-          <div className="absolute top-3 right-3 community-glass-card rounded-full px-2 py-0.5 text-xs tabular-nums font-medium" style={{ color: "var(--text-primary)" }}>
-            {index + 1} / {images.length}
-          </div>
-          <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1">
-            {images.map((_, i) => (
-              <div
-                key={i}
-                className="rounded-full transition-all duration-300"
-                style={{
-                  width: i === index ? 18 : 6,
-                  height: 4,
-                  background: i === index ? "var(--brand)" : "rgba(255,255,255,0.4)",
-                }}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(null)}
+              className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxIndex((i) => (i === null ? 0 : (i - 1 + images.length) % images.length));
+                  }}
+                  className="absolute left-2 rounded-full bg-white/10 p-2 text-white"
+                  aria-label="Previous"
+                >
+                  <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxIndex((i) => (i === null ? 0 : (i + 1) % images.length));
+                  }}
+                  className="absolute right-2 rounded-full bg-white/10 p-2 text-white"
+                  aria-label="Next"
+                >
+                  <ChevronRight className="h-5 w-5" strokeWidth={1.5} />
+                </button>
+              </>
+            )}
+
+            <motion.div
+              key={lightboxIndex}
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="relative h-[70vh] w-[90vw]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={images[lightboxIndex]}
+                alt=""
+                fill
+                sizes="90vw"
+                className="object-contain"
               />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

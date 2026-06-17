@@ -1,414 +1,272 @@
+// src/components/community-mobile/CommunityFeed.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
-import toast from "react-hot-toast";
-import { useThemeStore } from "@/lib/store";
-import "@/styles/community-mobile.css";
-import { PostCard } from "./PostCard";
-import { CommentsSheet } from "./CommentsSheet";
-import { PostComposer } from "./PostComposer";
-import { FilterPills } from "./FilterPills";
-import type { Post, Comment } from "./types";
-import { cn } from "./utils";
-import { SparklesIcon } from "@heroicons/react/24/solid";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { RefreshCw } from "lucide-react";
+
+import type { Post } from "./types";
+import { fetchForums, fetchForumPosts } from "./api";
+import { useCommunityStore } from "./store";
+import PostCard from "./PostCard";
+import PostComposer from "./PostComposer";
+import CommentsSheet from "./CommentsSheet";
+import ReportModal from "./ReportModal";
 
 interface CommunityFeedProps {
   currentUserId: string;
   currentUserName: string;
-  currentUserImage?: string | null;
-  initialPosts?: Post[];
-  isMobile: boolean;
+  currentUserAvatarUrl?: string | null;
+  isAdmin?: boolean;
 }
 
-const FILTERS = [
-  { key: "latest", label: "Latest", icon: "🔥" },
-  { key: "trending", label: "Trending", icon: "🚀" },
-  { key: "media", label: "Media", icon: "📸" },
-  { key: "pinned", label: "Pinned", icon: "📌" },
-];
-
-const API_BASE = "/api/v1";
+const PULL_THRESHOLD = 70;
 
 export function CommunityFeed({
   currentUserId,
   currentUserName,
-  currentUserImage,
-  initialPosts = [],
-  isMobile,
+  currentUserAvatarUrl,
+  isAdmin = false,
 }: CommunityFeedProps) {
-  const { theme, setTheme } = useThemeStore();
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("latest");
-  const [loading, setLoading] = useState(initialPosts.length === 0);
-  const [commentPostId, setCommentPostId] = useState<string | null>(null);
-  const [showComposer, setShowComposer] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const forums = useCommunityStore((s) => s.forums);
+  const activeForumId = useCommunityStore((s) => s.activeForumId);
+  const activeFilter = useCommunityStore((s) => s.activeFilter);
+  const posts = useCommunityStore((s) => s.posts);
+  const setForums = useCommunityStore((s) => s.setForums);
+  const setActiveFilter = useCommunityStore((s) => s.setActiveFilter);
+  const setPosts = useCommunityStore((s) => s.setPosts);
+  const appendPosts = useCommunityStore((s) => s.appendPosts);
+  const setFeedScrolled = useCommunityStore((s) => s.setFeedScrolled);
 
-  const isDark = theme === "dark" || (theme === "system" &&
-    (typeof window !== "undefined" ? window.matchMedia("(prefers-color-scheme: dark)").matches : false));
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const effectiveTheme = isDark ? "dark" : "light";
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const pullY = useMotionValue(0);
+  const scrollRAF = useRef<number | null>(null);
 
-  // Fetch posts from real API
-  const fetchPosts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_BASE}/forums?type=GLOBAL`);
-      if (!res.ok) throw new Error("Failed to fetch forums");
-      const forums = await res.json();
-      const globalForum = Array.isArray(forums) ? forums.find((f: any) => f.type === "GLOBAL") : null;
-      if (!globalForum) {
-        setPosts([]);
-        return;
-      }
-      const postsRes = await fetch(`${API_BASE}/forums/${globalForum.id}/posts?page=1&limit=20`);
-      const data = await postsRes.json();
-      const rawPosts = data.posts || data || [];
+  const handleFeedScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const top = e.currentTarget.scrollTop;
+    if (scrollRAF.current !== null) return;
+    scrollRAF.current = requestAnimationFrame(() => {
+      scrollRAF.current = null;
+      setFeedScrolled(top > 30);
+    });
+  }, [setFeedScrolled]);
+  const pullIndicatorOpacity = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
+  const pullIndicatorRotate = useTransform(pullY, [0, PULL_THRESHOLD], [0, 180]);
+  const touchStartY = useRef<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-      const mapped: Post[] = (Array.isArray(rawPosts) ? rawPosts : []).map((p: any) => ({
-        id: p.id,
-        author: {
-          id: p.author?.id || "unknown",
-          name: p.author?.name || "Unknown",
-          image: p.author?.image || null,
-          avatar: p.author?.name ? p.author.name.charAt(0).toUpperCase() : "?",
-          avatarColor: p.author?.color || "#6e40ff",
-          verified: p.author?.role === "ADMIN" || p.author?.role === "SUPER_ADMIN",
-          role: p.author?.role,
-        },
-        timestamp: formatTimeAgo(p.createdAt),
-        text: p.content || "",
-        tags: p.hashtags?.map((h: any) => h.hashtag?.name ? `#${h.hashtag.name}` : "") || [],
-        media: p.imageUrl ? [{ type: "image" as const, url: p.imageUrl }] : [],
-        attachments: [],
-        reactions: [
-          { emoji: "❤️", count: p._count?.likes || 0, reacted: p.likedByMe || false },
-          { emoji: "🔥", count: Math.floor(Math.random() * 50), reacted: false },
-          { emoji: "💯", count: Math.floor(Math.random() * 30), reacted: false },
-        ],
-        commentCount: p._count?.comments || 0,
-        shareCount: p._count?.shares || 0,
-        viewCount: `${Math.floor(Math.random() * 50) + 1}K`,
-        isOwner: p.author?.id === currentUserId,
-        saved: p.savedByMe || false,
-      }));
-
-      setPosts(mapped);
-    } catch (err) {
-      console.error("Failed to load posts:", err);
-      toast.error("Failed to load community posts");
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUserId]);
-
+  // Load forums once
   useEffect(() => {
-    if (isMobile) fetchPosts();
-  }, [isMobile, fetchPosts]);
+    fetchForums()
+      .then(setForums)
+      .catch(() => setError("Couldn't load forums."));
+  }, [setForums]);
 
-  // Interactions
-  const handleLike = async (postId: string) => {
-    try {
-      await fetch(`${API_BASE}/posts/${postId}/like`, { method: "POST" });
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? {
-                ...p,
-                reactions: p.reactions.map((r) =>
-                  r.emoji === "❤️"
-                    ? { ...r, count: r.reacted ? r.count - 1 : r.count + 1, reacted: !r.reacted }
-                    : r
-                ),
-              }
-            : p
-        )
-      );
-    } catch {
-      toast.error("Failed to toggle like");
-    }
-  };
+  const loadPosts = useCallback(
+    async (forumId: string, options: { reset?: boolean } = {}) => {
+      try {
+        const response = await fetchForumPosts(forumId, {
+          cursor: options.reset ? undefined : cursor ?? undefined,
+        });
+        if (options.reset) {
+          setPosts(response.items);
+        } else {
+          appendPosts(response.items);
+        }
+        setCursor(response.nextCursor);
+        setHasMore(response.hasMore);
+        setError(null);
+      } catch {
+        setError("Couldn't load posts. Pull down to try again.");
+      }
+    },
+    [cursor, setPosts, appendPosts]
+  );
 
-  const handleReact = async (postId: string, emoji: string) => {
-    if (emoji === "❤️") {
-      await handleLike(postId);
-      return;
-    }
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              reactions: p.reactions.map((r) =>
-                r.emoji === emoji
-                  ? { ...r, count: r.reacted ? r.count - 1 : r.count + 1, reacted: !r.reacted }
-                  : r
-              ),
-            }
-          : p
-      )
+  // Reload feed when forum changes
+  useEffect(() => {
+    if (!activeForumId) return;
+    setIsInitialLoading(true);
+    setCursor(null);
+    setHasMore(true);
+    loadPosts(activeForumId, { reset: true }).finally(() => setIsInitialLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeForumId]);
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    if (!sentinelRef.current || !activeForumId) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && hasMore && !isFetchingMore && !isInitialLoading) {
+          setIsFetchingMore(true);
+          loadPosts(activeForumId).finally(() => setIsFetchingMore(false));
+        }
+      },
+      { rootMargin: "200px" }
     );
-  };
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [activeForumId, hasMore, isFetchingMore, isInitialLoading, loadPosts]);
 
-  const handleSave = async (postId: string) => {
-    try {
-      await fetch(`${API_BASE}/posts/${postId}/save`, { method: "POST" });
-      setPosts((prev) =>
-        prev.map((p) => (p.id === postId ? { ...p, saved: !p.saved } : p))
-      );
-    } catch {
-      toast.error("Failed to save post");
+  // Reset feedScrolled on unmount
+  useEffect(() => {
+    return () => setFeedScrolled(false);
+  }, [setFeedScrolled]);
+
+  async function handleRefresh() {
+    if (!activeForumId || isRefreshing) return;
+    setIsRefreshing(true);
+    setCursor(null);
+    setHasMore(true);
+    await loadPosts(activeForumId, { reset: true });
+    setIsRefreshing(false);
+  }
+
+  // Pull-to-refresh gesture handling
+  function handleTouchStart(e: React.TouchEvent) {
+    if (scrollContainerRef.current && scrollContainerRef.current.scrollTop <= 0) {
+      touchStartY.current = e.touches[0].clientY;
     }
-  };
+  }
 
-  const handleShare = async (postId: string) => {
-    try {
-      await fetch(`${API_BASE}/posts/${postId}/share`, { method: "POST" });
-      const url = `${window.location.origin}/social?post=${postId}`;
-      await navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard!");
-    } catch {
-      toast.success("Link copied!");
+  function handleTouchMove(e: React.TouchEvent) {
+    if (touchStartY.current === null) return;
+    const delta = e.touches[0].clientY - touchStartY.current;
+    if (delta > 0) {
+      pullY.set(Math.min(delta * 0.5, PULL_THRESHOLD * 1.4));
     }
-  };
+  }
 
-  const handleComment = async (postId: string) => {
-    try {
-      const res = await fetch(`${API_BASE}/posts/${postId}/comments`);
-      const data = await res.json();
-      const rawComments = data.comments || data || [];
+  function handleTouchEnd() {
+    if (touchStartY.current === null) return;
+    const shouldRefresh = pullY.get() >= PULL_THRESHOLD;
+    animate(pullY, 0, { type: "spring", damping: 24, stiffness: 300 });
+    touchStartY.current = null;
+    if (shouldRefresh) handleRefresh();
+  }
 
-      const mapped: Comment[] = (Array.isArray(rawComments) ? rawComments : []).map((c: any) => ({
-        id: c.id,
-        author: {
-          id: c.author?.id || "unknown",
-          name: c.author?.name || "Unknown",
-          avatar: c.author?.name ? c.author.name.charAt(0).toUpperCase() : "?",
-          avatarColor: c.author?.color || "#6e40ff",
-          verified: c.author?.role === "ADMIN" || c.author?.role === "SUPER_ADMIN",
-        },
-        text: c.content || "",
-        time: formatTimeAgo(c.createdAt),
-        likes: c._count?.likes || c.likes || 0,
-        liked: c.likedByMe || false,
-        replies: c.replies?.map((r: any) => ({
-          id: r.id,
-          author: {
-            id: r.author?.id,
-            name: r.author?.name,
-            avatar: r.author?.name?.charAt(0).toUpperCase(),
-            avatarColor: r.author?.color || "#6e40ff",
-          },
-          text: r.content,
-          time: formatTimeAgo(r.createdAt),
-          likes: r._count?.likes || 0,
-          liked: r.likedByMe || false,
-        })),
-      }));
-
-      setComments(mapped);
-      setCommentPostId(postId);
-    } catch {
-      toast.error("Failed to load comments");
-    }
-  };
-
-  const handleAddComment = async (_postId: string, text: string) => {
-    try {
-      const res = await fetch(`${API_BASE}/posts/${_postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      toast.success("Comment added!");
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === _postId ? { ...p, commentCount: p.commentCount + 1 } : p
-        )
-      );
-    } catch {
-      toast.error("Failed to add comment");
-    }
-  };
-
-  const handleLikeComment = async (commentId: string) => {
-    try {
-      await fetch(`${API_BASE}/comments/${commentId}/like`, { method: "POST" });
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === commentId ? { ...c, liked: !c.liked, likes: c.liked ? c.likes - 1 : c.likes + 1 } : c
-        )
-      );
-    } catch {
-      toast.error("Failed");
-    }
-  };
-
-  const handleCreatePost = async (text: string) => {
-    try {
-      const res = await fetch(`${API_BASE}/forums`, { method: "GET" });
-      const forums = await res.json();
-      const globalForum = Array.isArray(forums) ? forums.find((f: any) => f.type === "GLOBAL") : null;
-      if (!globalForum) { toast.error("No forum available"); return; }
-
-      const postRes = await fetch(`${API_BASE}/forums/${globalForum.id}/posts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text, isForumPost: true, audience: "UNIVERSITY" }),
-      });
-      if (!postRes.ok) throw new Error("Failed");
-      toast.success("Post created!");
-      fetchPosts();
-    } catch {
-      toast.error("Failed to create post");
-    }
-  };
-
-  const handleDelete = async (postId: string) => {
-    try {
-      await fetch(`${API_BASE}/posts/${postId}`, { method: "DELETE" });
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
-      toast.success("Post deleted");
-    } catch {
-      toast.error("Failed to delete");
-    }
-  };
-
-  if (!isMobile) return null;
+  const filteredPosts = applyClientFilter(posts, activeFilter);
 
   return (
-    <div
-      className={cn("community-mobile", effectiveTheme === "light" && "light")}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 50,
-        background: "var(--bg-primary)",
-        color: "var(--text-primary)",
-        maxWidth: 480,
-        margin: "0 auto",
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: "'Nunito', 'Cairo', sans-serif",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 3rem)",
-      }}
-    >
-      {/* Ambient blobs */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden", maxWidth: 480, margin: "0 auto" }}>
-        <div className="community-ambient-blob" style={{ top: "-10%", left: "-10%", width: 250, height: 250, background: "#6e40ff" }} />
-        <div className="community-ambient-blob" style={{ bottom: "-10%", right: "-10%", width: 200, height: 200, background: "#c44dff" }} />
-      </div>
+    <div className="flex h-screen flex-col bg-background">
+      <div
+        ref={scrollContainerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onScroll={handleFeedScroll}
+        className="flex-1 overflow-y-auto pb-24 pt-[88px]"
+      >
+        <motion.div
+          style={{ height: pullY }}
+          className="flex items-center justify-center overflow-hidden"
+        >
+          <motion.span style={{ opacity: pullIndicatorOpacity, rotate: pullIndicatorRotate }}>
+            <RefreshCw className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+          </motion.span>
+        </motion.div>
 
-      {/* Top Bar - handled by GlobalTopBar */}
-      {/* pt accounts for fixed GlobalTopBar height */}
-      <div style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 60px)" }} />
+        {isRefreshing && (
+          <div className="flex justify-center py-2">
+            <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" strokeWidth={1.5} />
+          </div>
+        )}
 
-      {/* Scrollable Content */}
-      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", zIndex: 10 }}>
-        {/* Filter Pills */}
-        <FilterPills filters={FILTERS} active={filter} onChange={setFilter} />
+        {error && (
+          <div className="px-4 py-3">
+            <p className="text-center text-xs text-muted-foreground">{error}</p>
+          </div>
+        )}
 
-        {/* Feed */}
-        <div className="space-y-4 px-3 pb-4 pt-3">
-          {loading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="community-glass-card rounded-2xl p-4 space-y-3 animate-pulse">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full" style={{ background: "var(--bg-secondary)" }} />
-                    <div className="space-y-2 flex-1">
-                      <div className="h-3 w-1/3 rounded" style={{ background: "var(--bg-secondary)" }} />
-                      <div className="h-2 w-1/4 rounded" style={{ background: "var(--bg-secondary)" }} />
-                    </div>
-                  </div>
-                  <div className="h-3 w-full rounded" style={{ background: "var(--bg-secondary)" }} />
-                  <div className="h-3 w-2/3 rounded" style={{ background: "var(--bg-secondary)" }} />
-                </div>
-              ))}
-            </div>
-          ) : posts.length === 0 ? (
+        <div className="space-y-3 px-4 pt-1">
+          {isInitialLoading && <FeedSkeleton />}
+
+          {!isInitialLoading && filteredPosts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <SparklesIcon className="h-12 w-12" style={{ color: "var(--brand)" }} />
-              <p className="text-base font-semibold mt-4" style={{ color: "var(--text-primary)" }}>
-                No posts yet
-              </p>
-              <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-                Be the first to share something!
+              <p className="text-sm font-medium text-foreground">No posts yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Be the first to share something with your peers
               </p>
             </div>
-          ) : (
-            searchQuery.trim()
-              ? posts.filter((p) =>
-                  p.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  p.author.name.toLowerCase().includes(searchQuery.toLowerCase())
-                ).map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onLike={handleLike}
-                    onReact={handleReact}
-                    onComment={handleComment}
-                    onSave={handleSave}
-                    onShare={handleShare}
-                    onDelete={post.isOwner ? handleDelete : undefined}
-                  />
-                ))
-              : posts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onLike={handleLike}
-                    onReact={handleReact}
-                    onComment={handleComment}
-                    onSave={handleSave}
-                    onShare={handleShare}
-                    onDelete={post.isOwner ? handleDelete : undefined}
-                  />
-                ))
           )}
+
+          {!isInitialLoading &&
+            filteredPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={currentUserId}
+                isAdmin={isAdmin}
+              />
+            ))}
         </div>
+
+        {hasMore && !isInitialLoading && (
+          <div ref={sentinelRef} className="flex justify-center py-6">
+            {isFetchingMore && (
+              <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" strokeWidth={1.5} />
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Comments Sheet */}
-      <AnimatePresence>
-        {commentPostId && (
-          <CommentsSheet
-            postId={commentPostId}
-            comments={comments}
-            onClose={() => setCommentPostId(null)}
-            onAddComment={handleAddComment}
-            onLikeComment={handleLikeComment}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Post Composer */}
-      <AnimatePresence>
-        {showComposer && (
-          <PostComposer
-            currentUser={{ name: currentUserName, image: currentUserImage }}
-            onSubmit={handleCreatePost}
-            onClose={() => setShowComposer(false)}
-          />
-        )}
-      </AnimatePresence>
+      {activeForumId && (
+        <PostComposer
+          forumId={activeForumId}
+          currentUserAvatarUrl={currentUserAvatarUrl}
+          currentUserName={currentUserName}
+        />
+      )}
+      <CommentsSheet currentUserId={currentUserId} />
+      <ReportModal />
     </div>
   );
 }
 
-function formatTimeAgo(dateStr: string): string {
-  const now = Date.now();
-  const date = new Date(dateStr).getTime();
-  const diff = now - date;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
+function applyClientFilter(posts: Post[], filter: string): Post[] {
+  switch (filter) {
+    case "pinned":
+      return posts.filter((p) => p.isPinned);
+    case "media":
+      return posts.filter((p) => p.attachments.length > 0 || p.imageUrl);
+    case "trending":
+      return [...posts].sort((a, b) => {
+        const scoreA = Object.values(a.reactionCounts).reduce((s, v) => s + v, 0) + a.commentCount * 2;
+        const scoreB = Object.values(b.reactionCounts).reduce((s, v) => s + v, 0) + b.commentCount * 2;
+        return scoreB - scoreA;
+      });
+    default:
+      return posts;
+  }
+}
+
+function FeedSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="animate-pulse rounded-2xl border border-border/60 p-4">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-full bg-muted" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-2.5 w-28 rounded bg-muted" />
+              <div className="h-2 w-16 rounded bg-muted" />
+            </div>
+          </div>
+          <div className="mt-3 space-y-1.5">
+            <div className="h-2.5 w-full rounded bg-muted" />
+            <div className="h-2.5 w-4/5 rounded bg-muted" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }

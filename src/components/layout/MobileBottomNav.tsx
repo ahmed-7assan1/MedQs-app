@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { cn } from "@/lib/utils";
 import { isImmersiveMobileRoute } from "@/lib/mobile-chrome";
+import { useCommunityStore } from "@/components/community-mobile/store";
 
 interface TabDef {
   href: string;
@@ -85,6 +86,7 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const isComposerOpen = useCommunityStore((s) => s.isComposerOpen);
 
   useEffect(() => {
     const SCROLL_THRESHOLD = 8;
@@ -127,14 +129,11 @@ export function MobileBottomNav() {
     <div
       className={cn(
         "md:hidden fixed bottom-0 left-0 right-0 z-[10000]",
-        "bg-gradient-to-t from-background via-background/60 to-transparent",
-        "backdrop-blur-3xl saturate-[1.8]",
-        "rounded-t-2xl",
-        "border-t border-gray-200/50 dark:border-white/[0.05]",
-        "shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]",
-        "pb-[env(safe-area-inset-bottom,0px)]",
+        isComposerOpen 
+          ? "bg-background/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom,0px)]" 
+          : "bg-gradient-to-t from-background via-background/60 to-transparent backdrop-blur-3xl saturate-[1.8] rounded-t-2xl border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom,0px)]",
         "transition-transform duration-300 will-change-transform",
-        visible ? "translate-y-0" : "translate-y-full"
+        (visible || isComposerOpen) ? "translate-y-0" : "translate-y-full"
       )}
     >
       <div className="flex items-center justify-around h-[62px] px-1">

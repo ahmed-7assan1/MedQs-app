@@ -1,5 +1,4 @@
 "use client";
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -12,11 +11,10 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  session: null,
-  loading: true,
-  signOut: async () => {},
+  user: null, session: null, loading: true, signOut: async () => {},
 });
+
+const SESSION_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
 
 export const SupabaseAuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -31,7 +29,6 @@ export const SupabaseAuthProvider = ({ children }: { children: React.ReactNode }
       setUser(session?.user ?? null);
       setLoading(false);
     };
-
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -40,12 +37,22 @@ export const SupabaseAuthProvider = ({ children }: { children: React.ReactNode }
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Periodically refresh the session to prevent expiry
+    const refreshInterval = setInterval(async () => {
+      const { data: { session } } = await supabase.auth.refreshSession();
+      if (session) {
+        setSession(session);
+        setUser(session.user ?? null);
+      }
+    }, SESSION_REFRESH_INTERVAL);
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(refreshInterval);
+    };
   }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
+  const signOut = async () => { await supabase.auth.signOut(); };
 
   return (
     <AuthContext.Provider value={{ user, session, loading, signOut }}>

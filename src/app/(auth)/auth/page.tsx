@@ -97,7 +97,6 @@ function AuthContent() {
   useEffect(() => { if (selYear) { setSelSem(null); setSemesters([]); fetch(`/api/v1/semesters?academicYearId=${selYear.id}`).then(r => r.json()).then(d => setSemesters(unwrapApiList(d))); } }, [selYear]);
 
   const autoConfirm = async (e: string) => { try { await fetch("/api/v1/auth/confirm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: e }) }); } catch {} };
-  const doBypass = async (e: string) => { try { return (await fetch("/api/v1/auth/bypass", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: e }) })).ok; } catch { return false; } };
 
   const tryLogin = async (e: string, p: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email: e, password: p });
@@ -111,13 +110,9 @@ function AuthContent() {
     setLoading(true);
     try {
       if (mode === "login") {
-        let ok = await tryLogin(email, password);
-        if (!ok) { await doBypass(email); await autoConfirm(email); ok = await tryLogin(email, "123456"); }
-        if (!ok) throw new Error("Invalid email or password.");
+        const ok = await tryLogin(email, password);
+        if (!ok) throw new Error("Invalid email or password. If you forgot your password, click 'Forgot password'.");
         await fetch("/api/v1/auth/sync", { method: "POST" });
-        if (password === "123456") {
-          setTimeout(() => toast(t => <div className="flex flex-col gap-1.5"><span className="font-bold text-amber-500 text-xs">Security Notice</span><span className="text-[11px]">Default password detected. Change it in Settings.</span><button onClick={() => { toast.dismiss(t.id); router.push("/settings"); }} className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-primary text-white self-start mt-1">Change Password</button></div>, { duration: 8000 }), 500);
-        }
         window.location.href = "/dashboard-app";
       } else {
         if (!selUni || !selSem || !password || !firstName || !lastName) throw new Error("Please complete all fields.");

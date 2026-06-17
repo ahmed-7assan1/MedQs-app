@@ -1,252 +1,561 @@
+// src/components/community-mobile/PostCard.tsx
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  HeartIcon,
-  ChatBubbleOvalLeftIcon,
-  ShareIcon,
-  BookmarkIcon,
-  EllipsisVerticalIcon,
-  TrashIcon,
-  MapPinIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
-import type { Post } from "./types";
-import { RichText } from "./RichText";
-import { ImageCarousel } from "./ImageCarousel";
-import { YouTubePlayer } from "./YouTubePlayer";
-import { AttachmentCard } from "./AttachmentCard";
-import { formatCount } from "./utils";
+  Heart,
+  ThumbsUp,
+  Brain,
+  HelpCircle,
+  Lightbulb,
+  Handshake,
+  MessageCircle,
+  Bookmark,
+  Share2,
+  MoreHorizontal,
+  Pin,
+  Pencil,
+  Trash2,
+  Flag,
+  EyeOff,
+  type LucideIcon,
+} from "lucide-react";
+
+import type { Post, ReactionType } from "./types";
+import { REACTION_ORDER, REACTION_META } from "./types";
+import {
+  formatRelativeTime,
+  formatCompactNumber,
+  totalReactions,
+  extractYouTubeId,
+  extractFirstLink,
+  getInitials,
+} from "./utils";
+import { toggleReaction, savePost, sharePost, deletePost } from "./api";
+import { useCommunityStore } from "./store";
+import RichText from "./RichText";
+import ImageCarousel from "./ImageCarousel";
+import YouTubePlayer from "./YouTubePlayer";
+import LinkPreview from "./LinkPreview";
+
+const REACTION_ICONS: Record<ReactionType, LucideIcon> = {
+  HEART: Heart,
+  THUMBS_UP: ThumbsUp,
+  BRAIN: Brain,
+  QUESTION: HelpCircle,
+  LIGHTBULB: Lightbulb,
+  HANDSHAKE: Handshake,
+};
 
 interface PostCardProps {
   post: Post;
-  onLike: (id: string) => void;
-  onReact: (id: string, emoji: string) => void;
-  onComment: (id: string) => void;
-  onSave: (id: string) => void;
-  onShare: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onPin?: (id: string) => void;
+  currentUserId: string;
+  isAdmin?: boolean;
+  onHashtagClick?: (tag: string) => void;
+  onAuthorClick?: (userId: string) => void;
 }
 
-export function PostCard({ post, onLike, onReact, onComment, onSave, onShare, onDelete, onPin }: PostCardProps) {
+export default function PostCard({
+  post,
+  currentUserId,
+  isAdmin = false,
+  onHashtagClick,
+  onAuthorClick,
+}: PostCardProps) {
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const applyReaction = useCommunityStore((s) => s.applyReaction);
+  const updatePost = useCommunityStore((s) => s.updatePost);
+  const removePost = useCommunityStore((s) => s.removePost);
+  const openComments = useCommunityStore((s) => s.openComments);
+  const openReport = useCommunityStore((s) => s.openReport);
+  const openComposer = useCommunityStore((s) => s.openComposer);
 
-  const images = post.media.filter((m) => m.type === "image");
-  const youtube = post.media.find((m) => m.type === "youtube");
+  const isOwnPost = post.author?.id === currentUserId;
+  const youtubeId = extractYouTubeId(post.content);
+  const linkUrl = !youtubeId ? extractFirstLink(post.content) : null;
+  const total = totalReactions(post.reactionCounts);
+  const topReactions = REACTION_ORDER.filter((type) => post.reactionCounts[type] > 0)
+    .sort((a, b) => post.reactionCounts[b] - post.reactionCounts[a])
+    .slice(0, 3);
+
+  async function handleReact(type: ReactionType) {
+    const previous = post.userReaction;
+    const next = previous === type ? null : type;
+    applyReaction(post.id, next, previous);
+    setShowReactionPicker(false);
+    try {
+      await toggleReaction(post.id, next);
+    } catch {
+      applyReaction(post.id, previous, next);
+    }
+  }
+
+  async function handleSave() {
+    setIsSaving(true);
+    updatePost(post.id, { isSaved: !post.isSaved });
+    try {
+      await savePost(post.id);
+    } catch {
+      updatePost(post.id, { isSaved: post.isSaved });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleShare() {
+    try {
+      await sharePost(post.id);
+      updatePost(post.id, { shareCount: post.shareCount + 1 });
+      if (navigator.share) {
+        await navigator.share({ url: `${window.location.origin}/social/post/${post.id}` });
+      }
+    } catch {
+      // sharing is best-effort
+    }
+  }
+
+  async function handleDelete() {
+    setMenuOpen(false);
+    try {
+      await deletePost(post.id);
+      removePost(post.id);
+    } catch {
+      // surface via toast in real implementation
+    }
+  }
+
+  const authorName = post.isAnonymous ? "Anonymous" : post.author?.name ?? "Unknown";
+  const backgroundClass =
+    post.backgroundStyle && post.backgroundStyle !== "none"
+      ? backgroundStyleClass(post.backgroundStyle)
+      : "";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="community-glass-card rounded-2xl overflow-hidden"
+    <article
+      className={`rounded-2xl border border-border/60 bg-background p-4 shadow-sm ${backgroundClass}`}
     >
-      {/* Author header */}
-      <div className="flex items-center gap-3 px-4 pt-4 pb-2">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-          style={{
-            background: post.author.avatarColor || "var(--brand)",
-            color: "#fff",
-          }}
+      {/* Author row */}
+      <div className="flex items-start justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => !post.isAnonymous && post.author && onAuthorClick?.(post.author.id)}
+          className="flex items-center gap-2.5 text-left"
         >
-          {post.author.avatar || post.author.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-              {post.author.name}
-            </span>
-            {post.author.verified && (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--brand)" className="flex-shrink-0">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            )}
-            {post.author.role && (
-              <span
-                className="text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
-                style={{
-                  background: "var(--brand-soft)",
-                  color: "var(--brand)",
-                }}
-              >
-                {post.author.role}
-              </span>
+          <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-muted">
+            {!post.isAnonymous && post.author?.avatarUrl ? (
+              <Image src={post.author.avatarUrl} alt="" fill className="object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs font-medium text-muted-foreground">
+                {post.isAnonymous ? <EyeOff className="h-4 w-4" strokeWidth={1.5} /> : getInitials(authorName)}
+              </div>
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
-            <span>{post.timestamp}</span>
-            {post.pinned && (
-              <>
-                <span>&middot;</span>
-                <MapPinIcon className="h-[10px] w-[10px]" style={{ color: "var(--brand)" }} />
-                <span style={{ color: "var(--brand)" }}>Pinned</span>
-              </>
-            )}
+          <div className="flex min-w-0 flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="truncate text-sm font-semibold text-foreground">{authorName}</span>
+              {!post.isAnonymous && post.author?.rankLabel && (
+                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  {post.author.rankLabel}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              {post.isPinned && <Pin className="h-3 w-3" strokeWidth={1.5} />}
+              <span>{formatRelativeTime(post.createdAt)}</span>
+              {post.forumName && (
+                <>
+                  <span>·</span>
+                  <span className="truncate">{post.forumName}</span>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </button>
+
         <div className="relative">
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors"
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            className="rounded-full p-1.5 text-muted-foreground transition-colors active:bg-muted"
+            aria-label="More options"
           >
-            <EllipsisVerticalIcon className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
+            <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
           </button>
+
           <AnimatePresence>
             {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="absolute right-0 top-10 z-20 community-glass-card rounded-xl py-1 min-w-[150px] shadow-2xl"
-                onClick={() => setMenuOpen(false)}
-              >
-                {post.isOwner && onPin && (
-                  <button
-                    onClick={() => onPin(post.id)}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/5 transition-colors"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    <MapPinIcon className="h-3.5 w-3.5" /> {post.pinned ? "Unpin" : "Pin"}
-                  </button>
-                )}
-                {post.isOwner && onDelete && (
-                  <button
-                    onClick={() => onDelete(post.id)}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/5 transition-colors"
-                    style={{ color: "#ef4444" }}
-                  >
-                    <TrashIcon className="h-3.5 w-3.5" /> Delete
-                  </button>
-                )}
-                <button
-                  onClick={() => onShare(post.id)}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/5 transition-colors"
-                  style={{ color: "var(--text-secondary)" }}
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setMenuOpen(false)}
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-9 z-50 w-44 overflow-hidden rounded-2xl border border-border/60 bg-background shadow-lg"
                 >
-                  <ShareIcon className="h-3.5 w-3.5" /> Share
-                </button>
-              </motion.div>
+                  {isOwnPost ? (
+                    <>
+                      <MenuItem
+                        icon={Pencil}
+                        label="Edit post"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          openComposer(post.id);
+                        }}
+                      />
+                      <MenuItem
+                        icon={Trash2}
+                        label="Delete post"
+                        destructive
+                        onClick={handleDelete}
+                      />
+                    </>
+                  ) : (
+                    <MenuItem
+                      icon={Flag}
+                      label="Report post"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        openReport("post", post.id);
+                      }}
+                    />
+                  )}
+                  {isAdmin && (
+                    <MenuItem
+                      icon={Pin}
+                      label={post.isPinned ? "Unpin post" : "Pin post"}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        updatePost(post.id, { isPinned: !post.isPinned });
+                      }}
+                    />
+                  )}
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
         </div>
       </div>
 
       {/* Content */}
-      <div className="px-4 pb-2">
-        {post.text && <RichText text={post.text} collapsed />}
-
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {post.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs font-medium"
-                style={{ color: "var(--brand)" }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+      <div className="mt-3">
+        <RichText content={post.content} onHashtagClick={onHashtagClick} />
       </div>
 
       {/* Media */}
-      {images.length > 0 && <ImageCarousel images={images} />}
-      {youtube && <YouTubePlayer videoId={youtube.youtubeId!} thumbnail={youtube.thumbnail} duration={youtube.duration} caption={youtube.caption} />}
-
-      {/* Attachments */}
-      {post.attachments.length > 0 && (
-        <div className="px-4 pt-3 space-y-2">
-          {post.attachments.map((att, i) => (
-            <AttachmentCard key={i} attachment={att} />
-          ))}
+      {youtubeId && (
+        <div className="mt-3">
+          <YouTubePlayer videoId={youtubeId} />
+        </div>
+      )}
+      {!youtubeId && post.attachments.length > 0 && (
+        <div className="mt-3">
+          <ImageCarousel images={post.attachments.filter((a) => a.type === "image").map((a) => a.url)} />
+        </div>
+      )}
+      {!youtubeId && !post.attachments.length && post.imageUrl && (
+        <div className="mt-3">
+          <ImageCarousel images={[post.imageUrl]} />
+        </div>
+      )}
+      {linkUrl && (
+        <div className="mt-3">
+          <LinkPreview url={linkUrl} />
         </div>
       )}
 
-      {/* Reactions row */}
-      {post.reactions.length > 0 && (
-        <div className="flex items-center gap-1.5 px-4 pt-3 pb-1">
-          {post.reactions.map((r) => (
+      {/* Shared question */}
+      {post.sharedQuestionData && (
+        <div className="mt-3 rounded-xl border border-border/60 bg-muted/40 p-3">
+          <p className="text-xs font-medium text-muted-foreground">
+            {post.sharedQuestionData.subjectName ?? "Practice question"}
+          </p>
+          <p className="mt-1 text-sm font-medium text-foreground">
+            {post.sharedQuestionData.prompt}
+          </p>
+          <div className="mt-2 space-y-1.5">
+            {post.sharedQuestionData.choices?.map((choice) => (
+              <div
+                key={choice.id}
+                className="rounded-lg border border-border/60 px-2.5 py-1.5 text-xs text-foreground"
+              >
+                {choice.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Poll */}
+      {post.poll && <PollBlock poll={post.poll} postId={post.id} />}
+
+      {/* Hashtags */}
+      {post.hashtags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {post.hashtags.map((tag) => (
             <button
-              key={r.emoji}
-              onClick={() => onReact(post.id, r.emoji)}
-              className="flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all"
-              style={{
-                background: r.reacted ? "var(--brand-soft)" : "var(--bg-secondary)",
-                color: r.reacted ? "var(--brand)" : "var(--text-secondary)",
-              }}
+              key={tag}
+              type="button"
+              onClick={() => onHashtagClick?.(tag)}
+              className="text-xs text-primary"
             >
-              <span>{r.emoji}</span>
-              <span>{formatCount(r.count)}</span>
+              #{tag}
             </button>
           ))}
         </div>
       )}
 
-      {/* Stats row */}
-      <div className="flex items-center justify-between px-4 py-2 text-xs" style={{ color: "var(--text-muted)" }}>
-        <span>{formatCount(post.commentCount)} comments</span>
-        <div className="flex items-center gap-3">
-          <span>{formatCount(post.shareCount)} shares</span>
-          {post.viewCount && <span>{post.viewCount} views</span>}
+      {/* Reaction summary row */}
+      {total > 0 && (
+        <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex -space-x-1">
+            {topReactions.map((type) => {
+              const Icon = REACTION_ICONS[type];
+              return (
+                <span
+                  key={type}
+                  className={`flex h-4 w-4 items-center justify-center rounded-full bg-background ring-1 ring-background ${REACTION_META[type].colorClass}`}
+                >
+                  <Icon className="h-2.5 w-2.5" strokeWidth={2} />
+                </span>
+              );
+            })}
+          </div>
+          <span>{formatCompactNumber(total)}</span>
+        </div>
+      )}
+
+      {/* Reaction bar + actions */}
+      <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5">
+        <div className="relative flex items-center gap-1">
+          {post.userReaction ? (
+            <ReactionButton
+              type={post.userReaction}
+              active
+              onClick={() => handleReact(post.userReaction!)}
+              onLongPress={() => setShowReactionPicker((v) => !v)}
+            />
+          ) : (
+            <ReactionButton
+              type="HEART"
+              active={false}
+              isPlaceholder
+              onClick={() => setShowReactionPicker((v) => !v)}
+              onLongPress={() => setShowReactionPicker((v) => !v)}
+            />
+          )}
+
+          <AnimatePresence>
+            {showReactionPicker && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowReactionPicker(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 6 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute bottom-10 left-0 z-50 flex gap-1 rounded-full border border-border/60 bg-background p-1.5 shadow-lg"
+                >
+                  {REACTION_ORDER.map((type) => {
+                    const Icon = REACTION_ICONS[type];
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => handleReact(type)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-transform active:scale-90 ${REACTION_META[type].colorClass} hover:bg-muted`}
+                        aria-label={REACTION_META[type].label}
+                      >
+                        <Icon className="h-4 w-4" strokeWidth={1.5} />
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => openComments(post.id)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors active:text-foreground"
+          >
+            <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+            {post.commentCount > 0 && <span>{formatCompactNumber(post.commentCount)}</span>}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors active:text-foreground"
+            aria-label={post.isSaved ? "Unsave" : "Save"}
+          >
+            <Bookmark
+              className={`h-4 w-4 ${post.isSaved ? "fill-foreground text-foreground" : ""}`}
+              strokeWidth={1.5}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors active:text-foreground"
+            aria-label="Share"
+          >
+            <Share2 className="h-4 w-4" strokeWidth={1.5} />
+            {post.shareCount > 0 && <span>{formatCompactNumber(post.shareCount)}</span>}
+          </button>
         </div>
       </div>
-
-      {/* Actions */}
-      <div className="flex items-center justify-around border-t px-2 py-1" style={{ borderColor: "var(--border-glass)" }}>
-        <ActionBtn
-          icon={<HeartIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
-          activeIcon={<HeartIcon className="h-[18px] w-[18px] text-red-500" />}
-          active={false}
-          label="Like"
-          onClick={() => onLike(post.id)}
-        />
-        <ActionBtn
-          icon={<ChatBubbleOvalLeftIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
-          label="Comment"
-          onClick={() => onComment(post.id)}
-        />
-        <ActionBtn
-          icon={<ShareIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
-          label="Share"
-          onClick={() => onShare(post.id)}
-        />
-        <ActionBtn
-          icon={<BookmarkIcon className="h-[18px] w-[18px] text-gray-400 dark:text-white/40" />}
-          activeIcon={<BookmarkIcon className="h-[18px] w-[18px]" style={{ color: "var(--brand)" }} />}
-          active={post.saved || false}
-          label="Save"
-          onClick={() => onSave(post.id)}
-        />
-      </div>
-    </motion.div>
+    </article>
   );
 }
 
-function ActionBtn({
-  icon,
-  activeIcon,
+function ReactionButton({
+  type,
   active,
+  isPlaceholder,
+  onClick,
+  onLongPress,
+}: {
+  type: ReactionType;
+  active: boolean;
+  isPlaceholder?: boolean;
+  onClick: () => void;
+  onLongPress: () => void;
+}) {
+  const Icon = REACTION_ICONS[type];
+  const meta = REACTION_META[type];
+  let pressTimer: ReturnType<typeof setTimeout>;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onPointerDown={() => {
+        pressTimer = setTimeout(onLongPress, 380);
+      }}
+      onPointerUp={() => clearTimeout(pressTimer)}
+      onPointerLeave={() => clearTimeout(pressTimer)}
+      className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium transition-all duration-200 active:scale-95 ${
+        active && !isPlaceholder ? meta.activeClass : "text-muted-foreground hover:bg-muted"
+      }`}
+    >
+      <Icon
+        className={`h-4 w-4 ${active && !isPlaceholder ? "" : ""}`}
+        strokeWidth={1.5}
+      />
+      <span>{isPlaceholder ? "React" : meta.label}</span>
+    </button>
+  );
+}
+
+function MenuItem({
+  icon: Icon,
   label,
   onClick,
+  destructive,
 }: {
-  icon: React.ReactNode;
-  activeIcon?: React.ReactNode;
-  active?: boolean;
+  icon: LucideIcon;
   label: string;
   onClick: () => void;
+  destructive?: boolean;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl hover:bg-white/5 transition-colors"
+      className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm transition-colors active:bg-muted ${
+        destructive ? "text-red-500" : "text-foreground"
+      }`}
     >
-      {active && activeIcon ? activeIcon : icon}
-      <span className="text-xs font-medium" style={{ color: active ? "var(--brand)" : "var(--text-muted)" }}>
-        {label}
-      </span>
+      <Icon className="h-4 w-4" strokeWidth={1.5} />
+      {label}
     </button>
+  );
+}
+
+function backgroundStyleClass(style: string): string {
+  const map: Record<string, string> = {
+    indigo: "bg-indigo-50/60 dark:bg-indigo-950/20",
+    rose: "bg-rose-50/60 dark:bg-rose-950/20",
+    emerald: "bg-emerald-50/60 dark:bg-emerald-950/20",
+    amber: "bg-amber-50/60 dark:bg-amber-950/20",
+    slate: "bg-slate-50/60 dark:bg-slate-950/20",
+  };
+  return map[style] ?? "";
+}
+
+function PollBlock({ poll: pollProp, postId }: { poll: Post["poll"]; postId: string }) {
+  const updatePost = useCommunityStore((s) => s.updatePost);
+  const [voting, setVoting] = useState(false);
+  if (!pollProp) return null;
+  const poll = pollProp;
+
+  const hasVoted = Boolean(poll.userVotedOptionId);
+
+  async function vote(optionId: string) {
+    if (hasVoted || voting) return;
+    setVoting(true);
+    const updatedOptions = poll.options.map((o) =>
+      o.id === optionId ? { ...o, votes: o.votes + 1 } : o
+    );
+    updatePost(postId, {
+      poll: { ...poll, options: updatedOptions, totalVotes: poll.totalVotes + 1, userVotedOptionId: optionId },
+    });
+    try {
+      await fetch(`/api/v1/posts/${postId}/poll/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ optionId }),
+      });
+    } finally {
+      setVoting(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-border/60 p-3">
+      <p className="text-sm font-medium text-foreground">{poll.question}</p>
+      <div className="mt-2.5 space-y-2">
+        {poll.options.map((option) => {
+          const pct = poll.totalVotes > 0 ? Math.round((option.votes / poll.totalVotes) * 100) : 0;
+          const isSelected = poll.userVotedOptionId === option.id;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => vote(option.id)}
+              disabled={hasVoted}
+              className="relative w-full overflow-hidden rounded-lg border border-border/60 px-3 py-2 text-left text-xs"
+            >
+              {hasVoted && (
+                <div
+                  className={`absolute inset-y-0 left-0 ${isSelected ? "bg-primary/15" : "bg-muted"}`}
+                  style={{ width: `${pct}%` }}
+                />
+              )}
+              <div className="relative flex items-center justify-between">
+                <span className={isSelected ? "font-medium text-foreground" : "text-foreground"}>
+                  {option.label}
+                </span>
+                {hasVoted && <span className="text-muted-foreground">{pct}%</span>}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {formatCompactNumber(poll.totalVotes)} votes
+      </p>
+    </div>
   );
 }

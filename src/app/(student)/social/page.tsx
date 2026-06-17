@@ -86,6 +86,7 @@ export default async function SocialPage() {
         currentUserId={userId}
         currentUserName={userName}
         currentUserImage={userImage}
+        isAdmin={isAdminRole(role)}
       >
         <OneXCommunity
           circles={[]}
@@ -116,6 +117,7 @@ export default async function SocialPage() {
       currentUserId={userId}
       currentUserName={userName}
       currentUserImage={userImage}
+      isAdmin={isAdminRole(role)}
     >
       <OneXCommunity
         circles={forums as any}

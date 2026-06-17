@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 
 const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1),
@@ -56,6 +57,12 @@ export async function POST(req: NextRequest) {
     if (updateError) {
       return NextResponse.json({ error: 'Failed to update password' }, { status: 500 });
     }
+
+    const hashed = await bcrypt.hash(parsed.data.newPassword, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

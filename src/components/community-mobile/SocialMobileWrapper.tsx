@@ -8,6 +8,7 @@ interface SocialMobileWrapperProps {
   currentUserId: string;
   currentUserName: string;
   currentUserImage: string | null;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }
 
@@ -15,6 +16,7 @@ export function SocialMobileWrapper({
   currentUserId,
   currentUserName,
   currentUserImage,
+  isAdmin = false,
   children,
 }: SocialMobileWrapperProps) {
   const router = useRouter();
@@ -48,8 +50,8 @@ export function SocialMobileWrapper({
       <CommunityFeed
         currentUserId={currentUserId}
         currentUserName={currentUserName}
-        currentUserImage={currentUserImage}
-        isMobile={true}
+        currentUserAvatarUrl={currentUserImage}
+        isAdmin={isAdmin}
       />
     );
   }

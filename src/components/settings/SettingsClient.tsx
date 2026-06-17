@@ -90,6 +90,12 @@ export function SettingsClient({ user }: SettingsClientProps) {
         return;
       }
 
+      await fetch("/api/v1/auth/sync-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pwNew }),
+      });
+
       setPwSuccess(true);
       setPwCurrent(""); setPwNew(""); setPwConfirm("");
       toast.success("Password updated successfully!");

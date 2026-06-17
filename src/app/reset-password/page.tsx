@@ -49,6 +49,12 @@ export default function ResetPasswordPage() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) throw error;
+
+      await fetch("/api/v1/auth/sync-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
       
       setSuccess(true);
       toast.success("Password updated successfully!");

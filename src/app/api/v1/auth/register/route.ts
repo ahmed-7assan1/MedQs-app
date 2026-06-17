@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const parsed = RegisterSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.errors[0]?.message ?? "Invalid input" },
@@ -29,15 +29,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { 
-      name, email, password, nickname, studentId, 
-      universityId, facultyId, semesterId, 
-      telegramPhone, verificationCode 
+    const {
+      name, email, password, nickname, studentId,
+      universityId, facultyId, semesterId,
+      telegramPhone, verificationCode
     } = parsed.data;
 
     const cleanPhone = telegramPhone.replace(/[^0-9]/g, "");
 
-    // 1. Verify Telegram Code
+    // 1. Verify Telegram Code (single query with botUser include)
     const botUser = await (prisma as any).botUser.findFirst({
       where: { phoneNumber: cleanPhone }
     });
@@ -54,24 +54,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid or expired Telegram verification code" }, { status: 400 });
     }
 
-    // 2. Check Uniqueness
-    const existingEmail = await prisma.user.findUnique({ where: { email } });
-    if (existingEmail) return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+    // 2. Check Uniqueness — single query with OR
+    const existingUser = await (prisma.user as any).findFirst({
+      where: {
+        OR: [
+          { email },
+          { nickname: { equals: nickname, mode: "insensitive" } },
+          { telegramPhone: cleanPhone },
+        ]
+      },
+      select: { email: true, nickname: true, telegramPhone: true }
+    });
 
-    const existingNickname = await prisma.user.findFirst({ where: { nickname: { equals: nickname, mode: "insensitive" } } });
-    if (existingNickname) return NextResponse.json({ error: "Username already taken" }, { status: 409 });
+    if (existingUser) {
+      if (existingUser.email === email) return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      if (existingUser.nickname?.toLowerCase() === nickname.toLowerCase()) return NextResponse.json({ error: "Username already taken" }, { status: 409 });
+      if (existingUser.telegramPhone === cleanPhone) return NextResponse.json({ error: "Telegram phone already linked to another account" }, { status: 409 });
+    }
 
-    const existingPhone = await (prisma.user as any).findFirst({ where: { telegramPhone: cleanPhone } });
-    if (existingPhone) return NextResponse.json({ error: "Telegram phone already linked to another account" }, { status: 409 });
-
-    // 3. Generate Custom studentCode (Database ID)
-    const university = await prisma.university.findUnique({ where: { id: universityId } });
+    // 3. Fetch university + faculty in parallel
+    const [university, faculty] = await Promise.all([
+      prisma.university.findUnique({ where: { id: universityId } }),
+      (prisma.faculty as any).findUnique({ where: { id: facultyId } }),
+    ]);
     if (!university) return NextResponse.json({ error: "University not found" }, { status: 404 });
-
-    const faculty = await (prisma.faculty as any).findUnique({ where: { id: facultyId } });
     if (!faculty) return NextResponse.json({ error: "Faculty not found" }, { status: 404 });
 
-    // Get University Abbreviation (Update if not set)
+    // Get University Abbreviation
     let uniAbbr = (university as any).abbr;
     if (!uniAbbr) {
       uniAbbr = await getUniqueUniAbbr(university.name);
@@ -79,50 +88,51 @@ export async function POST(req: NextRequest) {
     }
 
     const facultyPrefix = getFacultyPrefix(faculty.category);
-    const yearSuffix = new Date().getFullYear().toString().slice(-2); // e.g., 26
-    
+    const yearSuffix = new Date().getFullYear().toString().slice(-2);
+
     // Format: mnum26-24010511-201093510425
     const studentCode = `${uniAbbr}${facultyPrefix}${yearSuffix}-${studentId}-${cleanPhone}`;
 
     const existingCode = await (prisma.user as any).findUnique({ where: { studentCode } });
     if (existingCode) return NextResponse.json({ error: "Student Registration Code already exists" }, { status: 409 });
 
-    // 4. Create User in Supabase Auth first
+    // 4. Create Supabase user + hash password in parallel
     const { createAdminClient } = await import("@/lib/supabase/admin");
     const supabase = createAdminClient();
 
-    const { data: sbData, error: sbError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: false,
-      user_metadata: {
-        name,
-        universityId,
-        facultyId,
-        semesterId,
-        onboarding_completed: true
-      }
-    });
+    const [sbResult, hashed] = await Promise.all([
+      supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          name,
+          universityId,
+          facultyId,
+          semesterId,
+          onboarding_completed: true,
+        },
+      }),
+      bcrypt.hash(password, 10),
+    ]);
 
-    if (sbError) {
-      console.error("[REGISTER] Supabase Error:", sbError);
-      return NextResponse.json({ error: sbError.message }, { status: 400 });
+    if (sbResult.error) {
+      console.error("[REGISTER] Supabase Error:", sbResult.error);
+      return NextResponse.json({ error: sbResult.error.message }, { status: 400 });
     }
 
-    const supabaseUserId = sbData.user.id;
+    const supabaseUserId = sbResult.data.user.id;
 
-    // 5. Create User in Prisma (use same ID as Supabase)
-    const hashed = await bcrypt.hash(password, 12);
-
+    // 5. Create User in Prisma
     const user = await (prisma.user as any).create({
       data: {
-        id: supabaseUserId, // Sync IDs
+        id: supabaseUserId,
         name,
         nickname,
         email,
         password: hashed,
-        studentId, 
-        studentCode, 
+        studentId,
+        studentCode,
         telegramPhone: cleanPhone,
         telegramId: botUser.telegramId,
         telegramVerified: true,
@@ -133,30 +143,31 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 6. Generate Link and Send Custom Email
-    try {
-      const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-        type: "signup",
-        email,
-        options: { redirectTo: `${req.nextUrl.origin}/auth/callback?next=/dashboard-app` }
-      });
+    // 6. Clean up verification code (fire-and-forget)
+    (prisma as any).botAuth.delete({ where: { telegramId: botUser.telegramId } }).catch(() => {});
 
-      if (!linkError && linkData.properties?.action_link) {
-        const { sendVerificationEmail } = await import("@/lib/email");
-        await sendVerificationEmail(email, linkData.properties.action_link);
+    // 7. Send confirmation email (fire-and-forget, after response)
+    (async () => {
+      try {
+        const { data: linkData } = await supabase.auth.admin.generateLink({
+          type: "signup",
+          email,
+          options: { redirectTo: `${req.nextUrl.origin}/auth/callback?next=/dashboard-app` },
+        });
+        if (linkData?.properties?.action_link) {
+          const { sendVerificationEmail } = await import("@/lib/email");
+          await sendVerificationEmail(email, linkData.properties.action_link);
+        }
+      } catch (e) {
+        console.warn("[REGISTER] Email send skipped:", e);
       }
-    } catch (emailErr) {
-      console.error("[REGISTER] Email Send Error (Non-blocking):", emailErr);
-    }
+    })();
 
-    // Clean up verification code
-    await (prisma as any).botAuth.delete({ where: { telegramId: botUser.telegramId } }).catch(() => {});
-
-    return NextResponse.json({ 
-      id: user.id, 
-      name: user.name, 
+    return NextResponse.json({
+      id: user.id,
+      name: user.name,
       studentCode,
-      message: "Registration successful. Please verify your email."
+      message: "Registration successful!"
     }, { status: 201 });
 
   } catch (error: any) {
