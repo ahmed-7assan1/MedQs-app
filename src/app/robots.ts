@@ -1,34 +1,19 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXTAUTH_URL || "https://medonex.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.VERCEL_URL ||
+    process.env.NEXTAUTH_URL ||
+    "https://medonex.vercel.app";
 
   return {
-    rules: {
-      userAgent: "*",
-      allow: [
-        "/",
-        "/about",
-        "/privacy",
-        "/terms",
-        "/founders",
-        "/atlas",
-        "/videos",
-        "/community",
-        "/leaderboard",
-      ],
-      disallow: [
-        "/admin/",
-        "/dashboard/",
-        "/dashboard-mobile/",
-        "/settings/",
-        "/profile/",
-        "/messages/",
-        "/quiz/",
-        "/quizzes/",
-        "/api/",
-      ],
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/tma/", "/claude-labs/"],
+      },
+    ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }

@@ -1,5 +1,11 @@
 import { BookOpen } from "lucide-react";
 import { OpenLibrarySearch } from "@/components/library/OpenLibrarySearch";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Medical Books Library",
+  description: "Browse and search a curated library of medical textbooks. Access free medical books for MBBS, USMLE, PLAB, and clinical reference.",
+};
 
 export default function MedicalBooksPage() {
   return (

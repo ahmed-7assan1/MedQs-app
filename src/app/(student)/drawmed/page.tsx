@@ -1,4 +1,10 @@
 import dynamic from "next/dynamic";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DrawMed — Medical Drawing Tool",
+  description: "Practice medical drawing and anatomy sketching with DrawMed. An interactive tool for medical students to learn anatomy through drawing.",
+};
 
 const DrawMedClient = dynamic(
   () => import("@/components/drawmed/DrawMedClient").then((m) => m.DrawMedClient),

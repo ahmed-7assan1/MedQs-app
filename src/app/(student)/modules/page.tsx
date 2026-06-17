@@ -5,8 +5,14 @@ import { BookOpen, Lock, GraduationCap, Library, Layers } from "lucide-react";
 import ModulesGrid, { ModuleWithStats } from "@/components/modules/ModulesGrid";
 import ContinueLearningCard from "@/components/modules/ContinueLearningCard";
 import { Prisma } from "@prisma/client";
+import type { Metadata } from "next";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Medical Modules",
+  description: "Browse all medical modules for MBBS, USMLE & PLAB preparation. Access lectures, past papers, and study materials organized by module.",
+};
 
 function moduleDifficultyLabel(
   questions: { difficulty: string }[]

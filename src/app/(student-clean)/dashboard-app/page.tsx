@@ -6,6 +6,12 @@ import { getUserRankInfo } from "@/lib/engagement";
 import { fetchDashboardData } from "@/lib/dashboard-queries";
 import { last7DayKeys } from "@/lib/dashboard-stats";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Your personalized medical study dashboard. Track progress, continue lectures, review past papers, and monitor your learning statistics.",
+};
 
 export default async function DashboardPage() {
   const supabase = createClient();

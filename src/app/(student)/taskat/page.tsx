@@ -2,6 +2,12 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { TaskatClient } from "../../../components/taskat/TaskatClient";
 import { prisma } from "@/lib/prisma";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Taskat — Medical Tasks",
+  description: "Track and manage your medical study tasks, assignments, and clinical rotations with Taskat.",
+};
 
 export default async function TaskatPage() {
   const session = await auth();

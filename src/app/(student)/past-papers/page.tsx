@@ -5,6 +5,12 @@ import Link from "next/link";
 import { FileText, Clock, BarChart3, ChevronRight, Eye, Plus, Settings2, Trophy, TrendingUp, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StudentPageShell } from "@/components/layout/StudentPageShell";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Past Papers & Quizzes",
+  description: "Access medical past papers, interactive MCQs, and practice quizzes. Prepare for exams with real exam questions and instant AI-powered feedback.",
+};
 
 export default async function PastPapersPage() {
   const session = await auth();
