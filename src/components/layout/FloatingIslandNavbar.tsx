@@ -152,7 +152,7 @@ export function FloatingIslandNavbar({
                     {(item as any).glow && !active && (
                       <span className="absolute inset-0 rounded-xl bg-primary/10 animate-pulse blur-sm" />
                     )}
-                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "group-hover:text-primary", (item as any).glow && !active && "text-primary/70")} />
+                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-gray-900 dark:text-white" : "group-hover:text-gray-900 dark:group-hover:text-white", (item as any).glow && !active && "text-primary/70")} />
                     <span className="text-[11px] font-black uppercase tracking-wider hidden lg:block">
                       {item.label}
                     </span>
