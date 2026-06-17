@@ -9,7 +9,6 @@ import type { Post } from "./types";
 import { fetchForums, fetchForumPosts } from "./api";
 import { useCommunityStore } from "./store";
 import PostCard from "./PostCard";
-import PostComposer from "./PostComposer";
 import CommentsSheet from "./CommentsSheet";
 import ReportModal from "./ReportModal";
 
@@ -219,13 +218,6 @@ export function CommunityFeed({
         )}
       </div>
 
-      {activeForumId && (
-        <PostComposer
-          forumId={activeForumId}
-          currentUserAvatarUrl={currentUserAvatarUrl}
-          currentUserName={currentUserName}
-        />
-      )}
       <CommentsSheet currentUserId={currentUserId} />
       <ReportModal />
     </div>

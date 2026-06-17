@@ -120,7 +120,7 @@ export default function AtlasQuizModal({ isOpen, onClose, systemId, structureId,
                 <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Target: {targetName}</p>
               </div>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+            <button onClick={onClose} aria-label="Close quiz" className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>

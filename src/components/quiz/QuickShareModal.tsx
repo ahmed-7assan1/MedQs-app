@@ -78,7 +78,7 @@ export function QuickShareModal({ isOpen, onClose, question, forums, currentUser
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Ask peers or discuss logic</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 text-white/20 hover:text-white hover:bg-white/5 rounded-full transition-all">
+            <button onClick={onClose} aria-label="Close share modal" className="p-2 text-white/20 hover:text-white hover:bg-white/5 rounded-full transition-all">
               <X size={20} weight="bold" />
             </button>
           </div>

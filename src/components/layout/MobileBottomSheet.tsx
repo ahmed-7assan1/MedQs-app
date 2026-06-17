@@ -129,6 +129,7 @@ export function MobileBottomSheet({
               </div>
               <button
                 onClick={onClose}
+                aria-label="Close menu"
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-600 dark:hover:text-white transition-all"
               >
                 <X className="h-4 w-4" />

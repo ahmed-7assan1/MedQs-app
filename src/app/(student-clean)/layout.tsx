@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import dynamic from "next/dynamic";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { GlobalPostComposer } from "@/components/layout/GlobalPostComposer";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,9 @@ import { redirect } from "next/navigation";
 import { TelegramBlocker } from "@/components/system/TelegramBlocker";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { unstable_cache } from "next/cache";
+
+const Sidebar = dynamic(() => import("@/components/layout/Sidebar").then(m => m.Sidebar), { ssr: false });
+const FirebaseProvider = dynamic(() => import("@/components/providers/FirebaseProvider").then(m => m.FirebaseProvider), { ssr: false });
 
 const getCachedSiteConfig = unstable_cache(
   async () => {
@@ -53,6 +57,7 @@ export default async function CleanStudentLayout({ children }: { children: React
   }
 
   return (
+    <FirebaseProvider>
     <TelegramBlocker>
       <SiteConfigProvider
         initial={{
@@ -94,8 +99,13 @@ export default async function CleanStudentLayout({ children }: { children: React
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />
+          <GlobalPostComposer
+            currentUserName={displayName}
+            currentUserAvatarUrl={userImage}
+          />
         </div>
       </SiteConfigProvider>
     </TelegramBlocker>
+    </FirebaseProvider>
   );
 }

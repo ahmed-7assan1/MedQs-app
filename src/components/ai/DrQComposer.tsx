@@ -184,7 +184,7 @@ export function DrQComposer({
                 <span className="text-cyan-400/60 text-[9px] font-bold uppercase tracking-wider">Replying to:</span>
                 <p className="text-xs text-white/80 truncate font-medium italic">"{replyContext.text}"</p>
               </div>
-              <button onClick={onClearReply} className="p-1 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-colors">
+              <button onClick={onClearReply} aria-label="Clear reply" className="p-1 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-colors">
                 <X size={14} weight="bold" />
               </button>
             </motion.div>

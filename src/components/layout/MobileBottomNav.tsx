@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   HomeIcon,
   BookOpenIcon,
   UserGroupIcon,
   ClipboardDocumentListIcon,
+  PlusIcon,
 } from "@heroicons/react/24/solid";
 import { cn } from "@/lib/utils";
 import { isImmersiveMobileRoute } from "@/lib/mobile-chrome";
@@ -84,9 +85,12 @@ function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
   const isComposerOpen = useCommunityStore((s) => s.isComposerOpen);
+  const openComposer = useCommunityStore((s) => s.openComposer);
+  const isSocial = pathname.startsWith("/social") || pathname.startsWith("/community");
 
   useEffect(() => {
     const SCROLL_THRESHOLD = 8;
@@ -137,7 +141,28 @@ export function MobileBottomNav() {
       )}
     >
       <div className="flex items-center justify-around h-[62px] px-1">
-        {TABS.map((tab) => (
+        {TABS.slice(0, 2).map((tab) => (
+          <TabItem key={tab.href} tab={tab} pathname={pathname} />
+        ))}
+
+        <button
+          type="button"
+          onClick={() => {
+            if (isSocial) {
+              openComposer();
+            } else {
+              router.push("/social");
+            }
+          }}
+          aria-label="Create post"
+          className="flex flex-1 items-center justify-center h-full min-h-[48px] min-w-[44px] active:scale-90 transition-transform duration-200"
+        >
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform active:scale-95">
+            <PlusIcon className="h-6 w-6" />
+          </span>
+        </button>
+
+        {TABS.slice(2).map((tab) => (
           <TabItem key={tab.href} tab={tab} pathname={pathname} />
         ))}
       </div>

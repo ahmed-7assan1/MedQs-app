@@ -8,7 +8,6 @@ import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { appFontVariableClassName, fontEnglish } from "@/lib/app-fonts";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
-import { FirebaseProvider } from "@/components/providers/FirebaseProvider";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { SessionPersistence } from "@/components/system/SessionPersistence";
@@ -217,7 +216,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   `.trim();
 
   return (
-    <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning>
+    <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning lang="en" dir="ltr">
       <head>
         {/* No-flicker theme + lang script — runs before first paint */}
         <script
@@ -322,15 +321,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <DevServiceWorkerCleanup />
         <ChunkLoadRecovery />
-        <FirebaseProvider>
-          <ConfirmProvider>
-            <SupabaseAuthProvider>
-              <SessionPersistence />
-              <ApplyLocale />
-              {children}
-            </SupabaseAuthProvider>
-          </ConfirmProvider>
-        </FirebaseProvider>
+        <ConfirmProvider>
+          <SupabaseAuthProvider>
+            <SessionPersistence />
+            <ApplyLocale />
+            <main>{children}</main>
+          </SupabaseAuthProvider>
+        </ConfirmProvider>
         <Toaster
           position="top-center"
           containerStyle={{

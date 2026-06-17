@@ -958,6 +958,7 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
     >
       <button
         onClick={onClose}
+        aria-label="Close image viewer"
         className="absolute top-5 right-5 h-11 w-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-all z-10"
       >
         <X size={20} weight="bold" />
@@ -968,7 +969,7 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
       </div>
 
       {images.length > 1 && (
-        <button onClick={prev} className="absolute left-4 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 z-10">
+        <button onClick={prev} aria-label="Previous image" className="absolute left-4 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 z-10">
           <ArrowLeft size={22} weight="bold" />
         </button>
       )}
@@ -989,7 +990,7 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
       </AnimatePresence>
 
       {images.length > 1 && (
-        <button onClick={next} className="absolute right-4 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 z-10">
+        <button onClick={next} aria-label="Next image" className="absolute right-4 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 z-10">
           <ArrowRight size={22} weight="bold" />
         </button>
       )}

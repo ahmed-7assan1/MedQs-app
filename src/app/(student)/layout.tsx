@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import dynamic from "next/dynamic";
 const Sidebar = dynamic(() => import("@/components/layout/Sidebar").then(m => m.Sidebar), { ssr: false });
 const AmbientGlow = dynamic(() => import("@/components/ui/AmbientGlow").then(m => m.AmbientGlow), { ssr: false });
+const FirebaseProvider = dynamic(() => import("@/components/providers/FirebaseProvider").then(m => m.FirebaseProvider), { ssr: false });
 import { NotificationsLoader } from "@/components/notifications/NotificationsLoader";
 import { AdBannerModal } from "@/components/ads/AdBannerModal";
 import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
@@ -14,6 +15,7 @@ import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
 import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
+import { GlobalPostComposer } from "@/components/layout/GlobalPostComposer";
 import { MobileSwipeLayout } from "@/components/layout/MobileSwipeLayout";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { PremiumNotificationPrompt } from "@/components/notifications/PremiumNotificationPrompt";
@@ -78,6 +80,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <>
+      <FirebaseProvider>
       <TelegramBlocker>
         <SiteConfigProvider
           initial={{
@@ -139,12 +142,17 @@ export default async function StudentLayout({ children }: { children: React.Reac
               <CookieConsentBanner />
               <PersistentAudioPlayer />
               <MobileBottomNav />
+              <GlobalPostComposer
+                currentUserName={displayName}
+                currentUserAvatarUrl={userImage}
+              />
               {isAdmin && <AdminStudentBar />}
               <PremiumNotificationPrompt />
             </div>
           </div>
         </SiteConfigProvider>
       </TelegramBlocker>
+      </FirebaseProvider>
     </>
   );
 }

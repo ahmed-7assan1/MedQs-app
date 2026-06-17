@@ -122,10 +122,10 @@ export function PersistentAudioPlayer() {
                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Now Streaming</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setMinimized(true)} className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors">
+                    <button onClick={() => setMinimized(true)} aria-label="Minimize player" className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors">
                       <Minimize2 className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={stop} className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors">
+                    <button onClick={stop} aria-label="Stop playback" className="p-1.5 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>

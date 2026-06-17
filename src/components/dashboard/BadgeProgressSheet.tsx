@@ -153,7 +153,7 @@ export function BadgeProgressSheet({
         <div className="px-5 pb-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-black text-foreground uppercase tracking-widest">Achievements</h2>
-            <button onClick={onClose} className="p-1.5 rounded-full hover:bg-muted/20 transition-colors text-muted-foreground">
+            <button onClick={onClose} aria-label="Close achievements" className="p-1.5 rounded-full hover:bg-muted/20 transition-colors text-muted-foreground">
               <XMarkIcon className="h-4 w-4" />
             </button>
           </div>

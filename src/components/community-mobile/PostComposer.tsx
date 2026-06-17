@@ -17,10 +17,10 @@ import {
   Sparkles,
   Plus,
   Trash2,
+  Paperclip,
   type LucideIcon,
 } from "lucide-react";
 
-import { BACKGROUND_STYLES } from "./types";
 import { createPost, updatePost as updatePostApi, fetchPost } from "./api";
 import { useCommunityStore } from "./store";
 
@@ -48,9 +48,10 @@ export default function PostComposer({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
 
   const [content, setContent] = useState("");
-  const [images, setImages] = useState<{ file: File; previewUrl: string }[]>([]);
+  const [attachments, setAttachments] = useState<{ file: File; previewUrl: string; type: string }[]>([]);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [backgroundStyle, setBackgroundStyle] = useState("none");
   const [showPollEditor, setShowPollEditor] = useState(false);
@@ -90,7 +91,7 @@ export default function PostComposer({
 
   function resetState() {
     setContent("");
-    setImages([]);
+    setAttachments([]);
     setIsAnonymous(false);
     setBackgroundStyle("none");
     setShowPollEditor(false);
@@ -131,15 +132,18 @@ export default function PostComposer({
     });
   }
 
-  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>, acceptType?: string) {
     const files = Array.from(e.target.files ?? []);
-    const next = files.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
-    setImages((prev) => [...prev, ...next].slice(0, 6));
+    const next = files.map((file) => {
+      const type = file.type.startsWith("image/") ? "image" : "file";
+      return { file, previewUrl: URL.createObjectURL(file), type };
+    });
+    setAttachments((prev) => [...prev, ...next].slice(0, 10));
     e.target.value = "";
   }
 
-  function removeImage(index: number) {
-    setImages((prev) => {
+  function removeAttachment(index: number) {
+    setAttachments((prev) => {
       const copy = [...prev];
       URL.revokeObjectURL(copy[index].previewUrl);
       copy.splice(index, 1);
@@ -183,33 +187,31 @@ export default function PostComposer({
     }
   }
 
-  async function uploadImages(): Promise<string[]> {
-    if (images.length === 0) return [];
-    const urls: string[] = [];
-    for (const img of images) {
-      const formData = new FormData();
-      formData.append("file", img.file);
-      formData.append("folder", "forum");
-      const res = await fetch("/api/v1/upload/direct", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("upload failed");
-      const data = await res.json();
-      urls.push(data.url);
-    }
-    return urls;
+  async function uploadFile(file: File): Promise<{ url: string; type: string; fileId: string; name: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/v1/debug/telegram-direct-upload", { method: "POST", body: formData });
+    const data = await res.json();
+    if (!data.success) throw new Error("Upload failed");
+    let type = "file";
+    if (file.type.startsWith("image/")) type = "image";
+    else if (file.type.startsWith("audio/")) type = "audio";
+    else if (file.type.startsWith("video/")) type = "video";
+    return { url: `/api/v1/files/telegram/preview?fileId=${data.fileId}&type=${type}`, type, fileId: data.fileId, name: file.name };
   }
 
   async function handleSubmit() {
-    if (!content.trim() && images.length === 0) return;
+    if (!content.trim() && attachments.length === 0) return;
     setIsSubmitting(true);
     setError(null);
     try {
-      const uploadedUrls = await uploadImages();
+      const uploaded = await Promise.all(attachments.map((a) => uploadFile(a.file)));
       const validPollOptions = poll.options.map((o) => o.trim()).filter(Boolean);
       const payload: Record<string, unknown> = {
         content,
         isAnonymous,
         backgroundStyle: backgroundStyle === "none" ? null : backgroundStyle,
-        attachments: uploadedUrls.map((url) => ({ type: "image", url })),
+        attachments: uploaded.map((a) => ({ type: a.type, url: a.url, fileId: a.fileId, name: a.name })),
       };
       if (showPollEditor && poll.question.trim() && validPollOptions.length >= 2) {
         payload.poll = { question: poll.question.trim(), options: validPollOptions };
@@ -230,7 +232,9 @@ export default function PostComposer({
     }
   }
 
-  const canSubmit = (content.trim().length > 0 || images.length > 0) && !isSubmitting;
+  const imageAttachments = attachments.filter((a) => a.type === "image");
+  const fileAttachments = attachments.filter((a) => a.type !== "image");
+  const canSubmit = (content.trim().length > 0 || attachments.length > 0) && !isSubmitting;
 
   return (
     <AnimatePresence>
@@ -242,25 +246,25 @@ export default function PostComposer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[70] bg-black/40"
+            className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm"
             onClick={handleClose}
           />
 
-          {/* Sheet */}
+          {/* Sheet — covers from top of screen, toolbar ends flush with bottom nav */}
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom,0px))] z-[71] flex max-h-[75vh] flex-col rounded-t-3xl bg-background shadow-2xl"
+            transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom,0px))] z-[201] flex flex-col rounded-t-2xl bg-background/80 backdrop-blur-xl saturate-[1.8] border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] min-h-[50vh] max-h-[85vh] overflow-hidden"
           >
             {/* Handle */}
-            <div className="flex justify-center pt-2 pb-1">
-              <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
+            <div className="w-full flex justify-center pt-3 pb-1 shrink-0" onClick={handleClose}>
+              <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-white/20" />
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2">
+            <div className="flex items-center justify-between px-5 py-2 shrink-0">
               <button
                 type="button"
                 onClick={handleClose}
@@ -281,7 +285,7 @@ export default function PostComposer({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+            <div className="flex-1 overflow-y-auto px-5 pb-6 space-y-4">
               {/* Author row + textarea */}
               <div className="rounded-xl bg-muted/30 p-3">
                 <div className="flex items-center gap-2.5">
@@ -310,16 +314,16 @@ export default function PostComposer({
               </div>
 
               {/* Image previews */}
-              {images.length > 0 && (
+              {imageAttachments.length > 0 && (
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Images</label>
                   <div className="grid grid-cols-3 gap-2">
-                    {images.map((img, index) => (
-                      <div key={img.previewUrl} className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-                        <Image src={img.previewUrl} alt="" fill className="object-cover" />
+                    {imageAttachments.map((att, index) => (
+                      <div key={att.previewUrl} className="relative aspect-square overflow-hidden rounded-xl bg-muted">
+                        <Image src={att.previewUrl} alt="" fill className="object-cover" />
                         <button
                           type="button"
-                          onClick={() => removeImage(index)}
+                          onClick={() => removeAttachment(attachments.indexOf(att))}
                           className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
                           aria-label="Remove image"
                         >
@@ -327,6 +331,37 @@ export default function PostComposer({
                         </button>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* File attachments */}
+              {fileAttachments.length > 0 && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Files</label>
+                  <div className="space-y-2">
+                    {fileAttachments.map((att, index) => {
+                      const realIdx = attachments.indexOf(att);
+                      return (
+                        <div key={att.previewUrl} className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                              <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                          </div>
+                          <span className="flex-1 truncate text-sm text-foreground">{att.file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(realIdx)}
+                            className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+                            aria-label="Remove file"
+                          >
+                            <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -385,34 +420,11 @@ export default function PostComposer({
                 </div>
               )}
 
-              {/* Background style chips */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Background</label>
-                <div className="flex items-center gap-2">
-                  {BACKGROUND_STYLES.map((style) => (
-                    <button
-                      key={style.id}
-                      type="button"
-                      onClick={() => setBackgroundStyle(style.id)}
-                      className={`h-7 w-7 rounded-full border transition-all duration-200 ${
-                        backgroundStyle === style.id ? "ring-2 ring-primary ring-offset-1" : "border-border/60"
-                      }`}
-                      style={{ background: style.swatch === "transparent" ? undefined : style.swatch }}
-                      aria-label={style.id}
-                    >
-                      {style.swatch === "transparent" && (
-                        <span className="block h-full w-full rounded-full border border-dashed border-border" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {error && <p className="text-xs text-red-500">{error}</p>}
             </div>
 
             {/* Toolbar — styled like the site's bottom nav bar */}
-            <div className="border-t border-border/60 bg-background/80 backdrop-blur-xl px-2 pb-2 pt-2">
+            <div className="bg-background/80 backdrop-blur-xl saturate-[1.8] border-t border-gray-200/50 dark:border-white/[0.05] px-2 pb-2 pt-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-0.5">
                   <ToolbarButton icon={Bold} label="Bold" onClick={() => wrapSelection("**")} />
@@ -429,7 +441,20 @@ export default function PostComposer({
                     accept="image/*"
                     multiple
                     hidden
-                    onChange={handleImageSelect}
+                    onChange={(e) => handleFileSelect(e, "image")}
+                  />
+                  <ToolbarButton
+                    icon={Paperclip}
+                    label="Attach file"
+                    onClick={() => docInputRef.current?.click()}
+                  />
+                  <input
+                    ref={docInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z"
+                    multiple
+                    hidden
+                    onChange={(e) => handleFileSelect(e, "file")}
                   />
                   <div className="mx-1 h-5 w-px bg-border/60" />
                   <ToolbarButton icon={Hash} label="Hashtag" onClick={insertHashtagPrompt} />

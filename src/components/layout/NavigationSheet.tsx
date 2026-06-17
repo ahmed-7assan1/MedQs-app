@@ -57,7 +57,7 @@ export function NavigationSheet({ isOpen, onClose }: { isOpen: boolean; onClose:
 
             <div className="px-6 py-4 flex items-center justify-between">
               <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Navigation</h2>
-              <button onClick={onClose} className="p-2 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-all">
+              <button onClick={onClose} aria-label="Close navigation" className="p-2 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-all">
                 <X className="h-5 w-5" />
               </button>
             </div>

@@ -336,13 +336,13 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 }} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all" title="Save to Flashcards">
                   <Lightning size={16} weight="bold" />
                 </button>
-                <button onClick={handleCopy} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                <button onClick={handleCopy} aria-label="Copy message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
                   {copying ? <Check size={16} weight="bold" className="text-emerald-500" /> : <Copy size={16} weight="bold" />}
                 </button>
-                <button onClick={onRegenerate} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                <button onClick={onRegenerate} aria-label="Regenerate response" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
                   <ArrowClockwise size={16} weight="bold" />
                 </button>
-                <button onClick={() => onShare?.(message.content)} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                <button onClick={() => onShare?.(message.content)} aria-label="Share message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
                   <ShareNetwork size={16} weight="bold" />
                 </button>
               </div>
@@ -674,8 +674,8 @@ function QuestionCard({ q, onSave, onShare }: { q: { question: string, options: 
           </div>
         </div>
         <div className="flex items-center gap-2">
-           <button onClick={onSave} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-indigo-500 dark:hover:text-white transition-all"><BookmarkSimple size={18} /></button>
-           <button onClick={onShare} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-indigo-500 dark:hover:text-white transition-all"><ShareNetwork size={18} /></button>
+           <button onClick={onSave} aria-label="Save question" className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-indigo-500 dark:hover:text-white transition-all"><BookmarkSimple size={18} /></button>
+           <button onClick={onShare} aria-label="Share question" className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-indigo-500 dark:hover:text-white transition-all"><ShareNetwork size={18} /></button>
         </div>
       </div>
       
