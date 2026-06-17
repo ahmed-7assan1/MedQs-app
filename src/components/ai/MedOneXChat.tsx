@@ -70,9 +70,9 @@ export function MedOneXChat() {
   const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
 
-  // ─── Shared input state via bridge store (synced with nav input) ───
-  const input = useChatInputBridge((s) => s.input);
-  const setInput = useChatInputBridge((s) => s.setInput);
+  // ─── Local input state (desktop). Synced to bridge for nav on mobile ───
+  const [input, setInput] = useState("");
+  const bridgeSetInput = useChatInputBridge((s) => s.setInput);
   const bridgeSetLoading = useChatInputBridge((s) => s.setLoading);
   const bridgeSetSendMessage = useChatInputBridge((s) => s.setSendMessage);
   const bridgeSetStopGeneration = useChatInputBridge((s) => s.setStopGeneration);
@@ -82,8 +82,9 @@ export function MedOneXChat() {
 
   // ─── Sync local state → bridge store for nav input ───
   useEffect(() => { bridgeSetLoading(loading); }, [loading, bridgeSetLoading]);
+  useEffect(() => { bridgeSetInput(input); }, [input, bridgeSetInput]);
   useEffect(() => {
-    bridgeSetSendMessage(() => { if (input.trim()) sendMessage(input); });
+    bridgeSetSendMessage(() => { const v = useChatInputBridge.getState().input; if (v.trim()) sendMessage(v); });
     bridgeSetStopGeneration(() => stopGeneration());
     bridgeSetOpenFilePicker(() => fileInputRef.current?.click());
     bridgeSetSuperExpertEnabled(!!settings.superExpertEnabled);
@@ -100,7 +101,7 @@ export function MedOneXChat() {
       bridgeSetOpenFilePicker(null);
       bridgeSetToggleSuperExpert(null);
     };
-  }, [input, sendMessage, stopGeneration, settings.superExpertEnabled, bridgeSetSendMessage, bridgeSetStopGeneration, bridgeSetOpenFilePicker, bridgeSetSuperExpertEnabled, bridgeSetToggleSuperExpert]);
+  }, [sendMessage, stopGeneration, settings.superExpertEnabled]);
 
   // Fetch user modules when the modal opens
   useEffect(() => {

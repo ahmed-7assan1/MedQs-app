@@ -50,6 +50,7 @@ export function MobileSwipeLayout({ children }: MobileSwipeLayoutProps) {
   return (
     <motion.div
       className="flex-1 flex flex-col w-full h-full relative overflow-hidden touch-pan-y"
+      style={{ willChange: "transform" }}
       drag={prefersReducedMotion ? false : "x"}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
