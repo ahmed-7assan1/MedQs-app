@@ -41,7 +41,7 @@
 }
 
 .dark[data-theme-variant="medonex-purple"] {
-  --background: 240 12% 7%;
+  --background: 240 3% 4%;          /* #0A0A0B near-black */
   --card: 240 16% 12%;
   --muted: 240 19% 16%;
   --border: 240 20% 22%;

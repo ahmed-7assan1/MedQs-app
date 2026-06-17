@@ -267,7 +267,7 @@
 
 .dark {
   --shadow-clr: rgba(0, 0, 0, 0.5);
-  --background: 240 12% 7%;         /* #0F0F13 page bg */
+  --background: 240 3% 4%;          /* #0A0A0B page bg — near-black */
   --foreground: 250 33% 95%;        /* #F0EFF8 headings */
   --card: 240 16% 12%;              /* #1A1A24 surfaces */
   --card-foreground: 250 33% 95%;
@@ -293,7 +293,7 @@
   --warning: 38 100% 65%;           /* #FFB84D */
   --warning-foreground: 0 0% 100%;
 
-  --surface-bg: 240 12% 7%;         /* matches --background */
+  --surface-bg: 240 3% 4%;          /* matches --background */
   --surface-card: 240 16% 12%;      /* matches --card */
   --surface-text: 250 33% 95%;      /* matches --foreground */
   --surface-text-muted: 246 14% 42%;/* matches --muted-foreground */
