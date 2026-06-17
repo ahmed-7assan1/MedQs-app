@@ -140,14 +140,14 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                       onClick={() => setNavSheetOpen(true)}
                       className={cn(
                         "shrink-0 p-1.5 -ml-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all",
-                        pathname?.includes("/modules") || pathname?.includes("/past-papers") ? "text-gray-500 dark:text-white/60" : "text-primary dark:text-white"
+                        pathname?.includes("/modules") || pathname?.includes("/past-papers") ? "text-gray-500 dark:text-white/60" : "text-gray-900 dark:text-white"
                       )}
                       aria-label="Open navigation menu"
                     >
                       <motion.span
                         className={cn(
                           "block h-7 w-7",
-                          pathname?.includes("/modules") || pathname?.includes("/past-papers") ? "bg-gray-500 dark:bg-white/60" : "bg-primary dark:bg-white"
+                          pathname?.includes("/modules") || pathname?.includes("/past-papers") ? "bg-gray-500 dark:bg-white/60" : "bg-gray-900 dark:bg-white"
                         )}
                         animate={{ rotate: navSheetOpen ? -90 : 0 }}
                         transition={{ duration: 0.25, ease: "easeInOut" }}
@@ -165,7 +165,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
                     </button>
                     <span className={cn(
                       "font-black text-sm tracking-tight -ml-1.5",
-                      pathname?.includes("/modules") || pathname?.includes("/past-papers") ? "text-gray-500 dark:text-white/60" : "text-primary dark:text-white"
+                      pathname?.includes("/modules") || pathname?.includes("/past-papers") ? "text-gray-500 dark:text-white/60" : "text-gray-900 dark:text-white"
                     )}>
                       {title}
                     </span>
