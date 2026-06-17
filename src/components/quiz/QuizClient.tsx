@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { QuestionCard } from "@/components/quiz/QuestionCard";
 import {
@@ -14,10 +15,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 
 interface Question {
   id: string;
@@ -92,21 +91,16 @@ export function QuizClient({
   const [bookmarked, setBookmarked] = useState<Set<string>>(() => new Set());
   const [reportOpen, setReportOpen] = useState(false);
   const [reportNote, setReportNote] = useState("");
+  const [reportImages, setReportImages] = useState<File[]>([]);
+  const [reportImagePreviews, setReportImagePreviews] = useState<string[]>([]);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [examMode, setExamMode] = useState(false);
-  const { siteName, logoUrl } = useSiteConfig();
-  const [logoHover, setLogoHover] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [direction, setDirection] = useState(1);
-  const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-    };
-  }, []);
+  const [exitModalOpen, setExitModalOpen] = useState(false);
+  const [previousAttempts, setPreviousAttempts] = useState<{ id: string; score: number; createdAt: string; timeTaken: number }[]>([]);
 
   const slideVariants = {
     enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
@@ -115,7 +109,6 @@ export function QuizClient({
   };
 
   const navigateTo = useCallback((index: number, dir: number) => {
-    if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
     setDirection(dir);
     setCurrentIndex(index);
   }, []);
@@ -305,6 +298,16 @@ export function QuizClient({
     recover();
   }, [paperId, guestQuiz, currentUserId]);
 
+  useEffect(() => {
+    const url = guestQuiz
+      ? `/api/v1/guest-quiz/past-papers/${paperId}/attempts`
+      : `/api/v1/past-papers/${paperId}/attempts`;
+    fetch(url)
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => setPreviousAttempts(data))
+      .catch(() => {});
+  }, [paperId, guestQuiz]);
+
   const onSelectAnswer = useCallback(
     (key: string) => {
       if (!q) return;
@@ -321,13 +324,6 @@ export function QuizClient({
       setAnswers((a) => ({ ...a, [q.id]: key }));
       setRevealed((r) => ({ ...r, [q.id]: true }));
       if (navigator.vibrate) navigator.vibrate(10);
-      if (!examMode && currentIndex < questions.length - 1) {
-        if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-        autoAdvanceRef.current = setTimeout(() => {
-          setDirection(1);
-          setCurrentIndex((i) => Math.min(i + 1, questions.length - 1));
-        }, 1200);
-      }
     },
     [q, revealed, examMode, currentIndex, questions.length]
   );
@@ -365,10 +361,18 @@ export function QuizClient({
     if (!q) return;
     setReportSubmitting(true);
     try {
+      const imageDataUrls = await Promise.all(
+        reportImages.map((f) => new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(f);
+        }))
+      );
       const res = await fetch(`/api/v1/questions/${q.id}/report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ note: reportNote, pastPaperId: paperId }),
+        body: JSON.stringify({ note: reportNote, pastPaperId: paperId, images: imageDataUrls }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -378,12 +382,14 @@ export function QuizClient({
       toast.success("Thanks — your report was recorded for review.");
       setReportOpen(false);
       setReportNote("");
+      setReportImages([]);
+      setReportImagePreviews([]);
     } catch {
       toast.error("Network error. Try again.");
     } finally {
       setReportSubmitting(false);
     }
-  }, [q, reportNote, paperId]);
+  }, [q, reportNote, reportImages, paperId]);
 
   if (submitted) {
     return (
@@ -403,79 +409,73 @@ export function QuizClient({
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-4 pb-6 md:px-6 md:py-8 animate-fade-in">
-      <header className="mb-6 sticky top-2 md:top-4 z-40 group">
-        {/* Dynamic Glassmorphic Capsule */}
-        <div className="rounded-2xl border border-border bg-background/80 dark:bg-muted/40 px-3 py-2.5 shadow-xl shadow-black/5 dark:shadow-black/20 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors">
-          
-          <div className="flex items-center gap-3">
+    <div className="animate-fade-in">
+      {/* ── Fixed top bar (portaled to body to escape translateZ) ── */}
+      {typeof document !== "undefined" && createPortal(
+        <header className="fixed top-0 inset-x-0 z-40 w-full rounded-b-2xl border-b border-gray-200/70 dark:border-white/[0.06] bg-background/95 backdrop-blur-xl saturate-[1.8] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 md:px-6 md:py-3">
+          <div className="flex items-center gap-2 min-w-0">
             <Link
               href="/"
-              onMouseEnter={() => setLogoHover(true)}
-              onMouseLeave={() => setLogoHover(false)}
-              className="flex items-center gap-2 rounded-xl bg-muted/50 dark:bg-white/[0.04] p-1.5 transition-colors hover:bg-muted dark:hover:bg-white/10"
+              className="flex items-center gap-1.5 shrink-0"
             >
-              <MedOneXLogoMark className="h-8 w-8" />
-              <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: logoHover ? "auto" : 0, opacity: logoHover ? 1 : 0 }}
-                className="overflow-hidden whitespace-nowrap font-display text-sm font-bold tracking-tight text-foreground/90"
-              >
-                <div className="pr-2">{siteName || "MedOneX"}</div>
-              </motion.div>
+              <span
+                className="block h-7 w-7 md:h-8 md:w-8 shrink-0 bg-foreground"
+                style={{
+                  maskImage: "url(/medonex-logo.svg)",
+                  maskSize: "contain",
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center",
+                  WebkitMaskImage: "url(/medonex-logo.svg)",
+                  WebkitMaskSize: "contain",
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                }}
+              />
             </Link>
-
-            <div className="w-px h-8 bg-border mx-1 hidden sm:block" />
-
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Question {currentIndex + 1} of {questions.length}</p>
-              <h1 className="font-display text-base font-bold tracking-tight text-foreground truncate max-w-[200px] sm:max-w-[300px]">{paperTitle}</h1>
+            <div className="min-w-0 max-w-[140px] md:max-w-[300px]">
+              <h1 className="text-sm font-black tracking-tight text-foreground truncate leading-tight">{paperTitle}</h1>
             </div>
           </div>
-
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             {!secureExamMode ? (
-              <div
-                className="flex rounded-xl border border-border bg-muted/50 p-1"
-                role="group"
-                aria-label="Study mode"
-              >
+              <div className="flex rounded-full border border-border bg-muted/50 p-0.5">
                 <button
                   type="button"
                   onClick={() => setExamMode(false)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] md:text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     !examMode ? "bg-background text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-pressed={!examMode}
                 >
-                  <BookOpen className="h-3.5 w-3.5" aria-hidden />
-                  Tutor
+                  <BookOpen className="h-3 w-3 md:h-3.5 md:w-3.5" aria-hidden />
+                  <span className="hidden sm:inline">Tutor</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setExamMode(true)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] md:text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     examMode ? "bg-background text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-pressed={examMode}
                 >
-                  <GraduationCap className="h-3.5 w-3.5" aria-hidden />
-                  Exam
+                  <GraduationCap className="h-3 w-3 md:h-3.5 md:w-3.5" aria-hidden />
+                  <span className="hidden sm:inline">Exam</span>
                 </button>
               </div>
             ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-200">
-                <GraduationCap className="h-3.5 w-3.5" aria-hidden />
+              <span className="inline-flex items-center gap-1 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] font-semibold text-amber-600 dark:text-amber-200">
+                <GraduationCap className="h-3 w-3" aria-hidden />
                 Secured
               </span>
             )}
             <div
-              className="flex items-center gap-1.5 rounded-xl border border-border bg-muted/50 px-3 py-1.5 text-xs tabular-nums text-muted-foreground"
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-muted/50 px-3 py-1.5 text-sm md:text-base tabular-nums text-muted-foreground"
               title="Time on this question"
             >
-              <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <Clock className="h-4 w-4 shrink-0" aria-hidden />
               <span className="font-mono font-medium">
                 {String(Math.floor(questionSeconds / 60)).padStart(2, "0")}:
                 {String(questionSeconds % 60).padStart(2, "0")}
@@ -484,7 +484,7 @@ export function QuizClient({
             {timeLeft !== null && (
               <div
                 className={cn(
-                  "flex items-center gap-1.5 rounded-xl border px-3 py-1.5 font-mono text-sm font-bold tabular-nums transition-colors",
+                  "flex items-center gap-1.5 rounded-xl border px-3 py-1.5 font-mono text-sm md:text-base font-bold tabular-nums transition-colors",
                   timerWarn
                     ? "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 animate-pulse-soft"
                     : "border-border bg-muted/50 text-foreground"
@@ -492,15 +492,53 @@ export function QuizClient({
                 role="timer"
                 aria-live="polite"
               >
-                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <Clock className="h-4 w-4 shrink-0" aria-hidden />
                 {mins}:{secs}
               </div>
             )}
           </div>
         </div>
-      </header>
+      </header>, document.body
+      )}
+
+      {/* ── Content area ── */}
+      <div className="mx-auto max-w-4xl px-4 pt-[52px] pb-6 md:px-6 md:py-8 md:pt-24" style={{ scrollbarGutter: "stable" }}>
 
       <div className="mb-6">
+        <div className="mb-2 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setExitModalOpen(true)}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Exit
+          </button>
+        </div>
+        {previousAttempts.length > 0 && (
+          <div className="mb-3">
+            <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Previous attempts</p>
+            <div className="flex flex-wrap gap-2">
+              {previousAttempts.map((a) => (
+                <Link
+                  key={a.id}
+                  href={guestQuiz ? `/guest/attempt/${a.id}` : `/quiz/attempt/${a.id}`}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors hover:bg-muted",
+                    a.score >= 70
+                      ? "border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                      : a.score >= 50
+                      ? "border-amber-500/30 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+                      : "border-red-500/30 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300"
+                  )}
+                >
+                  <span className="font-semibold">{Math.round(a.score)}%</span>
+                  <span className="opacity-60">{new Date(a.createdAt).toLocaleDateString()}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
         {examActive && (
           <p className="mb-2 rounded-xl border border-dashed border-primary/25 bg-primary/[0.04] px-3 py-2 text-xs text-muted-foreground">
             <span className="font-semibold text-foreground">Exam mode:</span> no instant feedback or AI explain — results after you submit.
@@ -541,7 +579,7 @@ export function QuizClient({
           setTouchStart(null);
           setTouchStartY(null);
         }}
-        className="touch-pan-y min-h-[40vh] sm:min-h-0"
+        className="touch-pan-y w-full min-h-[40vh] sm:min-h-0"
       >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
@@ -552,6 +590,7 @@ export function QuizClient({
             animate="center"
             exit="exit"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="w-full"
           >
             <QuestionCard
             question={q}
@@ -574,120 +613,142 @@ export function QuizClient({
         </AnimatePresence>
       </div>
 
-      {/* Spacer to prevent bottom nav from overlapping content on mobile */}
-      <div
-        className="sm:hidden"
-        style={{ height: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
-        aria-hidden
-      />
+      {/* Bottom spacer so content isn't hidden behind fixed nav */}
+      <div className="sm:hidden" style={{ height: "calc(5rem + env(safe-area-inset-bottom, 0px))" }} aria-hidden />
 
-      <nav
-        className="fixed bottom-0 inset-x-0 z-[130] flex flex-row items-center justify-between gap-4 border-t border-border bg-background/90 px-4 pt-4 backdrop-blur-xl sm:static sm:mt-8 sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
-        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
-        aria-label="Question navigation"
-      >
-        <div className="flex flex-1 sm:flex-none flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigateTo(Math.max(currentIndex - 1, 0), -1)}
-            disabled={currentIndex === 0}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 sm:py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">Previous</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setNavigatorOpen((o) => !o)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-3 sm:py-2.5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-expanded={navigatorOpen}
-          >
-            <ListOrdered className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">Outline</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigateTo(Math.min(currentIndex + 1, questions.length - 1), 1)}
-            disabled={currentIndex >= questions.length - 1}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 sm:py-2.5 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </button>
-        </div>
+      {/* ── Mobile nav + drawer integrated (portaled, always in DOM) ── */}
+      {typeof document !== "undefined" && createPortal(
+        <div className="md:hidden fixed bottom-0 inset-x-0 z-[10000] flex flex-col justify-end pointer-events-none">
+          {/* Backdrop (covers full screen, closes drawer on tap) */}
+          <AnimatePresence>
+            {navigatorOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/60 pointer-events-auto"
+                onClick={() => setNavigatorOpen(false)}
+              />
+            )}
+          </AnimatePresence>
+          {/* Drawer panel (slides up from inside the nav) */}
+          <AnimatePresence>
+            {navigatorOpen && (
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                className="pointer-events-auto w-full max-h-[70vh] rounded-t-2xl overflow-hidden border-t border-gray-200/70 dark:border-white/[0.06] bg-background/95 backdrop-blur-xl saturate-[1.8] shadow-[0_-4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Jump to question"
+              >
+                <div className="flex max-h-[70vh] flex-col">
+                  <div className="mx-auto mt-3 mb-1 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/20" />
+                  <div className="flex shrink-0 items-center justify-between px-4 pb-2">
+                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Jump to question</div>
+                    <button
+                      type="button"
+                      onClick={() => setNavigatorOpen(false)}
+                      className="rounded-lg p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label="Close"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto px-4 pb-4">
+                    <div className="flex flex-wrap gap-2 justify-center pt-2">
+                      {questions.map((qq, i) => {
+                        const done = !!answers[qq.id];
+                        const rev = !!revealed[qq.id];
+                        const choice = answers[qq.id];
+                        const correct = !examMode && rev && choice === qq.answer;
+                        const wrong = !examMode && rev && choice != null && choice !== qq.answer;
+                        const isFlagged = flagged.has(qq.id);
+                        return (
+                          <button
+                            key={qq.id}
+                            type="button"
+                            onClick={() => {
+                              navigateTo(i, i > currentIndex ? 1 : -1);
+                              setNavigatorOpen(false);
+                            }}
+                            className={cn(
+                              "flex h-11 min-w-[2.75rem] items-center justify-center rounded-lg border-2 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                              i === currentIndex && "border-primary ring-2 ring-primary/30 bg-primary/5",
+                              isFlagged && "border-amber-400 bg-amber-100 text-amber-800 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400",
+                              !done && !isFlagged && "border-gray-200 bg-white text-gray-500 dark:border-white/10 dark:bg-muted/30 dark:text-muted-foreground",
+                              examMode && done && !isFlagged && "border-primary/50 bg-primary/10 text-primary",
+                              correct && !isFlagged && "border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-500/50 dark:bg-emerald-500/10 dark:text-emerald-400",
+                              wrong && !isFlagged && "border-red-400 bg-red-50 text-red-700 dark:border-red-400/50 dark:bg-red-500/10 dark:text-red-400"
+                            )}
+                            aria-label={`Question ${i + 1}${done ? ", answered" : ", unanswered"}${isFlagged ? ", marked for review" : ""}`}
+                          >
+                            {i + 1}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 sm:px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ChevronRight className="h-4 w-4 sm:hidden" aria-hidden />}
-          <span className="hidden sm:inline">{submitting ? "Submitting…" : "Submit quiz"}</span>
-          <span className="sm:hidden">{submitting ? "..." : "Submit"}</span>
-        </button>
-      </nav>
-
-      {/* Mobile bottom sheet navigator */}
-      <AnimatePresence>
-        {navigatorOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[150] bg-black/50 sm:hidden"
-              onClick={() => setNavigatorOpen(false)}
-            />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 400, damping: 35 }}
-              className="fixed inset-x-0 bottom-0 z-[160] rounded-t-2xl border border-border bg-card p-4 shadow-2xl sm:hidden"
-              style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Jump to question"
-            >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/20" />
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Jump to</div>
-            <div className="flex max-h-60 flex-wrap gap-2 overflow-y-auto">
-              {questions.map((qq, i) => {
-                const done = !!answers[qq.id];
-                const rev = !!revealed[qq.id];
-                const choice = answers[qq.id];
-                const correct = !examMode && rev && choice === qq.answer;
-                const wrong = !examMode && rev && choice != null && choice !== qq.answer;
-                const isFlagged = flagged.has(qq.id);
-                return (
-                  <button
-                    key={qq.id}
-                    type="button"
-                    onClick={() => {
-                      navigateTo(i, i > currentIndex ? 1 : -1);
-                      setNavigatorOpen(false);
-                    }}
-                    className={cn(
-                      "flex h-11 min-w-[2.75rem] items-center justify-center rounded-lg border text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      i === currentIndex && "border-primary ring-2 ring-primary/30",
-                      isFlagged && "border-amber-400 bg-amber-400/30 text-amber-800 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400",
-                      !done && !isFlagged && "border-border bg-muted/30 text-muted-foreground",
-                      examMode && done && !isFlagged && "border-primary/45 bg-primary/10 text-primary",
-                      correct && !isFlagged && "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-                      wrong && !isFlagged && "border-red-400/50 bg-red-500/10 text-red-700 dark:text-red-400"
-                    )}
-                    aria-label={`Question ${i + 1}${done ? ", answered" : ", unanswered"}${isFlagged ? ", marked for review" : ""}`}
-                  >
-                    {i + 1}
-                  </button>
-                );
-              })}
+          {/* Nav bar itself */}
+          <nav
+            className="pointer-events-auto flex flex-row items-center justify-between gap-4 rounded-t-2xl border-t border-gray-200/70 dark:border-white/[0.06] bg-background/95 backdrop-blur-xl saturate-[1.8] px-4 pt-3 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]"
+            style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
+            aria-label="Question navigation"
+          >
+            <div className="flex flex-1 flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigateTo(Math.max(currentIndex - 1, 0), -1)}
+                disabled={currentIndex === 0}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden />
+                <span className="hidden sm:inline">Previous</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setNavigatorOpen((o) => !o)}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-3 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-expanded={navigatorOpen}
+              >
+                <ListOrdered className="h-4 w-4" aria-hidden />
+                <span className="hidden sm:inline">Outline</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo(Math.min(currentIndex + 1, questions.length - 1), 1)}
+                disabled={currentIndex >= questions.length - 1}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </button>
             </div>
-          </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ChevronRight className="h-4 w-4 sm:hidden" aria-hidden />}
+              <span className="hidden sm:inline">{submitting ? "Submitting…" : "Submit quiz"}</span>
+              <span className="sm:hidden">{submitting ? "..." : "Submit"}</span>
+            </button>
+          </nav>
+        </div>,
+        document.body
+      )}
 
       {/* Desktop inline navigator */}
       {navigatorOpen && (
@@ -734,13 +795,15 @@ export function QuizClient({
 
       {reportOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="report-dialog-title"
           onClick={() => {
             setReportOpen(false);
             setReportNote("");
+            setReportImages([]);
+            setReportImagePreviews([]);
           }}
         >
           <div
@@ -761,12 +824,67 @@ export function QuizClient({
               placeholder="Optional details…"
               aria-label="Report details"
             />
+
+            {/* ── Image attachment ── */}
+            <div className="mt-3">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    const newFiles = [...reportImages, ...files].slice(0, 5);
+                    setReportImages(newFiles);
+                    Promise.all(
+                      newFiles.map((f) => new Promise<string>((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result as string);
+                        reader.readAsDataURL(f);
+                      }))
+                    ).then(setReportImagePreviews);
+                    e.target.value = "";
+                  }}
+                />
+                <span className="text-sm">📎</span>
+                Attach images ({reportImages.length}/5)
+              </label>
+              {reportImagePreviews.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {reportImagePreviews.map((src, i) => (
+                    <div key={i} className="relative group">
+                      <img
+                        src={src}
+                        alt={`Attachment ${i + 1}`}
+                        className="h-16 w-16 rounded-lg border border-border object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newFiles = reportImages.filter((_, j) => j !== i);
+                          const newPreviews = reportImagePreviews.filter((_, j) => j !== i);
+                          setReportImages(newFiles);
+                          setReportImagePreviews(newPreviews);
+                        }}
+                        className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => {
                   setReportOpen(false);
                   setReportNote("");
+                  setReportImages([]);
+                  setReportImagePreviews([]);
                 }}
                 className="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
@@ -785,6 +903,48 @@ export function QuizClient({
           </div>
         </div>
       )}
+
+      {/* ── Exit confirmation modal ── */}
+      {typeof document !== "undefined" && exitModalOpen && createPortal(
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          onClick={() => setExitModalOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-foreground">Exit quiz?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Your progress will be lost if you leave before submitting.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setExitModalOpen(false)}
+                className="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/past-papers")}
+                className="rounded-xl bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Yes, exit
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>,
+        document.body
+      )}
+    </div>
     </div>
   );
 }

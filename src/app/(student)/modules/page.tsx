@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { BookOpen, Lock, GraduationCap, Library, Layers } from "lucide-react";
 import ModulesGrid, { ModuleWithStats } from "@/components/modules/ModulesGrid";
+import ContinueLearningCard from "@/components/modules/ContinueLearningCard";
 import { Prisma } from "@prisma/client";
 
 export const revalidate = 60;
@@ -144,8 +145,40 @@ export default async function ModulesPage() {
     };
   });
 
+  // Fetch semester info for hero
+  const semesterInfo = semesterId ? await prisma.semester.findUnique({
+    where: { id: semesterId },
+    select: { name: true, academicYear: { select: { university: { select: { name: true } } } } },
+  }) : null;
+  const semesterName = semesterInfo?.name ?? "";
+  const universityName = semesterInfo?.academicYear?.university?.name ?? "";
+
+  // Fetch last lecture activity for "Continue Learning" card
+  const lastActivity = userId ? await prisma.userLectureActivity.findFirst({
+    where: { userId },
+    orderBy: { lastViewedAt: "desc" },
+    select: {
+      lastViewedAt: true,
+      source: true,
+      lecture: {
+        select: {
+          id: true,
+          title: true,
+          subject: {
+            select: {
+              id: true,
+              name: true,
+              module: { select: { id: true, name: true } },
+            },
+          },
+        },
+      },
+    },
+  }) : null;
+
   // Page-level stats for hero
   const totalModules = modules.length;
+  const completedModules = modulesWithStats.filter(m => m.percentage >= 80).length;
   const totalLectures = modulesWithStats.reduce((a: number, m) => a + m.lecturesCount, 0);
   const totalQuestions = modulesWithStats.reduce((a: number, m) => a + m.questionsCount, 0);
 
@@ -155,8 +188,8 @@ export default async function ModulesPage() {
       <div className="hidden md:block absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="hidden md:block absolute top-40 right-1/4 h-[400px] w-[400px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />
 
-      {/* Mobile spacer for top nav */}
-      <div className="md:hidden h-16" />
+      {/* ── MOBILE SPACER ── */}
+      <div className="md:hidden h-6" />
 
       {/* ── DESKTOP HERO ── */}
       <div className="hidden md:block relative w-full overflow-hidden">
@@ -202,6 +235,39 @@ export default async function ModulesPage() {
 
       {/* ── MAIN CONTENT ── */}
       <div className="container mx-auto px-4 sm:px-6 space-y-8 md:space-y-12 relative z-20">
+        {/* ── Mobile continue learning card ── */}
+        {!isGuest && lastActivity && (
+          <div className="md:hidden">
+            <ContinueLearningCard
+              lectureId={lastActivity.lecture.id}
+              lectureTitle={lastActivity.lecture.title}
+              subjectName={lastActivity.lecture.subject.name}
+              moduleId={lastActivity.lecture.subject.module.id}
+              moduleName={lastActivity.lecture.subject.module.name}
+              lastViewedAt={lastActivity.lastViewedAt}
+              source={lastActivity.source}
+            />
+          </div>
+        )}
+
+        {/* ── Mobile metadata strip ── */}
+        {!isGuest && (semesterName || totalModules > 0) && (
+          <div className="md:hidden flex items-center justify-between px-1">
+            <div className="flex items-center gap-1.5 min-w-0 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
+              <span className="truncate">{semesterName || "Current Semester"}</span>
+              {universityName && (
+                <>
+                  <span className="text-muted-foreground/20 shrink-0">·</span>
+                  <span className="truncate">{universityName}</span>
+                </>
+              )}
+            </div>
+            <span className="shrink-0 ml-3 text-[10px] font-black text-foreground/80 tabular-nums">
+              {completedModules}/{totalModules}
+            </span>
+          </div>
+        )}
+
         {isGuest && (
           <div className="flex items-center gap-3 md:gap-4 rounded-2xl md:rounded-3xl border border-amber-500/20 bg-amber-500/5 p-4 md:p-6 backdrop-blur-md">
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">

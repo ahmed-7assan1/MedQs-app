@@ -399,6 +399,7 @@ model QuestionReport {
   questionId  String
   userId      String
   note        String?
+  images      String[]
   pastPaperId String?
   createdAt   DateTime   @default(now())
   pastPaper   PastPaper? @relation(fields: [pastPaperId], references: [id])

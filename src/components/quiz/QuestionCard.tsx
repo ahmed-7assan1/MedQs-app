@@ -164,7 +164,7 @@ export function QuestionCard({
   return (
     <article
       className={cn(
-        "rounded-2xl border border-white/[0.02] bg-card shadow-[0_4px_24px_rgb(0_0_0/0.05)] dark:shadow-[0_8px_32px_rgb(0_0_0/0.25)]",
+        "w-full rounded-2xl border border-white/[0.02] bg-card shadow-[0_4px_24px_rgb(0_0_0/0.05)] dark:shadow-[0_8px_32px_rgb(0_0_0/0.25)]",
         protectContent && "select-none"
       )}
       aria-labelledby={stemId}

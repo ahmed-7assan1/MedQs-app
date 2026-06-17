@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const NOTE_MAX = 2000;
+const IMAGE_MAX_COUNT = 5;
+const IMAGE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
@@ -21,6 +23,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const rawNote = typeof o.note === "string" ? o.note.trim() : "";
   const note = rawNote.slice(0, NOTE_MAX);
   const pastPaperId = typeof o.pastPaperId === "string" && o.pastPaperId.length > 0 ? o.pastPaperId : null;
+
+  let images: string[] = [];
+  if (Array.isArray(o.images)) {
+    images = o.images
+      .filter((img): img is string => typeof img === "string")
+      .slice(0, IMAGE_MAX_COUNT)
+      .filter((img) => img.length <= IMAGE_MAX_SIZE_BYTES);
+  }
 
   const question = await prisma.question.findUnique({
     where: { id: params.id },
@@ -45,6 +55,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       questionId: params.id,
       userId: session.user.id,
       note: note.length > 0 ? note : null,
+      images,
       pastPaperId,
     },
   });
