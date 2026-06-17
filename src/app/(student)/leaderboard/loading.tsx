@@ -1,5 +1,5 @@
-import { LeaderboardSkeleton } from "@/components/ui/skeleton";
+import { PremiumLoading } from "@/components/ui/PremiumLoading";
 
-export default function LeaderboardLoading() {
-  return <LeaderboardSkeleton rows={10} />;
+export default function Loading() {
+  return <PremiumLoading />;
 }

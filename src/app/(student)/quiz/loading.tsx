@@ -1,2 +1,5 @@
-import { QuizSkeleton } from "@/components/ui/skeletons";
-export default function Loading() { return <QuizSkeleton />; }
+import { PremiumLoading } from "@/components/ui/PremiumLoading";
+
+export default function Loading() {
+  return <PremiumLoading />;
+}

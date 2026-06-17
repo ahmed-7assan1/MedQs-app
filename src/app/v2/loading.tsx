@@ -1,2 +1,5 @@
-import { PageSkeleton } from "@/components/ui/skeletons";
-export default function Loading() { return <PageSkeleton />; }
+import { PremiumLoading } from "@/components/ui/PremiumLoading";
+
+export default function Loading() {
+  return <PremiumLoading />;
+}
