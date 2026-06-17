@@ -92,7 +92,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
           (visible || searchOpen || isSocial) ? "translate-y-0" : "-translate-y-full"
         )}
       >
-        <div className="bg-gradient-to-b from-background via-background/70 to-transparent backdrop-blur-3xl saturate-[1.8] border-b border-border shadow-lg">
+        <div className="bg-white/85 backdrop-blur-xl saturate-[1.5] dark:bg-black/85 dark:backdrop-blur-xl dark:saturate-[1.5] border-b border-gray-200/50 dark:border-white/[0.05] shadow-[0_4px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_32px_rgba(0,0,0,0.4)]">
           <div className="px-4 py-3 rounded-b-2xl">
             <AnimatePresence mode="wait">
               {searchOpen ? (
