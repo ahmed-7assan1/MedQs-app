@@ -167,7 +167,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
       <div className="space-y-2">
         {comments?.length === 0 && <p className={cn("text-xs text-center py-4", isDark ? "text-gray-500" : "text-gray-400")}>No comments yet</p>}
         {comments?.map((c: any) => (
-          <div key={c.id} className={cn("p-3 rounded-xl", isDark ? "bg-white/[0.03]" : "bg-gray-50")}>
+          <div key={c.id} className={cn("p-3 rounded-xl", isDark ? "bg-black/10 backdrop-blur-lg" : "bg-white/40 backdrop-blur-lg")}>
             <div className="flex items-center gap-2 mb-1">
               <span className={cn("text-[10px] font-bold", isDark ? "text-gray-400" : "text-gray-500")}>{c.userId?.slice(0, 8)}...</span>
               <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{new Date(c.createdAt).toLocaleDateString()}</span>
@@ -183,13 +183,13 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
     <AnimatePresence>
       {isOpen && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className={cn("fixed inset-0 z-[10030] overflow-y-auto", isDark ? "bg-[#0a0a0a]" : "bg-white")}>
+          className={cn("fixed inset-0 z-[10030] overflow-y-auto", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
           <div className="max-w-2xl mx-auto px-4 py-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 {(selectedQuiz || selectedSet) ? (
-                  <button onClick={backToList} className={cn("p-2 rounded-xl", isDark ? "hover:bg-white/10 text-gray-400" : "hover:bg-gray-100 text-gray-500")}>
+                  <button onClick={backToList} className={cn("p-2 rounded-xl", isDark ? "hover:bg-white/10 text-gray-400" : "hover:bg-white/80 text-gray-500")}>
                     <ArrowLeft size={20} />
                   </button>
                 ) : null}
@@ -200,14 +200,14 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
                   {selectedQuiz ? selectedQuiz.title : selectedSet ? selectedSet.title : "Library"}
                 </h1>
               </div>
-              <button onClick={() => { onClose(); backToList(); }} className={cn("p-2 rounded-xl", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}>
+              <button onClick={() => { onClose(); backToList(); }} className={cn("p-2 rounded-xl", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-white/80")}>
                 <X size={20} />
               </button>
             </div>
 
             {/* Tabs (only when not in detail view) */}
             {!selectedQuiz && !selectedSet && (
-              <div className={cn("flex gap-1 mb-4 p-1 rounded-xl", isDark ? "bg-white/[0.04]" : "bg-gray-100")}>
+              <div className={cn("flex gap-1 mb-4 p-1 rounded-xl", isDark ? "bg-black/20 backdrop-blur-xl" : "bg-white/50 backdrop-blur-xl")}>
                 {(["explore", "my-publications", "notifications"] as Tab[]).map(t => (
                   <button key={t} onClick={() => setTab(t)}
                     className={cn("flex items-center justify-center gap-1.5 flex-1 py-2.5 rounded-lg text-sm font-bold transition-all",
@@ -221,7 +221,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
 
             {/* Sub-tab for explore */}
             {!selectedQuiz && !selectedSet && tab === "explore" && (
-              <div className={cn("flex gap-1 mb-4 p-1 rounded-lg", isDark ? "bg-white/[0.03]" : "bg-gray-50")}>
+              <div className={cn("flex gap-1 mb-4 p-1 rounded-lg", isDark ? "bg-black/10 backdrop-blur-lg" : "bg-white/40 backdrop-blur-lg")}>
                 {(["quizzes", "flashcards"] as SubTab[]).map(t => (
                   <button key={t} onClick={() => setSubTab(t)}
                     className={cn("flex-1 py-2 rounded-lg text-xs font-bold transition-all",
@@ -234,7 +234,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
 
             {/* Sub-tab for my-publications */}
             {!selectedQuiz && !selectedSet && tab === "my-publications" && (
-              <div className={cn("flex gap-1 mb-4 p-1 rounded-lg", isDark ? "bg-white/[0.03]" : "bg-gray-50")}>
+              <div className={cn("flex gap-1 mb-4 p-1 rounded-lg", isDark ? "bg-black/10 backdrop-blur-lg" : "bg-white/40 backdrop-blur-lg")}>
                 {(["quizzes", "flashcards"] as SubTab[]).map(t => (
                   <button key={t} onClick={() => { setSubTab(t); fetchMyPublications(); }}
                     className={cn("flex-1 py-2 rounded-lg text-xs font-bold transition-all",
@@ -248,7 +248,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
             {/* ─── Content ─── */}
             {selectedQuiz ? (
               <div className="space-y-5">
-                <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-white/[0.02]" : "border-gray-100 bg-gray-50/50")}>
+                <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl" : "border-gray-100 bg-white/50 backdrop-blur-xl")}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-xs" style={{ color: isDark ? "#9ca3af" : "#6b7280" }}>
                       <User size={14} /><span>{selectedQuiz.creatorId.slice(0, 8)}...</span>
@@ -280,7 +280,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
                   <div className="space-y-2">
                     {selectedQuiz.comments?.length === 0 && <p className={cn("text-xs text-center py-4", isDark ? "text-gray-500" : "text-gray-400")}>No comments yet</p>}
                     {selectedQuiz.comments?.map((c: any) => (
-                      <div key={c.id} className={cn("p-3 rounded-xl", isDark ? "bg-white/[0.03]" : "bg-gray-50")}>
+                      <div key={c.id} className={cn("p-3 rounded-xl", isDark ? "bg-black/10 backdrop-blur-lg" : "bg-white/40 backdrop-blur-lg")}>
                         <div className="flex items-center gap-2 mb-1">
                           <span className={cn("text-[10px] font-bold", isDark ? "text-gray-400" : "text-gray-500")}>{c.userId.slice(0, 8)}...</span>
                           <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{new Date(c.createdAt).toLocaleDateString()}</span>
@@ -293,7 +293,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
               </div>
             ) : selectedSet && !viewingCards ? (
               <div className="space-y-5">
-                <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-white/[0.02]" : "border-gray-100 bg-gray-50/50")}>
+                <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl" : "border-gray-100 bg-white/50 backdrop-blur-xl")}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-xs" style={{ color: isDark ? "#9ca3af" : "#6b7280" }}>
                       <User size={14} /><span>{selectedSet.creatorId.slice(0, 8)}...</span>
@@ -339,13 +339,13 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
                   <div className="flex items-center justify-between mt-6">
                     <button onClick={() => { if (cardIndex > 0) { setCardIndex(cardIndex - 1); setCardFlipped(false); } }}
                       disabled={cardIndex === 0}
-                      className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-all", cardIndex === 0 ? (isDark ? "text-gray-600" : "text-gray-300") : (isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-gray-100"))}>
+                      className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-all", cardIndex === 0 ? (isDark ? "text-gray-600" : "text-gray-300") : (isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-white/80"))}>
                       Previous
                     </button>
                     <span className={cn("text-xs font-medium", isDark ? "text-gray-500" : "text-gray-400")}>{cardIndex + 1} / {selectedSet.flashcards.length}</span>
                     <button onClick={() => { if (cardIndex < selectedSet.flashcards.length - 1) { setCardIndex(cardIndex + 1); setCardFlipped(false); } }}
                       disabled={cardIndex === selectedSet.flashcards.length - 1}
-                      className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-all", cardIndex === selectedSet.flashcards.length - 1 ? (isDark ? "text-gray-600" : "text-gray-300") : (isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-gray-100"))}>
+                      className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-all", cardIndex === selectedSet.flashcards.length - 1 ? (isDark ? "text-gray-600" : "text-gray-300") : (isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-white/80"))}>
                       Next
                     </button>
                   </div>
@@ -364,7 +364,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
                   <div className="space-y-2">
                     {quizzes.map(q => (
                       <button key={q.id} onClick={() => openQuizDetail(q.id)}
-                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-white/[0.02] hover:bg-white/[0.05]" : "border-gray-100 bg-gray-50/50 hover:bg-gray-100")}>
+                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl hover:bg-white/[0.05]" : "border-gray-100 bg-white/50 backdrop-blur-xl hover:bg-white/80")}>
                         <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{q.title}</p>
                         <div className="flex items-center gap-3 mt-1.5">
                           <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}>{q.questionCount} questions</span>
@@ -384,7 +384,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
                   <div className="space-y-2">
                     {fcSets.map(s => (
                       <button key={s.id} onClick={() => openSetDetail(s.id)}
-                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-white/[0.02] hover:bg-white/[0.05]" : "border-gray-100 bg-gray-50/50 hover:bg-gray-100")}>
+                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl hover:bg-white/[0.05]" : "border-gray-100 bg-white/50 backdrop-blur-xl hover:bg-white/80")}>
                         <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{s.title}</p>
                         <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}>{s.cardCount} cards</span>
                       </button>
@@ -405,7 +405,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
                   <div className="space-y-2">
                     {myQuizzes.map(q => (
                       <button key={q.id} onClick={() => openQuizDetail(q.id)}
-                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-white/[0.02] hover:bg-white/[0.05]" : "border-gray-100 bg-gray-50/50 hover:bg-gray-100")}>
+                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl hover:bg-white/[0.05]" : "border-gray-100 bg-white/50 backdrop-blur-xl hover:bg-white/80")}>
                         <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{q.title}</p>
                         <div className="flex items-center gap-3 mt-1.5">
                           <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}>{q.questionCount} questions</span>
@@ -425,7 +425,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
                   <div className="space-y-2">
                     {myFcSets.map(s => (
                       <button key={s.id} onClick={() => openSetDetail(s.id)}
-                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-white/[0.02] hover:bg-white/[0.05]" : "border-gray-100 bg-gray-50/50 hover:bg-gray-100")}>
+                        className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl hover:bg-white/[0.05]" : "border-gray-100 bg-white/50 backdrop-blur-xl hover:bg-white/80")}>
                         <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{s.title}</p>
                         <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}>{s.cardCount} cards</span>
                       </button>
@@ -446,7 +446,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
               ) : (
                 <div className="space-y-2">
                   {notifications.map((n, i) => (
-                    <div key={`${n.type}-${n.itemId}-${i}`} className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-white/[0.02]" : "border-gray-100 bg-gray-50/50")}>
+                    <div key={`${n.type}-${n.itemId}-${i}`} className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl" : "border-gray-100 bg-white/50 backdrop-blur-xl")}>
                       <div className="flex items-start gap-3">
                         <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
                           n.type.includes("rating") ? (isDark ? "bg-amber-500/10" : "bg-amber-50") : (isDark ? "bg-indigo-500/10" : "bg-indigo-50"))}>

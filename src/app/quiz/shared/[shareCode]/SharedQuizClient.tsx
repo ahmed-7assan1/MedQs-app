@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,6 +28,14 @@ export function SharedQuizClient({ quiz }: { quiz: QuizData }) {
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    setCurrentIdx(0);
+    setSelected(null);
+    setRevealed(false);
+    setScore(0);
+    setFinished(false);
+  }, [quiz]);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -63,11 +71,22 @@ export function SharedQuizClient({ quiz }: { quiz: QuizData }) {
 
   const q = quiz.questions[currentIdx];
 
+  const correctAnswerText = useMemo(() => {
+    if (!q) return "";
+    if (q.options && q.options.length > 0) {
+      const letterIndex = q.answer?.charCodeAt(0) - 65;
+      if (letterIndex >= 0 && letterIndex < q.options.length) {
+        return q.options[letterIndex];
+      }
+    }
+    return q.answer || "";
+  }, [q]);
+
   const handleAnswer = (option: string) => {
     if (revealed) return;
     setSelected(option);
     setRevealed(true);
-    if (option === q.answer) setScore(s => s + 1);
+    if (option === correctAnswerText) setScore(s => s + 1);
   };
 
   const handleNext = () => {
@@ -101,8 +120,8 @@ export function SharedQuizClient({ quiz }: { quiz: QuizData }) {
     );
   }
 
-  const isCorrect = revealed && selected === q.answer;
-  const isWrong = revealed && selected !== q.answer;
+  const isCorrect = revealed && selected === correctAnswerText;
+  const isWrong = revealed && selected !== correctAnswerText;
 
   return (
     <div className={cn("min-h-screen flex flex-col", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
@@ -126,7 +145,7 @@ export function SharedQuizClient({ quiz }: { quiz: QuizData }) {
               <div className="space-y-2">
                 {q.options.map((opt) => {
                   const isSelected = selected === opt;
-                  const isAnswer = revealed && opt === q.answer;
+                  const isAnswer = revealed && opt === correctAnswerText;
                   let btnClass = isDark ? "border-white/10 text-gray-300" : "border-gray-200 text-gray-700";
                   if (isSelected && !revealed) btnClass = "border-indigo-500 bg-indigo-500/10 text-indigo-400";
                   if (isAnswer && revealed) btnClass = "border-emerald-500 bg-emerald-500/10 text-emerald-400";

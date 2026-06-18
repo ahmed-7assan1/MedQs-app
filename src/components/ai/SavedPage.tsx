@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   BookOpen, Spinner, X, Trash, Copy, Globe, GlobeSimple,
-  Clock, FileText, FloppyDisk
+  Clock, FileText, FloppyDisk, Check, PencilSimple
 } from "@phosphor-icons/react";
 import toast from "react-hot-toast";
 
@@ -30,6 +30,8 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
   const [quizzes, setQuizzes] = useState<SavedQuiz[]>([]);
   const [fcSets, setFcSets] = useState<SavedFlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingTitle, setEditingTitle] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const fetchQuizzes = async () => {
     setLoading(true);
@@ -70,6 +72,23 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
     } catch { toast.error("Failed to update"); }
   };
 
+  const renameItem = async (id: string, title: string, type: "quiz" | "flashcard") => {
+    const endpoint = type === "quiz"
+      ? `/api/v1/ai/saved-quizzes/${id}`
+      : `/api/v1/ai/saved-flashcard-sets/${id}`;
+    try {
+      const r = await fetch(endpoint, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      if (r.ok) {
+        if (type === "quiz") setQuizzes(prev => prev.map(q => q.id === id ? { ...q, title } : q));
+        else setFcSets(prev => prev.map(s => s.id === id ? { ...s, title } : s));
+        toast.success("Renamed!");
+      }
+    } catch { toast.error("Failed to rename"); }
+  };
+
   const deleteItem = async (id: string, type: "quiz" | "flashcard") => {
     const endpoint = type === "quiz"
       ? `/api/v1/ai/saved-quizzes/${id}`
@@ -90,19 +109,38 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
     toast.success("Share link copied!");
   };
 
+  const startEdit = (id: string, currentTitle: string) => {
+    setEditingTitle(id);
+    setEditValue(currentTitle);
+  };
+
+  const saveEdit = async (id: string, type: "quiz" | "flashcard") => {
+    if (!editValue.trim()) { toast.error("Title cannot be empty"); return; }
+    await renameItem(id, editValue.trim(), type);
+    setEditingTitle(null);
+  };
+
+  const cardClass = isDark
+    ? "border-white/[0.06] bg-white/[0.04] backdrop-blur-xl"
+    : "border-gray-200/60 bg-white/70 backdrop-blur-xl";
+
+  const surfaceClass = isDark
+    ? "bg-black/20 backdrop-blur-xl"
+    : "bg-white/50 backdrop-blur-xl";
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className={cn("fixed inset-0 z-[10030] overflow-y-auto",
-            isDark ? "bg-[#0a0a0a]" : "bg-white"
+            isDark ? "bg-[#050505]" : "bg-[#FCFCFC]"
           )}
         >
           <div className="max-w-2xl mx-auto px-4 py-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/10" : "bg-indigo-50")}>
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/10 backdrop-blur-xl" : "bg-indigo-50")}>
                   <BookOpen size={20} weight="bold" className={isDark ? "text-white" : "text-indigo-500"} />
                 </div>
                 <h1 className={cn("text-lg font-bold", isDark ? "text-white" : "text-gray-900")}>Saved</h1>
@@ -112,7 +150,7 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
               </button>
             </div>
 
-            <div className={cn("flex gap-1 mb-6 p-1 rounded-xl", isDark ? "bg-white/[0.04]" : "bg-gray-100")}>
+            <div className={cn("flex gap-1 mb-6 p-1 rounded-xl", surfaceClass)}>
               {(["quizzes", "flashcards"] as const).map(t => (
                 <button key={t} onClick={() => setTab(t)}
                   className={cn("flex-1 py-2.5 rounded-lg text-sm font-bold transition-all",
@@ -135,10 +173,25 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
               ) : (
                 <div className="space-y-3">
                   {quizzes.map(q => (
-                    <div key={q.id} className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-white/[0.02]" : "border-gray-100 bg-gray-50/50")}>
+                    <div key={q.id} className={cn("p-4 rounded-2xl border", cardClass)}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{q.title}</p>
+                          {editingTitle === q.id ? (
+                            <div className="flex items-center gap-2">
+                              <input value={editValue} onChange={e => setEditValue(e.target.value)}
+                                autoFocus className={cn("flex-1 px-2 py-1 rounded-lg text-sm font-bold border outline-none",
+                                  isDark ? "bg-white/10 border-white/20 text-white" : "bg-gray-50 border-gray-300 text-gray-900")}
+                                onKeyDown={e => { if (e.key === "Enter") saveEdit(q.id, "quiz"); if (e.key === "Escape") setEditingTitle(null); }} />
+                              <button onClick={() => saveEdit(q.id, "quiz")} className="p-1 rounded-lg text-emerald-500 hover:bg-emerald-500/10"><Check size={14} weight="bold" /></button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{q.title}</p>
+                              <button onClick={() => startEdit(q.id, q.title)} className={cn("p-1 rounded-lg flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all", isDark ? "hover:bg-white/10 text-gray-500" : "hover:bg-gray-100 text-gray-400")}>
+                                <PencilSimple size={12} />
+                              </button>
+                            </div>
+                          )}
                           <div className="flex items-center gap-3 mt-1">
                             <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}>{q.questions?.length || 0} questions</span>
                             <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}><Clock size={10} className="inline mr-0.5" />{new Date(q.createdAt).toLocaleDateString()}</span>
@@ -149,6 +202,11 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 mt-3 pt-3 border-t" style={{ borderColor: isDark ? "#ffffff10" : "#e5e7eb" }}>
+                        <button onClick={() => { startEdit(q.id, q.title); }}
+                          className={cn("flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
+                            isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}>
+                          <PencilSimple size={12} /> Rename
+                        </button>
                         <button onClick={() => togglePublish(q.id, q.published, "quiz")}
                           className={cn("flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
                             isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}>
@@ -177,10 +235,25 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
               ) : (
                 <div className="space-y-3">
                   {fcSets.map(s => (
-                    <div key={s.id} className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-white/[0.02]" : "border-gray-100 bg-gray-50/50")}>
+                    <div key={s.id} className={cn("p-4 rounded-2xl border", cardClass)}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{s.title}</p>
+                          {editingTitle === s.id ? (
+                            <div className="flex items-center gap-2">
+                              <input value={editValue} onChange={e => setEditValue(e.target.value)}
+                                autoFocus className={cn("flex-1 px-2 py-1 rounded-lg text-sm font-bold border outline-none",
+                                  isDark ? "bg-white/10 border-white/20 text-white" : "bg-gray-50 border-gray-300 text-gray-900")}
+                                onKeyDown={e => { if (e.key === "Enter") saveEdit(s.id, "flashcard"); if (e.key === "Escape") setEditingTitle(null); }} />
+                              <button onClick={() => saveEdit(s.id, "flashcard")} className="p-1 rounded-lg text-emerald-500 hover:bg-emerald-500/10"><Check size={14} weight="bold" /></button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{s.title}</p>
+                              <button onClick={() => startEdit(s.id, s.title)} className={cn("p-1 rounded-lg flex-shrink-0", isDark ? "hover:bg-white/10 text-gray-500" : "hover:bg-gray-100 text-gray-400")}>
+                                <PencilSimple size={12} />
+                              </button>
+                            </div>
+                          )}
                           <div className="flex items-center gap-3 mt-1">
                             <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}>{s.flashcards?.length || 0} cards</span>
                             <span className={cn("text-[11px]", isDark ? "text-gray-500" : "text-gray-400")}><Clock size={10} className="inline mr-0.5" />{new Date(s.createdAt).toLocaleDateString()}</span>
@@ -191,6 +264,11 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 mt-3 pt-3 border-t" style={{ borderColor: isDark ? "#ffffff10" : "#e5e7eb" }}>
+                        <button onClick={() => { startEdit(s.id, s.title); }}
+                          className={cn("flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
+                            isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}>
+                          <PencilSimple size={12} /> Rename
+                        </button>
                         <button onClick={() => togglePublish(s.id, s.published, "flashcard")}
                           className={cn("flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
                             isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}>

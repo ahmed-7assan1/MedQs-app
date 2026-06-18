@@ -1458,7 +1458,7 @@ export function MedOneXChat() {
                 <X size={16} weight="bold" />
               </button>
             </div>
-            <SharedQuizClient quiz={showLibraryQuiz} />
+            <SharedQuizClient key={showLibraryQuiz?.id || "quiz"} quiz={showLibraryQuiz} />
           </motion.div>
         )}
       </AnimatePresence>

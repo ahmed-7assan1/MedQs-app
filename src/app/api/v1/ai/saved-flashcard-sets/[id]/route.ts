@@ -11,10 +11,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     if (!set) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (set.userId !== session.user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const { published } = await req.json();
+    const body = await req.json();
+    const data: any = {};
+    if (body.published !== undefined) data.published = body.published;
+    if (body.title !== undefined) data.title = body.title;
     const updated = await prisma.savedFlashcardSet.update({
       where: { id: params.id },
-      data: { published },
+      data,
     });
     return NextResponse.json({ success: true, flashcardSet: updated });
   } catch (error) {

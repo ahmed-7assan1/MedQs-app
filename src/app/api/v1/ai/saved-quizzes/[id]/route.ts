@@ -24,10 +24,13 @@ export async function PUT(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { published } = await req.json();
+    const body = await req.json();
+    const data: any = {};
+    if (body.published !== undefined) data.published = body.published;
+    if (body.title !== undefined) data.title = body.title;
     const updated = await prisma.savedQuiz.update({
       where: { id: params.id },
-      data: { published },
+      data,
     });
 
     return NextResponse.json({ success: true, quiz: updated });

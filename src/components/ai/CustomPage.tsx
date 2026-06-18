@@ -142,7 +142,7 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
 
   const renderAgentCard = (agent: AgentItem, showActions?: boolean) => (
     <button key={agent.id} onClick={() => openDetail(agent.id)}
-      className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-white/[0.02] hover:bg-white/[0.05]" : "border-gray-100 bg-gray-50/50 hover:bg-gray-100")}>
+      className={cn("w-full text-left p-4 rounded-2xl border transition-all", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl hover:bg-white/[0.05]" : "border-gray-100 bg-white/50 backdrop-blur-xl hover:bg-white/80")}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-gray-900")}>{agent.name}</p>
@@ -156,7 +156,7 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
         </div>
         {showActions && agent.creatorId === userId && (
           <div className="flex gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-            <button onClick={() => startCreate(agent)} className={cn("p-1.5 rounded-lg transition-all", isDark ? "hover:bg-white/10 text-gray-400" : "hover:bg-gray-100 text-gray-500")}>
+            <button onClick={() => startCreate(agent)} className={cn("p-1.5 rounded-lg transition-all", isDark ? "hover:bg-white/10 text-gray-400" : "hover:bg-white/80 text-gray-500")}>
               <PencilSimple size={14} />
             </button>
             <button onClick={() => deleteAgent(agent.id)} className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all">
@@ -172,13 +172,13 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
     <AnimatePresence>
       {isOpen && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className={cn("fixed inset-0 z-[10030] overflow-y-auto", isDark ? "bg-[#0a0a0a]" : "bg-white")}>
+          className={cn("fixed inset-0 z-[10030] overflow-y-auto", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
           <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 {selected ? (
-                  <button onClick={() => setSelected(null)} className={cn("p-2 rounded-xl", isDark ? "hover:bg-white/10 text-gray-400" : "hover:bg-gray-100 text-gray-500")}>
+                  <button onClick={() => setSelected(null)} className={cn("p-2 rounded-xl", isDark ? "hover:bg-white/10 text-gray-400" : "hover:bg-white/80 text-gray-500")}>
                     <ArrowLeft size={20} />
                   </button>
                 ) : null}
@@ -189,14 +189,14 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
                   {selected ? selected.name : "Custom MedOneX"}
                 </h1>
               </div>
-              <button onClick={() => { onClose(); setSelected(null); }} className={cn("p-2 rounded-xl", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}>
+              <button onClick={() => { onClose(); setSelected(null); }} className={cn("p-2 rounded-xl", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-white/80")}>
                 <X size={20} />
               </button>
             </div>
 
             {/* Tabs */}
             {!selected && (
-              <div className={cn("flex gap-1 mb-4 p-1 rounded-xl", isDark ? "bg-white/[0.04]" : "bg-gray-100")}>
+              <div className={cn("flex gap-1 mb-4 p-1 rounded-xl", isDark ? "bg-black/20 backdrop-blur-xl" : "bg-white/50 backdrop-blur-xl")}>
                 {(["explore", "my-agents"] as const).map(t => (
                   <button key={t} onClick={() => setTab(t)}
                     className={cn("flex items-center justify-center gap-1.5 flex-1 py-2.5 rounded-lg text-sm font-bold transition-all",
@@ -211,7 +211,7 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
             {/* Content */}
             {selected ? (
               <div className="space-y-5">
-                <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-white/[0.02]" : "border-gray-100 bg-gray-50/50")}>
+                <div className={cn("p-4 rounded-2xl border", isDark ? "border-white/10 bg-black/5 backdrop-blur-xl" : "border-gray-100 bg-white/50 backdrop-blur-xl")}>
                   {selected.description && <p className={cn("text-sm mb-3", isDark ? "text-gray-400" : "text-gray-600")}>{selected.description}</p>}
                   <div className="flex items-center gap-1 mb-4">
                     {[1, 2, 3, 4, 5].map(s => (
@@ -272,7 +272,7 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
                   <div className="space-y-2">
                     {selected.comments?.length === 0 && <p className={cn("text-xs text-center py-4", isDark ? "text-gray-500" : "text-gray-400")}>No comments yet</p>}
                     {selected.comments?.map((c: any) => (
-                      <div key={c.id} className={cn("p-3 rounded-xl", isDark ? "bg-white/[0.03]" : "bg-gray-50")}>
+                      <div key={c.id} className={cn("p-3 rounded-xl", isDark ? "bg-black/10 backdrop-blur-lg" : "bg-white/40 backdrop-blur-lg")}>
                         <div className="flex items-center gap-2 mb-1">
                           <span className={cn("text-[10px] font-bold", isDark ? "text-gray-400" : "text-gray-500")}>{c.userId?.slice(0, 8)}...</span>
                           <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{new Date(c.createdAt).toLocaleDateString()}</span>
@@ -333,7 +333,7 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
                     <div className="flex justify-center pt-3 pb-1 sm:hidden"><div className={cn("w-10 h-1 rounded-full", isDark ? "bg-white/20" : "bg-gray-300")} /></div>
                     <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: isDark ? "#ffffff10" : "#e5e7eb" }}>
                       <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-gray-900")}>{editAgent ? "Edit Agent" : "Create Agent"}</h2>
-                      <button onClick={() => setShowCreate(false)} className={cn("p-2 rounded-xl", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}><X size={18} /></button>
+                      <button onClick={() => setShowCreate(false)} className={cn("p-2 rounded-xl", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-white/80")}><X size={18} /></button>
                     </div>
                     <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto no-scrollbar">
                       <div>
