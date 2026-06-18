@@ -14,26 +14,26 @@ export async function POST() {
     const { id, email, name, universityId, facultyId, semesterId, nickname, role, image } = session.user as any;
     const validatedRole = (role === "ADMIN" || role === "SUPER_ADMIN" || role === "TEACHER") ? role : "STUDENT";
 
-    // 1. Check if user already perfectly matches by ID
+    // 1. Check if user already exists by ID
     const existingById = await prisma.user.findUnique({
       where: { id },
       select: { id: true, role: true, image: true, name: true }
     });
 
     if (existingById) {
-      // If role or image changed in Supabase, update Prisma
-      if (existingById.role !== validatedRole || existingById.image !== image || existingById.name !== name) {
-        await prisma.user.update({
-          where: { id },
-          data: { 
-            role: validatedRole as any, 
-            image: image || existingById.image,
-            name: name || existingById.name
-          }
-        });
-        return NextResponse.json({ status: "synced", action: "updated_profile" });
-      }
-      return NextResponse.json({ status: "synced", action: "none" });
+      // Always sync all available fields from Supabase -> Prisma
+      await prisma.user.update({
+        where: { id },
+        data: { 
+          role: validatedRole as any, 
+          image: image || existingById.image,
+          name: name || existingById.name,
+          ...(semesterId ? { semesterId } : {}),
+          ...(universityId ? { universityId } : {}),
+          ...(facultyId ? { facultyId } : {}),
+        }
+      });
+      return NextResponse.json({ status: "synced", action: "updated_profile" });
     }
 
     // 2. Check if user exists by Email (ID mismatch scenario)

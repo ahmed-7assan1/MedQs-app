@@ -26,7 +26,7 @@ export default async function DashboardPage() {
 
   // Sync logic: If Prisma is missing data but metadata has it, sync now
   try {
-    if (user && (!fullProfile || !fullProfile.universityId)) {
+    if (user && (!fullProfile || !fullProfile.universityId || !fullProfile.semesterId)) {
       const meta = user.user_metadata;
       if (meta?.universityId) {
          fullProfile = await prisma.user.upsert({

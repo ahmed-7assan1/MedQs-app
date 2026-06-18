@@ -41,11 +41,57 @@ export default async function CleanStudentLayout({ children }: { children: React
     }) : Promise.resolve(null)
   ]);
 
-  const resolvedRole = dbUser?.role || authUser?.user_metadata?.role as string | undefined;
-  const resolvedSemesterId = dbUser?.semesterId || authUser?.user_metadata?.semesterId as string | undefined;
-  const displayName = dbUser?.nickname || dbUser?.name || authUser?.user_metadata?.name || "Student";
+  let resolvedRole = dbUser?.role || authUser?.user_metadata?.role as string | undefined;
+  let resolvedSemesterId = dbUser?.semesterId || authUser?.user_metadata?.semesterId as string | undefined;
+  let displayName = dbUser?.nickname || dbUser?.name || authUser?.user_metadata?.name || "Student";
   const userImage = dbUser?.image || authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.image || null;
-  const isAdmin = resolvedRole === "ADMIN" || resolvedRole === "SUPER_ADMIN";
+  let isAdmin = resolvedRole === "ADMIN" || resolvedRole === "SUPER_ADMIN";
+
+  // Fallback sync: if Prisma has no academic data but Supabase metadata does, upsert now
+  if (!isGuest && authUser && (!dbUser || !resolvedSemesterId) && authUser?.user_metadata?.semesterId) {
+    try {
+      const meta = authUser.user_metadata;
+      const metaName = meta?.name as string | undefined;
+      const metaUniId = meta?.universityId as string | undefined;
+      const metaFacId = meta?.facultyId as string | undefined;
+      const metaSemId = meta?.semesterId as string | undefined;
+
+      if (!dbUser) {
+        const codeSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        const studentCode = `USR-${Date.now().toString().slice(-6)}-${codeSuffix}`;
+        await prisma.user.create({
+          data: {
+            id: authUser.id,
+            email: authUser.email!,
+            name: metaName || authUser.email?.split('@')[0] || "Student",
+            universityId: metaUniId,
+            facultyId: metaFacId,
+            semesterId: metaSemId,
+            role: "STUDENT",
+            studentCode,
+          }
+        });
+      } else {
+        await prisma.user.update({
+          where: { id: authUser.id },
+          data: {
+            semesterId: metaSemId,
+            ...(metaUniId && { universityId: metaUniId }),
+            ...(metaFacId && { facultyId: metaFacId }),
+            ...(metaName && { name: metaName }),
+          }
+        });
+      }
+
+      // Re-evaluate from the freshly-synced metadata
+      resolvedSemesterId = metaSemId;
+      resolvedRole = resolvedRole || "STUDENT";
+      displayName = metaName || displayName;
+      isAdmin = resolvedRole === "ADMIN" || resolvedRole === "SUPER_ADMIN";
+    } catch (e) {
+      console.error("[layout] Profile sync error:", e);
+    }
+  }
 
   // Redirect logic
   if (!isGuest && authUser) {
