@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   HandThumbUpIcon,
   HandThumbDownIcon,
@@ -34,6 +34,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChatMessage, MessageReaction } from "@/hooks/useDrQChat";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
+import { QuestionsBottomSheet, type QuestionData } from "./QuestionsBottomSheet";
 import toast from "react-hot-toast";
 
 interface MessageProps {
@@ -64,6 +65,40 @@ const DrQMessageInner: React.FC<MessageProps> = ({
   const isAI = message.role === "assistant";
   const [copying, setCopying] = useState(false);
   const [selectionRange, setSelectionRange] = useState<{ text: string, top: number, left: number } | null>(null);
+  const [showQuestions, setShowQuestions] = useState(false);
+  const [isDark, _setIsDark] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    _setIsDark(mq.matches || document.documentElement.classList.contains("dark"));
+    const handler = () => _setIsDark(mq.matches || document.documentElement.classList.contains("dark"));
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Extract questions from message content
+  const parsedQuestions: QuestionData[] = useMemo(() => {
+    const qs: QuestionData[] = [];
+    const regex = /:::question\s*({.*?})\s*:::/gs;
+    let match;
+    while ((match = regex.exec(message.content)) !== null) {
+      try {
+        const raw = JSON.parse(match[1]);
+        qs.push({
+          question: raw.question || raw.body || "",
+          options: raw.options || (raw.choices ? raw.choices.map((c: any) => c.text || c) : []),
+          answer: raw.answer || "",
+          explanation: raw.explanation || "",
+        });
+      } catch {}
+    }
+    return qs;
+  }, [message.content]);
+
+  const cleanContent = useMemo(() => {
+    if (parsedQuestions.length === 0) return message.content;
+    return message.content.replace(/:::question\s*({.*?})\s*:::/gs, "").trim();
+  }, [message.content, parsedQuestions]);
 
   // Handle text selection for Reply
   useEffect(() => {
@@ -246,17 +281,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     p: ({ children }) => {
                       const content = React.Children.toArray(children).join("");
                       if (content.includes(":::question")) {
-                        try {
-                          const jsonStr = content.split(":::question")[1].split(":::")[0].trim();
-                          const raw = JSON.parse(jsonStr);
-                          const q = {
-                            question: raw.question || raw.body || "",
-                            options: raw.options || (raw.choices ? raw.choices.map((c: any) => c.text || c) : []),
-                            answer: raw.answer || "",
-                            explanation: raw.explanation || ""
-                          };
-                          return <QuestionCard q={q} onSave={() => toast.success("Question saved to your library")} onShare={() => toast.success("Copied link to Discuss Forum")} />;
-                        } catch { return <p className="mb-2 last:mb-0">{children}</p>; }
+                        return null;
                       }
                       if (content.includes(":::checklist")) {
                         try {
@@ -286,9 +311,34 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     }
                   }}
                 >
-                  {message.content.replace(/!\[.*?\]\((?:https?:\/\/)?[^\s)]+\)|!\[.*?\]\s*\(image:[^\s)]+\)/g, "").trim()}
+                  {cleanContent.replace(/!\[.*?\]\((?:https?:\/\/)?[^\s)]+\)|!\[.*?\]\s*\(image:[^\s)]+\)/g, "").trim()}
                 </ReactMarkdown>
               </div>
+
+              {/* Questions summary card */}
+              {isAI && parsedQuestions.length > 0 && !message.isStreaming && (
+                <motion.button
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => setShowQuestions(true)}
+                  className="mt-4 w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all active:scale-[0.99] bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/15"
+                >
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-indigo-100 dark:bg-indigo-500/20">
+                    <FileText size={16} weight="bold" className="text-indigo-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                      {parsedQuestions.length} Question{parsedQuestions.length > 1 ? "s" : ""} Generated
+                    </p>
+                    <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                      Click to view all questions
+                    </p>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-indigo-500 text-white dark:bg-indigo-500/20 dark:text-indigo-300">
+                    View
+                  </div>
+                </motion.button>
+              )}
 
               {/* Streaming Indicator (Live Typing Orb) */}
               {message.isStreaming && (
@@ -346,6 +396,13 @@ const DrQMessageInner: React.FC<MessageProps> = ({
           </div>
         )}
       </div>
+
+      <QuestionsBottomSheet
+        isOpen={showQuestions}
+        onClose={() => setShowQuestions(false)}
+        questions={parsedQuestions}
+        isDark={isDark}
+      />
     </div>
   );
 };
