@@ -1,3 +1,13 @@
+:root {
+  --scrollbar-size: 4px;
+  --scrollbar-radius: 9999px;
+  --scrollbar-thumb-light: rgba(0, 0, 0, 0.08);
+  --scrollbar-thumb-hover-light: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-dark: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb-hover-dark: rgba(255, 255, 255, 0.18);
+  --scrollbar-track: transparent;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -11,41 +21,81 @@ main#main-content {
   scrollbar-width: none;
 }
 
+/* ─── Professional scrollbar (hover-reveal) ─── */
 .scrollbar-hover {
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: var(--scrollbar-thumb-dark) var(--scrollbar-track);
 }
 
-.scrollbar-hover:hover {
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+@media (prefers-color-scheme: light) {
+  .scrollbar-hover {
+    scrollbar-color: var(--scrollbar-thumb-light) var(--scrollbar-track);
+  }
 }
 
 .scrollbar-hover::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+.scrollbar-hover::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
 }
 
 .scrollbar-hover::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 9999px;
-  transition: background-color 0.3s ease;
+  background: transparent;
+  border-radius: var(--scrollbar-radius);
+  transition: background 0.25s ease;
 }
 
 .scrollbar-hover:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: var(--scrollbar-thumb-dark);
 }
 
+@media (prefers-color-scheme: light) {
+  .scrollbar-hover:hover::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb-light);
+  }
+}
+
+.scrollbar-hover::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-dark) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  .scrollbar-hover::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover-light) !important;
+  }
+}
+
+/* ─── Global thin scrollbar (for sidebars/popovers) ─── */
 ::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
+  width: var(--scrollbar-size);
 }
 
 ::-webkit-scrollbar-track {
-  background-color: transparent;
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-dark);
+  border-radius: var(--scrollbar-radius);
+}
+
+@media (prefers-color-scheme: light) {
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb-light);
+  }
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-dark);
+}
+
+@media (prefers-color-scheme: light) {
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover-light);
+  }
 }
 
 /* ─── Stream Cursor: GPU-accelerated (opacity only, no layout thrash) ─── */

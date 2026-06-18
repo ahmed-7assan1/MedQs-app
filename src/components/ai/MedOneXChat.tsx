@@ -24,7 +24,7 @@ import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import {
   Bars3Icon, HomeIcon, BookOpenIcon, UserGroupIcon,
-  ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon, ChevronDoubleRightIcon,
+  ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon, ChevronDoubleRightIcon, ChevronDownIcon,
 } from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
 
@@ -83,6 +83,31 @@ export function MedOneXChat() {
   const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+
+  // Disable body scroll when sidebar is open
+  useEffect(() => {
+    if (showSidebar) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [showSidebar]);
+
+  // Track scroll position for scroll-to-bottom button
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const threshold = 400;
+      setShowScrollBtn(el.scrollHeight - el.scrollTop - el.clientHeight > threshold);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Track scroll position for scroll-to-bottom button
 
   // ─── Local input state ───
   const [input, setInput] = useState("");
@@ -539,23 +564,24 @@ export function MedOneXChat() {
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 260 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "absolute left-0 top-0 bottom-0 w-[80vw] max-w-[80vw] flex flex-col backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.35)]",
-                isDark ? "bg-[#050505]/80 border-r border-white/10" : "bg-white/80 border-r border-gray-200"
+                "absolute left-0 top-0 bottom-0 w-[85vw] max-w-[85vw] flex flex-col backdrop-blur-lg shadow-[4px_0_32px_rgba(0,0,0,0.4)]",
+                isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-white border-r border-gray-200/60"
               )}
+              style={{ willChange: "transform" }}
             >
               {/* Extending top edge */}
               <div className={cn(
                 "absolute top-0 right-0 h-px pointer-events-none",
                 isDark ? "bg-gradient-to-r from-white/10 to-transparent" : "bg-gradient-to-r from-gray-200 to-transparent"
-              )} style={{ width: "20vw" }} />
+              )} style={{ width: "15vw" }} />
               {/* Extending bottom edge */}
               <div className={cn(
                 "absolute bottom-0 right-0 h-px pointer-events-none",
                 isDark ? "bg-gradient-to-r from-white/10 to-transparent" : "bg-gradient-to-r from-gray-200 to-transparent"
-              )} style={{ width: "20vw" }} />
+              )} style={{ width: "15vw" }} />
               {/* Sidebar Header */}
               <div className={cn("flex items-center justify-between px-4 py-3 border-b", isDark ? "border-white/10" : "border-gray-200")}>
                 <div className="flex items-center gap-2.5">
@@ -894,12 +920,11 @@ export function MedOneXChat() {
 
       <motion.div
         animate={{
-          x: showSidebar ? "80vw" : 0,
-          scaleX: showSidebar ? 0.92 : 1,
+          x: showSidebar ? "85vw" : 0,
         }}
-        transition={{ type: "spring", damping: 30, stiffness: 260 }}
-        style={{ transformOrigin: "left center" }}
-        className="flex flex-col flex-1 min-h-0"
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className={cn("flex flex-col flex-1 min-h-0", showSidebar && "pointer-events-none overflow-hidden")}
+        style={{ willChange: "transform" }}
       >
 
       {/* ─── Messages Area ─── */}
@@ -1371,12 +1396,31 @@ export function MedOneXChat() {
         )}
       </AnimatePresence>
 
+      {/* ─── Scroll-to-bottom button ─── */}
+      <motion.div
+        initial={false}
+        animate={{ opacity: showScrollBtn && !showSidebar ? 1 : 0, scale: showScrollBtn && !showSidebar ? 1 : 0.8 }}
+        transition={{ duration: 0.15 }}
+        className="fixed bottom-24 right-5 z-[10002] md:hidden"
+      >
+        <button
+          onClick={() => { const el = scrollContainerRef.current; if (el) el.scrollTop = el.scrollHeight; }}
+          className={cn(
+            "w-10 h-10 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-all active:scale-90",
+            isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
+          )}
+        >
+          <ChevronDownIcon className="w-5 h-5" />
+        </button>
+      </motion.div>
+
       {/* ─── Mobile Floating Input ─── */}
       <motion.div
         animate={{
-          x: showSidebar ? "80vw" : 0,
+          x: showSidebar ? "85vw" : 0,
         }}
-        transition={{ type: "spring", damping: 30, stiffness: 260 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        style={{ willChange: "transform" }}
         className="md:hidden fixed bottom-0 left-0 right-0 z-[10003] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none"
       >
         <div className="px-2 pb-1 pointer-events-auto">
