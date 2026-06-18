@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { Quote } from "lucide-react";
 
 const QUOTES = [
@@ -22,27 +19,10 @@ const QUOTES = [
 ];
 
 export const DailyQuote = () => {
-  const [quote, setQuote] = useState<{ text: string; author: string } | null>(null);
-
-  useEffect(() => {
-    const today = new Date().toDateString();
-    const saved = sessionStorage.getItem("dash-quote");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.date === today) {
-          setQuote(parsed.quote);
-          return;
-        }
-      } catch {}
-    }
-    const idx = Math.floor(Math.random() * QUOTES.length);
-    const selected = QUOTES[idx];
-    sessionStorage.setItem("dash-quote", JSON.stringify({ date: today, quote: selected }));
-    setQuote(selected);
-  }, []);
-
-  if (!quote) return null;
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  const quote = QUOTES[dayOfYear % QUOTES.length];
 
   return (
     <div className="dash-sidebar-card">

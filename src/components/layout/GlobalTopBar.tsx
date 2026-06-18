@@ -26,7 +26,7 @@ const SOCIAL_PATHS = ["/social", "/community"];
 
 export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: GlobalTopBarProps) {
   const pathname = usePathname();
-  if (pathname?.startsWith("/quiz")) return null;
+  if (pathname?.startsWith("/quiz") || pathname?.startsWith("/ai-chat")) return null;
 
   const isSocial = SOCIAL_PATHS.some((p) => pathname?.startsWith(p));
 

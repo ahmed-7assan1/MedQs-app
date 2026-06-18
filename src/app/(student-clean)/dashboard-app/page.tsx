@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { getUserRankInfo } from "@/lib/engagement";
-import { fetchDashboardData } from "@/lib/dashboard-queries";
+import { getCachedDashboardData } from "@/lib/dashboard-queries";
 import { last7DayKeys } from "@/lib/dashboard-stats";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import type { Metadata } from "next";
@@ -71,10 +71,10 @@ export default async function DashboardPage() {
   let rankInfo: any = null;
 
   try {
-    [dashData, rankInfo] = await Promise.all([
-      fetchDashboardData(userId, chartDayKeyStrings),
+    [dashData, rankInfo] = await withRetry(() => Promise.all([
+      getCachedDashboardData(userId, chartDayKeyStrings),
       getUserRankInfo(userId),
-    ]);
+    ]), 2);
   } catch (err) {
     console.warn("[dashboard-app] DB error:", err instanceof Error ? err.message : err);
   }

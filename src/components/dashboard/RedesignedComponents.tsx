@@ -57,7 +57,7 @@ export const StatCard = ({
   label, value, subtitle, iconName, color, trend = "up", progress, delay = 0
 }: StatCardProps) => {
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true });
+  const isInView = useInView(ref, { once: true, margin: "200px" });
   const springValue = useSpring(0, { stiffness: 60, damping: 20 });
   const displayValue = useTransform(springValue, (v) => Math.floor(v).toLocaleString());
 
@@ -158,9 +158,11 @@ export const QuickActionCard = ({ label, iconName, color, href }: any) => {
 };
 
 export const QuickLinkCompact = ({ label, iconName, color, href }: any) => {
+  const shouldPrefetch = label === "Videos" || label === "Podcasts" || label === "Community";
   return (
     <Link
       href={href}
+      prefetch={!shouldPrefetch}
       className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/40 hover:bg-muted border border-border/50 transition-all active:scale-95"
     >
       <div className={cn("p-1 rounded-lg", color)}>

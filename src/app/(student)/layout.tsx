@@ -15,7 +15,6 @@ import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
 import { PersistentAudioPlayer } from "@/components/podcasts/PersistentAudioPlayer";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
-import { GlobalPostComposer } from "@/components/layout/GlobalPostComposer";
 import { MobileSwipeLayout } from "@/components/layout/MobileSwipeLayout";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { PremiumNotificationPrompt } from "@/components/notifications/PremiumNotificationPrompt";
@@ -142,10 +141,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
               <CookieConsentBanner />
               <PersistentAudioPlayer />
               <MobileBottomNav />
-              <GlobalPostComposer
-                currentUserName={displayName}
-                currentUserAvatarUrl={userImage}
-              />
               {isAdmin && <AdminStudentBar />}
               <PremiumNotificationPrompt />
             </div>

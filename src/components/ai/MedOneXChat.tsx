@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider } from "@/hooks/useDrQChat";
 import {
-  Plus, Paperclip, ArrowUp, Stop, X, Trash, ChatDots,
+  Plus, Paperclip, PaperPlaneRight, Stop, X, Trash, ChatDots,
   MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
   Check, GlobeHemisphereWest, Sparkle, Sun, Moon, Brain,
   WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft,
@@ -19,7 +19,12 @@ import { DrQMessage } from "./DrQMessage";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
-import { useThemeStore, useChatInputBridge } from "@/lib/store";
+import { useThemeStore } from "@/lib/store";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
+import {
+  Bars3Icon, HomeIcon, BookOpenIcon, UserGroupIcon,
+  ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon,
+} from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
 
 const C = {
@@ -43,6 +48,7 @@ const THREAD_TABS = [
 export function MedOneXChat() {
   const { theme, setTheme } = useThemeStore();
   const isDark = theme === "dark";
+  const { siteName, logoUrl } = useSiteConfig();
 
   const {
     threads, activeThreadId, messages, loading, streamingId,
@@ -55,6 +61,8 @@ export function MedOneXChat() {
   const isAtBottomRef = useRef<boolean>(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLTextAreaElement>(null);
+  const [mobileFocused, setMobileFocused] = useState(false);
   const [files, setFiles] = useState<FileAttachment[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   const [showProviderPicker, setShowProviderPicker] = useState(false);
@@ -69,39 +77,10 @@ export function MedOneXChat() {
   const [modulesSearch, setModulesSearch] = useState("");
   const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
-  // ─── Local input state (desktop). Synced to bridge for nav on mobile ───
+  // ─── Local input state ───
   const [input, setInput] = useState("");
-  const bridgeSetInput = useChatInputBridge((s) => s.setInput);
-  const bridgeSetLoading = useChatInputBridge((s) => s.setLoading);
-  const bridgeSetSendMessage = useChatInputBridge((s) => s.setSendMessage);
-  const bridgeSetStopGeneration = useChatInputBridge((s) => s.setStopGeneration);
-  const bridgeSetOpenFilePicker = useChatInputBridge((s) => s.setOpenFilePicker);
-  const bridgeSetSuperExpertEnabled = useChatInputBridge((s) => s.setSuperExpertEnabled);
-  const bridgeSetToggleSuperExpert = useChatInputBridge((s) => s.setToggleSuperExpert);
-
-  // ─── Sync local state → bridge store for nav input ───
-  useEffect(() => { bridgeSetLoading(loading); }, [loading, bridgeSetLoading]);
-  useEffect(() => { bridgeSetInput(input); }, [input, bridgeSetInput]);
-  useEffect(() => {
-    bridgeSetSendMessage(() => { const v = useChatInputBridge.getState().input; if (v.trim()) sendMessage(v); });
-    bridgeSetStopGeneration(() => stopGeneration());
-    bridgeSetOpenFilePicker(() => fileInputRef.current?.click());
-    bridgeSetSuperExpertEnabled(!!settings.superExpertEnabled);
-    bridgeSetToggleSuperExpert(() => {
-      if (!settings.superExpertEnabled) {
-        setShowSuperExpertWarning(true);
-      } else {
-        updateSettings({ superExpertEnabled: false });
-      }
-    });
-    return () => {
-      bridgeSetSendMessage(null);
-      bridgeSetStopGeneration(null);
-      bridgeSetOpenFilePicker(null);
-      bridgeSetToggleSuperExpert(null);
-    };
-  }, [sendMessage, stopGeneration, settings.superExpertEnabled]);
 
   // Fetch user modules when the modal opens
   useEffect(() => {
@@ -139,6 +118,16 @@ export function MedOneXChat() {
       inputRef.current.style.height = "auto";
       inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
     }
+  }, [input]);
+
+  // ─── Mobile input auto-resize ───
+  useEffect(() => {
+    const el = mobileInputRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 80) + "px";
+    });
   }, [input]);
 
   useEffect(() => {
@@ -204,7 +193,7 @@ export function MedOneXChat() {
   const personaList = Object.keys(DRQ_PERSONAS).slice(0, 5) as DrQPersonaId[];
 
   return (
-    <div className={cn("flex flex-col h-screen w-screen overflow-hidden transition-colors duration-300", isDark ? "bg-black" : "bg-white")}>
+    <div className={cn("flex flex-col flex-1 w-full overflow-hidden transition-colors duration-300", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
       <style>{`
         :root { color-scheme: ${isDark ? "dark" : "light"}; }
       `}</style>
@@ -355,7 +344,7 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       {/* ─── Top Island Bar ─── */}
-      <div className="fixed inset-x-0 top-0 z-40 flex justify-center items-start px-3 pt-0 pointer-events-none">
+      {false && <div className="fixed inset-x-0 top-0 z-40 flex justify-center items-start px-3 pt-0 pointer-events-none">
         <div className={cn(
           "pointer-events-auto relative flex flex-col items-center overflow-hidden",
           "rounded-b-[32px] rounded-t-none border-x border-b",
@@ -469,7 +458,173 @@ export function MedOneXChat() {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
+
+      {/* ─── Hamburger Button ─── */}
+      <button
+        onClick={() => setShowSidebar(true)}
+        className={cn(
+          "fixed top-3 left-3 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all",
+          isDark ? "bg-white/10 text-white hover:bg-white/20 backdrop-blur-xl" : "bg-black/5 text-gray-700 hover:bg-black/10 backdrop-blur-xl"
+        )}
+      >
+        <Bars3Icon className="w-5 h-5" />
+      </button>
+
+      {/* ─── Sidebar ─── */}
+      <AnimatePresence>
+        {showSidebar && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10010]"
+          >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSidebar(false)} />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 260 }}
+              className={cn(
+                "absolute left-0 top-0 bottom-0 w-[300px] max-w-[85vw] flex flex-col",
+                isDark ? "bg-[#050505] border-r border-white/10" : "bg-white border-r border-gray-200"
+              )}
+            >
+              {/* Sidebar Header */}
+              <div className={cn("flex items-center justify-between px-4 py-3 border-b", isDark ? "border-white/10" : "border-gray-200")}>
+                <div className="flex items-center gap-2.5">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt={siteName} className={cn("h-7 w-7 object-contain", isDark ? "brightness-0 invert" : "")} />
+                  ) : (
+                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900")}>
+                      {siteName?.charAt(0) || "M"}
+                    </div>
+                  )}
+                  <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-gray-900")}>{siteName}</span>
+                </div>
+                <button
+                  onClick={() => setShowSidebar(false)}
+                  className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto no-scrollbar">
+                {/* ─── Navigation Section ─── */}
+                <div className="p-3">
+                  <p className={cn("text-[10px] font-bold uppercase tracking-widest px-3 mb-2", isDark ? "text-gray-500" : "text-gray-400")}>Navigation</p>
+                  <div className="space-y-0.5">
+                    {[
+                      { icon: HomeIcon, label: "Home", href: "/dashboard-app" },
+                      { icon: BookOpenIcon, label: "Modules", href: "/modules" },
+                      { icon: UserGroupIcon, label: "Social", href: "/social" },
+                      { icon: ClipboardDocumentListIcon, label: "Quizzes", href: "/quiz" },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setShowSidebar(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                          isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
+                        )}
+                      >
+                        <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-indigo-500")} />
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={cn("mx-4 my-1 h-px", isDark ? "bg-white/10" : "bg-gray-200")} />
+
+                {/* ─── Chats Section ─── */}
+                <div className="p-3">
+                  <p className={cn("text-[10px] font-bold uppercase tracking-widest px-3 mb-2", isDark ? "text-gray-500" : "text-gray-400")}>Chats</p>
+                  <div className={cn("flex items-center gap-0.5 p-0.5 rounded-xl mb-3", isDark ? "bg-white/5" : "bg-gray-100")}>
+                    {THREAD_TABS.map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => { setActiveTab(tab.id); }}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all flex-1",
+                          activeTab === tab.id
+                            ? isDark ? "bg-white/10 text-white shadow-sm" : "bg-white text-gray-900 shadow-sm"
+                            : isDark ? "text-white/40 hover:text-white/70" : "text-gray-400 hover:text-gray-700"
+                        )}
+                      >
+                        <tab.icon size={14} weight={activeTab === tab.id ? "fill" : "regular"} />
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="relative mb-3">
+                    <MagnifyingGlass size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-gray-500" : "text-gray-400")} />
+                    <input
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder="Search conversations..."
+                      className={cn(
+                        "w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition-colors",
+                        isDark ? "bg-white/5 text-white placeholder-gray-500 border border-white/10" : "bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-200"
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-0.5 max-h-[200px] overflow-y-auto no-scrollbar">
+                    {filteredThreads.length === 0 ? (
+                      <div className={cn("text-xs text-center py-8", isDark ? "text-gray-500" : "text-gray-400")}>No conversations</div>
+                    ) : (
+                      filteredThreads.map(t => (
+                        <button
+                          key={t.id}
+                          onClick={() => { switchThread(t.id); setShowSidebar(false); }}
+                          className={cn(
+                            "w-full text-start px-3 py-2.5 rounded-xl text-sm transition-all",
+                            t.id === activeThreadId
+                              ? isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600"
+                              : isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-700 hover:bg-gray-50"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <ChatCircle size={14} weight={t.id === activeThreadId ? "fill" : "regular"} className={cn("flex-shrink-0", isDark ? "text-white" : "text-indigo-500")} />
+                            <span className="truncate">{t.title || "New Chat"}</span>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                  <button
+                    onClick={() => { newThread(); setShowSidebar(false); }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mt-2 transition-all",
+                      isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <Plus size={16} weight="bold" className={cn(isDark ? "text-white" : "text-indigo-500")} />
+                    New Chat
+                  </button>
+                </div>
+              </div>
+
+              {/* ─── Settings at Bottom ─── */}
+              <div className={cn("border-t p-3", isDark ? "border-white/10" : "border-gray-200")}>
+                <button
+                  onClick={() => { setShowConfig(true); setShowSidebar(false); }}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all",
+                    isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
+                  )}
+                >
+                  <Cog6ToothIcon className={cn("w-5 h-5", isDark ? "text-white" : "text-indigo-500")} />
+                  Settings
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── Threads Container — bottom sheet on mobile ─── */}
       <AnimatePresence>
@@ -662,7 +817,7 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       {/* ─── Messages Area ─── */}
-      <main className={cn("flex flex-col flex-1 min-h-0 pt-[60px] relative", isDark ? "bg-black" : "bg-white")}
+      <main className={cn("flex flex-col flex-1 min-h-0 relative", isDark ? "bg-[#050505]" : "bg-white")}
         style={{
           ...(settings.bgImage ? {
             backgroundImage: `url(${settings.bgImage})`,
@@ -682,7 +837,7 @@ export function MedOneXChat() {
             }}
           />
         )}
-        <div ref={scrollContainerRef} className={cn("flex-1 overflow-y-auto scrollbar-hover min-h-0 relative z-10", settings.bgImage && (isDark ? "bg-black/20" : "bg-white/20"))}>
+        <div ref={scrollContainerRef} className={cn("flex-1 overflow-y-auto scrollbar-hover min-h-0 relative z-10 md:pb-0 pb-24", settings.bgImage && (isDark ? "bg-black/20" : "bg-white/20"))}>
           {messages.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -733,7 +888,7 @@ export function MedOneXChat() {
                     key={i}
                     onClick={() => { setInput(s.text); inputRef.current?.focus(); }}
                     className={cn(
-                      "flex items-start gap-3 p-4 rounded-2xl border text-left text-sm transition-all",
+                      "flex items-start gap-3 p-4 rounded-2xl border text-start text-sm transition-all",
                       isDark
                         ? "border-white/10 text-gray-300 hover:bg-white/5 hover:border-white/20"
                         : "border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
@@ -861,7 +1016,7 @@ export function MedOneXChat() {
 
         {/* Reply Context Bar */}
         {replyContext && (
-          <div className={cn("flex-shrink-0 flex justify-center relative z-10", isDark ? "bg-black" : "bg-white")}>
+          <div className={cn("flex-shrink-0 flex justify-center relative z-10", isDark ? "bg-[#050505]" : "bg-white")}>
             <div className="w-full max-w-3xl mx-auto px-3 md:px-4 pb-1">
               <div className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs",
@@ -882,7 +1037,7 @@ export function MedOneXChat() {
 
         {/* ─── Super Expert Progress Panel ─── */}
         {superExpertStatus && superExpertStatus.phase !== "idle" && superExpertStatus.phase !== "done" && (
-          <div className={cn("flex-shrink-0 flex justify-center pt-2 relative z-10", isDark ? "bg-black" : "bg-white")}>
+          <div className={cn("flex-shrink-0 flex justify-center pt-2 relative z-10", isDark ? "bg-[#050505]" : "bg-white")}>
             <div className={cn(
               "super-expert-panel w-full max-w-3xl mx-auto px-3 md:px-4 pb-2",
               "rounded-2xl border p-3",
@@ -988,8 +1143,9 @@ export function MedOneXChat() {
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 placeholder="Message MedOneX Expert..."
+                dir="auto"
                 className={cn(
-                  "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar",
+                  "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar font-arabic",
                   isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
                 )}
               />
@@ -1003,16 +1159,15 @@ export function MedOneXChat() {
                     }
                   }}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all select-none",
+                    "flex items-center justify-center w-9 h-9 rounded-full transition-all select-none",
                     settings.superExpertEnabled
-                      ? "super-expert-pill-active text-indigo-300"
+                      ? "super-expert-pill-active text-indigo-400 bg-indigo-500/10"
                       : isDark
-                        ? "text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                        ? "text-gray-500 hover:text-gray-300 hover:bg-white/10"
                         : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                   )}
                 >
-                  <Lightning size={12} weight={settings.superExpertEnabled ? "fill" : "regular"} />
-                  <span>Super Expert</span>
+                  <Lightning size={14} weight={settings.superExpertEnabled ? "fill" : "regular"} />
                 </button>
                 {loading ? (
                   <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30">
@@ -1025,11 +1180,11 @@ export function MedOneXChat() {
                     className={cn(
                       "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
                       input.trim() || files.length > 0
-                        ? isDark ? "bg-white text-black hover:bg-gray-200 shadow-md" : "bg-black text-white hover:bg-gray-800 shadow-md"
+                        ? isDark ? "bg-white text-black hover:bg-gray-200 shadow-md" : "bg-[#141414] text-white hover:bg-gray-800 shadow-md"
                         : isDark ? "bg-white/5 text-gray-500" : "bg-black/5 text-gray-300"
                     )}
                   >
-                    <ArrowUp size={16} weight="bold" />
+                    <PaperPlaneRight size={16} weight="bold" />
                   </button>
                 )}
               </div>
@@ -1112,6 +1267,108 @@ export function MedOneXChat() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ─── Mobile Floating Input ─── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[10003] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none">
+        <div className="px-2 pb-1 pointer-events-auto">
+          <div className={cn(
+            "flex items-end gap-1 px-2 py-2 mx-2 mb-1 rounded-2xl border transition-colors shadow-lg",
+            isDark
+              ? "border-white/10 bg-[#141414]/90 backdrop-blur-xl text-white"
+              : "border-[#050505]/10 bg-[#F7F7F7] text-[#050505]"
+          )}>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className={cn(
+                "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-colors",
+                isDark
+                  ? "text-gray-400 hover:text-white hover:bg-white/10"
+                  : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
+              )}
+            >
+              <Paperclip size={14} />
+            </button>
+            <textarea
+              ref={mobileInputRef}
+              rows={1}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (input.trim()) sendMessage(input);
+                }
+              }}
+              onFocus={() => setMobileFocused(true)}
+              onBlur={() => setMobileFocused(false)}
+              placeholder="Message MedOneX Expert..."
+              dir="auto"
+              className={cn(
+                "flex-1 min-w-0 bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar placeholder-gray-400 font-arabic",
+                isDark ? "text-white" : "text-[#050505]"
+              )}
+            />
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={() => {
+                  if (!settings.superExpertEnabled) {
+                    setShowSuperExpertWarning(true);
+                  } else {
+                    updateSettings({ superExpertEnabled: false });
+                  }
+                }}
+                className={cn(
+                  "flex items-center justify-center w-8 h-8 min-w-8 min-h-8 rounded-full transition-all select-none",
+                  settings.superExpertEnabled
+                    ? "super-expert-pill-active text-indigo-400 bg-indigo-500/10"
+                    : isDark
+                      ? "text-gray-400 hover:text-gray-300 hover:bg-white/10"
+                      : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
+                )}
+              >
+                <Lightning size={13} weight={settings.superExpertEnabled ? "fill" : "regular"} />
+              </button>
+              <button
+                onClick={() => setShowProviderPicker(true)}
+                className={cn(
+                  "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all text-base",
+                  isDark
+                    ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
+                    : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
+                )}
+                title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
+              >
+                <span>{PROVIDER_CONFIGS[settings.activeProvider]?.icon}</span>
+              </button>
+              {loading ? (
+                <button
+                  onClick={stopGeneration}
+                  className="w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                >
+                  <Stop size={13} weight="fill" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => { if (input.trim()) sendMessage(input); }}
+                  disabled={!input.trim()}
+                  className={cn(
+                    "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                    input.trim()
+                      ? isDark
+                        ? "bg-white text-[#141414] hover:bg-gray-200 shadow-md"
+                        : "bg-[#050505] text-white hover:bg-gray-800 shadow-md"
+                      : isDark
+                        ? "bg-white/10 text-gray-500"
+                        : "bg-[#050505]/10 text-[#050505]/40"
+                  )}
+                >
+                  <PaperPlaneRight size={14} weight="bold" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1210,6 +1467,9 @@ function SuperExpertResults({ steps, isDark }: { steps: SuperExpertStep[]; isDar
           </motion.div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }
+
+/* ─── Super Expert Results Sub-Component ─── */

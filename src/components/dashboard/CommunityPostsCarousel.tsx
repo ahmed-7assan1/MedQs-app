@@ -611,11 +611,12 @@ function PostCard({
         {/* ── Header ── */}
         <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-border/10 shrink-0">
           {/* Avatar */}
-          <div className="relative shrink-0">
+            <div className="relative shrink-0">
             {post.author?.image ? (
               <img
                 src={post.author.image}
                 alt={post.author.name}
+                loading="lazy"
                 className="h-9 w-9 rounded-full object-cover ring-2 ring-border/20"
               />
             ) : (

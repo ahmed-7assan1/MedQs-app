@@ -7,7 +7,6 @@ import OneXCommunity from "@/components/social/OneXCommunity";
 import { SocialMobileWrapper } from "@/components/community-mobile/SocialMobileWrapper";
 import { unstable_cache } from "next/cache";
 
-// Keep page dynamic since it reads auth cookies per user
 export const dynamic = "force-dynamic";
 
 export const metadata = {
@@ -19,7 +18,6 @@ function isMobileUserAgent(ua: string): boolean {
   return /android|iphone|ipad|ipod|webos|blackberry|iemobile|opera mini|mobile/i.test(ua);
 }
 
-// ─── Cached DB Queries (60s TTL) ─────────────────────────────────────────────
 const getCachedForums = unstable_cache(
   async (universityId: string, semesterId: string | null, userId: string, isAdmin: boolean) => {
     const forumWhere = isAdmin
@@ -74,12 +72,10 @@ export default async function SocialPage() {
   const userName = session.user.name ?? "Student";
   const userImage = session.user.image ?? null;
 
-  // Detect mobile server-side to skip expensive queries
   const headersList = await headers();
   const ua = headersList.get("user-agent") || "";
   const isMobile = isMobileUserAgent(ua);
 
-  // Only fetch forum/room data on desktop (CommunityFeed fetches its own on mobile)
   if (isMobile) {
     return (
       <SocialMobileWrapper

@@ -4,7 +4,6 @@ import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { GlobalPostComposer } from "@/components/layout/GlobalPostComposer";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -99,10 +98,6 @@ export default async function CleanStudentLayout({ children }: { children: React
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />
-          <GlobalPostComposer
-            currentUserName={displayName}
-            currentUserAvatarUrl={userImage}
-          />
         </div>
       </SiteConfigProvider>
     </TelegramBlocker>

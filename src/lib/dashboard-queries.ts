@@ -6,6 +6,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Types
@@ -267,3 +268,11 @@ export async function fetchDashboardData(
     lastLectureActivity,
   };
 }
+
+export const getCachedDashboardData = unstable_cache(
+  async (userId: string, chartDayKeys: string[]) => {
+    return fetchDashboardData(userId, chartDayKeys);
+  },
+  ["dashboard-data"],
+  { revalidate: 60, tags: ["dashboard"] }
+);

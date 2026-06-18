@@ -2,6 +2,10 @@
   display: none;
 }
 
+main#main-content {
+  padding-top: 0 !important;
+}
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

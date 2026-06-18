@@ -20,12 +20,11 @@ import {
   BoltIcon,
   GlobeAltIcon,
 } from "@heroicons/react/24/solid";
-import { Paperclip, Lightning, Stop, ArrowUp } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { isImmersiveMobileRoute } from "@/lib/mobile-chrome";
 import { useCommunityStore } from "@/components/community-mobile/store";
-import { useChatInputBridge } from "@/lib/store";
+
 
 interface TabDef {
   href: string;
@@ -115,98 +114,6 @@ function TabItem({ tab, pathname }: { tab: TabDef; pathname: string }) {
   );
 }
 
-function AiChatInput() {
-  const input = useChatInputBridge((s) => s.input);
-  const setInput = useChatInputBridge((s) => s.setInput);
-  const loading = useChatInputBridge((s) => s.loading);
-  const sendMessage = useChatInputBridge((s) => s.sendMessage);
-  const stopGeneration = useChatInputBridge((s) => s.stopGeneration);
-  const openFilePicker = useChatInputBridge((s) => s.openFilePicker);
-  const superExpertEnabled = useChatInputBridge((s) => s.superExpertEnabled);
-  const toggleSuperExpert = useChatInputBridge((s) => s.toggleSuperExpert);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [inputFocused, setInputFocused] = useState(false);
-
-  useEffect(() => {
-    const el = inputRef.current;
-    if (!el) return;
-    requestAnimationFrame(() => {
-      el.style.height = "auto";
-      el.style.height = Math.min(el.scrollHeight, 80) + "px";
-    });
-  }, [input]);
-
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-0.5 px-1.5 py-1 mx-2 mb-1 rounded-xl border transition-colors",
-        inputFocused
-          ? "border-gray-500 dark:border-gray-500"
-          : "border-gray-200/80 dark:border-white/10",
-        "bg-white/80 dark:bg-black/60"
-      )}
-    >
-      <button
-        onClick={() => openFilePicker?.()}
-        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:hover:bg-white/10"
-      >
-        <Paperclip size={16} />
-      </button>
-      <textarea
-        ref={inputRef}
-        rows={1}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage?.();
-          }
-        }}
-        onFocus={() => setInputFocused(true)}
-        onBlur={() => setInputFocused(false)}
-        placeholder="Message MedOneX Expert..."
-        className="w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-      />
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <button
-          onClick={() => toggleSuperExpert?.()}
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all select-none",
-            superExpertEnabled
-              ? "super-expert-pill-active text-indigo-300"
-              : "text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-white/5"
-          )}
-        >
-          <Lightning size={12} weight={superExpertEnabled ? "fill" : "regular"} />
-          <span>Super Expert</span>
-        </button>
-        {loading ? (
-          <button
-            onClick={() => stopGeneration?.()}
-            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30"
-          >
-            <Stop size={14} weight="fill" />
-          </button>
-        ) : (
-          <button
-            onClick={() => sendMessage?.()}
-            disabled={!input.trim()}
-            className={cn(
-              "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
-              input.trim()
-                ? "bg-black text-white hover:bg-gray-800 shadow-md dark:bg-white dark:text-black dark:hover:bg-gray-200"
-                : "bg-black/5 text-gray-300 dark:bg-white/5 dark:text-gray-500"
-            )}
-          >
-            <ArrowUp size={16} weight="bold" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function MobileBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -259,6 +166,7 @@ export function MobileBottomNav() {
 
   return (
     <>
+      {/* Tab bar — slides on scroll */}
       <div
         className={cn(
           "md:hidden fixed bottom-0 left-0 right-0 z-[10002]",
@@ -321,8 +229,6 @@ export function MobileBottomNav() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {pathname.startsWith("/ai-chat") && <AiChatInput />}
 
         <div className="flex items-center justify-around h-[62px] px-1 relative z-20">
           {TABS.slice(0, 2).map((tab) => (

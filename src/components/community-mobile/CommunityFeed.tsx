@@ -2,8 +2,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Plus } from "lucide-react";
+
+const PostComposerLoader = dynamic(() => import("./PostComposer"), { ssr: false });
 
 import type { Post } from "./types";
 import { fetchForums, fetchForumPosts } from "./api";
@@ -36,6 +39,8 @@ export function CommunityFeed({
   const setPosts = useCommunityStore((s) => s.setPosts);
   const appendPosts = useCommunityStore((s) => s.appendPosts);
   const setFeedScrolled = useCommunityStore((s) => s.setFeedScrolled);
+  const isComposerOpen = useCommunityStore((s) => s.isComposerOpen);
+  const openComposer = useCommunityStore((s) => s.openComposer);
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -220,6 +225,24 @@ export function CommunityFeed({
 
       <CommentsSheet currentUserId={currentUserId} />
       <ReportModal />
+
+      {/* FAB — floating create button */}
+      {!isComposerOpen && (
+        <button
+          onClick={() => openComposer()}
+          className="fixed bottom-24 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95"
+          aria-label="Create post"
+        >
+          <Plus className="h-5 w-5" strokeWidth={1.5} />
+        </button>
+      )}
+
+      {/* PostComposer — rendered when open */}
+      {activeForumId && <PostComposerLoader
+        forumId={activeForumId}
+        currentUserAvatarUrl={currentUserAvatarUrl}
+        currentUserName={currentUserName}
+      />}
     </div>
   );
 }

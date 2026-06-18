@@ -45,9 +45,9 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
   }, []);
 
   const trigger = useCallback((streak: number) => {
-    setPieces(createPieces(40));
+    setPieces(createPieces(8));
     setShow(true);
-    setTimeout(() => setShow(false), 3500);
+    setTimeout(() => setShow(false), 2500);
     saveMilestones([...celebrated, streak]);
   }, [celebrated, saveMilestones]);
 

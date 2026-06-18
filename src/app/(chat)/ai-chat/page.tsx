@@ -16,7 +16,7 @@ export default async function AIChatPage() {
   }
 
   return (
-    <div className="w-full h-screen flex flex-col md:pb-0">
+    <div className="flex-1 flex flex-col w-full overflow-hidden">
       <MedOneXChat />
     </div>
   );

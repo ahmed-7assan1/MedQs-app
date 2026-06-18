@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
 import { syncAllThreadsToFirestore, subscribeToThreads, deleteThreadFromFirestore } from "@/lib/firebase/firestore";
 import { getAIEndpoint } from "@/lib/api-config";
@@ -447,7 +447,7 @@ const DEFAULT_SETTINGS: DrQSettings = {
   activeProvider: "gemini",
   activeModels: {},
   activePersona: "explainer",
-  fontSize: 15,
+  fontSize: 16,
   userBubbleColor: "#6d28d9",
   aiBubbleColor: "#1a1830",
   bgImage: "",
@@ -472,39 +472,75 @@ async function streamGemini(
   const sysMsg = messages.find(m => m.role === "system");
   const nonSystem = messages.filter(m => m.role !== "system");
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const modelOpts: any = { model };
-  if (sysMsg) modelOpts.systemInstruction = sysMsg.content;
-  if (webSearch) modelOpts.tools = [{ googleSearch: {} }];
-  const mdl = genAI.getGenerativeModel(modelOpts);
-
-  const history = nonSystem.slice(0, -1).map((m) => ({
+  const contents = nonSystem.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
     parts: [{ text: m.content }],
   }));
 
-  const chat = mdl.startChat({ history });
-
-  const lastMsg = nonSystem[nonSystem.length - 1] || messages[messages.length - 1];
-  const parts: any[] = [{ text: lastMsg.content || "" }];
-
-  for (const f of files) {
-    if (f.mimeType.startsWith("image/") || f.mimeType === "application/pdf" || f.mimeType.includes("presentation")) {
-      const base64 = f.data.split(",")[1];
-      parts.push({ inlineData: { mimeType: f.mimeType, data: base64 } });
-    } else {
-      const textContent = atob(f.data.split(",")[1] || f.data);
-      parts.push({ text: `\n\n[File: ${f.name}]\n${textContent}` });
+  if (files.length > 0 && contents.length > 0) {
+    const lastIdx = contents.length - 1;
+    const lastParts = contents[lastIdx].parts;
+    for (const f of files) {
+      if (f.mimeType.startsWith("image/") || f.mimeType === "application/pdf" || f.mimeType.includes("presentation")) {
+        const base64 = f.data.split(",")[1];
+        lastParts.push({ inlineData: { mimeType: f.mimeType, data: base64 } });
+      } else {
+        const textContent = atob(f.data.split(",")[1] || f.data);
+        lastParts.push({ text: `\n\n[File: ${f.name}]\n${textContent}` });
+      }
     }
   }
 
-  const result = await chat.sendMessageStream(parts, { signal: signal ?? AbortSignal.timeout(STREAM_TIMEOUT) });
-  let full = "";
-  for await (const chunk of result.stream) {
-    const text = chunk.text();
-    full += text;
-    onChunk(full);
+  const body: any = { contents };
+  if (sysMsg) body.systemInstruction = { parts: [{ text: sysMsg.content }] };
+  if (webSearch) body.tools = [{ googleSearch: {} }];
+
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
+    body: JSON.stringify(body),
+    signal: signal ?? AbortSignal.timeout(STREAM_TIMEOUT),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `Gemini API error ${resp.status}`);
   }
+
+  const reader = resp.body!.getReader();
+  const decoder = new TextDecoder();
+  let full = "";
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith("data:")) continue;
+      const jsonStr = trimmed.slice(5).trim();
+      if (!jsonStr) continue;
+      try {
+        const json = JSON.parse(jsonStr);
+        const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          full += text;
+          onChunk(full);
+        }
+      } catch {
+        // skip malformed JSON lines
+      }
+    }
+  }
+
   return full;
 }
 

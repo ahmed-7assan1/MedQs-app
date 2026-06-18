@@ -21,7 +21,7 @@ import { StreakCelebration } from "@/components/dashboard/StreakCelebration";
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
+  show: { transition: { staggerChildren: 0.04 } },
 };
 const itemAnim = {
   hidden: { opacity: 0, y: 20 },
@@ -132,6 +132,7 @@ export function DashboardShell({
                           stroke="currentColor"
                           fill="transparent"
                           r="42" cx="50" cy="50"
+                          style={{ willChange: "stroke-dashoffset" }}
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -232,6 +233,7 @@ export function DashboardShell({
                   stroke="currentColor"
                   fill="transparent"
                   r="42" cx="50" cy="50"
+                  style={{ willChange: "stroke-dashoffset" }}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">

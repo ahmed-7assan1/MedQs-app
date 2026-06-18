@@ -1,26 +1,31 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import {
+  HandThumbUpIcon,
+  HandThumbDownIcon,
+  ArrowPathIcon,
+  ClipboardIcon,
+  ShareIcon,
+  BoltIcon,
+  CheckIcon,
+} from "@heroicons/react/16/solid";
 import { 
-  ThumbsUp, 
-  ThumbsDown, 
-  ArrowClockwise, 
-  Copy, 
   ArrowBendUpLeft,
-  ShareNetwork,
   FileText,
   Image as ImageIcon,
-  Check,
   CheckCircle,
   WarningCircle,
-  Table,
+  Copy,
+  Check,
   Lightning,
+  ShareNetwork,
+  Table,
   Quotes,
   Spinner,
   BookmarkSimple,
   CaretLeft,
   CaretRight,
-  User,
   X as XIcon
 } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
@@ -136,16 +141,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 <span className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest">Medical Assistant</span>
               </div>
             </div>
-          ) : (
-            <div className="flex items-center gap-2.5 px-1 mb-1 justify-end">
-              <div className="flex flex-col items-end">
-                <span className="text-[12px] font-black text-slate-800 dark:text-slate-100 tracking-tight">You</span>
-              </div>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm bg-gradient-to-br from-slate-400 to-slate-500 dark:from-slate-500 dark:to-slate-600">
-                <User size={14} weight="fill" className="text-white" />
-              </div>
-            </div>
-          )
+          ) : null
         )}
 
         {message.isStreaming && !message.content ? (
@@ -163,7 +159,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
               className={cn(
                 "relative overflow-hidden transition-all",
                 variant === "flat" && isAI 
-                  ? "px-4 py-2.5 text-slate-800 dark:text-white/90" 
+                  ? "px-4 py-2.5 text-gray-900 dark:text-white" 
                   : "px-4 py-2.5 shadow-sm",
                 !variant && isAI 
                   ? "rounded-3xl rounded-tl-sm border border-slate-200/60 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none" 
@@ -224,7 +220,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
 
               {/* Markdown Content (images stripped) */}
               <div dir="auto" className={cn(
-                "prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
+                "prose prose-base max-w-none prose-p:text-[16px] prose-p:font-medium prose-p:leading-[1.6] prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 font-arabic",
                 isAI ? "prose-slate dark:prose-invert prose-pre:bg-slate-50 dark:prose-pre:bg-black/30 prose-pre:border-slate-200 dark:prose-pre:border-white/5 prose-table:border-slate-200 dark:prose-table:border-white/10 prose-th:bg-slate-50 dark:prose-th:bg-white/5" : "text-gray-900 dark:text-white prose-p:text-gray-900 dark:prose-p:text-white prose-headings:text-gray-900 dark:prose-headings:text-white prose-strong:text-gray-900 dark:prose-strong:text-white prose-code:text-gray-900 dark:prose-code:text-white"
               )}>
                 <ReactMarkdown 
@@ -243,7 +239,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                            <Copy size={14} />
                          </button>
                          <div className="overflow-x-auto">
-                          <table className="w-full text-left border-collapse">{children}</table>
+                           <table className="w-full text-start border-collapse">{children}</table>
                          </div>
                       </div>
                     ),
@@ -315,13 +311,13 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                   onClick={() => onReaction(message.id, message.reaction === "like" ? null : "like")}
                   className={cn("p-1.5 rounded-lg transition-all", message.reaction === "like" ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5")}
                 >
-                  <ThumbsUp size={16} weight={message.reaction === "like" ? "fill" : "bold"} />
+                  <HandThumbUpIcon className={cn("w-4 h-4", message.reaction === "like" ? "text-emerald-500" : "")} />
                 </button>
                 <button 
                   onClick={() => onReaction(message.id, message.reaction === "dislike" ? null : "dislike")}
                   className={cn("p-1.5 rounded-lg transition-all", message.reaction === "dislike" ? "text-rose-500 bg-rose-50 dark:bg-rose-500/10" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5")}
                 >
-                  <ThumbsDown size={16} weight={message.reaction === "dislike" ? "fill" : "bold"} />
+                  <HandThumbDownIcon className={cn("w-4 h-4", message.reaction === "dislike" ? "text-rose-500" : "")} />
                 </button>
                 <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
                 <button onClick={() => {
@@ -334,16 +330,16 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     }
                   );
                 }} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all" title="Save to Flashcards">
-                  <Lightning size={16} weight="bold" />
+                  <BoltIcon className="w-4 h-4" />
                 </button>
                 <button onClick={handleCopy} aria-label="Copy message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
-                  {copying ? <Check size={16} weight="bold" className="text-emerald-500" /> : <Copy size={16} weight="bold" />}
+                  {copying ? <CheckIcon className="w-4 h-4 text-emerald-500" /> : <ClipboardIcon className="w-4 h-4" />}
                 </button>
                 <button onClick={onRegenerate} aria-label="Regenerate response" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
-                  <ArrowClockwise size={16} weight="bold" />
+                  <ArrowPathIcon className="w-4 h-4" />
                 </button>
                 <button onClick={() => onShare?.(message.content)} aria-label="Share message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
-                  <ShareNetwork size={16} weight="bold" />
+                  <ShareIcon className="w-4 h-4" />
                 </button>
               </div>
             )}
@@ -615,7 +611,7 @@ function ChecklistCard({ c }: { c: { title: string, items: { text: string, compl
             <span className="text-[14px] font-black text-slate-800 dark:text-white tracking-tight">{c.title}</span>
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-end">
            <span className="text-[15px] font-black text-emerald-500 dark:text-emerald-400">{progress}%</span>
            <div className="w-20 h-1.5 bg-slate-100 dark:bg-white/5 rounded-full mt-1 overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} className="h-full bg-emerald-500" />
@@ -629,7 +625,7 @@ function ChecklistCard({ c }: { c: { title: string, items: { text: string, compl
             key={i}
             onClick={() => toggleItem(i)}
             className={cn(
-              "w-full flex items-center gap-4 p-4 rounded-xl transition-all text-left group border border-transparent",
+              "w-full flex items-center gap-4 p-4 rounded-xl transition-all text-start group border border-transparent",
               item.completed ? "bg-emerald-50 dark:bg-emerald-500/5 text-emerald-700 dark:text-white/90 border-emerald-100 dark:border-transparent" : "bg-slate-50 dark:bg-white/[0.02] text-slate-600 dark:text-white/60 hover:bg-slate-100 dark:hover:bg-white/5 hover:border-slate-200 dark:hover:border-white/5"
             )}
           >
@@ -688,7 +684,7 @@ function QuestionCard({ q, onSave, onShare }: { q: { question: string, options: 
             disabled={selected !== null}
             onClick={() => setSelected(opt)}
             className={cn(
-              "w-full text-left px-5 py-4 rounded-2xl border transition-all flex items-center justify-between group",
+              "w-full text-start px-5 py-4 rounded-2xl border transition-all flex items-center justify-between group",
               selected === null ? "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/5 hover:border-indigo-500/30 dark:hover:border-indigo-500/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/5" : 
               opt === q.answer ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500/30 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400 font-bold" :
               selected === opt ? "bg-rose-50 dark:bg-rose-500/10 border-rose-500/30 dark:border-rose-500/50 text-rose-700 dark:text-rose-400 font-bold" : "bg-slate-100 dark:bg-black/20 border-slate-200 dark:border-white/5 opacity-50"

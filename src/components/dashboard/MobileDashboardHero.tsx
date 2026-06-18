@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import {
   FireIcon, TrophyIcon, AcademicCapIcon, StarIcon,
   ShieldCheckIcon, RocketLaunchIcon, SparklesIcon,
@@ -13,23 +12,11 @@ import { BadgeProgressSheet } from "@/components/dashboard/BadgeProgressSheet";
 function AnimatedFlame() {
   return (
     <span className="relative inline-flex items-center justify-center shrink-0">
-      <motion.span
-        className="absolute inset-0 rounded-full bg-orange-500/30 blur-md"
-        animate={{ scale: [1, 1.3, 0.9, 1.2, 1], opacity: [0.4, 0.7, 0.3, 0.6, 0.4] }}
-        transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.span
-        className="absolute inset-0 rounded-full bg-amber-400/20 blur-sm"
-        animate={{ scale: [1, 0.8, 1.1, 0.9, 1], opacity: [0.3, 0.6, 0.2, 0.5, 0.3] }}
-        transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-      />
-      <motion.span
-        animate={{ scale: [1, 1.08, 0.95, 1.05, 1], rotate: [0, -3, 2, -1, 0] }}
-        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
-        className="relative"
-      >
+      <span className="absolute inset-0 rounded-full bg-orange-500/30 blur-md animate-flame-glow" />
+      <span className="absolute inset-0 rounded-full bg-amber-400/20 blur-sm animate-flame-pulse" />
+      <span className="relative animate-fire">
         <FireIcon className="h-5 w-5 text-orange-500 drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" />
-      </motion.span>
+      </span>
     </span>
   );
 }
@@ -37,10 +24,9 @@ function AnimatedFlame() {
 function ShimmerOverlay({ delay = 1 }: { delay?: number }) {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[inherit]">
-      <motion.div
-        className="absolute -inset-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-20deg]"
-        animate={{ left: ["-100%", "200%"] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay }}
+      <div
+        className="absolute -inset-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-20deg] animate-shimmer"
+        style={{ animationDelay: `${delay}s` }}
       />
     </div>
   );
@@ -171,10 +157,9 @@ export function MobileDashboardHero({
             )}
           >
             <div className="absolute inset-0 rounded-xl overflow-hidden">
-              <motion.div
-                className="absolute -inset-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]"
-                animate={{ left: ["-100%", "200%"] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+              <div
+                className="absolute -inset-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg] animate-shimmer"
+                style={{ animationDelay: "0.2s", animationDuration: "2s" }}
               />
             </div>
             <BadgeIcon className="h-4 w-4 relative z-10 drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]" />
@@ -212,12 +197,8 @@ export function MobileDashboardHero({
           <ShimmerOverlay delay={1.5} />
           <div className="relative z-10 flex items-center gap-2.5 px-3.5 py-3 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-500/10 dark:to-yellow-500/5">
             <span className="relative inline-flex items-center justify-center shrink-0">
-              <motion.span
-                className="absolute inset-0 rounded-full bg-amber-400/20 blur-sm"
-                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <TrophyIcon className="h-5 w-5 relative text-amber-500" />
+              <span className="absolute inset-0 rounded-full bg-amber-400/20 blur-sm animate-trophy-glow" />
+              <TrophyIcon className="h-5 w-5 relative text-amber-500 animate-trophy" />
             </span>
             <div>
               <p className="text-base font-black text-foreground leading-none">{(rankPoints || 0).toLocaleString()}</p>
