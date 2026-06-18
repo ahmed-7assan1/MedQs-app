@@ -20,11 +20,10 @@ import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import { InstallPWA } from "./InstallPWA";
 import { PWAInstallModal } from "./PWAInstallModal";
-import { SavedContentPanel } from "./SavedContentPanel";
-import { LibraryContentPanel } from "./LibraryContentPanel";
+import { SavedPage } from "./SavedPage";
+import { LibraryPage } from "./LibraryPage";
 import { SharedQuizClient } from "@/app/quiz/shared/[shareCode]/SharedQuizClient";
-import { CustomAgentCreatePanel } from "./CustomAgentCreatePanel";
-import { CustomAgentGallery } from "./CustomAgentGallery";
+import { CustomPage } from "./CustomPage";
 import { CustomAgentChat } from "./CustomAgentChat";
 import { QuestionsBottomSheet, type QuestionData } from "./QuestionsBottomSheet";
 import { FlashcardsBottomSheet, type FlashcardData } from "./FlashcardsBottomSheet";
@@ -1435,10 +1434,9 @@ export function MedOneXChat() {
       </motion.div>
 
       <DrQConfigPanel isOpen={showConfig} settings={settings} onUpdate={updateSettings} onClose={() => setShowConfig(false)} />
-      <SavedContentPanel isOpen={showSaved} onClose={() => setShowSaved(false)} isDark={isDark} />
-      <LibraryContentPanel isOpen={showLibrary} onClose={() => setShowLibrary(false)} isDark={isDark} onOpenQuiz={(quiz) => setShowLibraryQuiz(quiz)} />
-      <CustomAgentCreatePanel isOpen={showAgentCreate} onClose={() => setShowAgentCreate(false)} isDark={isDark} onSaved={() => {}} />
-      <CustomAgentGallery isOpen={showAgentGallery} onClose={() => setShowAgentGallery(false)} isDark={isDark} onSelectAgent={(agent) => setActiveAgent(agent)} />
+      <SavedPage isOpen={showSaved} onClose={() => setShowSaved(false)} isDark={isDark} />
+      <LibraryPage isOpen={showLibrary} onClose={() => setShowLibrary(false)} isDark={isDark} onOpenQuiz={(quiz: any) => setShowLibraryQuiz(quiz)} />
+      <CustomPage isOpen={showAgentGallery} onClose={() => setShowAgentGallery(false)} isDark={isDark} onSelectAgent={(agent: any) => setActiveAgent(agent)} />
       <AnimatePresence>
         {activeAgent && (
           <CustomAgentChat agent={activeAgent} onClose={() => setActiveAgent(null)} isDark={isDark} />
