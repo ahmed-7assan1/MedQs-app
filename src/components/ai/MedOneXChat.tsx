@@ -23,7 +23,7 @@ import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import {
   Bars3Icon, HomeIcon, BookOpenIcon, UserGroupIcon,
-  ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon,
+  ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon, ChevronDoubleRightIcon,
 } from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
 
@@ -65,6 +65,7 @@ export function MedOneXChat() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLTextAreaElement>(null);
+  const touchStartX = useRef(0);
   const [mobileFocused, setMobileFocused] = useState(false);
   const [files, setFiles] = useState<FileAttachment[]>([]);
   const [showConfig, setShowConfig] = useState(false);
@@ -485,6 +486,18 @@ export function MedOneXChat() {
         </div>
       </div>}
 
+      {/* ─── Swipe Zone (left edge) ─── */}
+      {!showSidebar && (
+        <div
+          className="fixed left-0 top-0 bottom-0 w-6 z-[10008] touch-none"
+          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchMove={(e) => {
+            const diff = e.touches[0].clientX - touchStartX.current;
+            if (diff > 30) setShowSidebar(true);
+          }}
+        />
+      )}
+
       {/* ─── Hamburger Button ─── */}
       <button
         onClick={() => setShowSidebar(true)}
@@ -513,8 +526,8 @@ export function MedOneXChat() {
               transition={{ type: "spring", damping: 30, stiffness: 260 }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "absolute left-0 top-0 bottom-0 w-[80vw] max-w-[80vw] flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.35)]",
-                isDark ? "bg-[#050505] border-r border-white/10" : "bg-white border-r border-gray-200"
+                "absolute left-0 top-0 bottom-0 w-[80vw] max-w-[80vw] flex flex-col backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.35)]",
+                isDark ? "bg-[#050505]/80 border-r border-white/10" : "bg-white/80 border-r border-gray-200"
               )}
             >
               {/* Sidebar Header */}
@@ -533,7 +546,7 @@ export function MedOneXChat() {
                   onClick={() => setShowSidebar(false)}
                   className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}
                 >
-                  <XMarkIcon className="w-5 h-5" />
+                  <ChevronDoubleRightIcon className="w-5 h-5" />
                 </button>
               </div>
 
@@ -889,7 +902,7 @@ export function MedOneXChat() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="h-full flex flex-col items-center justify-center px-6 pt-8 md:pt-12"
+              className="h-full flex flex-col items-center justify-center px-6 pt-16 md:pt-24"
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -898,9 +911,21 @@ export function MedOneXChat() {
                 className="flex items-center justify-center mb-5"
               >
                 {logoUrl ? (
-                  <img src={logoUrl} alt={siteName} className="h-14 w-14 object-contain" />
+                  <div
+                    className="h-20 w-20 bg-gradient-to-br from-violet-500 to-fuchsia-500"
+                    style={{
+                      maskImage: `url(${logoUrl})`,
+                      maskSize: 'contain',
+                      maskRepeat: 'no-repeat',
+                      maskPosition: 'center',
+                      WebkitMaskImage: `url(${logoUrl})`,
+                      WebkitMaskSize: 'contain',
+                      WebkitMaskRepeat: 'no-repeat',
+                      WebkitMaskPosition: 'center',
+                    }}
+                  />
                 ) : (
-                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold shadow-lg", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900")}>
+                  <div className="h-20 w-20 rounded-2xl flex items-center justify-center text-lg font-bold bg-gradient-to-br from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
                     {siteName?.charAt(0) || "M"}
                   </div>
                 )}
@@ -909,7 +934,7 @@ export function MedOneXChat() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className={cn("text-2xl font-bold mb-1", isDark ? "text-white" : "text-gray-900")}
+                className="text-2xl font-bold mb-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent animate-gradient"
               >
                 MedOneX Expert
               </motion.h1>

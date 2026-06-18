@@ -1568,6 +1568,11 @@ html[data-theme="dark"] body {
   }
 }
 
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
 @keyframes notif-pop {
   0% {
     transform: scale(0.7) translateY(8px);
