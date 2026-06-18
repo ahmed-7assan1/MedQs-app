@@ -465,7 +465,7 @@ export function MedOneXChat() {
         onClick={() => setShowSidebar(true)}
         className={cn(
           "fixed top-3 left-3 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all",
-          isDark ? "bg-white/10 text-white hover:bg-white/20 backdrop-blur-xl" : "bg-black/5 text-gray-700 hover:bg-black/10 backdrop-blur-xl"
+          isDark ? "bg-black text-white hover:bg-gray-900 backdrop-blur-xl" : "bg-white text-gray-900 hover:bg-gray-100 backdrop-blur-xl shadow-sm"
         )}
       >
         <Bars3Icon className="w-5 h-5" />
@@ -495,7 +495,7 @@ export function MedOneXChat() {
               <div className={cn("flex items-center justify-between px-4 py-3 border-b", isDark ? "border-white/10" : "border-gray-200")}>
                 <div className="flex items-center gap-2.5">
                   {logoUrl ? (
-                    <img src={logoUrl} alt={siteName} className={cn("h-7 w-7 object-contain", isDark ? "brightness-0 invert" : "")} />
+                    <img src={logoUrl} alt={siteName} className={cn("h-7 w-7 object-contain", isDark ? "brightness-0 invert" : "brightness-0")} />
                   ) : (
                     <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900")}>
                       {siteName?.charAt(0) || "M"}
@@ -531,7 +531,7 @@ export function MedOneXChat() {
                           isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
                         )}
                       >
-                        <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-indigo-500")} />
+                        <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
                         {item.label}
                       </Link>
                     ))}
@@ -588,7 +588,7 @@ export function MedOneXChat() {
                           )}
                         >
                           <div className="flex items-center gap-3">
-                            <ChatCircle size={14} weight={t.id === activeThreadId ? "fill" : "regular"} className={cn("flex-shrink-0", isDark ? "text-white" : "text-indigo-500")} />
+                            <ChatCircle size={14} weight={t.id === activeThreadId ? "fill" : "regular"} className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
                             <span className="truncate">{t.title || "New Chat"}</span>
                           </div>
                         </button>
@@ -602,14 +602,24 @@ export function MedOneXChat() {
                       isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
-                    <Plus size={16} weight="bold" className={cn(isDark ? "text-white" : "text-indigo-500")} />
+                    <Plus size={16} weight="bold" className={cn(isDark ? "text-white" : "text-gray-900")} />
                     New Chat
                   </button>
                 </div>
               </div>
 
               {/* ─── Settings at Bottom ─── */}
-              <div className={cn("border-t p-3", isDark ? "border-white/10" : "border-gray-200")}>
+              <div className={cn("border-t p-3 space-y-1", isDark ? "border-white/10" : "border-gray-200")}>
+                <button
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all",
+                    isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
+                  )}
+                >
+                  {isDark ? <Sun size={18} className="text-white" /> : <Moon size={18} className="text-gray-900" />}
+                  {isDark ? "Light Mode" : "Dark Mode"}
+                </button>
                 <button
                   onClick={() => { setShowConfig(true); setShowSidebar(false); }}
                   className={cn(
@@ -617,7 +627,7 @@ export function MedOneXChat() {
                     isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
                   )}
                 >
-                  <Cog6ToothIcon className={cn("w-5 h-5", isDark ? "text-white" : "text-indigo-500")} />
+                  <Cog6ToothIcon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
                   Settings
                 </button>
               </div>

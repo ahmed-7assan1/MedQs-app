@@ -75,6 +75,10 @@
 - تغيير `text-left` → `text-start` في sidebar thread items و suggestion buttons لتحترم RTL
 - تغيير `text-left` → `text-start` في جداول markdown بـ DrQMessage
 - تغيير `text-left` → `text-start` و `text-right` → `text-end` في checklist و quiz cards بـ DrQMessage
+- تعديل hamburger button: خلفية بيضاء في الوضع الفاتح (`bg-white`) وسوداء في الوضع الغامق (`bg-black`)
+- تعديل اللوجو في السايد بار: `brightness-0` في الوضع الفاتح (أسود) و `brightness-0 invert` في الغامق (أبيض)
+- تغيير لون أيقونات السايد بار من `text-indigo-500` → `text-gray-900` في الوضع الفاتح (أسود)
+- إضافة زر تبديل المود (Dark/Light Mode) في السايد بار تحت الإعدادات
 
 ### In Progress
 - (none)
