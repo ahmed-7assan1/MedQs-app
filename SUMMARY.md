@@ -80,6 +80,7 @@
 - تغيير لون أيقونات السايد بار من `text-indigo-500` → `text-gray-900` في الوضع الفاتح (أسود)
 - إضافة زر تبديل المود (Dark/Light Mode) في السايد بار تحت الإعدادات
 - تغيير السايد بار من Overlay Drawer إلى Push Drawer (DeepSeek style): إزالة backdrop، تحويل العرض إلى `w-[80vw]`، إضافة shadow، تطبيق `translateX(80vw) + scale(0.92)` على المحتوى الرئيسي، إغلاق السايد بار بالضغط على الـ 20% الظاهر
+- إضافة نفس push effect `translateX(80vw)` لصندوق الإرسال (mobile input) ليتحرك مع باقي المحتوى
 
 ### In Progress
 - (none)

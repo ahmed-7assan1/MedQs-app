@@ -1291,7 +1291,13 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       {/* ─── Mobile Floating Input ─── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[10003] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none">
+      <motion.div
+        animate={{
+          x: showSidebar ? "80vw" : 0,
+        }}
+        transition={{ type: "spring", damping: 30, stiffness: 260 }}
+        className="md:hidden fixed bottom-0 left-0 right-0 z-[10003] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none"
+      >
         <div className="px-2 pb-1 pointer-events-auto">
           <div className={cn(
             "flex items-end gap-1 px-2 py-2 mx-2 mb-1 rounded-2xl border transition-colors shadow-lg",
@@ -1390,7 +1396,7 @@ export function MedOneXChat() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
