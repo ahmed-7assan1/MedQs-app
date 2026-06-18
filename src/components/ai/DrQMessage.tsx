@@ -26,7 +26,9 @@ import {
   BookmarkSimple,
   CaretLeft,
   CaretRight,
-  X as XIcon
+  X as XIcon,
+  BookOpen,
+  Link as LinkIcon
 } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -35,6 +37,8 @@ import { cn } from "@/lib/utils";
 import { ChatMessage, MessageReaction } from "@/hooks/useDrQChat";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import { QuestionsBottomSheet, type QuestionData } from "./QuestionsBottomSheet";
+import { FlashcardsBottomSheet, type FlashcardData } from "./FlashcardsBottomSheet";
+import { ResourcesBottomSheet, type ResourceItem } from "./ResourcesBottomSheet";
 import toast from "react-hot-toast";
 
 interface MessageProps {
@@ -48,6 +52,11 @@ interface MessageProps {
   onShare?: (text: string) => void;
   activePersona?: string;
   variant?: "bubble" | "flat";
+}
+
+// Check if text is English-only (no Arabic/Persian/Urdu chars)
+function isEnglishOnly(text: string): boolean {
+  return !/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
 }
 
 const DrQMessageInner: React.FC<MessageProps> = ({
@@ -66,6 +75,8 @@ const DrQMessageInner: React.FC<MessageProps> = ({
   const [copying, setCopying] = useState(false);
   const [selectionRange, setSelectionRange] = useState<{ text: string, top: number, left: number } | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [showFlashcards, setShowFlashcards] = useState(false);
+  const [showResources, setShowResources] = useState(false);
   const [isDark, _setIsDark] = useState(false);
 
   useEffect(() => {
@@ -76,7 +87,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Extract questions from message content
+  // Extract questions from message content (English-only)
   const parsedQuestions: QuestionData[] = useMemo(() => {
     const qs: QuestionData[] = [];
     const regex = /:::question\s*({.*?})\s*:::/gs;
@@ -84,8 +95,10 @@ const DrQMessageInner: React.FC<MessageProps> = ({
     while ((match = regex.exec(message.content)) !== null) {
       try {
         const raw = JSON.parse(match[1]);
+        const qText = raw.question || raw.body || "";
+        if (!isEnglishOnly(qText)) continue;
         qs.push({
-          question: raw.question || raw.body || "",
+          question: qText,
           options: raw.options || (raw.choices ? raw.choices.map((c: any) => c.text || c) : []),
           answer: raw.answer || "",
           explanation: raw.explanation || "",
@@ -96,9 +109,44 @@ const DrQMessageInner: React.FC<MessageProps> = ({
   }, [message.content]);
 
   const cleanContent = useMemo(() => {
-    if (parsedQuestions.length === 0) return message.content;
-    return message.content.replace(/:::question\s*({.*?})\s*:::/gs, "").trim();
+    let text = message.content;
+    if (parsedQuestions.length > 0) text = text.replace(/:::question\s*({.*?})\s*:::/gs, "").trim();
+    return text;
   }, [message.content, parsedQuestions]);
+
+  // Extract flashcards (English-only)
+  const parsedFlashcards: FlashcardData[] = useMemo(() => {
+    const fs: FlashcardData[] = [];
+    const regex = /:::flashcard\s*({.*?})\s*:::/gs;
+    let match;
+    while ((match = regex.exec(message.content)) !== null) {
+      try {
+        const raw = JSON.parse(match[1]);
+        if (!isEnglishOnly(raw.front || "") || !isEnglishOnly(raw.back || "")) continue;
+        fs.push({ front: raw.front || "", back: raw.back || "" });
+      } catch {}
+    }
+    return fs;
+  }, [message.content]);
+
+  const cleanContent2 = useMemo(() => {
+    let text = cleanContent;
+    if (parsedFlashcards.length > 0) text = text.replace(/:::flashcard\s*({.*?})\s*:::/gs, "").trim();
+    return text;
+  }, [cleanContent, parsedFlashcards]);
+
+  // Extract resource URLs from content
+  const parsedResources: ResourceItem[] = useMemo(() => {
+    const items: ResourceItem[] = [];
+    const urlRegex = /https?:\/\/[^\s()<>"\]]+/g;
+    let match;
+    while ((match = urlRegex.exec(message.content)) !== null) {
+      const url = match[0].replace(/[.,;:!?]+$/, "");
+      const title = url.length > 60 ? url.substring(0, 60) + "..." : url;
+      if (!items.some((i) => i.url === url)) items.push({ url, title });
+    }
+    return items;
+  }, [message.content]);
 
   // Handle text selection for Reply
   useEffect(() => {
@@ -151,7 +199,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
         )}
       </AnimatePresence>
 
-      <div className={cn("max-w-[90%] md:max-w-[85%] flex flex-col gap-2", !isAI && "items-end")}>
+      <div className={cn("w-full flex flex-col gap-2", !isAI && "items-end")}>
         
         {/* Reply-to header */}
         {message.replyTo && (
@@ -180,10 +228,21 @@ const DrQMessageInner: React.FC<MessageProps> = ({
         )}
 
         {message.isStreaming && !message.content ? (
-          /* Initial Streaming State */
-          <div className="flex items-center gap-3 py-4 text-indigo-500">
-             <Spinner size={24} className="animate-spin" />
-             <span className="text-[14px] font-bold">MedOneX Expert is thinking...</span>
+          /* Professional thinking animation */
+          <div className="flex flex-col items-start gap-3 py-4">
+            <div className="flex items-center gap-2.5">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500"
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
+                />
+              ))}
+            </div>
+            <span className="text-sm font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              MedOneX Expert is thinking...
+            </span>
           </div>
         ) : (
           <div className="relative">
@@ -261,6 +320,11 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
                   components={{
+                    a: ({ href, children }) => (
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium text-indigo-500 underline underline-offset-2 hover:text-indigo-600 transition-colors">
+                        {children}
+                      </a>
+                    ),
                     table: ({ children }) => (
                       <div className="relative group/table overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 my-4 bg-white dark:bg-transparent">
                          <button 
@@ -281,6 +345,9 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     p: ({ children }) => {
                       const content = React.Children.toArray(children).join("");
                       if (content.includes(":::question")) {
+                        return null;
+                      }
+                      if (content.includes(":::flashcard")) {
                         return null;
                       }
                       if (content.includes(":::checklist")) {
@@ -311,7 +378,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     }
                   }}
                 >
-                  {cleanContent.replace(/!\[.*?\]\((?:https?:\/\/)?[^\s)]+\)|!\[.*?\]\s*\(image:[^\s)]+\)/g, "").trim()}
+                  {cleanContent2.replace(/!\[.*?\]\((?:https?:\/\/)?[^\s)]+\)|!\[.*?\]\s*\(image:[^\s)]+\)/g, "").trim()}
                 </ReactMarkdown>
               </div>
 
@@ -340,11 +407,60 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 </motion.button>
               )}
 
-              {/* Streaming Indicator (Live Typing Orb) */}
+              {/* Flashcards summary card */}
+              {isAI && parsedFlashcards.length > 0 && !message.isStreaming && (
+                <motion.button
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => setShowFlashcards(true)}
+                  className="mt-3 w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all active:scale-[0.99] bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/15"
+                >
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-amber-100 dark:bg-amber-500/20">
+                    <BookOpen size={16} weight="bold" className="text-amber-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                      {parsedFlashcards.length} Flashcard{parsedFlashcards.length > 1 ? "s" : ""} Generated
+                    </p>
+                    <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                      Tap card to flip, save to spaced repetition
+                    </p>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-300">
+                    View
+                  </div>
+                </motion.button>
+              )}
+
+              {/* Resources icon */}
+              {isAI && parsedResources.length > 0 && !message.isStreaming && (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  onClick={() => setShowResources(true)}
+                  className={cn(
+                    "mt-3 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all border",
+                    isDark
+                      ? "border-white/10 text-gray-400 hover:bg-white/5"
+                      : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                  )}
+                >
+                  <LinkIcon size={14} />
+                  {parsedResources.length} Resource{parsedResources.length > 1 ? "s" : ""}
+                </motion.button>
+              )}
+
+              {/* Streaming Indicator - subtle wave dots */}
               {message.isStreaming && (
-                <div className="flex items-center gap-2 mt-4 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 w-fit">
-                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-                   <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">MedOneX Expert is thinking...</span>
+                <div className="flex items-center gap-2.5 mt-3">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full bg-indigo-400 dark:bg-indigo-500"
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.12, ease: "easeInOut" }}
+                    />
+                  ))}
                 </div>
               )}
             </motion.div>
@@ -352,43 +468,31 @@ const DrQMessageInner: React.FC<MessageProps> = ({
             {/* AI Message Actions */}
             {isAI && !message.isStreaming && (
               <div className={cn(
-                "flex items-center gap-1 p-1 rounded-xl z-10",
+                "flex items-center gap-0.5 z-10",
                 variant === "flat" 
-                  ? "mt-2 border border-slate-200 dark:border-white/10 bg-transparent w-fit" 
-                  : "absolute -bottom-5 right-4 bg-white dark:bg-[#1a1830] border border-slate-200 dark:border-white/10 shadow-lg opacity-0 group-hover/msg:opacity-100"
+                  ? "mt-5"
+                  : "absolute -bottom-5 right-4 opacity-0 group-hover/msg:opacity-100"
               )}>
                 <button 
                   onClick={() => onReaction(message.id, message.reaction === "like" ? null : "like")}
-                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "like" ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5")}
+                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "like" ? "text-emerald-500" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white")}
                 >
                   <HandThumbUpIcon className={cn("w-4 h-4", message.reaction === "like" ? "text-emerald-500" : "")} />
                 </button>
                 <button 
                   onClick={() => onReaction(message.id, message.reaction === "dislike" ? null : "dislike")}
-                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "dislike" ? "text-rose-500 bg-rose-50 dark:bg-rose-500/10" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5")}
+                  className={cn("p-1.5 rounded-lg transition-all", message.reaction === "dislike" ? "text-rose-500" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white")}
                 >
                   <HandThumbDownIcon className={cn("w-4 h-4", message.reaction === "dislike" ? "text-rose-500" : "")} />
                 </button>
                 <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
-                <button onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Saving to Flashcards...',
-                      success: 'Successfully added to spaced repetition!',
-                      error: 'Failed to save flashcard.',
-                    }
-                  );
-                }} className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all" title="Save to Flashcards">
-                  <BoltIcon className="w-4 h-4" />
-                </button>
-                <button onClick={handleCopy} aria-label="Copy message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                <button onClick={handleCopy} aria-label="Copy message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white transition-all">
                   {copying ? <CheckIcon className="w-4 h-4 text-emerald-500" /> : <ClipboardIcon className="w-4 h-4" />}
                 </button>
-                <button onClick={onRegenerate} aria-label="Regenerate response" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                <button onClick={onRegenerate} aria-label="Regenerate response" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white transition-all">
                   <ArrowPathIcon className="w-4 h-4" />
                 </button>
-                <button onClick={() => onShare?.(message.content)} aria-label="Share message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                <button onClick={() => onShare?.(message.content)} aria-label="Share message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white transition-all">
                   <ShareIcon className="w-4 h-4" />
                 </button>
               </div>
@@ -401,6 +505,18 @@ const DrQMessageInner: React.FC<MessageProps> = ({
         isOpen={showQuestions}
         onClose={() => setShowQuestions(false)}
         questions={parsedQuestions}
+        isDark={isDark}
+      />
+      <FlashcardsBottomSheet
+        isOpen={showFlashcards}
+        onClose={() => setShowFlashcards(false)}
+        flashcards={parsedFlashcards}
+        isDark={isDark}
+      />
+      <ResourcesBottomSheet
+        isOpen={showResources}
+        onClose={() => setShowResources(false)}
+        resources={parsedResources}
         isDark={isDark}
       />
     </div>

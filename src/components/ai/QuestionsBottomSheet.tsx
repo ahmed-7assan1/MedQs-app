@@ -143,7 +143,7 @@ export function QuestionsBottomSheet({ isOpen, onClose, questions, isDark }: Que
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[10020]"
+          className="fixed inset-0 z-[10030]"
           onClick={onClose}
         >
           {/* Overlay */}

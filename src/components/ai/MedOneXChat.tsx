@@ -1029,7 +1029,7 @@ export function MedOneXChat() {
               </motion.div>
             </motion.div>
           ) : (
-            <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 pb-8 space-y-1">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-8 space-y-1">
               {messages.map((m, idx) => (
                 <motion.div
                   key={m.id}
@@ -1239,11 +1239,11 @@ export function MedOneXChat() {
       {/* Desktop inline chat input (nav handles mobile) */}
       <div className="hidden md:block flex-shrink-0 relative">
         <div className={cn(
-          "absolute inset-0 pointer-events-none",
+          "absolute inset-0 rounded-t-3xl pointer-events-none",
           isDark
             ? "bg-gradient-to-t from-black via-black/80 to-transparent"
             : "bg-gradient-to-t from-white via-white/80 to-transparent"
-        )} style={{ top: "-48px" }} />
+        )} />
         <div className="pt-4 pb-3 flex justify-center">
           <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
             <div
@@ -1435,7 +1435,7 @@ export function MedOneXChat() {
       >
         {/* Gradient backdrop */}
         <div className={cn(
-          "absolute inset-0 pointer-events-none",
+          "absolute inset-0 rounded-t-2xl pointer-events-none",
           isDark
             ? "bg-gradient-to-t from-black via-black/80 to-transparent"
             : "bg-gradient-to-t from-white via-white/80 to-transparent"

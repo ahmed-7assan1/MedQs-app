@@ -683,7 +683,7 @@ export function useDrQChat() {
     }, 1500);
   }, [threads]);
 
-  // Load syllabus context — user-specific modules
+  // Load syllabus context — user-specific modules (compressed, minimal tokens)
   useEffect(() => {
     const loadSyllabus = async () => {
       try {
@@ -691,20 +691,12 @@ export function useDrQChat() {
         if (res.ok) {
           const data = await res.json();
           if (data?.modules && Array.isArray(data.modules) && data.modules.length > 0) {
-            let ctx = "Your enrolled modules on MedOneX:\n";
+            let ctx = "[YOUR CONTENT - MedOneX]\n";
             data.modules.forEach((mod: any) => {
-              ctx += `- Module: ${mod.name}\n`;
-              if (Array.isArray(mod.subjects)) {
-                mod.subjects.forEach((sub: any) => {
-                  ctx += `  * Subject: ${sub.name}\n`;
-                  if (Array.isArray(sub.lectures)) {
-                    sub.lectures.forEach((lec: any) => {
-                      ctx += `    - Lecture: ${lec.title}\n`;
-                    });
-                  }
-                });
-              }
+              const subs = Array.isArray(mod.subjects) ? mod.subjects.map((s: any) => s.name).join(", ") : "";
+              ctx += `◉ ${mod.name}${subs ? ` → ${subs}` : ""}\n`;
             });
+            ctx += "\nIf the user asks about a specific lecture, include [LECTURE:full_lecture_name] in your response and the system will inject its details.\n";
             setSyllabusContext(ctx);
             return;
           }
@@ -712,7 +704,6 @@ export function useDrQChat() {
       } catch (err) {
         console.warn("Failed to load user syllabus for DrQ", err);
       }
-      // Fallback: minimal context
       setSyllabusContext("");
     };
     loadSyllabus();
@@ -1163,6 +1154,8 @@ FORMATS:
 - Images: Include ![short English description](image:the-image-topic) — our system will auto-fetch a real image
 - Web search available for recent info.
 
+ENGLISH-ONLY RULE: All :::question and :::flashcard content MUST be in English only. No Arabic or other languages allowed inside these blocks.
+
 ${systemPrompt}`;
 
           systemPrompt += `\n\nUser: ${userName}, ${userFaculty} student at ${userUni}. Greet them by name.`;
@@ -1507,6 +1500,36 @@ ${systemPrompt}`;
           );
           return updated;
         });
+
+        // ─── Lecture Lookup: resolve [LECTURE:name] markers ───
+        if (finalContentForStorage && finalContentForStorage.includes("[LECTURE:")) {
+          const lectureMatch = finalContentForStorage.match(/\[LECTURE:([^\]]+)\]/);
+          if (lectureMatch) {
+            const lectureName = lectureMatch[1].trim();
+            try {
+              const lecRes = await fetch(`/api/v1/lectures/search?q=${encodeURIComponent(lectureName)}`);
+              if (lecRes.ok) {
+                const lecData = await lecRes.json();
+                const lectureContent = lecData?.content || lecData?.description || `Details for "${lectureName}"`;
+                const updatedContent = finalContentForStorage.replace(
+                  /\[LECTURE:[^\]]+\]/,
+                  `\n\n**📖 Lecture: ${lectureName}**\n${lectureContent}\n`
+                );
+                if (updatedContent !== finalContentForStorage) {
+                  setThreads(prev => {
+                    const updated = prev.map(t => t.id === threadId
+                      ? { ...t, messages: t.messages.map(m => m.id === aiMsgId ? { ...m, content: updatedContent } : m) }
+                      : t
+                    );
+                    return updated;
+                  });
+                }
+              }
+            } catch (e) {
+              console.warn("Lecture lookup failed", e);
+            }
+          }
+        }
 
         // ─── Cache the response ───
         if (finalContent && !replyToId && !webSearch) {
