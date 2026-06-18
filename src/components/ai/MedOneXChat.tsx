@@ -19,6 +19,7 @@ import { DrQMessage } from "./DrQMessage";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import { InstallPWA } from "./InstallPWA";
+import { PWAInstallModal } from "./PWAInstallModal";
 import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
@@ -557,7 +558,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10010]"
+            className="fixed inset-0 z-[10010] bg-black/20 backdrop-blur-sm"
             onClick={() => setShowSidebar(false)}
           >
             <motion.div
@@ -1523,6 +1524,8 @@ export function MedOneXChat() {
           </div>
         </div>
       </motion.div>
+
+      <PWAInstallModal isDark={isDark} />
     </div>
   );
 }
