@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X, ArrowLeft, ArrowRight, FloppyDisk, BookOpen, Check, Clock } from "@phosphor-icons/react";
 import toast from "react-hot-toast";
-import { useSession } from "next-auth/react";
 
 export interface FlashcardData {
   front: string;
@@ -36,7 +35,6 @@ export function FlashcardsBottomSheet({ isOpen, onClose, flashcards, isDark }: F
   const [savingSet, setSavingSet] = useState(false);
   const [saved, setSaved] = useState<Set<number>>(new Set());
   const [setSavedState, setSetSavedState] = useState(false);
-  const { data: session } = useSession();
 
   const current = flashcards[currentIndex];
 
@@ -68,10 +66,6 @@ export function FlashcardsBottomSheet({ isOpen, onClose, flashcards, isDark }: F
   }, [current, currentIndex, saved]);
 
   const handleSaveSet = useCallback(async () => {
-    if (!session?.user) {
-      toast.error("Please sign in to save flashcard sets");
-      return;
-    }
     setSavingSet(true);
     try {
       const title = `Flashcard Set (${flashcards.length} cards)`;
@@ -80,6 +74,10 @@ export function FlashcardsBottomSheet({ isOpen, onClose, flashcards, isDark }: F
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, flashcards, shareCode: crypto.randomUUID().slice(0, 8) }),
       });
+      if (res.status === 401) {
+        toast.error("Please sign in to save flashcard sets");
+        return;
+      }
       if (!res.ok) throw new Error("Failed to save set");
       setSetSavedState(true);
       toast.success("Flashcard set saved!");
@@ -87,7 +85,7 @@ export function FlashcardsBottomSheet({ isOpen, onClose, flashcards, isDark }: F
       toast.error("Failed to save flashcard set");
     }
     setSavingSet(false);
-  }, [flashcards, session]);
+  }, [flashcards]);
 
   return (
     <AnimatePresence>
