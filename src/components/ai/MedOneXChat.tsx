@@ -18,6 +18,7 @@ import { checkProviderRate } from "@/lib/rate-limits";
 import { DrQMessage } from "./DrQMessage";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
+import { InstallPWA } from "./InstallPWA";
 import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
@@ -545,6 +546,16 @@ export function MedOneXChat() {
                 isDark ? "bg-[#050505]/80 border-r border-white/10" : "bg-white/80 border-r border-gray-200"
               )}
             >
+              {/* Extending top edge */}
+              <div className={cn(
+                "absolute top-0 right-0 h-px pointer-events-none",
+                isDark ? "bg-gradient-to-r from-white/10 to-transparent" : "bg-gradient-to-r from-gray-200 to-transparent"
+              )} style={{ width: "20vw" }} />
+              {/* Extending bottom edge */}
+              <div className={cn(
+                "absolute bottom-0 right-0 h-px pointer-events-none",
+                isDark ? "bg-gradient-to-r from-white/10 to-transparent" : "bg-gradient-to-r from-gray-200 to-transparent"
+              )} style={{ width: "20vw" }} />
               {/* Sidebar Header */}
               <div className={cn("flex items-center justify-between px-4 py-3 border-b", isDark ? "border-white/10" : "border-gray-200")}>
                 <div className="flex items-center gap-2.5">
@@ -684,6 +695,7 @@ export function MedOneXChat() {
                   <Cog6ToothIcon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
                   Settings
                 </button>
+                <InstallPWA isDark={isDark} />
               </div>
             </motion.div>
           </motion.div>

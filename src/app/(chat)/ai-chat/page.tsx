@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "AI Chat Tutor",
   description: "Chat with MedOneX AI tutor. Get instant answers to medical questions, clarify concepts, and enhance your learning with AI-powered medical assistance.",
+  manifest: "/ai-chat/manifest",
 };
 
 export default async function AIChatPage() {
