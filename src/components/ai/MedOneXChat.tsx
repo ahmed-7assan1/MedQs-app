@@ -165,6 +165,20 @@ export function MedOneXChat() {
     }
   }, [settings.byokKeys, settings.activeProvider, messages.length]);
 
+  const scrollLastToTop = () => {
+    requestAnimationFrame(() => {
+      const el = scrollContainerRef.current;
+      if (!el) return;
+      const messages = el.querySelectorAll<HTMLElement>("[data-message-id]");
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg) {
+        lastMsg.scrollIntoView({ block: "start", behavior: "instant" });
+      } else {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
+  };
+
   const handleSend = () => {
     if ((!input.trim() && files.length === 0) || loading || files.some(f => f.loading)) return;
     const apiKey = settings.byokKeys[settings.activeProvider];
@@ -176,6 +190,7 @@ export function MedOneXChat() {
     setInput("");
     setFiles([]);
     setReplyContext(null);
+    scrollLastToTop();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -912,7 +927,7 @@ export function MedOneXChat() {
               >
                 {logoUrl ? (
                   <div
-                    className="h-20 w-20 bg-gradient-to-br from-violet-500 to-fuchsia-500"
+                    className={cn("h-20 w-20 bg-gradient-to-br", isDark ? "from-blue-400 to-blue-600" : "from-blue-700 to-blue-950")}
                     style={{
                       maskImage: `url(${logoUrl})`,
                       maskSize: 'contain',
@@ -925,7 +940,7 @@ export function MedOneXChat() {
                     }}
                   />
                 ) : (
-                  <div className="h-20 w-20 rounded-2xl flex items-center justify-center text-lg font-bold bg-gradient-to-br from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+                  <div className={cn("h-20 w-20 rounded-2xl flex items-center justify-center text-lg font-bold bg-gradient-to-br bg-clip-text text-transparent", isDark ? "from-blue-400 to-blue-600" : "from-blue-700 to-blue-950")}>
                     {siteName?.charAt(0) || "M"}
                   </div>
                 )}
@@ -934,7 +949,7 @@ export function MedOneXChat() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-2xl font-bold mb-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent animate-gradient"
+                className={cn("text-xl font-bold mb-1 bg-gradient-to-r bg-clip-text text-transparent animate-gradient", isDark ? "from-blue-400 to-blue-600" : "from-blue-700 to-blue-950")}
               >
                 MedOneX Expert
               </motion.h1>
@@ -979,6 +994,7 @@ export function MedOneXChat() {
               {messages.map((m, idx) => (
                 <motion.div
                   key={m.id}
+                  data-message-id={m.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: idx < 5 ? idx * 0.03 : 0 }}
@@ -1377,7 +1393,7 @@ export function MedOneXChat() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  if (input.trim()) { sendMessage(input); setInput(""); }
+                  if (input.trim()) { sendMessage(input); setInput(""); scrollLastToTop(); }
                 }
               }}
               onFocus={() => setMobileFocused(true)}
@@ -1430,7 +1446,7 @@ export function MedOneXChat() {
                 </button>
               ) : (
                 <button
-                  onClick={() => { if (input.trim()) { sendMessage(input); setInput(""); } }}
+                  onClick={() => { if (input.trim()) { sendMessage(input); setInput(""); scrollLastToTop(); } }}
                   disabled={!input.trim()}
                   className={cn(
                     "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
