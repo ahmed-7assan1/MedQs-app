@@ -8,7 +8,7 @@ import {
   MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
   Check, GlobeHemisphereWest, Sparkle, Sun, Moon, Brain,
   WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft,
-  ShieldCheck, ClockCountdown, ChartBar, Robot, Book
+  ShieldCheck, ClockCountdown, ChartBar, Robot, Book, FileText
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,9 @@ import { SharedQuizClient } from "@/app/quiz/shared/[shareCode]/SharedQuizClient
 import { CustomAgentCreatePanel } from "./CustomAgentCreatePanel";
 import { CustomAgentGallery } from "./CustomAgentGallery";
 import { CustomAgentChat } from "./CustomAgentChat";
+import { QuestionsBottomSheet, type QuestionData } from "./QuestionsBottomSheet";
+import { FlashcardsBottomSheet, type FlashcardData } from "./FlashcardsBottomSheet";
+import { ResourcesBottomSheet, type ResourceItem } from "./ResourcesBottomSheet";
 import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
@@ -99,6 +102,9 @@ export function MedOneXChat() {
   const [showAgentGallery, setShowAgentGallery] = useState(false);
   const [activeAgent, setActiveAgent] = useState<any>(null);
   const [showLibraryQuiz, setShowLibraryQuiz] = useState<any>(null);
+  const [showGlobalQuestions, setShowGlobalQuestions] = useState(false);
+  const [showGlobalFlashcards, setShowGlobalFlashcards] = useState(false);
+  const [showGlobalResources, setShowGlobalResources] = useState(false);
 
   // Prevent main content scroll when sidebar is open (direct DOM, no re-render)
   useEffect(() => {
@@ -123,6 +129,65 @@ export function MedOneXChat() {
 
   // ─── Local input state ───
   const [input, setInput] = useState("");
+
+  // ─── Aggregate questions/flashcards/resources from all messages ───
+  const isEnglishOnly = (text: string) => !/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(text);
+  const globalQuestions = React.useMemo(() => {
+    const qs: QuestionData[] = [];
+    if (!messages) return qs;
+    const regex = /:::question\s*({[\s\S]*?})\s*:::/g;
+    for (const msg of messages) {
+      if (msg.role !== "assistant") continue;
+      let m;
+      while ((m = regex.exec(msg.content)) !== null) {
+        try {
+          const raw = JSON.parse(m[1]);
+          const qText = raw.question || raw.body || "";
+          if (!isEnglishOnly(qText)) continue;
+          qs.push({
+            question: qText,
+            options: raw.options || (raw.choices ? raw.choices.map((c: any) => c.text || c) : []),
+            answer: raw.answer || "",
+            explanation: raw.explanation || "",
+          });
+        } catch {}
+      }
+    }
+    return qs;
+  }, [messages]);
+  const globalFlashcards = React.useMemo(() => {
+    const fs: FlashcardData[] = [];
+    if (!messages) return fs;
+    const regex = /:::flashcard\s*({[\s\S]*?})\s*:::/g;
+    for (const msg of messages) {
+      if (msg.role !== "assistant") continue;
+      let m;
+      while ((m = regex.exec(msg.content)) !== null) {
+        try {
+          const raw = JSON.parse(m[1]);
+          if (!isEnglishOnly(raw.front || "") || !isEnglishOnly(raw.back || "")) continue;
+          fs.push({ front: raw.front || "", back: raw.back || "" });
+        } catch {}
+      }
+    }
+    return fs;
+  }, [messages]);
+  const globalResources = React.useMemo(() => {
+    const items: ResourceItem[] = [];
+    if (!messages) return items;
+    const urlRegex = /https?:\/\/[^\s()<>"\]]+/g;
+    for (const msg of messages) {
+      if (msg.role !== "assistant") continue;
+      let m;
+      while ((m = urlRegex.exec(msg.content)) !== null) {
+        const url = m[0].replace(/[.,;:!?]+$/, "");
+        const title = url.length > 60 ? url.substring(0, 60) + "..." : url;
+        if (!items.some(i => i.url === url)) items.push({ url, title });
+      }
+    }
+    return items;
+  }, [messages]);
+  // ─── End aggregation ───
 
   // Fetch user modules when the modal opens
   useEffect(() => {
@@ -1603,6 +1668,72 @@ export function MedOneXChat() {
         </div>
       </motion.div>
 
+      {/* ─── Floating toolbar for questions/flashcards/resources ─── */}
+      {(globalQuestions.length > 0 || globalFlashcards.length > 0 || globalResources.length > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-20 right-5 z-[10002] md:bottom-16 flex flex-col gap-1.5"
+        >
+          {globalQuestions.length > 0 && (
+            <button
+              onClick={() => setShowGlobalQuestions(true)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg backdrop-blur-md transition-all active:scale-90 text-xs font-bold",
+                isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
+              )}
+            >
+              <FileText size={14} weight="bold" />
+              {globalQuestions.length}
+            </button>
+          )}
+          {globalFlashcards.length > 0 && (
+            <button
+              onClick={() => setShowGlobalFlashcards(true)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg backdrop-blur-md transition-all active:scale-90 text-xs font-bold",
+                isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
+              )}
+            >
+              <BookOpen size={14} weight="bold" />
+              {globalFlashcards.length}
+            </button>
+          )}
+          {globalResources.length > 0 && (
+            <button
+              onClick={() => setShowGlobalResources(true)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg backdrop-blur-md transition-all active:scale-90 text-xs font-bold",
+                isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
+              )}
+            >
+              <GlobeHemisphereWest size={14} weight="bold" />
+              {globalResources.length}
+            </button>
+          )}
+        </motion.div>
+      )}
+
+      {/* ─── Global Bottom Sheets (from floating toolbar) ─── */}
+      <QuestionsBottomSheet
+        isOpen={showGlobalQuestions}
+        onClose={() => setShowGlobalQuestions(false)}
+        questions={globalQuestions}
+        isDark={isDark}
+      />
+      <FlashcardsBottomSheet
+        isOpen={showGlobalFlashcards}
+        onClose={() => setShowGlobalFlashcards(false)}
+        flashcards={globalFlashcards}
+        isDark={isDark}
+      />
+      <ResourcesBottomSheet
+        isOpen={showGlobalResources}
+        onClose={() => setShowGlobalResources(false)}
+        resources={globalResources}
+        isDark={isDark}
+      />
+
       <PWAInstallModal isDark={isDark} />
     </div>
   );
@@ -1702,7 +1833,6 @@ function SuperExpertResults({ steps, isDark }: { steps: SuperExpertStep[]; isDar
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X, ArrowLeft, ArrowRight, FloppyDisk, BookOpen, Check, Clock } from "@phosphor-icons/react";
 import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export interface FlashcardData {
   front: string;
@@ -32,7 +33,10 @@ export function FlashcardsBottomSheet({ isOpen, onClose, flashcards, isDark }: F
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savingSet, setSavingSet] = useState(false);
   const [saved, setSaved] = useState<Set<number>>(new Set());
+  const [setSavedState, setSetSavedState] = useState(false);
+  const { data: session } = useSession();
 
   const current = flashcards[currentIndex];
 
@@ -62,6 +66,28 @@ export function FlashcardsBottomSheet({ isOpen, onClose, flashcards, isDark }: F
     }
     setSaving(false);
   }, [current, currentIndex, saved]);
+
+  const handleSaveSet = useCallback(async () => {
+    if (!session?.user) {
+      toast.error("Please sign in to save flashcard sets");
+      return;
+    }
+    setSavingSet(true);
+    try {
+      const title = `Flashcard Set (${flashcards.length} cards)`;
+      const res = await fetch("/api/v1/ai/save-flashcard-set", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, flashcards, shareCode: crypto.randomUUID().slice(0, 8) }),
+      });
+      if (!res.ok) throw new Error("Failed to save set");
+      setSetSavedState(true);
+      toast.success("Flashcard set saved!");
+    } catch {
+      toast.error("Failed to save flashcard set");
+    }
+    setSavingSet(false);
+  }, [flashcards, session]);
 
   return (
     <AnimatePresence>
@@ -165,6 +191,19 @@ export function FlashcardsBottomSheet({ isOpen, onClose, flashcards, isDark }: F
               </button>
 
               <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSaveSet}
+                  disabled={savingSet || setSavedState}
+                  className={cn(
+                    "px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5",
+                    setSavedState
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      : isDark ? "bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30" : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                  )}
+                >
+                  <FloppyDisk size={14} weight={setSavedState ? "fill" : "regular"} />
+                  {setSavedState ? "Saved Set" : savingSet ? "Saving..." : "Save Set"}
+                </button>
                 <button
                   onClick={handleSave}
                   disabled={saving || saved.has(currentIndex)}

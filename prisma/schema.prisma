@@ -2282,6 +2282,41 @@ model QuizComment {
   @@index([quizId])
 }
 
+model SavedFlashcardSet {
+  id         String   @id @default(uuid())
+  userId     String
+  title      String
+  flashcards Json
+  shareCode  String   @unique
+  published  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([shareCode])
+}
+
+model FlashcardSetRating {
+  id         String            @id @default(uuid())
+  flashcardSetId String
+  userId     String
+  rating     Int
+  createdAt  DateTime          @default(now())
+
+  @@unique([flashcardSetId, userId])
+  @@index([flashcardSetId])
+}
+
+model FlashcardSetComment {
+  id         String            @id @default(uuid())
+  flashcardSetId String
+  userId     String
+  text       String
+  createdAt  DateTime          @default(now())
+
+  @@index([flashcardSetId])
+}
+
 model CustomAgent {
   id           String   @id @default(uuid())
   creatorId    String
