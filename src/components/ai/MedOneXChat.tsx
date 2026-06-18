@@ -1237,18 +1237,25 @@ export function MedOneXChat() {
       </main>
 
       {/* Desktop inline chat input (nav handles mobile) */}
-      <div className="hidden md:flex flex-shrink-0 pt-4 pb-3 justify-center">
-        <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
-          <div
-            className={cn(
-              "rounded-full border transition-all duration-200 shadow-sm",
-              inputFocused
-                ? isDark ? "border-gray-500" : "border-gray-300"
-                : isDark ? "border-white/10" : "border-gray-200/80",
-              isDark ? "bg-[#0d0d12]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
-            )}
-          >
-            <div className="flex items-center gap-0.5 px-1.5 py-1">
+      <div className="hidden md:block flex-shrink-0 relative">
+        <div className={cn(
+          "absolute inset-0 pointer-events-none",
+          isDark
+            ? "bg-gradient-to-t from-black via-black/80 to-transparent"
+            : "bg-gradient-to-t from-white via-white/80 to-transparent"
+        )} style={{ top: "-48px" }} />
+        <div className="pt-4 pb-3 flex justify-center">
+          <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
+            <div
+              className={cn(
+                "rounded-full border transition-all duration-200 shadow-sm",
+                inputFocused
+                  ? isDark ? "border-gray-500" : "border-gray-300"
+                  : isDark ? "border-white/10" : "border-gray-200/80",
+                isDark ? "bg-[#0d0d12]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
+              )}
+            >
+              <div className="flex items-center gap-0.5 px-1.5 py-1">
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
@@ -1317,11 +1324,12 @@ export function MedOneXChat() {
                   </button>
                 )}
               </div>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center justify-between mt-1.5 px-1">
-            <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>MedOneX Expert</span>
-            <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{limits.used}/{limits.limit}</span>
+            <div className="flex items-center justify-between mt-1.5 px-1">
+              <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>MedOneX Expert</span>
+              <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{limits.used}/{limits.limit}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1425,6 +1433,13 @@ export function MedOneXChat() {
         style={{ willChange: "transform" }}
         className="md:hidden fixed bottom-0 left-0 right-0 z-[10003] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none"
       >
+        {/* Gradient backdrop */}
+        <div className={cn(
+          "absolute inset-0 pointer-events-none",
+          isDark
+            ? "bg-gradient-to-t from-black via-black/80 to-transparent"
+            : "bg-gradient-to-t from-white via-white/80 to-transparent"
+        )} />
         <div className="px-2 pb-1 pointer-events-auto">
           <div className={cn(
             "flex items-end gap-1 px-2 py-2 mx-2 mb-1 rounded-2xl border transition-colors shadow-lg",
