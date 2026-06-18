@@ -8,7 +8,7 @@ import {
   MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
   Check, GlobeHemisphereWest, Sparkle, Sun, Moon, Brain,
   WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft,
-  ShieldCheck, ClockCountdown, ChartBar
+  ShieldCheck, ClockCountdown, ChartBar, Robot, Book
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -20,12 +20,19 @@ import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
 import { InstallPWA } from "./InstallPWA";
 import { PWAInstallModal } from "./PWAInstallModal";
+import { SavedContentPanel } from "./SavedContentPanel";
+import { LibraryContentPanel } from "./LibraryContentPanel";
+import { SharedQuizClient } from "@/app/quiz/shared/[shareCode]/SharedQuizClient";
+import { CustomAgentCreatePanel } from "./CustomAgentCreatePanel";
+import { CustomAgentGallery } from "./CustomAgentGallery";
+import { CustomAgentChat } from "./CustomAgentChat";
 import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import {
   Bars3Icon, HomeIcon, BookOpenIcon, UserGroupIcon,
   ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon, ChevronDoubleRightIcon, ChevronDownIcon,
+  BookmarkIcon as BookmarkIconSolid,
 } from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
 
@@ -86,6 +93,12 @@ export function MedOneXChat() {
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [showAgentCreate, setShowAgentCreate] = useState(false);
+  const [showAgentGallery, setShowAgentGallery] = useState(false);
+  const [activeAgent, setActiveAgent] = useState<any>(null);
+  const [showLibraryQuiz, setShowLibraryQuiz] = useState<any>(null);
 
   // Prevent main content scroll when sidebar is open (direct DOM, no re-render)
   useEffect(() => {
@@ -613,19 +626,40 @@ export function MedOneXChat() {
                       { icon: BookOpenIcon, label: "Modules", href: "/modules" },
                       { icon: UserGroupIcon, label: "Social", href: "/social" },
                       { icon: ClipboardDocumentListIcon, label: "Quizzes", href: "/quiz" },
-                    ].map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setShowSidebar(false)}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                          isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
-                        )}
-                      >
-                        <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
-                        {item.label}
-                      </Link>
+                      { icon: BookmarkIconSolid, label: "Saved", href: null, action: () => setShowSaved(true) },
+                      { icon: null, label: "Library", href: null, action: () => setShowLibrary(true), customIcon: Book },
+                      { icon: null, label: "Custom MedOneX", href: null, action: () => setShowAgentGallery(true), customIcon: Robot },
+                    ].map((item: any) => (
+                      item.href ? (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onClick={() => setShowSidebar(false)}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                            isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
+                          )}
+                        >
+                          <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
+                          {item.label}
+                        </Link>
+                      ) : (
+                        <button
+                          key={item.label}
+                          onClick={() => { setShowSidebar(false); item.action(); }}
+                          className={cn(
+                            "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                            isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
+                          )}
+                        >
+                          {item.customIcon ? (
+                            <item.customIcon size={20} weight="bold" className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
+                          ) : (
+                            <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
+                          )}
+                          {item.label}
+                        </button>
+                      )
                     ))}
                   </div>
                 </div>
@@ -1336,6 +1370,35 @@ export function MedOneXChat() {
       </motion.div>
 
       <DrQConfigPanel isOpen={showConfig} settings={settings} onUpdate={updateSettings} onClose={() => setShowConfig(false)} />
+      <SavedContentPanel isOpen={showSaved} onClose={() => setShowSaved(false)} isDark={isDark} />
+      <LibraryContentPanel isOpen={showLibrary} onClose={() => setShowLibrary(false)} isDark={isDark} onOpenQuiz={(quiz) => setShowLibraryQuiz(quiz)} />
+      <CustomAgentCreatePanel isOpen={showAgentCreate} onClose={() => setShowAgentCreate(false)} isDark={isDark} onSaved={() => {}} />
+      <CustomAgentGallery isOpen={showAgentGallery} onClose={() => setShowAgentGallery(false)} isDark={isDark} onSelectAgent={(agent) => setActiveAgent(agent)} />
+      <AnimatePresence>
+        {activeAgent && (
+          <CustomAgentChat agent={activeAgent} onClose={() => setActiveAgent(null)} isDark={isDark} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showLibraryQuiz && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10030] bg-[#050505] overflow-y-auto"
+          >
+            <div className="sticky top-0 z-10 flex justify-end p-4">
+              <button
+                onClick={() => setShowLibraryQuiz(null)}
+                className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-all"
+              >
+                <X size={16} weight="bold" />
+              </button>
+            </div>
+            <SharedQuizClient quiz={showLibraryQuiz} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── Provider Picker — bottom sheet on mobile (Img 4), modal on desktop ─── */}
       <AnimatePresence>

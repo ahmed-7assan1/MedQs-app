@@ -2233,3 +2233,91 @@ model AiResponseCache {
   @@index([questionHash])
   @@index([hitCount])
 }
+
+model SavedQuiz {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  questions   Json
+  shareCode   String   @unique
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([shareCode])
+}
+
+model SharedQuizAttempt {
+  id          String   @id @default(uuid())
+  quizId      String
+  userId      String?
+  guestName   String?
+  score       Int?
+  total       Int?
+  answers     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([quizId])
+}
+
+model QuizRating {
+  id        String   @id @default(uuid())
+  quizId    String
+  userId    String
+  rating    Int
+  createdAt DateTime @default(now())
+
+  @@unique([quizId, userId])
+  @@index([quizId])
+}
+
+model QuizComment {
+  id        String   @id @default(uuid())
+  quizId    String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([quizId])
+}
+
+model CustomAgent {
+  id           String   @id @default(uuid())
+  creatorId    String
+  name         String
+  description  String?
+  instructions String
+  files        Json?
+  links        Json?
+  isPublished  Boolean  @default(false)
+  usageCount   Int      @default(0)
+  avgRating    Float    @default(0)
+  ratingCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([creatorId])
+  @@index([isPublished])
+}
+
+model CustomAgentRating {
+  id        String   @id @default(uuid())
+  agentId   String
+  userId    String
+  rating    Int
+  createdAt DateTime @default(now())
+
+  @@unique([agentId, userId])
+  @@index([agentId])
+}
+
+model CustomAgentComment {
+  id        String   @id @default(uuid())
+  agentId   String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([agentId])
+}

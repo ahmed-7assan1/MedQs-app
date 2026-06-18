@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { X, Check, Download, ArrowLeft, ArrowRight, FileText } from "@phosphor-icons/react";
+import { X, Check, Download, ArrowLeft, ArrowRight, FileText, BookmarkSimple } from "@phosphor-icons/react";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import toast from "react-hot-toast";
@@ -121,6 +121,8 @@ function exportToWord(questions: QuestionData[]) {
 
 export function QuestionsBottomSheet({ isOpen, onClose, questions, isDark }: QuestionsBottomSheetProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const current = questions[currentIndex];
 
@@ -133,6 +135,27 @@ export function QuestionsBottomSheet({ isOpen, onClose, questions, isDark }: Que
 
   const handleExport = () => {
     exportToWord(questions);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/v1/ai/save-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: questions[0]?.question?.slice(0, 60) || "Untitled Quiz",
+          questions,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      setSaved(true);
+      toast.success("Quiz saved! Find it in Saved → Quizzes");
+    } catch {
+      toast.error("Failed to save quiz");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -191,6 +214,19 @@ export function QuestionsBottomSheet({ isOpen, onClose, questions, isDark }: Que
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleSave}
+                  disabled={saving || saved}
+                  className={cn(
+                    "p-2 rounded-xl transition-colors",
+                    saved
+                      ? "text-emerald-500"
+                      : isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100"
+                  )}
+                  title={saved ? "Saved" : "Save Quiz"}
+                >
+                  <BookmarkSimple size={18} weight={saved ? "fill" : "regular"} />
+                </button>
                 <button
                   onClick={handleExport}
                   className={cn(
