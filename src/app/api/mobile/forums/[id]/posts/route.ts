@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 
 // GET /api/mobile/forums/[id]/posts?page=1&limit=20
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string | undefined;
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string | undefined;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

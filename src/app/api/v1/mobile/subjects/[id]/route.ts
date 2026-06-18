@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { decode } from "next-auth/jwt";
+import { verifyMobileToken } from '@/lib/supabase/auth-helpers';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -9,9 +9,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
-      const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "";
-      try {
-        const decoded = await decode({ token, secret, salt: "authjs.session-token" });
+            try {
+        const decoded = await verifyMobileToken(token);
         if (decoded?.id) {
           userId = decoded.id;
         }

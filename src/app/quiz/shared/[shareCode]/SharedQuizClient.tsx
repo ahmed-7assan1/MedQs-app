@@ -46,6 +46,19 @@ export function SharedQuizClient({ quiz }: { quiz: QuizData }) {
       .catch(() => {});
   }, []);
 
+  const q = quiz.questions[currentIdx];
+
+  const correctAnswerText = useMemo(() => {
+    if (!q) return "";
+    if (q.options && q.options.length > 0) {
+      const letterIndex = q.answer?.charCodeAt(0) - 65;
+      if (letterIndex >= 0 && letterIndex < q.options.length) {
+        return q.options[letterIndex];
+      }
+    }
+    return q.answer || "";
+  }, [q]);
+
   if (!authenticated) {
     return (
       <div className={cn("min-h-screen flex items-center justify-center", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
@@ -68,19 +81,6 @@ export function SharedQuizClient({ quiz }: { quiz: QuizData }) {
       </div>
     );
   }
-
-  const q = quiz.questions[currentIdx];
-
-  const correctAnswerText = useMemo(() => {
-    if (!q) return "";
-    if (q.options && q.options.length > 0) {
-      const letterIndex = q.answer?.charCodeAt(0) - 65;
-      if (letterIndex >= 0 && letterIndex < q.options.length) {
-        return q.options[letterIndex];
-      }
-    }
-    return q.answer || "";
-  }, [q]);
 
   const handleAnswer = (option: string) => {
     if (revealed) return;

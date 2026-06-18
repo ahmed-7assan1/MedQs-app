@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 
 // POST /api/mobile/lecture-activity
@@ -8,7 +8,7 @@ import { NextRequest } from 'next/server';
 // Called every 10s during playback AND on video completion
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string | undefined;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

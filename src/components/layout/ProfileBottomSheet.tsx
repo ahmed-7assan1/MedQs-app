@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { createClient } from '@/lib/supabase/client';
 import { 
   X, Moon, Sun, Monitor, LogOut, Settings, 
   Bell, BookOpen, Trophy, Smartphone, UserCircle,
@@ -136,7 +136,7 @@ export function ProfileBottomSheet({ isOpen, onClose, userImage, userName }: Pro
               {/* Actions */}
               <div className="pt-6 border-t border-border">
                 <button 
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={async () => { const supabase = createClient(); await supabase.auth.signOut(); window.location.href = "/login"; }}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-red-500/10 text-red-500 font-bold text-sm hover:bg-red-500/20 transition-all active:scale-95"
                 >
                   <LogOut className="h-4 w-4" /> Sign Out

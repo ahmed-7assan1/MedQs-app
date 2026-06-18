@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     if (!error && user) {
       // For password recovery, skip Prisma sync and go directly to the reset page
       if (type === "recovery") {
-        return NextResponse.redirect(`${requestUrl.origin}/reset-password`);
+        return NextResponse.redirect(`${requestUrl.origin}/auth/reset-password`);
       }
 
       // Synchronize the user to Prisma for all other flows (login, signup, magic link)

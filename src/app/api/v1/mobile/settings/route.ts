@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 
 export async function PUT(req: NextRequest) {

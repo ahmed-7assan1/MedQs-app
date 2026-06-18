@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 // GET /api/mobile/leaderboard?universityId=...&semesterId=...&facultyId=...&limit=50
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const currentUserId = (token?.sub || token?.id) as string | undefined;
     const { searchParams } = new URL(req.url);
     const universityId = searchParams.get('universityId');

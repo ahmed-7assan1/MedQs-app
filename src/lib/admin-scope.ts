@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { Session } from "next-auth";
+import type { AuthSession as Session } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSessionScope, isAdminRole, isSuperAdmin, type SessionScope } from "@/lib/tenant";
 

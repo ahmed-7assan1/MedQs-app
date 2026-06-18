@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { createClient } from '@/lib/supabase/client';
 import { X, LogOut, Settings, Sun, Moon, Monitor, Search, User } from "lucide-react";
 import {
   LayoutDashboard, BookOpen, BarChart3, HelpCircle, Video,
@@ -271,7 +271,7 @@ export function MobileBottomSheet({
                 </Link>
                 {!isGuest && (
                   <button
-                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    onClick={async () => { const supabase = createClient(); await supabase.auth.signOut(); window.location.href = "/login"; }}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-500/20 transition-all active:scale-[0.98]"
                   >
                     <LogOut className="h-4 w-4" /> Sign Out

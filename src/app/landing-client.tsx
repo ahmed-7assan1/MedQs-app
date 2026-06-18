@@ -560,6 +560,13 @@ function FooterSection() {
 }
 
 export default function LandingPageContent() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if (code) {
+      window.location.href = `/auth/callback?code=${encodeURIComponent(code)}&type=${params.get("type") || "recovery"}&next=/auth/reset-password`;
+    }
+  }, []);
   return (
     <div className="bg-[#0A0E1A] text-white min-h-screen">
       <Navbar />

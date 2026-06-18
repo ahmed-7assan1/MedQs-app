@@ -9,7 +9,7 @@ import {
   Maximize, Minimize, Youtube, Send
 } from "lucide-react";
 
-import { signOut } from "next-auth/react";
+import { createClient } from '@/lib/supabase/client';
 import { useNotificationStore, useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
@@ -233,7 +233,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
               <div className="absolute right-0 top-12 w-48 rounded-2xl border border-white/[0.07] bg-[#131220] shadow-2xl py-2 animate-in fade-in slide-in-from-top-2">
                 <Link href="/profile/me" className="block px-4 py-2 text-[12px] font-bold text-white/40 hover:text-white hover:bg-white/5 transition-colors">Profile</Link>
                 <div className="h-px bg-white/[0.03] my-1" />
-                <button onClick={() => signOut({ callbackUrl: "/login" })} className="w-full text-left px-4 py-2 text-[12px] font-bold text-red-500 hover:bg-red-500/10 transition-colors">Sign Out</button>
+                <button onClick={async () => { const supabase = createClient(); await supabase.auth.signOut(); window.location.href = "/login"; }} className="w-full text-left px-4 py-2 text-[12px] font-bold text-red-500 hover:bg-red-500/10 transition-colors">Sign Out</button>
               </div>
             )}
           </div>

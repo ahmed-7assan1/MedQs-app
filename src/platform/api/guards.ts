@@ -1,4 +1,4 @@
-import type { Session } from "next-auth";
+import type { AuthSession as Session } from "@/lib/auth";
 import { fail } from "@/platform/api/envelope";
 import { resolveTenantContext } from "@/platform/tenant/tenant-resolver";
 

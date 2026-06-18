@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { decode } from "next-auth/jwt";
+import { verifyMobileToken } from '@/lib/supabase/auth-helpers';
 
 export const maxDuration = 300; // Allow long-lived streams on Vercel Pro
 export const dynamic = "force-dynamic";
@@ -42,8 +42,7 @@ export async function GET(
         const authHeader = req.headers.get("authorization");
         if (authHeader && authHeader.startsWith("Bearer ")) {
           const token = authHeader.substring(7);
-          const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "";
-          const decoded = await decode({ token, secret, salt: "authjs.session-token" }).catch(() => null);
+                    const decoded = await verifyMobileToken(token);
           if (!decoded?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
           }

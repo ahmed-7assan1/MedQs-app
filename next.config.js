@@ -91,8 +91,8 @@ const nextConfig = {
   // ── Output ───────────────────────────────────────────────────────────────────
   // output: "standalone",       // uncomment for Docker/self-host deployments
 
-  // Bundle next-auth through Next's compiler (fixes broken vendor-chunk paths on Windows).
-  transpilePackages: ["next-auth"],
+  // Bundle auth packages through Next's compiler
+  transpilePackages: [],
 
   // ── Images ───────────────────────────────────────────────────────────────────
   images: {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // Returns: totalAttempts, avgScore, completedLectures, points, rank
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string | undefined;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
 // PUT /api/mobile/users/stats  → actually update profile
 export async function PUT(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string | undefined;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

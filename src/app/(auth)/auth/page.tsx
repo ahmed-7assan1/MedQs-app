@@ -139,7 +139,7 @@ function AuthContent() {
     e.preventDefault();
     if (!email) return toast.error("Enter your email.");
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback?next=/reset-password` });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback` });
     setLoading(false);
     if (error) return toast.error(error.message);
     setForgotSent(true);

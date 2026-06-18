@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest, props: { params: Promise<{ userId: string }> }) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const currentUserId = (token?.sub || token?.id) as string | undefined;
     if (!currentUserId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

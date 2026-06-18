@@ -9,7 +9,7 @@ import { StudentPageShell } from "@/components/layout/StudentPageShell";
 import { unwrapApiList } from "@/lib/api-list";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
 import { ImageUploadWithCrop } from "@/components/ui/ImageUploadWithCrop";
-import { signOut } from "next-auth/react";
+import { createClient } from '@/lib/supabase/client';
 import { uploadFiles } from "@/lib/uploadthing-react";
 
 interface University { id: string; name: string }
@@ -264,7 +264,7 @@ function EditProfileContent() {
       const res = await fetch("/api/v1/auth/profile", { method: "DELETE" });
       if (res.ok) {
         toast.success("Account deleted.");
-        signOut({ callbackUrl: "/" });
+        const supabase = createClient(); await supabase.auth.signOut(); window.location.href = "/";
       } else {
         toast.error("Failed to delete account.");
       }
@@ -722,7 +722,7 @@ function EditProfileContent() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                      <button 
-                       onClick={() => signOut({ callbackUrl: "/" })}
+                       onClick={async () => { const supabase = createClient(); await supabase.auth.signOut(); window.location.href = "/"; }}
                        className="flex items-center justify-between gap-4 rounded-2xl border border-red-200 dark:border-red-500/10 bg-white dark:bg-white/5 p-6 transition-all hover:bg-red-100 dark:hover:bg-red-500/10 group"
                      >
                         <div className="flex items-center gap-4">

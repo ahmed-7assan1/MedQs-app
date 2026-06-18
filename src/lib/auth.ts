@@ -1,12 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
 
-export const auth = async () => {
+export type AuthSession = {
+  user: {
+    id: string;
+    email?: string;
+    name?: string;
+    image?: string;
+    role: string;
+    semesterId?: string;
+    facultyId?: string;
+    universityId?: string;
+    studentId?: string;
+    nickname?: string;
+    facultyCategory?: string;
+  };
+  expires: string;
+};
+
+export const auth = async (): Promise<AuthSession | null> => {
   const supabase = createClient();
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    // Return a session object compatible with NextAuth
     const isSuperAdmin = user.user_metadata?.role === "SUPER_ADMIN" || user.email === "ahmedhassan0business@gmail.com";
     const userRole = isSuperAdmin ? "SUPER_ADMIN" : (user.user_metadata?.role || "STUDENT");
 
@@ -31,31 +47,7 @@ export const auth = async () => {
   }
 };
 
-export const signIn = async (provider?: string, options?: any) => {
-  // Mock signIn for redirect logic or legacy calls
-  // In Supabase, signIn is handled by the client
-  return { url: "/login" }; 
-};
-
 export const signOut = async () => {
   const supabase = createClient();
   await supabase.auth.signOut();
-};
-
-export const handlers = {
-  GET: async () => {
-    try {
-      const session = await auth();
-      return new Response(JSON.stringify(session || {}), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (e) {
-      return new Response(JSON.stringify({}), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-  },
-  POST: () => new Response("Supabase Auth Active", { status: 200 }),
 };

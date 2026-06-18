@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 import { generateExplanationWithMeta } from '@/lib/gemini';
 import { cacheGet, cacheSet } from '@/lib/redis';
@@ -8,7 +8,7 @@ import { cacheGet, cacheSet } from '@/lib/redis';
 // POST /api/mobile/questions/[id]/explain
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     if (!token?.sub) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const params = await props.params;

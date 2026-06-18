@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { getAIEndpoint } from "@/lib/api-config";
-import { useSession } from "next-auth/react";
+import { createClient } from "@/lib/supabase/client";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -122,7 +122,15 @@ async function callPuterImage(prompt: string): Promise<string> {
 
 // ─── Main hook ────────────────────────────────────────────────────────────────
 export function useAIChat() {
-  const { data: session } = useSession();
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => listener?.subscription.unsubscribe();
+  }, []);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -256,7 +264,7 @@ export function useAIChat() {
   // ─── Send a TEXT message ────────────────────────────────────────────────
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || loading) return;
-    if (!session?.user) {
+    if (!user) {
       toast.error("Please login to use Dr. Q");
       return;
     }
@@ -274,9 +282,9 @@ export function useAIChat() {
       // 2. Build Rich Context (Student Data + Institutional Knowledge)
       const studentData = `
 Student Profile:
-- Name: ${session.user.name}
-- Email: ${session.user.email}
-- University/Academic Info: ${JSON.stringify(session.user)}
+- Name: ${user.user_metadata?.name || user.email}
+- Email: ${user.email}
+- University/Academic Info: ${JSON.stringify(user)}
 - Status: Authenticated at MedOneX
       `;
 
@@ -333,7 +341,7 @@ CONSTRAINTS:
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: session.user.id,
+          userId: user.id,
           message: content,
           reply: reply,
           context: { provider, model: puterModel }
@@ -358,7 +366,7 @@ CONSTRAINTS:
     } finally {
       setLoading(false);
     }
-  }, [messages, loading, activeThreadId, puterModel, activeAgent, session, callDirectAI]);
+  }, [messages, loading, activeThreadId, puterModel, activeAgent, user, callDirectAI]);
 
   // ─── Generate IMAGE via Puter.js ─────────────────────────────────────────
   const generateImage = useCallback(async (prompt: string) => {

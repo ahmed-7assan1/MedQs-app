@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Session } from "next-auth";
+import type { AuthSession as Session } from "@/lib/auth";
 
 export type SessionScope = {
   userId: string;

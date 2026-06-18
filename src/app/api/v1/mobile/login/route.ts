@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { encode } from "next-auth/jwt";
+import { createMobileToken } from "@/lib/supabase/auth-helpers";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -11,22 +11,7 @@ const loginSchema = z.object({
 });
 
 async function generateToken(user: any) {
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
-  if (!secret) throw new Error("Missing AUTH_SECRET environment variable");
-
-  const token = await encode({
-    token: {
-      id: user.id,
-      sub: user.id,
-      role: user.role,
-      semesterId: user.semesterId,
-      universityId: user.universityId,
-      nickname: user.nickname,
-      studentId: user.studentId,
-    },
-    secret,
-    salt: "authjs.session-token",
-  });
+  const token = await createMobileToken(user);
 
   return NextResponse.json({
     token,

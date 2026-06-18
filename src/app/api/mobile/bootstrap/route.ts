@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 import { redis } from '@/lib/redis';
 
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // GET /api/mobile/bootstrap — everything the app needs at startup in ONE call
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string | undefined;
     
     // 1. Get Site Config (can be public or scoped to user's uni)

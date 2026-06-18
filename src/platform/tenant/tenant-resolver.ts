@@ -1,4 +1,4 @@
-import type { Session } from "next-auth";
+import type { AuthSession as Session } from "@/lib/auth";
 import { getSessionScope } from "@/lib/tenant";
 
 export type TenantContext = {

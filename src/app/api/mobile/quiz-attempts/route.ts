@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
 
 // POST /api/mobile/quiz-attempts — Submit quiz, get score + items back
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const body = await req.json();
     const { pastPaperId, answers, timeTaken, focusLossCount, guestQuizUserId } = body;
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 // GET /api/mobile/quiz-attempts?userId=...&limit=20
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

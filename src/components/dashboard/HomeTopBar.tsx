@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { signOut } from "next-auth/react";
+import { createClient } from '@/lib/supabase/client';
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 
@@ -149,7 +149,7 @@ export function HomeTopBar({ userName, userImage, location = "Medical Platform",
                     )}
                   </div>
                   <div className="border-t border-white/[0.02] py-1.5">
-                    <button onClick={() => signOut({ callbackUrl: "/login" })} className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] font-medium text-red-500 hover:bg-red-500/10 transition-colors">
+                    <button onClick={async () => { const supabase = createClient(); await supabase.auth.signOut(); window.location.href = "/login"; }} className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] font-medium text-red-500 hover:bg-red-500/10 transition-colors">
                       <LogOut className="h-4 w-4" /> Sign out
                     </button>
                   </div>

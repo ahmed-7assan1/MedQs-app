@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import type { Session } from "next-auth";
+import type { AuthSession as Session } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 /** STUDENT users must have university + semester before using the main app. */
