@@ -301,7 +301,20 @@ export function QuestionsBottomSheet({ isOpen, onClose, questions, isDark }: Que
 
 function QuestionView({ question, index, isDark }: { question: QuestionData; index: number; isDark: boolean }) {
   const [selected, setSelected] = useState<string | null>(null);
-  const isCorrect = selected === question.answer;
+
+  // Determine the correct answer text: if answer is a letter key (A,B,C,D,E), map to option text
+  const correctAnswerText = useMemo(() => {
+    const ans = question.answer;
+    if (!ans) return "";
+    // If answer is a single letter A-E, get the corresponding option
+    if (/^[A-Ea-e]$/.test(ans.trim())) {
+      const idx = ans.trim().toUpperCase().charCodeAt(0) - 65;
+      return question.options[idx] || ans;
+    }
+    return ans;
+  }, [question.answer, question.options]);
+
+  const isCorrect = selected === correctAnswerText;
 
   return (
     <div>
@@ -319,7 +332,7 @@ function QuestionView({ question, index, isDark }: { question: QuestionData; ind
         {(question.options || []).map((opt, i) => {
           const letter = String.fromCharCode(65 + i);
           const isSelectedOption = selected === opt;
-          const isAnswer = opt === question.answer;
+          const isAnswer = opt === correctAnswerText;
           let optionClass = isDark
             ? "border-white/10 bg-white/[0.03] text-gray-300"
             : "border-gray-200 bg-gray-50/50 text-gray-700";
