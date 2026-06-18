@@ -66,6 +66,7 @@ export function MedOneXChat() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLTextAreaElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
   const [mobileFocused, setMobileFocused] = useState(false);
   const [files, setFiles] = useState<FileAttachment[]>([]);
@@ -85,14 +86,11 @@ export function MedOneXChat() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
 
-  // Disable body scroll when sidebar is open
+  // Prevent main content scroll when sidebar is open (direct DOM, no re-render)
   useEffect(() => {
-    if (showSidebar) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
+    const el = mainRef.current;
+    if (!el) return;
+    el.style.overflow = showSidebar ? "hidden" : "";
   }, [showSidebar]);
 
   // Track scroll position for scroll-to-bottom button
@@ -925,7 +923,8 @@ export function MedOneXChat() {
           x: showSidebar ? "85vw" : 0,
         }}
         transition={{ duration: 0.18, ease: "easeOut" }}
-        className={cn("flex flex-col flex-1 min-h-0", showSidebar && "pointer-events-none overflow-hidden")}
+        className="flex flex-col flex-1 min-h-0"
+        ref={mainRef}
         style={{ willChange: "transform" }}
       >
 
