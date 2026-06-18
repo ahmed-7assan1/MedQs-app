@@ -59,6 +59,9 @@ export function MedOneXChat() {
   const endRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef<boolean>(true);
+  const hasInitialScrolledRef = useRef(false);
+  const prevDesktopHeightRef = useRef(0);
+  const prevMobileHeightRef = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLTextAreaElement>(null);
@@ -106,28 +109,50 @@ export function MedOneXChat() {
     return () => { observer.disconnect(); };
   }, []);
 
+  // Force scroll to bottom on initial messages load
+  useEffect(() => {
+    if (!hasInitialScrolledRef.current && messages.length > 0) {
+      hasInitialScrolledRef.current = true;
+      requestAnimationFrame(() => {
+        const el = scrollContainerRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+      });
+    }
+  }, [messages]);
+
   useEffect(() => {
     if (isAtBottomRef.current) {
       const el = scrollContainerRef.current;
-      if (el) el.scrollTop = el.scrollHeight;
+      if (el) {
+        requestAnimationFrame(() => {
+          el.scrollTop = el.scrollHeight;
+        });
+      }
     }
   }, [messages, streamingId]);
 
+  // ─── Auto-resize (desktop only) ───
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
+    const el = inputRef.current;
+    if (!el || window.innerWidth < 768) return;
+    el.style.height = "auto";
+    const newHeight = Math.min(el.scrollHeight, 200);
+    if (newHeight !== prevDesktopHeightRef.current) {
+      el.style.height = newHeight + "px";
+      prevDesktopHeightRef.current = newHeight;
     }
   }, [input]);
 
-  // ─── Mobile input auto-resize ───
+  // ─── Auto-resize (mobile only) ───
   useEffect(() => {
     const el = mobileInputRef.current;
-    if (!el) return;
-    requestAnimationFrame(() => {
-      el.style.height = "auto";
-      el.style.height = Math.min(el.scrollHeight, 80) + "px";
-    });
+    if (!el || window.innerWidth >= 768) return;
+    el.style.height = "auto";
+    const newHeight = Math.min(el.scrollHeight, 80);
+    if (newHeight !== prevMobileHeightRef.current) {
+      el.style.height = newHeight + "px";
+      prevMobileHeightRef.current = newHeight;
+    }
   }, [input]);
 
   useEffect(() => {
@@ -830,7 +855,7 @@ export function MedOneXChat() {
       <motion.div
         animate={{
           x: showSidebar ? "80vw" : 0,
-          scale: showSidebar ? 0.92 : 1,
+          scaleX: showSidebar ? 0.92 : 1,
         }}
         transition={{ type: "spring", damping: 30, stiffness: 260 }}
         style={{ transformOrigin: "left center" }}
@@ -864,18 +889,21 @@ export function MedOneXChat() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="h-full flex flex-col items-center justify-center px-6"
+              className="h-full flex flex-col items-center justify-center px-6 pt-8 md:pt-12"
             >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
-                className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg",
-                  isDark ? "bg-white/10" : "bg-gray-100"
-                )}
+                className="flex items-center justify-center mb-5"
               >
-                <Lightning size={28} weight="fill" className={isDark ? "text-indigo-400" : "text-indigo-500"} />
+                {logoUrl ? (
+                  <img src={logoUrl} alt={siteName} className="h-14 w-14 object-contain" />
+                ) : (
+                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold shadow-lg", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900")}>
+                    {siteName?.charAt(0) || "M"}
+                  </div>
+                )}
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
@@ -1324,7 +1352,7 @@ export function MedOneXChat() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  if (input.trim()) sendMessage(input);
+                  if (input.trim()) { sendMessage(input); setInput(""); }
                 }
               }}
               onFocus={() => setMobileFocused(true)}
@@ -1377,7 +1405,7 @@ export function MedOneXChat() {
                 </button>
               ) : (
                 <button
-                  onClick={() => { if (input.trim()) sendMessage(input); }}
+                  onClick={() => { if (input.trim()) { sendMessage(input); setInput(""); } }}
                   disabled={!input.trim()}
                   className={cn(
                     "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
