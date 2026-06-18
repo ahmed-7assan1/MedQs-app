@@ -79,6 +79,7 @@
 - تعديل اللوجو في السايد بار: `brightness-0` في الوضع الفاتح (أسود) و `brightness-0 invert` في الغامق (أبيض)
 - تغيير لون أيقونات السايد بار من `text-indigo-500` → `text-gray-900` في الوضع الفاتح (أسود)
 - إضافة زر تبديل المود (Dark/Light Mode) في السايد بار تحت الإعدادات
+- تغيير السايد بار من Overlay Drawer إلى Push Drawer (DeepSeek style): إزالة backdrop، تحويل العرض إلى `w-[80vw]`، إضافة shadow، تطبيق `translateX(80vw) + scale(0.92)` على المحتوى الرئيسي، إغلاق السايد بار بالضغط على الـ 20% الظاهر
 
 ### In Progress
 - (none)
@@ -87,6 +88,7 @@
 - (none)
 
 ## Key Decisions
+- **Push Drawer بدل Overlay Drawer**: السايد بار يزق المحتوى لليمين (80vw) مع scale(0.92) بدل ما يغطيه بالـ backdrop. العناصر `fixed` (modals, mobile input) توضع خارج `motion.div` عشان ما يتأثروش بـ CSS transform
 - استخدام `unstable_cache` بدل SWR/React Query – مدمج مع Next.js ويعمل في server components
 - تحويل framer-motion infinite animations إلى CSS animations لأنها تشتغل على GPU compositor thread
 - `connection_limit=5` بدل 30 لمنع استنزاف Supabase connection pool

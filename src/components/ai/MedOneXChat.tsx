@@ -479,15 +479,16 @@ export function MedOneXChat() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[10010]"
+            onClick={() => setShowSidebar(false)}
           >
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSidebar(false)} />
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 260 }}
+              onClick={(e) => e.stopPropagation()}
               className={cn(
-                "absolute left-0 top-0 bottom-0 w-[300px] max-w-[85vw] flex flex-col",
+                "absolute left-0 top-0 bottom-0 w-[80vw] max-w-[80vw] flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.35)]",
                 isDark ? "bg-[#050505] border-r border-white/10" : "bg-white border-r border-gray-200"
               )}
             >
@@ -825,6 +826,16 @@ export function MedOneXChat() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <motion.div
+        animate={{
+          x: showSidebar ? "80vw" : 0,
+          scale: showSidebar ? 0.92 : 1,
+        }}
+        transition={{ type: "spring", damping: 30, stiffness: 260 }}
+        style={{ transformOrigin: "left center" }}
+        className="flex flex-col flex-1 min-h-0"
+      >
 
       {/* ─── Messages Area ─── */}
       <main className={cn("flex flex-col flex-1 min-h-0 relative", isDark ? "bg-[#050505]" : "bg-white")}
@@ -1206,6 +1217,7 @@ export function MedOneXChat() {
           </div>
         </div>
       </div>
+      </motion.div>
 
       <DrQConfigPanel isOpen={showConfig} settings={settings} onUpdate={updateSettings} onClose={() => setShowConfig(false)} />
 
