@@ -90,7 +90,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
   // Extract questions from message content (English-only)
   const parsedQuestions: QuestionData[] = useMemo(() => {
     const qs: QuestionData[] = [];
-    const regex = /:::question\s*({.*?})\s*:::/gs;
+    const regex = /:::question\s*({[\s\S]*?})\s*:::/g;
     let match;
     while ((match = regex.exec(message.content)) !== null) {
       try {
@@ -110,14 +110,14 @@ const DrQMessageInner: React.FC<MessageProps> = ({
 
   const cleanContent = useMemo(() => {
     let text = message.content;
-    if (parsedQuestions.length > 0) text = text.replace(/:::question\s*({.*?})\s*:::/gs, "").trim();
+    if (parsedQuestions.length > 0) text = text.replace(/:::question\s*({[\s\S]*?})\s*:::/g, "").trim();
     return text;
   }, [message.content, parsedQuestions]);
 
   // Extract flashcards (English-only)
   const parsedFlashcards: FlashcardData[] = useMemo(() => {
     const fs: FlashcardData[] = [];
-    const regex = /:::flashcard\s*({.*?})\s*:::/gs;
+    const regex = /:::flashcard\s*({[\s\S]*?})\s*:::/g;
     let match;
     while ((match = regex.exec(message.content)) !== null) {
       try {
@@ -131,7 +131,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
 
   const cleanContent2 = useMemo(() => {
     let text = cleanContent;
-    if (parsedFlashcards.length > 0) text = text.replace(/:::flashcard\s*({.*?})\s*:::/gs, "").trim();
+    if (parsedFlashcards.length > 0) text = text.replace(/:::flashcard\s*({[\s\S]*?})\s*:::/g, "").trim();
     return text;
   }, [cleanContent, parsedFlashcards]);
 
@@ -228,21 +228,24 @@ const DrQMessageInner: React.FC<MessageProps> = ({
         )}
 
         {message.isStreaming && !message.content ? (
-          /* Professional thinking animation */
-          <div className="flex flex-col items-start gap-3 py-4">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 py-4">
+            <span
+              className="text-sm font-bold"
+              style={{ color: "#505050" }}
+            >
+              Thinking
+            </span>
+            <div className="flex gap-0.5">
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500"
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
+                  className="w-1 h-1 rounded-full"
+                  style={{ backgroundColor: "#505050" }}
+                  animate={{ opacity: [0.2, 1, 0.2] }}
+                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.25, ease: "easeInOut" }}
                 />
               ))}
             </div>
-            <span className="text-sm font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              MedOneX Expert is thinking...
-            </span>
           </div>
         ) : (
           <div className="relative">

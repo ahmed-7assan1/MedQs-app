@@ -881,13 +881,17 @@ export function AIAssistantPanel({
 
       {loading && (
         <div className="flex justify-start">
-          <div className="flex items-center gap-2.5 rounded-2xl rounded-bl-sm bg-primary/5 px-4 py-2.5 border border-primary/10">
-            <div className="flex gap-1">
-              <div className="ai-thinking-dot" />
-              <div className="ai-thinking-dot" />
-              <div className="ai-thinking-dot" />
+          <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm px-4 py-2.5 border" style={{ borderColor: "#50505020", backgroundColor: "#50505008" }}>
+            <span className="text-sm font-bold" style={{ color: "#505050" }}>Thinking</span>
+            <div className="flex gap-0.5">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-1 h-1 rounded-full"
+                  style={{ backgroundColor: "#505050", animation: `pulse 1.2s ease-in-out ${i * 0.25}s infinite` }}
+                />
+              ))}
             </div>
-            <span className="text-xs font-bold text-primary animate-pulse">{t.thinking}</span>
           </div>
         </div>
       )}
