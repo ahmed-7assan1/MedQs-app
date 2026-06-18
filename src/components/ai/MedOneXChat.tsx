@@ -140,10 +140,12 @@ export function MedOneXChat() {
   useEffect(() => {
     if (!hasInitialScrolledRef.current && messages.length > 0) {
       hasInitialScrolledRef.current = true;
-      requestAnimationFrame(() => {
+      const doScroll = () => {
         const el = scrollContainerRef.current;
         if (el) el.scrollTop = el.scrollHeight;
-      });
+      };
+      requestAnimationFrame(doScroll);
+      requestAnimationFrame(doScroll);
     }
   }, [messages]);
 
@@ -1401,7 +1403,7 @@ export function MedOneXChat() {
         initial={false}
         animate={{ opacity: showScrollBtn && !showSidebar ? 1 : 0, scale: showScrollBtn && !showSidebar ? 1 : 0.8 }}
         transition={{ duration: 0.15 }}
-        className="fixed bottom-24 right-5 z-[10002] md:hidden"
+        className="fixed bottom-24 right-5 z-[10002] md:bottom-20"
       >
         <button
           onClick={() => { const el = scrollContainerRef.current; if (el) el.scrollTop = el.scrollHeight; }}
