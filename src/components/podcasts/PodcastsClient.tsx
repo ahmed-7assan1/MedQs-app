@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { 
   Headphones, Play, Search, X,
   Mic2, LayoutGrid, List as ListIcon,
@@ -32,22 +32,30 @@ type RecordItem = {
   createdAt: string;
 };
 
-export function PodcastsClient({ 
-  initialRecords, 
-  initialHasMore 
-}: { 
-  initialRecords: RecordItem[],
-  initialHasMore: boolean 
-}) {
-  const [records, setRecords] = useState<RecordItem[]>(initialRecords);
+export function PodcastsClient() {
+  const [records, setRecords] = useState<RecordItem[]>([]);
   const [search, setSearch] = useState("");
   const [activeRecord, setActiveRecord] = useState<RecordItem | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [loading, setLoading] = useState(true);
   
   // Pagination state
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/v1/podcasts?page=1&limit=12")
+      .then(r => r.json())
+      .then(data => {
+        if (data?.items) {
+          setRecords(data.items);
+          setHasMore(data.hasMore);
+        }
+      })
+      .catch(err => console.error("Failed to load podcasts:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const loadMore = async () => {
     if (isLoadingMore || !hasMore) return;
@@ -175,8 +183,15 @@ export function PodcastsClient({
 
         {/* Content */}
         <div className="space-y-12">
+          {/* Loading State */}
+          {loading && (
+            <div className="py-20 flex items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          )}
+
           {/* Latest Releases */}
-          {latest.length > 0 && !search && (
+          {!loading && latest.length > 0 && !search && (
             <section>
               <div className="flex items-center gap-3 mb-6">
                 <Sparkles className="h-5 w-5 text-primary" />
@@ -207,7 +222,7 @@ export function PodcastsClient({
               <span className="text-xs font-bold dark:text-white/30 text-slate-400">{filtered.length} tracks</span>
             </div>
 
-            {filtered.length === 0 ? (
+            {!loading && filtered.length === 0 ? (
               <div className="py-20 flex flex-col items-center gap-3 dark:text-white/20 text-slate-300">
                 <Headphones className="h-16 w-16" />
                 <p className="font-bold text-sm">No audio lectures found</p>
