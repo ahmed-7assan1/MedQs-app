@@ -106,10 +106,37 @@ export function DrQChat() {
   const [showHistorySidebar, setShowHistorySidebar] = useState(true);
   
   const endRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: streamingId ? "auto" : "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    setShowScrollBtn(!isNearBottom);
   }, [messages, streamingId]);
+
+  useEffect(() => {
+    if (!showScrollBtn) {
+      endRef.current?.scrollIntoView({ behavior: streamingId ? "auto" : "smooth" });
+    }
+  }, [messages, streamingId, showScrollBtn]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+      setShowScrollBtn(!isNearBottom);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollToBottom = () => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShowScrollBtn(false);
+  };
 
   const handleShareToForum = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -345,7 +372,7 @@ export function DrQChat() {
         </header>
 
         {/* Message Stream */}
-        <div className="flex-1 overflow-y-auto no-scrollbar relative z-20 scroll-smooth">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar relative z-20 scroll-smooth">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center p-6 md:p-12 text-center max-w-4xl mx-auto z-20">
               
@@ -472,6 +499,23 @@ export function DrQChat() {
             </div>
           )}
         </div>
+
+        {/* Scroll to bottom button */}
+        <AnimatePresence>
+          {showScrollBtn && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              onClick={scrollToBottom}
+              className="absolute bottom-24 right-6 z-50 w-12 h-12 flex items-center justify-center rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 backdrop-blur-md text-white shadow-lg transition-all"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12l7 7 7-7" />
+              </svg>
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         {/* Composer Bar */}
         <div className="absolute bottom-0 left-0 w-full z-40 bg-gradient-to-t from-[#09090b] via-[#09090b]/90 to-transparent pt-16 px-4 md:px-8 pointer-events-none" style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}>
