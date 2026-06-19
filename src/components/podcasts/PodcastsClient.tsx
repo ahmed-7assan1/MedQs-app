@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { CustomAudioPlayer } from "@/components/content/CustomAudioPlayer";
 import Link from "next/link";
-import Image from "next/image";
 import { InfiniteScrollContainer } from "@/components/ui/InfiniteScrollContainer";
 
 type RecordItem = {
@@ -311,11 +310,9 @@ function RecordCard({ record, onClick, isActive }: { record: RecordItem, onClick
             <Play className="h-5 w-5 ml-0.5" />
           </div>
         </div>
-        <Image 
+        <img 
           src={record.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(record.lecture.subject.name)}&background=6366f1&color=fff&size=400`} 
           alt={record.title}
-          width={400}
-          height={400}
           className="h-full w-full object-cover transition-transform group-hover:scale-110 duration-500" 
         />
       </div>
@@ -344,11 +341,9 @@ function RecordListRow({ record, index, onClick, isActive }: { record: RecordIte
     >
       <span className="w-8 text-sm font-bold dark:text-white/20 text-slate-400 text-right shrink-0">{index + 1}</span>
       <div className="h-12 w-12 rounded-xl dark:bg-white/5 bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border dark:border-white/5 border-slate-200">
-        <Image 
+        <img 
           src={record.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(record.lecture.subject.name)}&background=6366f1&color=fff&size=100`} 
           alt={record.title}
-          width={100}
-          height={100}
           className="h-full w-full object-cover" 
         />
       </div>
