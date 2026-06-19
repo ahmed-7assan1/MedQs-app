@@ -1133,15 +1133,20 @@ export function useDrQChat() {
 
         // 1. Persona & Context Injection
         let systemPrompt = "";
+        let tieredContext = "";
         try {
+          // Fetch tiered context from server (basic always + syllabus/quiz/leaderboard if detected)
+          try {
+            const ctxRes = await fetch(`/api/v1/ai/context?message=${encodeURIComponent(content)}`);
+            if (ctxRes.ok) {
+              const ctxData = await ctxRes.json();
+              if (ctxData.context) tieredContext = ctxData.context;
+            }
+          } catch {}
+
           const { DRQ_PERSONAS } = require("@/components/ai/DrQPersonas");
           const persona = DRQ_PERSONAS[activePersona] || DRQ_PERSONAS.explainer;
           systemPrompt = persona.systemPrompt;
-          
-          // User Context  
-          const userName = (authUser as any)?.user_metadata?.name || "Student";
-          const userUni = (authUser as any)?.user_metadata?.universityName || "Medical University";
-          const userFaculty = (authUser as any)?.user_metadata?.facultyName || "Faculty of Medicine";
           
           // MedOneX Identity Context (concise for token efficiency)
           systemPrompt = `You are MedOneX Expert AI — a medical AI tutor on medonex.app. Speak in the user's language (Arabic/English). Keep medical terms in English (e.g. "Inflammation في الـ Liver"). Stay on medical topics. Be concise.
@@ -1158,19 +1163,11 @@ ENGLISH-ONLY RULE: All :::question and :::flashcard content MUST be in English o
 
 ${systemPrompt}`;
 
-          systemPrompt += `\n\nUser: ${userName}, ${userFaculty} student at ${userUni}. Greet them by name.`;
+          if (tieredContext) {
+            systemPrompt += `\n\n### Student Context:\n${tieredContext}\n(Use this data when relevant. Do NOT ask the user for info already provided above.)`;
+          }
         } catch (e) {
           systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
-        }
-
-        // Inject syllabus context (only on syllabus-related questions)
-        if (syllabusContext) {
-          const syllabusKeywords = ['module', 'lecture', 'syllabus', 'curriculum', 'subject', 'topic', 'study',
-            'منهج', 'محاضرة', 'مادة', 'درس', 'مقرر', 'موديول'];
-          const lower = content.toLowerCase();
-          if (syllabusKeywords.some(k => lower.includes(k))) {
-            systemPrompt += `\n\nSyllabus: ${syllabusContext}`;
-          }
         }
 
         let enhancedHistory: MessageForAPI[] = [
@@ -1178,13 +1175,6 @@ ${systemPrompt}`;
           ...currentMessages.map(m => ({ role: m.role, content: m.content })),
           { role: 'user', content: content }
         ];
-
-        // 1. Site Data Context Injection (Dynamic)
-        const lowerContent = content.toLowerCase();
-        const dataKeywords = ['course', 'exam', 'score', 'اسئله', 'امتحان', 'منهج', 'درجاتي'];
-        if (dataKeywords.some(kw => lowerContent.includes(kw))) {
-          enhancedHistory[enhancedHistory.length - 1].content = `[User is a medical student on MedOneX]\n\n` + enhancedHistory[enhancedHistory.length - 1].content;
-        }
 
 
         // Create AbortController for this generation

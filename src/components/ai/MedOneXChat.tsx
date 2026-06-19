@@ -9,7 +9,7 @@ import {
   Check, GlobeHemisphereWest, Sparkle, Sun, Moon, Brain,
   WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft,
   ShieldCheck, ClockCountdown, ChartBar, Robot, Book, FileText,
-  ArrowUpRight, Eye, EyeSlash, Spinner
+  ArrowUpRight, Eye, EyeSlash, Spinner, TextIndent
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -33,9 +33,9 @@ import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import {
-  Bars3Icon, HomeIcon, BookOpenIcon, UserGroupIcon,
+  HomeIcon, BookOpenIcon, UserGroupIcon,
   ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon, ChevronDoubleRightIcon, ChevronDownIcon,
-  BookmarkIcon as BookmarkIconSolid,
+  BookmarkIcon as BookmarkIconSolid, DocumentTextIcon, GlobeAltIcon,
 } from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
 
@@ -355,7 +355,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[10020] flex items-center justify-center p-4"
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSuperExpertWarning(false)} />
             <motion.div
@@ -467,7 +467,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[min(600px,calc(100vw-32px))]"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[10030] w-[min(600px,calc(100vw-32px))]"
           >
             <div className={cn(
               "rounded-2xl border shadow-2xl p-4 flex items-start gap-3 backdrop-blur-xl",
@@ -493,123 +493,6 @@ export function MedOneXChat() {
         )}
       </AnimatePresence>
 
-      {/* ─── Top Island Bar ─── */}
-      {false && <div className="fixed inset-x-0 top-0 z-40 flex justify-center items-start px-3 pt-0 pointer-events-none">
-        <div className={cn(
-          "pointer-events-auto relative flex flex-col items-center overflow-hidden",
-          "rounded-b-[32px] rounded-t-none border-x border-b",
-          isDark ? "border-white/10 bg-black/80" : "border-black/5 bg-white/90",
-          "backdrop-blur-[40px] shadow-[0_25px_60px_rgba(0,0,0,0.25)]",
-          "w-[min(1400px,calc(100vw-24px))] transition-all duration-300 ease-out"
-        )}>
-          {/* Main Island Row */}
-          <div className="flex w-full items-center justify-between gap-2 h-[60px] px-3">
-            {/* Left: Home + Personas */}
-            <div className="flex items-center gap-1.5">
-              <Link
-                href="/dashboard-app"
-                className={cn(
-                  "p-2 rounded-xl transition-all flex-shrink-0",
-                  isDark ? "text-white/40 hover:bg-white/5 hover:text-white" : "text-gray-400 hover:bg-black/5 hover:text-gray-800"
-                )}
-                title="Home"
-              >
-                <House size={18} weight="bold" />
-              </Link>
-              <div className={cn("w-px h-5 mx-1", isDark ? "bg-white/10" : "bg-gray-200")} />
-              {personaList.map(pid => {
-                const p = DRQ_PERSONAS[pid];
-                const isActive = settings.activePersona === pid;
-                return (
-                  <button
-                    key={pid}
-                    onClick={() => {
-                      const ws = Object.values(DRQ_WORKSPACES).find(w => w.personaId === pid);
-                      if (ws) updateSettings({ activePersona: pid, activeProvider: ws.defaultProvider, activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] } });
-                      else updateSettings({ activePersona: pid });
-                    }}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all",
-                      isActive
-                        ? isDark ? "bg-white/10 text-white shadow-sm" : "bg-black/5 text-gray-900 shadow-sm"
-                        : isDark ? "text-white/50 hover:bg-white/5 hover:text-white/80" : "text-gray-500 hover:bg-black/5 hover:text-gray-800"
-                    )}
-                  >
-                    <span className="text-sm">{p.icon as any}</span>
-                    <span className="hidden sm:inline">{p.shortName}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Center: Thread Tabs */}
-            <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-white/5 rounded-xl p-0.5">
-              {THREAD_TABS.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveTab(tab.id); setShowThreads(true); }}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all",
-                    activeTab === tab.id && showThreads
-                      ? isDark ? "bg-white/10 text-white shadow-sm" : "bg-white text-gray-900 shadow-sm"
-                      : isDark ? "text-white/40 hover:text-white/70" : "text-gray-400 hover:text-gray-700"
-                  )}
-                >
-                  <tab.icon size={14} weight={activeTab === tab.id && showThreads ? "fill" : "regular"} />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Modules Button */}
-            <button
-              onClick={() => setShowModules(true)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all",
-                isDark ? "text-white/40 hover:bg-white/5 hover:text-white/70" : "text-gray-400 hover:bg-black/5 hover:text-gray-700"
-              )}
-              title="My Modules"
-            >
-              <BookOpen size={14} weight="bold" />
-              <span className="hidden sm:inline">Modules</span>
-            </button>
-
-              {/* Right: Actions */}
-              <div className="flex items-center gap-1.5">
-                {/* Provider Selector — single button opens picker */}
-                <button
-                  onClick={() => setShowProviderPicker(true)}
-                  className={cn(
-                    "flex items-center gap-1 px-2 py-1.5 rounded-xl text-xs font-medium transition-all",
-                    isDark ? "bg-white/10 text-white shadow-sm hover:bg-white/15" : "bg-black/5 text-gray-900 shadow-sm hover:bg-black/10"
-                  )}
-                  title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
-                >
-                  <span className="text-[13px] md:text-[11px] font-bold">{PROVIDER_CONFIGS[settings.activeProvider]?.icon}</span>
-                </button>
-
-              <div className={cn("w-px h-5", isDark ? "bg-white/10" : "bg-gray-200")} />
-
-              {/* Theme Toggle */}
-              <button
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className={cn("p-2 rounded-xl transition-all", isDark ? "text-white/50 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-black/5 hover:text-gray-800")}
-              >
-                {isDark ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
-              </button>
-
-              {/* Config Gear */}
-              <button
-                onClick={() => setShowConfig(true)}
-                className={cn("p-2 rounded-xl transition-all", isDark ? "text-white/50 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-black/5 hover:text-gray-800")}
-              >
-                <Gear size={16} weight="bold" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>}
-
       {/* ─── Swipe Zone (left edge) ─── */}
       {!showSidebar && (
         <div
@@ -622,16 +505,58 @@ export function MedOneXChat() {
         />
       )}
 
-      {/* ─── Hamburger Button ─── */}
-      <button
-        onClick={() => setShowSidebar(true)}
-        className={cn(
-          "fixed top-3 left-3 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all",
-          isDark ? "bg-black text-white hover:bg-gray-900 backdrop-blur-xl" : "bg-white text-gray-900 hover:bg-gray-100 backdrop-blur-xl shadow-sm"
-        )}
-      >
-        <Bars3Icon className="w-5 h-5" />
-      </button>
+      {/* ─── Top Bar (hamburger + questions/flashcards/resources) ─── */}
+      <div className={cn(
+        "fixed top-0 left-0 right-0 z-50 h-14 flex items-start justify-between",
+        isDark
+          ? "bg-gradient-to-b from-black via-black to-transparent"
+          : "bg-gradient-to-b from-white via-white to-transparent"
+      )}>
+        <button
+          onClick={() => setShowSidebar(true)}
+          className={cn(
+            "mt-3 ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-all",
+            isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-gray-100"
+          )}
+        >
+          <TextIndent size={20} weight="bold" />
+        </button>
+        <div className="flex items-center gap-2 mr-4 mt-4">
+          {globalQuestions.length > 0 && (
+            <button
+              onClick={() => setShowGlobalQuestions(true)}
+              className={cn(
+                "transition-all active:scale-90",
+                isDark ? "text-white hover:text-white/80" : "text-gray-900 hover:text-gray-600"
+              )}
+            >
+              <DocumentTextIcon className="w-4 h-4" />
+            </button>
+          )}
+          {globalFlashcards.length > 0 && (
+            <button
+              onClick={() => setShowGlobalFlashcards(true)}
+              className={cn(
+                "transition-all active:scale-90",
+                isDark ? "text-white hover:text-white/80" : "text-gray-900 hover:text-gray-600"
+              )}
+            >
+              <BookOpenIcon className="w-4 h-4" />
+            </button>
+          )}
+          {globalResources.length > 0 && (
+            <button
+              onClick={() => setShowGlobalResources(true)}
+              className={cn(
+                "transition-all active:scale-90",
+                isDark ? "text-white hover:text-white/80" : "text-gray-900 hover:text-gray-600"
+              )}
+            >
+              <GlobeAltIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* ─── Sidebar ─── */}
       <AnimatePresence>
@@ -839,7 +764,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-30 flex items-end md:items-center justify-center"
+            className="fixed inset-0 z-[10030] flex items-end md:items-center justify-center"
           >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowThreads(false)} />
             <motion.div
@@ -934,7 +859,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-30 flex items-end md:items-center justify-center"
+            className="fixed inset-0 z-[10030] flex items-end md:items-center justify-center"
           >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModules(false)} />
             <motion.div
@@ -1425,22 +1350,24 @@ export function MedOneXChat() {
                 </button>
                 <button
                   onClick={() => {
-                    if (!settings.superExpertEnabled) {
-                      setShowSuperExpertWarning(true);
-                    } else {
-                      updateSettings({ superExpertEnabled: false });
-                    }
+                    const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
+                    const nextPersona = personaList[(currentIdx + 1) % personaList.length];
+                    const ws = Object.values(DRQ_WORKSPACES).find(w => w.personaId === nextPersona);
+                    if (ws) updateSettings({ activePersona: nextPersona, activeProvider: ws.defaultProvider, activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] } });
+                    else updateSettings({ activePersona: nextPersona });
                   }}
                   className={cn(
-                    "flex items-center justify-center w-9 h-9 rounded-full transition-all select-none",
-                    settings.superExpertEnabled
-                      ? "super-expert-pill-active text-indigo-400 bg-indigo-500/10"
-                      : isDark
-                        ? "text-gray-500 hover:text-gray-300 hover:bg-white/10"
-                        : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                    "flex items-center justify-center w-8 h-8 rounded-full transition-all select-none",
+                    isDark
+                      ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
+                      : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                   )}
+                  title={(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
                 >
-                  <Lightning size={14} weight={settings.superExpertEnabled ? "fill" : "regular"} />
+                  {React.cloneElement(
+                    (DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement,
+                    { size: 14, weight: "regular" }
+                  )}
                 </button>
                 {loading ? (
                   <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30">
@@ -1465,9 +1392,9 @@ export function MedOneXChat() {
               </div>
               </div>
             </div>
-            <div className="flex items-center justify-between mt-1.5 px-1">
-              <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>MedOneX Expert</span>
-              <span className={cn("text-[10px]", isDark ? "text-gray-600" : "text-gray-400")}>{limits.used}/{limits.limit}</span>
+            <div className="flex items-center justify-between mt-3 px-1">
+              <span className={cn("text-[8px] leading-tight", isDark ? "text-gray-500" : "text-gray-500")}>This AI chat is for educational purposes only &bull; Please set your API key for accurate responses</span>
+              <span className={cn("text-[9px]", isDark ? "text-gray-500" : "text-gray-500")}>{limits.used}/{limits.limit}</span>
             </div>
           </div>
         </div>
@@ -1479,6 +1406,28 @@ export function MedOneXChat() {
         "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none",
         isDark ? "bg-black" : "bg-white"
       )} style={{ height: "calc(30px + env(safe-area-inset-bottom, 0px))" }} />
+
+      {/* Mobile scroll-to-bottom button (above capsule) */}
+      <button
+        onClick={() => {
+          const el = scrollContainerRef.current;
+          if (el) { el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }); return; }
+          const m = mainRef.current;
+          if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
+        }}
+        className={cn(
+          "md:hidden fixed right-5 z-[10004] w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
+          showScrollBtn && !showSidebar ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
+          isDark
+            ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
+            : "border-black/20 bg-black/15 text-black hover:bg-black/25"
+        )}
+        style={{ bottom: "calc(30px + env(safe-area-inset-bottom, 0px) + 60px)" }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 5v14M5 12l7 7 7-7" />
+        </svg>
+      </button>
 
       {/* ─── Mobile Floating Input ─── */}
       <motion.div
@@ -1497,26 +1446,6 @@ export function MedOneXChat() {
             : "bg-gradient-to-t from-white via-white/80 to-transparent"
         )} />
         <div className="px-2 pb-1 pointer-events-auto relative">
-          {/* Scroll-to-bottom button */}
-          <button
-            onClick={() => { 
-              const el = scrollContainerRef.current; 
-              if (el) { el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }); return; }
-              const m = mainRef.current;
-              if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
-            }}
-            className={cn(
-              "absolute bottom-full right-5 mb-2 z-10 w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
-              showScrollBtn && !showSidebar ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
-              isDark
-                ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
-                : "border-black/20 bg-black/15 text-black hover:bg-black/25"
-            )}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-          </button>
           <div className={cn(
             "flex items-end gap-1 px-3 py-2.5 mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm",
             isDark ? "ring-white/10" : "ring-gray-200/80",
@@ -1558,22 +1487,24 @@ export function MedOneXChat() {
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={() => {
-                  if (!settings.superExpertEnabled) {
-                    setShowSuperExpertWarning(true);
-                  } else {
-                    updateSettings({ superExpertEnabled: false });
-                  }
+                  const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
+                  const nextPersona = personaList[(currentIdx + 1) % personaList.length];
+                  const ws = Object.values(DRQ_WORKSPACES).find(w => w.personaId === nextPersona);
+                  if (ws) updateSettings({ activePersona: nextPersona, activeProvider: ws.defaultProvider, activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] } });
+                  else updateSettings({ activePersona: nextPersona });
                 }}
                 className={cn(
                   "flex items-center justify-center w-9 h-9 min-w-9 min-h-9 rounded-full transition-all select-none",
-                  settings.superExpertEnabled
-                    ? "super-expert-pill-active text-indigo-400 bg-indigo-500/10"
-                    : isDark
-                      ? "text-gray-400 hover:text-gray-300 hover:bg-white/10"
-                      : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
+                  isDark
+                    ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
+                    : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
                 )}
+                title={(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
               >
-                <Lightning size={18} weight={settings.superExpertEnabled ? "fill" : "regular"} />
+                {React.cloneElement(
+                  (DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement,
+                  { size: 18, weight: "regular" }
+                )}
               </button>
               <button
                 onClick={() => setShowProviderPicker(true)}
@@ -1617,53 +1548,10 @@ export function MedOneXChat() {
             </div>
           </div>
         </div>
+        <div className="px-4 pb-1 relative z-10 pt-1">
+          <span className={cn("block text-[8px] leading-tight text-center", isDark ? "text-gray-500" : "text-gray-500")}>This AI chat is for educational purposes only &bull; Please set your API key for accurate responses</span>
+        </div>
       </motion.div>
-
-      {/* ─── Floating toolbar for questions/flashcards/resources ─── */}
-      {(globalQuestions.length > 0 || globalFlashcards.length > 0 || globalResources.length > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-20 right-5 z-[10002] md:bottom-16 flex flex-col gap-1.5"
-        >
-          {globalQuestions.length > 0 && (
-            <button
-              onClick={() => setShowGlobalQuestions(true)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg backdrop-blur-md transition-all active:scale-90 text-xs font-bold",
-                isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
-              )}
-            >
-              <FileText size={14} weight="bold" />
-              {globalQuestions.length}
-            </button>
-          )}
-          {globalFlashcards.length > 0 && (
-            <button
-              onClick={() => setShowGlobalFlashcards(true)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg backdrop-blur-md transition-all active:scale-90 text-xs font-bold",
-                isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
-              )}
-            >
-              <BookOpen size={14} weight="bold" />
-              {globalFlashcards.length}
-            </button>
-          )}
-          {globalResources.length > 0 && (
-            <button
-              onClick={() => setShowGlobalResources(true)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg backdrop-blur-md transition-all active:scale-90 text-xs font-bold",
-                isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
-              )}
-            >
-              <GlobeHemisphereWest size={14} weight="bold" />
-              {globalResources.length}
-            </button>
-          )}
-        </motion.div>
-      )}
 
       {/* ─── Global Bottom Sheets (from floating toolbar) ─── */}
       <QuestionsBottomSheet

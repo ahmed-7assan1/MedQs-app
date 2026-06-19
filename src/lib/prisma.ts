@@ -8,8 +8,8 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient() {
   const url = new URL(process.env.DATABASE_URL || "");
   // Override connection_limit & pool_timeout for serverless safety
-  url.searchParams.set("connection_limit", "5");
-  url.searchParams.set("pool_timeout", "10");
+  url.searchParams.set("connection_limit", "3");
+  url.searchParams.set("pool_timeout", "5");
 
   return new PrismaClient({
     datasources: { db: { url: url.toString() } },

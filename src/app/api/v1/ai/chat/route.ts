@@ -11,6 +11,7 @@ import {
   type ChatPdfPart,
 } from "@/lib/ai-router";
 import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
+import { buildStudentContext } from "@/lib/ai-context-builder";
 import { processBotCommand, SECRET_CODE } from "@/lib/bot-commander";
 import { getCachedSiteData } from "@/lib/site-cache";
 
@@ -436,17 +437,7 @@ ${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
       specializedModel
     );
 
-  let personalContext = isLab ? "" : await buildStudentStudyContext(userId).catch(() => "");
-  
-  if (!isLab) {
-    const profileLines: string[] = [];
-    if (user.name) profileLines.push(`Name: ${user.name}`);
-    if (user.university) profileLines.push(`University/Faculty: ${user.university.name}`);
-    if (user.semester) profileLines.push(`Academic Year & Semester: ${user.semester.name}`);
-    if (profileLines.length > 0) {
-      personalContext = `### Student Profile Information:\n${profileLines.join("\n")}\n(Do NOT ask the user for this information since it is already provided above)\n\n### Study Context:\n${personalContext}`;
-    }
-  }
+  let personalContext = isLab ? "" : await buildStudentContext(userId, message).catch(() => "");
   
   const siteContext = siteData 
     ? `### Platform Information (${siteData.siteConfig?.siteName ?? "MedOneX"}):

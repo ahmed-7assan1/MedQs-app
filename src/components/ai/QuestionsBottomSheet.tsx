@@ -184,7 +184,7 @@ export function QuestionsBottomSheet({ isOpen, onClose, questions, isDark }: Que
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "absolute bottom-0 left-0 right-0 max-h-[88vh] rounded-t-3xl shadow-2xl flex flex-col overflow-hidden",
-              isDark ? "bg-[#121212] border-t border-white/10" : "bg-white border-t border-gray-200"
+              isDark ? "bg-[#050505] border-t border-white/10" : "bg-[#FCFCFC] border-t border-gray-200"
             )}
           >
             {/* Drag handle */}
@@ -251,7 +251,7 @@ export function QuestionsBottomSheet({ isOpen, onClose, questions, isDark }: Que
 
             {/* Question content */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-5">
-              {current && <QuestionView question={current} index={currentIndex} isDark={isDark} />}
+              {current && <QuestionView key={currentIndex} question={current} index={currentIndex} isDark={isDark} />}
             </div>
 
             {/* Footer navigation */}

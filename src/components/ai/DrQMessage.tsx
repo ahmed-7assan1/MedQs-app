@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import {
   HandThumbUpIcon,
   HandThumbDownIcon,
@@ -504,24 +505,33 @@ const DrQMessageInner: React.FC<MessageProps> = ({
         )}
       </div>
 
-      <QuestionsBottomSheet
-        isOpen={showQuestions}
-        onClose={() => setShowQuestions(false)}
-        questions={parsedQuestions}
-        isDark={isDark}
-      />
-      <FlashcardsBottomSheet
-        isOpen={showFlashcards}
-        onClose={() => setShowFlashcards(false)}
-        flashcards={parsedFlashcards}
-        isDark={isDark}
-      />
-      <ResourcesBottomSheet
-        isOpen={showResources}
-        onClose={() => setShowResources(false)}
-        resources={parsedResources}
-        isDark={isDark}
-      />
+      {showQuestions && createPortal(
+        <QuestionsBottomSheet
+          isOpen={showQuestions}
+          onClose={() => setShowQuestions(false)}
+          questions={parsedQuestions}
+          isDark={isDark}
+        />,
+        document.body
+      )}
+      {showFlashcards && createPortal(
+        <FlashcardsBottomSheet
+          isOpen={showFlashcards}
+          onClose={() => setShowFlashcards(false)}
+          flashcards={parsedFlashcards}
+          isDark={isDark}
+        />,
+        document.body
+      )}
+      {showResources && createPortal(
+        <ResourcesBottomSheet
+          isOpen={showResources}
+          onClose={() => setShowResources(false)}
+          resources={parsedResources}
+          isDark={isDark}
+        />,
+        document.body
+      )}
     </div>
   );
 };
