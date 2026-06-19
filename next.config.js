@@ -118,6 +118,7 @@ const nextConfig = {
       { protocol: "https", hostname: "i.ytimg.com" },
       { protocol: "https", hostname: "i.scdn.co" },
       { protocol: "https", hostname: "*.scdn.co" },
+      { protocol: "https", hostname: "ui-avatars.com" },
     ],
   },
 
