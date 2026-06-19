@@ -7,15 +7,30 @@ import { InstagramLogo, FacebookLogo, TelegramLogo } from "@phosphor-icons/react
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { createClient } from "@/lib/supabase/client";
 
+function getRememberMe(): boolean {
+  if (typeof document === "undefined") return true;
+  return document.cookie.split("; ").find(r => r.startsWith("remember_me="))?.split("=")[1] === "true";
+}
+
 export default function SplashPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       setReady(true);
       if (data?.user) {
+        const onboardingDone = data.user.user_metadata?.onboarding_completed === true;
+        if (!onboardingDone) {
+          setTimeout(() => router.replace("/complete-profile"), 2000);
+          return;
+        }
+        if (!getRememberMe()) {
+          await supabase.auth.signOut({ scope: "local" });
+          setTimeout(() => router.replace("/auth?mode=login"), 2800);
+          return;
+        }
         setTimeout(() => router.replace("/dashboard-app"), 2000);
       } else {
         setTimeout(() => router.replace("/auth?mode=login"), 2800);

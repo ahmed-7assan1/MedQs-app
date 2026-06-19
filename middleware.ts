@@ -34,11 +34,19 @@ export async function middleware(request: NextRequest) {
   // Logged-in users: redirect from public pages to last page or dashboard
   if (
     user &&
-    PUBLIC_PATHS.includes(pathname) &&
-    !(pathname === '/auth' && request.nextUrl.searchParams.get('mode') === 'onboarding')
+    PUBLIC_PATHS.includes(pathname)
   ) {
     const lastPage = request.cookies.get('last_page')?.value || '/dashboard-app'
     return NextResponse.redirect(new URL(lastPage, request.url))
+  }
+
+  // Complete-profile: allow only if onboarding not done yet
+  if (pathname === '/complete-profile') {
+    if (!user) return NextResponse.redirect(new URL('/auth?mode=login', request.url))
+    if (user.user_metadata?.onboarding_completed) {
+      return NextResponse.redirect(new URL('/dashboard-app', request.url))
+    }
+    return response
   }
 
   // Unauthenticated users cannot access dashboard

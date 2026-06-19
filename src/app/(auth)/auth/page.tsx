@@ -1,72 +1,19 @@
 "use client";
 
-import { useState, useEffect, Suspense, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import {
-  Mail, Lock, User, Building2, GraduationCap, Calendar, BookOpen,
-  ChevronRight, Loader2, CheckCircle, ShieldCheck, ArrowLeft, Send,
-  Eye, EyeOff, Github, Chrome, Facebook
+  Mail, Lock, Loader2, CheckCircle, ArrowLeft, Send,
+  Eye, EyeOff, Chrome, Facebook
 } from "lucide-react";
-import { CaretUpDown } from "@phosphor-icons/react";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { MedicalCinematicBg } from "@/components/auth/MedicalCinematicBg";
 import toast from "react-hot-toast";
-import { unwrapApiList } from "@/lib/api-list";
 import { cn } from "@/lib/utils";
 
-const steps = [
-  { num: "01", label: "Sign up your account" },
-  { num: "02", label: "Set up your workspace" },
-  { num: "03", label: "Set up your profile" },
-];
-
-function CustomDropdown({ label, options, value, onChange, icon: Icon, disabled, placeholder }: any) {
-  const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const f = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false); };
-    document.addEventListener("mousedown", f);
-    return () => document.removeEventListener("mousedown", f);
-  }, []);
-  return (
-    <div className="space-y-1 relative" ref={ref}>
-      <label className="text-[9px] font-bold text-white/40 uppercase ml-1 tracking-widest">{label}</label>
-      <button type="button" disabled={disabled} onClick={() => setIsOpen(!isOpen)}
-        className={cn("w-full flex items-center justify-between gap-2 px-4 py-3.5 rounded-xl border transition-all bg-white/[0.02] border-white/[0.06]",
-          isOpen ? "ring-1 ring-primary/30 border-primary/40" : "hover:bg-white/[0.05]", disabled && "opacity-40")}>
-        <div className="flex items-center gap-2.5 overflow-hidden">
-          <Icon className={cn("shrink-0", value ? "text-primary" : "text-white/20")} size={15} />
-          <span className={cn("text-xs font-semibold truncate", value ? "text-white" : "text-white/20")}>
-            {value ? (options.find((o: any) => o.id === value.id)?.name || value.name) : placeholder}
-          </span>
-        </div>
-        <CaretUpDown className="text-white/20 shrink-0" size={12} />
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.95 }}
-            className="absolute z-[100] left-0 right-0 mt-1.5 p-1.5 bg-[#0d101f] border border-white/10 rounded-xl shadow-2xl backdrop-blur-md max-h-[200px] overflow-y-auto custom-scrollbar">
-            {options.length === 0 ? (
-              <div className="py-6 text-center text-[10px] text-white/40">No options found</div>
-            ) : options.map((opt: any) => (
-              <button key={opt.id} type="button" onClick={() => { onChange(opt); setIsOpen(false); }}
-                className={cn("w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all text-left",
-                  value?.id === opt.id ? "bg-primary text-white shadow-sm" : "text-white/60 hover:bg-white/5")}>
-                {opt.name || `Year ${opt.yearNumber}`}
-                {value?.id === opt.id && <CheckCircle size={14} className="ml-auto" />}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 function AuthContent() {
-  const router = useRouter();
   const sp = useSearchParams();
   const supabase = createClient();
 
@@ -75,26 +22,14 @@ function AuthContent() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
-  const [activeStep, setActiveStep] = useState(0);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
 
-  const [unis, setUnis] = useState<any[]>([]);
-  const [faculties, setFaculties] = useState<any[]>([]);
-  const [years, setYears] = useState<any[]>([]);
-  const [semesters, setSemesters] = useState<any[]>([]);
-  const [selUni, setSelUni] = useState<any>(null);
-  const [selFac, setSelFac] = useState<any>(null);
-  const [selYear, setSelYear] = useState<any>(null);
-  const [selSem, setSelSem] = useState<any>(null);
-
-  useEffect(() => { fetch("/api/v1/universities").then(r => r.ok ? r.json() : { data: [] }).then(d => setUnis(unwrapApiList(d))).catch(() => {}); }, []);
-  useEffect(() => { if (selUni) { setSelFac(null); setSelYear(null); setSelSem(null); setFaculties([]); setYears([]); setSemesters([]); fetch(`/api/v1/faculties?universityId=${selUni.id}`).then(r => r.json()).then(d => setFaculties(unwrapApiList(d))); } }, [selUni]);
-  useEffect(() => { if (selFac) { setSelYear(null); setSelSem(null); setYears([]); setSemesters([]); fetch(`/api/v1/academic-years?universityId=${selUni?.id}&facultyId=${selFac.id}`).then(r => r.json()).then(d => setYears(unwrapApiList(d))); } }, [selFac, selUni]);
-  useEffect(() => { if (selYear) { setSelSem(null); setSemesters([]); fetch(`/api/v1/semesters?academicYearId=${selYear.id}`).then(r => r.json()).then(d => setSemesters(unwrapApiList(d))); } }, [selYear]);
+  const setRememberMeCookie = (remember: boolean) => {
+    document.cookie = `remember_me=${remember}; path=/; max-age=${remember ? 31536000 : 0}; SameSite=Lax`;
+  };
 
   const autoConfirm = async (e: string) => { try { await fetch("/api/v1/auth/confirm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: e }) }); } catch {} };
 
@@ -115,34 +50,23 @@ function AuthContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode !== "login") return;
     setLoading(true);
     try {
-      if (mode === "login") {
-        const ok = await tryLogin(email, password);
-        if (!ok) throw new Error("Invalid email or password. If you forgot your password, click 'Forgot password'.");
-        await fetch("/api/v1/auth/sync", { method: "POST" });
-        window.location.href = "/dashboard-app";
-      } else {
-        if (!selUni || !selSem || !password || !firstName || !lastName) throw new Error("Please complete all fields.");
-        const exists = await checkEmailExists(email);
-        if (exists) throw new Error("This email is already registered. Try signing in or use a different email.");
-        const fullName = `${firstName} ${lastName}`;
-        const { data, error } = await supabase.auth.signUp({
-          email, password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard-app`, data: { name: fullName, universityId: selUni.id, facultyId: selFac?.id, semesterId: selSem.id, onboarding_completed: true } }
-        });
-        if (error) throw error;
-        await autoConfirm(email);
-        if (data.session) { await fetch("/api/v1/auth/sync", { method: "POST" }); toast.success("Account created!"); window.location.href = "/dashboard-app"; }
-        else { const r = await tryLogin(email, password); if (r) { await fetch("/api/v1/auth/sync", { method: "POST" }); toast.success("Account created!"); window.location.href = "/dashboard-app"; } else { toast.success("Account created! You can now sign in."); setMode("login"); } }
-      }
+      const ok = await tryLogin(email, password);
+      if (!ok) throw new Error("Invalid email or password. If you forgot your password, click 'Forgot password'.");
+      setRememberMeCookie(rememberMe);
+      await fetch("/api/v1/auth/sync", { method: "POST" });
+      window.location.href = "/dashboard-app";
     } catch (err: any) { toast.error(err.message || "Something went wrong."); } finally { setLoading(false); }
   };
 
   const socialLogin = async (provider: "google" | "facebook") => {
     setLoading(true);
-    try { await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback?next=/auth%3Fmode%3Donboarding` } }); }
-    catch { toast.error(`${provider} login failed.`); setLoading(false); }
+    try {
+      setRememberMeCookie(rememberMe);
+      await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard-app` } });
+    } catch { toast.error(`${provider} login failed.`); setLoading(false); }
   };
 
   const handleForgot = async (e: React.FormEvent) => {
@@ -167,18 +91,9 @@ function AuthContent() {
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-bold tracking-tight text-white mb-3">
           Get Started with Us
         </motion.h2>
-        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-sm text-white/40 font-medium mb-12 max-w-md">
-          Complete these easy steps to register your account.
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-sm text-white/40 font-medium max-w-md">
+          Your gateway to medical education excellence.
         </motion.p>
-        <div className="space-y-4">
-          {steps.map((s, i) => (
-            <motion.div key={s.num} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.1 }}
-              className={cn("flex items-center gap-4 p-4 rounded-2xl transition-all duration-500", activeStep === i ? "bg-white/[0.06] border border-white/[0.08] shadow-lg backdrop-blur-sm" : "bg-white/[0.02] border border-transparent")}>
-              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-all", activeStep === i ? "bg-primary text-white shadow-lg shadow-primary/30" : "bg-white/5 text-white/30")}>{s.num}</div>
-              <span className={cn("text-sm font-semibold transition-all", activeStep === i ? "text-white" : "text-white/30")}>{s.label}</span>
-            </motion.div>
-          ))}
-        </div>
       </div>
       <div className="relative z-10 text-[11px] text-white/20 font-medium">MedOneX 2026 — Medical Education Platform</div>
     </div>
@@ -232,6 +147,10 @@ function AuthContent() {
                 <div className="flex justify-between items-center">
                   <button type="button" onClick={() => setMode("forgot-password")} className="text-[10px] font-semibold text-white/30 hover:text-primary transition-colors">Forgot password?</button>
                 </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-3.5 h-3.5 rounded border-white/20 bg-white/5 accent-primary" />
+                  <span className="text-[10px] font-medium text-white/40">Remember me</span>
+                </label>
                 <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-widest uppercase shadow-lg shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
                 </button>
@@ -252,70 +171,17 @@ function AuthContent() {
 
             {/* ── REGISTER ── */}
             {mode === "register" && (
-              <motion.form key="register" initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -15 }} onSubmit={handleSubmit} className="space-y-4">
+              <motion.div key="register" initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -15 }} className="space-y-4">
                 <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold text-white">Sign Up Account</h3>
-                  <p className="text-[11px] text-white/40 mt-1">Enter your personal data to create your account.</p>
+                  <h3 className="text-xl font-bold text-white">Create Account</h3>
+                  <p className="text-[11px] text-white/40 mt-1">Start your medical journey with MedOneX</p>
                 </div>
-
-                {/* Social */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => socialLogin("google")} disabled={loading} className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.05] transition-all active:scale-[0.98]">
-                    <Chrome size={16} /> Google
-                  </button>
-                  <button type="button" onClick={() => socialLogin("facebook")} disabled={loading} className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.05] transition-all active:scale-[0.98]">
-                    <Facebook size={16} /> Facebook
-                  </button>
-                </div>
-
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/[0.06]" /></div>
-                  <div className="relative flex justify-center"><span className="bg-[#111] px-3 text-[9px] text-white/20 font-semibold uppercase tracking-widest">Or</span></div>
-                </div>
-
-                {/* Academic */}
-                <div className="space-y-3 pb-1">
-                  <CustomDropdown label="University" options={unis} value={selUni} onChange={(v: any) => { setSelUni(v); setActiveStep(1); }} icon={Building2} placeholder="Select University" />
-                  {selUni && <CustomDropdown label="Faculty" options={faculties} value={selFac} onChange={setSelFac} icon={GraduationCap} placeholder="Select Faculty" />}
-                  {selFac && <div className="grid grid-cols-2 gap-3">
-                    <CustomDropdown label="Year" options={years} value={selYear} onChange={setSelYear} icon={Calendar} placeholder="Year" />
-                    <CustomDropdown label="Semester" options={semesters} value={selSem} onChange={(v: any) => { setSelSem(v); setActiveStep(2); }} icon={BookOpen} placeholder="Sem" />
-                  </div>}
-                </div>
-
-                {/* Personal */}
-                {selSem && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 pt-1 border-t border-white/[0.06]">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" size={15} />
-                        <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First Name"
-                          className="w-full bg-white/[0.02] border border-white/[0.07] rounded-xl py-3 pl-9 pr-3 text-xs font-semibold text-white placeholder:text-white/20 outline-none transition-all focus:border-primary/40 focus:ring-1 focus:ring-primary/20" />
-                      </div>
-                      <div className="relative">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" size={15} />
-                        <input type="text" required value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last Name"
-                          className="w-full bg-white/[0.02] border border-white/[0.07] rounded-xl py-3 pl-9 pr-3 text-xs font-semibold text-white placeholder:text-white/20 outline-none transition-all focus:border-primary/40 focus:ring-1 focus:ring-primary/20" />
-                      </div>
-                    </div>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" size={15} />
-                      <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email"
-                        className="w-full bg-white/[0.02] border border-white/[0.07] rounded-xl py-3 pl-9 pr-3 text-xs font-semibold text-white placeholder:text-white/20 outline-none transition-all focus:border-primary/40 focus:ring-1 focus:ring-primary/20" />
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" size={15} />
-                      <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Password"
-                        className="w-full bg-white/[0.02] border border-white/[0.07] rounded-xl py-3 pl-9 pr-3 text-xs font-semibold text-white placeholder:text-white/20 outline-none transition-all focus:border-primary/40 focus:ring-1 focus:ring-primary/20" />
-                    </div>
-                  </motion.div>
-                )}
-
-                <button type="submit" disabled={loading || !selSem}
-                  className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-widest uppercase shadow-lg shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign Up"}
+                <button type="button" onClick={() => socialLogin("google")} disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 text-sm font-semibold text-white/70 hover:text-white hover:bg-white/[0.05] transition-all active:scale-[0.98] disabled:opacity-50">
+                  <Chrome size={20} /> Continue with Google
                 </button>
-              </motion.form>
+                <p className="text-center text-[10px] text-white/20 mt-4">By continuing, you agree to our Terms and Privacy Policy.</p>
+              </motion.div>
             )}
 
             {/* ── FORGOT PASSWORD ── */}
@@ -363,11 +229,7 @@ function AuthContent() {
       <MedicalCinematicBg />
       {leftPanel}
       {rightPanel}
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 20px; }
-      `}</style>
+      
     </div>
   );
 }

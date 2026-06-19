@@ -25,6 +25,10 @@ export async function GET(request: Request) {
         });
       } catch {}
 
+      const onboardingDone = user.user_metadata?.onboarding_completed === true;
+      if (!onboardingDone) {
+        return NextResponse.redirect(`${requestUrl.origin}/complete-profile`);
+      }
       return NextResponse.redirect(`${requestUrl.origin}${next}`);
     }
   }
