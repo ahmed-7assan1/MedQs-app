@@ -94,10 +94,14 @@ function clampPct(n: number): number {
 }
 
 function safeMetadataBase(): URL | undefined {
-  const raw = process.env.NEXTAUTH_URL?.trim() || "https://medonex.vercel.app";
+  const raw =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    process.env.VERCEL_URL?.trim() ||
+    process.env.NEXTAUTH_URL?.trim() ||
+    "https://medonex.vercel.app";
   if (!raw) return undefined;
   try {
-    return new URL(raw);
+    return new URL(raw.startsWith("http") ? raw : `https://${raw}`);
   } catch {
     return undefined;
   }

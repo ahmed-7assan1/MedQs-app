@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.VERCEL_URL ||
-    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ||
+    process.env.NEXTAUTH_URL?.trim() ||
     "https://medonex.vercel.app";
 
   const staticRoutes: MetadataRoute.Sitemap = [
