@@ -73,13 +73,13 @@ function DiceIcon() {
       transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
       className="absolute left-1/2 top-12 z-10 -translate-x-1/2 md:top-16"
     >
-      <motion.div
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
-        className="grid h-16 w-16 place-items-center rounded-2xl bg-card shadow-[0_20px_40px_-12px_rgba(0,0,0,0.2)] ring-1 ring-border"
-      >
-        <span className="text-2xl font-bold text-primary">Q</span>
-      </motion.div>
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+          className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-primary/80 to-primary shadow-[0_20px_40px_-12px_rgba(0,0,0,0.2)] ring-1 ring-primary/30"
+        >
+          <Brain className="h-8 w-8 text-primary-foreground" />
+        </motion.div>
     </motion.div>
   );
 }
