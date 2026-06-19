@@ -317,7 +317,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
 
               {/* Markdown Content (images stripped) */}
               <div dir="auto" className={cn(
-                "prose prose-base max-w-none ai-chat-prose prose-p:text-[16px] prose-p:font-normal prose-p:leading-[1.75] prose-p:mb-5 prose-headings:mt-7 prose-headings:mb-3 prose-hr:my-6 prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
+                "prose prose-base max-w-none ai-chat-prose prose-p:text-[16px] prose-p:font-normal prose-p:leading-[1.75] prose-p:mb-4 prose-headings:mt-8 prose-headings:mb-3 prose-ul:mt-3 prose-ul:mb-4 prose-li:mb-2 prose-ol:mt-3 prose-ol:mb-4 prose-hr:my-8 prose-pre:border prose-table:border prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2",
                 isAI ? "prose-slate dark:prose-invert prose-pre:bg-slate-50 dark:prose-pre:bg-black/30 prose-pre:border-slate-200 dark:prose-pre:border-white/5 prose-table:border-slate-200 dark:prose-table:border-white/10 prose-th:bg-slate-50 dark:prose-th:bg-white/5" : "text-gray-900 dark:text-white prose-p:text-gray-900 dark:prose-p:text-white prose-headings:text-gray-900 dark:prose-headings:text-white prose-strong:text-gray-900 dark:prose-strong:text-white prose-code:text-gray-900 dark:prose-code:text-white"
               )}>
                 <ReactMarkdown 
