@@ -116,13 +116,14 @@ export function MedOneXChat() {
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
-    const onScroll = () => {
-      const threshold = 400;
+    const check = () => {
+      const threshold = 200;
       setShowScrollBtn(el.scrollHeight - el.scrollTop - el.clientHeight > threshold);
     };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    return () => el.removeEventListener("scroll", check);
+  }, [messages]);
 
   // Track scroll position for scroll-to-bottom button
 
@@ -1533,22 +1534,20 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       {/* ─── Scroll-to-bottom button ─── */}
-      <motion.div
-        initial={false}
-        animate={{ opacity: showScrollBtn && !showSidebar ? 1 : 0, scale: showScrollBtn && !showSidebar ? 1 : 0.8 }}
-        transition={{ duration: 0.15 }}
-        className="fixed bottom-24 right-5 z-[10002] md:bottom-20"
-      >
-        <button
-          onClick={() => { const el = scrollContainerRef.current; if (el) el.scrollTop = el.scrollHeight; }}
-          className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-all active:scale-90",
-            isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-gray-900 hover:bg-gray-100"
-          )}
-        >
-          <ChevronDownIcon className="w-5 h-5" />
-        </button>
-      </motion.div>
+      <AnimatePresence>
+        {showScrollBtn && !showSidebar && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            transition={{ duration: 0.15 }}
+            onClick={() => { const el = scrollContainerRef.current; if (el) el.scrollTop = el.scrollHeight; }}
+            className="fixed bottom-24 right-5 z-[10002] md:bottom-20 w-11 h-11 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md border border-white/20 bg-white/20 text-white hover:bg-white/30 active:scale-90"
+          >
+            <ChevronDownIcon className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* ─── Mobile Floating Input ─── */}
       <motion.div
