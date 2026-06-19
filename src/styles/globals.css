@@ -1726,6 +1726,12 @@ html[data-theme="light"] {
   font-family: var(--font-nunito), var(--font-cairo), sans-serif !important;
 }
 
+/* AI chat: Vazirmatn (overrides the global prose rule) */
+.ai-chat-prose.prose,
+.ai-chat-prose.prose-base {
+  font-family: var(--font-vazirmatn), var(--font-nunito), var(--font-cairo), sans-serif !important;
+}
+
 .prose code,
 .prose pre,
 .prose kbd,
