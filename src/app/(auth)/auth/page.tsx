@@ -98,6 +98,14 @@ function AuthContent() {
 
   const autoConfirm = async (e: string) => { try { await fetch("/api/v1/auth/confirm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: e }) }); } catch {} };
 
+  const checkEmailExists = async (e: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/v1/auth/check-email?email=${encodeURIComponent(e)}`);
+      const d = await res.json();
+      return d.exists;
+    } catch { return false; }
+  };
+
   const tryLogin = async (e: string, p: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email: e, password: p });
     if (!error) return true;
@@ -116,6 +124,8 @@ function AuthContent() {
         window.location.href = "/dashboard-app";
       } else {
         if (!selUni || !selSem || !password || !firstName || !lastName) throw new Error("Please complete all fields.");
+        const exists = await checkEmailExists(email);
+        if (exists) throw new Error("This email is already registered. Try signing in or use a different email.");
         const fullName = `${firstName} ${lastName}`;
         const { data, error } = await supabase.auth.signUp({
           email, password,
@@ -139,6 +149,8 @@ function AuthContent() {
     e.preventDefault();
     if (!email) return toast.error("Enter your email.");
     setLoading(true);
+    const exists = await checkEmailExists(email);
+    if (!exists) { setLoading(false); return toast.error("This email is not registered. Please check your email or create a new account."); }
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback?next=/reset-password` });
     setLoading(false);
     if (error) return toast.error(error.message);
