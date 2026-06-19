@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSessionScope, isAdminRole, isSuperAdmin } from "@/lib/tenant";
+import { deleteUserAccount } from "@/lib/account-deletion";
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
@@ -21,6 +22,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
   }
 
-  await prisma.user.delete({ where: { id: params.id } });
-  return NextResponse.json({ ok: true });
+  try {
+    await deleteUserAccount(params.id);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[ADMIN_DELETE_USER] Error:", error);
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
+  }
 }

@@ -248,7 +248,8 @@ export async function DELETE(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    await prisma.user.delete({ where: { id: session.user.id } });
+    const { deleteUserAccount } = await import("@/lib/account-deletion");
+    await deleteUserAccount(session.user.id);
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: "Failed to delete account" }, { status: 500 });
