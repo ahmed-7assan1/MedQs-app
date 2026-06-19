@@ -1127,7 +1127,7 @@ export function MedOneXChat() {
               </motion.div>
             </motion.div>
           ) : (
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-8 space-y-1">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-8 space-y-6">
               {messages.map((m, idx) => (
                 <motion.div
                   key={m.id}

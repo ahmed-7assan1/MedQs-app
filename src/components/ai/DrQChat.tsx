@@ -444,7 +444,7 @@ export function DrQChat() {
 
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto px-4 md:px-6 py-10 pb-40 space-y-8">
+            <div className="max-w-4xl mx-auto px-4 md:px-6 py-10 pb-40 space-y-10">
               <AnimatePresence initial={false}>
                 {messages.map((m) => (
                   <motion.div

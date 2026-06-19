@@ -427,7 +427,7 @@ export function DrQFuturisticChat() {
               </motion.div>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 pb-44 space-y-6">
+            <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 pb-44 space-y-10">
               <AnimatePresence initial={false}>
                 {messages.map((m) => (
                   <motion.div key={m.id}
