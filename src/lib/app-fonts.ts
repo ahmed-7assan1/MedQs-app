@@ -1,4 +1,4 @@
-import { Cairo, Nunito, Syne } from "next/font/google";
+import { Cairo, Nunito, Syne, Vazirmatn } from "next/font/google";
 
 /**
  * UI pair: **Nunito** (English / UI) + **Cairo** (Arabic).
@@ -18,6 +18,13 @@ export const fontArabic = Cairo({
   display: "swap",
 });
 
+export const fontVazirmatn = Vazirmatn({
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-vazirmatn",
+  display: "swap",
+});
+
 export const fontSyne = Syne({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
@@ -25,4 +32,4 @@ export const fontSyne = Syne({
   display: "swap",
 });
 
-export const appFontVariableClassName = `${fontEnglish.variable} ${fontArabic.variable} ${fontSyne.variable}`.trim();
+export const appFontVariableClassName = `${fontEnglish.variable} ${fontArabic.variable} ${fontVazirmatn.variable} ${fontSyne.variable}`.trim();
