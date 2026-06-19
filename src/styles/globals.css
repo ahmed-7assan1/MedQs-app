@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Landing page dot-grid background ── */
+.landing-dot-grid {
+  background-image: radial-gradient(hsl(var(--border)) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ── Landing sticky-note color ── */
+.bg-note { background-color: hsl(48, 100%, 80%); }
+.text-note-foreground { color: hsl(35, 20%, 25%); }
+
 /* 🎨 MedOneX Theme Variants — 16 themes via data-theme-variant attribute */
 @import "./themes.css";
 
