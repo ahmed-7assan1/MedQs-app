@@ -2,13 +2,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider } from "@/hooks/useDrQChat";
+import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider, DrQSettings } from "@/hooks/useDrQChat";
 import {
   Plus, Paperclip, PaperPlaneRight, Stop, X, Trash, ChatDots,
   MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
   Check, GlobeHemisphereWest, Sparkle, Sun, Moon, Brain,
   WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft,
-  ShieldCheck, ClockCountdown, ChartBar, Robot, Book, FileText
+  ShieldCheck, ClockCountdown, ChartBar, Robot, Book, FileText,
+  ArrowUpRight, Eye, EyeSlash, Spinner
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -114,16 +115,15 @@ export function MedOneXChat() {
 
   // Track scroll position for scroll-to-bottom button
   useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const check = () => {
-      const threshold = 200;
-      setShowScrollBtn(el.scrollHeight - el.scrollTop - el.clientHeight > threshold);
-    };
-    check();
-    el.addEventListener("scroll", check, { passive: true });
-    return () => el.removeEventListener("scroll", check);
-  }, [messages]);
+    const id = setInterval(() => {
+      const el = scrollContainerRef.current;
+      if (!el) return;
+      const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setShowScrollBtn(dist > 150);
+    }, 200);
+    return () => clearInterval(id);
+  }, []);
+
 
   // Track scroll position for scroll-to-bottom button
 
@@ -211,7 +211,7 @@ export function MedOneXChat() {
     const sentinel = endRef.current;
     if (sentinel) observer.observe(sentinel);
     return () => { observer.disconnect(); };
-  }, []);
+  }, [messages.length > 0]);
 
   // Force scroll to bottom on initial messages load
   useEffect(() => {
@@ -241,11 +241,13 @@ export function MedOneXChat() {
   useEffect(() => {
     const el = inputRef.current;
     if (!el || window.innerWidth < 768) return;
-    el.style.height = "auto";
+    el.style.height = "0px";
     const newHeight = Math.min(el.scrollHeight, 200);
     if (newHeight !== prevDesktopHeightRef.current) {
       el.style.height = newHeight + "px";
       prevDesktopHeightRef.current = newHeight;
+    } else {
+      el.style.height = prevDesktopHeightRef.current + "px";
     }
   }, [input]);
 
@@ -253,11 +255,13 @@ export function MedOneXChat() {
   useEffect(() => {
     const el = mobileInputRef.current;
     if (!el || window.innerWidth >= 768) return;
-    el.style.height = "auto";
-    const newHeight = Math.min(el.scrollHeight, 80);
+    el.style.height = "0px";
+    const newHeight = Math.min(el.scrollHeight, 130);
     if (newHeight !== prevMobileHeightRef.current) {
       el.style.height = newHeight + "px";
       prevMobileHeightRef.current = newHeight;
+    } else {
+      el.style.height = prevMobileHeightRef.current + "px";
     }
   }, [input]);
 
@@ -1049,7 +1053,7 @@ export function MedOneXChat() {
             }}
           />
         )}
-        <div ref={scrollContainerRef} className={cn("flex-1 overflow-y-auto scrollbar-hover min-h-0 relative z-10 md:pb-0 pb-24", settings.bgImage && (isDark ? "bg-black/20" : "bg-white/20"))}>
+        <div ref={scrollContainerRef} className={cn("flex-1 overflow-y-auto scrollbar-hover min-h-0 relative z-10 md:pb-0 pb-[calc(30px+env(safe-area-inset-bottom,0px)+80px)]", settings.bgImage && (isDark ? "bg-black/20" : "bg-white/20"))}>
           {messages.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -1335,23 +1339,44 @@ export function MedOneXChat() {
         )}
       </main>
 
+      {/* Shared file input (outside both desktop/mobile sections for reliability) */}
+      <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
+
       {/* Desktop inline chat input (nav handles mobile) */}
-      <div className="hidden md:block flex-shrink-0 relative">
+      <div className="hidden md:block flex-shrink-0 relative mb-[30px]">
         <div className={cn(
           "absolute inset-0 rounded-t-3xl pointer-events-none",
           isDark
             ? "bg-gradient-to-t from-black via-black/80 to-transparent"
             : "bg-gradient-to-t from-white via-white/80 to-transparent"
         )} />
-        <div className="pt-4 pb-3 flex justify-center">
+        <div className="pt-4 pb-3 flex justify-center relative">
+          {/* Desktop scroll-to-bottom button */}
+          <button
+            onClick={() => { 
+              const el = scrollContainerRef.current; 
+              if (el) { el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }); return; }
+              const m = mainRef.current;
+              if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
+            }}
+            className={cn(
+              "absolute bottom-full right-8 mb-2 z-10 w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
+              showScrollBtn && !showSidebar ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
+              isDark
+                ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
+                : "border-black/20 bg-black/15 text-black hover:bg-black/25"
+            )}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12l7 7 7-7" />
+            </svg>
+          </button>
           <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
             <div
               className={cn(
-                "rounded-full border transition-all duration-200 shadow-sm",
-                inputFocused
-                  ? isDark ? "border-gray-500" : "border-gray-300"
-                  : isDark ? "border-white/10" : "border-gray-200/80",
-                isDark ? "bg-[#0d0d12]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
+                "rounded-[20px] ring-1 transition-all duration-200 shadow-sm",
+                isDark ? "ring-white/10" : "ring-gray-200/80",
+                isDark ? "bg-[#141414]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
               )}
             >
               <div className="flex items-center gap-0.5 px-1.5 py-1">
@@ -1365,10 +1390,11 @@ export function MedOneXChat() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                 ) : (
-                  <Paperclip size={16} />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
                 )}
               </button>
-              <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
               <textarea
                 ref={inputRef}
                 rows={1}
@@ -1377,14 +1403,26 @@ export function MedOneXChat() {
                 onKeyDown={handleKeyDown}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
-                placeholder="Message MedOneX Expert..."
+                placeholder="MedOneX Expert"
                 dir="auto"
                 className={cn(
-                  "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar font-arabic",
+                  "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar font-[family-name:var(--font-english)]",
                   isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
                 )}
               />
               <div className="flex items-center gap-1 flex-shrink-0">
+                <button
+                  onClick={() => setShowProviderPicker(true)}
+                  className={cn(
+                    "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                    isDark
+                      ? "text-gray-400 hover:text-white hover:bg-white/10"
+                      : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                  )}
+                  title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
+                >
+                  <Brain size={15} weight="regular" />
+                </button>
                 <button
                   onClick={() => {
                     if (!settings.superExpertEnabled) {
@@ -1419,7 +1457,9 @@ export function MedOneXChat() {
                         : isDark ? "bg-white/5 text-gray-500" : "bg-black/5 text-gray-300"
                     )}
                   >
-                    <PaperPlaneRight size={16} weight="bold" />
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 19V5M5 12l7-7 7 7" />
+                    </svg>
                   </button>
                 )}
               </div>
@@ -1434,120 +1474,11 @@ export function MedOneXChat() {
       </div>
       </motion.div>
 
-      <DrQConfigPanel isOpen={showConfig} settings={settings} onUpdate={updateSettings} onClose={() => setShowConfig(false)} />
-      <SavedPage isOpen={showSaved} onClose={() => setShowSaved(false)} isDark={isDark} />
-      <LibraryPage isOpen={showLibrary} onClose={() => setShowLibrary(false)} isDark={isDark} onOpenQuiz={(quiz: any) => setShowLibraryQuiz(quiz)} />
-      <CustomPage isOpen={showAgentGallery} onClose={() => setShowAgentGallery(false)} isDark={isDark} onSelectAgent={(agent: any) => setActiveAgent(agent)} />
-      <AnimatePresence>
-        {activeAgent && (
-          <CustomAgentChat agent={activeAgent} onClose={() => setActiveAgent(null)} isDark={isDark} />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {showLibraryQuiz && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10030] bg-[#050505] overflow-y-auto"
-          >
-            <div className="sticky top-0 z-10 flex justify-end p-4">
-              <button
-                onClick={() => setShowLibraryQuiz(null)}
-                className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-all"
-              >
-                <X size={16} weight="bold" />
-              </button>
-            </div>
-            <SharedQuizClient key={showLibraryQuiz?.id || "quiz"} quiz={showLibraryQuiz} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── Provider Picker — bottom sheet on mobile (Img 4), modal on desktop ─── */}
-      <AnimatePresence>
-        {showProviderPicker && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-end md:items-center justify-center"
-          >
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowProviderPicker(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              transition={{ type: "spring", stiffness: 300, damping: 32 }}
-              className={cn(
-                "relative w-full md:max-w-sm md:rounded-3xl rounded-t-3xl overflow-hidden border md:border shadow-2xl",
-                "md:mx-4 pt-2",
-                isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200"
-              )}
-            >
-              {/* Drag handle */}
-              <div className="flex justify-center md:hidden pt-1 pb-2">
-                <div className="w-8 h-1 rounded-full bg-white/20" />
-              </div>
-              <div className={cn("flex items-center justify-between px-5 pb-4 md:pt-5", isDark ? "" : "")}>
-                <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-gray-900")}>Select Provider</h2>
-                <button onClick={() => setShowProviderPicker(false)} className={cn("p-2 rounded-xl transition-all", isDark ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500 hover:text-gray-800")}>
-                  <X size={18} weight="bold" />
-                </button>
-              </div>
-              <div className="px-3 pb-4 max-h-[60vh] md:max-h-[60vh] overflow-y-auto no-scrollbar">
-                <div className="grid grid-cols-3 md:grid-cols-3 gap-2">
-                  {(Object.keys(PROVIDER_CONFIGS) as AIProvider[]).map(p => {
-                    const isActive = settings.activeProvider === p;
-                    const config = PROVIDER_CONFIGS[p];
-                    return (
-                      <button
-                        key={p}
-                        onClick={() => { updateSettings({ activeProvider: p }); setShowProviderPicker(false); }}
-                        className={cn(
-                          "flex flex-col items-center gap-1.5 px-2 py-4 rounded-2xl text-center transition-all active:scale-95",
-                          isActive
-                            ? isDark ? "bg-white/10 text-white shadow-sm ring-1 ring-indigo-500/40" : "bg-gray-100 text-gray-900 shadow-sm ring-1 ring-indigo-400/30"
-                            : isDark ? "text-white/50 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold",
-                          isActive
-                            ? "bg-indigo-500 text-white"
-                            : isDark ? "bg-white/10" : "bg-gray-200"
-                        )}>
-                          {config.icon}
-                        </div>
-                        <div className={cn("text-[10px] font-semibold leading-tight", isActive && "text-indigo-400")}>
-                          {config.label}
-                        </div>
-                        {isActive && <Check size={12} weight="bold" className="text-indigo-400" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── Scroll-to-bottom button ─── */}
-      <AnimatePresence>
-        {showScrollBtn && !showSidebar && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 10 }}
-            transition={{ duration: 0.15 }}
-            onClick={() => { const el = scrollContainerRef.current; if (el) el.scrollTop = el.scrollHeight; }}
-            className="fixed bottom-24 right-5 z-[10002] md:bottom-20 w-11 h-11 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md border border-white/20 bg-white/20 text-white hover:bg-white/30 active:scale-90"
-          >
-            <ChevronDownIcon className="w-5 h-5" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Solid fill below mobile capsule */}
+      <div className={cn(
+        "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none",
+        isDark ? "bg-black" : "bg-white"
+      )} style={{ height: "calc(30px + env(safe-area-inset-bottom, 0px))" }} />
 
       {/* ─── Mobile Floating Input ─── */}
       <motion.div
@@ -1556,7 +1487,7 @@ export function MedOneXChat() {
         }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         style={{ willChange: "transform" }}
-        className="md:hidden fixed bottom-0 left-0 right-0 z-[10003] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none"
+        className="md:hidden fixed bottom-[calc(30px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-[10003] pointer-events-none"
       >
         {/* Gradient backdrop */}
         <div className={cn(
@@ -1565,23 +1496,44 @@ export function MedOneXChat() {
             ? "bg-gradient-to-t from-black via-black/80 to-transparent"
             : "bg-gradient-to-t from-white via-white/80 to-transparent"
         )} />
-        <div className="px-2 pb-1 pointer-events-auto">
+        <div className="px-2 pb-1 pointer-events-auto relative">
+          {/* Scroll-to-bottom button */}
+          <button
+            onClick={() => { 
+              const el = scrollContainerRef.current; 
+              if (el) { el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }); return; }
+              const m = mainRef.current;
+              if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
+            }}
+            className={cn(
+              "absolute bottom-full right-5 mb-2 z-10 w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
+              showScrollBtn && !showSidebar ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
+              isDark
+                ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
+                : "border-black/20 bg-black/15 text-black hover:bg-black/25"
+            )}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12l7 7 7-7" />
+            </svg>
+          </button>
           <div className={cn(
-            "flex items-end gap-1 px-2 py-2 mx-2 mb-1 rounded-2xl border transition-colors shadow-lg",
-            isDark
-              ? "border-white/10 bg-[#141414]/90 backdrop-blur-xl text-white"
-              : "border-[#050505]/10 bg-[#F7F7F7] text-[#050505]"
+            "flex items-end gap-1 px-3 py-2.5 mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm",
+            isDark ? "ring-white/10" : "ring-gray-200/80",
+            isDark ? "bg-[#141414]/90 backdrop-blur-xl text-white" : "bg-[#F7F7F7] text-[#050505]"
           )}>
             <button
               onClick={() => fileInputRef.current?.click()}
               className={cn(
-                "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-colors",
+                "w-10 h-10 min-w-10 min-h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
                 isDark
                   ? "text-gray-400 hover:text-white hover:bg-white/10"
                   : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
               )}
             >
-              <Paperclip size={14} />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
             </button>
             <textarea
               ref={mobileInputRef}
@@ -1591,15 +1543,15 @@ export function MedOneXChat() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  if (input.trim()) { sendMessage(input); setInput(""); scrollLastToTop(); }
+                  handleSend();
                 }
               }}
               onFocus={() => setMobileFocused(true)}
               onBlur={() => setMobileFocused(false)}
-              placeholder="Message MedOneX Expert..."
+              placeholder="MedOneX Expert"
               dir="auto"
               className={cn(
-                "flex-1 min-w-0 bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar placeholder-gray-400 font-arabic",
+                "flex-1 min-w-0 bg-transparent border-none outline-none resize-none py-1.5 px-2 text-base leading-relaxed no-scrollbar placeholder-gray-400 font-[family-name:var(--font-english)]",
                 isDark ? "text-white" : "text-[#050505]"
               )}
             />
@@ -1613,7 +1565,7 @@ export function MedOneXChat() {
                   }
                 }}
                 className={cn(
-                  "flex items-center justify-center w-8 h-8 min-w-8 min-h-8 rounded-full transition-all select-none",
+                  "flex items-center justify-center w-9 h-9 min-w-9 min-h-9 rounded-full transition-all select-none",
                   settings.superExpertEnabled
                     ? "super-expert-pill-active text-indigo-400 bg-indigo-500/10"
                     : isDark
@@ -1621,33 +1573,33 @@ export function MedOneXChat() {
                       : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
                 )}
               >
-                <Lightning size={13} weight={settings.superExpertEnabled ? "fill" : "regular"} />
+                <Lightning size={18} weight={settings.superExpertEnabled ? "fill" : "regular"} />
               </button>
               <button
                 onClick={() => setShowProviderPicker(true)}
                 className={cn(
-                  "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all text-base",
+                  "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all text-base",
                   isDark
                     ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
                     : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
                 )}
                 title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
               >
-                <span>{PROVIDER_CONFIGS[settings.activeProvider]?.icon}</span>
+                <Brain size={18} weight="regular" />
               </button>
               {loading ? (
                 <button
                   onClick={stopGeneration}
-                  className="w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                  className="w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30"
                 >
-                  <Stop size={13} weight="fill" />
+                  <Stop size={18} weight="fill" />
                 </button>
               ) : (
                 <button
-                  onClick={() => { if (input.trim()) { sendMessage(input); setInput(""); scrollLastToTop(); } }}
-                  disabled={!input.trim()}
+                  onClick={handleSend}
+                  disabled={!input.trim() && files.length === 0}
                   className={cn(
-                    "w-8 h-8 min-w-8 min-h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                    "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
                     input.trim()
                       ? isDark
                         ? "bg-white text-[#141414] hover:bg-gray-200 shadow-md"
@@ -1657,7 +1609,9 @@ export function MedOneXChat() {
                         : "bg-[#050505]/10 text-[#050505]/40"
                   )}
                 >
-                  <PaperPlaneRight size={14} weight="bold" />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 19V5M5 12l7-7 7 7" />
+                  </svg>
                 </button>
               )}
             </div>
@@ -1728,6 +1682,15 @@ export function MedOneXChat() {
         isOpen={showGlobalResources}
         onClose={() => setShowGlobalResources(false)}
         resources={globalResources}
+        isDark={isDark}
+      />
+
+      {/* ─── Provider & API Keys Bottom Sheet ─── */}
+      <ProviderPickerSheet
+        isOpen={showProviderPicker}
+        onClose={() => setShowProviderPicker(false)}
+        settings={settings}
+        onUpdate={updateSettings}
         isDark={isDark}
       />
 
@@ -1834,4 +1797,322 @@ function SuperExpertResults({ steps, isDark }: { steps: SuperExpertStep[]; isDar
   );
 }
 
-/* ─── Super Expert Results Sub-Component ─── */
+/* ─── Provider Picker Bottom Sheet ─── */
+function getKeysArray(keys: string | string[] | undefined): string[] {
+  if (Array.isArray(keys)) return keys;
+  if (typeof keys === "string" && keys) return [keys];
+  return [];
+}
+
+async function testProviderKey(pid: AIProvider, key: string): Promise<{ ok: boolean; error?: string }> {
+  const config = PROVIDER_CONFIGS[pid];
+  if (config.needsKey === false) return { ok: true };
+  if (!key) return { ok: false, error: "No key entered" };
+  try {
+    if (pid === "gemini") {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`, {
+        signal: AbortSignal.timeout(8000),
+      });
+      if (res.ok) return { ok: true };
+      const body = await res.json().catch(() => ({}));
+      return { ok: false, error: body?.error?.message || `HTTP ${res.status}` };
+    }
+    if (pid === "mistral") {
+      const res = await fetch("https://api.mistral.ai/v1/models", {
+        headers: { Authorization: `Bearer ${key}` },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (res.ok) return { ok: true };
+      const body = await res.json().catch(() => ({}));
+      return { ok: false, error: body?.error?.message || `HTTP ${res.status}` };
+    }
+    const baseURL = config.baseURL || "https://api.openai.com/v1";
+    const URL = baseURL.endsWith("/v1") ? `${baseURL}/models` : `${baseURL.replace(/\/+$/, "")}/v1/models`;
+    const res = await fetch(URL, {
+      headers: { Authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.ok) return { ok: true };
+    const body = await res.json().catch(() => ({}));
+    return { ok: false, error: body?.error?.message || body?.error || `HTTP ${res.status}` };
+  } catch (e: any) {
+    return { ok: false, error: e.name === "TimeoutError" ? "Timeout (8s)" : e.message || "Unknown error" };
+  }
+}
+
+function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
+  isOpen: boolean;
+  onClose: () => void;
+  settings: DrQSettings;
+  onUpdate: (updated: Partial<DrQSettings>) => void;
+  isDark: boolean;
+}) {
+  const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({});
+  const [testingKey, setTestingKey] = useState<Record<string, "idle" | "testing" | "ok" | "fail">>({});
+  const [keyError, setKeyError] = useState<Record<string, string>>({});
+
+  const handleKeyChange = (pid: AIProvider, index: number, value: string) => {
+    const current = settings.byokKeys[pid];
+    const arr = getKeysArray(current);
+    while (arr.length <= index) arr.push("");
+    arr[index] = value;
+    const cleaned = arr.length > 1 ? arr.filter((k, i) => i === 0 || k || i < arr.length - 1) : arr;
+    onUpdate({ byokKeys: { ...settings.byokKeys, [pid]: cleaned } });
+  };
+
+  const addKeyField = (pid: AIProvider) => {
+    const current = settings.byokKeys[pid];
+    const arr = getKeysArray(current);
+    if (arr.length >= 5) return;
+    arr.push("");
+    onUpdate({ byokKeys: { ...settings.byokKeys, [pid]: arr } });
+  };
+
+  const removeKeyField = (pid: AIProvider, index: number) => {
+    const current = settings.byokKeys[pid];
+    let arr = getKeysArray(current);
+    if (arr.length <= 1) { arr = [""]; }
+    else { arr = arr.filter((_, i) => i !== index); }
+    onUpdate({ byokKeys: { ...settings.byokKeys, [pid]: arr } });
+  };
+
+  const handleTest = async (pid: AIProvider, index: number) => {
+    const current = settings.byokKeys[pid];
+    const arr = getKeysArray(current);
+    const key = arr[index];
+    const id = `${pid}-${index}`;
+    setTestingKey(prev => ({ ...prev, [id]: "testing" }));
+    setKeyError(prev => ({ ...prev, [id]: "" }));
+    const result = await testProviderKey(pid, key);
+    setTestingKey(prev => ({ ...prev, [id]: result.ok ? "ok" : "fail" }));
+    if (!result.ok) {
+      setKeyError(prev => ({ ...prev, [id]: result.error || "Unknown error" }));
+    }
+  };
+
+  const keyLabel = (pid: AIProvider): string => {
+    if (pid === "gemini") return "Google AI Studio API Key";
+    if (pid === "ovhcloud") return "OVHcloud Endpoint";
+    if (pid === "github") return "GitHub Personal Access Token";
+    return `API Key`;
+  };
+
+  const providers = Object.keys(PROVIDER_CONFIGS) as AIProvider[];
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-[10010]"
+          onClick={onClose}
+        >
+          <div className={cn(
+            "absolute inset-0",
+            isDark ? "bg-black/60 backdrop-blur-sm" : "bg-black/40 backdrop-blur-sm"
+          )} />
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            onClick={e => e.stopPropagation()}
+            className={cn(
+              "absolute bottom-0 left-0 right-0 max-h-[88vh] rounded-t-3xl shadow-2xl flex flex-col overflow-hidden",
+              isDark ? "bg-[#050505] border-t border-white/10" : "bg-white border-t border-gray-200"
+            )}
+            style={settings.bgImage ? {
+              backgroundImage: `url(${settings.bgImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            } : undefined}
+          >
+            {settings.bgImage && (
+              <div
+                className="absolute inset-0"
+                style={{
+                  backdropFilter: `blur(${settings.bgBlur || 0}px)`,
+                  backgroundColor: isDark
+                    ? `rgba(5,5,5,${settings.bgOpacity ?? 0.85})`
+                    : `rgba(255,255,255,${settings.bgOpacity ?? 0.85})`,
+                }}
+              />
+            )}
+            <div className="relative z-10 flex flex-col max-h-[88vh]">
+              {/* Drag handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className={cn("w-10 h-1 rounded-full", isDark ? "bg-white/20" : "bg-gray-300")} />
+              </div>
+
+              {/* Header */}
+              <div className={cn(
+                "flex items-center justify-between px-5 py-3 border-b flex-shrink-0",
+                isDark ? "border-white/10" : "border-gray-200"
+              )}>
+                <div className="flex items-center gap-2.5">
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", isDark ? "bg-white/10" : "bg-gray-100")}>
+                    <Brain size={16} weight="bold" className={isDark ? "text-white" : "text-gray-800"} />
+                  </div>
+                  <div>
+                    <h2 className={cn("text-sm font-bold", isDark ? "text-white" : "text-gray-900")}>Provider & API Keys</h2>
+                    <p className={cn("text-[10px] font-medium", isDark ? "text-gray-500" : "text-gray-400")}>Choose model and manage keys</p>
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  className={cn("p-2 rounded-xl transition-all", isDark ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500 hover:text-gray-800")}
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-5">
+                {/* ─── Provider Selection ─── */}
+                <div>
+                  <h3 className={cn("text-xs font-bold uppercase tracking-wider mb-3", isDark ? "text-gray-400" : "text-gray-500")}>Model Provider</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {providers.map(pid => {
+                      const config = PROVIDER_CONFIGS[pid];
+                      const isActive = settings.activeProvider === pid;
+                      return (
+                        <button
+                          key={pid}
+                          onClick={() => onUpdate({ activeProvider: pid })}
+                          className={cn(
+                            "flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium transition-all text-left",
+                            isActive
+                              ? isDark ? "bg-white/10 text-white ring-1 ring-white/20" : "bg-gray-100 text-gray-900 ring-1 ring-gray-300"
+                              : isDark ? "bg-white/[0.03] text-gray-400 hover:bg-white/5 hover:text-gray-200" : "bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                          )}
+                        >
+                          <span className="text-base flex-shrink-0">{config.icon}</span>
+                          <span className="truncate flex-1">{config.label}</span>
+                          {isActive && <Check size={12} weight="bold" className="flex-shrink-0 text-indigo-500" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className={cn(
+                    "mt-2 px-3 py-2 rounded-xl text-[11px] font-medium",
+                    isDark ? "bg-white/[0.03] text-gray-500" : "bg-gray-50 text-gray-500"
+                  )}>
+                    Active model: <span className={isDark ? "text-white" : "text-gray-800"}>{PROVIDER_CONFIGS[settings.activeProvider]?.defaultModel}</span>
+                  </div>
+                </div>
+
+                {/* ─── API Keys ─── */}
+                <div>
+                  <h3 className={cn("text-xs font-bold uppercase tracking-wider mb-3", isDark ? "text-gray-400" : "text-gray-500")}>API Keys</h3>
+                  <div className="space-y-3">
+                    {providers.map(pid => {
+                      const config = PROVIDER_CONFIGS[pid];
+                      const keys = getKeysArray(settings.byokKeys[pid]);
+                      const hasAnyKey = keys.some(k => k);
+                      return (
+                        <div key={pid} className={cn("p-3 rounded-2xl border", isDark ? "bg-white/[0.02] border-white/10" : "bg-gray-50 border-gray-200")}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold", isDark ? "bg-white/10" : "bg-white border border-gray-200")}>
+                                {config.icon}
+                              </div>
+                              <span className={cn("text-xs font-medium", isDark ? "text-white" : "text-gray-900")}>{config.label}</span>
+                              {config.keyUrl && (
+                                <a href={config.keyUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                                  className={cn("flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full transition-all hover:scale-105", isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600")}
+                                >
+                                  Get <ArrowUpRight size={8} weight="bold" />
+                                </a>
+                              )}
+                            </div>
+                            {hasAnyKey ? (
+                              <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600")}>
+                                {keys.filter(k => k).length} key{keys.filter(k => k).length !== 1 ? "s" : ""}
+                              </span>
+                            ) : (
+                              <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isDark ? "bg-red-500/10 text-red-400" : "bg-red-50 text-red-500")}>No Key</span>
+                            )}
+                          </div>
+                          <div className="space-y-1.5">
+                            {keys.map((key, idx) => {
+                              const id = `${pid}-${idx}`;
+                              const testState = testingKey[id];
+                              const isVisible = visibleKeys[id];
+                              return (
+                                <div key={idx} className="flex items-center gap-1.5">
+                                  <div className="relative flex-1">
+                                    <input
+                                      type={isVisible ? "text" : "password"}
+                                      placeholder={`${config.label} Key ${idx + 1}${idx === 0 ? " (Primary)" : ""}...`}
+                                      value={key}
+                                      onChange={e => handleKeyChange(pid, idx, e.target.value)}
+                                      className={cn(
+                                        "w-full rounded-xl px-3 py-2 text-xs outline-none transition-all font-mono",
+                                        isDark ? "bg-black/40 text-white placeholder-gray-600 border border-white/10 focus:border-indigo-500/50" : "bg-white text-gray-900 placeholder-gray-300 border border-gray-200 focus:border-indigo-400/50"
+                                      )}
+                                    />
+                                    <button
+                                      onClick={() => setVisibleKeys({ ...visibleKeys, [id]: !isVisible })}
+                                      className={cn("absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-gray-500 hover:text-white" : "text-gray-400 hover:text-gray-700")}
+                                    >
+                                      {isVisible ? <EyeSlash size={14} /> : <Eye size={14} />}
+                                    </button>
+                                  </div>
+                                  <button
+                                    onClick={() => handleTest(pid, idx)}
+                                    disabled={!key || testState === "testing"}
+                                    className={cn(
+                                      "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all",
+                                      testState === "testing" ? (isDark ? "bg-white/5 text-gray-500" : "bg-gray-100 text-gray-400")
+                                        : testState === "ok" ? "bg-emerald-500/10 text-emerald-500"
+                                        : testState === "fail" ? "bg-red-500/10 text-red-500"
+                                        : isDark ? "bg-white/10 text-gray-400 hover:bg-white/20" : "bg-gray-200 text-gray-600 hover:bg-gray-300",
+                                      !key ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                                    )}
+                                    title="Test key"
+                                  >
+                                    {testState === "testing" ? <Spinner size={13} weight="bold" className="animate-spin" />
+                                      : testState === "ok" ? <Check size={13} weight="bold" />
+                                      : testState === "fail" ? <WarningCircle size={13} weight="bold" />
+                                      : <Lightning size={13} weight="bold" />}
+                                  </button>
+                                  {keys.length > 1 && (
+                                    <button
+                                      onClick={() => removeKeyField(pid, idx)}
+                                      className={cn("flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all", isDark ? "text-gray-500 hover:bg-white/10 hover:text-red-400" : "text-gray-400 hover:bg-gray-200 hover:text-red-500")}
+                                    >
+                                      <X size={10} weight="bold" />
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            {keyError[`${pid}-${keys.length - 1}`] && (
+                              <p className="text-[10px] text-red-400 pl-1">{keyError[`${pid}-${keys.length - 1}`]}</p>
+                            )}
+                            {keys.length < 5 && (
+                              <button
+                                onClick={() => addKeyField(pid)}
+                                className={cn("flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-xl transition-all", isDark ? "text-gray-400 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800")}
+                              >
+                                <Plus size={10} weight="bold" />
+                                Add Key ({keys.length}/5)
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

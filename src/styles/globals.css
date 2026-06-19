@@ -170,6 +170,7 @@
 :root {
   --font-ui: var(--font-nunito), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-ui);
+  --font-english: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
   --font-arabic: var(--font-cairo), var(--font-nunito), ui-sans-serif, sans-serif;
   --font-display: var(--font-nunito), var(--font-cairo), ui-sans-serif, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -1726,10 +1727,10 @@ html[data-theme="light"] {
   font-family: var(--font-nunito), var(--font-cairo), sans-serif !important;
 }
 
-/* AI chat: Vazirmatn (overrides the global prose rule) */
+/* AI chat: Vazirmatn (handles both scripts) */
 .ai-chat-prose.prose,
 .ai-chat-prose.prose-base {
-  font-family: var(--font-vazirmatn), var(--font-nunito), var(--font-cairo), sans-serif !important;
+  font-family: var(--font-vazirmatn), var(--font-english), sans-serif !important;
 }
 
 .prose code,
