@@ -1,11 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Brain, ChevronRight } from "lucide-react";
+import { Brain, ChevronRight, Sun, Moon } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useThemeStore } from "@/lib/store";
 import { NAV_LINKS, EASE } from "./marketing-data";
 
 export function Navbar() {
+  const { theme, setTheme } = useThemeStore();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const toggle = () => setTheme(theme === "dark" ? "light" : "dark");
+
   return (
     <motion.header
       initial={{ y: -30, opacity: 0 }}
@@ -27,6 +35,15 @@ export function Navbar() {
         ))}
       </nav>
       <div className="flex items-center gap-2">
+        {mounted && (
+          <button
+            onClick={toggle}
+            aria-label="Toggle theme"
+            className="grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:text-foreground hover:shadow-sm"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+        )}
         <Link href="/auth" className="hidden px-3 py-2 text-sm text-muted-foreground/80 hover:text-foreground sm:inline">
           Sign in
         </Link>
