@@ -58,12 +58,12 @@ export async function POST(req: Request) {
 
       for (const mData of modules) {
         // 1. Find or create the Module
-        let module = await tx.module.findFirst({
+        let mod = await tx.module.findFirst({
           where: { name: mData.name, semesterId }
         });
 
-        if (!module) {
-          module = await tx.module.create({
+        if (!mod) {
+          mod = await tx.module.create({
             data: { name: mData.name, semesterId }
           });
           stats.modules++;
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
         // (This will cascade delete Lectures and LectureFiles)
         // But importantly, we do NOT delete PastPapers (Quizzes) as they are linked to the Module/Semester
         await tx.subject.deleteMany({
-          where: { moduleId: module.id }
+          where: { moduleId: mod.id }
         });
 
         // 3. Create new structure
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
           const subject = await tx.subject.create({
             data: {
               name: sData.name,
-              moduleId: module.id
+              moduleId: mod.id
             }
           });
           stats.subjects++;

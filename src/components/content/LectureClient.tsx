@@ -431,7 +431,7 @@ function QuestionItem({
                 </div>
 
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 text-sm text-white/80 italic leading-relaxed">
-                   "{essayResult.feedback}"
+                   &ldquo;{essayResult.feedback}&rdquo;
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">

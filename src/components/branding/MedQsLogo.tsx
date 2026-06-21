@@ -3,6 +3,32 @@
 import { cn } from "@/lib/utils";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 
+function DefaultLogoMark({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center",
+        className
+      )}
+    >
+      <svg
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-full"
+      >
+        <rect x="2" y="2" width="28" height="28" rx="8" className="fill-current opacity-20" />
+        <path
+          d="M16 8v16M8 16h16"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 
 type LogoVariant = "default" | "onDark";
 
@@ -89,7 +115,7 @@ export function MedOneXLogoMark({
     );
   }
 
-  return null;
+  return <DefaultLogoMark className={className} />;
 }
 
 export const MedQsLogoMark = MedOneXLogoMark;

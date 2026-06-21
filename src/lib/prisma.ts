@@ -16,8 +16,8 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL is not set in environment variables. Check your .env file.");
   }
   const url = new URL(raw);
-  url.searchParams.set("connection_limit", "3");
-  url.searchParams.set("pool_timeout", "5");
+  url.searchParams.set("connection_limit", "5");
+  url.searchParams.set("pool_timeout", "15");
 
   return new PrismaClient({
     datasources: { db: { url: url.toString() } },

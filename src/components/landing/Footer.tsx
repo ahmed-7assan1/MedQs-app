@@ -1,19 +1,22 @@
 "use client";
 
-import { Brain, Twitter, Github, Linkedin } from "lucide-react";
+import { Twitter, Github, Linkedin } from "lucide-react";
 import Link from "next/link";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { FOOTER } from "./marketing-data";
 
 export function Footer() {
+  const { siteName } = useSiteConfig();
   return (
     <footer className="border-t border-border bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-5">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2">
-            <div className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-primary/80 to-primary">
-              <Brain className="h-4 w-4 text-primary-foreground" />
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center border border-primary/20">
+              <MedOneXLogoMark title={siteName} className="h-6 w-6 text-primary" interactiveColor />
             </div>
-            <span className="text-lg font-semibold tracking-tight">{FOOTER.brand}</span>
+            <span className="text-lg font-semibold tracking-tight">{siteName}</span>
           </div>
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">{FOOTER.tagline}</p>
           <div className="mt-5 flex gap-2">

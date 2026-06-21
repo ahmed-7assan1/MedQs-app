@@ -177,7 +177,7 @@ export function CreateRoomModal({ isOpen, onClose, onSuccess }: CreateRoomModalP
                   >
                     <div className="p-5 rounded-3xl bg-blue-500/5 border border-blue-500/10 mb-6">
                        <p className="text-[12px] font-medium text-blue-400 leading-relaxed italic">
-                         "Optimize your study environment with integrated media signal sync."
+                          &ldquo;Optimize your study environment with integrated media signal sync.&rdquo;
                        </p>
                     </div>
 

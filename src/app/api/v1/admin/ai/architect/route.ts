@@ -227,17 +227,17 @@ Accuracy is CRITICAL. Extract ALL lectures and links.`;
         const existingModules = await tx.module.findMany({ where: { semesterId }, include: { subjects: { include: { lectures: true } } } });
 
         for (const mData of structure.modules) {
-          let module = existingModules.find((em: any) => semanticMatch(em.name, mData.name));
-          if (!module) {
-            module = await tx.module.create({ data: { name: mData.name, semesterId } });
-            existingModules.push({ ...module, subjects: [] });
+          let mod = existingModules.find((em: any) => semanticMatch(em.name, mData.name));
+          if (!mod) {
+            mod = await tx.module.create({ data: { name: mData.name, semesterId } });
+            existingModules.push({ ...mod, subjects: [] });
           }
           for (const sData of mData.subjects || []) {
-            let subject = module.subjects?.find((es: any) => semanticMatch(es.name, sData.name));
+            let subject = mod.subjects?.find((es: any) => semanticMatch(es.name, sData.name));
             if (!subject) {
-              subject = await tx.subject.create({ data: { name: sData.name, moduleId: module.id } });
-              if (!module.subjects) module.subjects = [];
-              module.subjects.push({ ...subject, lectures: [] });
+              subject = await tx.subject.create({ data: { name: sData.name, moduleId: mod.id } });
+              if (!mod.subjects) mod.subjects = [];
+              mod.subjects.push({ ...subject, lectures: [] });
             }
             let nextOrder = subject.lectures?.length || 0;
             for (const lecData of sData.lectures || []) {

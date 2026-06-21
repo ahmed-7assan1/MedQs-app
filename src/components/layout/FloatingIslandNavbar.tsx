@@ -37,7 +37,6 @@ export function FloatingIslandNavbar({
   userId?: string 
 }) {
   const pathname = usePathname();
-  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social") || pathname.startsWith("/modules"))) return null;
   const router = useRouter();
   const { siteName, logoUrl } = useSiteConfig();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -74,6 +73,8 @@ export function FloatingIslandNavbar({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [handleScroll]);
+
+  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social") || pathname.startsWith("/modules"))) return null;
 
   const handleSearchInput = async (val: string) => {
     setSearchQuery(val);

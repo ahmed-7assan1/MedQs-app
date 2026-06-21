@@ -26,8 +26,6 @@ const SOCIAL_PATHS = ["/social", "/community"];
 
 export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: GlobalTopBarProps) {
   const pathname = usePathname();
-  if (pathname?.startsWith("/quiz") || pathname?.startsWith("/ai-chat")) return null;
-
   const isSocial = SOCIAL_PATHS.some((p) => pathname?.startsWith(p));
 
   const [searchOpen, setSearchOpen] = useState(false);
@@ -74,6 +72,8 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isSocial]);
+
+  if (pathname?.startsWith("/quiz") || pathname?.startsWith("/ai-chat")) return null;
 
   const title = isSocial
     ? "MedOneX Community"

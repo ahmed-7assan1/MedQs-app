@@ -99,7 +99,7 @@ export function PremiumNotificationPrompt() {
             <div className="p-8 text-center">
               <h2 className="text-2xl font-black text-white mb-3">Stay Connected</h2>
               <p className="text-white/60 text-sm leading-relaxed mb-8">
-                Receive real-time updates about your lectures, quizzes, and community discussions even when you're offline.
+                Receive real-time updates about your lectures, quizzes, and community discussions even when you&rsquo;re offline.
               </p>
 
               <div className="space-y-3">

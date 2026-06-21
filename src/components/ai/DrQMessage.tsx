@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   HandThumbUpIcon,
@@ -74,6 +74,8 @@ const DrQMessageInner: React.FC<MessageProps> = ({
 }) => {
   const isAI = message.role === "assistant";
   const [copying, setCopying] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
   const [selectionRange, setSelectionRange] = useState<{ text: string, top: number, left: number } | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
   const [showFlashcards, setShowFlashcards] = useState(false);
@@ -176,6 +178,89 @@ const DrQMessageInner: React.FC<MessageProps> = ({
     setTimeout(() => setCopying(false), 2000);
   };
 
+  const exportAsPdf = async () => {
+    const el = contentRef.current;
+    if (!el) return;
+    setExporting(true);
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.style.backgroundColor = "#ffffff";
+      clone.style.color = "#1a1a1a";
+      clone.style.padding = "28px";
+      clone.style.fontFamily = "'Segoe UI', 'Tahoma', 'Noto Sans Arabic', system-ui, -apple-system, sans-serif";
+      clone.style.lineHeight = "1.75";
+      clone.style.fontSize = "15px";
+      clone.style.direction = "auto";
+      clone.style.position = "fixed";
+      clone.style.left = "-9999px";
+      clone.style.top = "0";
+      clone.style.width = el.offsetWidth + "px";
+      clone.style.maxWidth = "800px";
+      clone.style.zIndex = "-1";
+      clone.style.borderRadius = "0";
+      clone.style.boxShadow = "none";
+      document.body.appendChild(clone);
+
+      clone.querySelectorAll("*").forEach((child) => {
+        const c = child as HTMLElement;
+        if (c.style.color && c.style.color.includes("fff") || c.className.includes("text-white")) {
+          c.style.color = "#1a1a1a";
+        }
+        if (c.className.includes("dark:")) {
+          Array.from(c.classList).forEach((cls) => {
+            if (cls.startsWith("dark:")) c.classList.remove(cls);
+          });
+        }
+        if (c.style.backgroundColor && (c.style.backgroundColor === "transparent" || c.style.backgroundColor.includes("0)"))) {
+          c.style.backgroundColor = "";
+        }
+        if (c.tagName === "A") {
+          c.style.color = "#4f46e5";
+        }
+        if (c.tagName === "PRE" || c.tagName === "CODE") {
+          c.style.backgroundColor = "#f5f5f5";
+          c.style.color = "#1a1a1a";
+          c.style.border = "1px solid #e5e7eb";
+        }
+        if (c.tagName === "TABLE") {
+          c.style.borderCollapse = "collapse";
+        }
+        if (c.tagName === "TD" || c.tagName === "TH") {
+          c.style.border = "1px solid #d1d5db";
+          c.style.padding = "8px 12px";
+        }
+        if (c.tagName === "TH") {
+          c.style.backgroundColor = "#f9fafb";
+        }
+        if (c.tagName === "IMG") {
+          c.style.maxWidth = "100%";
+          c.style.height = "auto";
+          c.style.borderRadius = "8px";
+        }
+      });
+
+      await html2pdf()
+        .set({
+          margin: [10, 10, 10, 10],
+          filename: `medonex-response-${message.id.slice(0, 8)}.pdf`,
+          image: { type: "jpeg", quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        })
+        .from(clone)
+        .save();
+
+      document.body.removeChild(clone);
+      toast.success("PDF exported successfully");
+    } catch {
+      toast.error("Failed to export PDF");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className={cn("flex group/msg relative", isAI ? "justify-start" : "justify-end")}>
       
@@ -251,6 +336,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
         ) : (
           <div className="relative">
             <motion.div 
+              ref={contentRef}
               initial={{ opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
@@ -263,7 +349,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                   ? "rounded-3xl rounded-tl-sm border border-slate-200/60 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none" 
                   : "",
                 !isAI 
-                  ? "rounded-2xl bg-black/[0.06] dark:bg-white/[0.04] text-gray-900 dark:text-white shadow-sm border border-black/[0.08] dark:border-white/[0.06]"
+                  ? "rounded-[28px] rounded-br-sm bg-[#F7F7F7] dark:bg-white/[0.04] text-gray-900 dark:text-white shadow-sm border border-black/[0.08] dark:border-white/[0.06]"
                   : ""
               )}
               style={{ 
@@ -273,26 +359,47 @@ const DrQMessageInner: React.FC<MessageProps> = ({
             >
               {/* File/Image Inline Display */}
               {message.files && message.files.length > 0 && (
-                <div className="flex flex-wrap gap-3 mb-4">
+                <div className={cn("flex flex-wrap gap-2 mb-3", message.files.filter(f => f.mimeType.startsWith("image/")).length >= 2 && "grid grid-cols-2")}>
                   {message.files.map((f, i) => {
                     const isImg = f.mimeType.startsWith("image/");
                     return isImg ? (
-                      <div key={i} className="relative group overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm max-w-md">
-                        <img src={f.data} alt={f.name} className="w-full h-auto object-cover max-h-[400px]" />
-                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-xs text-white truncate block">{f.name}</span>
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, delay: i * 0.05 }}
+                        className="relative group overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 shadow-sm"
+                      >
+                        <img src={f.data} alt={f.name} className="w-full h-auto object-cover max-h-[220px]" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <span className="text-[11px] text-white/90 truncate block font-medium">{f.name}</span>
                         </div>
-                      </div>
+                      </motion.div>
                     ) : (
-                      <div key={i} className={cn("flex items-center gap-3 p-3 rounded-xl border max-w-xs", isAI ? "bg-muted/30 border-border" : "bg-black/[0.06] border-black/[0.1] dark:bg-white/10 dark:border-white/20")}>
-                        <div className="w-10 h-10 rounded-lg bg-white/20 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
-                          <FileText size={20} className={isAI ? "text-rose-500" : "text-white"} />
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, delay: i * 0.05 }}
+                        className={cn(
+                          "flex items-center gap-2 p-2.5 rounded-xl border max-w-[220px]",
+                          isAI ? "bg-muted/30 border-border" : "bg-[#F7F7F7] border-black/[0.1] dark:bg-white/10 dark:border-white/20"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-[11px] font-bold",
+                          isAI ? "bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400" : "bg-white/20 text-white"
+                        )}>
+                          {f.name.match(/\.pdf$/i) ? "PDF" : f.name.match(/\.docx?$/i) ? "DOC" : f.name.match(/\.xlsx?$/i) ? "XLS" : f.name.match(/\.pptx?$/i) ? "PPT" : f.name.match(/\.zip$/i) || f.name.match(/\.rar$/i) ? "ZIP" : f.name.match(/\.mp[34]$/i) || f.name.match(/\.mov$/i) || f.name.match(/\.avi$/i) ? "VID" : "📄"}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold truncate text-gray-900 dark:text-white">{f.name}</p>
-                          <p className="text-[10px] font-semibold text-slate-500 dark:text-white/50">{isImg ? "Image File" : "PDF Document"}</p>
+                          <p className="text-[11px] font-semibold truncate text-gray-900 dark:text-white">{f.name}</p>
+                          <p className="text-[9px] text-slate-500 dark:text-white/40">
+                            {f.size ? `${(f.size / 1024 / 1024).toFixed(1)} MB` : ""}
+                          </p>
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -498,6 +605,9 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 </button>
                 <button onClick={() => onShare?.(message.content)} aria-label="Share message" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white transition-all">
                   <ShareIcon className="w-4 h-4" />
+                </button>
+                <button onClick={exportAsPdf} disabled={exporting} aria-label="Export as PDF" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white transition-all disabled:opacity-50">
+                  {exporting ? <Spinner size={14} /> : <FileText size={16} weight="fill" />}
                 </button>
               </div>
             )}

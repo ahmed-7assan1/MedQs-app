@@ -1170,7 +1170,7 @@ function AiAnalysisTab({ room, currentUserId }: { room: Room; currentUserId: str
                 <div className="h-10 w-10 bg-primary/15 rounded-xl flex items-center justify-center text-primary">
                    <Target size={20} weight="fill" />
                 </div>
-                <h4 className="text-sm font-black text-foreground uppercase tracking-widest">Dr. Q's Strategy Recommendations</h4>
+                <h4 className="text-sm font-black text-foreground uppercase tracking-widest">Dr. Q&rsquo;s Strategy Recommendations</h4>
              </div>
              <ul className="space-y-4">
                 {[

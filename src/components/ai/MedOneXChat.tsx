@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import React, { useState, useRef, useEffect, startTransition, useCallback } from "react";
+
 import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider, DrQSettings } from "@/hooks/useDrQChat";
 import {
-  Plus, Paperclip, PaperPlaneRight, Stop, X, Trash, ChatDots,
-  MagnifyingGlass, Gear, List, NoteBlank, Quotes, BookOpen, Lightning,
-  Check, GlobeHemisphereWest, Sparkle, Sun, Moon, Brain,
-  WarningCircle, Clock, House, ChatCircle, Key, ArrowBendUpLeft,
-  ShieldCheck, ClockCountdown, ChartBar, Robot, Book, FileText,
-  ArrowUpRight, Eye, EyeSlash, Spinner, TextIndent
+  Plus, Stop, X, Trash,
+  MagnifyingGlass, BookOpen, Check, Brain,
+  WarningCircle, ChatCircle, ArrowBendUpLeft,
+  ShieldCheck, ClockCountdown, ChartBar, Lightning,
+  ArrowUpRight, Eye, EyeSlash, Spinner, TextIndent,
+  Quotes, NoteBlank, Sparkle,
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ import { checkProviderRate } from "@/lib/rate-limits";
 import { DrQMessage } from "./DrQMessage";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
-import { InstallPWA } from "./InstallPWA";
+import { MobileChatSidebar } from "./MobileChatSidebar";
 import { PWAInstallModal } from "./PWAInstallModal";
 import { SavedPage } from "./SavedPage";
 import { LibraryPage } from "./LibraryPage";
@@ -33,9 +33,7 @@ import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import {
-  HomeIcon, BookOpenIcon, UserGroupIcon,
-  ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon, ChevronDoubleRightIcon, ChevronDownIcon,
-  BookmarkIcon as BookmarkIconSolid, DocumentTextIcon, GlobeAltIcon,
+  GlobeAltIcon,
 } from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
 
@@ -50,12 +48,6 @@ const C = {
   border: "border-gray-200 dark:border-white/10",
   borderLight: "border-gray-100 dark:border-white/5",
 };
-
-const THREAD_TABS = [
-  { id: "recent", label: "Recent", icon: Clock },
-  { id: "pinned", label: "Starred", icon: ChatDots },
-  { id: "all", label: "All Chats", icon: List },
-];
 
 export function MedOneXChat() {
   const { theme, setTheme } = useThemeStore();
@@ -93,6 +85,9 @@ export function MedOneXChat() {
   const [modulesData, setModulesData] = useState<any[]>([]);
   const [modulesSearch, setModulesSearch] = useState("");
   const [replyContext, setReplyContext] = useState<{ id: string; text: string } | null>(null);
+  const handleReply = useCallback((id: string, text: string) => {
+    setReplyContext({ id, text });
+  }, []);
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -113,15 +108,21 @@ export function MedOneXChat() {
     el.style.overflow = showSidebar ? "hidden" : "";
   }, [showSidebar]);
 
+  // Reset initial-scroll flag when switching threads so it scrolls to the last message
+  useEffect(() => {
+    hasInitialScrolledRef.current = false;
+  }, [activeThreadId]);
+
   // Track scroll position for scroll-to-bottom button
   useEffect(() => {
-    const id = setInterval(() => {
-      const el = scrollContainerRef.current;
-      if (!el) return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onScroll = () => {
       const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
       setShowScrollBtn(dist > 150);
-    }, 200);
-    return () => clearInterval(id);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
 
@@ -307,10 +308,16 @@ export function MedOneXChat() {
   };
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB client-side limit
+  const MAX_FILES = 5;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
     if (!selected) return;
+    if (files.length + selected.length > MAX_FILES) {
+      toast.error(`Maximum ${MAX_FILES} files allowed`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     Array.from(selected).forEach(file => {
       if (file.size > MAX_FILE_SIZE) {
         toast.error(`"${file.name}" is too large (max 10MB)`);
@@ -332,9 +339,12 @@ export function MedOneXChat() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const filteredThreads = threads.filter(t =>
-    t.title?.toLowerCase().includes(searchQuery.toLowerCase()) && 
-    (activeTab === "all" || (activeTab === "recent" && true))
+  const filteredThreads = React.useMemo(() =>
+    threads.filter(t =>
+      t.title?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (activeTab === "all" || (activeTab === "recent" && true))
+    ),
+    [threads, searchQuery, activeTab]
   );
 
   const activePersonaObj = DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer;
@@ -509,253 +519,75 @@ export function MedOneXChat() {
       <div className={cn(
         "fixed top-0 left-0 right-0 z-50 h-14 flex items-start justify-between",
         isDark
-          ? "bg-gradient-to-b from-black via-black to-transparent"
-          : "bg-gradient-to-b from-white via-white to-transparent"
+          ? "bg-black"
+          : "bg-white"
       )}>
         <button
           onClick={() => setShowSidebar(true)}
           className={cn(
-            "mt-3 ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-all",
+            "mt-1.5 ml-3 w-11 h-11 rounded-full flex items-center justify-center transition-all",
             isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-gray-100"
           )}
         >
           <TextIndent size={20} weight="bold" />
         </button>
-        <div className="flex items-center gap-2 mr-4 mt-4">
+        <div className="flex items-center gap-1.5 mr-4 mt-2">
           {globalQuestions.length > 0 && (
             <button
               onClick={() => setShowGlobalQuestions(true)}
               className={cn(
-                "transition-all active:scale-90",
-                isDark ? "text-white hover:text-white/80" : "text-gray-900 hover:text-gray-600"
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
+                isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
               )}
             >
-              <DocumentTextIcon className="w-4 h-4" />
+              <ChatCircle size={18} weight="fill" />
             </button>
           )}
           {globalFlashcards.length > 0 && (
             <button
               onClick={() => setShowGlobalFlashcards(true)}
               className={cn(
-                "transition-all active:scale-90",
-                isDark ? "text-white hover:text-white/80" : "text-gray-900 hover:text-gray-600"
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
+                isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
               )}
             >
-              <BookOpenIcon className="w-4 h-4" />
+              <BookOpen size={18} weight="fill" />
             </button>
           )}
           {globalResources.length > 0 && (
             <button
               onClick={() => setShowGlobalResources(true)}
               className={cn(
-                "transition-all active:scale-90",
-                isDark ? "text-white hover:text-white/80" : "text-gray-900 hover:text-gray-600"
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
+                isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
               )}
             >
-              <GlobeAltIcon className="w-4 h-4" />
+              <GlobeAltIcon className="w-[18px] h-[18px]" />
             </button>
           )}
         </div>
       </div>
 
-      {/* ─── Sidebar ─── */}
-      <AnimatePresence>
-        {showSidebar && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10010] bg-black/20 backdrop-blur-sm"
-            onClick={() => setShowSidebar(false)}
-          >
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              onClick={(e) => e.stopPropagation()}
-              className={cn(
-                "absolute left-0 top-0 bottom-0 w-[85vw] max-w-[85vw] flex flex-col backdrop-blur-lg shadow-[4px_0_32px_rgba(0,0,0,0.4)]",
-                isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-white border-r border-gray-200/60"
-              )}
-              style={{ willChange: "transform" }}
-            >
-              {/* Extending top edge */}
-              <div className={cn(
-                "absolute top-0 right-0 h-px pointer-events-none",
-                isDark ? "bg-gradient-to-r from-white/10 to-transparent" : "bg-gradient-to-r from-gray-200 to-transparent"
-              )} style={{ width: "15vw" }} />
-              {/* Extending bottom edge */}
-              <div className={cn(
-                "absolute bottom-0 right-0 h-px pointer-events-none",
-                isDark ? "bg-gradient-to-r from-white/10 to-transparent" : "bg-gradient-to-r from-gray-200 to-transparent"
-              )} style={{ width: "15vw" }} />
-              {/* Sidebar Header */}
-              <div className={cn("flex items-center justify-between px-4 py-3 border-b", isDark ? "border-white/10" : "border-gray-200")}>
-                <div className="flex items-center gap-2.5">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt={siteName} className={cn("h-7 w-7 object-contain", isDark ? "brightness-0 invert" : "brightness-0")} />
-                  ) : (
-                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900")}>
-                      {siteName?.charAt(0) || "M"}
-                    </div>
-                  )}
-                  <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-gray-900")}>{siteName}</span>
-                </div>
-                <button
-                  onClick={() => setShowSidebar(false)}
-                  className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}
-                >
-                  <ChevronDoubleRightIcon className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto no-scrollbar">
-                {/* ─── Navigation Section ─── */}
-                <div className="p-3">
-                  <p className={cn("text-[10px] font-bold uppercase tracking-widest px-3 mb-2", isDark ? "text-gray-500" : "text-gray-400")}>Navigation</p>
-                  <div className="space-y-0.5">
-                    {[
-                      { icon: HomeIcon, label: "Home", href: "/dashboard-app" },
-                      { icon: BookOpenIcon, label: "Modules", href: "/modules" },
-                      { icon: UserGroupIcon, label: "Social", href: "/social" },
-                      { icon: ClipboardDocumentListIcon, label: "Quizzes", href: "/quiz" },
-                      { icon: BookmarkIconSolid, label: "Saved", href: null, action: () => setShowSaved(true) },
-                      { icon: null, label: "Library", href: null, action: () => setShowLibrary(true), customIcon: Book },
-                      { icon: null, label: "Custom MedOneX", href: null, action: () => setShowAgentGallery(true), customIcon: Robot },
-                    ].map((item: any) => (
-                      item.href ? (
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          onClick={() => setShowSidebar(false)}
-                          className={cn(
-                            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                            isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
-                          )}
-                        >
-                          <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
-                          {item.label}
-                        </Link>
-                      ) : (
-                        <button
-                          key={item.label}
-                          onClick={() => { setShowSidebar(false); item.action(); }}
-                          className={cn(
-                            "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                            isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
-                          )}
-                        >
-                          {item.customIcon ? (
-                            <item.customIcon size={20} weight="bold" className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
-                          ) : (
-                            <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
-                          )}
-                          {item.label}
-                        </button>
-                      )
-                    ))}
-                  </div>
-                </div>
-
-                <div className={cn("mx-4 my-1 h-px", isDark ? "bg-white/10" : "bg-gray-200")} />
-
-                {/* ─── Chats Section ─── */}
-                <div className="p-3">
-                  <p className={cn("text-[10px] font-bold uppercase tracking-widest px-3 mb-2", isDark ? "text-gray-500" : "text-gray-400")}>Chats</p>
-                  <div className={cn("flex items-center gap-0.5 p-0.5 rounded-xl mb-3", isDark ? "bg-white/5" : "bg-gray-100")}>
-                    {THREAD_TABS.map(tab => (
-                      <button
-                        key={tab.id}
-                        onClick={() => { setActiveTab(tab.id); }}
-                        className={cn(
-                          "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all flex-1",
-                          activeTab === tab.id
-                            ? isDark ? "bg-white/10 text-white shadow-sm" : "bg-white text-gray-900 shadow-sm"
-                            : isDark ? "text-white/40 hover:text-white/70" : "text-gray-400 hover:text-gray-700"
-                        )}
-                      >
-                        <tab.icon size={14} weight={activeTab === tab.id ? "fill" : "regular"} />
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="relative mb-3">
-                    <MagnifyingGlass size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-gray-500" : "text-gray-400")} />
-                    <input
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      placeholder="Search conversations..."
-                      className={cn(
-                        "w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition-colors",
-                        isDark ? "bg-white/5 text-white placeholder-gray-500 border border-white/10" : "bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-200"
-                      )}
-                    />
-                  </div>
-                  <div className="space-y-0.5 max-h-[200px] overflow-y-auto no-scrollbar">
-                    {filteredThreads.length === 0 ? (
-                      <div className={cn("text-xs text-center py-8", isDark ? "text-gray-500" : "text-gray-400")}>No conversations</div>
-                    ) : (
-                      filteredThreads.map(t => (
-                        <button
-                          key={t.id}
-                          onClick={() => { switchThread(t.id); setShowSidebar(false); }}
-                          className={cn(
-                            "w-full text-start px-3 py-2.5 rounded-xl text-sm transition-all",
-                            t.id === activeThreadId
-                              ? isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600"
-                              : isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-700 hover:bg-gray-50"
-                          )}
-                        >
-                          <div className="flex items-center gap-3">
-                            <ChatCircle size={14} weight={t.id === activeThreadId ? "fill" : "regular"} className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
-                            <span className="truncate">{t.title || "New Chat"}</span>
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                  <button
-                    onClick={() => { newThread(); setShowSidebar(false); }}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mt-2 transition-all",
-                      isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
-                    )}
-                  >
-                    <Plus size={16} weight="bold" className={cn(isDark ? "text-white" : "text-gray-900")} />
-                    New Chat
-                  </button>
-                </div>
-              </div>
-
-              {/* ─── Settings at Bottom ─── */}
-              <div className={cn("border-t p-3 space-y-1", isDark ? "border-white/10" : "border-gray-200")}>
-                <button
-                  onClick={() => setTheme(isDark ? "light" : "dark")}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all",
-                    isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  {isDark ? <Sun size={18} className="text-white" /> : <Moon size={18} className="text-gray-900" />}
-                  {isDark ? "Light Mode" : "Dark Mode"}
-                </button>
-                <button
-                  onClick={() => { setShowConfig(true); setShowSidebar(false); }}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all",
-                    isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  <Cog6ToothIcon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
-                  Settings
-                </button>
-                <InstallPWA isDark={isDark} />
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MobileChatSidebar
+        showSidebar={showSidebar}
+        onClose={() => setShowSidebar(false)}
+        isDark={isDark}
+        siteName={siteName}
+        logoUrl={logoUrl}
+        filteredThreads={filteredThreads}
+        activeThreadId={activeThreadId}
+        onSwitchThread={switchThread}
+        onNewThread={newThread}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onThemeToggle={() => setTheme(isDark ? "light" : "dark")}
+        onOpenConfig={() => setShowConfig(true)}
+        onOpenSaved={() => setShowSaved(true)}
+        onOpenLibrary={() => setShowLibrary(true)}
+        onOpenAgentGallery={() => setShowAgentGallery(true)}
+      />
 
       {/* ─── Threads Container — bottom sheet on mobile ─── */}
       <AnimatePresence>
@@ -947,14 +779,14 @@ export function MedOneXChat() {
         )}
       </AnimatePresence>
 
-      <motion.div
-        animate={{
-          x: showSidebar ? "85vw" : 0,
-        }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
+      <div
         className="flex flex-col flex-1 min-h-0"
         ref={mainRef}
-        style={{ willChange: "transform" }}
+        style={{
+          transform: showSidebar ? "translateX(85vw)" : "translateX(0)",
+          transition: "transform 0.18s ease-out",
+          willChange: "transform",
+        }}
       >
 
       {/* ─── Messages Area ─── */}
@@ -1095,7 +927,7 @@ export function MedOneXChat() {
                       aiBubbleColor={settings.aiBubbleColor}
                       onReaction={setReaction}
                       onRegenerate={regenerate}
-                      onReply={(id, text) => setReplyContext({ id, text })}
+                      onReply={handleReply}
                       activePersona={settings.activePersona}
                       variant="flat"
                     />
@@ -1108,7 +940,7 @@ export function MedOneXChat() {
                       aiBubbleColor={settings.aiBubbleColor}
                       onReaction={setReaction}
                       onRegenerate={undefined}
-                      onReply={(id, text) => setReplyContext({ id, text })}
+                      onReply={handleReply}
                       activePersona={settings.activePersona}
                     />
                   )}
@@ -1125,51 +957,6 @@ export function MedOneXChat() {
             </div>
           )}
         </div>
-
-        {/* File Preview Bar */}
-        {files.length > 0 && (
-          <div className="flex-shrink-0 flex justify-center px-3 md:px-4 pb-1 relative z-10">
-            <div className="w-full max-w-3xl flex flex-wrap gap-2">
-              {files.map((f, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "group relative flex items-center gap-2 px-2 py-1.5 rounded-xl border max-w-[200px]",
-                    isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-200"
-                  )}
-                >
-                  {f.loading ? (
-                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", isDark ? "bg-white/10" : "bg-gray-200")}>
-                      <svg className="animate-spin h-3.5 w-3.5 text-indigo-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    </div>
-                  ) : f.mimeType.startsWith("image/") ? (
-                    <img src={f.data} alt={f.name} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" />
-                  ) : (
-                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold flex-shrink-0", isDark ? "bg-white/10 text-gray-300" : "bg-gray-200 text-gray-500")}>
-                      {f.name.match(/\.pdf$/i) ? "PDF" : f.name.match(/\.pptx?$/i) ? "PPT" : "📄"}
-                    </div>
-                  )}
-                  <div className="flex flex-col min-w-0">
-                    <span className={cn("text-xs truncate max-w-[100px]", f.loading && "text-indigo-500")}>{f.name}</span>
-                    {f.loading && <span className="text-[9px] text-indigo-400">Reading...</span>}
-                  </div>
-                  <button
-                    onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
-                    className={cn(
-                      "absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity",
-                      isDark ? "bg-gray-700 text-gray-300" : "bg-gray-300 text-gray-600"
-                    )}
-                  >
-                    <X size={10} weight="bold" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Reply Context Bar */}
         {replyContext && (
@@ -1265,7 +1052,7 @@ export function MedOneXChat() {
       </main>
 
       {/* Shared file input (outside both desktop/mobile sections for reliability) */}
-      <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,application/pdf,.ppt,.pptx,.pptm" onChange={handleFileChange} />
+      <input type="file" ref={fileInputRef} className="hidden" multiple accept="*/*" onChange={handleFileChange} />
 
       {/* Desktop inline chat input (nav handles mobile) */}
       <div className="hidden md:block flex-shrink-0 relative mb-[30px]">
@@ -1304,38 +1091,76 @@ export function MedOneXChat() {
                 isDark ? "bg-[#141414]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
               )}
             >
-              <div className="flex items-center gap-0.5 px-1.5 py-1">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
-              >
-                {files.some(f => f.loading) ? (
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                )}
-              </button>
+              {files.length > 0 && (
+                <div className={cn(
+                  "flex flex-wrap gap-1.5 px-3 pt-2.5 pb-1.5 max-h-[120px] overflow-y-auto border-b",
+                  isDark ? "border-white/10" : "border-gray-200/60"
+                )}>
+                  {files.map((f, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs max-w-[160px] transition-all",
+                        isDark ? "bg-white/10" : "bg-gray-100"
+                      )}
+                    >
+                      {f.loading ? (
+                        <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0">
+                          <svg className="animate-spin h-3 w-3 text-indigo-500" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                        </div>
+                      ) : f.mimeType.startsWith("image/") ? (
+                        <img src={f.data} alt={f.name} className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                      ) : (
+                        <span className="text-[10px] flex-shrink-0">
+                          {f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}
+                        </span>
+                      )}
+                      <span className="truncate max-w-[80px]">{f.name}</span>
+                      <button
+                        onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
+                        className="flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
+                      >
+                        <X size={10} weight="bold" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               <textarea
                 ref={inputRef}
                 rows={1}
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={e => startTransition(() => setInput(e.target.value))}
                 onKeyDown={handleKeyDown}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 placeholder="MedOneX Expert"
                 dir="auto"
                 className={cn(
-                  "w-full bg-transparent border-none outline-none resize-none py-1.5 px-2 text-sm leading-relaxed no-scrollbar font-[family-name:var(--font-english)]",
+                  "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-sm leading-relaxed no-scrollbar font-[family-name:var(--font-english)]",
                   isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
                 )}
               />
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center justify-between px-2 pb-2">
+                <div className="flex items-center gap-0.5">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                >
+                  {files.some(f => f.loading) ? (
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                  )}
+                </button>
                 <button
                   onClick={() => setShowProviderPicker(true)}
                   className={cn(
@@ -1369,6 +1194,7 @@ export function MedOneXChat() {
                     { size: 14, weight: "regular" }
                   )}
                 </button>
+                </div>
                 {loading ? (
                   <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30">
                     <Stop size={14} weight="fill" />
@@ -1390,7 +1216,6 @@ export function MedOneXChat() {
                   </button>
                 )}
               </div>
-              </div>
             </div>
             <div className="flex items-center justify-between mt-3 px-1">
               <span className={cn("text-[8px] leading-tight", isDark ? "text-gray-500" : "text-gray-500")}>This AI chat is for educational purposes only &bull; Please set your API key for accurate responses</span>
@@ -1399,7 +1224,7 @@ export function MedOneXChat() {
           </div>
         </div>
       </div>
-      </motion.div>
+    </div>
 
       {/* Solid fill below mobile capsule */}
       <div className={cn(
@@ -1447,28 +1272,53 @@ export function MedOneXChat() {
         )} />
         <div className="px-2 pb-1 pointer-events-auto relative">
           <div className={cn(
-            "flex items-end gap-1 px-3 py-2.5 mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm",
+            "flex flex-col mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm",
             isDark ? "ring-white/10" : "ring-gray-200/80",
             isDark ? "bg-[#141414]/90 backdrop-blur-xl text-white" : "bg-[#F7F7F7] text-[#050505]"
           )}>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className={cn(
-                "w-10 h-10 min-w-10 min-h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
-                isDark
-                  ? "text-gray-400 hover:text-white hover:bg-white/10"
-                  : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
-              )}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
+            {files.length > 0 && (
+              <div className={cn(
+                "flex flex-wrap gap-1.5 px-3 pt-2.5 pb-1.5 max-h-[120px] overflow-y-auto border-b",
+                isDark ? "border-white/10" : "border-gray-200/60"
+              )}>
+                {files.map((f, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs max-w-[160px] transition-all",
+                      isDark ? "bg-white/10" : "bg-gray-100"
+                    )}
+                  >
+                    {f.loading ? (
+                      <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0">
+                        <svg className="animate-spin h-3 w-3 text-indigo-500" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      </div>
+                    ) : f.mimeType.startsWith("image/") ? (
+                      <img src={f.data} alt={f.name} className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                    ) : (
+                      <span className="text-[10px] flex-shrink-0">
+                        {f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}
+                      </span>
+                    )}
+                    <span className="truncate max-w-[80px]">{f.name}</span>
+                    <button
+                      onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
+                      className="flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
+                    >
+                      <X size={10} weight="bold" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <textarea
               ref={mobileInputRef}
               rows={1}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => startTransition(() => setInput(e.target.value))}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -1480,11 +1330,25 @@ export function MedOneXChat() {
               placeholder="MedOneX Expert"
               dir="auto"
               className={cn(
-                "flex-1 min-w-0 bg-transparent border-none outline-none resize-none py-1.5 px-2 text-base leading-relaxed no-scrollbar placeholder-gray-400 font-[family-name:var(--font-english)]",
+                "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-base leading-relaxed no-scrollbar placeholder-gray-400 font-[family-name:var(--font-english)]",
                 isDark ? "text-white" : "text-[#050505]"
               )}
             />
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center justify-between px-2 pb-2">
+              <div className="flex items-center gap-0.5">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className={cn(
+                  "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
+                  isDark
+                    ? "text-gray-400 hover:text-white hover:bg-white/10"
+                    : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
+                )}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </button>
               <button
                 onClick={() => {
                   const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
@@ -1518,6 +1382,7 @@ export function MedOneXChat() {
               >
                 <Brain size={18} weight="regular" />
               </button>
+              </div>
               {loading ? (
                 <button
                   onClick={stopGeneration}
@@ -1738,6 +1603,7 @@ function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
   const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({});
   const [testingKey, setTestingKey] = useState<Record<string, "idle" | "testing" | "ok" | "fail">>({});
   const [keyError, setKeyError] = useState<Record<string, string>>({});
+  const [pickerTab, setPickerTab] = useState<"provider" | "keys">("provider");
 
   const handleKeyChange = (pid: AIProvider, index: number, value: string) => {
     const current = settings.byokKeys[pid];
@@ -1857,11 +1723,32 @@ function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
                 </button>
               </div>
 
+              {/* Tabs */}
+              <div className={cn("flex gap-1 px-5 pt-3 pb-2 border-b flex-shrink-0", isDark ? "border-white/10" : "border-gray-200")}>
+                {[
+                  { key: "provider" as const, label: "Provider" },
+                  { key: "keys" as const, label: "API Keys" },
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setPickerTab(tab.key)}
+                    className={cn(
+                      "relative px-4 py-1.5 rounded-lg text-xs font-medium transition-all",
+                      pickerTab === tab.key
+                        ? isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900"
+                        : isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-5">
-                {/* ─── Provider Selection ─── */}
+                {pickerTab === "provider" ? (
+                /* ─── Provider Selection ─── */
                 <div>
-                  <h3 className={cn("text-xs font-bold uppercase tracking-wider mb-3", isDark ? "text-gray-400" : "text-gray-500")}>Model Provider</h3>
                   <div className="grid grid-cols-2 gap-2">
                     {providers.map(pid => {
                       const config = PROVIDER_CONFIGS[pid];
@@ -1891,111 +1778,109 @@ function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
                     Active model: <span className={isDark ? "text-white" : "text-gray-800"}>{PROVIDER_CONFIGS[settings.activeProvider]?.defaultModel}</span>
                   </div>
                 </div>
-
-                {/* ─── API Keys ─── */}
-                <div>
-                  <h3 className={cn("text-xs font-bold uppercase tracking-wider mb-3", isDark ? "text-gray-400" : "text-gray-500")}>API Keys</h3>
-                  <div className="space-y-3">
-                    {providers.map(pid => {
-                      const config = PROVIDER_CONFIGS[pid];
-                      const keys = getKeysArray(settings.byokKeys[pid]);
-                      const hasAnyKey = keys.some(k => k);
-                      return (
-                        <div key={pid} className={cn("p-3 rounded-2xl border", isDark ? "bg-white/[0.02] border-white/10" : "bg-gray-50 border-gray-200")}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold", isDark ? "bg-white/10" : "bg-white border border-gray-200")}>
-                                {config.icon}
-                              </div>
-                              <span className={cn("text-xs font-medium", isDark ? "text-white" : "text-gray-900")}>{config.label}</span>
-                              {config.keyUrl && (
-                                <a href={config.keyUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-                                  className={cn("flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full transition-all hover:scale-105", isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600")}
-                                >
-                                  Get <ArrowUpRight size={8} weight="bold" />
-                                </a>
-                              )}
+                ) : (
+                /* ─── API Keys ─── */
+                <div className="space-y-3">
+                  {providers.map(pid => {
+                    const config = PROVIDER_CONFIGS[pid];
+                    const keys = getKeysArray(settings.byokKeys[pid]);
+                    const hasAnyKey = keys.some(k => k);
+                    return (
+                      <div key={pid} className={cn("p-3 rounded-2xl border", isDark ? "bg-white/[0.02] border-white/10" : "bg-gray-50 border-gray-200")}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold", isDark ? "bg-white/10" : "bg-white border border-gray-200")}>
+                              {config.icon}
                             </div>
-                            {hasAnyKey ? (
-                              <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600")}>
-                                {keys.filter(k => k).length} key{keys.filter(k => k).length !== 1 ? "s" : ""}
-                              </span>
-                            ) : (
-                              <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isDark ? "bg-red-500/10 text-red-400" : "bg-red-50 text-red-500")}>No Key</span>
-                            )}
-                          </div>
-                          <div className="space-y-1.5">
-                            {keys.map((key, idx) => {
-                              const id = `${pid}-${idx}`;
-                              const testState = testingKey[id];
-                              const isVisible = visibleKeys[id];
-                              return (
-                                <div key={idx} className="flex items-center gap-1.5">
-                                  <div className="relative flex-1">
-                                    <input
-                                      type={isVisible ? "text" : "password"}
-                                      placeholder={`${config.label} Key ${idx + 1}${idx === 0 ? " (Primary)" : ""}...`}
-                                      value={key}
-                                      onChange={e => handleKeyChange(pid, idx, e.target.value)}
-                                      className={cn(
-                                        "w-full rounded-xl px-3 py-2 text-xs outline-none transition-all font-mono",
-                                        isDark ? "bg-black/40 text-white placeholder-gray-600 border border-white/10 focus:border-indigo-500/50" : "bg-white text-gray-900 placeholder-gray-300 border border-gray-200 focus:border-indigo-400/50"
-                                      )}
-                                    />
-                                    <button
-                                      onClick={() => setVisibleKeys({ ...visibleKeys, [id]: !isVisible })}
-                                      className={cn("absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-gray-500 hover:text-white" : "text-gray-400 hover:text-gray-700")}
-                                    >
-                                      {isVisible ? <EyeSlash size={14} /> : <Eye size={14} />}
-                                    </button>
-                                  </div>
-                                  <button
-                                    onClick={() => handleTest(pid, idx)}
-                                    disabled={!key || testState === "testing"}
-                                    className={cn(
-                                      "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all",
-                                      testState === "testing" ? (isDark ? "bg-white/5 text-gray-500" : "bg-gray-100 text-gray-400")
-                                        : testState === "ok" ? "bg-emerald-500/10 text-emerald-500"
-                                        : testState === "fail" ? "bg-red-500/10 text-red-500"
-                                        : isDark ? "bg-white/10 text-gray-400 hover:bg-white/20" : "bg-gray-200 text-gray-600 hover:bg-gray-300",
-                                      !key ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
-                                    )}
-                                    title="Test key"
-                                  >
-                                    {testState === "testing" ? <Spinner size={13} weight="bold" className="animate-spin" />
-                                      : testState === "ok" ? <Check size={13} weight="bold" />
-                                      : testState === "fail" ? <WarningCircle size={13} weight="bold" />
-                                      : <Lightning size={13} weight="bold" />}
-                                  </button>
-                                  {keys.length > 1 && (
-                                    <button
-                                      onClick={() => removeKeyField(pid, idx)}
-                                      className={cn("flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all", isDark ? "text-gray-500 hover:bg-white/10 hover:text-red-400" : "text-gray-400 hover:bg-gray-200 hover:text-red-500")}
-                                    >
-                                      <X size={10} weight="bold" />
-                                    </button>
-                                  )}
-                                </div>
-                              );
-                            })}
-                            {keyError[`${pid}-${keys.length - 1}`] && (
-                              <p className="text-[10px] text-red-400 pl-1">{keyError[`${pid}-${keys.length - 1}`]}</p>
-                            )}
-                            {keys.length < 5 && (
-                              <button
-                                onClick={() => addKeyField(pid)}
-                                className={cn("flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-xl transition-all", isDark ? "text-gray-400 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800")}
+                            <span className={cn("text-xs font-medium", isDark ? "text-white" : "text-gray-900")}>{config.label}</span>
+                            {config.keyUrl && (
+                              <a href={config.keyUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                                className={cn("flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full transition-all hover:scale-105", isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600")}
                               >
-                                <Plus size={10} weight="bold" />
-                                Add Key ({keys.length}/5)
-                              </button>
+                                Get <ArrowUpRight size={8} weight="bold" />
+                              </a>
                             )}
                           </div>
+                          {hasAnyKey ? (
+                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600")}>
+                              {keys.filter(k => k).length} key{keys.filter(k => k).length !== 1 ? "s" : ""}
+                            </span>
+                          ) : (
+                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isDark ? "bg-red-500/10 text-red-400" : "bg-red-50 text-red-500")}>No Key</span>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
+                        <div className="space-y-1.5">
+                          {keys.map((key, idx) => {
+                            const id = `${pid}-${idx}`;
+                            const testState = testingKey[id];
+                            const isVisible = visibleKeys[id];
+                            return (
+                              <div key={idx} className="flex items-center gap-1.5">
+                                <div className="relative flex-1">
+                                  <input
+                                    type={isVisible ? "text" : "password"}
+                                    placeholder={`${config.label} Key ${idx + 1}${idx === 0 ? " (Primary)" : ""}...`}
+                                    value={key}
+                                    onChange={e => handleKeyChange(pid, idx, e.target.value)}
+                                    className={cn(
+                                      "w-full rounded-xl px-3 py-2 text-xs outline-none transition-all font-mono",
+                                      isDark ? "bg-black/40 text-white placeholder-gray-600 border border-white/10 focus:border-indigo-500/50" : "bg-white text-gray-900 placeholder-gray-300 border border-gray-200 focus:border-indigo-400/50"
+                                    )}
+                                  />
+                                  <button
+                                    onClick={() => setVisibleKeys({ ...visibleKeys, [id]: !isVisible })}
+                                    className={cn("absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-gray-500 hover:text-white" : "text-gray-400 hover:text-gray-700")}
+                                  >
+                                    {isVisible ? <EyeSlash size={14} /> : <Eye size={14} />}
+                                  </button>
+                                </div>
+                                <button
+                                  onClick={() => handleTest(pid, idx)}
+                                  disabled={!key || testState === "testing"}
+                                  className={cn(
+                                    "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all",
+                                    testState === "testing" ? (isDark ? "bg-white/5 text-gray-500" : "bg-gray-100 text-gray-400")
+                                      : testState === "ok" ? "bg-emerald-500/10 text-emerald-500"
+                                      : testState === "fail" ? "bg-red-500/10 text-red-500"
+                                      : isDark ? "bg-white/10 text-gray-400 hover:bg-white/20" : "bg-gray-200 text-gray-600 hover:bg-gray-300",
+                                    !key ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                                  )}
+                                  title="Test key"
+                                >
+                                  {testState === "testing" ? <Spinner size={13} weight="bold" className="animate-spin" />
+                                    : testState === "ok" ? <Check size={13} weight="bold" />
+                                    : testState === "fail" ? <WarningCircle size={13} weight="bold" />
+                                    : <Lightning size={13} weight="bold" />}
+                                </button>
+                                {keys.length > 1 && (
+                                  <button
+                                    onClick={() => removeKeyField(pid, idx)}
+                                    className={cn("flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all", isDark ? "text-gray-500 hover:bg-white/10 hover:text-red-400" : "text-gray-400 hover:bg-gray-200 hover:text-red-500")}
+                                  >
+                                    <X size={10} weight="bold" />
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                          {keyError[`${pid}-${keys.length - 1}`] && (
+                            <p className="text-[10px] text-red-400 pl-1">{keyError[`${pid}-${keys.length - 1}`]}</p>
+                          )}
+                          {keys.length < 5 && (
+                            <button
+                              onClick={() => addKeyField(pid)}
+                              className={cn("flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-xl transition-all", isDark ? "text-gray-400 hover:bg-white/5 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800")}
+                            >
+                              <Plus size={10} weight="bold" />
+                              Add Key ({keys.length}/5)
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+                )}
               </div>
             </div>
           </motion.div>

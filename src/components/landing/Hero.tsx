@@ -3,6 +3,8 @@
 import { motion, type Variants } from "framer-motion";
 import { ChevronRight, Check, Pin, Timer, Calendar, Brain, Sparkles, Play, Star, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { HERO, EASE } from "./marketing-data";
 
 const fadeUp: Variants = {
@@ -66,21 +68,11 @@ function CheckCard() {
 }
 
 function DiceIcon() {
+  const { siteName } = useSiteConfig();
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20, scale: 0.8 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
-      className="absolute left-1/2 top-12 z-10 -translate-x-1/2 md:top-16"
-    >
-        <motion.div
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
-          className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-primary/80 to-primary shadow-[0_20px_40px_-12px_rgba(0,0,0,0.2)] ring-1 ring-primary/30"
-        >
-          <Brain className="h-8 w-8 text-primary-foreground" />
-        </motion.div>
-    </motion.div>
+    <div className="absolute left-1/2 top-12 z-10 -translate-x-1/2 md:top-[0px]">
+      <MedOneXLogoMark title={siteName} className="h-24 w-24 md:h-48 md:w-48" interactiveColor />
+    </div>
   );
 }
 

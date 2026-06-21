@@ -24,7 +24,6 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ userImage, userName, userId, isAdmin, isGuest }: MobileHeaderProps) {
   const pathname = usePathname();
-  if (pathname?.startsWith("/drawmed") || pathname?.startsWith("/community") || pathname === "/social") return null;
   const { siteName } = useSiteConfig();
   const { theme, setTheme } = useThemeStore();
   const { unread } = useNotificationStore();
@@ -36,6 +35,8 @@ export function MobileHeader({ userImage, userName, userId, isAdmin, isGuest }: 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (pathname?.startsWith("/drawmed") || pathname?.startsWith("/community") || pathname === "/social") return null;
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 

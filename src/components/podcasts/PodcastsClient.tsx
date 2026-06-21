@@ -214,7 +214,7 @@ export function PodcastsClient() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-black dark:text-white text-slate-800">
                 {search 
-                  ? <span>Results for <span className="text-primary">"{search}"</span> — {filtered.length} found</span>
+                  ? <span>Results for <span className="text-primary">&ldquo;{search}&rdquo;</span> — {filtered.length} found</span>
                   : "All Audio Lectures"
                 }
               </h2>

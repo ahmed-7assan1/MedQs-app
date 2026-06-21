@@ -114,8 +114,6 @@ export function PostCardRedesigned({
   const [editedState, setEditedState] = useState(isEdited);
   const [showPostModal, setShowPostModal] = useState(false);
 
-  if (isDeleted) return null;
-
   const avatarUrl =
     post.author?.image ||
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(post.author?.name || "user")}`;
@@ -288,6 +286,8 @@ export function PostCardRedesigned({
       return <p {...props}>{children}</p>;
     }
   };
+
+  if (isDeleted) return null;
 
   return (
     <motion.div

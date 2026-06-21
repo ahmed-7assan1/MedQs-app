@@ -160,27 +160,34 @@ export default async function ModulesPage() {
   const universityName = semesterInfo?.academicYear?.university?.name ?? "";
 
   // Fetch last lecture activity for "Continue Learning" card
-  const lastActivity = userId ? await prisma.userLectureActivity.findFirst({
-    where: { userId },
-    orderBy: { lastViewedAt: "desc" },
-    select: {
-      lastViewedAt: true,
-      source: true,
-      lecture: {
+  let lastActivity = null;
+  if (userId) {
+    try {
+      lastActivity = await prisma.userLectureActivity.findFirst({
+        where: { userId },
+        orderBy: { lastViewedAt: "desc" },
         select: {
-          id: true,
-          title: true,
-          subject: {
+          lastViewedAt: true,
+          source: true,
+          lecture: {
             select: {
               id: true,
-              name: true,
-              module: { select: { id: true, name: true } },
+              title: true,
+              subject: {
+                select: {
+                  id: true,
+                  name: true,
+                  module: { select: { id: true, name: true } },
+                },
+              },
             },
           },
         },
-      },
-    },
-  }) : null;
+      });
+    } catch {
+      lastActivity = null;
+    }
+  }
 
   // Page-level stats for hero
   const totalModules = modules.length;
