@@ -115,3 +115,24 @@
 ### 12. backdrop-blur سبب رئيسي للـ lag على الموبايل
 **السياق:** السايدبار بتاع AI Chat كان عنده `backdrop-blur-sm` على الخلفية (overlay) و `backdrop-blur-lg` على اللوحة نفسها.
 **الدرس:** `backdrop-blur` بيكلف GPU كتير، خصوصاً على الموبايلات الضعيفة. استبدله بـ `bg-black/40` (أو opacity عادي) لو مش ضروري. الفرق في الشكل بسيط، الفرق في الأداء كبير.
+
+### 13. Telegram Bot — تجنب التوسع المفرط في ملف واحد
+**السياق:** بوت التيليجرام كان في ملف واحد (`src/app/api/telegram/route.ts`، 629 سطر) بكل handlers (start, auth, AI, group, media, modules, quiz). أي تعديل كان يسبب ripple effect.
+**الدرس:** أي بوت تيليجرام (أو أي integration مشابه) اعمل له `/lib/telegram-bot/` بـ structure:
+- `helpers.ts` — دوال DB مشتركة (getLinkedUser, getBotUser, keys)
+- `keyboards.ts` — كل keyboards منفصلة (استخدم plain objects بدل Markup builder عشان types)
+- `start.ts`, `auth.ts`, `ai.ts`, `group.ts`, `contact.ts`, `modules.ts` — كل feature في ملف
+- `index.ts` — singleton + register all handlers
+- `route.ts` — webhook نحيف جداً (< 50 سطر)
+
+### 14. AI Telegram — BYOK من User model مش BotUser
+**السياق:** البوت القديم كان يقرأ `botUser.personalKey` + `preferredProvider` ويرسلهم لـ `generateAIReplyWithFallback`. المشكلة: المستخدمين كانوا يحطوا API keys على المنصة (`User.personalGeminiKey` إلخ) فالبوت كان يقول "No response from" لأن المفاتيح مش في botUser.
+**الدرس:** دايماً اقرأ API keys من `User` model (الـ personal[Provider]Key fields) مش من botUser. استخدم `getUserApiKeys(user)` اللي بتجيب كل المفاتيح وترجع `Record<ProviderKey, string | null>`.
+
+### 15. Group Chat — ما تطلبش login من المستخدمين غير المسجلين
+**السياق:** البوت القديم كان `if (!linkedUser) return ctx.reply('Please login...')` لكل النصوص حتى في المجموعات. المستخدمين اللي مش مسجلين كانو يشوفوا رسالة تسجيل كل ما يذكروا البوت.
+**الدرس:** لو في group chat، استخدم free fallback (Gemini API key من env) للمستخدمين غير المسجلين. كمان استخدم `reply_parameters: { message_id }` بدل `reply_to_message_id` عشان تتوافق مع API الجديد.
+
+### 16. Password Security — احذف password من الذاكرة
+**السياق:** لما المستخدم يدخل password في خطوة تسجيل الدخول، استخدم `finally` block عشان تمسح المتغير من الذاكرة بعد المقارنة: `(password as any) = undefined;` في `finally`.
+**الدرس:** أي حاجة sensitive (password, token, key) تمر من خلال المتغيرات في الـ handler، احذفها ب `finally` block عشان تمنع تسربها في stack traces أو logs.
