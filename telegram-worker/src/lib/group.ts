@@ -25,18 +25,34 @@ function getMediaFromMessage(msg: any): { fileId: string } | null {
   return null;
 }
 
+function getReplyContext(ctx: Context): string {
+  const replyTo = (ctx.message as any)?.reply_to_message;
+  if (!replyTo) return "";
+  const replyText = replyTo.text || replyTo.caption || "";
+  const replyFrom = replyTo.from;
+  if (!replyText && !getMediaFromMessage(replyTo)) return "";
+  const fromName = replyFrom?.first_name || "User";
+  const isBot = replyFrom?.is_bot;
+  if (!replyText && getMediaFromMessage(replyTo)) {
+    return `\n[Replying to ${isBot ? "my previous message" : `${fromName}'s message`} which contained media]`;
+  }
+  return `\n[Replying to ${isBot ? "my previous message" : `${fromName}'s message`}: "${replyText}"]`;
+}
+
 export function registerGroup(bot: Telegraf, env: Record<string, string | undefined>) {
-  const geminiKeys = [
-    env.GEMINI_API_KEY,
-    env.GEMINI_API_KEY_2,
-    env.GEMINI_API_KEY_3,
-    env.GEMINI_API_KEY_4,
-  ].filter((k): k is string => !!k);
+  const envKeys: Record<string, string> = {};
+  for (const p of ["gemini", "groq", "openrouter", "siliconflow", "openai", "anthropic", "huggingface"]) {
+    const keyVar = `${p.toUpperCase()}_API_KEY`;
+    if (env[keyVar]) envKeys[p] = env[keyVar]!;
+  }
+  const extraGemini = [env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3, env.GEMINI_API_KEY_4].filter((k): k is string => !!k);
+  const allGeminiKeys = envKeys.gemini ? [envKeys.gemini, ...extraGemini] : extraGemini;
 
   bot.on("text", async (ctx, next) => {
     try {
       if (!isGroupChat(ctx)) return next();
-      if (!isBotMentioned(ctx)) return next();
+      const isReplyToBot = ctx.message.reply_to_message?.from?.id === ctx.botInfo.id;
+      if (!isBotMentioned(ctx) && !isReplyToBot) return next();
 
       const messageText = ((ctx.message as any).text ?? "").trim();
       const cleanText = messageText
@@ -67,6 +83,9 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
         }
       }
 
+      const replyContext = getReplyContext(ctx);
+      const fullText = replyContext ? `${cleanText}\n\n${replyContext}` : cleanText;
+
       const tid = ctx.from!.id.toString();
       const linked = await getLinkedUser(tid);
       const history = await getConversationHistory(tid);
@@ -75,8 +94,8 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
 
       try {
         const reply = replyMedia
-          ? await generateAIReply(linked, cleanText, "gemini", geminiKeys, replyMedia, history)
-          : await generateAIReply(linked, cleanText, "gemini", geminiKeys, undefined, history);
+          ? await generateAIReply(linked, fullText, "gemini", envKeys, replyMedia, history)
+          : await generateAIReply(linked, fullText, "gemini", envKeys, undefined, history);
         const safe = escapeMarkdown(reply);
         if (safe.length > 4000) {
           for (let i = 0; i < safe.length; i += 4000) {
@@ -91,7 +110,7 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
             reply_parameters: { message_id: ctx.message.message_id },
           });
         }
-        await addConversationMessage(tid, "user", cleanText);
+        await addConversationMessage(tid, "user", fullText);
         await addConversationMessage(tid, "assistant", reply);
       } catch (e: any) {
         console.error("[Group AI] Error:", e.message);
@@ -109,15 +128,20 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
   bot.on(["photo", "document", "video"], async (ctx, next) => {
     try {
       if (!isGroupChat(ctx)) return next();
-      if (!isBotMentioned(ctx)) return next();
+      const isReplyToBot = ctx.message.reply_to_message?.from?.id === ctx.botInfo.id;
+      if (!isBotMentioned(ctx) && !isReplyToBot) return next();
 
       const msg = ctx.message as any;
       let fileId: string | undefined;
       const caption = (msg.caption || "").trim();
-      const cleanText = caption
+      let cleanText = caption
         .replace(new RegExp(`@${BOT_USERNAME}`, "gi"), "")
         .replace(new RegExp(BOT_ARABIC, "g"), "")
-        .trim() || "Analyze this media from a medical perspective.";
+        .trim();
+      if (!cleanText) cleanText = "Analyze this media from a medical perspective.";
+
+      const replyContext = getReplyContext(ctx);
+      if (replyContext) cleanText += `\n\n${replyContext}`;
 
       if (msg.photo) {
         fileId = msg.photo[msg.photo.length - 1].file_id;
@@ -143,7 +167,7 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
       const tid = ctx.from!.id.toString();
       const linked = await getLinkedUser(tid);
       const history = await getConversationHistory(tid);
-      const reply = await generateAIReply(linked, cleanText, "gemini", geminiKeys, media, history);
+      const reply = await generateAIReply(linked, cleanText, "gemini", envKeys, media, history);
       const safe = escapeMarkdown(reply);
 
       if (safe.length > 4000) {
