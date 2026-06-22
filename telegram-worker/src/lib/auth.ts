@@ -129,6 +129,59 @@ export function registerAuth(bot: Telegraf, env: Bindings) {
     }
   });
 
+  bot.action("set_ai", async (ctx) => {
+    try {
+      await ctx.answerCbQuery();
+      const state = await getBotState(ctx.from!.id.toString());
+      const current = state.provider || "gemini";
+      const providers = [
+        { label: "Gemini", id: "gemini", emoji: "🔮" },
+        { label: "Groq", id: "groq", emoji: "⚡" },
+        { label: "OpenRouter", id: "openrouter", emoji: "🌐" },
+        { label: "SiliconFlow", id: "siliconflow", emoji: "💎" },
+        { label: "Anthropic", id: "anthropic", emoji: "🤖" },
+        { label: "OpenAI", id: "openai", emoji: "🧠" },
+        { label: "HuggingFace", id: "huggingface", emoji: "🤗" },
+        { label: "Mistral", id: "mistral", emoji: "🌬️" },
+        { label: "Together", id: "together", emoji: "🔄" },
+      ];
+      const rows = [];
+      for (let i = 0; i < providers.length; i += 2) {
+        const row = [];
+        for (let j = i; j < i + 2 && j < providers.length; j++) {
+          const p = providers[j];
+          const isActive = p.id === current;
+          row.push({ text: `${isActive ? "✅ " : ""}${p.emoji} ${p.label}`, callback_data: `ai_provider|${p.id}` });
+        }
+        rows.push(row);
+      }
+      rows.push([{ text: "⬅ Back", callback_data: "back_main" }]);
+      await ctx.editMessageText(
+        `🤖 *Change AI Model*\n\nCurrent provider: *${current}*\n\nSelect a provider:`,
+        { parse_mode: "Markdown", reply_markup: { inline_keyboard: rows } }
+      );
+    } catch (e: any) {
+      console.error("set_ai error:", e);
+      try { await ctx.answerCbQuery(`⚠️ ${e.message}`.slice(0, 200)); } catch (_) {}
+    }
+  });
+
+  bot.action(/^ai_provider\|(.+)$/, async (ctx) => {
+    try {
+      await ctx.answerCbQuery();
+      const provider = ctx.match![1];
+      const tid = ctx.from!.id.toString();
+      await updateBotState(tid, { provider });
+      await ctx.editMessageText(
+        `✅ *Provider changed to ${provider}*`,
+        { parse_mode: "Markdown", reply_markup: { inline_keyboard: [[{ text: "⬅ Back", callback_data: "back_main" }]] } }
+      );
+    } catch (e: any) {
+      console.error("ai_provider error:", e);
+      try { await ctx.answerCbQuery(`⚠️ ${e.message}`.slice(0, 200)); } catch (_) {}
+    }
+  });
+
   bot.on("text", async (ctx, next) => {
     try {
       const sql = getSql();
