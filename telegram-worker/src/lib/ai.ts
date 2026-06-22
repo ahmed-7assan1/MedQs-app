@@ -75,7 +75,7 @@ export async function generateAIReply(
   user: LinkedUser | null,
   message: string,
   preferredProvider: string,
-  envApiKey: string,
+  geminiKeys: string[],
   media?: { data: string; mimeType: string },
   history?: { role: string; content: string }[]
 ): Promise<string> {
@@ -106,7 +106,7 @@ export async function generateAIReply(
 
   if (!apiKey) {
     provider = "gemini";
-    apiKey = envApiKey;
+    apiKey = geminiKeys[0] || null;
     model = PROVIDER_MODELS.gemini.model;
     baseURL = PROVIDER_MODELS.gemini.baseURL;
   }
@@ -148,9 +148,9 @@ export async function generateAIReply(
         }
       }
     }
-    if (envApiKey) {
+    for (const gk of geminiKeys) {
       try {
-        return await callAI("gemini", envApiKey, PROVIDER_MODELS.gemini.model, PROVIDER_MODELS.gemini.baseURL, messages, media);
+        return await callAI("gemini", gk, PROVIDER_MODELS.gemini.model, PROVIDER_MODELS.gemini.baseURL, messages, media);
       } catch (_) {}
     }
     return "❌ No response from AI. Please check your keys or try again.";
@@ -158,7 +158,12 @@ export async function generateAIReply(
 }
 
 export function registerAI(bot: Telegraf, env: Record<string, string | undefined>) {
-  const envApiKey = env.GEMINI_API_KEY || "";
+  const geminiKeys = [
+    env.GEMINI_API_KEY,
+    env.GEMINI_API_KEY_2,
+    env.GEMINI_API_KEY_3,
+    env.GEMINI_API_KEY_4,
+  ].filter((k): k is string => !!k);
 
   bot.action("ai_chat", async (ctx) => {
     try {
@@ -221,7 +226,7 @@ export function registerAI(bot: Telegraf, env: Record<string, string | undefined
       const history = await getConversationHistory(tid);
 
       try {
-        const reply = await generateAIReply(isGuest ? null : linked, messageText, state.provider, envApiKey, undefined, history);
+        const reply = await generateAIReply(isGuest ? null : linked, messageText, state.provider, geminiKeys, undefined, history);
         if (reply.length > 4000) {
           for (let i = 0; i < reply.length; i += 4000) {
             await ctx.reply(escapeMarkdown(reply.slice(i, i + 4000)), { parse_mode: "Markdown" });
@@ -275,7 +280,7 @@ export function registerAI(bot: Telegraf, env: Record<string, string | undefined
       const linked = await getLinkedUser(tid);
       const isGuest = state.chatState === "AI_CHAT_GUEST";
       const history = await getConversationHistory(tid);
-      const reply = await generateAIReply(isGuest ? null : linked, caption, state.provider, envApiKey, media, history);
+      const reply = await generateAIReply(isGuest ? null : linked, caption, state.provider, geminiKeys, media, history);
 
       if (reply.length > 4000) {
         for (let i = 0; i < reply.length; i += 4000) {

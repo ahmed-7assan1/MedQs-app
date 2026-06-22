@@ -26,7 +26,12 @@ function getMediaFromMessage(msg: any): { fileId: string } | null {
 }
 
 export function registerGroup(bot: Telegraf, env: Record<string, string | undefined>) {
-  const envApiKey = env.GEMINI_API_KEY || "";
+  const geminiKeys = [
+    env.GEMINI_API_KEY,
+    env.GEMINI_API_KEY_2,
+    env.GEMINI_API_KEY_3,
+    env.GEMINI_API_KEY_4,
+  ].filter((k): k is string => !!k);
 
   bot.on("text", async (ctx, next) => {
     try {
@@ -70,8 +75,8 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
 
       try {
         const reply = replyMedia
-          ? await generateAIReply(linked, cleanText, "gemini", envApiKey, replyMedia, history)
-          : await generateAIReply(linked, cleanText, "gemini", envApiKey, undefined, history);
+          ? await generateAIReply(linked, cleanText, "gemini", geminiKeys, replyMedia, history)
+          : await generateAIReply(linked, cleanText, "gemini", geminiKeys, undefined, history);
         const safe = escapeMarkdown(reply);
         if (safe.length > 4000) {
           for (let i = 0; i < safe.length; i += 4000) {
@@ -138,7 +143,7 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
       const tid = ctx.from!.id.toString();
       const linked = await getLinkedUser(tid);
       const history = await getConversationHistory(tid);
-      const reply = await generateAIReply(linked, cleanText, "gemini", envApiKey, media, history);
+      const reply = await generateAIReply(linked, cleanText, "gemini", geminiKeys, media, history);
       const safe = escapeMarkdown(reply);
 
       if (safe.length > 4000) {

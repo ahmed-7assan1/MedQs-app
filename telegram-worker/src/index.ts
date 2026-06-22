@@ -8,6 +8,9 @@ type Bindings = {
   DATABASE_URL: string;
   NEXTAUTH_URL: string;
   GEMINI_API_KEY: string;
+  GEMINI_API_KEY_2?: string;
+  GEMINI_API_KEY_3?: string;
+  GEMINI_API_KEY_4?: string;
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
   TELEGRAM_STORAGE_GROUP_ID?: string;
