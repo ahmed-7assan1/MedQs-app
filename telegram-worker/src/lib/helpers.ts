@@ -128,8 +128,7 @@ export async function addConversationMessage(telegramId: string, role: string, c
 export async function getLinkedUser(telegramId: string): Promise<LinkedUser | null> {
   const sql = getSql();
   const [user] = await sql`
-    SELECT u.id, u.name, u.email, u."telegramId", u."telegramVerified",
-      u."semesterId", u."universityId", u.points,
+    SELECT u.*,
       uni.name as university_name, fac.name as faculty_name,
       sem.name as semester_name, ay."yearNumber" as academic_year
     FROM "User" u
@@ -141,7 +140,7 @@ export async function getLinkedUser(telegramId: string): Promise<LinkedUser | nu
     LIMIT 1
   `;
   if (!user) return null;
-  return { ...(user as unknown as Omit<LinkedUser, keyof typeof DEFAULT_KEYS>), ...DEFAULT_KEYS };
+  return user as unknown as LinkedUser;
 }
 
 export function getUserApiKeys(user: LinkedUser): Record<ProviderKey, string | null> {

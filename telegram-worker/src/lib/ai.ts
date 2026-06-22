@@ -148,7 +148,7 @@ export async function generateAIReply(
         }
       }
     }
-    if (envApiKey && provider !== "gemini") {
+    if (envApiKey) {
       try {
         return await callAI("gemini", envApiKey, PROVIDER_MODELS.gemini.model, PROVIDER_MODELS.gemini.baseURL, messages, media);
       } catch (_) {}
