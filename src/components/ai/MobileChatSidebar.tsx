@@ -8,8 +8,8 @@ import { InstallPWA } from "./InstallPWA";
 import {
   HomeIcon, BookOpenIcon, UserGroupIcon,
   ClipboardDocumentListIcon, Cog6ToothIcon, ChevronDoubleRightIcon,
-  BookmarkIcon as BookmarkIconSolid,
-} from "@heroicons/react/24/solid";
+  BookmarkIcon,
+} from "@heroicons/react/24/outline";
 import {
   Plus, MagnifyingGlass, Sun, Moon, ChatCircle, List, Clock, ChatDots,
   Book, Robot,
@@ -126,7 +126,7 @@ function MobileSidebarInner({
                     { icon: BookOpenIcon, label: "Modules", href: "/modules" },
                     { icon: UserGroupIcon, label: "Social", href: "/social" },
                     { icon: ClipboardDocumentListIcon, label: "Quizzes", href: "/quiz" },
-                    { icon: BookmarkIconSolid, label: "Saved", href: null, action: onOpenSaved },
+                    { icon: BookmarkIcon, label: "Saved", href: null, action: onOpenSaved },
                     { icon: null, label: "Library", href: null, action: onOpenLibrary, customIcon: Book },
                     { icon: null, label: "Custom MedOneX", href: null, action: onOpenAgentGallery, customIcon: Robot },
                   ].map((item: any) => (
@@ -153,7 +153,7 @@ function MobileSidebarInner({
                         )}
                       >
                         {item.customIcon ? (
-                          <item.customIcon size={20} weight="bold" className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
+                          <item.customIcon size={20} weight="regular" className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
                         ) : (
                           <item.icon className={cn("w-5 h-5", isDark ? "text-white" : "text-gray-900")} />
                         )}
@@ -181,7 +181,7 @@ function MobileSidebarInner({
                           : isDark ? "text-white/40 hover:text-white/70" : "text-gray-400 hover:text-gray-700"
                       )}
                     >
-                      <tab.icon size={14} weight={activeTab === tab.id ? "fill" : "regular"} />
+                      <tab.icon size={14} weight="regular" />
                       {tab.label}
                     </button>
                   ))}
@@ -214,7 +214,7 @@ function MobileSidebarInner({
                         )}
                       >
                         <div className="flex items-center gap-3">
-                          <ChatCircle size={14} weight={t.id === activeThreadId ? "fill" : "regular"} className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
+                          <ChatCircle size={14} weight="regular" className={cn("flex-shrink-0", isDark ? "text-white" : "text-gray-900")} />
                           <span className="truncate">{t.title || "New Chat"}</span>
                         </div>
                       </button>
@@ -228,7 +228,7 @@ function MobileSidebarInner({
                     isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
                   )}
                 >
-                  <Plus size={16} weight="bold" className={cn(isDark ? "text-white" : "text-gray-900")} />
+                  <Plus size={16} weight="regular" className={cn(isDark ? "text-white" : "text-gray-900")} />
                   New Chat
                 </button>
               </div>

@@ -61,7 +61,7 @@ export function DrQSidebar({
           className="flex items-center gap-3 h-10 w-full rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:scale-[1.05] active:scale-95 transition-all overflow-hidden px-0 justify-center group-hover/sidebar:px-4 group-hover/sidebar:justify-start"
           title="New Chat"
         >
-          <Plus size={20} weight="bold" className="flex-shrink-0" />
+          <Plus size={20} weight="regular" className="flex-shrink-0" />
           <span className="text-[12px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
             New Chat
           </span>
@@ -82,7 +82,7 @@ export function DrQSidebar({
               )}
             >
               <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                <ChatCircle size={20} weight={activeThreadId === thread.id ? "fill" : "bold"} />
+                <ChatCircle size={20} weight="regular" />
               </div>
               
               <div className="flex-1 text-left min-w-0 pr-2 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
@@ -131,7 +131,7 @@ export function DrQSidebar({
           className="flex items-center gap-3 h-11 rounded-xl text-slate-500 dark:text-white/50 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all justify-center group-hover/sidebar:justify-start group-hover/sidebar:px-4"
           title="Configuration"
         >
-          <Gear size={20} weight="bold" className="flex-shrink-0" />
+          <Gear size={20} weight="regular" className="flex-shrink-0" />
           <span className="text-[13px] font-bold whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Settings</span>
         </button>
 
@@ -140,7 +140,7 @@ export function DrQSidebar({
             className="w-full flex items-center gap-3 h-11 rounded-xl text-slate-500 dark:text-white/50 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all justify-center group-hover/sidebar:justify-start group-hover/sidebar:px-4"
             title="Export"
           >
-            <Export size={20} weight="bold" className="flex-shrink-0" />
+            <Export size={20} weight="regular" className="flex-shrink-0" />
             <span className="text-[13px] font-bold whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Export Chat</span>
           </button>
           
