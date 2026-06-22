@@ -517,52 +517,52 @@ export function MedOneXChat() {
 
       {/* ─── Top Bar (hamburger + questions/flashcards/resources) ─── */}
       <div className={cn(
-        "fixed top-0 left-0 right-0 z-50 h-14 flex items-start justify-between",
+        "fixed top-0 left-0 right-0 z-50 h-14 md:h-12 flex items-start md:items-center justify-between md:border-b",
         isDark
-          ? "bg-black"
-          : "bg-white"
+          ? "bg-black md:bg-black/80 md:backdrop-blur-xl md:border-white/[0.06]"
+          : "bg-white md:bg-white/80 md:backdrop-blur-xl md:border-gray-100"
       )}>
         <button
           onClick={() => setShowSidebar(true)}
           className={cn(
-            "mt-1.5 ml-3 w-11 h-11 rounded-full flex items-center justify-center transition-all",
+            "mt-1.5 md:mt-0 ml-3 w-11 h-11 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all",
             isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-gray-100"
           )}
         >
-          <TextIndent size={20} weight="bold" />
+          <TextIndent size={20} className="md:scale-90" />
         </button>
-        <div className="flex items-center gap-1.5 mr-4 mt-2">
+        <div className="flex items-center gap-1.5 mr-4 mt-2 md:mt-0">
           {globalQuestions.length > 0 && (
             <button
               onClick={() => setShowGlobalQuestions(true)}
               className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
+                "w-10 h-10 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
                 isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
               )}
             >
-              <ChatCircle size={18} weight="fill" />
+              <ChatCircle size={18} weight="fill" className="md:scale-[0.85]" />
             </button>
           )}
           {globalFlashcards.length > 0 && (
             <button
               onClick={() => setShowGlobalFlashcards(true)}
               className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
+                "w-10 h-10 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
                 isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
               )}
             >
-              <BookOpen size={18} weight="fill" />
+              <BookOpen size={18} weight="fill" className="md:scale-[0.85]" />
             </button>
           )}
           {globalResources.length > 0 && (
             <button
               onClick={() => setShowGlobalResources(true)}
               className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
+                "w-10 h-10 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all active:scale-90 text-[#C1C1C1]",
                 isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
               )}
             >
-              <GlobeAltIcon className="w-[18px] h-[18px]" />
+              <GlobeAltIcon className="w-[18px] h-[18px] md:w-[15px] md:h-[15px]" />
             </button>
           )}
         </div>
@@ -889,7 +889,7 @@ export function MedOneXChat() {
               </motion.div>
             </motion.div>
           ) : (
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-8 space-y-6">
+            <div className="w-full px-4 sm:px-6 md:px-0 md:max-w-[48rem] md:mx-auto py-6 pb-8 space-y-6">
               {messages.map((m, idx) => (
                 <motion.div
                   key={m.id}
@@ -897,13 +897,13 @@ export function MedOneXChat() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: idx < 5 ? idx * 0.03 : 0 }}
-                  className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
+                  className={cn("flex", m.role === "user" ? "justify-end" : "justify-start", m.role === "user" ? "md:max-w-[70%]" : "md:max-w-[85%]")}
                 >
                   {m.role === "assistant" ? (
-                    <div className={cn("w-full max-w-full", m.isStreaming && "stream-cursor")}>
+                    <div className={cn("w-full", m.isStreaming && "stream-cursor")}>
                       <div className="flex items-center gap-3 px-1 mb-2 mt-6">
                         <div className={cn(
-                          "w-8 h-8 rounded-xl flex items-center justify-center shadow-md",
+                          "w-8 h-8 md:w-7 md:h-7 rounded-xl flex items-center justify-center shadow-md",
                           `bg-gradient-to-br ${(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).gradient}`
                         )}>
                           {React.cloneElement(
@@ -912,7 +912,7 @@ export function MedOneXChat() {
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-gray-900")}>
+                          <span className={cn("text-sm md:text-[13px] font-bold", isDark ? "text-white" : "text-gray-900")}>
                             {(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
                           </span>
                           <span className={cn("text-[10px] font-semibold uppercase tracking-widest", isDark ? "text-gray-500" : "text-gray-400")}>
@@ -1057,14 +1057,8 @@ export function MedOneXChat() {
     {/* ^ mainRef closes here */}
 
       {/* Desktop fixed input */}
-      <div className="hidden md:block fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none">
-        <div className={cn(
-          "absolute inset-0 rounded-t-3xl pointer-events-none",
-          isDark
-            ? "bg-gradient-to-t from-black via-black/80 to-transparent"
-            : "bg-gradient-to-t from-white via-white/80 to-transparent"
-        )} />
-        <div className="flex justify-center relative pointer-events-auto">
+      <div className="hidden md:block fixed bottom-0 left-0 right-0 z-[10002]">
+        <div className="flex justify-center relative">
           {/* Desktop scroll-to-bottom button */}
           <button
             onClick={() => { 
@@ -1085,7 +1079,7 @@ export function MedOneXChat() {
               <path d="M12 5v14M5 12l7 7 7-7" />
             </svg>
           </button>
-          <div className="w-full max-w-[800px] mx-auto px-4 pb-4 pt-4">
+          <div className="w-full md:max-w-[48rem] mx-auto px-4 pb-4 pt-2">
             {files.length > 0 && (
               <div className={cn(
                 "flex flex-wrap gap-1.5 px-3 py-2 mb-2 rounded-2xl",
@@ -1114,11 +1108,11 @@ export function MedOneXChat() {
             <div
               onClick={() => { if (!inputFocused) inputRef.current?.focus(); }}
               className={cn(
-                "flex flex-col rounded-[20px] ring-1 transition-all duration-200 cursor-text",
+                "flex flex-col rounded-2xl ring-1 transition-all duration-200 cursor-text",
                 inputFocused
-                  ? isDark ? "ring-white/20 shadow-lg" : "ring-black/20 shadow-lg"
-                  : isDark ? "ring-white/10 shadow-sm" : "ring-gray-200/80 shadow-sm",
-                isDark ? "bg-[#141414]/90 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
+                  ? isDark ? "ring-white/25 shadow-lg shadow-black/20" : "ring-black/20 shadow-lg shadow-black/5"
+                  : isDark ? "ring-white/10 shadow-sm" : "ring-gray-200/70 shadow-sm",
+                isDark ? "bg-[#141414]" : "bg-white"
               )}
             >
               <div className="grid transition-all duration-200 ease-out" style={{ gridTemplateRows: inputFocused ? '1fr' : '0fr' }}>
@@ -1131,7 +1125,7 @@ export function MedOneXChat() {
                     onKeyDown={handleKeyDown}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
-                    placeholder="MedOneX Expert"
+                    placeholder="Ask MedOneX anything..."
                     dir="auto"
                     className={cn(
                       "w-full bg-transparent border-none outline-none resize-none px-4 pt-3.5 pb-1 text-base leading-relaxed no-scrollbar max-h-[150px]",
@@ -1172,7 +1166,7 @@ export function MedOneXChat() {
                     <button onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
                     </button>
-                    <span className={cn("text-xs font-medium", isDark ? "text-gray-400" : "text-gray-500")}>MedOneX Expert</span>
+                    <span className={cn("text-sm", isDark ? "text-gray-400" : "text-gray-500")}>Ask MedOneX anything...</span>
                   </div>
                 )}
                 {loading ? (
@@ -1198,7 +1192,7 @@ export function MedOneXChat() {
               </div>
             </div>
             <div className="flex items-center justify-center mt-2.5 px-1">
-              <span className={cn("text-[9px] opacity-50", isDark ? "text-gray-500" : "text-gray-500")}>MedOneX Expert AI · Medical AI Can Make Mistakes</span>
+              <span className={cn("text-[10px] opacity-40", isDark ? "text-gray-500" : "text-gray-500")}>MedOneX can make mistakes. Verify important information.</span>
             </div>
           </div>
         </div>

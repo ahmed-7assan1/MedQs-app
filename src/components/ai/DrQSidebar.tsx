@@ -58,7 +58,7 @@ export function DrQSidebar({
       <div className="p-3 flex flex-col gap-4 mt-2">
         <button 
           onClick={onNewThread}
-          className="flex items-center gap-3 h-10 w-full rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:scale-[1.05] active:scale-95 transition-all overflow-hidden px-0 justify-center group-hover/sidebar:px-4 group-hover/sidebar:justify-start"
+          className="flex items-center gap-3 h-10 w-full rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black shadow-md hover:scale-[1.05] active:scale-95 transition-all overflow-hidden px-0 justify-center group-hover/sidebar:px-4 group-hover/sidebar:justify-start"
           title="New Chat"
         >
           <Plus size={20} weight="regular" className="flex-shrink-0" />
@@ -77,8 +77,8 @@ export function DrQSidebar({
               className={cn(
                 "w-full flex items-center gap-3 h-11 rounded-xl transition-all relative overflow-hidden group justify-center group-hover/sidebar:justify-start group-hover/sidebar:px-3",
                 activeThreadId === thread.id 
-                  ? "bg-indigo-50 dark:bg-white/10 text-indigo-600 dark:text-white border border-indigo-200 dark:border-white/10 shadow-sm" 
-                  : "text-slate-500 dark:text-white/40 hover:text-indigo-600 dark:hover:text-white/70 hover:bg-slate-50 dark:hover:bg-white/5"
+                  ? "bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white" 
+                  : "text-slate-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white/70 hover:bg-gray-50 dark:hover:bg-white/5"
               )}
             >
               <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
@@ -107,13 +107,13 @@ export function DrQSidebar({
                 <div className="absolute right-2 flex items-center gap-1 opacity-0 group-hover/sidebar:opacity-100 transition-opacity">
                   <button 
                     onClick={(e) => { e.stopPropagation(); setEditingId(thread.id); setEditTitle(thread.title); }}
-                    className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-indigo-600 dark:hover:text-white"
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white"
                   >
                     <PencilSimple size={14} />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); onDeleteThread(thread.id); }}
-                    className="p-1.5 hover:bg-rose-100 dark:hover:bg-red-500/20 rounded-lg text-slate-400 dark:text-white/40 hover:text-rose-600 dark:hover:text-red-400"
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg text-slate-400 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400"
                   >
                     <Trash size={14} />
                   </button>
@@ -128,7 +128,7 @@ export function DrQSidebar({
       <div className="p-3 border-t border-slate-200/50 dark:border-white/5 flex flex-col gap-2">
         <button 
           onClick={onShowConfig}
-          className="flex items-center gap-3 h-11 rounded-xl text-slate-500 dark:text-white/50 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all justify-center group-hover/sidebar:justify-start group-hover/sidebar:px-4"
+          className="flex items-center gap-3 h-11 rounded-xl text-slate-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-all justify-center group-hover/sidebar:justify-start group-hover/sidebar:px-4"
           title="Configuration"
         >
           <Gear size={20} weight="regular" className="flex-shrink-0" />
@@ -137,7 +137,7 @@ export function DrQSidebar({
 
         <div className="relative group/export">
           <button 
-            className="w-full flex items-center gap-3 h-11 rounded-xl text-slate-500 dark:text-white/50 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all justify-center group-hover/sidebar:justify-start group-hover/sidebar:px-4"
+            className="w-full flex items-center gap-3 h-11 rounded-xl text-slate-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-all justify-center group-hover/sidebar:justify-start group-hover/sidebar:px-4"
             title="Export"
           >
             <Export size={20} weight="regular" className="flex-shrink-0" />
@@ -146,10 +146,10 @@ export function DrQSidebar({
           
           {/* Export Dropdown */}
           <div className="absolute bottom-full left-0 mb-2 w-48 bg-card border border-border rounded-2xl shadow-xl invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all p-2 z-[60]">
-             <button onClick={() => onExport("markdown")} className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 text-[12px] font-bold text-slate-600 dark:text-white/70 hover:text-indigo-600 dark:hover:text-white transition-all flex items-center gap-2">
+             <button onClick={() => onExport("markdown")} className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 text-[12px] font-bold text-slate-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2">
                 Markdown (.md)
              </button>
-             <button onClick={() => onExport("json")} className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 text-[12px] font-bold text-slate-600 dark:text-white/70 hover:text-indigo-600 dark:hover:text-white transition-all flex items-center gap-2">
+             <button onClick={() => onExport("json")} className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 text-[12px] font-bold text-slate-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2">
                 JSON Data (.json)
              </button>
           </div>
