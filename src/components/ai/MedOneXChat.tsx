@@ -1249,70 +1249,78 @@ export function MedOneXChat() {
             : "bg-gradient-to-t from-white via-white/80 to-transparent"
         )} />
         <div className="px-2 pb-1 pointer-events-auto relative">
-          <div className={cn(
-            "flex flex-col mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm",
-            isDark ? "ring-white/10" : "ring-gray-200/80",
-            isDark ? "bg-[#141414]/90 backdrop-blur-xl text-white" : "bg-[#F7F7F7] text-[#050505]"
-          )}>
-            {files.length > 0 && (
-              <div className={cn(
-                "flex flex-wrap gap-1.5 px-3 pt-2.5 pb-1.5 max-h-[120px] overflow-y-auto border-b",
-                isDark ? "border-white/10" : "border-gray-200/60"
-              )}>
-                {files.map((f, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs max-w-[160px] transition-all",
-                      isDark ? "bg-white/10" : "bg-gray-100"
-                    )}
-                  >
-                    {f.loading ? (
-                      <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0">
-                        <svg className="animate-spin h-3 w-3 text-indigo-500" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                      </div>
-                    ) : f.mimeType.startsWith("image/") ? (
-                      <img src={f.data} alt={f.name} className="w-5 h-5 rounded object-cover flex-shrink-0" />
-                    ) : (
-                      <span className="text-[10px] flex-shrink-0">
-                        {f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}
-                      </span>
-                    )}
-                    <span className="truncate max-w-[80px]">{f.name}</span>
-                    <button
-                      onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
-                      className="flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
+          <div
+            onClick={() => { if (!mobileFocused) mobileInputRef.current?.focus(); }}
+            className={cn(
+              "flex flex-col mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm cursor-text",
+              isDark ? "ring-white/10" : "ring-gray-200/80",
+              isDark ? "bg-[#141414]/90 backdrop-blur-xl text-white" : "bg-[#F7F7F7] text-[#050505]"
+            )}>
+            <div className="grid transition-all duration-200 ease-out" style={{ gridTemplateRows: mobileFocused ? '1fr' : '0fr' }}>
+              <div className="overflow-hidden min-h-0">
+              {files.length > 0 && (
+                <div className={cn(
+                  "flex flex-wrap gap-1.5 px-3 pt-2.5 pb-1.5 max-h-[120px] overflow-y-auto border-b",
+                  isDark ? "border-white/10" : "border-gray-200/60"
+                )}>
+                  {files.map((f, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs max-w-[160px] transition-all",
+                        isDark ? "bg-white/10" : "bg-gray-100"
+                      )}
                     >
-                      <X size={10} weight="bold" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <textarea
-              ref={mobileInputRef}
-              rows={1}
-              value={input}
-              onChange={(e) => startTransition(() => setInput(e.target.value))}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              onFocus={() => setMobileFocused(true)}
-              onBlur={() => setMobileFocused(false)}
-              placeholder="MedOneX Expert"
-              dir="auto"
-              className={cn(
-                "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-base leading-relaxed no-scrollbar placeholder-gray-400 font-[family-name:var(--font-english)]",
-                isDark ? "text-white" : "text-[#050505]"
+                      {f.loading ? (
+                        <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0">
+                          <svg className="animate-spin h-3 w-3 text-indigo-500" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                        </div>
+                      ) : f.mimeType.startsWith("image/") ? (
+                        <img src={f.data} alt={f.name} className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                      ) : (
+                        <span className="text-[10px] flex-shrink-0">
+                          {f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}
+                        </span>
+                      )}
+                      <span className="truncate max-w-[80px]">{f.name}</span>
+                      <button
+                        onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
+                        className="flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
+                      >
+                        <X size={10} weight="bold" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
-            />
-            <div className="flex items-center justify-between px-2 pb-2">
+              <textarea
+                ref={mobileInputRef}
+                rows={1}
+                value={input}
+                onChange={(e) => startTransition(() => setInput(e.target.value))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                onFocus={() => setMobileFocused(true)}
+                onBlur={() => setMobileFocused(false)}
+                placeholder="MedOneX Expert"
+                dir="auto"
+                className={cn(
+                  "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-base leading-relaxed no-scrollbar placeholder-gray-400",
+                  isDark ? "text-white" : "text-[#050505]"
+                )}
+              />
+              </div>
+            </div>
+            <div className={cn("flex items-center justify-between px-2", mobileFocused ? "pb-2 pt-0" : "py-2")}>
+              {mobileFocused ? (
+              <>
               <div className="flex items-center gap-0.5">
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -1387,6 +1395,47 @@ export function MedOneXChat() {
                     <path d="M12 19V5M5 12l7-7 7 7" />
                   </svg>
                 </button>
+              )}
+              </>
+              ) : (
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  {React.cloneElement(
+                    (DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement,
+                    { size: 18, weight: "regular" }
+                  )}
+                  <span className={cn("text-sm font-medium", isDark ? "text-gray-300" : "text-gray-600")}>MedOneX Expert</span>
+                </div>
+                {!input.trim() && files.length === 0 ? (
+                  <button
+                    onClick={() => { mobileInputRef.current?.focus(); }}
+                    className={cn(
+                      "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200",
+                      isDark
+                        ? "bg-white/10 text-gray-400 hover:bg-white/20"
+                        : "bg-[#050505]/10 text-[#050505]/40 hover:bg-[#050505]/20"
+                    )}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 19V5M5 12l7-7 7 7" />
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSend}
+                    className={cn(
+                      "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                      isDark
+                        ? "bg-white text-[#141414] hover:bg-gray-200 shadow-md"
+                        : "bg-[#050505] text-white hover:bg-gray-800 shadow-md"
+                    )}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 19V5M5 12l7-7 7 7" />
+                    </svg>
+                  </button>
+                )}
+              </div>
               )}
             </div>
           </div>
