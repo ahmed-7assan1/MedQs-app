@@ -9,7 +9,7 @@ import {
   WarningCircle, ChatCircle, ArrowBendUpLeft,
   ShieldCheck, ClockCountdown, ChartBar, Lightning,
   ArrowUpRight, Eye, EyeSlash, Spinner, TextIndent,
-  Quotes, NoteBlank, Sparkle,
+  Quotes, NoteBlank, Sparkle, Microphone,
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,8 @@ import { QuestionsBottomSheet, type QuestionData } from "./QuestionsBottomSheet"
 import { FlashcardsBottomSheet, type FlashcardData } from "./FlashcardsBottomSheet";
 import { ResourcesBottomSheet, type ResourceItem } from "./ResourcesBottomSheet";
 import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
+import VoicePersonaPicker from "./VoicePersonaPicker";
+import { type VoicePersona } from "./voicePersonas";
 import { useThemeStore } from "@/lib/store";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import {
@@ -88,6 +90,80 @@ export function MedOneXChat() {
   const handleReply = useCallback((id: string, text: string) => {
     setReplyContext({ id, text });
   }, []);
+
+  // ─── Voice Chat ───
+  const [showVoicePicker, setShowVoicePicker] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [voicePersona, setVoicePersona] = useState<VoicePersona | null>(null);
+  const recognitionRef = useRef<any>(null);
+
+  const stopRecording = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsRecording(false);
+  }, []);
+
+  const startRecording = useCallback((persona: VoicePersona) => {
+    stopRecording();
+    setVoicePersona(persona);
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) {
+      toast.error("Voice recognition not supported in this browser. Try Chrome or Edge.");
+      return;
+    }
+    const recognition = new SpeechRecognitionAPI();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = persona.lang === "ar" ? "ar-SA" : "en-US";
+
+    let finalTranscript = "";
+    recognition.onresult = (e: any) => {
+      let transcript = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        transcript += e.results[i][0].transcript;
+      }
+      finalTranscript = transcript;
+      startTransition(() => setInput(transcript));
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      if (finalTranscript.trim()) {
+        sendMessage(finalTranscript, [], undefined, false);
+        startTransition(() => setInput(""));
+      }
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  }, [sendMessage, stopRecording]);
+
+  const handleVoicePersonaSelect = useCallback((persona: VoicePersona) => {
+    setShowVoicePicker(false);
+    startRecording(persona);
+  }, [startRecording]);
+
+  // Auto-TTS for voice chat: speak the last assistant message
+  useEffect(() => {
+    if (!voicePersona || messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last?.role !== "assistant" || last.isStreaming || loading) return;
+    const synth = window.speechSynthesis;
+    if (synth.speaking) synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(last.content);
+    utterance.lang = voicePersona.lang === "ar" ? "ar" : "en";
+    const voices = synth.getVoices();
+    const match = voices.find((v) => v.lang.startsWith(voicePersona.lang));
+    if (match) utterance.voice = match;
+    synth.speak(utterance);
+  }, [messages, loading, voicePersona]);
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -897,7 +973,7 @@ export function MedOneXChat() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: idx < 5 ? idx * 0.03 : 0 }}
-                  className={cn("flex", m.role === "user" ? "justify-end" : "justify-start", m.role === "user" ? "md:max-w-[70%]" : "md:max-w-[85%]")}
+                  className={cn("flex", m.role === "user" ? "justify-end md:max-w-none" : "justify-start md:ml-[15%]", m.role === "user" ? "" : "md:max-w-[85%]")}
                 >
                   {m.role === "assistant" ? (
                     <div className={cn("w-full", m.isStreaming && "stream-cursor")}>
@@ -1160,18 +1236,29 @@ export function MedOneXChat() {
                     >
                       {React.cloneElement((DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement, { size: 14, weight: "regular" })}
                     </button>
+                    <button
+                      onClick={() => setShowVoicePicker(true)}
+                      className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isRecording ? "text-red-500 bg-red-500/15" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                      title={isRecording ? "Recording..." : "Voice Chat"}
+                    >
+                      <Microphone size={15} weight={isRecording ? "fill" : "regular"} />
+                    </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <button onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
                     </button>
+                    <button onClick={() => setShowVoicePicker(true)} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")} title="Voice Chat">
+                      <Microphone size={15} weight="regular" />
+                    </button>
                     <span className={cn("text-sm", isDark ? "text-gray-400" : "text-gray-500")}>Ask MedOneX anything...</span>
                   </div>
                 )}
                 {loading ? (
-                  <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/15 text-red-400 hover:bg-red-500/25">
-                    <Stop size={13} weight="fill" />
+                  <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center leading-none transition-all hover:opacity-80"
+                    style={{ backgroundColor: isDark ? "#FFFFFF" : "#000000" }}>
+                    <Stop size={13} weight="fill" color={isDark ? "#000000" : "#FFFFFF"} />
                   </button>
                 ) : (
                   <button
@@ -1202,7 +1289,7 @@ export function MedOneXChat() {
       <div className={cn(
         "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none",
         isDark ? "bg-black" : "bg-white"
-      )} style={{ height: "calc(30px + env(safe-area-inset-bottom, 0px))" }} />
+      )} style={{ height: "calc(16px + env(safe-area-inset-bottom, 0px))" }} />
 
       {/* Mobile scroll-to-bottom button (above capsule) */}
       <button
@@ -1219,7 +1306,7 @@ export function MedOneXChat() {
             ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
             : "border-black/20 bg-black/15 text-black hover:bg-black/25"
         )}
-        style={{ bottom: "calc(30px + env(safe-area-inset-bottom, 0px) + 60px)" }}
+        style={{ bottom: "calc(16px + env(safe-area-inset-bottom, 0px) + 60px)" }}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12l7 7 7-7" />
@@ -1233,7 +1320,7 @@ export function MedOneXChat() {
         }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         style={{ willChange: "transform" }}
-        className="md:hidden fixed bottom-[calc(30px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-[10003] pointer-events-none"
+        className="md:hidden fixed bottom-[calc(16px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-[10003] pointer-events-none"
       >
         {/* Gradient backdrop */}
         <div className={cn(
@@ -1246,9 +1333,10 @@ export function MedOneXChat() {
           <div
             onClick={() => { if (!mobileFocused) mobileInputRef.current?.focus(); }}
             className={cn(
-              "flex flex-col mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm cursor-text",
+              "flex flex-col mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm cursor-text overflow-hidden",
+              mobileFocused && "rounded-[22px]",
               isDark ? "ring-white/10" : "ring-gray-200/80",
-              isDark ? "bg-[#141414]/90 backdrop-blur-xl text-white" : "bg-[#F7F7F7] text-[#050505]"
+              isDark ? "bg-[#141414]/90 backdrop-blur-xl text-white" : "bg-white text-[#050505]"
             )}>
             <div className="grid transition-all duration-200 ease-out" style={{ gridTemplateRows: mobileFocused ? '1fr' : '0fr' }}>
               <div className="overflow-hidden min-h-0">
@@ -1362,13 +1450,28 @@ export function MedOneXChat() {
               >
                 <Brain size={18} weight="regular" />
               </button>
+              <button
+                onClick={() => setShowVoicePicker(true)}
+                className={cn(
+                  "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all",
+                  isRecording
+                    ? "text-red-500 bg-red-500/15"
+                    : isDark
+                      ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
+                      : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
+                )}
+                title={isRecording ? "Recording..." : "Voice Chat"}
+              >
+                <Microphone size={18} weight={isRecording ? "fill" : "regular"} />
+              </button>
               </div>
               {loading ? (
                 <button
                   onClick={stopGeneration}
-                  className="w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                  className="w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center leading-none transition-all hover:opacity-80"
+                  style={{ backgroundColor: isDark ? "#FFFFFF" : "#000000" }}
                 >
-                  <Stop size={18} weight="fill" />
+                  <Stop size={18} weight="fill" color={isDark ? "#000000" : "#FFFFFF"} />
                 </button>
               ) : (
                 <button
@@ -1401,6 +1504,13 @@ export function MedOneXChat() {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={cn(isDark ? "text-gray-400" : "text-gray-500")}>
                       <path d="M12 5v14M5 12h14" />
                     </svg>
+                  </button>
+                  <button
+                    onClick={() => setShowVoicePicker(true)}
+                    className={cn("flex items-center justify-center w-7 h-7 rounded-full transition-colors", isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-[#050505]")}
+                    title="Voice Chat"
+                  >
+                    <Microphone size={16} weight="regular" />
                   </button>
                   <span className={cn("text-sm font-medium", isDark ? "text-gray-300" : "text-gray-600")}>MedOneX Expert</span>
                 </div>
@@ -1469,6 +1579,13 @@ export function MedOneXChat() {
         onClose={() => setShowProviderPicker(false)}
         settings={settings}
         onUpdate={updateSettings}
+        isDark={isDark}
+      />
+
+      <VoicePersonaPicker
+        isOpen={showVoicePicker}
+        onClose={() => setShowVoicePicker(false)}
+        onSelect={handleVoicePersonaSelect}
         isDark={isDark}
       />
 

@@ -29,7 +29,9 @@ import {
   CaretRight,
   X as XIcon,
   BookOpen,
-  Link as LinkIcon
+  Link as LinkIcon,
+  SpeakerHigh,
+  CaretDown
 } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -81,6 +83,11 @@ const DrQMessageInner: React.FC<MessageProps> = ({
   const [showFlashcards, setShowFlashcards] = useState(false);
   const [showResources, setShowResources] = useState(false);
   const [isDark, _setIsDark] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState("");
+  const [showVoicePicker, setShowVoicePicker] = useState(false);
+  const voicePickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -89,6 +96,34 @@ const DrQMessageInner: React.FC<MessageProps> = ({
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
+
+  // Load available TTS voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const available = window.speechSynthesis.getVoices();
+      if (available.length > 0) {
+        setVoices(available);
+        if (!selectedVoiceURI) {
+          const arabicVoice = available.find(v => v.lang.startsWith("ar"));
+          setSelectedVoiceURI(arabicVoice?.voiceURI || available[0]?.voiceURI || "");
+        }
+      }
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, [selectedVoiceURI]);
+
+  // Close voice picker on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (voicePickerRef.current && !voicePickerRef.current.contains(e.target as Node)) {
+        setShowVoicePicker(false);
+      }
+    };
+    if (showVoicePicker) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showVoicePicker]);
 
   // Extract questions from message content (English-only)
   const parsedQuestions: QuestionData[] = useMemo(() => {
@@ -176,6 +211,24 @@ const DrQMessageInner: React.FC<MessageProps> = ({
     setCopying(true);
     toast.success("Copied to clipboard");
     setTimeout(() => setCopying(false), 2000);
+  };
+
+  const handleSpeak = () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(message.content);
+    utterance.lang = /[\u0600-\u06FF]/.test(message.content) ? "ar" : "en";
+    if (selectedVoiceURI) {
+      const voice = voices.find(v => v.voiceURI === selectedVoiceURI);
+      if (voice) utterance.voice = voice;
+    }
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
   };
 
   const exportAsPdf = async () => {
@@ -603,6 +656,26 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 <button onClick={exportAsPdf} disabled={exporting} aria-label="Export as PDF" className="p-1.5 rounded-lg text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white transition-all disabled:opacity-50">
                   {exporting ? <Spinner size={14} /> : <FileText size={16} weight="fill" />}
                 </button>
+                <div ref={voicePickerRef} className="relative flex items-center">
+                  <button onClick={handleSpeak} aria-label="Read message aloud" className={cn("p-1.5 rounded-lg transition-all", isSpeaking ? "text-indigo-500 dark:text-indigo-400" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white")}>
+                    <SpeakerHigh size={16} weight={isSpeaking ? "fill" : "regular"} />
+                  </button>
+                  {voices.length > 0 && (
+                    <button onClick={() => setShowVoicePicker(!showVoicePicker)} className={cn("p-1 rounded-lg transition-all", showVoicePicker ? "text-indigo-500 dark:text-indigo-400" : "text-slate-300 dark:text-white/20 hover:text-slate-500 dark:hover:text-white/50")}>
+                      <CaretDown size={10} weight="bold" />
+                    </button>
+                  )}
+                  {showVoicePicker && (
+                    <div className={cn("absolute bottom-full right-0 mb-2 w-56 max-h-48 overflow-y-auto rounded-xl shadow-lg border py-1 z-[99999]", isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200")}>
+                      {voices.map((v) => (
+                        <button key={v.voiceURI} onClick={() => { setSelectedVoiceURI(v.voiceURI); setShowVoicePicker(false); }} className={cn("w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center gap-2", selectedVoiceURI === v.voiceURI ? (isDark ? "bg-white/10 text-white" : "bg-black/5 text-black") : (isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-600 hover:bg-black/5"))}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", selectedVoiceURI === v.voiceURI ? "bg-indigo-500" : "bg-transparent")} />
+                          <span className="truncate">{v.name.replace(/^Microsoft /, "")}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

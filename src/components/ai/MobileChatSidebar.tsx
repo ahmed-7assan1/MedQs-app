@@ -82,7 +82,7 @@ function MobileSidebarInner({
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "absolute left-0 top-0 bottom-0 w-[85vw] max-w-[85vw] flex flex-col shadow-[4px_0_32px_rgba(0,0,0,0.4)]",
-              isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-white border-r border-gray-200/60"
+              isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-[#F9F9F9] border-r border-gray-200/60"
             )}
             style={{ willChange: "transform" }}
           >
