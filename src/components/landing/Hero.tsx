@@ -75,7 +75,7 @@ function DiceIcon() {
             <stop offset="100%" stopColor="#dcdde6" />
           </linearGradient>
         </defs>
-        <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#heroGrad)" opacity="0.2" />
+        <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#heroGrad)" opacity="0.55" />
         <path d="M16 8v16M8 16h16" stroke="url(#heroGrad)" strokeWidth="3" strokeLinecap="round" />
       </svg>
     </div>
