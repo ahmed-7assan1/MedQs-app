@@ -137,13 +137,13 @@ export function registerAuth(bot: Telegraf, env: Bindings) {
       const providers = [
         { label: "Gemini", id: "gemini", emoji: "🔮" },
         { label: "Groq", id: "groq", emoji: "⚡" },
+        { label: "DuckDuckGo", id: "duckduckgo", emoji: "🦆" },
         { label: "OpenRouter", id: "openrouter", emoji: "🌐" },
         { label: "SiliconFlow", id: "siliconflow", emoji: "💎" },
-        { label: "Anthropic", id: "anthropic", emoji: "🤖" },
-        { label: "OpenAI", id: "openai", emoji: "🧠" },
+        { label: "DeepSeek", id: "deepseek", emoji: "🧊" },
+        { label: "xAI (Grok)", id: "xai", emoji: "🤖" },
         { label: "HuggingFace", id: "huggingface", emoji: "🤗" },
         { label: "Mistral", id: "mistral", emoji: "🌬️" },
-        { label: "Together", id: "together", emoji: "🔄" },
       ];
       const rows = [];
       for (let i = 0; i < providers.length; i += 2) {

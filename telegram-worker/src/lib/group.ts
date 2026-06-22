@@ -40,8 +40,8 @@ function getReplyContext(ctx: Context): string {
 }
 
 export function registerGroup(bot: Telegraf, env: Record<string, string | undefined>) {
-  const envKeys: Record<string, string> = {};
-  for (const p of ["gemini", "groq", "openrouter", "siliconflow", "openai", "anthropic", "huggingface"]) {
+  const envKeys: Record<string, string> = { duckduckgo: "free" };
+  for (const p of ["gemini", "groq", "openrouter", "siliconflow", "deepseek", "xai", "huggingface", "mistral"]) {
     const keyVar = `${p.toUpperCase()}_API_KEY`;
     if (env[keyVar]) envKeys[p] = env[keyVar]!;
   }

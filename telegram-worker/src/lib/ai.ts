@@ -24,11 +24,11 @@ const PROVIDER_MODELS: Record<string, { model: string; baseURL: string }> = {
   groq: { model: "llama-3.3-70b-versatile", baseURL: "https://api.groq.com/openai/v1" },
   openrouter: { model: "openrouter/free", baseURL: "https://openrouter.ai/api/v1" },
   siliconflow: { model: "deepseek-ai/DeepSeek-V3", baseURL: "https://api.siliconflow.cn/v1" },
-  anthropic: { model: "claude-3.5-sonnet", baseURL: "https://api.anthropic.com/v1" },
-  openai: { model: "gpt-4o-mini", baseURL: "https://api.openai.com/v1" },
+  duckduckgo: { model: "gpt-4o-mini", baseURL: "https://duckduckgo.com/duckchat/v1" },
+  deepseek: { model: "deepseek-chat", baseURL: "https://api.deepseek.com/chat/completions" },
+  xai: { model: "grok-2", baseURL: "https://api.x.ai/v1" },
   huggingface: { model: "meta-llama/Llama-3.3-70B-Instruct", baseURL: "https://api-inference.huggingface.co/v1" },
   mistral: { model: "mistral-large-latest", baseURL: "https://api.mistral.ai/v1" },
-  together: { model: "meta-llama/Llama-3.3-70B-Instruct-Turbo", baseURL: "https://api.together.xyz/v1" },
 };
 
 async function callAI(
@@ -57,6 +57,40 @@ async function callAI(
     const data: any = await res.json();
     if (!res.ok) throw new Error(data?.error?.message ?? "Gemini error");
     return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "❌ No response.";
+  }
+
+  if (provider === "duckduckgo") {
+    const vqdRes = await fetch("https://duckduckgo.com/duckchat/v1/status", {
+      headers: { "x-vqd-accept": "1" },
+    });
+    const vqd = vqdRes.headers.get("x-vqd-4") || vqdRes.headers.get("x-vqd-accept");
+    if (!vqd) throw new Error("Could not negotiate VQD from DuckDuckGo.");
+    const res = await fetch("https://duckduckgo.com/duckchat/v1/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-vqd-4": vqd },
+      body: JSON.stringify({ model, messages }),
+    });
+    if (!res.ok) throw new Error(`DuckDuckGo error: ${res.statusText}`);
+    const reader = res.body?.getReader();
+    if (!reader) throw new Error("No response body from DuckDuckGo");
+    let fullText = "";
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      for (const line of chunk.split("\n")) {
+        if (line.startsWith("data: ")) {
+          const content = line.substring(6);
+          if (content === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(content);
+            if (parsed.message) fullText += parsed.message;
+          } catch {}
+        }
+      }
+    }
+    return fullText || "❌ No response from DuckDuckGo.";
   }
 
   const url = `${baseURL.replace(/\/$/, "")}/chat/completions`;
@@ -107,20 +141,31 @@ export async function generateAIReply(
   }
 
   if (!apiKey) {
-    const cfg = PROVIDER_MODELS[provider];
-    if (cfg && envKeys[provider]) {
-      apiKey = envKeys[provider];
-      model = cfg.model;
-      baseURL = cfg.baseURL;
+    if (provider === "duckduckgo") {
+      model = PROVIDER_MODELS.duckduckgo.model;
+      baseURL = PROVIDER_MODELS.duckduckgo.baseURL;
     } else {
-      for (const p of Object.keys(PROVIDER_MODELS)) {
-        const ek = envKeys[p];
-        if (!ek) continue;
-        provider = p;
-        apiKey = ek;
-        model = PROVIDER_MODELS[p].model;
-        baseURL = PROVIDER_MODELS[p].baseURL;
-        break;
+      const cfg = PROVIDER_MODELS[provider];
+      if (cfg && envKeys[provider]) {
+        apiKey = envKeys[provider];
+        model = cfg.model;
+        baseURL = cfg.baseURL;
+      } else {
+        for (const p of Object.keys(PROVIDER_MODELS)) {
+          if (p === "duckduckgo") continue;
+          const ek = envKeys[p];
+          if (!ek) continue;
+          provider = p;
+          apiKey = ek;
+          model = PROVIDER_MODELS[p].model;
+          baseURL = PROVIDER_MODELS[p].baseURL;
+          break;
+        }
+        if (!apiKey) {
+          provider = "duckduckgo";
+          model = PROVIDER_MODELS.duckduckgo.model;
+          baseURL = PROVIDER_MODELS.duckduckgo.baseURL;
+        }
       }
     }
   }
@@ -163,19 +208,24 @@ export async function generateAIReply(
       }
     }
     for (const p of Object.keys(PROVIDER_MODELS)) {
+      if (p === "duckduckgo") continue;
       const ek = envKeys[p];
       if (!ek) continue;
       try {
         return await callAI(p, ek, PROVIDER_MODELS[p].model, PROVIDER_MODELS[p].baseURL, messages, media);
       } catch (_) {}
     }
+    try {
+      return await callAI("duckduckgo", "", PROVIDER_MODELS.duckduckgo.model, PROVIDER_MODELS.duckduckgo.baseURL, messages, media);
+    } catch (_) {}
     return "❌ No response from AI. Please check your keys or try again.";
   }
 }
 
 export function registerAI(bot: Telegraf, env: Record<string, string | undefined>) {
-  const envKeys: Record<string, string> = {};
+  const envKeys: Record<string, string> = { duckduckgo: "free" };
   for (const p of Object.keys(PROVIDER_MODELS)) {
+    if (p === "duckduckgo") continue;
     const keyVar = `${p.toUpperCase()}_API_KEY`;
     if (env[keyVar]) envKeys[p] = env[keyVar]!;
   }
