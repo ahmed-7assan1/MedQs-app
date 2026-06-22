@@ -5,7 +5,6 @@ import { ChevronRight, Sun, Moon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
-import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { useThemeStore } from "@/lib/store";
 import { NAV_LINKS, EASE } from "./marketing-data";
 
@@ -26,7 +25,16 @@ export function Navbar() {
     >
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center border border-primary/20">
-          <MedOneXLogoMark title={siteName} className="h-6 w-6 text-primary" interactiveColor />
+          <svg viewBox="0 0 32 32" className="h-6 w-6 shrink-0">
+            <defs>
+              <linearGradient id="nbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#405a8d" />
+                <stop offset="100%" stopColor="#dcdde6" />
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#nbGrad)" opacity="0.2" />
+            <path d="M16 8v16M8 16h16" stroke="url(#nbGrad)" strokeWidth="3" />
+          </svg>
         </div>
         <span className="text-lg font-semibold tracking-tight">{siteName}</span>
       </div>

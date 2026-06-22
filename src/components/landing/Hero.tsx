@@ -3,8 +3,6 @@
 import { motion, type Variants } from "framer-motion";
 import { ChevronRight, Check, Pin, Timer, Calendar, Brain, Sparkles, Play, Star, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
-import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { HERO, EASE } from "./marketing-data";
 
 const fadeUp: Variants = {
@@ -68,10 +66,18 @@ function CheckCard() {
 }
 
 function DiceIcon() {
-  const { siteName } = useSiteConfig();
   return (
     <div className="absolute left-1/2 top-12 z-10 -translate-x-1/2 md:top-[0px]">
-      <MedOneXLogoMark title={siteName} className="h-24 w-24 md:h-48 md:w-48" interactiveColor />
+      <svg viewBox="0 0 32 32" className="h-24 w-24 md:h-48 md:w-48">
+        <defs>
+          <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#405a8d" />
+            <stop offset="100%" stopColor="#dcdde6" />
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#heroGrad)" opacity="0.2" />
+        <path d="M16 8v16M8 16h16" stroke="url(#heroGrad)" strokeWidth="3" strokeLinecap="round" />
+      </svg>
     </div>
   );
 }
