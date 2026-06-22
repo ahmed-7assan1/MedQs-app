@@ -77,7 +77,6 @@ function DiceIcon() {
         </defs>
         <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#heroGrad)" />
           </svg>
-      </svg>
     </div>
   );
 }
