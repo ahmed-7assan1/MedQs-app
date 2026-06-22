@@ -152,7 +152,7 @@ const nextConfig = {
 
   // ── Experimental ─────────────────────────────────────────────────────────────
   experimental: {
-    serverComponentsExternalPackages: ["pdfjs-dist"],
+    serverComponentsExternalPackages: ["pdfjs-dist", "edge-tts-universal"],
     serverActions: {
       bodySizeLimit: '100mb',
       allowedOrigins: [

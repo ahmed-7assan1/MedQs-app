@@ -5,6 +5,8 @@ class EdgeTTSManager {
   private currentAudio: HTMLAudioElement | null = null;
   private _voices: EdgeTTSVoice[] | null = null;
   private onInterrupt: (() => void) | null = null;
+  lastSpokenText: string = "";
+  onStateChange: ((playing: boolean) => void) | null = null;
 
   set interruptHandler(fn: (() => void) | null) {
     this.onInterrupt = fn;
@@ -25,6 +27,7 @@ class EdgeTTSManager {
     this.stop();
     const clean = stripMarkdown(text);
     if (!clean) return;
+    this.lastSpokenText = clean;
 
     const params = new URLSearchParams({
       text: clean,
@@ -45,9 +48,9 @@ class EdgeTTSManager {
       this.currentAudio = audio;
 
       return new Promise((resolve, reject) => {
-        audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
-        audio.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Audio playback failed")); };
-        audio.play().catch(reject);
+        audio.onended = () => { URL.revokeObjectURL(url); this.onStateChange?.(false); resolve(); };
+        audio.onerror = () => { URL.revokeObjectURL(url); this.onStateChange?.(false); reject(new Error("Audio playback failed")); };
+        audio.play().then(() => this.onStateChange?.(true)).catch(reject);
       });
     } catch (err) {
       console.error("Edge TTS speak error:", err);
@@ -60,6 +63,7 @@ class EdgeTTSManager {
       this.currentAudio.pause();
       this.currentAudio = null;
     }
+    this.onStateChange?.(false);
     if (this.onInterrupt) this.onInterrupt();
   }
 

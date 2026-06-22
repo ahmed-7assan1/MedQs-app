@@ -40,6 +40,7 @@ import {
 } from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
 import { edgeTTS } from "@/lib/tts";
+import { textSimilarity } from "@/lib/echoUtils";
 
 const C = {
   surface: "bg-white dark:bg-[#121212]",
@@ -108,6 +109,7 @@ export function MedOneXChat() {
   const loadingRef = useRef(loading);
   useEffect(() => { loadingRef.current = loading; }, [loading]);
   const prevVoiceModeRef = useRef(false);
+  const pendingEchoClearRef = useRef(false);
 
   // Sync voiceMode ref
   useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
@@ -166,17 +168,36 @@ export function MedOneXChat() {
         utteranceText = transcript;
         utteranceFinalized = false;
 
+        const trimmed = transcript.trim();
+
+        // Echo detection: if TTS is playing, check text similarity
+        if (trimmed && edgeTTS.isPlaying) {
+          const sim = textSimilarity(transcript, edgeTTS.lastSpokenText);
+          if (sim > 0.8) {
+            clearSilenceTimer();
+            return;
+          }
+        }
+
         // Barge-in: if AI is speaking, stop it and listen
-        if (transcript.trim()) {
+        if (trimmed) {
           if (edgeTTS.isPlaying) edgeTTS.stop();
           if (loadingRef.current) stopGeneration();
+        }
+
+        // Echo buffer cleanup after TTS finishes
+        if (pendingEchoClearRef.current && !edgeTTS.isPlaying) {
+          pendingEchoClearRef.current = false;
+          setLiveTranscript("");
+          clearSilenceTimer();
+          return;
         }
 
         setLiveTranscript(transcript);
 
         // Reset silence timer on each speech
         clearSilenceTimer();
-        if (transcript.trim()) {
+        if (trimmed) {
           silenceTimerRef.current = setTimeout(() => {
             if (!utteranceFinalized && utteranceText.trim()) {
               utteranceFinalized = true;
@@ -255,6 +276,15 @@ export function MedOneXChat() {
     edgeTTS.interruptHandler = null;
     edgeTTS.speak(last.content, voiceId).catch(() => {});
   }, [messages, loading, voicePersona, voiceMode, voiceMuted]);
+
+  // Track TTS state for echo detection
+  useEffect(() => {
+    edgeTTS.onStateChange = (playing) => {
+      if (!playing) pendingEchoClearRef.current = true;
+    };
+    return () => { edgeTTS.onStateChange = null; };
+  }, []);
+
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
