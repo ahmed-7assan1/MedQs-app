@@ -10,6 +10,7 @@ import {
   ShieldCheck, ClockCountdown, ChartBar, Lightning,
   ArrowUpRight, Eye, EyeSlash, Spinner, TextIndent,
   Quotes, NoteBlank, Sparkle, Microphone,
+  SpeakerHigh, SpeakerSlash,
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ import {
   GlobeAltIcon,
 } from "@heroicons/react/24/solid";
 import "./MedOneXChat.css";
+import { edgeTTS } from "@/lib/tts";
 
 const C = {
   surface: "bg-white dark:bg-[#121212]",
@@ -93,77 +95,166 @@ export function MedOneXChat() {
 
   // ─── Voice Chat ───
   const [showVoicePicker, setShowVoicePicker] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [voiceMuted, setVoiceMuted] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [voicePersona, setVoicePersona] = useState<VoicePersona | null>(null);
+  const [liveTranscript, setLiveTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const vadLockRef = useRef(false);
+  const lastSpokenMsgIdRef = useRef<string | null>(null);
+  const voiceModeRef = useRef(false);
+  const loadingRef = useRef(loading);
+  useEffect(() => { loadingRef.current = loading; }, [loading]);
+  const prevVoiceModeRef = useRef(false);
+
+  // Sync voiceMode ref
+  useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
+
+  // When voice mode first activates, mark the latest assistant message as already spoken
+  useEffect(() => {
+    if (voiceMode && !prevVoiceModeRef.current) {
+      const last = messages[messages.length - 1];
+      if (last?.role === "assistant") lastSpokenMsgIdRef.current = last.id;
+    }
+    prevVoiceModeRef.current = voiceMode;
+  }, [voiceMode, messages]);
+
+  const clearSilenceTimer = () => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  };
 
   const stopRecording = useCallback(() => {
+    clearSilenceTimer();
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      try { recognitionRef.current.stop(); } catch {}
       recognitionRef.current = null;
     }
     setIsRecording(false);
+    setLiveTranscript("");
   }, []);
 
-  const startRecording = useCallback((persona: VoicePersona) => {
-    stopRecording();
+  const startVoiceMode = useCallback((persona: VoicePersona) => {
+    voiceModeRef.current = true;
     setVoicePersona(persona);
+    setVoiceMode(true);
+
     const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) {
       toast.error("Voice recognition not supported in this browser. Try Chrome or Edge.");
+      setVoiceMode(false);
       return;
     }
-    const recognition = new SpeechRecognitionAPI();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = persona.lang === "ar" ? "ar-SA" : "en-US";
 
-    let finalTranscript = "";
-    recognition.onresult = (e: any) => {
-      let transcript = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        transcript += e.results[i][0].transcript;
-      }
-      finalTranscript = transcript;
-      startTransition(() => setInput(transcript));
+    const startListening = () => {
+      if (!voiceModeRef.current) return;
+      const recognition = new SpeechRecognitionAPI();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = persona.lang === "ar" ? "ar-SA" : "en-US";
+
+      let utteranceText = "";
+      let utteranceFinalized = false;
+
+      recognition.onresult = (e: any) => {
+        const lastResult = e.results[e.results.length - 1];
+        const transcript = lastResult[0].transcript;
+        utteranceText = transcript;
+        utteranceFinalized = false;
+
+        // Barge-in: if AI is speaking, stop it and listen
+        if (transcript.trim()) {
+          if (edgeTTS.isPlaying) edgeTTS.stop();
+          if (loadingRef.current) stopGeneration();
+        }
+
+        setLiveTranscript(transcript);
+
+        // Reset silence timer on each speech
+        clearSilenceTimer();
+        if (transcript.trim()) {
+          silenceTimerRef.current = setTimeout(() => {
+            if (!utteranceFinalized && utteranceText.trim()) {
+              utteranceFinalized = true;
+              setLiveTranscript("");
+              sendMessage(utteranceText, [], undefined, false);
+            }
+          }, 2000);
+        }
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+        // Auto-restart if voice mode is still active
+        if (voiceModeRef.current && !vadLockRef.current) {
+          startListening();
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsRecording(false);
+        if (voiceModeRef.current && !vadLockRef.current) {
+          startListening();
+        }
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+      setIsRecording(true);
     };
 
-    recognition.onend = () => {
-      setIsRecording(false);
-      if (finalTranscript.trim()) {
-        sendMessage(finalTranscript, [], undefined, false);
-        startTransition(() => setInput(""));
-      }
-    };
+    startListening();
+  }, [sendMessage, stopGeneration]);
 
-    recognition.onerror = () => {
-      setIsRecording(false);
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsRecording(true);
-  }, [sendMessage, stopRecording]);
+  const stopVoiceMode = useCallback(() => {
+    vadLockRef.current = true;
+    setVoiceMode(false);
+    edgeTTS.stop();
+    stopRecording();
+    setLiveTranscript("");
+    setTimeout(() => { vadLockRef.current = false; }, 100);
+  }, [stopRecording]);
 
   const handleVoicePersonaSelect = useCallback((persona: VoicePersona) => {
     setShowVoicePicker(false);
-    startRecording(persona);
-  }, [startRecording]);
+    stopVoiceMode();
+    startVoiceMode(persona);
+  }, [startVoiceMode, stopVoiceMode]);
 
-  // Auto-TTS for voice chat: speak the last assistant message
+  // Toggle voice mode on/off
+  const toggleVoiceMode = useCallback(() => {
+    if (voiceMode) {
+      stopVoiceMode();
+    } else {
+      setShowVoicePicker(true);
+    }
+  }, [voiceMode, stopVoiceMode]);
+
+  // Auto-TTS: wait for full assistant response, then read it
   useEffect(() => {
-    if (!voicePersona || messages.length === 0) return;
+    if (!voicePersona || !voiceMode || voiceMuted || loading) return;
     const last = messages[messages.length - 1];
-    if (last?.role !== "assistant" || last.isStreaming || loading) return;
-    const synth = window.speechSynthesis;
-    if (synth.speaking) synth.cancel();
-    const utterance = new SpeechSynthesisUtterance(last.content);
-    utterance.lang = voicePersona.lang === "ar" ? "ar" : "en";
-    const voices = synth.getVoices();
-    const match = voices.find((v) => v.lang.startsWith(voicePersona.lang));
-    if (match) utterance.voice = match;
-    synth.speak(utterance);
-  }, [messages, loading, voicePersona]);
+    if (last?.role !== "assistant" || last.isStreaming) return;
+    if (last.id === lastSpokenMsgIdRef.current) return;
+    lastSpokenMsgIdRef.current = last.id;
+
+    const personaVoiceMap: Record<string, string> = {
+      salem: "ar-SA-HamedNeural",
+      layla: "ar-EG-SalmaNeural",
+      omar: "ar-AE-HamdanNeural",
+      alex: "en-US-GuyNeural",
+      sarah: "en-GB-SoniaNeural",
+      david: "en-US-GuyNeural",
+    };
+    const voiceId = personaVoiceMap[voicePersona.id] || (voicePersona.lang === "ar" ? "ar-EG-SalmaNeural" : "en-US-GuyNeural");
+
+    edgeTTS.interruptHandler = null;
+    edgeTTS.speak(last.content, voiceId).catch(() => {});
+  }, [messages, loading, voicePersona, voiceMode, voiceMuted]);
   const [showSuperExpertWarning, setShowSuperExpertWarning] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -1022,6 +1113,20 @@ export function MedOneXChat() {
                   )}
                 </motion.div>
               ))}
+
+              {isRecording && liveTranscript && (
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex justify-end"
+                >
+                  <div style={{ fontSize: settings.fontSize + 'px' }} className="max-w-[75%] px-4 py-2.5 rounded-[28px] rounded-br-sm leading-relaxed shadow-sm border border-black/[0.08] dark:border-white/[0.06] md:border-none md:shadow-none bg-[#F7F7F7] dark:bg-white/[0.04] md:bg-gray-100 md:dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <span>{liveTranscript}</span>
+                  </div>
+                </motion.div>
+              )}
+
               <div ref={endRef} />
 
               {/* ─── Super Expert: Expandable Individual Responses ─── */}
@@ -1201,7 +1306,7 @@ export function MedOneXChat() {
                     onKeyDown={handleKeyDown}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
-                    placeholder="Ask MedOneX anything..."
+                    placeholder={isRecording ? (voicePersona?.lang === "ar" ? "تسجيل..." : "Recording...") : "Ask MedOneX anything..."}
                     dir="auto"
                     className={cn(
                       "w-full bg-transparent border-none outline-none resize-none px-4 pt-3.5 pb-1 text-base leading-relaxed no-scrollbar max-h-[150px]",
@@ -1213,10 +1318,11 @@ export function MedOneXChat() {
               <div className={cn("flex items-center justify-between px-2", inputFocused ? "pb-2.5 pt-0" : "py-2.5")}>
                 {inputFocused ? (
                   <div className="flex items-center gap-0.5">
-                    <button onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
+                    <button onMouseDown={(e) => e.preventDefault()} onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
                     </button>
                     <button
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setShowProviderPicker(true)}
                       className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
                       title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
@@ -1224,6 +1330,7 @@ export function MedOneXChat() {
                       <Brain size={15} weight="regular" />
                     </button>
                     <button
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
                         const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
                         const nextPersona = personaList[(currentIdx + 1) % personaList.length];
@@ -1237,31 +1344,53 @@ export function MedOneXChat() {
                       {React.cloneElement((DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement, { size: 14, weight: "regular" })}
                     </button>
                     <button
-                      onClick={() => setShowVoicePicker(true)}
-                      className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isRecording ? "text-red-500 bg-red-500/15" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
-                      title={isRecording ? "Recording..." : "Voice Chat"}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={toggleVoiceMode}
+                      className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", (voiceMode || isRecording) ? "text-red-500 bg-red-500/15" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                      title={voiceMode ? "Voice Mode" : "Voice Chat"}
                     >
-                      <Microphone size={15} weight={isRecording ? "fill" : "regular"} />
+                      <Microphone size={15} weight={(voiceMode || isRecording) ? "fill" : "regular"} />
                     </button>
+                    {voiceMode && (
+                      <button
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setVoiceMuted(v => !v)}
+                        className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                        title={voiceMuted ? "Unmute voice" : "Mute voice"}
+                      >
+                        {voiceMuted ? <SpeakerSlash size={15} weight="fill" /> : <SpeakerHigh size={15} weight="fill" />}
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <button onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
+                    <button onMouseDown={(e) => e.preventDefault()} onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
                     </button>
-                    <button onClick={() => setShowVoicePicker(true)} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")} title="Voice Chat">
-                      <Microphone size={15} weight="regular" />
+                    <button onMouseDown={(e) => e.preventDefault()} onClick={toggleVoiceMode} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", (voiceMode || isRecording) ? "text-red-500 bg-red-500/15" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")} title={voiceMode ? "Voice Mode" : "Voice Chat"}>
+                      <Microphone size={15} weight={(voiceMode || isRecording) ? "fill" : "regular"} />
                     </button>
-                    <span className={cn("text-sm", isDark ? "text-gray-400" : "text-gray-500")}>Ask MedOneX anything...</span>
+                    {voiceMode && (
+                      <button
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setVoiceMuted(v => !v)}
+                        className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                        title={voiceMuted ? "Unmute voice" : "Mute voice"}
+                      >
+                        {voiceMuted ? <SpeakerSlash size={15} weight="fill" /> : <SpeakerHigh size={15} weight="fill" />}
+                      </button>
+                    )}
+                    <span className={cn("text-sm", isDark ? "text-gray-400" : "text-gray-500")}>{isRecording ? (voicePersona?.lang === "ar" ? "تسجيل..." : "Recording...") : "Ask MedOneX anything..."}</span>
                   </div>
                 )}
                 {loading ? (
-                  <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center leading-none transition-all hover:opacity-80"
+                  <button onMouseDown={(e) => e.preventDefault()} onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center leading-none transition-all hover:opacity-80"
                     style={{ backgroundColor: isDark ? "#FFFFFF" : "#000000" }}>
                     <Stop size={13} weight="fill" color={isDark ? "#000000" : "#FFFFFF"} />
                   </button>
                 ) : (
                   <button
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={handleSend}
                     disabled={!input.trim() && files.length === 0}
                     className={cn(
@@ -1391,7 +1520,7 @@ export function MedOneXChat() {
                 }}
                 onFocus={() => setMobileFocused(true)}
                 onBlur={() => setMobileFocused(false)}
-                placeholder="MedOneX Expert"
+                placeholder={isRecording ? (voicePersona?.lang === "ar" ? "تسجيل..." : "Recording...") : "MedOneX Expert"}
                 dir="auto"
                 className={cn(
                   "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-base leading-relaxed no-scrollbar placeholder-gray-400",
@@ -1405,6 +1534,7 @@ export function MedOneXChat() {
               <>
               <div className="flex items-center gap-0.5">
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
                   "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
@@ -1418,6 +1548,7 @@ export function MedOneXChat() {
                 </svg>
               </button>
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
                   const nextPersona = personaList[(currentIdx + 1) % personaList.length];
@@ -1439,6 +1570,7 @@ export function MedOneXChat() {
                 )}
               </button>
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setShowProviderPicker(true)}
                 className={cn(
                   "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all text-base",
@@ -1451,22 +1583,39 @@ export function MedOneXChat() {
                 <Brain size={18} weight="regular" />
               </button>
               <button
-                onClick={() => setShowVoicePicker(true)}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={toggleVoiceMode}
                 className={cn(
                   "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all",
-                  isRecording
+                  (voiceMode || isRecording)
                     ? "text-red-500 bg-red-500/15"
                     : isDark
                       ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
                       : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
                 )}
-                title={isRecording ? "Recording..." : "Voice Chat"}
+                title={voiceMode ? "Voice Mode" : "Voice Chat"}
               >
-                <Microphone size={18} weight={isRecording ? "fill" : "regular"} />
+                <Microphone size={18} weight={(voiceMode || isRecording) ? "fill" : "regular"} />
               </button>
+              {voiceMode && (
+                <button
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setVoiceMuted(v => !v)}
+                  className={cn(
+                    "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all",
+                    isDark
+                      ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
+                      : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5"
+                  )}
+                  title={voiceMuted ? "Unmute voice" : "Mute voice"}
+                >
+                  {voiceMuted ? <SpeakerSlash size={18} weight="fill" /> : <SpeakerHigh size={18} weight="fill" />}
+                </button>
+              )}
               </div>
               {loading ? (
                 <button
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={stopGeneration}
                   className="w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center leading-none transition-all hover:opacity-80"
                   style={{ backgroundColor: isDark ? "#FFFFFF" : "#000000" }}
@@ -1475,6 +1624,7 @@ export function MedOneXChat() {
                 </button>
               ) : (
                 <button
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={handleSend}
                   disabled={!input.trim() && files.length === 0}
                   className={cn(
@@ -1506,13 +1656,24 @@ export function MedOneXChat() {
                     </svg>
                   </button>
                   <button
-                    onClick={() => setShowVoicePicker(true)}
-                    className={cn("flex items-center justify-center w-7 h-7 rounded-full transition-colors", isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-[#050505]")}
-                    title="Voice Chat"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={toggleVoiceMode}
+                    className={cn("flex items-center justify-center w-7 h-7 rounded-full transition-colors", (voiceMode || isRecording) ? "text-red-500" : isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-[#050505]")}
+                    title={voiceMode ? "Voice Mode" : "Voice Chat"}
                   >
-                    <Microphone size={16} weight="regular" />
+                    <Microphone size={16} weight={(voiceMode || isRecording) ? "fill" : "regular"} />
                   </button>
-                  <span className={cn("text-sm font-medium", isDark ? "text-gray-300" : "text-gray-600")}>MedOneX Expert</span>
+                  {voiceMode && (
+                    <button
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => setVoiceMuted(v => !v)}
+                      className={cn("flex items-center justify-center w-7 h-7 rounded-full transition-colors", isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-[#050505]")}
+                      title={voiceMuted ? "Unmute voice" : "Mute voice"}
+                    >
+                      {voiceMuted ? <SpeakerSlash size={16} weight="fill" /> : <SpeakerHigh size={16} weight="fill" />}
+                    </button>
+                  )}
+                  <span className={cn("text-sm font-medium", isDark ? "text-gray-300" : "text-gray-600")}>{isRecording ? (voicePersona?.lang === "ar" ? "تسجيل..." : "Recording...") : "MedOneX Expert"}</span>
                 </div>
                 {!input.trim() && files.length === 0 ? (
                   <button

@@ -43,6 +43,8 @@ import { QuestionsBottomSheet, type QuestionData } from "./QuestionsBottomSheet"
 import { FlashcardsBottomSheet, type FlashcardData } from "./FlashcardsBottomSheet";
 import { ResourcesBottomSheet, type ResourceItem } from "./ResourcesBottomSheet";
 import toast from "react-hot-toast";
+import { edgeTTS } from "@/lib/tts";
+import { EDGE_TTS_ARABIC_VOICES, type EdgeTTSVoice } from "./edgeTTSVoices";
 
 interface MessageProps {
   message: ChatMessage;
@@ -84,9 +86,8 @@ const DrQMessageInner: React.FC<MessageProps> = ({
   const [showResources, setShowResources] = useState(false);
   const [isDark, _setIsDark] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [selectedVoiceURI, setSelectedVoiceURI] = useState("");
   const [showVoicePicker, setShowVoicePicker] = useState(false);
+  const [edgeVoiceId, setEdgeVoiceId] = useState("ar-EG-SalmaNeural");
   const voicePickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -96,23 +97,6 @@ const DrQMessageInner: React.FC<MessageProps> = ({
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
-
-  // Load available TTS voices
-  useEffect(() => {
-    const loadVoices = () => {
-      const available = window.speechSynthesis.getVoices();
-      if (available.length > 0) {
-        setVoices(available);
-        if (!selectedVoiceURI) {
-          const arabicVoice = available.find(v => v.lang.startsWith("ar"));
-          setSelectedVoiceURI(arabicVoice?.voiceURI || available[0]?.voiceURI || "");
-        }
-      }
-    };
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    return () => { window.speechSynthesis.onvoiceschanged = null; };
-  }, [selectedVoiceURI]);
 
   // Close voice picker on outside click
   useEffect(() => {
@@ -215,20 +199,16 @@ const DrQMessageInner: React.FC<MessageProps> = ({
 
   const handleSpeak = () => {
     if (isSpeaking) {
-      window.speechSynthesis.cancel();
+      edgeTTS.stop();
       setIsSpeaking(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(message.content);
-    utterance.lang = /[\u0600-\u06FF]/.test(message.content) ? "ar" : "en";
-    if (selectedVoiceURI) {
-      const voice = voices.find(v => v.voiceURI === selectedVoiceURI);
-      if (voice) utterance.voice = voice;
-    }
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
+    edgeTTS.speak(message.content, edgeVoiceId).then(() => {
+      setIsSpeaking(false);
+    }).catch(() => {
+      setIsSpeaking(false);
+    });
   };
 
   const exportAsPdf = async () => {
@@ -658,19 +638,20 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 </button>
                 <div ref={voicePickerRef} className="relative flex items-center">
                   <button onClick={handleSpeak} aria-label="Read message aloud" className={cn("p-1.5 rounded-lg transition-all", isSpeaking ? "text-indigo-500 dark:text-indigo-400" : "text-slate-400 dark:text-white/30 hover:text-slate-700 dark:hover:text-white")}>
-                    <SpeakerHigh size={16} weight={isSpeaking ? "fill" : "regular"} />
+                    <SpeakerHigh size={16} weight="fill" />
                   </button>
-                  {voices.length > 0 && (
-                    <button onClick={() => setShowVoicePicker(!showVoicePicker)} className={cn("p-1 rounded-lg transition-all", showVoicePicker ? "text-indigo-500 dark:text-indigo-400" : "text-slate-300 dark:text-white/20 hover:text-slate-500 dark:hover:text-white/50")}>
-                      <CaretDown size={10} weight="bold" />
-                    </button>
-                  )}
+                  <button onClick={() => setShowVoicePicker(!showVoicePicker)} className={cn("p-1 rounded-lg transition-all", showVoicePicker ? "text-indigo-500 dark:text-indigo-400" : "text-slate-300 dark:text-white/20 hover:text-slate-500 dark:hover:text-white/50")}>
+                    <CaretDown size={10} weight="bold" />
+                  </button>
                   {showVoicePicker && (
-                    <div className={cn("absolute bottom-full right-0 mb-2 w-56 max-h-48 overflow-y-auto rounded-xl shadow-lg border py-1 z-[99999]", isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200")}>
-                      {voices.map((v) => (
-                        <button key={v.voiceURI} onClick={() => { setSelectedVoiceURI(v.voiceURI); setShowVoicePicker(false); }} className={cn("w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center gap-2", selectedVoiceURI === v.voiceURI ? (isDark ? "bg-white/10 text-white" : "bg-black/5 text-black") : (isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-600 hover:bg-black/5"))}>
-                          <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", selectedVoiceURI === v.voiceURI ? "bg-indigo-500" : "bg-transparent")} />
-                          <span className="truncate">{v.name.replace(/^Microsoft /, "")}</span>
+                    <div className={cn("absolute bottom-full right-0 mb-2 w-64 max-h-64 overflow-y-auto rounded-xl shadow-lg border py-1 z-[99999]", isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200")}>
+                      {EDGE_TTS_ARABIC_VOICES.map((v) => (
+                        <button key={v.id} onClick={() => { setEdgeVoiceId(v.id); setShowVoicePicker(false); }} className={cn("w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center gap-2", edgeVoiceId === v.id ? (isDark ? "bg-white/10 text-white" : "bg-black/5 text-black") : (isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-600 hover:bg-black/5"))}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", edgeVoiceId === v.id ? "bg-indigo-500" : "bg-transparent")} />
+                          <span>{v.flag}</span>
+                          <span className="font-medium">{v.name}</span>
+                          <span className={isDark ? "text-gray-500" : "text-gray-400"}>{v.gender === "female" ? "♀" : "♂"}</span>
+                          <span className={cn("ml-auto truncate", isDark ? "text-gray-500" : "text-gray-400")}>{v.country}</span>
                         </button>
                       ))}
                     </div>
