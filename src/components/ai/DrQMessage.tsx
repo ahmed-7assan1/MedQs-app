@@ -335,6 +335,49 @@ const DrQMessageInner: React.FC<MessageProps> = ({
           </div>
         ) : (
           <div className="relative">
+            {/* Files ABOVE bubble */}
+            {message.files && message.files.length > 0 && (
+              <div className={cn("flex mb-2", !isAI && "justify-end")}>
+                <div className={cn("flex flex-wrap gap-2", !isAI ? "max-w-[75%]" : "max-w-[85%]")}>
+                  {message.files.map((f, i) => {
+                    const isImg = f.mimeType.startsWith("image/");
+                    return isImg ? (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, delay: i * 0.05 }}
+                        className="relative group overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-md"
+                      >
+                        <img src={f.data} alt={f.name} className="w-full h-auto object-cover max-h-[260px] min-w-[120px]" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <span className="text-[11px] text-white/95 truncate block font-semibold drop-shadow-sm">{f.name}</span>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, delay: i * 0.05 }}
+                        className="flex items-center gap-3 p-3 rounded-2xl border bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 shadow-sm min-w-[200px]"
+                      >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-[12px] font-bold bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
+                          {f.name.match(/\.pdf$/i) ? "PDF" : f.name.match(/\.docx?$/i) ? "DOC" : f.name.match(/\.xlsx?$/i) ? "XLS" : f.name.match(/\.pptx?$/i) ? "PPT" : f.name.match(/\.zip$/i) || f.name.match(/\.rar$/i) ? "ZIP" : "FILE"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-semibold truncate text-gray-900 dark:text-white">{f.name}</p>
+                          {f.size && (
+                            <p className="text-[10px] font-medium text-slate-400 dark:text-white/40">{`${(f.size / 1024 / 1024).toFixed(1)} MB`}</p>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <motion.div 
               ref={contentRef}
               initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -357,55 +400,6 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                 backgroundColor: isAI && variant !== "flat" ? aiBubbleColor : undefined,
               }}
             >
-              {/* File/Image Inline Display */}
-              {message.files && message.files.length > 0 && (
-                <div className={cn("flex flex-wrap gap-2 mb-3", message.files.filter(f => f.mimeType.startsWith("image/")).length >= 2 && "grid grid-cols-2")}>
-                  {message.files.map((f, i) => {
-                    const isImg = f.mimeType.startsWith("image/");
-                    return isImg ? (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2, delay: i * 0.05 }}
-                        className="relative group overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 shadow-sm"
-                      >
-                        <img src={f.data} alt={f.name} className="w-full h-auto object-cover max-h-[220px]" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <span className="text-[11px] text-white/90 truncate block font-medium">{f.name}</span>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2, delay: i * 0.05 }}
-                        className={cn(
-                          "flex items-center gap-2 p-2.5 rounded-xl border max-w-[220px]",
-                          isAI ? "bg-muted/30 border-border" : "bg-[#F7F7F7] border-black/[0.1] dark:bg-white/10 dark:border-white/20"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-[11px] font-bold",
-                          isAI ? "bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400" : "bg-white/20 text-white"
-                        )}>
-                          {f.name.match(/\.pdf$/i) ? "PDF" : f.name.match(/\.docx?$/i) ? "DOC" : f.name.match(/\.xlsx?$/i) ? "XLS" : f.name.match(/\.pptx?$/i) ? "PPT" : f.name.match(/\.zip$/i) || f.name.match(/\.rar$/i) ? "ZIP" : f.name.match(/\.mp[34]$/i) || f.name.match(/\.mov$/i) || f.name.match(/\.avi$/i) ? "VID" : "📄"}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-semibold truncate text-gray-900 dark:text-white">{f.name}</p>
-                          <p className="text-[9px] text-slate-500 dark:text-white/40">
-                            {f.size ? `${(f.size / 1024 / 1024).toFixed(1)} MB` : ""}
-                          </p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
-
-
               {/* ✦ AI Images Gallery ✦ */}
               {isAI && (() => {
                 const directImgRegex = /!\[.*?\]\((https?:\/\/[^\s)]+)\)/g;

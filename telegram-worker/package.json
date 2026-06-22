@@ -10,8 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
     "hono": "^4.12.18",
+    "postgres": "^3.4.9",
     "telegraf": "^4.16.3"
   }
 }

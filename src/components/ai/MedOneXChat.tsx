@@ -780,7 +780,7 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       <div
-        className="flex flex-col flex-1 min-h-0"
+        className="flex flex-col flex-1 min-h-0 pb-24"
         ref={mainRef}
         style={{
           transform: showSidebar ? "translateX(85vw)" : "translateX(0)",
@@ -1053,16 +1053,18 @@ export function MedOneXChat() {
 
       {/* Shared file input (outside both desktop/mobile sections for reliability) */}
       <input type="file" ref={fileInputRef} className="hidden" multiple accept="*/*" onChange={handleFileChange} />
+    </div>
+    {/* ^ mainRef closes here */}
 
-      {/* Desktop inline chat input (nav handles mobile) */}
-      <div className="hidden md:block flex-shrink-0 relative mb-[30px]">
+      {/* Desktop fixed input */}
+      <div className="hidden md:block fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none">
         <div className={cn(
           "absolute inset-0 rounded-t-3xl pointer-events-none",
           isDark
             ? "bg-gradient-to-t from-black via-black/80 to-transparent"
             : "bg-gradient-to-t from-white via-white/80 to-transparent"
         )} />
-        <div className="pt-4 pb-3 flex justify-center relative">
+        <div className="flex justify-center relative pointer-events-auto">
           {/* Desktop scroll-to-bottom button */}
           <button
             onClick={() => { 
@@ -1072,132 +1074,110 @@ export function MedOneXChat() {
               if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
             }}
             className={cn(
-              "absolute bottom-full right-8 mb-2 z-10 w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
-              showScrollBtn && !showSidebar ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
+              "absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-lg border backdrop-blur-md active:scale-90 transition-all duration-200",
+              showScrollBtn ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
               isDark
-                ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
-                : "border-black/20 bg-black/15 text-black hover:bg-black/25"
+                ? "border-white/[0.12] bg-white/10 text-white hover:bg-white/20"
+                : "border-black/[0.08] bg-black/5 text-black hover:bg-black/10"
             )}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 5v14M5 12l7 7 7-7" />
             </svg>
           </button>
-          <div className="w-full max-w-3xl mx-auto px-3 md:px-4">
+          <div className="w-full max-w-[800px] mx-auto px-4 pb-4 pt-4">
+            {files.length > 0 && (
+              <div className={cn(
+                "flex flex-wrap gap-1.5 px-3 py-2 mb-2 rounded-2xl",
+                isDark ? "bg-white/[0.03]" : "bg-black/[0.02]"
+              )}>
+                {files.map((f, i) => (
+                  <div key={i} className={cn("flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs max-w-[160px] transition-all", isDark ? "bg-white/10" : "bg-gray-100")}>
+                    {f.loading ? (
+                      <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0">
+                        <svg className="animate-spin h-2.5 w-2.5 text-indigo-500" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      </div>
+                    ) : f.mimeType.startsWith("image/") ? (
+                      <img src={f.data} alt={f.name} className="w-4 h-4 rounded object-cover flex-shrink-0" />
+                    ) : (
+                      <span className="text-[10px] flex-shrink-0">{f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}</span>
+                    )}
+                    <span className="truncate max-w-[80px]">{f.name}</span>
+                    <button onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))} className="flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100 transition-opacity"><X size={10} weight="bold" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div
+              onClick={() => { if (!inputFocused) inputRef.current?.focus(); }}
               className={cn(
-                "rounded-[20px] ring-1 transition-all duration-200 shadow-sm",
-                isDark ? "ring-white/10" : "ring-gray-200/80",
-                isDark ? "bg-[#141414]/80 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
+                "flex flex-col rounded-[20px] ring-1 transition-all duration-200 cursor-text",
+                inputFocused
+                  ? isDark ? "ring-white/20 shadow-lg" : "ring-black/20 shadow-lg"
+                  : isDark ? "ring-white/10 shadow-sm" : "ring-gray-200/80 shadow-sm",
+                isDark ? "bg-[#141414]/90 backdrop-blur-2xl" : "bg-white/80 backdrop-blur-xl"
               )}
             >
-              {files.length > 0 && (
-                <div className={cn(
-                  "flex flex-wrap gap-1.5 px-3 pt-2.5 pb-1.5 max-h-[120px] overflow-y-auto border-b",
-                  isDark ? "border-white/10" : "border-gray-200/60"
-                )}>
-                  {files.map((f, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs max-w-[160px] transition-all",
-                        isDark ? "bg-white/10" : "bg-gray-100"
-                      )}
+              <div className="grid transition-all duration-200 ease-out" style={{ gridTemplateRows: inputFocused ? '1fr' : '0fr' }}>
+                <div className="overflow-hidden min-h-0">
+                  <textarea
+                    ref={inputRef}
+                    rows={1}
+                    value={input}
+                    onChange={e => startTransition(() => setInput(e.target.value))}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                    placeholder="MedOneX Expert"
+                    dir="auto"
+                    className={cn(
+                      "w-full bg-transparent border-none outline-none resize-none px-4 pt-3.5 pb-1 text-base leading-relaxed no-scrollbar max-h-[150px]",
+                      isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
+                    )}
+                  />
+                </div>
+              </div>
+              <div className={cn("flex items-center justify-between px-2", inputFocused ? "pb-2.5 pt-0" : "py-2.5")}>
+                {inputFocused ? (
+                  <div className="flex items-center gap-0.5">
+                    <button onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                    </button>
+                    <button
+                      onClick={() => setShowProviderPicker(true)}
+                      className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                      title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
                     >
-                      {f.loading ? (
-                        <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0">
-                          <svg className="animate-spin h-3 w-3 text-indigo-500" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                        </div>
-                      ) : f.mimeType.startsWith("image/") ? (
-                        <img src={f.data} alt={f.name} className="w-5 h-5 rounded object-cover flex-shrink-0" />
-                      ) : (
-                        <span className="text-[10px] flex-shrink-0">
-                          {f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}
-                        </span>
-                      )}
-                      <span className="truncate max-w-[80px]">{f.name}</span>
-                      <button
-                        onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
-                        className="flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
-                      >
-                        <X size={10} weight="bold" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <textarea
-                ref={inputRef}
-                rows={1}
-                value={input}
-                onChange={e => startTransition(() => setInput(e.target.value))}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                placeholder="MedOneX Expert"
-                dir="auto"
-                className={cn(
-                  "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-sm leading-relaxed no-scrollbar font-[family-name:var(--font-english)]",
-                  isDark ? "text-white placeholder-gray-500" : "text-gray-900 placeholder-gray-400"
+                      <Brain size={15} weight="regular" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
+                        const nextPersona = personaList[(currentIdx + 1) % personaList.length];
+                        const ws = Object.values(DRQ_WORKSPACES).find(w => w.personaId === nextPersona);
+                        if (ws) updateSettings({ activePersona: nextPersona, activeProvider: ws.defaultProvider, activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] } });
+                        else updateSettings({ activePersona: nextPersona });
+                      }}
+                      className={cn("flex items-center justify-center w-8 h-8 rounded-full transition-all select-none", isDark ? "text-gray-500 hover:text-gray-200 hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
+                      title={(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
+                    >
+                      {React.cloneElement((DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement, { size: 14, weight: "regular" })}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                    </button>
+                    <span className={cn("text-xs font-medium", isDark ? "text-gray-400" : "text-gray-500")}>MedOneX Expert</span>
+                  </div>
                 )}
-              />
-              <div className="flex items-center justify-between px-2 pb-2">
-                <div className="flex items-center gap-0.5">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100")}
-                >
-                  {files.some(f => f.loading) ? (
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
-                  )}
-                </button>
-                <button
-                  onClick={() => setShowProviderPicker(true)}
-                  className={cn(
-                    "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                    isDark
-                      ? "text-gray-400 hover:text-white hover:bg-white/10"
-                      : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
-                  )}
-                  title={PROVIDER_CONFIGS[settings.activeProvider]?.label}
-                >
-                  <Brain size={15} weight="regular" />
-                </button>
-                <button
-                  onClick={() => {
-                    const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
-                    const nextPersona = personaList[(currentIdx + 1) % personaList.length];
-                    const ws = Object.values(DRQ_WORKSPACES).find(w => w.personaId === nextPersona);
-                    if (ws) updateSettings({ activePersona: nextPersona, activeProvider: ws.defaultProvider, activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] } });
-                    else updateSettings({ activePersona: nextPersona });
-                  }}
-                  className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-full transition-all select-none",
-                    isDark
-                      ? "text-gray-400 hover:text-gray-200 hover:bg-white/10"
-                      : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
-                  )}
-                  title={(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
-                >
-                  {React.cloneElement(
-                    (DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement,
-                    { size: 14, weight: "regular" }
-                  )}
-                </button>
-                </div>
                 {loading ? (
-                  <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/20 text-red-400 hover:bg-red-500/30">
-                    <Stop size={14} weight="fill" />
+                  <button onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-red-500/15 text-red-400 hover:bg-red-500/25">
+                    <Stop size={13} weight="fill" />
                   </button>
                 ) : (
                   <button
@@ -1217,14 +1197,12 @@ export function MedOneXChat() {
                 )}
               </div>
             </div>
-            <div className="flex items-center justify-between mt-3 px-1">
-              <span className={cn("text-[8px] leading-tight", isDark ? "text-gray-500" : "text-gray-500")}>This AI chat is for educational purposes only &bull; Please set your API key for accurate responses</span>
-              <span className={cn("text-[9px]", isDark ? "text-gray-500" : "text-gray-500")}>{limits.used}/{limits.limit}</span>
+            <div className="flex items-center justify-center mt-2.5 px-1">
+              <span className={cn("text-[9px] opacity-50", isDark ? "text-gray-500" : "text-gray-500")}>MedOneX Expert AI · Medical AI Can Make Mistakes</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
       {/* Solid fill below mobile capsule */}
       <div className={cn(
