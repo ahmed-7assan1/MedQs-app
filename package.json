@@ -97,6 +97,7 @@
     "date-fns": "^4.1.0",
     "docx": "^9.6.1",
     "docxtemplater": "^3.68.4",
+    "edge-tts-universal": "^1.4.0",
     "file-saver": "^2.0.5",
     "firebase": "^12.13.0",
     "firebase-admin": "^13.9.0",
