@@ -32,7 +32,8 @@ export function Navbar() {
                 <stop offset="100%" stopColor="#dcdde6" />
               </linearGradient>
             </defs>
-            <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#nbGrad)" />
+            <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#nbGrad)" opacity="0.2" />
+            <path d="M16 8v16M8 16h16" stroke="url(#nbGrad)" strokeWidth="3" strokeLinecap="round" />
           </svg>
         </div>
         <span className="text-lg font-semibold tracking-tight">{siteName}</span>
