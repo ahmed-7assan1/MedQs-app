@@ -113,14 +113,24 @@ export async function generateAIReply(
   preferredProvider: string,
   envKeys: Record<string, string>,
   media?: { data: string; mimeType: string },
-  history?: { role: string; content: string }[]
+  history?: { role: string; content: string }[],
+  customApiKey?: string | null
 ): Promise<string> {
   let provider = preferredProvider || "gemini";
   let apiKey: string | null = null;
   let model = PROVIDER_MODELS.gemini.model;
   let baseURL = PROVIDER_MODELS.gemini.baseURL;
 
-  if (user) {
+  if (customApiKey) {
+    const cfg = PROVIDER_MODELS[provider];
+    if (cfg) {
+      apiKey = customApiKey;
+      model = cfg.model;
+      baseURL = cfg.baseURL;
+    }
+  }
+
+  if (!apiKey && user) {
     const keys = getUserApiKeys(user);
     const cfg = PROVIDER_MODELS[provider];
     if (cfg && keys[provider as ProviderKey]) {
@@ -293,7 +303,7 @@ export function registerAI(bot: Telegraf, env: Record<string, string | undefined
       const history = await getConversationHistory(tid);
 
       try {
-        let reply = await generateAIReply(isGuest ? null : linked, messageText, state.provider, envKeys, undefined, history);
+        let reply = await generateAIReply(isGuest ? null : linked, messageText, state.provider, envKeys, undefined, history, state.apiKey);
         if (reply.startsWith("❌") && allGeminiKeys.length > 1) {
           for (const gk of allGeminiKeys) {
             try {
@@ -355,7 +365,7 @@ export function registerAI(bot: Telegraf, env: Record<string, string | undefined
       const linked = await getLinkedUser(tid);
       const isGuest = state.chatState === "AI_CHAT_GUEST";
       const history = await getConversationHistory(tid);
-      const reply = await generateAIReply(isGuest ? null : linked, caption, state.provider, envKeys, media, history);
+      const reply = await generateAIReply(isGuest ? null : linked, caption, state.provider, envKeys, media, history, state.apiKey);
 
       if (reply.length > 4000) {
         for (let i = 0; i < reply.length; i += 4000) {

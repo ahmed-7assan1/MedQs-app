@@ -78,6 +78,7 @@ export function groupMentionKeyboard() {
       inline_keyboard: [
         [{ text: "📚 Browse Modules", callback_data: "modules" }],
         [{ text: "💬 AI Chat (Free)", callback_data: "ai_guest" }],
+        [{ text: "🤖 Change AI Provider", callback_data: "set_ai" }],
         [{ text: "🔑 Sign In for Full Access", callback_data: "auth_login_start" }],
       ],
     },

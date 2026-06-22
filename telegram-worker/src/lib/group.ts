@@ -1,5 +1,5 @@
 import { Telegraf, Context } from "telegraf";
-import { getLinkedUser, downloadTelegramFile, getConversationHistory, addConversationMessage } from "./helpers";
+import { getLinkedUser, getBotState, downloadTelegramFile, getConversationHistory, addConversationMessage } from "./helpers";
 import { generateAIReply, escapeMarkdown } from "./ai";
 import { groupMentionKeyboard } from "./keyboards";
 
@@ -88,14 +88,15 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
 
       const tid = ctx.from!.id.toString();
       const linked = await getLinkedUser(tid);
+      const state = await getBotState(tid);
       const history = await getConversationHistory(tid);
 
       await ctx.sendChatAction("typing");
 
       try {
         const reply = replyMedia
-          ? await generateAIReply(linked, fullText, "gemini", envKeys, replyMedia, history)
-          : await generateAIReply(linked, fullText, "gemini", envKeys, undefined, history);
+          ? await generateAIReply(linked, fullText, state.provider || "gemini", envKeys, replyMedia, history, state.apiKey)
+          : await generateAIReply(linked, fullText, state.provider || "gemini", envKeys, undefined, history, state.apiKey);
         const safe = escapeMarkdown(reply);
         if (safe.length > 4000) {
           for (let i = 0; i < safe.length; i += 4000) {
@@ -166,8 +167,9 @@ export function registerGroup(bot: Telegraf, env: Record<string, string | undefi
 
       const tid = ctx.from!.id.toString();
       const linked = await getLinkedUser(tid);
+      const state = await getBotState(tid);
       const history = await getConversationHistory(tid);
-      const reply = await generateAIReply(linked, cleanText, "gemini", envKeys, media, history);
+      const reply = await generateAIReply(linked, cleanText, state.provider || "gemini", envKeys, media, history, state.apiKey);
       const safe = escapeMarkdown(reply);
 
       if (safe.length > 4000) {

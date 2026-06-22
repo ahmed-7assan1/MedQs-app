@@ -171,10 +171,30 @@ export function registerAuth(bot: Telegraf, env: Bindings) {
       await ctx.answerCbQuery();
       const provider = ctx.match![1];
       const tid = ctx.from!.id.toString();
-      await updateBotState(tid, { provider });
+
+      if (provider === "duckduckgo") {
+        await updateBotState(tid, { provider, apiKey: null });
+        await ctx.editMessageText(
+          `✅ *Provider changed to DuckDuckGo* 🦆\n\nNo API key needed — it's free!`,
+          { parse_mode: "Markdown", reply_markup: { inline_keyboard: [[{ text: "⬅ Back", callback_data: "back_main" }]] } }
+        );
+        return;
+      }
+
+      const isGroup = ctx.callbackQuery?.message?.chat?.type === "group" || ctx.callbackQuery?.message?.chat?.type === "supergroup";
+      if (isGroup) {
+        await updateBotState(tid, { provider, chatState: "AWAITING_API_KEY" });
+        await ctx.editMessageText(
+          `🔑 *Send your API key for ${provider} via private message*\n\nMessage me here: @${ctx.botInfo?.username || "MedOneX_bot"}\n\nType /skip in DM to use the default key.`,
+          { parse_mode: "Markdown", reply_markup: { inline_keyboard: [[{ text: "⬅ Back", callback_data: "back_main" }]] } }
+        );
+        return;
+      }
+
+      await updateBotState(tid, { provider, chatState: "AWAITING_API_KEY" });
       await ctx.editMessageText(
-        `✅ *Provider changed to ${provider}*`,
-        { parse_mode: "Markdown", reply_markup: { inline_keyboard: [[{ text: "⬅ Back", callback_data: "back_main" }]] } }
+        `🔑 *Enter your API key for ${provider}*\n\nSend me your API key in a message.\n\nType /skip to use the default key.`,
+        { parse_mode: "Markdown", reply_markup: { inline_keyboard: [[{ text: "⬅ Cancel", callback_data: "back_main" }]] } }
       );
     } catch (e: any) {
       console.error("ai_provider error:", e);
@@ -257,6 +277,19 @@ export function registerAuth(bot: Telegraf, env: Bindings) {
           });
           await updateBotState(tid, { chatState: "IDLE", tempEmail: null });
         }
+        return;
+      }
+
+      if (state.chatState === "AWAITING_API_KEY") {
+        const text = (ctx.message as any).text?.trim();
+        if (!text || text === "/skip") {
+          await updateBotState(tid, { chatState: "IDLE", apiKey: null });
+          await ctx.reply(`✅ Using default key for ${state.provider || "gemini"}.`);
+          return;
+        }
+        await updateBotState(tid, { chatState: "IDLE", apiKey: text });
+        await ctx.reply(`✅ *API key saved for ${state.provider || "gemini"}!*`, { parse_mode: "Markdown" });
+        try { await (ctx as any).deleteMessage().catch(() => {}); } catch (_) {}
         return;
       }
 
