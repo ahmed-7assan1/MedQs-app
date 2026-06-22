@@ -1459,7 +1459,7 @@ export function MedOneXChat() {
           if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
         }}
         className={cn(
-          "md:hidden fixed right-5 z-[10004] w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
+          "md:hidden fixed left-1/2 -translate-x-1/2 z-[10004] w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
           showScrollBtn && !showSidebar ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
           isDark
             ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
