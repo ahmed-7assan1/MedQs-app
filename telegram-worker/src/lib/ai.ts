@@ -6,10 +6,12 @@ import {
 } from "./helpers";
 import { mainGuestKeyboard, mainMenuKeyboard, cancelKeyboard } from "./keyboards";
 
-const SYSTEM_PROMPT = `You are Dr. Q, an elite AI medical tutor for MedOneX.
+const SYSTEM_PROMPT = `You are Dr. Q, a friendly and warm AI medical tutor for MedOneX.
 Instructions:
+- Be kind, encouraging, and supportive. Use a friendly tone like a helpful senior colleague.
 - Respond concisely and professionally in Telegram Markdown.
-- You are bilingual in Arabic and English.
+- Use emojis naturally to make responses warm and engaging (✅ 🏥 📚 💊 🩺 etc).
+- You are fully bilingual in Arabic and English — match the user's language.
 - Use bold for medical terms.
 - If explaining procedures, use bullet points.
 - Scope: Medicine, Clinical Reasoning, and Study Skills only.
@@ -75,7 +77,7 @@ export async function generateAIReply(
   user: LinkedUser | null,
   message: string,
   preferredProvider: string,
-  geminiKeys: string[],
+  envKeys: Record<string, string>,
   media?: { data: string; mimeType: string },
   history?: { role: string; content: string }[]
 ): Promise<string> {
@@ -105,10 +107,22 @@ export async function generateAIReply(
   }
 
   if (!apiKey) {
-    provider = "gemini";
-    apiKey = geminiKeys[0] || null;
-    model = PROVIDER_MODELS.gemini.model;
-    baseURL = PROVIDER_MODELS.gemini.baseURL;
+    const cfg = PROVIDER_MODELS[provider];
+    if (cfg && envKeys[provider]) {
+      apiKey = envKeys[provider];
+      model = cfg.model;
+      baseURL = cfg.baseURL;
+    } else {
+      for (const p of Object.keys(PROVIDER_MODELS)) {
+        const ek = envKeys[p];
+        if (!ek) continue;
+        provider = p;
+        apiKey = ek;
+        model = PROVIDER_MODELS[p].model;
+        baseURL = PROVIDER_MODELS[p].baseURL;
+        break;
+      }
+    }
   }
 
   if (!apiKey) {
@@ -148,9 +162,11 @@ export async function generateAIReply(
         }
       }
     }
-    for (const gk of geminiKeys) {
+    for (const p of Object.keys(PROVIDER_MODELS)) {
+      const ek = envKeys[p];
+      if (!ek) continue;
       try {
-        return await callAI("gemini", gk, PROVIDER_MODELS.gemini.model, PROVIDER_MODELS.gemini.baseURL, messages, media);
+        return await callAI(p, ek, PROVIDER_MODELS[p].model, PROVIDER_MODELS[p].baseURL, messages, media);
       } catch (_) {}
     }
     return "❌ No response from AI. Please check your keys or try again.";
@@ -158,12 +174,13 @@ export async function generateAIReply(
 }
 
 export function registerAI(bot: Telegraf, env: Record<string, string | undefined>) {
-  const geminiKeys = [
-    env.GEMINI_API_KEY,
-    env.GEMINI_API_KEY_2,
-    env.GEMINI_API_KEY_3,
-    env.GEMINI_API_KEY_4,
-  ].filter((k): k is string => !!k);
+  const envKeys: Record<string, string> = {};
+  for (const p of Object.keys(PROVIDER_MODELS)) {
+    const keyVar = `${p.toUpperCase()}_API_KEY`;
+    if (env[keyVar]) envKeys[p] = env[keyVar]!;
+  }
+  const extraGemini = [env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3, env.GEMINI_API_KEY_4].filter((k): k is string => !!k);
+  const allGeminiKeys = envKeys.gemini ? [envKeys.gemini, ...extraGemini] : extraGemini;
 
   bot.action("ai_chat", async (ctx) => {
     try {
@@ -226,7 +243,15 @@ export function registerAI(bot: Telegraf, env: Record<string, string | undefined
       const history = await getConversationHistory(tid);
 
       try {
-        const reply = await generateAIReply(isGuest ? null : linked, messageText, state.provider, geminiKeys, undefined, history);
+        let reply = await generateAIReply(isGuest ? null : linked, messageText, state.provider, envKeys, undefined, history);
+        if (reply.startsWith("❌") && allGeminiKeys.length > 1) {
+          for (const gk of allGeminiKeys) {
+            try {
+              const retry = await callAI("gemini", gk, PROVIDER_MODELS.gemini.model, PROVIDER_MODELS.gemini.baseURL, [{ role: "user", content: messageText }]);
+              if (retry) { reply = retry; break; }
+            } catch (_) {}
+          }
+        }
         if (reply.length > 4000) {
           for (let i = 0; i < reply.length; i += 4000) {
             await ctx.reply(escapeMarkdown(reply.slice(i, i + 4000)), { parse_mode: "Markdown" });
@@ -280,7 +305,7 @@ export function registerAI(bot: Telegraf, env: Record<string, string | undefined
       const linked = await getLinkedUser(tid);
       const isGuest = state.chatState === "AI_CHAT_GUEST";
       const history = await getConversationHistory(tid);
-      const reply = await generateAIReply(isGuest ? null : linked, caption, state.provider, geminiKeys, media, history);
+      const reply = await generateAIReply(isGuest ? null : linked, caption, state.provider, envKeys, media, history);
 
       if (reply.length > 4000) {
         for (let i = 0; i < reply.length; i += 4000) {
