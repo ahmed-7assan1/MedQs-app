@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Sun, Moon, Languages } from "lucide-react";
 import Link from "next/link";
 
 type Lang = "en" | "ar";
@@ -127,6 +127,7 @@ function useLang(): [Lang, () => void] {
 export function Story() {
   const { siteName } = useSiteConfig();
   const [lang, toggleLang] = useLang();
+  const [lightMode, setLightMode] = useState(false);
   const isAr = lang === "ar";
   const sectionsRef = useRef<HTMLDivElement>(null);
 
@@ -148,20 +149,50 @@ export function Story() {
   }, [lang]);
 
   return (
-    <div className="story-page" dir="rtl">
+    <div className={`story-page ${lightMode ? "light-mode" : ""}`} dir="rtl">
       <ParticlesCanvas />
       <div className="aurora" />
 
       <style>{`
         .story-page {
+          --c-bg: #060E1E;
+          --c-text: #FFFFFF;
+          --c-text-dim: rgba(255,255,255,0.55);
+          --c-text-dimmer: rgba(255,255,255,0.3);
+          --c-border: rgba(255,255,255,0.08);
+          --c-border-light: rgba(255,255,255,0.07);
+          --c-card-bg: rgba(255,255,255,0.04);
+          --c-card-bg-soft: rgba(255,255,255,0.03);
+          --c-btn-bg: rgba(6,14,30,0.8);
+          --c-shine: rgba(255,255,255,0.15);
           font-family: 'Cairo', 'Tajawal', sans-serif;
-          background: #060E1E;
-          color: #FFFFFF;
+          background: var(--c-bg);
+          color: var(--c-text);
           overflow-x: hidden;
           line-height: 1.7;
           min-height: 100vh;
           position: relative;
+          transition: background 0.4s, color 0.4s;
         }
+        .story-page.light-mode {
+          --c-bg: #f0f2f5;
+          --c-text: #1a1a2e;
+          --c-text-dim: rgba(0,0,0,0.55);
+          --c-text-dimmer: rgba(0,0,0,0.3);
+          --c-border: rgba(0,0,0,0.08);
+          --c-border-light: rgba(0,0,0,0.06);
+          --c-card-bg: rgba(255,255,255,0.85);
+          --c-card-bg-soft: rgba(255,255,255,0.7);
+          --c-btn-bg: rgba(255,255,255,0.9);
+          --c-shine: rgba(0,0,0,0.06);
+        }
+        .story-page.light-mode .aurora { opacity: 0.15; }
+        .story-page.light-mode .hero-glow { background: radial-gradient(circle, rgba(26,107,255,0.08) 0%, transparent 70%); }
+        .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%); }
+        .story-page.light-mode .np-old { color: var(--c-text-dimmer); }
+        .story-page.light-mode .logo-x { text-shadow: 0 0 20px rgba(0,212,255,0.25); }
+        .story-page.light-mode .ch-accent { color: var(--c-text); }
+        .story-page.light-mode .fi-num { border-color: rgba(26,107,255,0.2); }
 
         .aurora {
           position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -233,7 +264,7 @@ export function Story() {
         }
         .hero-eyebrow::after { background: linear-gradient(to left, transparent, #00D4FF); }
 
-        .logo-med { color: #FFFFFF; }
+        .logo-med { color: var(--c-text); }
         .logo-one { color: #3D8FFF; }
         .logo-x {
           color: transparent;
@@ -298,8 +329,8 @@ export function Story() {
         }
 
         .ch-card {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--c-card-bg);
+          border: 1px solid var(--c-border);
           border-radius: 20px;
           padding: 2rem;
           backdrop-filter: blur(8px);
@@ -310,12 +341,12 @@ export function Story() {
           content: '';
           position: absolute; top: 0; left: 0; right: 0;
           height: 1px;
-          background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+          background: linear-gradient(to right, transparent, var(--c-shine), transparent);
         }
 
         .ch-era { font-size: 11px; font-weight: 700; letter-spacing: 3px; margin-bottom: 0.5rem; }
-        .ch-title { font-size: 26px; font-weight: 900; color: #FFFFFF; margin-bottom: 1rem; line-height: 1.25; }
-        .ch-body { font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.9; margin-bottom: 1rem; }
+        .ch-title { font-size: 26px; font-weight: 900; color: var(--c-text); margin-bottom: 1rem; line-height: 1.25; }
+        .ch-body { font-size: 15px; color: var(--c-text-dim); line-height: 1.9; margin-bottom: 1rem; }
 
         .ch-accent {
           border-radius: 10px;
@@ -366,7 +397,7 @@ export function Story() {
         .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.25rem 0; }
         .stat-chip {
           border-radius: 14px; padding: 1rem; text-align: center;
-          border: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden;
+          border: 1px solid var(--c-border); position: relative; overflow: hidden;
         }
         .stat-chip::before {
           content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -374,9 +405,9 @@ export function Story() {
         }
         .stat-num {
           font-size: 34px; font-weight: 900; line-height: 1; margin-bottom: 4px;
-          color: #FFFFFF;
+          color: var(--c-text);
         }
-        .stat-lbl { font-size: 12px; color: rgba(255,255,255,0.55); }
+        .stat-lbl { font-size: 12px; color: var(--c-text-dim); }
         .s-blue { background: rgba(26,107,255,0.08); }
         .s-blue .stat-num { color: #00D4FF; }
         .s-purple { background: rgba(139,92,246,0.08); }
@@ -388,16 +419,16 @@ export function Story() {
         .name-fx { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 1.25rem 0; flex-wrap: wrap; }
         .name-pill { padding: 8px 22px; border-radius: 30px; font-size: 18px; font-weight: 900; }
         .np-old {
-          background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3);
-          text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.2);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--c-card-bg); color: var(--c-text-dimmer);
+          text-decoration: line-through; text-decoration-color: var(--c-text-dimmer);
+          border: 1px solid var(--c-border);
         }
         .np-new {
           background: rgba(26,107,255,0.15); color: #00D4FF;
           border: 1px solid rgba(0,212,255,0.3); font-size: 22px;
           box-shadow: 0 0 30px rgba(0,212,255,0.15);
         }
-        .np-arrow { color: rgba(255,255,255,0.55); font-size: 22px; }
+        .np-arrow { color: var(--c-text-dim); font-size: 22px; }
 
         /* Ideas */
         .ideas-list { display: flex; flex-direction: column; gap: 10px; margin: 1rem 0; }
@@ -412,19 +443,19 @@ export function Story() {
           color: #7AFFDA; border-radius: 10px; padding: 8px 12px;
           font-size: 13px; font-weight: 600; text-align: center;
         }
-        .idea-arr { color: rgba(255,255,255,0.55); font-size: 16px; text-align: center; }
+        .idea-arr { color: var(--c-text-dim); font-size: 16px; text-align: center; }
 
         /* Feature grid */
         .feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 1.25rem 0; }
         .feat-item {
-          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+          background: var(--c-card-bg); border: 1px solid var(--c-border-light);
           border-radius: 10px; padding: 10px 8px; font-size: 12px;
-          color: rgba(255,255,255,0.55); text-align: center;
+          color: var(--c-text-dim); text-align: center;
           display: flex; flex-direction: column; align-items: center; gap: 6px;
           transition: background 0.2s, border-color 0.2s;
         }
         .feat-item:hover {
-          background: rgba(26,107,255,0.1); border-color: rgba(26,107,255,0.3); color: #FFFFFF;
+          background: rgba(26,107,255,0.1); border-color: rgba(26,107,255,0.3); color: var(--c-text);
         }
         .feat-dot { width: 8px; height: 8px; border-radius: 50%; }
 
@@ -461,11 +492,11 @@ export function Story() {
           background: linear-gradient(135deg, #3D8FFF, #00D4FF);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-        .future-sub { color: rgba(255,255,255,0.55); margin-bottom: 2.5rem; font-size: 15px; position: relative; }
+        .future-sub { color: var(--c-text-dim); margin-bottom: 2.5rem; font-size: 15px; position: relative; }
         .future-items { display: flex; flex-direction: column; gap: 16px; margin-bottom: 2.5rem; position: relative; }
         .fi {
           display: flex; align-items: center; gap: 16px;
-          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+          background: var(--c-card-bg); border: 1px solid var(--c-border-light);
           border-radius: 14px; padding: 1rem 1.5rem; text-align: right;
           transition: background 0.2s, border-color 0.2s, transform 0.2s;
         }
@@ -478,9 +509,9 @@ export function Story() {
           color: #00D4FF; font-size: 14px; font-weight: 900;
           display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .fi-text { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.85); flex: 1; }
-        .closing-quote { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 2rem; position: relative; }
-        .cq-lead { color: rgba(255,255,255,0.55); font-size: 15px; margin-bottom: 0.5rem; }
+        .fi-text { font-size: 15px; font-weight: 600; color: var(--c-text-dim); flex: 1; }
+        .closing-quote { border-top: 1px solid var(--c-border); padding-top: 2rem; position: relative; }
+        .cq-lead { color: var(--c-text-dim); font-size: 15px; margin-bottom: 0.5rem; }
         .cq-main {
           font-size: 28px; font-weight: 900;
           background: linear-gradient(135deg, #3D8FFF, #00D4FF, #00FFB2);
@@ -504,11 +535,15 @@ export function Story() {
       `}</style>
 
       {/* ─── TOP BAR ─── */}
-      <div className="fixed top-4 z-50 flex items-center gap-3" style={{ left: "1rem" }}>
+      <div className="fixed top-4 z-50 flex items-center gap-2" style={{ left: "1rem" }}>
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-full border border-white/10 bg-[#060E1E]/80 px-4 py-2 text-xs font-medium text-white/60 backdrop-blur-md transition-colors hover:text-white"
-          style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(6,14,30,0.8)" }}
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors hover:brightness-150"
+          style={{
+            border: "1px solid var(--c-border)",
+            background: "var(--c-btn-bg)",
+            color: "var(--c-text-dim)",
+          }}
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {isAr ? "رجوع" : "Back"}
@@ -521,25 +556,40 @@ export function Story() {
       >
         <a
           href="/auth?mode=signin"
-          className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors"
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-all"
           style={{
-            border: "1px solid rgba(0,212,255,0.3)",
-            background: "rgba(0,212,255,0.1)",
+            border: "1px solid color-mix(in srgb, #00D4FF 40%, transparent)",
+            background: lightMode ? "rgba(0,212,255,0.08)" : "rgba(0,212,255,0.1)",
             color: "#00D4FF",
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,212,255,0.18)"; e.currentTarget.style.borderColor = "#00D4FF"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = lightMode ? "rgba(0,212,255,0.08)" : "rgba(0,212,255,0.1)"; e.currentTarget.style.borderColor = "color-mix(in srgb, #00D4FF 40%, transparent)"; }}
         >
           {isAr ? "تسجيل الدخول" : "Sign In"}
         </a>
         <button
-          onClick={toggleLang}
-          className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors"
+          onClick={() => setLightMode((p) => !p)}
+          className="flex items-center justify-center rounded-full w-9 h-9 backdrop-blur-md transition-colors"
           style={{
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(6,14,30,0.8)",
-            color: "rgba(255,255,255,0.6)",
+            border: "1px solid var(--c-border)",
+            background: "var(--c-btn-bg)",
+            color: "var(--c-text-dim)",
           }}
+          title={lightMode ? (isAr ? "داكن" : "Dark") : isAr ? "فاتح" : "Light"}
         >
-          {isAr ? "English" : "بالعربي"}
+          {lightMode ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+        </button>
+        <button
+          onClick={toggleLang}
+          className="flex items-center justify-center rounded-full w-9 h-9 backdrop-blur-md transition-colors"
+          style={{
+            border: "1px solid var(--c-border)",
+            background: "var(--c-btn-bg)",
+            color: "var(--c-text-dim)",
+          }}
+          title={isAr ? "English" : "بالعربي"}
+        >
+          <Languages className="h-3.5 w-3.5" />
         </button>
       </div>
 
