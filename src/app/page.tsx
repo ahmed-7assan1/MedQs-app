@@ -1,5 +1,6 @@
 import { Story } from "@/components/landing/Story";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
+import { CapsuleWrapper } from "@/components/story/CapsuleWrapper";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,9 @@ export default async function LandingPage() {
         logoUrlDark: siteConfig?.logoUrlDark ?? null,
       }}
     >
-      <Story />
+      <CapsuleWrapper>
+        <Story />
+      </CapsuleWrapper>
     </SiteConfigProvider>
   );
 }

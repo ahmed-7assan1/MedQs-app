@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
+import { useCapsule } from "@/components/story/CapsuleWrapper";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { Sun, Moon, Languages } from "lucide-react";
 import Link from "next/link";
@@ -111,6 +112,7 @@ function useLang(): [Lang, () => void] {
 
 export function Story() {
   const { siteName } = useSiteConfig();
+  const { setCapsuleOpen } = useCapsule();
   const [lang, toggleLang] = useLang();
   const [lightMode, setLightMode] = useState(false);
   const [expandedStat, setExpandedStat] = useState<number | null>(null);
@@ -190,6 +192,19 @@ export function Story() {
           background: linear-gradient(to right, transparent, rgba(0,212,255,0.4));
         }
         .hero-eyebrow::after { background: linear-gradient(to left, transparent, rgba(0,212,255,0.4)); }
+
+        .hero-sub-card {
+          max-width: 480px; margin: 0 auto;
+          border-radius: 60px; padding: 0.6rem 1.5rem;
+          background: var(--c-card-bg-soft);
+          border: 1px solid var(--c-border);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          font-size: 14px; line-height: 1.7;
+        }
+        .story-page.light-mode .hero-sub-card {
+          background: rgba(255,255,255,0.7);
+        }
 
         /* Marquee background */
         .marquee-bg {
@@ -553,13 +568,15 @@ export function Story() {
           .future-title { font-size: 24px; }
           .future-card { padding: 2rem 1.5rem; }
         }
+
       `}</style>
 
       {/* ─── TOP BAR ─── */}
-      <Link
-        href="/"
+      <button
+        onClick={() => setCapsuleOpen(true)}
         className="fixed top-4 z-50"
         style={{ left: "1rem" }}
+        aria-label="Menu"
       >
         <div
           className="rounded-full backdrop-blur-md transition-colors hover:brightness-150"
@@ -571,14 +588,15 @@ export function Story() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            cursor: "pointer",
           }}
         >
           <MedOneXLogoMark
-            className={`h-5 w-5 ${lightMode ? "text-[#1A6BFF]" : "text-white"}`}
+            className={`h-5 w-5 ${lightMode ? "text-black" : "text-white"}`}
             interactiveColor
           />
         </div>
-      </Link>
+      </button>
 
       <div
         className="fixed top-4 z-50 flex items-center gap-2"
@@ -677,16 +695,18 @@ export function Story() {
             }}
           >
             <MedOneXLogoMark
-              className={`h-full w-full ${lightMode ? "text-[#1A6BFF]" : "text-white"}`}
+              className={`h-full w-full ${lightMode ? "text-black" : "text-white"}`}
               interactiveColor
             />
           </div>
 
-          <p className="text-lg max-w-md mx-auto" style={{ color: "var(--c-text-dim)" }}>
-            {isAr
-              ? "من سؤال واحد لطالب طب... إلى نظام تعليمي متكامل"
-              : "From one medical student's question... to a complete education system"}
-          </p>
+          <div className="hero-sub-card">
+            <p style={{ color: "var(--c-text-dim)" }}>
+              {isAr
+                ? "من سؤال واحد لطالب طب... إلى نظام تعليمي متكامل"
+                : "From one medical student's question... to a complete education system"}
+            </p>
+          </div>
 
           <div className="flex flex-col items-center gap-2 mt-16" style={{ marginTop: "4rem" }}>
             <span className="text-[11px] tracking-[2px] uppercase" style={{ color: lightMode ? "#1A6BFF" : "rgba(0,212,255,0.7)" }}>
@@ -1057,6 +1077,7 @@ export function Story() {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

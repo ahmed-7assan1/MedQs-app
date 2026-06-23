@@ -1,5 +1,6 @@
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
+import { CapsuleWrapper } from "@/components/story/CapsuleWrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,9 @@ export default async function StoryLayout({ children }: { children: React.ReactN
         logoUrlDark: siteConfig?.logoUrlDark ?? null,
       }}
     >
-      {children}
+      <CapsuleWrapper>
+        {children}
+      </CapsuleWrapper>
     </SiteConfigProvider>
   );
 }
