@@ -164,11 +164,31 @@ export function Story() {
           100% { transform: translate3d(0, 0, 0); }
         }
         .review-card {
-          flex-shrink: 0; width: 240px;
-          background: var(--c-card-bg); padding: 14px;
-          border-radius: 10px;
+          flex-shrink: 0; width: 250px;
+          background: var(--c-card-bg); padding: 18px 16px 14px;
+          border-radius: 14px;
+          border-left: 3px solid rgba(0,212,255,0.2);
           contain: layout style paint;
         }
+        .review-text {
+          margin-top: 10px; font-size: 12px; line-height: 1.65;
+          color: var(--c-text-dim);
+          display: -webkit-box;
+          -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .review-footer {
+          margin-top: 12px; border-top: 1px solid var(--c-border); padding-top: 10px;
+          display: flex; align-items: center; gap: 8px;
+        }
+        .review-avatar {
+          width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 11px; font-weight: 800;
+          background: rgba(0,212,255,0.12); color: #00D4FF;
+        }
+        .review-info { flex: 1; min-width: 0; }
+        .review-name { font-size: 12px; font-weight: 700; color: var(--c-text); }
+        .review-role { font-size: 10px; color: var(--c-text-dim); margin-top: 1px; }
 
         .scroll-line {
           width: 1px; height: 50px;
@@ -503,8 +523,11 @@ export function Story() {
                         <Stars size={10} />
                         <p className="review-text">{isAr ? r.q : r.qEn}</p>
                         <div className="review-footer">
-                          <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                          <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                          <div className="review-avatar">{(isAr ? r.name : r.nameEn).charAt(0)}</div>
+                          <div className="review-info">
+                            <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                            <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                          </div>
                         </div>
                       </div>
                     ))}
