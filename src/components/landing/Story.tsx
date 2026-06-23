@@ -5,11 +5,12 @@ import { useRef, useState, useEffect } from "react";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import {
-  ArrowDown, GitCommit, AlertTriangle, Quote, ChevronDown,
-  ChevronUp, Globe, LucideIcon,
+  ArrowDown, ChevronDown, ArrowLeft, BookOpen,
+  type LucideIcon,
 } from "lucide-react";
 import { CHAPTERS, BRAND_VALUES, type Chapter } from "./story-data";
 import { EASE, VIEWPORT } from "./marketing-data";
+import Link from "next/link";
 
 type Lang = "en" | "ar";
 
@@ -23,83 +24,52 @@ function t<T>(en: T, ar: T, lang: Lang) {
   return lang === "ar" ? ar : en;
 }
 
-function badgeColor(type: "triumph" | "struggle" | "pivot") {
-  switch (type) {
-    case "triumph": return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
-    case "struggle": return "border-red-500/30 bg-red-500/10 text-red-400";
-    case "pivot": return "border-amber-500/30 bg-amber-500/10 text-amber-400";
-  }
-}
-
-function badgeLabel(type: "triumph" | "struggle" | "pivot", lang: Lang) {
-  if (lang === "ar") {
-    switch (type) {
-      case "triumph": return "▲ نجاح";
-      case "struggle": return "✕ عثرة";
-      case "pivot": return "→ تغيير";
-    }
-  }
-  switch (type) {
-    case "triumph": return "▲ Triumph";
-    case "struggle": return "✕ Struggle";
-    case "pivot": return "→ Pivot";
-  }
-}
-
 function ChapterCard({ chapter, index, lang }: { chapter: Chapter; index: number; lang: Lang }) {
   const [open, setOpen] = useState(false);
-  const [showStruggle, setShowStruggle] = useState(false);
   const Icon = chapter.icon;
   const isAr = lang === "ar";
-
-  const periodDate = chapter.period;
-  const title = t(chapter.title, chapter.titleAr, lang);
-  const subtitle = t(chapter.subtitle, chapter.subtitleAr, lang);
   const narrative = t(chapter.narrative, chapter.narrativeAr, lang);
-  const struggle = t(chapter.struggle, chapter.struggleAr, lang);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={VIEWPORT}
-      transition={{ duration: 0.5, ease: EASE }}
+      transition={{ duration: 0.5, ease: EASE, delay: 0.05 }}
       className="group"
     >
       <div
         className={`relative overflow-hidden rounded-2xl border border-border bg-card transition-all ${
           open ? "shadow-xl" : "shadow-sm hover:shadow-md"
-        }`}
+        } ${open ? "ring-1 ring-[#405a8d]/20" : ""}`}
       >
-        {/* Clickable preview header */}
+        {/* Clickable header */}
         <button
           onClick={() => setOpen(!open)}
           className={`flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-accent/30 md:p-6 ${isAr ? "flex-row-reverse" : ""}`}
         >
-          {/* Icon */}
+          {/* Number badge */}
           <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white"
             style={{ backgroundColor: "#405a8d" }}
           >
-            <Icon className="h-5 w-5 text-white" />
+            {index + 1}
           </div>
 
-          {/* Info */}
+          {/* Title + period */}
           <div className={`flex-1 min-w-0 ${isAr ? "text-right" : ""}`}>
-            <div className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground ${isAr ? "flex-row-reverse" : ""}`}>
-              <span className="rounded-md border border-border bg-background px-2 py-0.5">
-                {t("Chapter", "الفصل", lang)} {index + 1}
-              </span>
-              <span className="rounded-md px-2 py-0.5 text-white" style={{ backgroundColor: "#405a8d" }}>
-                {periodDate}
+            <div className={`flex items-center gap-2 mb-0.5 ${isAr ? "flex-row-reverse" : ""}`}>
+              <span className="inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[11px] font-semibold text-white" style={{ backgroundColor: "#405a8d" }}>
+                <BookOpen className="h-3 w-3" />
+                {chapter.period}
               </span>
             </div>
-            <h3 className="mt-1 text-base font-bold tracking-tight md:text-lg">{title}</h3>
-            <p className="text-xs text-muted-foreground/70">{subtitle}</p>
+            <h3 className="text-sm font-bold leading-snug tracking-tight md:text-base">
+              {t(chapter.title, chapter.title, lang)}
+            </h3>
           </div>
 
-          {/* Expand chevron */}
-          <div className="shrink-0 text-muted-foreground transition-transform" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
+          <div className="shrink-0 text-muted-foreground transition-transform duration-300" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
             <ChevronDown className="h-5 w-5" />
           </div>
         </button>
@@ -116,56 +86,29 @@ function ChapterCard({ chapter, index, lang }: { chapter: Chapter; index: number
             >
               <div className={`space-y-4 border-t border-border px-5 pb-6 pt-4 md:px-6 ${isAr ? "text-right" : ""}`}>
                 {/* Narrative */}
-                <p className="text-sm leading-relaxed text-muted-foreground">{narrative}</p>
-
-                {/* Struggle (collapsible) */}
-                <div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setShowStruggle(!showStruggle); }}
-                    className={`inline-flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 ${isAr ? "flex-row-reverse" : ""}`}
-                  >
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    {t("What went wrong", "اللي كان غلط", lang)}
-                    {showStruggle ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                  </button>
-                  <AnimatePresence>
-                    {showStruggle && (
-                      <motion.p
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: EASE }}
-                        className="mt-2 overflow-hidden text-xs leading-relaxed text-red-300/80"
-                      >
-                        {struggle}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                <div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                  {narrative}
                 </div>
 
-                {/* Key commits */}
-                <div>
-                  <div className={`mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground ${isAr ? "flex-row-reverse" : ""}`}>
-                    <GitCommit className="h-3 w-3" />
-                    {t("Key moments", "لحظات مهمة", lang)}
+                {/* Milestones */}
+                {chapter.milestones.length > 0 && (
+                  <div>
+                    <p className={`mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 ${isAr ? "text-right" : ""}`}>
+                      {t("Key moments", "محطات مهمة", lang)}
+                    </p>
+                    <ul className={`space-y-1.5 ${isAr ? "text-right" : ""}`}>
+                      {chapter.milestones.map((m, i) => (
+                        <li key={i} className={`flex items-start gap-2 text-xs text-muted-foreground/80 ${isAr ? "flex-row-reverse" : ""}`}>
+                          <span
+                            className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: "#405a8d" }}
+                          />
+                          {m}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className={`flex flex-wrap gap-1.5 ${isAr ? "flex-row-reverse" : ""}`}>
-                    {chapter.milestones.map((m) => (
-                      <span
-                        key={m.commit}
-                        className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium ${badgeColor(m.type)} ${isAr ? "flex-row-reverse" : ""}`}
-                      >
-                        {badgeLabel(m.type, lang)}
-                        <span className="max-w-[180px] truncate">{m.commit}</span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Commit count */}
-                <div className="border-t border-border pt-3 text-[10px] text-muted-foreground/50">
-                  {t(`${chapter.commitCount} commits in this chapter`, `${chapter.commitCount} commit في الفصل ده`, lang)}
-                </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -235,14 +178,23 @@ export function Story() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#405a8d]/10 via-transparent to-background" />
         <div className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#405a8d]/20 blur-[120px]" />
 
-        {/* Lang toggle */}
+        {/* Top bar */}
+        <div className={`fixed top-4 z-50 flex items-center gap-3 ${isAr ? "left-4" : "left-4"}`}>
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-md transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            {t("Back", "رجوع", lang)}
+          </Link>
+        </div>
+
         <button
           onClick={toggle}
           className={`fixed top-4 z-50 flex items-center gap-2 rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-md transition-colors hover:text-foreground ${
             isAr ? "right-4" : "right-4"
           }`}
         >
-          <Globe className="h-3.5 w-3.5" />
           {isAr ? "English" : "بالعربي"}
         </button>
 
@@ -258,70 +210,79 @@ export function Story() {
 
           {isAr ? (
             <>
-              <h1 className="text-4xl font-black tracking-tight md:text-6xl">
+              <h1 className="text-3xl font-black tracking-tight md:text-5xl">
                 قصة{" "}
                 <span className="bg-gradient-to-r from-[#405a8d] to-[#dcdde6] bg-clip-text text-transparent">
                   {siteName}
-                </span>{" "}
-                الحقيقية
+                </span>
               </h1>
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
-                مش قصة تسويق. الرحلة الحقيقية — بكل build error، redirect loop،
-                و 3 AM breakthrough. اللي حصل بالظبط من أول commit لحد النهاردة.
+              <p className="mt-2 text-sm text-muted-foreground/70 md:text-base">
+                من فكرة بسيطة إلى منصة طبية متكاملة
+              </p>
+              <p className="mt-4 max-w-xl mx-auto text-sm leading-relaxed text-muted-foreground md:text-base">
+                كل حاجة بدأت بسؤال بسيط قاله طالب طب. مش خطة عمل، مش اجتماع. مجرد سؤال.
               </p>
             </>
           ) : (
             <>
-              <h1 className="text-4xl font-black tracking-tight md:text-6xl">
+              <h1 className="text-3xl font-black tracking-tight md:text-5xl">
                 The{" "}
                 <span className="bg-gradient-to-r from-[#405a8d] to-[#dcdde6] bg-clip-text text-transparent">
                   Real Story
                 </span>{" "}
                 of {siteName}
               </h1>
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
-                Not a marketing fable. The real journey — every build error,
-                redirect loop, and 3 AM breakthrough included.
+              <p className="mt-2 text-sm text-muted-foreground/70 md:text-base">
+                From a simple idea to a complete medical platform
+              </p>
+              <p className="mt-4 max-w-xl mx-auto text-sm leading-relaxed text-muted-foreground md:text-base">
+                It all started with a simple question a medical student asked. Not a business plan, not a meeting. Just a question.
               </p>
             </>
           )}
 
-          <div className={`mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground/60 ${isAr ? "flex-row-reverse" : ""}`}>
-            <span className="rounded-full border border-border bg-card px-3 py-1">~300 commits</span>
-            <span className="rounded-full border border-border bg-card px-3 py-1">{t("80 days", "80 يوم", lang)}</span>
-            <span className="rounded-full border border-border bg-card px-3 py-1">{t("6 chapters", "6 فصول", lang)}</span>
+          <div className={`mt-6 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground/60 ${isAr ? "flex-row-reverse" : ""}`}>
+            <span className="rounded-full border border-border bg-card px-3 py-1">
+              {t("9 chapters", "9 فصول", lang)}
+            </span>
+            <span className="rounded-full border border-border bg-card px-3 py-1">
+              {t("From 2024", "من 2024", lang)}
+            </span>
+            <span className="rounded-full border border-border bg-card px-3 py-1">
+              {t("Born from a question", "من سؤال طالب", lang)}
+            </span>
           </div>
 
           <motion.button
             onClick={scrollToTimeline}
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="mt-10 inline-flex items-center gap-2 text-xs text-muted-foreground/50 transition-colors hover:text-muted-foreground"
+            className="mt-8 inline-flex items-center gap-2 text-xs text-muted-foreground/50 transition-colors hover:text-muted-foreground"
           >
-            {t("Scroll to explore", "اسحب لاستكشاف", lang)} <ArrowDown className="h-3 w-3" />
+            {t("Read the story", "اقرأ القصة", lang)} <ArrowDown className="h-3 w-3" />
           </motion.button>
         </motion.div>
       </section>
 
       {/* ─── TIMELINE ─── */}
-      <section ref={timelineRef} className="relative px-6 py-20 md:py-28">
+      <section ref={timelineRef} className="relative px-6 pb-20 md:pb-28">
         <div className="relative mx-auto max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={VIEWPORT}
             transition={{ duration: 0.5, ease: EASE }}
-            className={`mb-12 text-center ${isAr ? "text-right" : ""}`}
+            className={`mb-10 text-center ${isAr ? "text-right" : ""}`}
           >
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              {t("The Timeline", "الخط الزمني", lang)}
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+              {t("The Journey", "الرحلة", lang)}
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("Every chapter, every struggle, every shipped feature", "كل فصل، كل عثرة، كل ميزة اتنشرت", lang)}
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("Tap any chapter to read", "اضغط على أي فصل لقراءته", lang)}
             </p>
           </motion.div>
 
-          <div className="relative space-y-6">
+          <div className="relative space-y-4">
             {CHAPTERS.map((chapter, i) => (
               <div key={chapter.id} data-chapter={i}>
                 <ChapterCard chapter={chapter} index={i} lang={lang} />
@@ -332,19 +293,19 @@ export function Story() {
       </section>
 
       {/* ─── BRAND VALUES ─── */}
-      <section className="relative border-t border-border px-6 py-20">
+      <section className="relative border-t border-border px-6 py-16">
         <div className="mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={VIEWPORT}
             transition={{ duration: 0.5, ease: EASE }}
-            className={`mb-12 text-center ${isAr ? "text-right" : ""}`}
+            className={`mb-10 text-center ${isAr ? "text-right" : ""}`}
           >
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
               {t("What We Believe", "إحنا مؤمنين بكده", lang)}
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t("These aren't corporate values. They're scars.", "دي مش قيم شركات. دي آثار المعارك.", lang)}
             </p>
           </motion.div>
@@ -367,8 +328,8 @@ export function Story() {
                   >
                     <Icon className="h-5 w-5" style={{ color: v.color }} />
                   </div>
-                  <h3 className="mb-2 text-base font-semibold">{t(v.title, v.titleAr, lang)}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
+                  <h3 className="mb-2 text-sm font-semibold">{t(v.title, v.titleAr, lang)}</h3>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
                     {t(v.desc, v.descAr, lang)}
                   </p>
                 </motion.div>
@@ -390,38 +351,28 @@ export function Story() {
             viewport={VIEWPORT}
             transition={{ duration: 0.5, ease: EASE }}
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
-              <Quote className="h-3 w-3" />
-              {t("What's next", "مستقبلاً", lang)}
-            </div>
-
             {isAr ? (
               <>
-                <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
                   القصة لسه مخلصتش
                 </h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  كل commit هو جملة في الكتاب. كل build error هو twist في الحبكة.
-                  بوت التليجرام لسه بيتعلم. الذكاء الاصطناعي لسه بيسمع.
-                  اللاندينج بيج غالباً هتتعمل تاني بكره.
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground max-w-lg mx-auto">
+                  كل فصل جديد بيكتب دلوقتي. الفكرة الجاية ممكن تبدأ من سؤال بسيط — زيه زي أول سؤال.
                 </p>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground/60">
-                  المشروع ده عايش. الفصل الجاي لسه متكتبش — ودي أجمل حاجة فيه.
+                <p className="mt-3 text-xs text-muted-foreground/60">
+                  — وممكن تكون إنت اللي تسأله.
                 </p>
               </>
             ) : (
               <>
-                <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
                   The Story Isn&apos;t Over
                 </h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  Every commit is a sentence. Every build error is a plot twist.
-                  The Telegram bot is still learning. The AI is still listening.
-                  The landing page will probably be redesigned again tomorrow.
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground max-w-lg mx-auto">
+                  Every new chapter is being written right now. The next idea might start with a simple question — just like the first one.
                 </p>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground/60">
-                  This repository is alive. The next chapter hasn&apos;t been written yet —
-                  and that&apos;s exactly how it should be.
+                <p className="mt-3 text-xs text-muted-foreground/60">
+                  — And you might be the one asking it.
                 </p>
               </>
             )}
