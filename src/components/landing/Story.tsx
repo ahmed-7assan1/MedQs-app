@@ -1,387 +1,899 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
-import {
-  ArrowDown, ChevronDown, ArrowLeft, BookOpen,
-  type LucideIcon,
-} from "lucide-react";
-import { CHAPTERS, BRAND_VALUES, type Chapter } from "./story-data";
-import { EASE, VIEWPORT } from "./marketing-data";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 type Lang = "en" | "ar";
 
-function useLang() {
-  const [lang, setLang] = useState<Lang>("en");
-  const toggle = () => setLang((l) => (l === "en" ? "ar" : "en"));
-  return { lang, toggle, isAr: lang === "ar" };
-}
+const CHAPTER_THEMES = ["blue", "cyan", "coral", "purple", "amber", "coral", "teal", "pink"];
 
-function t<T>(en: T, ar: T, lang: Lang) {
-  return lang === "ar" ? ar : en;
-}
+const FEATURES = [
+  { label: "أسئلة MCQ", labelEn: "MCQ Questions", color: "#1A6BFF" },
+  { label: "فيديوهات شرح", labelEn: "Videos", color: "#00D4FF" },
+  { label: "بطاقات مذاكرة", labelEn: "Flashcards", color: "#8B5CF6" },
+  { label: "Dr. Q AI", labelEn: "Dr. Q AI", color: "#F472B6" },
+  { label: "منتدى اجتماعي", labelEn: "Social Forum", color: "#FBBF24" },
+  { label: "بوت تيليجرام", labelEn: "Telegram Bot", color: "#00FFB2" },
+  { label: "لوح رسم طبي", labelEn: "Medical Board", color: "#1A6BFF" },
+  { label: "أطلس تشريح", labelEn: "Anatomy Atlas", color: "#00D4FF" },
+  { label: "تطبيق موبايل", labelEn: "Mobile App", color: "#8B5CF6" },
+  { label: "غرف دراسة", labelEn: "Study Rooms", color: "#FF6B6B" },
+  { label: "مسابقات مباشرة", labelEn: "Live Quizzes", color: "#FBBF24" },
+  { label: "نقاط وترتيب", labelEn: "Leaderboard", color: "#00FFB2" },
+];
 
-function ChapterCard({ chapter, index, lang }: { chapter: Chapter; index: number; lang: Lang }) {
-  const [open, setOpen] = useState(false);
-  const Icon = chapter.icon;
-  const isAr = lang === "ar";
-  const narrative = t(chapter.narrative, chapter.narrativeAr, lang);
+const FUTURE_ITEMS_AR = [
+  "كل كلية طب في مصر تلاقي نفسها على MedOneX",
+  "Dr. Q يبقى مساعد طبي حقيقي مدرب على بيانات عربية",
+  "امتحانات OSCE افتراضية — الطالب يتدرب مع مريض رقمي",
+];
+const FUTURE_ITEMS_EN = [
+  "Every medical school in Egypt on MedOneX",
+  "Dr. Q becomes a real Arabic-trained medical assistant",
+  "Virtual OSCE exams — train with a digital patient",
+];
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={VIEWPORT}
-      transition={{ duration: 0.5, ease: EASE, delay: 0.05 }}
-      className="group"
-    >
-      <div
-        className={`relative overflow-hidden rounded-2xl border border-border bg-card transition-all ${
-          open ? "shadow-xl" : "shadow-sm hover:shadow-md"
-        } ${open ? "ring-1 ring-[#405a8d]/20" : ""}`}
-      >
-        {/* Clickable header */}
-        <button
-          onClick={() => setOpen(!open)}
-          className={`flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-accent/30 md:p-6 ${isAr ? "flex-row-reverse" : ""}`}
-        >
-          {/* Number badge */}
-          <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white"
-            style={{ backgroundColor: "#405a8d" }}
-          >
-            {index + 1}
-          </div>
-
-          {/* Title + period */}
-          <div className={`flex-1 min-w-0 ${isAr ? "text-right" : ""}`}>
-            <div className={`flex items-center gap-2 mb-0.5 ${isAr ? "flex-row-reverse" : ""}`}>
-              <span className="inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[11px] font-semibold text-white" style={{ backgroundColor: "#405a8d" }}>
-                <BookOpen className="h-3 w-3" />
-                {chapter.period}
-              </span>
-            </div>
-            <h3 className="text-sm font-bold leading-snug tracking-tight md:text-base">
-              {t(chapter.title, chapter.title, lang)}
-            </h3>
-          </div>
-
-          <div className="shrink-0 text-muted-foreground transition-transform duration-300" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
-            <ChevronDown className="h-5 w-5" />
-          </div>
-        </button>
-
-        {/* Expanded content */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.35, ease: EASE }}
-              className="overflow-hidden"
-            >
-              <div className={`space-y-4 border-t border-border px-5 pb-6 pt-4 md:px-6 ${isAr ? "text-right" : ""}`}>
-                {/* Narrative */}
-                <div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-                  {narrative}
-                </div>
-
-                {/* Milestones */}
-                {chapter.milestones.length > 0 && (
-                  <div>
-                    <p className={`mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 ${isAr ? "text-right" : ""}`}>
-                      {t("Key moments", "محطات مهمة", lang)}
-                    </p>
-                    <ul className={`space-y-1.5 ${isAr ? "text-right" : ""}`}>
-                      {chapter.milestones.map((m, i) => (
-                        <li key={i} className={`flex items-start gap-2 text-xs text-muted-foreground/80 ${isAr ? "flex-row-reverse" : ""}`}>
-                          <span
-                            className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
-                            style={{ backgroundColor: "#405a8d" }}
-                          />
-                          {m}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-}
-
-function ProgressIndicator({ chapters, lang }: { chapters: Chapter[]; lang: Lang }) {
-  const [visible, setVisible] = useState<number[]>([]);
-  const isAr = lang === "ar";
+function ParticlesCanvas() {
+  const cvRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const id = Number(entry.target.getAttribute("data-chapter"));
-          if (entry.isIntersecting) {
-            setVisible((prev) => (prev.includes(id) ? prev : [...prev, id].sort()));
-          } else {
-            setVisible((prev) => prev.filter((v) => v !== id));
+    const cv = cvRef.current;
+    if (!cv) return;
+    const ctx = cv.getContext("2d");
+    if (!ctx) return;
+
+    let W: number, H: number;
+    const resize = () => {
+      W = cv.width = window.innerWidth;
+      H = cv.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const COLS = ["rgba(26,107,255,", "rgba(0,212,255,", "rgba(139,92,246,", "rgba(0,255,178,"];
+    const pts: { x: number; y: number; vx: number; vy: number; r: number; col: string; a: number }[] = [];
+
+    for (let i = 0; i < 60; i++) {
+      pts.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 2 + 0.5,
+        col: COLS[Math.floor(Math.random() * COLS.length)],
+        a: Math.random() * 0.5 + 0.1,
+      });
+    }
+
+    let anim: number;
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.col + p.a + ")";
+        ctx.fill();
+
+        for (let j = i + 1; j < pts.length; j++) {
+          const q = pts[j];
+          const dx = p.x - q.x;
+          const dy = p.y - q.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = p.col + (0.08 * (1 - d / 120)) + ")";
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
           }
-        });
-      },
-      { threshold: 0.3 }
-    );
+        }
+      }
+      anim = requestAnimationFrame(draw);
+    }
+    draw();
 
-    chapters.forEach((_, i) => {
-      const el = document.querySelector(`[data-chapter="${i}"]`);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [chapters]);
-
-  if (visible.length === 0) return null;
-  const current = Math.max(...visible);
+    return () => {
+      cancelAnimationFrame(anim);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
 
   return (
-    <div
-      className={`fixed bottom-6 z-40 flex items-center gap-2 rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-md shadow-sm ${
-        isAr ? "left-6" : "right-6"
-      }`}
-      dir={isAr ? "rtl" : "ltr"}
-    >
-      <span className="flex h-2 w-2 rounded-full" style={{ backgroundColor: "#405a8d" }} />
-      {t("Chapter", "الفصل", lang)} {current + 1} {t("of", "من", lang)} {chapters.length}
-    </div>
+    <canvas
+      ref={cvRef}
+      id="story-canvas"
+      className="fixed inset-0 pointer-events-none z-0"
+      style={{ opacity: 0.5 }}
+    />
   );
+}
+
+function useLang(): [Lang, () => void] {
+  const [lang, setLang] = useState<Lang>("ar");
+  const toggle = useCallback(() => setLang((l) => (l === "en" ? "ar" : "en")), []);
+  return [lang, toggle];
 }
 
 export function Story() {
   const { siteName } = useSiteConfig();
-  const { lang, toggle, isAr } = useLang();
-  const topRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
+  const [lang, toggleLang] = useLang();
+  const isAr = lang === "ar";
+  const sectionsRef = useRef<HTMLDivElement>(null);
 
-  const scrollToTimeline = () => {
-    timelineRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  useEffect(() => {
+    const chapters = document.querySelectorAll("[data-ch]");
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("visible");
+            obs.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    chapters.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [lang]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden" ref={topRef} dir={isAr ? "rtl" : "ltr"}>
+    <div className="story-page" dir="rtl">
+      <ParticlesCanvas />
+      <div className="aurora" />
+
+      <style>{`
+        .story-page {
+          font-family: 'Cairo', 'Tajawal', sans-serif;
+          background: #060E1E;
+          color: #FFFFFF;
+          overflow-x: hidden;
+          line-height: 1.7;
+          min-height: 100vh;
+          position: relative;
+        }
+
+        .aurora {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          background:
+            radial-gradient(ellipse 60% 40% at 20% 60%, rgba(26,107,255,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 50% at 80% 30%, rgba(139,92,246,0.05) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 60% at 50% 80%, rgba(0,212,255,0.04) 0%, transparent 60%);
+          animation: auroraDrift 15s ease-in-out infinite alternate;
+        }
+        @keyframes auroraDrift {
+          0% { opacity: 0.6; }
+          100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .hero-glow {
+          position: absolute;
+          width: 800px; height: 800px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(26,107,255,0.18) 0%, transparent 70%);
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          animation: glowPulse 4s ease-in-out infinite;
+        }
+        .hero-glow2 {
+          position: absolute;
+          width: 500px; height: 500px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%);
+          top: 40%; left: 55%;
+          transform: translate(-50%, -50%);
+          animation: glowPulse 6s ease-in-out infinite reverse;
+        }
+        @keyframes glowPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+        }
+
+        .ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 1px solid rgba(26,107,255,0.15);
+          transform: translate(-50%, -50%);
+          animation: ringExpand 6s linear infinite;
+        }
+        .ring:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+        .ring:nth-child(2) { width: 500px; height: 500px; animation-delay: 1.5s; }
+        .ring:nth-child(3) { width: 700px; height: 700px; animation-delay: 3s; }
+        .ring:nth-child(4) { width: 900px; height: 900px; animation-delay: 4.5s; }
+        @keyframes ringExpand {
+          0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-eyebrow {
+          font-size: 12px; font-weight: 700; letter-spacing: 4px;
+          color: #00D4FF; margin-bottom: 1.5rem;
+          display: flex; align-items: center; gap: 12px;
+        }
+        .hero-eyebrow::before,
+        .hero-eyebrow::after {
+          content: '';
+          width: 40px; height: 1px;
+          background: linear-gradient(to right, transparent, #00D4FF);
+        }
+        .hero-eyebrow::after { background: linear-gradient(to left, transparent, #00D4FF); }
+
+        .logo-med { color: #FFFFFF; }
+        .logo-one { color: #3D8FFF; }
+        .logo-x {
+          color: transparent;
+          -webkit-text-stroke: 2px #00D4FF;
+          text-shadow: 0 0 40px rgba(0,212,255,0.5);
+          animation: xGlow 2s ease-in-out infinite;
+        }
+        @keyframes xGlow {
+          0%, 100% { text-shadow: 0 0 40px rgba(0,212,255,0.5); }
+          50% { text-shadow: 0 0 80px rgba(0,212,255,0.9), 0 0 120px rgba(0,212,255,0.4); }
+        }
+
+        .scroll-line {
+          width: 1px; height: 50px;
+          background: linear-gradient(to bottom, #00D4FF, transparent);
+          animation: scrollAnim 1.5s ease-in-out infinite;
+        }
+        @keyframes scrollAnim {
+          0%, 100% { opacity: 1; transform: scaleY(1); }
+          50% { opacity: 0.5; transform: scaleY(0.7); }
+        }
+
+        /* ─── CHAPTER ─── */
+        .chapter {
+          display: grid;
+          grid-template-columns: 80px 1fr;
+          gap: 0 2rem;
+          margin-bottom: 5rem;
+          opacity: 0;
+          transform: translateY(40px);
+          transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .chapter.visible { opacity: 1; transform: translateY(0); }
+
+        .ch-spine {
+          display: flex; flex-direction: column; align-items: center; padding-top: 8px;
+        }
+        .ch-dot {
+          width: 18px; height: 18px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          position: relative;
+          z-index: 2;
+        }
+        .ch-dot::after {
+          content: '';
+          position: absolute;
+          inset: -5px;
+          border-radius: 50%;
+          animation: dotPulse 2s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+          0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 0.6; }
+          50% { box-shadow: 0 0 0 8px transparent; opacity: 0; }
+        }
+        .ch-line {
+          width: 1px; flex: 1; margin-top: 8px; min-height: 60px;
+        }
+
+        .ch-card {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
+          padding: 2rem;
+          backdrop-filter: blur(8px);
+          position: relative;
+          overflow: hidden;
+        }
+        .ch-card::before {
+          content: '';
+          position: absolute; top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+        }
+
+        .ch-era { font-size: 11px; font-weight: 700; letter-spacing: 3px; margin-bottom: 0.5rem; }
+        .ch-title { font-size: 26px; font-weight: 900; color: #FFFFFF; margin-bottom: 1rem; line-height: 1.25; }
+        .ch-body { font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.9; margin-bottom: 1rem; }
+
+        .ch-accent {
+          border-radius: 10px;
+          padding: 1rem 1.25rem;
+          margin: 1rem 0;
+          font-size: 15px;
+          font-weight: 600;
+          line-height: 1.8;
+        }
+
+        /* Theme colors */
+        .ch-blue .ch-dot { background: #1A6BFF; color: #1A6BFF; box-shadow: 0 0 16px rgba(26,107,255,0.6); }
+        .ch-blue .ch-line { background: linear-gradient(to bottom, #1A6BFF, transparent); }
+        .ch-blue .ch-era { color: #3D8FFF; }
+        .ch-blue .ch-accent { background: rgba(26,107,255,0.12); border-right: 3px solid #1A6BFF; color: #A5C4FF; }
+
+        .ch-cyan .ch-dot { background: #00D4FF; color: #00D4FF; box-shadow: 0 0 16px rgba(0,212,255,0.6); }
+        .ch-cyan .ch-line { background: linear-gradient(to bottom, #00D4FF, transparent); }
+        .ch-cyan .ch-era { color: #00D4FF; }
+        .ch-cyan .ch-accent { background: rgba(0,212,255,0.08); border-right: 3px solid #00D4FF; color: #7FE8FF; }
+
+        .ch-coral .ch-dot { background: #FF6B6B; color: #FF6B6B; box-shadow: 0 0 16px rgba(255,107,107,0.6); }
+        .ch-coral .ch-line { background: linear-gradient(to bottom, #FF6B6B, transparent); }
+        .ch-coral .ch-era { color: #FF6B6B; }
+        .ch-coral .ch-accent { background: rgba(255,107,107,0.08); border-right: 3px solid #FF6B6B; color: #FFAAAA; }
+
+        .ch-purple .ch-dot { background: #8B5CF6; color: #8B5CF6; box-shadow: 0 0 16px rgba(139,92,246,0.6); }
+        .ch-purple .ch-line { background: linear-gradient(to bottom, #8B5CF6, transparent); }
+        .ch-purple .ch-era { color: #8B5CF6; }
+        .ch-purple .ch-accent { background: rgba(139,92,246,0.1); border-right: 3px solid #8B5CF6; color: #C4B0FF; }
+
+        .ch-amber .ch-dot { background: #FBBF24; color: #FBBF24; box-shadow: 0 0 16px rgba(251,191,36,0.6); }
+        .ch-amber .ch-line { background: linear-gradient(to bottom, #FBBF24, transparent); }
+        .ch-amber .ch-era { color: #FBBF24; }
+        .ch-amber .ch-accent { background: rgba(251,191,36,0.08); border-right: 3px solid #FBBF24; color: #FFE08A; }
+
+        .ch-teal .ch-dot { background: #00FFB2; color: #00FFB2; box-shadow: 0 0 16px rgba(0,255,178,0.6); }
+        .ch-teal .ch-line { background: linear-gradient(to bottom, #00FFB2, transparent); }
+        .ch-teal .ch-era { color: #00FFB2; }
+        .ch-teal .ch-accent { background: rgba(0,255,178,0.08); border-right: 3px solid #00FFB2; color: #7AFFDA; }
+
+        .ch-pink .ch-dot { background: #F472B6; color: #F472B6; box-shadow: 0 0 16px rgba(244,114,182,0.6); }
+        .ch-pink .ch-line { background: linear-gradient(to bottom, #F472B6, transparent); }
+        .ch-pink .ch-era { color: #F472B6; }
+        .ch-pink .ch-accent { background: rgba(244,114,182,0.08); border-right: 3px solid #F472B6; color: #FFAAD4; }
+
+        /* Stats */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.25rem 0; }
+        .stat-chip {
+          border-radius: 14px; padding: 1rem; text-align: center;
+          border: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden;
+        }
+        .stat-chip::before {
+          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+        }
+        .stat-num {
+          font-size: 34px; font-weight: 900; line-height: 1; margin-bottom: 4px;
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .stat-lbl { font-size: 12px; color: rgba(255,255,255,0.55); }
+        .s-blue { background: rgba(26,107,255,0.08); }
+        .s-blue .stat-num { background: linear-gradient(135deg, #3D8FFF, #00D4FF); }
+        .s-purple { background: rgba(139,92,246,0.08); }
+        .s-purple .stat-num { background: linear-gradient(135deg, #A78BFA, #F472B6); }
+        .s-teal { background: rgba(0,255,178,0.06); }
+        .s-teal .stat-num { background: linear-gradient(135deg, #00FFB2, #00D4FF); }
+
+        /* Name transition */
+        .name-fx { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 1.25rem 0; flex-wrap: wrap; }
+        .name-pill { padding: 8px 22px; border-radius: 30px; font-size: 18px; font-weight: 900; }
+        .np-old {
+          background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3);
+          text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.2);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+        .np-new {
+          background: rgba(26,107,255,0.15); color: #00D4FF;
+          border: 1px solid rgba(0,212,255,0.3); font-size: 22px;
+          box-shadow: 0 0 30px rgba(0,212,255,0.15);
+        }
+        .np-arrow { color: rgba(255,255,255,0.55); font-size: 22px; }
+
+        /* Ideas */
+        .ideas-list { display: flex; flex-direction: column; gap: 10px; margin: 1rem 0; }
+        .idea-row { display: grid; grid-template-columns: 1fr 24px 1fr; gap: 8px; align-items: center; }
+        .idea-q {
+          background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25);
+          color: #C4B0FF; border-radius: 10px; padding: 8px 12px;
+          font-size: 13px; font-weight: 600; text-align: center;
+        }
+        .idea-a {
+          background: rgba(0,255,178,0.08); border: 1px solid rgba(0,255,178,0.2);
+          color: #7AFFDA; border-radius: 10px; padding: 8px 12px;
+          font-size: 13px; font-weight: 600; text-align: center;
+        }
+        .idea-arr { color: rgba(255,255,255,0.55); font-size: 16px; text-align: center; }
+
+        /* Feature grid */
+        .feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 1.25rem 0; }
+        .feat-item {
+          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 10px; padding: 10px 8px; font-size: 12px;
+          color: rgba(255,255,255,0.55); text-align: center;
+          display: flex; flex-direction: column; align-items: center; gap: 6px;
+          transition: background 0.2s, border-color 0.2s;
+        }
+        .feat-item:hover {
+          background: rgba(26,107,255,0.1); border-color: rgba(26,107,255,0.3); color: #FFFFFF;
+        }
+        .feat-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Divider */
+        .divider {
+          display: flex; align-items: center; gap: 16px;
+          margin: 4rem auto 3rem; max-width: 900px; padding: 0 1.5rem;
+        }
+        .divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, rgba(26,107,255,0.4), transparent); }
+        .divider-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: rgba(26,107,255,0.6); }
+
+        /* Future */
+        .future-card {
+          background: rgba(26,107,255,0.06); border: 1px solid rgba(26,107,255,0.2);
+          border-radius: 24px; padding: 3rem 2.5rem;
+          position: relative; overflow: hidden; text-align: center;
+        }
+        .future-mesh {
+          position: absolute; inset: 0; pointer-events: none;
+          background-image:
+            radial-gradient(circle at 20% 50%, rgba(26,107,255,0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(0,212,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 60% 80%, rgba(139,92,246,0.08) 0%, transparent 50%);
+        }
+        .future-grid {
+          position: absolute; inset: 0; pointer-events: none;
+          background-image:
+            linear-gradient(rgba(26,107,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(26,107,255,0.05) 1px, transparent 1px);
+          background-size: 50px 50px;
+        }
+        .future-title { font-size: 36px; font-weight: 900; margin-bottom: 0.5rem; position: relative; }
+        .future-title span {
+          background: linear-gradient(135deg, #3D8FFF, #00D4FF);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .future-sub { color: rgba(255,255,255,0.55); margin-bottom: 2.5rem; font-size: 15px; position: relative; }
+        .future-items { display: flex; flex-direction: column; gap: 16px; margin-bottom: 2.5rem; position: relative; }
+        .fi {
+          display: flex; align-items: center; gap: 16px;
+          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 14px; padding: 1rem 1.5rem; text-align: right;
+          transition: background 0.2s, border-color 0.2s, transform 0.2s;
+        }
+        .fi:hover {
+          background: rgba(26,107,255,0.1); border-color: rgba(26,107,255,0.3); transform: translateX(-4px);
+        }
+        .fi-num {
+          width: 36px; height: 36px; border-radius: 50%;
+          background: rgba(26,107,255,0.15); border: 1px solid rgba(26,107,255,0.3);
+          color: #00D4FF; font-size: 14px; font-weight: 900;
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .fi-text { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.85); flex: 1; }
+        .closing-quote { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 2rem; position: relative; }
+        .cq-lead { color: rgba(255,255,255,0.55); font-size: 15px; margin-bottom: 0.5rem; }
+        .cq-main {
+          font-size: 28px; font-weight: 900;
+          background: linear-gradient(135deg, #3D8FFF, #00D4FF, #00FFB2);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+          background-size: 200%;
+          animation: shimmer 3s linear infinite;
+        }
+        @keyframes shimmer {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 200% 50%; }
+        }
+
+        @media (max-width: 600px) {
+          .chapter { grid-template-columns: 40px 1fr; gap: 0 1rem; }
+          .feat-grid { grid-template-columns: repeat(3, 1fr); }
+          .stats-row { grid-template-columns: 1fr; }
+          .ch-title { font-size: 20px; }
+          .future-title { font-size: 24px; }
+          .future-card { padding: 2rem 1.5rem; }
+        }
+      `}</style>
+
+      {/* ─── TOP BAR ─── */}
+      <div className="fixed top-4 z-50 flex items-center gap-3" style={{ left: "1rem" }}>
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-full border border-white/10 bg-[#060E1E]/80 px-4 py-2 text-xs font-medium text-white/60 backdrop-blur-md transition-colors hover:text-white"
+          style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(6,14,30,0.8)" }}
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          {isAr ? "رجوع" : "Back"}
+        </Link>
+      </div>
+
+      <button
+        onClick={toggleLang}
+        className="fixed top-4 z-50 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors"
+        style={{
+          right: "1rem",
+          border: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(6,14,30,0.8)",
+          color: "rgba(255,255,255,0.6)",
+        }}
+      >
+        {isAr ? "English" : "بالعربي"}
+      </button>
+
       {/* ─── HERO ─── */}
-      <section className="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#405a8d]/10 via-transparent to-background" />
-        <div className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#405a8d]/20 blur-[120px]" />
-
-        {/* Top bar */}
-        <div className={`fixed top-4 z-50 flex items-center gap-3 ${isAr ? "left-4" : "left-4"}`}>
-          <Link
-            href="/"
-            className="flex items-center gap-2 rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-md transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            {t("Back", "رجوع", lang)}
-          </Link>
+      <section className="relative flex min-h-screen flex-col items-center justify-center text-center px-6 z-[1] overflow-hidden">
+        <div className="rings" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+          <div className="ring" />
+          <div className="ring" />
+          <div className="ring" />
+          <div className="ring" />
         </div>
+        <div className="hero-glow" />
+        <div className="hero-glow2" />
 
-        <button
-          onClick={toggle}
-          className={`fixed top-4 z-50 flex items-center gap-2 rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-md transition-colors hover:text-foreground ${
-            isAr ? "right-4" : "right-4"
-          }`}
-        >
-          {isAr ? "English" : "بالعربي"}
-        </button>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE }}
-          className="relative z-10 mx-auto max-w-3xl text-center"
-        >
-          <div className="mb-6 inline-flex items-center justify-center">
-            <MedOneXLogoMark className="h-16 w-16 text-primary md:h-20 md:w-20" interactiveColor />
+        <div className="relative z-10 max-w-lg mx-auto">
+          <div className="hero-eyebrow" style={{ justifyContent: "center" }}>
+            {isAr ? "قصة · 2024 · من البداية للنهاية" : "Story · 2024 · From Start to Finish"}
           </div>
 
-          {isAr ? (
-            <>
-              <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-                قصة{" "}
-                <span className="bg-gradient-to-r from-[#405a8d] to-[#dcdde6] bg-clip-text text-transparent">
-                  {siteName}
-                </span>
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground/70 md:text-base">
-                من فكرة بسيطة إلى منصة طبية متكاملة
-              </p>
-              <p className="mt-4 max-w-xl mx-auto text-sm leading-relaxed text-muted-foreground md:text-base">
-                كل حاجة بدأت بسؤال بسيط قاله طالب طب. مش خطة عمل، مش اجتماع. مجرد سؤال.
-              </p>
-            </>
-          ) : (
-            <>
-              <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-                The{" "}
-                <span className="bg-gradient-to-r from-[#405a8d] to-[#dcdde6] bg-clip-text text-transparent">
-                  Real Story
-                </span>{" "}
-                of {siteName}
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground/70 md:text-base">
-                From a simple idea to a complete medical platform
-              </p>
-              <p className="mt-4 max-w-xl mx-auto text-sm leading-relaxed text-muted-foreground md:text-base">
-                It all started with a simple question a medical student asked. Not a business plan, not a meeting. Just a question.
-              </p>
-            </>
-          )}
+          <h1 className="text-[clamp(60px,12vw,120px)] font-black leading-none mb-6">
+            <span className="logo-med">Med</span><span className="logo-one">One</span><span className="logo-x">X</span>
+          </h1>
 
-          <div className={`mt-6 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground/60 ${isAr ? "flex-row-reverse" : ""}`}>
-            <span className="rounded-full border border-border bg-card px-3 py-1">
-              {t("9 chapters", "9 فصول", lang)}
+          <p className="text-lg text-white/60 max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
+            {isAr
+              ? "من سؤال واحد لطالب طب... إلى نظام تعليمي متكامل"
+              : "From one medical student's question... to a complete education system"}
+          </p>
+
+          <div className="flex flex-col items-center gap-2 mt-16" style={{ marginTop: "4rem" }}>
+            <span className="text-[11px] tracking-[2px] text-[#00D4FF]/70 uppercase">
+              {isAr ? "اسكرول" : "Scroll"}
             </span>
-            <span className="rounded-full border border-border bg-card px-3 py-1">
-              {t("From 2024", "من 2024", lang)}
-            </span>
-            <span className="rounded-full border border-border bg-card px-3 py-1">
-              {t("Born from a question", "من سؤال طالب", lang)}
-            </span>
+            <div className="scroll-line" />
           </div>
-
-          <motion.button
-            onClick={scrollToTimeline}
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="mt-8 inline-flex items-center gap-2 text-xs text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-          >
-            {t("Read the story", "اقرأ القصة", lang)} <ArrowDown className="h-3 w-3" />
-          </motion.button>
-        </motion.div>
+        </div>
       </section>
 
-      {/* ─── TIMELINE ─── */}
-      <section ref={timelineRef} className="relative px-6 pb-20 md:pb-28">
-        <div className="relative mx-auto max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={VIEWPORT}
-            transition={{ duration: 0.5, ease: EASE }}
-            className={`mb-10 text-center ${isAr ? "text-right" : ""}`}
-          >
-            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t("The Journey", "الرحلة", lang)}
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("Tap any chapter to read", "اضغط على أي فصل لقراءته", lang)}
-            </p>
-          </motion.div>
+      {/* ─── DIVIDER ─── */}
+      <div className="divider">
+        <div className="divider-line" />
+        <span className="divider-label">{isAr ? "الرحلة الكاملة" : "The Full Journey"}</span>
+        <div className="divider-line" />
+      </div>
 
-          <div className="relative space-y-4">
-            {CHAPTERS.map((chapter, i) => (
-              <div key={chapter.id} data-chapter={i}>
-                <ChapterCard chapter={chapter} index={i} lang={lang} />
+      {/* ─── CHAPTERS ─── */}
+      <div ref={sectionsRef} className="max-w-[900px] mx-auto px-6 pb-24 relative z-[1]">
+        {/* Ch 1 - البداية */}
+        <div className={`chapter ch-${CHAPTER_THEMES[0]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "البداية" : "The Beginning"}</div>
+            <h2 className="ch-title">
+              {isAr ? "مشكلة حقيقية في حياة طالب حقيقي" : "A Real Problem for a Real Student"}
+            </h2>
+            <p className="ch-body">
+              {isAr
+                ? "طالب طب، السنة الثانية. أمامه ٤٠٠ سؤال. الامتحان بعد أسبوعين. والمصادر مبعثرة — فيديو هنا، PDF هناك، وأسئلة من سنة فاتت في مجموعة واتساب مش مرتبة."
+                : "A second-year medical student. 400 questions to study. The exam is in two weeks. Resources are scattered — a video here, a PDF there, questions from last year in a messy WhatsApp group."}
+            </p>
+            <div className="ch-accent">
+              {isAr
+                ? '"ليه مفيش مكان واحد فيه كل حاجة؟ الأسئلة، الفيديوهات، الملفات — في نفس المكان؟"'
+                : '"Why isn\'t there one place for everything? Questions, videos, files — all in one spot?"'}
+            </div>
+            <p className="ch-body">
+              {isAr
+                ? "هذا السؤال البسيط لم يكن فكرة شركة، ولا خطة عمل، ولا اجتماع. مجرد إحساس بإن في حاجة ناقصة."
+                : "That simple question wasn't a company idea, a business plan, or a meeting. Just a feeling that something was missing."}
+            </p>
+          </div>
+        </div>
+
+        {/* Ch 2 - الخطوة الأولى */}
+        <div className={`chapter ch-${CHAPTER_THEMES[1]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "الخطوة الأولى" : "The First Step"}</div>
+            <h2 className="ch-title">
+              {isAr ? "أول يوم — صفحة فارغة وحلم كبير" : "First Day — A Blank Page and a Big Dream"}
+            </h2>
+            <p className="ch-body">
+              {isAr
+                ? "البداية كانت بسيطة جداً. موقع بيعرض أسئلة وإجاباتها. مش أكتر. الاسم الأول:"
+                : "The beginning was very simple. A website that shows questions and answers. Nothing more. The first name:"}
+            </p>
+            <div className="name-fx">
+              <span className="name-pill np-old">MedQs</span>
+            </div>
+            <p className="ch-body">
+              {isAr
+                ? "بعد أول أسبوع، الأسئلة بدأت تتراكم:"
+                : "After the first week, questions started piling up:"}
+            </p>
+            <div className="ch-accent">
+              {isAr
+                ? '"طب وإيه رأيك لو الطالب يقدر يتابع تقدمه؟ وفيديوهات شرح؟ وبطاقات مذاكرة؟ وملفات PDF؟"'
+                : '"What if students could track progress? Explanation videos? Flashcards? PDF files?"'}
+            </div>
+            <p className="ch-body">
+              {isAr
+                ? "كل سؤال كان يفتح باب لفكرة جديدة. والفكرة الجديدة كانت تفتح باب لفكرتين. هكذا بدأ الموقع يكبر — فكرة فوق فكرة."
+                : "Each question opened the door to a new idea. And the new idea opened two more doors. That's how the site grew — idea upon idea."}
+            </p>
+          </div>
+        </div>
+
+        {/* Ch 3 - الأزمة الأولى */}
+        <div className={`chapter ch-${CHAPTER_THEMES[2]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "الأزمة الأولى" : "The First Crisis"}</div>
+            <h2 className="ch-title">
+              {isAr ? "لما الموقع وقع في أول ليلة" : "When the Site Crashed on the First Night"}
+            </h2>
+            <p className="ch-body">
+              {isAr
+                ? "تم رفع الموقع. تم مشاركة الرابط. جاء أول مستخدمين. وبعدين..."
+                : "The site was deployed. The link was shared. The first users arrived. And then..."}
+            </p>
+            <div className="ch-accent">
+              {isAr
+                ? "الموقع وقف. قاعدة البيانات رفضت الاتصال. الأكواد بعتت رسائل خطأ. الساعة ٢ الصبح."
+                : "The site stopped. The database refused to connect. Errors everywhere. 2 AM."}
+            </div>
+            <p className="ch-body">
+              {isAr
+                ? "المشكلة اتحلت بعد ٤ ساعات من البحث المتواصل."
+                : "The problem was fixed after 4 hours of searching."}
+            </p>
+            <div className="ch-accent">
+              {isAr
+                ? "الدرس: كل حاجة بتشتغل لوحدها، مش معناه هتشتغل مع بعض."
+                : "Lesson: Everything working alone doesn't mean it'll work together."}
+            </div>
+          </div>
+        </div>
+
+        {/* Ch 4 - AI */}
+        <div className={`chapter ch-${CHAPTER_THEMES[3]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "الفكرة اللي غيرت كل حاجة" : "The Idea That Changed Everything"}</div>
+            <h2 className="ch-title">
+              {isAr ? "لما الذكاء الاصطناعي دخل الصورة" : "When AI Entered the Picture"}
+            </h2>
+            <p className="ch-body">
+              {isAr
+                ? "جاءت فكرة: مساعد ذكاء اصطناعي بيفهم في الطب ويشرح الأسئلة. وُلد:"
+                : "An idea came: an AI assistant that understands medicine and explains questions. Born:"}
+            </p>
+            <div className="ch-accent" style={{ textAlign: "center", fontSize: "20px", fontWeight: 900 }}>
+              {isAr ? "Dr. Q — دكتور رقمي" : "Dr. Q — A Digital Doctor"}
+            </div>
+            <p className="ch-body">
+              {isAr
+                ? "التحدي: خدمات AI بتكلف فلوس، والموقع مجاني. الحل؟"
+                : "The challenge: AI services cost money, and the site is free. The solution?"}
+            </p>
+            <div className="ch-accent">
+              {isAr
+                ? '"نربط بـ ٦ شركات ذكاء اصطناعي مختلفة. لو واحدة وقفت، التانية تشتغل. لو التانية وقفت، التالتة تشتغل."'
+                : '"Connect 6 different AI companies. If one stops, the second works. If the second stops, the third works."'}
+            </div>
+            <p className="ch-body">
+              {isAr
+                ? "النتيجة: Dr. Q مابيوقفش. مهما حصل في الخلفية، الطالب بيفضل يسأل ويجاوب."
+                : "Result: Dr. Q never stops. No matter what happens in the background, the student keeps studying."}
+            </p>
+          </div>
+        </div>
+
+        {/* Ch 5 - Rebrand */}
+        <div className={`chapter ch-${CHAPTER_THEMES[4]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "لحظة التحول الكبير" : "The Big Transformation"}</div>
+            <h2 className="ch-title">
+              {isAr ? "MedQs مات. MedOneX وُلد." : "MedQs Died. MedOneX Was Born."}
+            </h2>
+            <div className="stats-row">
+              <div className="stat-chip s-blue">
+                <div className="stat-num">6+</div>
+                <div className="stat-lbl">{isAr ? "محركات AI" : "AI Engines"}</div>
+              </div>
+              <div className="stat-chip s-purple">
+                <div className="stat-num">15+</div>
+                <div className="stat-lbl">{isAr ? "ميزة مختلفة" : "Different Features"}</div>
+              </div>
+              <div className="stat-chip s-teal">
+                <div className="stat-num">300+</div>
+                <div className="stat-lbl">{isAr ? "تحديث وإصلاح" : "Updates & Fixes"}</div>
+              </div>
+            </div>
+            <div className="name-fx">
+              <span className="name-pill np-old">MedQs</span>
+              <span className="np-arrow">←</span>
+              <span className="name-pill np-new">MedOneX</span>
+            </div>
+            <div className="ch-accent">
+              {isAr
+                ? '"مش بس غيرنا الاسم. غيرنا الهوية كلها. الشعار، الألوان، الرسالة. كأننا عمدنا الموقع من جديد."'
+                : '"We didn\'t just change the name. We changed the entire identity. The logo, colors, message. It was like baptizing the site anew."'}
+            </div>
+          </div>
+        </div>
+
+        {/* Ch 6 - Hardest Crisis */}
+        <div className={`chapter ch-${CHAPTER_THEMES[5]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "الأزمة الأصعب" : "The Hardest Crisis"}</div>
+            <h2 className="ch-title">
+              {isAr ? "لما كل حاجة اتكسرت في نفس الوقت" : "When Everything Broke at Once"}
+            </h2>
+            <p className="ch-body">
+              {isAr
+                ? "تغيير قاعدة البيانات بالكامل — زي ما بتنقل كل أثاث بيتك لبيت جديد وانت مش واقف الشغل. في يوم واحد:"
+                : "Migrating the entire database — imagine moving your furniture to a new house while still living in it. In one day:"}
+            </p>
+            <div className="ch-accent">
+              {isAr
+                ? "الـ login وقف · الأسئلة اختفت · الفيديوهات بطلت تشتغل · ٣ رسائل خطأ مختلفة في نفس الوقت"
+                : "Login stopped · Questions disappeared · Videos broke · 3 different errors at the same time"}
+            </div>
+            <p className="ch-body">
+              {isAr
+                ? "الحل أخذ ٤٨ ساعة متواصلة. لكن في النهاية، كل حاجة رجعت أحسن من قبل — وأسرع."
+                : "The fix took 48 continuous hours. But in the end, everything came back better and faster."}
+            </p>
+            <div className="ch-accent">
+              {isAr
+                ? "الدرس: كل أزمة بتنتهي بنظام أقوى. كل مشكلة بتنحل بفهم أعمق."
+                : "Lesson: Every crisis ends with a stronger system. Every problem is solved with deeper understanding."}
+            </div>
+          </div>
+        </div>
+
+        {/* Ch 7 - User Ideas */}
+        <div className={`chapter ch-${CHAPTER_THEMES[6]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "الأفكار من المستخدمين" : "Ideas from Users"}</div>
+            <h2 className="ch-title">
+              {isAr ? '"ليه مفيش..." — الجملة اللي بنيت الموقع' : '"Why isn\'t there..." — The Sentence That Built the Site'}
+            </h2>
+            <p className="ch-body">
+              {isAr
+                ? "كل ميزة كبيرة في MedOneX جاءت من سؤال بسيط قاله طالب:"
+                : "Every major feature in MedOneX came from a simple question a student asked:"}
+            </p>
+            <div className="ideas-list">
+              <div className="idea-row">
+                <div className="idea-q">
+                  {isAr ? '"ليه مفيش بوت تيليجرام أذاكر منه في الميكروباص؟"' : '"Why no Telegram bot for studying on the bus?"'}
+                </div>
+                <div className="idea-arr">←</div>
+                <div className="idea-a">{isAr ? "بوت تيليجرام متكامل" : "Full Telegram Bot"}</div>
+              </div>
+              <div className="idea-row">
+                <div className="idea-q">
+                  {isAr ? '"ليه مفيش لوحة رسم أشرح عليها للزملاء؟"' : '"Why no whiteboard to explain to classmates?"'}
+                </div>
+                <div className="idea-arr">←</div>
+                <div className="idea-a">{isAr ? "DrawMed" : "DrawMed"}</div>
+              </div>
+              <div className="idea-row">
+                <div className="idea-q">
+                  {isAr ? '"ليه مفيش أطلس تشريح تفاعلي؟"' : '"Why no interactive anatomy atlas?"'}
+                </div>
+                <div className="idea-arr">←</div>
+                <div className="idea-a">{isAr ? "Anatomy Atlas" : "Anatomy Atlas"}</div>
+              </div>
+            </div>
+            <div className="ch-accent">
+              {isAr
+                ? "المنطق بسيط: الطالب هو اللي يعرف إيه اللي ناقص. الدور إننا نبنيه."
+                : "Simple logic: the student knows what's missing. Our role is to build it."}
+            </div>
+          </div>
+        </div>
+
+        {/* Ch 8 - Today */}
+        <div className={`chapter ch-${CHAPTER_THEMES[7]}`} data-ch>
+          <div className="ch-spine">
+            <div className="ch-dot" />
+            <div className="ch-line" />
+          </div>
+          <div className="ch-card">
+            <div className="ch-era">{isAr ? "اليوم" : "Today"}</div>
+            <h2 className="ch-title">
+              {isAr ? "من سؤال واحد لنظام متكامل" : "From One Question to a Complete System"}
+            </h2>
+            <p className="ch-body">
+              {isAr
+                ? "MedOneX اليوم ليس موقع أسئلة. هو نظام تعليم طبي متكامل:"
+                : "MedOneX today is not a question site. It's a complete medical education system:"}
+            </p>
+            <div className="feat-grid">
+              {FEATURES.map((f, i) => (
+                <div key={i} className="feat-item">
+                  <div className="feat-dot" style={{ background: f.color }} />
+                  {isAr ? f.label : f.labelEn}
+                </div>
+              ))}
+            </div>
+            <div className="ch-accent">
+              {isAr
+                ? '"بدأنا بسؤال واحد: ليه التعلم صعب؟ والإجابة لسه بتتبنى."'
+                : '"We started with one question: Why is learning hard? And the answer is still being built."'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── FUTURE ─── */}
+      <div className="max-w-[900px] mx-auto px-6 mb-8 relative z-[1]">
+        <div className="future-card" data-ch>
+          <div className="future-mesh" />
+          <div className="future-grid" />
+
+          <h2 className="future-title">
+            {isAr ? "المستقبل — " : "The Future — "}
+            <span>{isAr ? "الفصل اللي لسه ما اتكتبش" : "The Chapter Not Yet Written"}</span>
+          </h2>
+          <p className="future-sub">
+            {isAr
+              ? "القصة مش خلصت. في فصول جاية لسه بتتكتب..."
+              : "The story isn't over. There are chapters still being written..."}
+          </p>
+
+          <div className="future-items">
+            {(isAr ? FUTURE_ITEMS_AR : FUTURE_ITEMS_EN).map((item, i) => (
+              <div key={i} className="fi">
+                <div className="fi-num">{i + 1}</div>
+                <span className="fi-text">{item}</span>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ─── BRAND VALUES ─── */}
-      <section className="relative border-t border-border px-6 py-16">
-        <div className="mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={VIEWPORT}
-            transition={{ duration: 0.5, ease: EASE }}
-            className={`mb-10 text-center ${isAr ? "text-right" : ""}`}
-          >
-            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t("What We Believe", "إحنا مؤمنين بكده", lang)}
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("These aren't corporate values. They're scars.", "دي مش قيم شركات. دي آثار المعارك.", lang)}
+          <div className="closing-quote">
+            <p className="cq-lead">
+              {isAr
+                ? "كل فكرة كبيرة بدأت بطالب قال..."
+                : "Every big idea started with a student saying..."}
             </p>
-          </motion.div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {BRAND_VALUES.map((v, i) => {
-              const Icon = v.icon;
-              return (
-                <motion.div
-                  key={v.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={VIEWPORT}
-                  transition={{ duration: 0.4, ease: EASE, delay: i * 0.08 }}
-                  className={`group relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all hover:shadow-lg ${isAr ? "text-right" : ""}`}
-                >
-                  <div
-                    className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: `${v.color}20` }}
-                  >
-                    <Icon className="h-5 w-5" style={{ color: v.color }} />
-                  </div>
-                  <h3 className="mb-2 text-sm font-semibold">{t(v.title, v.titleAr, lang)}</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    {t(v.desc, v.descAr, lang)}
-                  </p>
-                </motion.div>
-              );
-            })}
+            <div className="cq-main">
+              {isAr ? '"ليه مفيش...؟"' : '"Why isn\'t there...?"'}
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* ─── FUTURE ─── */}
-      <section className="relative overflow-hidden border-t border-border px-6 py-20">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#405a8d]/5 to-transparent" />
-        <div className="pointer-events-none absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#405a8d]/10 blur-[100px]" />
-
-        <div className="relative mx-auto max-w-3xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={VIEWPORT}
-            transition={{ duration: 0.5, ease: EASE }}
-          >
-            {isAr ? (
-              <>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                  القصة لسه مخلصتش
-                </h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground max-w-lg mx-auto">
-                  كل فصل جديد بيكتب دلوقتي. الفكرة الجاية ممكن تبدأ من سؤال بسيط — زيه زي أول سؤال.
-                </p>
-                <p className="mt-3 text-xs text-muted-foreground/60">
-                  — وممكن تكون إنت اللي تسأله.
-                </p>
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                  The Story Isn&apos;t Over
-                </h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground max-w-lg mx-auto">
-                  Every new chapter is being written right now. The next idea might start with a simple question — just like the first one.
-                </p>
-                <p className="mt-3 text-xs text-muted-foreground/60">
-                  — And you might be the one asking it.
-                </p>
-              </>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Floating progress */}
-      <ProgressIndicator chapters={CHAPTERS} lang={lang} />
+      </div>
     </div>
   );
 }
