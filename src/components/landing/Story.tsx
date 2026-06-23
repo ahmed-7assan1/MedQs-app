@@ -143,7 +143,7 @@ export function Story() {
         .marquee-bg {
           position: fixed; inset: 0; z-index: 0; pointer-events: none;
           display: flex; flex-direction: column; justify-content: center; gap: 20px;
-          overflow: hidden; opacity: 0.15;
+          overflow: hidden; opacity: 0.3;
         }
         .story-page.light-mode .marquee-bg { opacity: 0.08; }
         .marquee-row {
