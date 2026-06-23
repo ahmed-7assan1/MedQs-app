@@ -1,7 +1,7 @@
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export default async function StoryLayout({ children }: { children: React.ReactNode }) {
   const siteConfig = await prisma.siteConfig

@@ -3,12 +3,13 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
-import { ArrowLeft, Sun, Moon, Languages } from "lucide-react";
+import { Sun, Moon, Languages } from "lucide-react";
 import Link from "next/link";
 
 type Lang = "en" | "ar";
 
 const CHAPTER_THEMES = ["blue", "cyan", "coral", "purple", "amber", "coral", "teal", "pink"];
+const DATES = ["2026", "2026", "2026", "2026", "2026", "2026", "2026", "2026"];
 
 const FEATURES = [
   { label: "أسئلة MCQ", labelEn: "MCQ Questions", color: "#1A6BFF" },
@@ -101,7 +102,7 @@ export function Story() {
 
       <style>{`
         .story-page {
-          --c-bg: #060E1E;
+          --c-bg: #000000;
           --c-text: #FFFFFF;
           --c-text-dim: rgba(255,255,255,0.55);
           --c-text-dimmer: rgba(255,255,255,0.3);
@@ -111,7 +112,8 @@ export function Story() {
           --c-card-bg-soft: rgba(255,255,255,0.03);
           --c-btn-bg: rgba(6,14,30,0.8);
           --c-shine: rgba(255,255,255,0.15);
-          font-family: 'Cairo', 'Tajawal', sans-serif;
+          font-family: "Cairo", "Tajawal", sans-serif;
+          -webkit-text-size-adjust: 100%;
           background: var(--c-bg);
           color: var(--c-text);
           overflow-x: hidden;
@@ -139,13 +141,27 @@ export function Story() {
         .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to left, transparent, #1A6BFF); }
         .story-page.light-mode .ch-accent { color: var(--c-text); }
 
+        .hero-eyebrow {
+          display: flex; align-items: center; gap: 12px;
+          font-size: 11px; font-weight: 700; letter-spacing: 3px;
+          color: rgba(0,212,255,0.7); margin-bottom: 2rem;
+        }
+        .hero-eyebrow::before,
+        .hero-eyebrow::after {
+          content: "";
+          width: 60px; height: 1px;
+          background: linear-gradient(to right, transparent, rgba(0,212,255,0.4));
+        }
+        .hero-eyebrow::after { background: linear-gradient(to left, transparent, rgba(0,212,255,0.4)); }
+
         /* Marquee background */
         .marquee-bg {
           position: fixed; inset: 0; z-index: 0; pointer-events: none;
           display: flex; flex-direction: column; justify-content: center; gap: 20px;
           overflow: hidden; opacity: 0.3;
         }
-        .story-page.light-mode .marquee-bg { opacity: 0.08; }
+        .story-page.light-mode .marquee-bg { opacity: 0.2; }
+        .story-page.light-mode .review-card { background: rgba(255,255,255,0.9); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
         .marquee-row {
           display: flex; gap: 0; width: max-content;
           will-change: transform;
@@ -223,7 +239,7 @@ export function Story() {
           z-index: 2;
         }
         .ch-dot::after {
-          content: '';
+          content: "";
           position: absolute;
           inset: -5px;
           border-radius: 50%;
@@ -232,6 +248,11 @@ export function Story() {
         @keyframes dotPulse {
           0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 0.6; }
           50% { box-shadow: 0 0 0 8px transparent; opacity: 0; }
+        }
+        .ch-date {
+          font-size: 11px; font-weight: 800; letter-spacing: 1px;
+          color: var(--c-text-dimmer); margin-top: 3px; text-align: center;
+          white-space: nowrap;
         }
         .ch-line {
           width: 1px; flex: 1; margin-top: 8px; min-height: 60px;
@@ -244,9 +265,11 @@ export function Story() {
           padding: 2rem;
           position: relative;
           overflow: hidden;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
         }
         .ch-card::before {
-          content: '';
+          content: "";
           position: absolute; top: 0; left: 0; right: 0;
           height: 1px;
           background: linear-gradient(to right, transparent, var(--c-shine), transparent);
@@ -308,7 +331,7 @@ export function Story() {
           border: 1px solid var(--c-border); position: relative; overflow: hidden;
         }
         .stat-chip::before {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+          content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
           background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
         }
         .stat-num {
@@ -443,20 +466,29 @@ export function Story() {
       `}</style>
 
       {/* ─── TOP BAR ─── */}
-      <div className="fixed top-4 z-50 flex items-center gap-2" style={{ left: "1rem" }}>
-        <Link
-          href="/"
-          className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors hover:brightness-150"
+      <Link
+        href="/"
+        className="fixed top-4 z-50"
+        style={{ left: "1rem" }}
+      >
+        <div
+          className="rounded-full backdrop-blur-md transition-colors hover:brightness-150"
           style={{
             border: "1px solid var(--c-border)",
             background: "var(--c-btn-bg)",
-            color: "var(--c-text-dim)",
+            width: 40,
+            height: 40,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {isAr ? "رجوع" : "Back"}
-        </Link>
-      </div>
+          <MedOneXLogoMark
+            className={`h-5 w-5 ${lightMode ? "text-[#1A6BFF]" : "text-white"}`}
+            interactiveColor
+          />
+        </div>
+      </Link>
 
       <div
         className="fixed top-4 z-50 flex items-center gap-2"
@@ -543,8 +575,8 @@ export function Story() {
       <section className="relative flex min-h-screen flex-col items-center justify-center text-center px-6 z-[1] overflow-hidden">
 
         <div className="relative z-10 max-w-lg mx-auto">
-          <div className="hero-eyebrow" style={{ justifyContent: "center" }}>
-            {isAr ? "قصة · 2024 · من البداية للنهاية" : "Story · 2024 · From Start to Finish"}
+          <div className="hero-eyebrow">
+            {isAr ? "القصة الكاملة · 2025 · ماضي وحاضر ومستقبل" : "The Complete Story · 2025 · Past, Present & Future"}
           </div>
 
           <div
@@ -555,7 +587,7 @@ export function Story() {
             }}
           >
             <MedOneXLogoMark
-              className={`h-full w-full ${lightMode ? "text-[#1A6BFF]" : "text-[#00D4FF]"}`}
+              className={`h-full w-full ${lightMode ? "text-[#1A6BFF]" : "text-white"}`}
               interactiveColor
             />
           </div>
@@ -588,6 +620,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[0]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[0]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
@@ -617,6 +650,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[1]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[1]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
@@ -654,6 +688,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[2]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[2]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
@@ -688,6 +723,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[3]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[3]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
@@ -725,6 +761,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[4]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[4]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
@@ -763,6 +800,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[5]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[5]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
@@ -797,6 +835,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[6]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[6]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
@@ -844,6 +883,7 @@ export function Story() {
         <div className={`chapter ch-${CHAPTER_THEMES[7]}`} data-ch>
           <div className="ch-spine">
             <div className="ch-dot" />
+            <span className="ch-date">{DATES[7]}</span>
             <div className="ch-line" />
           </div>
           <div className="ch-card">
