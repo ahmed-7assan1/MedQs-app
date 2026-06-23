@@ -165,6 +165,7 @@ export function Story() {
           --c-card-bg-soft: rgba(255,255,255,0.03);
           --c-btn-bg: rgba(6,14,30,0.8);
           --c-shine: rgba(255,255,255,0.15);
+          --c-logo-glow: 0,212,255;
           font-family: 'Cairo', 'Tajawal', sans-serif;
           background: var(--c-bg);
           color: var(--c-text);
@@ -185,10 +186,12 @@ export function Story() {
           --c-card-bg-soft: rgba(255,255,255,0.7);
           --c-btn-bg: rgba(255,255,255,0.9);
           --c-shine: rgba(0,0,0,0.06);
+          --c-logo-glow: 26,107,255;
         }
         .story-page.light-mode .aurora { opacity: 0.15; }
-        .story-page.light-mode .hero-glow { background: radial-gradient(circle, rgba(26,107,255,0.08) 0%, transparent 70%); }
-        .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%); }
+        .story-page.light-mode .hero-glow { background: radial-gradient(circle, rgba(26,107,255,0.1) 0%, transparent 70%); }
+        .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(26,107,255,0.06) 0%, transparent 70%); }
+        .story-page.light-mode .ring { border-color: rgba(26,107,255,0.1); }
         .story-page.light-mode .np-old { color: var(--c-text-dimmer); }
         .story-page.light-mode .logo-x { text-shadow: 0 0 20px rgba(0,212,255,0.25); }
         .story-page.light-mode .hero-eyebrow { color: #1A6BFF; }
@@ -201,9 +204,9 @@ export function Story() {
         .aurora {
           position: fixed; inset: 0; pointer-events: none; z-index: 0;
           background:
-            radial-gradient(ellipse 60% 40% at 20% 60%, rgba(26,107,255,0.07) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 50% at 80% 30%, rgba(139,92,246,0.05) 0%, transparent 60%),
-            radial-gradient(ellipse 40% 60% at 50% 80%, rgba(0,212,255,0.04) 0%, transparent 60%);
+            radial-gradient(ellipse 60% 40% at 20% 60%, rgba(0,212,255,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 50% at 80% 30%, rgba(0,212,255,0.04) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 60% at 50% 80%, rgba(0,212,255,0.03) 0%, transparent 60%);
           animation: auroraDrift 15s ease-in-out infinite alternate;
         }
         @keyframes auroraDrift {
@@ -215,7 +218,7 @@ export function Story() {
           position: absolute;
           width: 800px; height: 800px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(26,107,255,0.18) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(0,212,255,0.18) 0%, transparent 70%);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           animation: glowPulse 4s ease-in-out infinite;
@@ -224,7 +227,7 @@ export function Story() {
           position: absolute;
           width: 500px; height: 500px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
           top: 40%; left: 55%;
           transform: translate(-50%, -50%);
           animation: glowPulse 6s ease-in-out infinite reverse;
@@ -237,7 +240,7 @@ export function Story() {
         .ring {
           position: absolute;
           border-radius: 50%;
-          border: 1px solid rgba(26,107,255,0.15);
+          border: 1px solid rgba(0,212,255,0.12);
           transform: translate(-50%, -50%);
           animation: ringExpand 6s linear infinite;
         }
@@ -281,8 +284,8 @@ export function Story() {
           50% { text-shadow: 0 0 80px rgba(0,212,255,0.9), 0 0 120px rgba(0,212,255,0.4); }
         }
         @keyframes logoGlow {
-          0%, 100% { filter: drop-shadow(0 0 30px rgba(0,212,255,0.4)); }
-          50% { filter: drop-shadow(0 0 70px rgba(0,212,255,0.8)); }
+          0%, 100% { filter: drop-shadow(0 0 30px rgba(var(--c-logo-glow),0.4)); }
+          50% { filter: drop-shadow(0 0 70px rgba(var(--c-logo-glow),0.8)); }
         }
 
         .scroll-line {
@@ -619,7 +622,6 @@ export function Story() {
               width: "clamp(80px,16vw,160px)",
               height: "clamp(80px,16vw,160px)",
               animation: "logoGlow 2s ease-in-out infinite",
-              filter: lightMode ? "drop-shadow(0 0 20px rgba(26,107,255,0.5))" : undefined,
             }}
           >
             <MedOneXLogoMark
