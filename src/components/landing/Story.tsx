@@ -245,6 +245,10 @@ export function Story() {
           0%, 100% { text-shadow: 0 0 40px rgba(0,212,255,0.5); }
           50% { text-shadow: 0 0 80px rgba(0,212,255,0.9), 0 0 120px rgba(0,212,255,0.4); }
         }
+        @keyframes logoGlow {
+          0%, 100% { filter: drop-shadow(0 0 30px rgba(0,212,255,0.4)); }
+          50% { filter: drop-shadow(0 0 70px rgba(0,212,255,0.8)); }
+        }
 
         .scroll-line {
           width: 1px; height: 50px;
@@ -540,9 +544,19 @@ export function Story() {
             {isAr ? "قصة · 2024 · من البداية للنهاية" : "Story · 2024 · From Start to Finish"}
           </div>
 
-          <h1 className="text-[clamp(60px,12vw,120px)] font-black leading-none mb-6">
-            <span className="logo-med">Med</span><span className="logo-one">One</span><span className="logo-x">X</span>
-          </h1>
+          <div
+            className="mx-auto mb-6"
+            style={{
+              width: "clamp(80px,16vw,160px)",
+              height: "clamp(80px,16vw,160px)",
+              animation: "logoGlow 2s ease-in-out infinite",
+            }}
+          >
+            <MedOneXLogoMark
+              className="h-full w-full text-[#00D4FF]"
+              interactiveColor
+            />
+          </div>
 
           <p className="text-lg text-white/60 max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
             {isAr
