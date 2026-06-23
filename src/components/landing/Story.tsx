@@ -11,6 +11,42 @@ type Lang = "en" | "ar";
 const CHAPTER_THEMES = ["blue", "cyan", "coral", "purple", "amber", "coral", "teal", "pink"];
 const DATES = ["2026", "2026", "2026", "2026", "2026", "2026", "2026", "2026"];
 
+const STATS_DATA = [
+  {
+    num: "6+",
+    labelAr: "محركات AI",
+    labelEn: "AI Engines",
+    theme: "s-blue",
+    numColor: "#00D4FF",
+    detailTitleAr: "محركات الذكاء الاصطناعي",
+    detailTitleEn: "AI Engines",
+    itemsAr: ["OpenAI (GPT-4, GPT-4o)", "Google (Gemini 1.5 Pro/Flash)", "Anthropic (Claude 3.5)", "Meta (Llama 3)", "Mistral AI", "DeepSeek"],
+    itemsEn: ["OpenAI (GPT-4, GPT-4o)", "Google (Gemini 1.5 Pro/Flash)", "Anthropic (Claude 3.5)", "Meta (Llama 3)", "Mistral AI", "DeepSeek"],
+  },
+  {
+    num: "15+",
+    labelAr: "ميزة مختلفة",
+    labelEn: "Different Features",
+    theme: "s-purple",
+    numColor: "#A78BFA",
+    detailTitleAr: "الميزات",
+    detailTitleEn: "Features",
+    itemsAr: ["أسئلة MCQ تفاعلية", "فيديوهات شرح", "بطاقات مذاكرة", "Dr. Q AI", "منتدى اجتماعي", "بوت تيليجرام", "لوح رسم طبي", "أطلس تشريح ثلاثي الأبعاد", "تطبيق موبايل", "غرف دراسة", "مسابقات مباشرة"],
+    itemsEn: ["MCQ Questions", "Video Lectures", "Flashcards", "Dr. Q AI", "Social Forum", "Telegram Bot", "DrawMed Board", "3D Anatomy Atlas", "Mobile App", "Study Rooms", "Live Quizzes"],
+  },
+  {
+    num: "300+",
+    labelAr: "تحديث وإصلاح",
+    labelEn: "Updates & Fixes",
+    theme: "s-teal",
+    numColor: "#00FFB2",
+    detailTitleAr: "التحديثات والإصلاحات",
+    detailTitleEn: "Updates & Fixes",
+    itemsAr: ["تحسينات أداء", "تطوير واجهة المستخدم", "إصلاح أخطاء", "تحديثات أمان", "ميزات جديدة", "تحسين API", "تحديثات الموبايل", "تحديث محتوى"],
+    itemsEn: ["Performance Optimization", "UI/UX Improvements", "Bug Fixes", "Security Patches", "New Features", "API Enhancements", "Mobile Updates", "Content Updates"],
+  },
+];
+
 const FEATURES = [
   { label: "أسئلة MCQ", labelEn: "MCQ Questions", color: "#1A6BFF" },
   { label: "فيديوهات شرح", labelEn: "Videos", color: "#00D4FF" },
@@ -77,6 +113,7 @@ export function Story() {
   const { siteName } = useSiteConfig();
   const [lang, toggleLang] = useLang();
   const [lightMode, setLightMode] = useState(false);
+  const [expandedStat, setExpandedStat] = useState<number | null>(null);
   const isAr = lang === "ar";
   const sectionsRef = useRef<HTMLDivElement>(null);
 
@@ -345,6 +382,59 @@ export function Story() {
         .s-purple .stat-num { color: #A78BFA; }
         .s-teal { background: rgba(0,255,178,0.06); }
         .s-teal .stat-num { color: #00FFB2; }
+
+        .stat-chip {
+          cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .stat-chip:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+          border-color: rgba(255,255,255,0.15);
+        }
+        .stat-chip.stat-active {
+          transform: translateY(-2px);
+          border-color: var(--c-text-dim);
+        }
+        .stat-see {
+          margin-top: 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+          color: var(--c-text-dimmer); opacity: 0.6;
+          transition: opacity 0.2s;
+        }
+        .stat-chip:hover .stat-see { opacity: 1; }
+        .stat-chip.stat-active .stat-see { opacity: 0; }
+
+        .stat-detail {
+          display: grid; grid-template-rows: 0fr;
+          transition: grid-template-rows 0.45s ease;
+          margin-top: 0;
+        }
+        .stat-detail-open { grid-template-rows: 1fr; margin-top: 12px; }
+        .stat-detail-inner {
+          overflow: hidden;
+          border-radius: 14px; padding: 1.25rem;
+          border: 1px solid var(--c-border);
+          background: var(--c-card-bg);
+          position: relative;
+        }
+        .stat-detail-close {
+          position: absolute; top: 8px; left: 8px; width: 26px; height: 26px;
+          border-radius: 50%; border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 16px; line-height: 1;
+          background: var(--c-border); color: var(--c-text-dim);
+          transition: background 0.2s;
+        }
+        .stat-detail-close:hover { background: rgba(255,255,255,0.15); color: var(--c-text); }
+        .stat-detail-title {
+          font-size: 16px; font-weight: 800; margin-bottom: 12px;
+          color: var(--c-text);
+        }
+        .stat-detail-list { display: flex; flex-direction: column; gap: 6px; }
+        .stat-detail-item {
+          font-size: 13px; padding: 4px 0; color: var(--c-text-dim);
+          display: flex; align-items: center; gap: 6px;
+        }
+        .stat-detail-item:first-child { padding-top: 0; }
 
         /* Name transition */
         .name-fx { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 1.25rem 0; flex-wrap: wrap; }
@@ -770,18 +860,35 @@ export function Story() {
               {isAr ? "MedQs مات. MedOneX وُلد." : "MedQs Died. MedOneX Was Born."}
             </h2>
             <div className="stats-row">
-              <div className="stat-chip s-blue">
-                <div className="stat-num">6+</div>
-                <div className="stat-lbl">{isAr ? "محركات AI" : "AI Engines"}</div>
-              </div>
-              <div className="stat-chip s-purple">
-                <div className="stat-num">15+</div>
-                <div className="stat-lbl">{isAr ? "ميزة مختلفة" : "Different Features"}</div>
-              </div>
-              <div className="stat-chip s-teal">
-                <div className="stat-num">300+</div>
-                <div className="stat-lbl">{isAr ? "تحديث وإصلاح" : "Updates & Fixes"}</div>
-              </div>
+              {STATS_DATA.map((s, i) => (
+                <div
+                  key={i}
+                  className={`stat-chip ${s.theme} ${expandedStat === i ? "stat-active" : ""}`}
+                  onClick={() => setExpandedStat(expandedStat === i ? null : i)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedStat(expandedStat === i ? null : i); } }}
+                >
+                  <div className="stat-num" style={{ color: s.numColor }}>{s.num}</div>
+                  <div className="stat-lbl">{isAr ? s.labelAr : s.labelEn}</div>
+                  <div className="stat-see">{isAr ? "ايه هي؟" : "See"}</div>
+                </div>
+              ))}
+            </div>
+            <div className={`stat-detail ${expandedStat !== null ? "stat-detail-open" : ""}`}>
+              {expandedStat !== null && (
+                <div className="stat-detail-inner">
+                  <button className="stat-detail-close" onClick={() => setExpandedStat(null)}>×</button>
+                  <div className="stat-detail-title">
+                    {isAr ? STATS_DATA[expandedStat].detailTitleAr : STATS_DATA[expandedStat].detailTitleEn}
+                  </div>
+                  <div className="stat-detail-list">
+                    {(isAr ? STATS_DATA[expandedStat].itemsAr : STATS_DATA[expandedStat].itemsEn).map((item, j) => (
+                      <div key={j} className="stat-detail-item">✓ {item}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="name-fx">
               <span className="name-pill np-old">MedQs</span>
