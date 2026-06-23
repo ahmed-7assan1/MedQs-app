@@ -191,6 +191,10 @@ export function Story() {
         .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%); }
         .story-page.light-mode .np-old { color: var(--c-text-dimmer); }
         .story-page.light-mode .logo-x { text-shadow: 0 0 20px rgba(0,212,255,0.25); }
+        .story-page.light-mode .hero-eyebrow { color: #0099CC; }
+        .story-page.light-mode .hero-eyebrow::before,
+        .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to right, transparent, #0099CC); }
+        .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to left, transparent, #0099CC); }
         .story-page.light-mode .ch-accent { color: var(--c-text); }
         .story-page.light-mode .fi-num { border-color: rgba(26,107,255,0.2); }
 
@@ -623,14 +627,14 @@ export function Story() {
             />
           </div>
 
-          <p className="text-lg text-white/60 max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
+          <p className="text-lg max-w-md mx-auto" style={{ color: "var(--c-text-dim)" }}>
             {isAr
               ? "من سؤال واحد لطالب طب... إلى نظام تعليمي متكامل"
               : "From one medical student's question... to a complete education system"}
           </p>
 
           <div className="flex flex-col items-center gap-2 mt-16" style={{ marginTop: "4rem" }}>
-            <span className="text-[11px] tracking-[2px] text-[#00D4FF]/70 uppercase">
+            <span className="text-[11px] tracking-[2px] uppercase" style={{ color: lightMode ? "#0099CC" : "rgba(0,212,255,0.7)" }}>
               {isAr ? "اسكرول" : "Scroll"}
             </span>
             <div className="scroll-line" />
