@@ -132,15 +132,43 @@ export function Story() {
           --c-btn-bg: rgba(255,255,255,0.9);
           --c-shine: rgba(0,0,0,0.06);
         }
-        .story-page.light-mode .aurora { opacity: 0.15; }
-        .story-page.light-mode .hero-glow { background: radial-gradient(circle, rgba(26,107,255,0.1) 0%, transparent 70%); }
-        .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(26,107,255,0.06) 0%, transparent 70%); }
         .story-page.light-mode .np-old { color: var(--c-text-dimmer); }
         .story-page.light-mode .hero-eyebrow { color: #1A6BFF; }
         .story-page.light-mode .hero-eyebrow::before,
         .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to right, transparent, #1A6BFF); }
         .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to left, transparent, #1A6BFF); }
         .story-page.light-mode .ch-accent { color: var(--c-text); }
+
+        /* Marquee background */
+        .marquee-bg {
+          position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          display: flex; flex-direction: column; justify-content: center; gap: 20px;
+          overflow: hidden; opacity: 0.15;
+        }
+        .story-page.light-mode .marquee-bg { opacity: 0.08; }
+        .marquee-row {
+          display: flex; gap: 0;
+          will-change: transform;
+          backface-visibility: hidden;
+          transform: translateZ(0);
+        }
+        .marquee-set { display: flex; gap: 16px; }
+        .marquee-right { animation: mR 35s linear infinite; }
+        .marquee-left { animation: mL 35s linear infinite; }
+        @keyframes mR {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+        @keyframes mL {
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
+        }
+        .review-card {
+          flex-shrink: 0; width: 240px;
+          background: var(--c-card-bg); padding: 14px;
+          border-radius: 10px;
+          contain: layout style paint;
+        }
 
         .scroll-line {
           width: 1px; height: 50px;
