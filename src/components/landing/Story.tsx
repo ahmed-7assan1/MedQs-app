@@ -215,14 +215,14 @@ export function Story() {
           display: flex; gap: 0; width: max-content;
         }
         .marquee-set { display: flex; gap: 20px; }
-        .marquee-right { animation: marqueeRight 100s linear infinite; }
-        .marquee-left { animation: marqueeLeft 100s linear infinite; }
+        .marquee-right { animation: marqueeRight 80s linear infinite; }
+        .marquee-left { animation: marqueeLeft 80s linear infinite; }
         @keyframes marqueeRight {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(-5%); }
         }
         @keyframes marqueeLeft {
-          0% { transform: translateX(-50%); }
+          0% { transform: translateX(-5%); }
           100% { transform: translateX(0); }
         }
         .review-card {
@@ -555,86 +555,41 @@ export function Story() {
       </div>
 
       {/* ─── MARQUEE BACKGROUND ─── */}
-      <div className="marquee-bg">
-        <div className="marquee-row marquee-right">
-          <div className="marquee-set">
-            {REVIEWS.slice(0, 5).map((r, i) => (
-              <div key={i} className="review-card">
-                <Stars size={10} />
-                <p className="review-text">{isAr ? r.q : r.qEn}</p>
-                <div className="review-footer">
-                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
-                </div>
+      {(() => {
+        const ROW_COPIES = 20;
+        const rows = [
+          REVIEWS.slice(0, 5),
+          REVIEWS.slice(5, 10),
+          REVIEWS.slice(10, 15),
+        ];
+        const dirs: ("marquee-right" | "marquee-left")[] = [
+          "marquee-right",
+          "marquee-left",
+          "marquee-right",
+        ];
+        return (
+          <div className="marquee-bg">
+            {rows.map((set, ri) => (
+              <div key={ri} className={`marquee-row ${dirs[ri]}`}>
+                {Array.from({ length: ROW_COPIES }).map((_, ci) => (
+                  <div key={ci} className="marquee-set">
+                    {set.map((r, i) => (
+                      <div key={i} className="review-card">
+                        <Stars size={10} />
+                        <p className="review-text">{isAr ? r.q : r.qEn}</p>
+                        <div className="review-footer">
+                          <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                          <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
               </div>
             ))}
           </div>
-          <div className="marquee-set">
-            {REVIEWS.slice(0, 5).map((r, i) => (
-              <div key={i} className="review-card">
-                <Stars size={10} />
-                <p className="review-text">{isAr ? r.q : r.qEn}</p>
-                <div className="review-footer">
-                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="marquee-row marquee-left">
-          <div className="marquee-set">
-            {REVIEWS.slice(5, 10).map((r, i) => (
-              <div key={i} className="review-card">
-                <Stars size={10} />
-                <p className="review-text">{isAr ? r.q : r.qEn}</p>
-                <div className="review-footer">
-                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="marquee-set">
-            {REVIEWS.slice(5, 10).map((r, i) => (
-              <div key={i} className="review-card">
-                <Stars size={10} />
-                <p className="review-text">{isAr ? r.q : r.qEn}</p>
-                <div className="review-footer">
-                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="marquee-row marquee-right">
-          <div className="marquee-set">
-            {REVIEWS.slice(10, 15).map((r, i) => (
-              <div key={i} className="review-card">
-                <Stars size={10} />
-                <p className="review-text">{isAr ? r.q : r.qEn}</p>
-                <div className="review-footer">
-                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="marquee-set">
-            {REVIEWS.slice(10, 15).map((r, i) => (
-              <div key={i} className="review-card">
-                <Stars size={10} />
-                <p className="review-text">{isAr ? r.q : r.qEn}</p>
-                <div className="review-footer">
-                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* ─── HERO ─── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center text-center px-6 z-[1] overflow-hidden">
