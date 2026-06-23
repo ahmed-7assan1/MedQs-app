@@ -245,6 +245,10 @@ export function Story() {
           0%, 100% { text-shadow: 0 0 40px rgba(0,212,255,0.5); }
           50% { text-shadow: 0 0 80px rgba(0,212,255,0.9), 0 0 120px rgba(0,212,255,0.4); }
         }
+        @keyframes logoGlow {
+          0%, 100% { filter: drop-shadow(0 0 30px rgba(0,212,255,0.4)); }
+          50% { filter: drop-shadow(0 0 70px rgba(0,212,255,0.8)); }
+        }
 
         .scroll-line {
           width: 1px; height: 50px;
@@ -511,18 +515,33 @@ export function Story() {
         </Link>
       </div>
 
-      <button
-        onClick={toggleLang}
-        className="fixed top-4 z-50 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors"
-        style={{
-          right: "1rem",
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(6,14,30,0.8)",
-          color: "rgba(255,255,255,0.6)",
-        }}
+      <div
+        className="fixed top-4 z-50 flex items-center gap-2"
+        style={{ right: "1rem" }}
       >
-        {isAr ? "English" : "بالعربي"}
-      </button>
+        <a
+          href="/auth?mode=signin"
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors"
+          style={{
+            border: "1px solid rgba(0,212,255,0.3)",
+            background: "rgba(0,212,255,0.1)",
+            color: "#00D4FF",
+          }}
+        >
+          {isAr ? "تسجيل الدخول" : "Sign In"}
+        </a>
+        <button
+          onClick={toggleLang}
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium backdrop-blur-md transition-colors"
+          style={{
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(6,14,30,0.8)",
+            color: "rgba(255,255,255,0.6)",
+          }}
+        >
+          {isAr ? "English" : "بالعربي"}
+        </button>
+      </div>
 
       {/* ─── HERO ─── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center text-center px-6 z-[1] overflow-hidden">
@@ -545,10 +564,13 @@ export function Story() {
             style={{
               width: "clamp(80px,16vw,160px)",
               height: "clamp(80px,16vw,160px)",
-              filter: "drop-shadow(0 0 30px rgba(0,212,255,0.5))",
+              animation: "logoGlow 2s ease-in-out infinite",
             }}
           >
-            <MedOneXLogoMark className="h-full w-full text-[#00D4FF]" />
+            <MedOneXLogoMark
+              className="h-full w-full text-[#00D4FF]"
+              interactiveColor
+            />
           </div>
 
           <p className="text-lg text-white/60 max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
