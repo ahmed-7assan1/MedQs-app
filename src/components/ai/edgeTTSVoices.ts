@@ -84,10 +84,6 @@ export const EDGE_TTS_ARABIC_VOICES: EdgeTTSVoice[] = [
   // موريتانيا (Mauritania)
   { id: "ar-MR-MinaNeural", name: "Mina", country: "موريتانيا", flag: "🇲🇷", gender: "female", locale: "ar-MR" },
   { id: "ar-MR-MokhtarNeural", name: "Mokhtar", country: "موريتانيا", flag: "🇲🇷", gender: "male", locale: "ar-MR" },
-
-  // إسرائيل (Israel - Arabic)
-  { id: "ar-IL-HanaNeural", name: "Hana", country: "إسرائيل", flag: "🇮🇱", gender: "female", locale: "ar-IL" },
-  { id: "ar-IL-SamiNeural", name: "Sami", country: "إسرائيل", flag: "🇮🇱", gender: "male", locale: "ar-IL" },
 ];
 
 export const EDGE_TTS_ENGLISH_VOICES: EdgeTTSVoice[] = [

@@ -136,3 +136,57 @@
 ### 16. Password Security — احذف password من الذاكرة
 **السياق:** لما المستخدم يدخل password في خطوة تسجيل الدخول، استخدم `finally` block عشان تمسح المتغير من الذاكرة بعد المقارنة: `(password as any) = undefined;` في `finally`.
 **الدرس:** أي حاجة sensitive (password, token, key) تمر من خلال المتغيرات في الـ handler، احذفها ب `finally` block عشان تمنع تسربها في stack traces أو logs.
+
+---
+
+## مشروع LibreChat — القواعد الإلزامية
+
+### المبدأ الأول: العمل من PLAN.md
+
+- **اقرأ `PLAN.md` أولاً** قبل أي تنفيذ — هذا هو المصدر الوحيد للحقيقة عن التقدم
+- كل الخطوات موثقة في `PLAN.md` — اتبعه بدقة
+- **بعد نهاية أي خطوة:** حدث `PLAN.md` — انقل السطر من ⏳ إلى ✅ وسجل التاريخ
+
+### المبدأ الثاني: كل شيء من الصفر
+
+- **ممنوع استخدام** أي component من الملفات التالية:
+  - `src/components/ai/DrQChat.tsx`, `DrQMessage.tsx`, `DrQComposer.tsx`, `DrQSidebar.tsx`, `DrQConfigPanel.tsx`, `DrQPersonas.ts`, `DrQWorkspaces.ts`
+  - `src/components/ai/MedOneXChat.tsx`
+  - `src/hooks/useDrQChat.ts`
+  - `src/components/ai/` بأكمله
+- **المسموح به فقط:**
+  - Firebase config (الموجود)
+  - Supabase Auth (الموجود)
+  - APIs: `/api/v1/ai/chat`, `/api/v1/ai/agents`
+  - Firebase Firestore collections (new subcollections للـ librechat)
+- كل components, hooks, utils جديدة تكتب من الصفر في:
+  - `src/components/librechat/`
+  - `src/hooks/` (hooks جدد)
+  - `src/utils/` (utils جدد)
+
+### المبدأ الثالث: Task Breakdown
+
+- **كل خطوة = Task واحد** باستخدام `todowrite`
+- **قسم كل خطوة إلى sub-tasks** (3-10 sub-tasks حسب التعقيد)
+- مثال: الخطوة 1 تنقسم إلى:
+  1. إنشاء مجلدات + page route
+  2. إنشاء LibreChatShell layout
+  3. إنشاء useChat hook
+  4. إنشاء useThreads hook
+  5. إنشاء Composer
+  6. إنشاء MessageList + MessageBubble
+  7. إنشاء LoadingDots + EmptyState
+  8. اختبار وتجربة
+
+### المبدأ الرابع: المراجعة بعد كل خطوة
+
+بعد نهاية أي خطوة:
+1. **راجع** الـ code المنفذ — تأكد إنه يعمل
+2. **حدث** `PLAN.md` — انقل الخطوة إلى ✅ وسجل التاريخ
+3. **أبلغ المستخدم** بما تم إنجازه + اطلب الموافقة على الخطوة التالية
+
+### المبدأ الخامس: الالتزام بالخطة
+
+- لا تتعدى على خطوة لم يحن وقتها
+- لا تضيف features خارج الخطة بدون سؤال المستخدم
+- لا تستخدم مكونات قديمة حتى لو وفرت وقت — الالتزام بـ "من الصفر" إجباري

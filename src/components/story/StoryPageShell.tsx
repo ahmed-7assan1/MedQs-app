@@ -44,7 +44,8 @@ export function StoryPageShell({
           --c-card-bg-soft: rgba(255,255,255,0.03);
           --c-btn-bg: rgba(6,14,30,0.8);
           --c-shine: rgba(255,255,255,0.15);
-          font-family: "Cairo", "Tajawal", sans-serif;
+          --font-display: "Cairo", "Tajawal", sans-serif;
+          font-family: system-ui, -apple-system, sans-serif;
           -webkit-text-size-adjust: 100%;
           background: var(--c-bg);
           color: var(--c-text);
@@ -65,6 +66,15 @@ export function StoryPageShell({
           --c-card-bg-soft: rgba(255,255,255,0.7);
           --c-btn-bg: rgba(255,255,255,0.9);
           --c-shine: rgba(0,0,0,0.06);
+        }
+        .story-shell h1,
+        .story-shell h2,
+        .story-shell h3,
+        .story-shell .page-topbar-title,
+        .story-shell .page-section-title,
+        .story-shell [class*="-title"],
+        .story-shell [class*="-name"] {
+          font-family: var(--font-display);
         }
         .story-shell .page-topbar {
           position: fixed; top: 0; left: 0; right: 0; z-index: 40;

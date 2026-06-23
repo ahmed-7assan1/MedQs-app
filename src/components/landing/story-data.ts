@@ -24,6 +24,118 @@ export type BrandValue = {
   color: string;
 };
 
+export type StatItem = {
+  num: string;
+  labelAr: string;
+  labelEn: string;
+  theme: string;
+  numColor: string;
+  detailTitleAr: string;
+  detailTitleEn: string;
+  itemsAr: string[];
+  itemsEn: string[];
+};
+
+export type FeatureItem = {
+  label: string;
+  labelEn: string;
+  color: string;
+};
+
+export type ReviewItem = {
+  q: string;
+  qEn: string;
+  name: string;
+  nameEn: string;
+  role: string;
+  roleEn: string;
+};
+
+export const CHAPTER_THEMES = ["blue", "cyan", "coral", "purple", "amber", "coral", "teal", "pink"];
+
+export const DATES = ["2026", "2026", "2026", "2026", "2026", "2026", "2026", "2026"];
+
+export const STATS_DATA: StatItem[] = [
+  {
+    num: "6+",
+    labelAr: "محركات AI",
+    labelEn: "AI Engines",
+    theme: "s-blue",
+    numColor: "#00D4FF",
+    detailTitleAr: "محركات الذكاء الاصطناعي",
+    detailTitleEn: "AI Engines",
+    itemsAr: ["OpenAI (GPT-4, GPT-4o)", "Google (Gemini 1.5 Pro/Flash)", "Anthropic (Claude 3.5)", "Meta (Llama 3)", "Mistral AI", "DeepSeek"],
+    itemsEn: ["OpenAI (GPT-4, GPT-4o)", "Google (Gemini 1.5 Pro/Flash)", "Anthropic (Claude 3.5)", "Meta (Llama 3)", "Mistral AI", "DeepSeek"],
+  },
+  {
+    num: "15+",
+    labelAr: "ميزة مختلفة",
+    labelEn: "Different Features",
+    theme: "s-purple",
+    numColor: "#A78BFA",
+    detailTitleAr: "الميزات",
+    detailTitleEn: "Features",
+    itemsAr: ["أسئلة MCQ تفاعلية", "فيديوهات شرح", "بطاقات مذاكرة", "Dr. Q AI", "منتدى اجتماعي", "بوت تيليجرام", "لوح رسم طبي", "أطلس تشريح ثلاثي الأبعاد", "تطبيق موبايل", "غرف دراسة", "مسابقات مباشرة"],
+    itemsEn: ["MCQ Questions", "Video Lectures", "Flashcards", "Dr. Q AI", "Social Forum", "Telegram Bot", "DrawMed Board", "3D Anatomy Atlas", "Mobile App", "Study Rooms", "Live Quizzes"],
+  },
+  {
+    num: "300+",
+    labelAr: "تحديث وإصلاح",
+    labelEn: "Updates & Fixes",
+    theme: "s-teal",
+    numColor: "#00FFB2",
+    detailTitleAr: "التحديثات والإصلاحات",
+    detailTitleEn: "Updates & Fixes",
+    itemsAr: ["تحسينات أداء", "تطوير واجهة المستخدم", "إصلاح أخطاء", "تحديثات أمان", "ميزات جديدة", "تحسين API", "تحديثات الموبايل", "تحديث محتوى"],
+    itemsEn: ["Performance Optimization", "UI/UX Improvements", "Bug Fixes", "Security Patches", "New Features", "API Enhancements", "Mobile Updates", "Content Updates"],
+  },
+];
+
+export const FEATURES: FeatureItem[] = [
+  { label: "أسئلة MCQ", labelEn: "MCQ Questions", color: "#1A6BFF" },
+  { label: "فيديوهات شرح", labelEn: "Videos", color: "#00D4FF" },
+  { label: "بطاقات مذاكرة", labelEn: "Flashcards", color: "#8B5CF6" },
+  { label: "Dr. Q AI", labelEn: "Dr. Q AI", color: "#F472B6" },
+  { label: "منتدى اجتماعي", labelEn: "Social Forum", color: "#FBBF24" },
+  { label: "بوت تيليجرام", labelEn: "Telegram Bot", color: "#00FFB2" },
+  { label: "لوح رسم طبي", labelEn: "Medical Board", color: "#1A6BFF" },
+  { label: "أطلس تشريح", labelEn: "Anatomy Atlas", color: "#00D4FF" },
+  { label: "تطبيق موبايل", labelEn: "Mobile App", color: "#8B5CF6" },
+  { label: "غرف دراسة", labelEn: "Study Rooms", color: "#FF6B6B" },
+  { label: "مسابقات مباشرة", labelEn: "Live Quizzes", color: "#FBBF24" },
+  { label: "نقاط وترتيب", labelEn: "Leaderboard", color: "#00FFB2" },
+];
+
+export const FUTURE_ITEMS_AR = [
+  "كل كلية طب في مصر تلاقي نفسها على MedOneX",
+  "Dr. Q يبقى مساعد طبي حقيقي مدرب على بيانات عربية",
+  "امتحانات OSCE افتراضية — الطالب يتدرب مع مريض رقمي",
+];
+
+export const FUTURE_ITEMS_EN = [
+  "Every medical school in Egypt on MedOneX",
+  "Dr. Q becomes a real Arabic-trained medical assistant",
+  "Virtual OSCE exams — train with a digital patient",
+];
+
+export const REVIEWS: ReviewItem[] = [
+  { q: "MedOneX غير طريقة مذاكرتي خالص. النظام بتاع التكرار المتباعد خلاني احتفظ بالمعلومات ٣ أضعاف.", qEn: "MedOneX completely changed my study method. The spaced repetition system helped me retain 3x more.", name: "أحمد علي", nameEn: "Ahmed Ali", role: "جامعة القاهرة", roleEn: "Cairo University" },
+  { q: "Dr. Q AI بيفهم أسئلتي بالعربي ويرد بدقة. حرفيًا زي مدرس خصوصي 24 ساعة.", qEn: "Dr. Q AI understands my Arabic questions and responds accurately. Like a 24/7 personal tutor.", name: "سارة محمود", nameEn: "Sara Mahmoud", role: "جامعة عين شمس", roleEn: "Ain Shams University" },
+  { q: "البطاقات التفاعلية والأسئلة اليومية خلقت عندي عادة مذاكرة مستمرة. أول مرة أذاكر بانتظام.", qEn: "The flashcards and daily quizzes built a consistent study habit. First time I've studied regularly.", name: "محمد حسن", nameEn: "Mohamed Hassan", role: "جامعة الإسكندرية", roleEn: "Alexandria University" },
+  { q: "بفضل MedOneX جبت أول مرة امتحاناتي. التقييمات والتحليل واللي كانوا عايزينه.", qEn: "Thanks to MedOneX I aced my exams for the first time. The analytics showed me exactly what I needed.", name: "نورا إبراهيم", nameEn: "Noura Ibrahim", role: "جامعة المنصورة", roleEn: "Mansoura University" },
+  { q: "التجميعات وأسئلة السنوات السابقة متاحة بسهولة. وفّر عليا وقت كبير في البحث.", qEn: "Previous year questions and compilations are easily available. Saved me so much time.", name: "لينا يوسف", nameEn: "Lina Youssef", role: "جامعة الزقازيق", roleEn: "Zagazig University" },
+  { q: "غرف الدراسة التفاعلية خلّت المذاكرة الجماعية أسهل من الواتساب.", qEn: "Interactive study rooms made group studying easier than WhatsApp.", name: "عمر عبدالله", nameEn: "Omar Abdullah", role: "جامعة أسيوط", roleEn: "Assiut University" },
+  { q: "منصة متكاملة — فيديوهات، أسئلة، بطاقات، و Dr. Q. مش محتاج حاجة تاني.", qEn: "All-in-one platform — videos, questions, flashcards, and Dr. Q. Don't need anything else.", name: "مريم وليد", nameEn: "Mariam Walid", role: "جامعة طنطا", roleEn: "Tanta University" },
+  { q: "الترتيب والتنافس بين الطلاب حفزني أذاكر أكتر. نظام النقاط عبقري.", qEn: "The leaderboard competition motivated me to study more. The points system is genius.", name: "خالد أحمد", nameEn: "Khaled Ahmed", role: "جامعة بنها", roleEn: "Benha University" },
+  { q: "بوت التيليجرام والموقع متزامنين — أذاكر في أي مكان ومن غير ما افتح الموقع.", qEn: "Telegram bot and site stay in sync — I study anywhere without opening the site.", name: "هدى جمال", nameEn: "Hoda Gamal", role: "جامعة المنوفية", roleEn: "Menoufia University" },
+  { q: "أتلس التشريح ثلاثي الأبعاد خلاني أتخيل كل حرفيًا. الحفظ بقى فهم.", qEn: "The 3D anatomy atlas helped me visualize everything. Memorization turned into understanding.", name: "يوسف سامي", nameEn: "Youssef Sami", role: "جامعة بورسعيد", roleEn: "Port Said University" },
+  { q: "دعم المجتمع في المنتدى كبير. أي سؤال بتلاقي إجابة من دفعة تانية.", qEn: "The community forum support is massive. Any question gets answered by other batches.", name: "دينا كمال", nameEn: "Dina Kamal", role: "جامعة السويس", roleEn: "Suez University" },
+  { q: "حرفيًا حسّن مستوايا في المواد النظرية. بقيت بفهم بدل ما أحفظ.", qEn: "It literally improved my level in theoretical subjects. I understand instead of memorize.", name: "أسماء عاطف", nameEn: "Asma Atef", role: "جامعة قناة السويس", roleEn: "Suez Canal University" },
+  { q: "المسابقات المباشرة (Live Quizzes) بتساعدني أراجع بسرعة قبل الامتحان.", qEn: "Live quizzes help me review quickly before the exam.", name: "إسلام ناصر", nameEn: "Islam Nasser", role: "جامعة كفر الشيخ", roleEn: "Kafr El Sheikh University" },
+  { q: "التطبيق على الموبايل سهل وسريع. بذاكر في المواصلات.", qEn: "The mobile app is fast and easy. I study during commutes.", name: "منى شريف", nameEn: "Mona Sherif", role: "جامعة الفيوم", roleEn: "Fayoum University" },
+  { q: "MedOneX مش مجرد موقع — هو نظام تعليمي متكامل. الطالب دلوقتي عنده كل حاجة.", qEn: "MedOneX isn't just a site — it's a complete education system. Students now have everything.", name: "إيمان رجب", nameEn: "Eman Ragab", role: "جامعة بني سويف", roleEn: "Beni Suef University" },
+];
+
 export const CHAPTERS: Chapter[] = [
   {
     id: "beginning",
