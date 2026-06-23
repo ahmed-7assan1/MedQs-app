@@ -245,10 +245,6 @@ export function Story() {
           0%, 100% { text-shadow: 0 0 40px rgba(0,212,255,0.5); }
           50% { text-shadow: 0 0 80px rgba(0,212,255,0.9), 0 0 120px rgba(0,212,255,0.4); }
         }
-        @keyframes logoGlow {
-          0%, 100% { filter: drop-shadow(0 0 30px rgba(0,212,255,0.4)); }
-          50% { filter: drop-shadow(0 0 70px rgba(0,212,255,0.8)); }
-        }
 
         .scroll-line {
           width: 1px; height: 50px;
@@ -549,13 +545,10 @@ export function Story() {
             style={{
               width: "clamp(80px,16vw,160px)",
               height: "clamp(80px,16vw,160px)",
-              animation: "logoGlow 2s ease-in-out infinite",
+              filter: "drop-shadow(0 0 30px rgba(0,212,255,0.5))",
             }}
           >
-            <MedOneXLogoMark
-              className="h-full w-full text-[#00D4FF]"
-              interactiveColor
-            />
+            <MedOneXLogoMark className="h-full w-full text-[#00D4FF]" />
           </div>
 
           <p className="text-lg text-white/60 max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
