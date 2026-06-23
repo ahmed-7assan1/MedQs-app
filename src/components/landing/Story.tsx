@@ -624,7 +624,7 @@ export function Story() {
           </p>
 
           <div className="flex flex-col items-center gap-2 mt-16" style={{ marginTop: "4rem" }}>
-            <span className="text-[11px] tracking-[2px] uppercase" style={{ color: lightMode ? "#1A6BFF" : "rgba(0,212,255,0.7)" }}>>
+            <span className="text-[11px] tracking-[2px] uppercase" style={{ color: lightMode ? "#1A6BFF" : "rgba(0,212,255,0.7)" }}>
               {isAr ? "اسكرول" : "Scroll"}
             </span>
             <div className="scroll-line" />
