@@ -36,85 +36,33 @@ const FUTURE_ITEMS_EN = [
   "Virtual OSCE exams — train with a digital patient",
 ];
 
-function ParticlesCanvas() {
-  const cvRef = useRef<HTMLCanvasElement>(null);
+const REVIEWS = [
+  { q: "MedOneX غير طريقة مذاكرتي خالص. النظام بتاع التكرار المتباعد خلاني احتفظ بالمعلومات ٣ أضعاف.", qEn: "MedOneX completely changed my study method. The spaced repetition system helped me retain 3x more.", name: "أحمد علي", nameEn: "Ahmed Ali", role: "جامعة القاهرة", roleEn: "Cairo University" },
+  { q: "Dr. Q AI بيفهم أسئلتي بالعربي ويرد بدقة. حرفيًا زي مدرس خصوصي 24 ساعة.", qEn: "Dr. Q AI understands my Arabic questions and responds accurately. Like a 24/7 personal tutor.", name: "سارة محمود", nameEn: "Sara Mahmoud", role: "جامعة عين شمس", roleEn: "Ain Shams University" },
+  { q: "البطاقات التفاعلية والأسئلة اليومية خلقت عندي عادة مذاكرة مستمرة. أول مرة أذاكر بانتظام.", qEn: "The flashcards and daily quizzes built a consistent study habit. First time I've studied regularly.", name: "محمد حسن", nameEn: "Mohamed Hassan", role: "جامعة الإسكندرية", roleEn: "Alexandria University" },
+  { q: "بفضل MedOneX جبت أول مرة امتحاناتي. التقييمات والتحليل واللي كانوا عايزينه.", qEn: "Thanks to MedOneX I aced my exams for the first time. The analytics showed me exactly what I needed.", name: "نورا إبراهيم", nameEn: "Noura Ibrahim", role: "جامعة المنصورة", roleEn: "Mansoura University" },
+  { q: "التجميعات وأسئلة السنوات السابقة متاحة بسهولة. وفّر عليا وقت كبير في البحث.", qEn: "Previous year questions and compilations are easily available. Saved me so much time.", name: "لينا يوسف", nameEn: "Lina Youssef", role: "جامعة الزقازيق", roleEn: "Zagazig University" },
+  { q: "غرف الدراسة التفاعلية خلّت المذاكرة الجماعية أسهل من الواتساب.", qEn: "Interactive study rooms made group studying easier than WhatsApp.", name: "عمر عبدالله", nameEn: "Omar Abdullah", role: "جامعة أسيوط", roleEn: "Assiut University" },
+  { q: "منصة متكاملة — فيديوهات، أسئلة، بطاقات، و Dr. Q. مش محتاج حاجة تاني.", qEn: "All-in-one platform — videos, questions, flashcards, and Dr. Q. Don't need anything else.", name: "مريم وليد", nameEn: "Mariam Walid", role: "جامعة طنطا", roleEn: "Tanta University" },
+  { q: "الترتيب والتنافس بين الطلاب حفزني أذاكر أكتر. نظام النقاط عبقري.", qEn: "The leaderboard competition motivated me to study more. The points system is genius.", name: "خالد أحمد", nameEn: "Khaled Ahmed", role: "جامعة بنها", roleEn: "Benha University" },
+  { q: "بوت التيليجرام والموقع متزامنين — أذاكر في أي مكان ومن غير ما افتح الموقع.", qEn: "Telegram bot and site stay in sync — I study anywhere without opening the site.", name: "هدى جمال", nameEn: "Hoda Gamal", role: "جامعة المنوفية", roleEn: "Menoufia University" },
+  { q: "أتلس التشريح ثلاثي الأبعاد خلاني أتخيل كل حرفيًا. الحفظ بقى فهم.", qEn: "The 3D anatomy atlas helped me visualize everything. Memorization turned into understanding.", name: "يوسف سامي", nameEn: "Youssef Sami", role: "جامعة بورسعيد", roleEn: "Port Said University" },
+  { q: "دعم المجتمع في المنتدى كبير. أي سؤال بتلاقي إجابة من دفعة تانية.", qEn: "The community forum support is massive. Any question gets answered by other batches.", name: "دينا كمال", nameEn: "Dina Kamal", role: "جامعة السويس", roleEn: "Suez University" },
+  { q: "حرفيًا حسّن مستوايا في المواد النظرية. بقيت بفهم بدل ما أحفظ.", qEn: "It literally improved my level in theoretical subjects. I understand instead of memorize.", name: "أسماء عاطف", nameEn: "Asma Atef", role: "جامعة قناة السويس", roleEn: "Suez Canal University" },
+  { q: "المسابقات المباشرة (Live Quizzes) بتساعدني أراجع بسرعة قبل الامتحان.", qEn: "Live quizzes help me review quickly before the exam.", name: "إسلام ناصر", nameEn: "Islam Nasser", role: "جامعة كفر الشيخ", roleEn: "Kafr El Sheikh University" },
+  { q: "التطبيق على الموبايل سهل وسريع. بذاكر في المواصلات.", qEn: "The mobile app is fast and easy. I study during commutes.", name: "منى شريف", nameEn: "Mona Sherif", role: "جامعة الفيوم", roleEn: "Fayoum University" },
+  { q: "MedOneX مش مجرد موقع — هو نظام تعليمي متكامل. الطالب دلوقتي عنده كل حاجة.", qEn: "MedOneX isn't just a site — it's a complete education system. Students now have everything.", name: "إيمان رجب", nameEn: "Eman Ragab", role: "جامعة بني سويف", roleEn: "Beni Suef University" },
+];
 
-  useEffect(() => {
-    const cv = cvRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-
-    let W: number, H: number;
-    const resize = () => {
-      W = cv.width = window.innerWidth;
-      H = cv.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const COLS = ["rgba(26,107,255,", "rgba(0,212,255,", "rgba(139,92,246,", "rgba(0,255,178,"];
-    const pts: { x: number; y: number; vx: number; vy: number; r: number; col: string; a: number }[] = [];
-
-    for (let i = 0; i < 60; i++) {
-      pts.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        r: Math.random() * 2 + 0.5,
-        col: COLS[Math.floor(Math.random() * COLS.length)],
-        a: Math.random() * 0.5 + 0.1,
-      });
-    }
-
-    let anim: number;
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-      for (let i = 0; i < pts.length; i++) {
-        const p = pts[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > W) p.vx *= -1;
-        if (p.y < 0 || p.y > H) p.vy *= -1;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.col + p.a + ")";
-        ctx.fill();
-
-        for (let j = i + 1; j < pts.length; j++) {
-          const q = pts[j];
-          const dx = p.x - q.x;
-          const dy = p.y - q.y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < 120) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = p.col + (0.08 * (1 - d / 120)) + ")";
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      }
-      anim = requestAnimationFrame(draw);
-    }
-    draw();
-
-    return () => {
-      cancelAnimationFrame(anim);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
+function Stars({ size = 12 }: { size?: number }) {
   return (
-    <canvas
-      ref={cvRef}
-      id="story-canvas"
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.5 }}
-    />
+    <div className="flex gap-[2px]" style={{ color: "#EAB308" }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </div>
   );
 }
 
@@ -150,8 +98,6 @@ export function Story() {
 
   return (
     <div className={`story-page ${lightMode ? "light-mode" : ""}`} dir="rtl">
-      <ParticlesCanvas />
-      <div className="aurora" />
 
       <style>{`
         .story-page {
@@ -191,7 +137,6 @@ export function Story() {
         .story-page.light-mode .aurora { opacity: 0.15; }
         .story-page.light-mode .hero-glow { background: radial-gradient(circle, rgba(26,107,255,0.1) 0%, transparent 70%); }
         .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(26,107,255,0.06) 0%, transparent 70%); }
-        .story-page.light-mode .ring { border-color: rgba(26,107,255,0.1); }
         .story-page.light-mode .np-old { color: var(--c-text-dimmer); }
         .story-page.light-mode .logo-x { text-shadow: 0 0 20px rgba(0,212,255,0.25); }
         .story-page.light-mode .hero-eyebrow { color: #1A6BFF; }
@@ -200,19 +145,6 @@ export function Story() {
         .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to left, transparent, #1A6BFF); }
         .story-page.light-mode .ch-accent { color: var(--c-text); }
         .story-page.light-mode .fi-num { border-color: rgba(26,107,255,0.2); }
-
-        .aurora {
-          position: fixed; inset: 0; pointer-events: none; z-index: 0;
-          background:
-            radial-gradient(ellipse 60% 40% at 20% 60%, rgba(0,212,255,0.07) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 50% at 80% 30%, rgba(0,212,255,0.04) 0%, transparent 60%),
-            radial-gradient(ellipse 40% 60% at 50% 80%, rgba(0,212,255,0.03) 0%, transparent 60%);
-          animation: auroraDrift 15s ease-in-out infinite alternate;
-        }
-        @keyframes auroraDrift {
-          0% { opacity: 0.6; }
-          100% { opacity: 1; transform: scale(1.05); }
-        }
 
         .hero-glow {
           position: absolute;
@@ -235,22 +167,6 @@ export function Story() {
         @keyframes glowPulse {
           0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
           50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-        }
-
-        .ring {
-          position: absolute;
-          border-radius: 50%;
-          border: 1px solid rgba(0,212,255,0.12);
-          transform: translate(-50%, -50%);
-          animation: ringExpand 6s linear infinite;
-        }
-        .ring:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
-        .ring:nth-child(2) { width: 500px; height: 500px; animation-delay: 1.5s; }
-        .ring:nth-child(3) { width: 700px; height: 700px; animation-delay: 3s; }
-        .ring:nth-child(4) { width: 900px; height: 900px; animation-delay: 4.5s; }
-        @keyframes ringExpand {
-          0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); }
-          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
         }
 
         @keyframes fadeUp {
@@ -287,6 +203,43 @@ export function Story() {
           0%, 100% { filter: drop-shadow(0 0 30px rgba(var(--c-logo-glow),0.4)); }
           50% { filter: drop-shadow(0 0 70px rgba(var(--c-logo-glow),0.8)); }
         }
+
+        /* Marquee background */
+        .marquee-bg {
+          position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          display: flex; flex-direction: column; justify-content: center; gap: 24px;
+          overflow: hidden; opacity: 0.12;
+        }
+        .story-page.light-mode .marquee-bg { opacity: 0.08; }
+        .marquee-row {
+          display: flex; gap: 20px; width: max-content;
+        }
+        .marquee-right { animation: marqueeRight 100s linear infinite; }
+        .marquee-left { animation: marqueeLeft 100s linear infinite; }
+        @keyframes marqueeRight {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes marqueeLeft {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .review-card {
+          flex-shrink: 0; width: 260px;
+          border-radius: 14px; border: 1px solid var(--c-border);
+          background: var(--c-card-bg); padding: 16px;
+          backdrop-filter: blur(4px);
+        }
+        .review-text {
+          margin-top: 8px; font-size: 11px; line-height: 1.6;
+          color: var(--c-text-dim); display: -webkit-box;
+          -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .review-footer {
+          margin-top: 10px; border-top: 1px solid var(--c-border); padding-top: 8px;
+        }
+        .review-name { font-size: 11px; font-weight: 700; color: var(--c-text); }
+        .review-role { font-size: 10px; color: var(--c-text-dim); margin-top: 1px; }
 
         .scroll-line {
           width: 1px; height: 50px;
@@ -600,14 +553,48 @@ export function Story() {
         </button>
       </div>
 
+      {/* ─── MARQUEE BACKGROUND ─── */}
+      <div className="marquee-bg">
+        <div className="marquee-row marquee-right">
+          {REVIEWS.slice(0, 5).concat(REVIEWS.slice(0, 5)).map((r, i) => (
+            <div key={i} className="review-card">
+              <Stars size={10} />
+              <p className="review-text">{isAr ? r.q : r.qEn}</p>
+              <div className="review-footer">
+                <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="marquee-row marquee-left">
+          {REVIEWS.slice(5, 10).concat(REVIEWS.slice(5, 10)).map((r, i) => (
+            <div key={i} className="review-card">
+              <Stars size={10} />
+              <p className="review-text">{isAr ? r.q : r.qEn}</p>
+              <div className="review-footer">
+                <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="marquee-row marquee-right">
+          {REVIEWS.slice(10, 15).concat(REVIEWS.slice(10, 15)).map((r, i) => (
+            <div key={i} className="review-card">
+              <Stars size={10} />
+              <p className="review-text">{isAr ? r.q : r.qEn}</p>
+              <div className="review-footer">
+                <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ─── HERO ─── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center text-center px-6 z-[1] overflow-hidden">
-        <div className="rings" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-          <div className="ring" />
-          <div className="ring" />
-          <div className="ring" />
-          <div className="ring" />
-        </div>
         <div className="hero-glow" />
         <div className="hero-glow2" />
 
