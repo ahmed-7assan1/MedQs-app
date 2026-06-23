@@ -212,8 +212,9 @@ export function Story() {
         }
         .story-page.light-mode .marquee-bg { opacity: 0.08; }
         .marquee-row {
-          display: flex; gap: 20px; width: max-content;
+          display: flex; gap: 0; width: max-content;
         }
+        .marquee-set { display: flex; gap: 20px; }
         .marquee-right { animation: marqueeRight 100s linear infinite; }
         .marquee-left { animation: marqueeLeft 100s linear infinite; }
         @keyframes marqueeRight {
@@ -556,40 +557,82 @@ export function Story() {
       {/* ─── MARQUEE BACKGROUND ─── */}
       <div className="marquee-bg">
         <div className="marquee-row marquee-right">
-          {REVIEWS.slice(0, 5).concat(REVIEWS.slice(0, 5)).map((r, i) => (
-            <div key={i} className="review-card">
-              <Stars size={10} />
-              <p className="review-text">{isAr ? r.q : r.qEn}</p>
-              <div className="review-footer">
-                <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+          <div className="marquee-set">
+            {REVIEWS.slice(0, 5).map((r, i) => (
+              <div key={i} className="review-card">
+                <Stars size={10} />
+                <p className="review-text">{isAr ? r.q : r.qEn}</p>
+                <div className="review-footer">
+                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="marquee-set">
+            {REVIEWS.slice(0, 5).map((r, i) => (
+              <div key={i} className="review-card">
+                <Stars size={10} />
+                <p className="review-text">{isAr ? r.q : r.qEn}</p>
+                <div className="review-footer">
+                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <div className="marquee-row marquee-left">
-          {REVIEWS.slice(5, 10).concat(REVIEWS.slice(5, 10)).map((r, i) => (
-            <div key={i} className="review-card">
-              <Stars size={10} />
-              <p className="review-text">{isAr ? r.q : r.qEn}</p>
-              <div className="review-footer">
-                <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+          <div className="marquee-set">
+            {REVIEWS.slice(5, 10).map((r, i) => (
+              <div key={i} className="review-card">
+                <Stars size={10} />
+                <p className="review-text">{isAr ? r.q : r.qEn}</p>
+                <div className="review-footer">
+                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="marquee-set">
+            {REVIEWS.slice(5, 10).map((r, i) => (
+              <div key={i} className="review-card">
+                <Stars size={10} />
+                <p className="review-text">{isAr ? r.q : r.qEn}</p>
+                <div className="review-footer">
+                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <div className="marquee-row marquee-right">
-          {REVIEWS.slice(10, 15).concat(REVIEWS.slice(10, 15)).map((r, i) => (
-            <div key={i} className="review-card">
-              <Stars size={10} />
-              <p className="review-text">{isAr ? r.q : r.qEn}</p>
-              <div className="review-footer">
-                <p className="review-name">{isAr ? r.name : r.nameEn}</p>
-                <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+          <div className="marquee-set">
+            {REVIEWS.slice(10, 15).map((r, i) => (
+              <div key={i} className="review-card">
+                <Stars size={10} />
+                <p className="review-text">{isAr ? r.q : r.qEn}</p>
+                <div className="review-footer">
+                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="marquee-set">
+            {REVIEWS.slice(10, 15).map((r, i) => (
+              <div key={i} className="review-card">
+                <Stars size={10} />
+                <p className="review-text">{isAr ? r.q : r.qEn}</p>
+                <div className="review-footer">
+                  <p className="review-name">{isAr ? r.name : r.nameEn}</p>
+                  <p className="review-role">{isAr ? r.role : r.roleEn}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
