@@ -147,7 +147,7 @@ export function Story() {
         }
         .story-page.light-mode .marquee-bg { opacity: 0.08; }
         .marquee-row {
-          display: flex; gap: 0;
+          display: flex; gap: 0; width: max-content;
           will-change: transform;
           backface-visibility: hidden;
           transform: translateZ(0);
