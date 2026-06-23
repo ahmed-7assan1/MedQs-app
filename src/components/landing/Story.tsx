@@ -111,7 +111,6 @@ export function Story() {
           --c-card-bg-soft: rgba(255,255,255,0.03);
           --c-btn-bg: rgba(6,14,30,0.8);
           --c-shine: rgba(255,255,255,0.15);
-          --c-logo-glow: 0,212,255;
           font-family: 'Cairo', 'Tajawal', sans-serif;
           background: var(--c-bg);
           color: var(--c-text);
@@ -132,117 +131,16 @@ export function Story() {
           --c-card-bg-soft: rgba(255,255,255,0.7);
           --c-btn-bg: rgba(255,255,255,0.9);
           --c-shine: rgba(0,0,0,0.06);
-          --c-logo-glow: 26,107,255;
         }
         .story-page.light-mode .aurora { opacity: 0.15; }
         .story-page.light-mode .hero-glow { background: radial-gradient(circle, rgba(26,107,255,0.1) 0%, transparent 70%); }
         .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(26,107,255,0.06) 0%, transparent 70%); }
         .story-page.light-mode .np-old { color: var(--c-text-dimmer); }
-        .story-page.light-mode .logo-x { text-shadow: 0 0 20px rgba(0,212,255,0.25); }
         .story-page.light-mode .hero-eyebrow { color: #1A6BFF; }
         .story-page.light-mode .hero-eyebrow::before,
         .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to right, transparent, #1A6BFF); }
         .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to left, transparent, #1A6BFF); }
         .story-page.light-mode .ch-accent { color: var(--c-text); }
-        .story-page.light-mode .fi-num { border-color: rgba(26,107,255,0.2); }
-
-        .hero-glow {
-          position: absolute;
-          width: 800px; height: 800px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(0,212,255,0.18) 0%, transparent 70%);
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          animation: glowPulse 4s ease-in-out infinite;
-        }
-        .hero-glow2 {
-          position: absolute;
-          width: 500px; height: 500px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
-          top: 40%; left: 55%;
-          transform: translate(-50%, -50%);
-          animation: glowPulse 6s ease-in-out infinite reverse;
-        }
-        @keyframes glowPulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-        }
-
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .hero-eyebrow {
-          font-size: 12px; font-weight: 700; letter-spacing: 4px;
-          color: #00D4FF; margin-bottom: 1.5rem;
-          display: flex; align-items: center; gap: 12px;
-        }
-        .hero-eyebrow::before,
-        .hero-eyebrow::after {
-          content: '';
-          width: 40px; height: 1px;
-          background: linear-gradient(to right, transparent, #00D4FF);
-        }
-        .hero-eyebrow::after { background: linear-gradient(to left, transparent, #00D4FF); }
-
-        .logo-med { color: var(--c-text); }
-        .logo-one { color: #3D8FFF; }
-        .logo-x {
-          color: transparent;
-          -webkit-text-stroke: 2px #00D4FF;
-          text-shadow: 0 0 40px rgba(0,212,255,0.5);
-          animation: xGlow 2s ease-in-out infinite;
-        }
-        @keyframes xGlow {
-          0%, 100% { text-shadow: 0 0 40px rgba(0,212,255,0.5); }
-          50% { text-shadow: 0 0 80px rgba(0,212,255,0.9), 0 0 120px rgba(0,212,255,0.4); }
-        }
-        @keyframes logoGlow {
-          0%, 100% { filter: drop-shadow(0 0 30px rgba(var(--c-logo-glow),0.4)); }
-          50% { filter: drop-shadow(0 0 70px rgba(var(--c-logo-glow),0.8)); }
-        }
-
-        /* Marquee background */
-        .marquee-bg {
-          position: fixed; inset: 0; z-index: 0; pointer-events: none;
-          display: flex; flex-direction: column; justify-content: center; gap: 24px;
-          overflow: hidden; opacity: 0.12;
-        }
-        .story-page.light-mode .marquee-bg { opacity: 0.08; }
-        .marquee-row {
-          display: flex; gap: 0;
-          will-change: transform;
-          backface-visibility: hidden;
-        }
-        .marquee-set { display: flex; gap: 20px; }
-        .marquee-right { animation: marqueeRight 80s linear infinite; }
-        .marquee-left { animation: marqueeLeft 80s linear infinite; }
-        @keyframes marqueeRight {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(-33.33%, 0, 0); }
-        }
-        @keyframes marqueeLeft {
-          0% { transform: translate3d(-33.33%, 0, 0); }
-          100% { transform: translate3d(0, 0, 0); }
-        }
-        .review-card {
-          flex-shrink: 0; width: 260px;
-          border-radius: 14px; border: 1px solid var(--c-border);
-          background: var(--c-card-bg); padding: 16px;
-          contain: layout style paint;
-        }
-        .review-text {
-          margin-top: 8px; font-size: 11px; line-height: 1.6;
-          color: var(--c-text-dim); display: -webkit-box;
-          -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-        }
-        .review-footer {
-          margin-top: 10px; border-top: 1px solid var(--c-border); padding-top: 8px;
-        }
-        .review-name { font-size: 11px; font-weight: 700; color: var(--c-text); }
-        .review-role { font-size: 10px; color: var(--c-text-dim); margin-top: 1px; }
 
         .scroll-line {
           width: 1px; height: 50px;
@@ -296,7 +194,6 @@ export function Story() {
           border: 1px solid var(--c-border);
           border-radius: 20px;
           padding: 2rem;
-          backdrop-filter: blur(8px);
           position: relative;
           overflow: hidden;
         }
@@ -558,16 +455,14 @@ export function Story() {
 
       {/* ─── MARQUEE BACKGROUND ─── */}
       {(() => {
-        const ROW_COPIES = 3;
+        const ROW_COPIES = 2;
         const rows = [
           REVIEWS.slice(0, 5),
           REVIEWS.slice(5, 10),
-          REVIEWS.slice(10, 15),
         ];
         const dirs: ("marquee-right" | "marquee-left")[] = [
           "marquee-right",
           "marquee-left",
-          "marquee-right",
         ];
         return (
           <div className="marquee-bg">
@@ -595,8 +490,6 @@ export function Story() {
 
       {/* ─── HERO ─── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center text-center px-6 z-[1] overflow-hidden">
-        <div className="hero-glow" />
-        <div className="hero-glow2" />
 
         <div className="relative z-10 max-w-lg mx-auto">
           <div className="hero-eyebrow" style={{ justifyContent: "center" }}>
@@ -608,7 +501,6 @@ export function Story() {
             style={{
               width: "clamp(80px,16vw,160px)",
               height: "clamp(80px,16vw,160px)",
-              animation: "logoGlow 2s ease-in-out infinite",
             }}
           >
             <MedOneXLogoMark
