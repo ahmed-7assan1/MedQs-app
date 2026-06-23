@@ -191,10 +191,10 @@ export function Story() {
         .story-page.light-mode .hero-glow2 { background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%); }
         .story-page.light-mode .np-old { color: var(--c-text-dimmer); }
         .story-page.light-mode .logo-x { text-shadow: 0 0 20px rgba(0,212,255,0.25); }
-        .story-page.light-mode .hero-eyebrow { color: #0099CC; }
+        .story-page.light-mode .hero-eyebrow { color: #1A6BFF; }
         .story-page.light-mode .hero-eyebrow::before,
-        .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to right, transparent, #0099CC); }
-        .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to left, transparent, #0099CC); }
+        .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to right, transparent, #1A6BFF); }
+        .story-page.light-mode .hero-eyebrow::after { background: linear-gradient(to left, transparent, #1A6BFF); }
         .story-page.light-mode .ch-accent { color: var(--c-text); }
         .story-page.light-mode .fi-num { border-color: rgba(26,107,255,0.2); }
 
@@ -619,10 +619,11 @@ export function Story() {
               width: "clamp(80px,16vw,160px)",
               height: "clamp(80px,16vw,160px)",
               animation: "logoGlow 2s ease-in-out infinite",
+              filter: lightMode ? "drop-shadow(0 0 20px rgba(26,107,255,0.5))" : undefined,
             }}
           >
             <MedOneXLogoMark
-              className="h-full w-full text-[#00D4FF]"
+              className={`h-full w-full ${lightMode ? "text-[#1A6BFF]" : "text-[#00D4FF]"}`}
               interactiveColor
             />
           </div>
@@ -634,7 +635,7 @@ export function Story() {
           </p>
 
           <div className="flex flex-col items-center gap-2 mt-16" style={{ marginTop: "4rem" }}>
-            <span className="text-[11px] tracking-[2px] uppercase" style={{ color: lightMode ? "#0099CC" : "rgba(0,212,255,0.7)" }}>
+            <span className="text-[11px] tracking-[2px] uppercase" style={{ color: lightMode ? "#1A6BFF" : "rgba(0,212,255,0.7)" }}>>
               {isAr ? "اسكرول" : "Scroll"}
             </span>
             <div className="scroll-line" />
