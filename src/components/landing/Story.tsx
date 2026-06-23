@@ -153,15 +153,15 @@ export function Story() {
           transform: translateZ(0);
         }
         .marquee-set { display: flex; gap: 16px; }
-        .marquee-right { animation: mR 35s linear infinite; }
-        .marquee-left { animation: mL 35s linear infinite; }
+        .marquee-right { animation: mR 30s linear infinite; }
+        .marquee-left { animation: mL 30s linear infinite; }
         @keyframes mR {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(-50%, 0, 0); }
-        }
-        @keyframes mL {
           0% { transform: translate3d(-50%, 0, 0); }
           100% { transform: translate3d(0, 0, 0); }
+        }
+        @keyframes mL {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
         .review-card {
           flex-shrink: 0; width: 250px;
