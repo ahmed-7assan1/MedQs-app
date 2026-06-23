@@ -212,24 +212,26 @@ export function Story() {
         }
         .story-page.light-mode .marquee-bg { opacity: 0.08; }
         .marquee-row {
-          display: flex; gap: 0; width: max-content;
+          display: flex; gap: 0;
+          will-change: transform;
+          backface-visibility: hidden;
         }
         .marquee-set { display: flex; gap: 20px; }
         .marquee-right { animation: marqueeRight 80s linear infinite; }
         .marquee-left { animation: marqueeLeft 80s linear infinite; }
         @keyframes marqueeRight {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-5%); }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-33.33%, 0, 0); }
         }
         @keyframes marqueeLeft {
-          0% { transform: translateX(-5%); }
-          100% { transform: translateX(0); }
+          0% { transform: translate3d(-33.33%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
         }
         .review-card {
           flex-shrink: 0; width: 260px;
           border-radius: 14px; border: 1px solid var(--c-border);
           background: var(--c-card-bg); padding: 16px;
-          backdrop-filter: blur(4px);
+          contain: layout style paint;
         }
         .review-text {
           margin-top: 8px; font-size: 11px; line-height: 1.6;
@@ -556,7 +558,7 @@ export function Story() {
 
       {/* ─── MARQUEE BACKGROUND ─── */}
       {(() => {
-        const ROW_COPIES = 20;
+        const ROW_COPIES = 3;
         const rows = [
           REVIEWS.slice(0, 5),
           REVIEWS.slice(5, 10),
