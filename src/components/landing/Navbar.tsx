@@ -31,11 +31,21 @@ export function Navbar() {
         <span className="text-lg font-semibold tracking-tight">{siteName}</span>
       </div>
       <nav className="hidden items-center justify-center gap-9 text-sm text-muted-foreground md:flex">
-        {NAV_LINKS.map((l) => (
-          <a key={l} href={`#${l.toLowerCase().replace(/\s+/g, "-")}`} className="transition-colors hover:text-foreground">
-            {l}
-          </a>
-        ))}
+        {NAV_LINKS.map((l) =>
+          l === "Our Story" ? (
+            <Link
+              key={l}
+              href="/story"
+              className="transition-colors hover:text-foreground"
+            >
+              {l}
+            </Link>
+          ) : (
+            <a key={l} href={`#${l.toLowerCase().replace(/\s+/g, "-")}`} className="transition-colors hover:text-foreground">
+              {l}
+            </a>
+          )
+        )}
       </nav>
       <div className="flex items-center justify-end gap-2">
         {mounted && (

@@ -1,6 +1,6 @@
 import { Brain, BookOpen, Layers, Target, MessageSquare, Clock, BarChart3, TrendingUp, GraduationCap, Sparkles, Zap, Users, Calendar, Bell, Check } from "lucide-react";
 
-export const NAV_LINKS = ["Features", "How It Works", "Testimonials", "Pricing"];
+export const NAV_LINKS = ["Features", "How It Works", "Our Story", "Testimonials", "Pricing"];
 
 export const HERO = {
   badge: "Trusted by 10,000+ medical students",
@@ -78,7 +78,7 @@ export const FOOTER = {
   tagline: "AI-powered medical education platform. Study smarter, not harder.",
   columns: [
     { title: "Product", links: [{ label: "Features", href: "#features" }, { label: "Pricing", href: "#pricing" }, { label: "AI Chat", href: "/ai-chat" }, { label: "Download", href: "/download" }] },
-    { title: "Company", links: [{ label: "About", href: "/about" }, { label: "Founders", href: "/founders" }, { label: "Community", href: "/community" }, { label: "Leaderboard", href: "/leaderboard" }] },
+    { title: "Company", links: [{ label: "About", href: "/about" }, { label: "Our Story", href: "/story" }, { label: "Founders", href: "/founders" }, { label: "Community", href: "/community" }, { label: "Leaderboard", href: "/leaderboard" }] },
     { title: "Support", links: [{ label: "Privacy", href: "/privacy" }, { label: "Terms", href: "/terms" }, { label: "Contact", href: "mailto:support@medonex.com" }, { label: "FAQ", href: "/#faq" }] },
   ],
   copyright: "MedOneX. All rights reserved.",
