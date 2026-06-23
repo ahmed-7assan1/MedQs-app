@@ -370,15 +370,15 @@ export function Story() {
         }
         .stat-num {
           font-size: 34px; font-weight: 900; line-height: 1; margin-bottom: 4px;
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+          color: #FFFFFF;
         }
         .stat-lbl { font-size: 12px; color: rgba(255,255,255,0.55); }
         .s-blue { background: rgba(26,107,255,0.08); }
-        .s-blue .stat-num { background: linear-gradient(135deg, #3D8FFF, #00D4FF); }
+        .s-blue .stat-num { color: #00D4FF; }
         .s-purple { background: rgba(139,92,246,0.08); }
-        .s-purple .stat-num { background: linear-gradient(135deg, #A78BFA, #F472B6); }
+        .s-purple .stat-num { color: #A78BFA; }
         .s-teal { background: rgba(0,255,178,0.06); }
-        .s-teal .stat-num { background: linear-gradient(135deg, #00FFB2, #00D4FF); }
+        .s-teal .stat-num { color: #00FFB2; }
 
         /* Name transition */
         .name-fx { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 1.25rem 0; flex-wrap: wrap; }
