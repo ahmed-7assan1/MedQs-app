@@ -2171,7 +2171,7 @@ function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[10010]"
+          className="fixed inset-0 z-[10010] flex items-end md:items-center justify-center"
           onClick={onClose}
         >
           <div className={cn(
@@ -2179,14 +2179,14 @@ function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
             isDark ? "bg-black/60 backdrop-blur-sm" : "bg-black/40 backdrop-blur-sm"
           )} />
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ type: "spring", stiffness: 300, damping: 32 }}
             onClick={e => e.stopPropagation()}
             className={cn(
-              "absolute bottom-0 left-0 right-0 max-h-[88vh] rounded-t-3xl shadow-2xl flex flex-col overflow-hidden",
-              isDark ? "bg-[#050505] border-t border-white/10" : "bg-white border-t border-gray-200"
+              "relative w-full md:max-w-lg max-h-[88vh] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden md:mx-4",
+              isDark ? "bg-[#050505] border-t md:border border-white/10" : "bg-white border-t md:border border-gray-200"
             )}
             style={settings.bgImage ? {
               backgroundImage: `url(${settings.bgImage})`,
@@ -2207,7 +2207,7 @@ function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
             )}
             <div className="relative z-10 flex flex-col max-h-[88vh]">
               {/* Drag handle */}
-              <div className="flex justify-center pt-3 pb-1">
+              <div className="flex justify-center pt-3 pb-1 md:hidden">
                 <div className={cn("w-10 h-1 rounded-full", isDark ? "bg-white/20" : "bg-gray-300")} />
               </div>
 

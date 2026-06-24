@@ -1170,10 +1170,20 @@ ${systemPrompt}`;
           systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
         }
 
+        // Inject reply context into the user message if replying to a specific message
+        let userContent = content;
+        if (replyToId) {
+          const originalMsg = currentMessages.find(m => m.id === replyToId);
+          if (originalMsg) {
+            const quoted = originalMsg.content.slice(0, 500);
+            userContent = `[Replying to: "${quoted}"]\n\n${content}`;
+          }
+        }
+
         let enhancedHistory: MessageForAPI[] = [
           { role: 'system', content: systemPrompt },
           ...currentMessages.map(m => ({ role: m.role, content: m.content })),
-          { role: 'user', content: content }
+          { role: 'user', content: userContent }
         ];
 
 
