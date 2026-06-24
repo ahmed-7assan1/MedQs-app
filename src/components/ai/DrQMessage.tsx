@@ -430,7 +430,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                   ? "rounded-3xl rounded-tl-sm border border-slate-200/60 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none" 
                   : "",
                 !isAI 
-                  ? "rounded-[28px] rounded-br-sm bg-[#F7F7F7] dark:bg-white/[0.04] md:bg-gray-100 md:dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm border border-black/[0.08] dark:border-white/[0.06] md:border-none md:shadow-none"
+                  ? "rounded-[28px] rounded-br-sm bg-[#F7F7F7] dark:bg-white/[0.04] md:bg-gray-100 text-gray-900 dark:text-white shadow-sm border border-black/[0.08] dark:border-white/[0.06] md:border-none md:shadow-none"
                   : ""
               )}
               style={{ 

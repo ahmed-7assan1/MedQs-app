@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, startTransition, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider, DrQSettings } from "@/hooks/useDrQChat";
 import {
@@ -18,8 +19,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { SuperExpertProgress, SuperExpertStep } from "@/lib/super-expert";
-import { checkProviderRate } from "@/lib/rate-limits";
+import { SuperExpertStep } from "@/lib/super-expert";
 import { DrQMessage } from "./DrQMessage";
 import { DrQConfigPanel } from "./DrQConfigPanel";
 import { DRQ_PERSONAS, DrQPersonaId } from "./DrQPersonas";
@@ -27,13 +27,12 @@ import { MobileChatSidebar } from "./MobileChatSidebar";
 import { PWAInstallModal } from "./PWAInstallModal";
 import { SavedPage } from "./SavedPage";
 import { LibraryPage } from "./LibraryPage";
-import { SharedQuizClient } from "@/app/quiz/shared/[shareCode]/SharedQuizClient";
-import { CustomPage } from "./CustomPage";
+import { CustomAgentGallery } from "./CustomAgentGallery";
 import { CustomAgentChat } from "./CustomAgentChat";
 import { QuestionsBottomSheet, type QuestionData } from "./QuestionsBottomSheet";
 import { FlashcardsBottomSheet, type FlashcardData } from "./FlashcardsBottomSheet";
 import { ResourcesBottomSheet, type ResourceItem } from "./ResourcesBottomSheet";
-import { DRQ_WORKSPACES, WORKSPACE_IDS } from "./DrQWorkspaces";
+import { DRQ_WORKSPACES } from "./DrQWorkspaces";
 import VoicePersonaPicker from "./VoicePersonaPicker";
 import { type VoicePersona } from "./voicePersonas";
 import { useThemeStore } from "@/lib/store";
@@ -44,18 +43,6 @@ import {
 import "./MedOneXChat.css";
 import { edgeTTS } from "@/lib/tts";
 import { textSimilarity } from "@/lib/echoUtils";
-
-const C = {
-  surface: "bg-white dark:bg-[#121212]",
-  surfaceAlt: "bg-gray-50 dark:bg-[#1e1e1e]",
-  surfaceChat: "bg-gray-100 dark:bg-[#2d2d2d]",
-  surfaceSecondary: "bg-gray-200 dark:bg-[#3a3a3a]",
-  textPrimary: "text-gray-900 dark:text-[#f0f0f0]",
-  textSecondary: "text-gray-600 dark:text-[#d0d0d0]",
-  textTertiary: "text-gray-400 dark:text-[#a0a0a0]",
-  border: "border-gray-200 dark:border-white/10",
-  borderLight: "border-gray-100 dark:border-white/5",
-};
 
 export function MedOneXChat() {
   const { theme, setTheme } = useThemeStore();
@@ -293,7 +280,6 @@ export function MedOneXChat() {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
-  const [showAgentCreate, setShowAgentCreate] = useState(false);
   const [showAgentGallery, setShowAgentGallery] = useState(false);
   const [activeAgent, setActiveAgent] = useState<any>(null);
   const [showLibraryQuiz, setShowLibraryQuiz] = useState<any>(null);
@@ -395,13 +381,14 @@ export function MedOneXChat() {
   // Fetch user modules when the modal opens
   useEffect(() => {
     if (showModules && modulesData.length === 0) {
-      fetch("/api/v1/user/syllabus").then(r => r.json()).then(d => {
+      fetch("/api/v1/user/syllabus").then(r => r.json()).then((d: any) => {
         if (d?.modules) setModulesData(d.modules);
       }).catch(() => {});
     }
-  }, [showModules]);
+  }, [showModules, modulesData.length]);
 
   // ─── Smart auto-scroll (IntersectionObserver, scroll container directly) ───
+  const hasMessages = messages.length > 0;
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -414,7 +401,7 @@ export function MedOneXChat() {
     const sentinel = endRef.current;
     if (sentinel) observer.observe(sentinel);
     return () => { observer.disconnect(); };
-  }, [messages.length > 0]);
+  }, [hasMessages]);
 
   // Force scroll to bottom on initial messages load
   useEffect(() => {
@@ -544,18 +531,17 @@ export function MedOneXChat() {
   const filteredThreads = React.useMemo(() =>
     threads.filter(t =>
       t.title?.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (activeTab === "all" || (activeTab === "recent" && true))
+      (activeTab === "all" || activeTab === "recent" || activeTab === "pinned")
     ),
     [threads, searchQuery, activeTab]
   );
 
-  const activePersonaObj = DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer;
   const apiKeyMissing = !settings.byokKeys[settings.activeProvider];
 
   const personaList = Object.keys(DRQ_PERSONAS).slice(0, 5) as DrQPersonaId[];
 
   return (
-    <div className={cn("flex flex-col flex-1 w-full overflow-hidden transition-colors duration-300", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
+    <div className={cn("flex flex-col flex-1 w-full overflow-hidden transition-colors duration-200 ease-out", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
       <style>{`
         :root { color-scheme: ${isDark ? "dark" : "light"}; }
       `}</style>
@@ -719,11 +705,18 @@ export function MedOneXChat() {
 
       {/* ─── Top Bar (hamburger + questions/flashcards/resources) ─── */}
       <div className={cn(
-        "fixed top-0 left-0 right-0 z-50 h-14 md:h-12 flex items-start md:items-center justify-between md:justify-end md:border-b transition-colors duration-200",
+        "fixed top-0 left-0 right-0 z-50 h-14 md:h-12 flex items-start md:items-center justify-between md:justify-end md:border-b transition-colors duration-200 ease-out",
         isDark
           ? "bg-black md:bg-black/80 md:backdrop-blur-xl md:border-white/[0.06]"
           : "bg-white md:bg-white/80 md:backdrop-blur-xl md:border-gray-100"
       )}>
+        {/* Gradient fade — messages fade smoothly behind top bar */}
+        <div className="absolute top-full left-0 right-0 pointer-events-none z-[-1]" style={{ height: "20px" }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505] via-[#050505]/95 via-60% to-transparent transition-opacity duration-150 ease-out"
+               style={{ opacity: isDark ? 1 : 0 }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-white/95 via-60% to-transparent transition-opacity duration-150 ease-out"
+               style={{ opacity: isDark ? 0 : 1 }} />
+        </div>
         <button
           onClick={() => setShowSidebar(prev => !prev)}
           className={cn(
@@ -794,10 +787,12 @@ export function MedOneXChat() {
       {/* ─── Desktop Sidebar — always rendered, collapsible (ChatGPT-style) ─── */}
       <div className="hidden md:block fixed left-0 top-0 bottom-0 z-[10001]">
         <div className={cn(
-          "h-full transition-all duration-300 ease-in-out overflow-hidden flex flex-col",
+          "h-full overflow-hidden flex flex-col",
           showSidebar ? "w-[260px]" : "w-[52px]",
           isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-[#F9F9F9] border-r border-gray-200/60"
-        )}>
+        )} style={{
+          transition: 'width 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out'
+        }}>
           {showSidebar ? (
             <MobileChatSidebar
               desktop
@@ -821,7 +816,7 @@ export function MedOneXChat() {
               onOpenAgentGallery={() => setShowAgentGallery(true)}
             />
           ) : (
-            <div className="flex flex-col items-center h-full">
+            <div className="flex flex-col items-center h-full transition-colors duration-200 ease-out">
               {/* Logo — click to expand sidebar */}
               <div className="pt-3 pb-2">
                 <button
@@ -834,6 +829,7 @@ export function MedOneXChat() {
                 >
                   <div className="relative w-6 h-6 flex items-center justify-center">
                     {logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={logoUrl}
                         alt={siteName}
@@ -862,40 +858,40 @@ export function MedOneXChat() {
                 </button>
               </div>
 
-              <div className={cn("w-6 h-px", isDark ? "bg-white/10" : "bg-gray-200")} />
+              <div className={cn("w-6 h-px transition-colors duration-200 ease-out", isDark ? "bg-white/10" : "bg-gray-200")} />
 
               {/* Navigation Icons */}
               <div className="flex flex-col items-center gap-1 flex-1 overflow-y-auto no-scrollbar pt-3">
-                <Link href="/dashboard-app" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Home">
+                <Link href="/dashboard-app" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Home">
                   <House size={20} weight="regular" />
                 </Link>
-                <Link href="/modules" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Modules">
+                <Link href="/modules" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Modules">
                   <BookOpen size={20} weight="regular" />
                 </Link>
-                <Link href="/social" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Social">
+                <Link href="/social" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Social">
                   <UsersThree size={20} weight="regular" />
                 </Link>
-                <Link href="/quiz" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Quizzes">
+                <Link href="/quiz" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Quizzes">
                   <ClipboardText size={20} weight="regular" />
                 </Link>
-                <button onClick={() => setShowSaved(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Saved">
+                <button onClick={() => setShowSaved(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Saved">
                   <BookmarkSimple size={20} weight="regular" />
                 </button>
-                <button onClick={() => setShowLibrary(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Library">
+                <button onClick={() => setShowLibrary(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Library">
                   <Books size={20} weight="regular" />
                 </button>
-                <button onClick={() => setShowAgentGallery(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Custom MedOneX">
+                <button onClick={() => setShowAgentGallery(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Custom MedOneX">
                   <Robot size={20} weight="regular" />
                 </button>
               </div>
 
               {/* Settings Icons */}
               <div className="flex flex-col items-center gap-1 pb-3">
-                <div className={cn("w-6 h-px mb-1", isDark ? "bg-white/10" : "bg-gray-200")} />
-                <button onClick={() => setTheme(isDark ? "light" : "dark")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title={isDark ? "Light Mode" : "Dark Mode"}>
+                <div className={cn("w-6 h-px mb-1 transition-colors duration-200 ease-out", isDark ? "bg-white/10" : "bg-gray-200")} />
+                <button onClick={() => setTheme(isDark ? "light" : "dark")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title={isDark ? "Light Mode" : "Dark Mode"}>
                   {isDark ? <Sun size={20} weight="regular" /> : <Moon size={20} weight="regular" />}
                 </button>
-                <button onClick={() => setShowConfig(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Settings">
+                <button onClick={() => setShowConfig(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Settings">
                   <Gear size={20} weight="regular" />
                 </button>
               </div>
@@ -1097,7 +1093,7 @@ export function MedOneXChat() {
       <div
         className={cn(
           "flex flex-col flex-1 min-h-0 pb-24",
-          "transition-all duration-300 ease-in-out",
+          "transition-[margin] duration-200 ease-out",
           showSidebar && "translate-x-[85vw]",
           "md:translate-x-0",
           showSidebar ? "md:ml-[260px]" : "md:ml-[52px]"
@@ -1106,7 +1102,7 @@ export function MedOneXChat() {
       >
 
       {/* ─── Messages Area ─── */}
-      <main className={cn("flex flex-col flex-1 min-h-0 relative transition-colors duration-200", isDark ? "bg-[#050505]" : "bg-white")}
+      <main className={cn("flex flex-col flex-1 min-h-0 relative transition-colors duration-200 ease-out", isDark ? "bg-[#050505]" : "bg-white")}
         style={{
           ...(settings.bgImage ? {
             backgroundImage: `url(${settings.bgImage})`,
@@ -1367,10 +1363,17 @@ export function MedOneXChat() {
 
       {/* Desktop fixed input */}
       <div className={cn(
-        "hidden md:block fixed bottom-0 z-[10002] transition-colors duration-200",
+        "hidden md:block fixed bottom-0 z-[10002] transition-colors duration-200 ease-out",
         showSidebar ? "left-[260px] right-0" : "left-[52px] right-0"
       )}>
         <div className="flex justify-center relative">
+          {/* Gradient backdrop — messages fade smoothly behind input */}
+          <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-[-1]" style={{ height: "60px" }}>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/95 via-60% to-transparent transition-opacity duration-150 ease-out"
+                 style={{ opacity: isDark ? 1 : 0 }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/95 via-60% to-transparent transition-opacity duration-150 ease-out"
+                 style={{ opacity: isDark ? 0 : 1 }} />
+          </div>
           {/* Desktop scroll-to-bottom button */}
           <button
             onClick={() => { 
@@ -1380,7 +1383,7 @@ export function MedOneXChat() {
               if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
             }}
             className={cn(
-              "absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-lg border backdrop-blur-md active:scale-90 transition-all duration-200",
+              "absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-lg border backdrop-blur-md active:scale-90 transition-all duration-200 ease-out",
               showScrollBtn ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
               isDark
                 ? "border-white/[0.12] bg-white/10 text-white hover:bg-white/20"
@@ -1399,7 +1402,7 @@ export function MedOneXChat() {
                 isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"
               )}>
                 <ArrowBendUpLeft size={14} weight="bold" className="flex-shrink-0" />
-                <span className="truncate flex-1">Replying to: "{replyContext.text}"</span>
+                <span className="truncate flex-1">Replying to: &ldquo;{replyContext.text}&rdquo;</span>
                 <button
                   onClick={() => setReplyContext(null)}
                   className={cn("p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0", isDark ? "hover:text-white" : "hover:text-gray-800")}
@@ -1425,7 +1428,7 @@ export function MedOneXChat() {
                         </svg>
                       </div>
                     ) : f.mimeType.startsWith("image/") ? (
-                      <img src={f.data} alt={f.name} className="w-4 h-4 rounded object-cover flex-shrink-0" />
+                      <Image src={f.data} alt={f.name} width={16} height={16} className="w-4 h-4 rounded object-cover flex-shrink-0" unoptimized />
                     ) : (
                       <span className="text-[10px] flex-shrink-0">{f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}</span>
                     )}
@@ -1438,7 +1441,7 @@ export function MedOneXChat() {
             <div
               onClick={() => { if (!inputFocused) inputRef.current?.focus(); }}
               className={cn(
-                "flex flex-col rounded-2xl ring-1 transition-all duration-200 cursor-text",
+                "flex flex-col rounded-2xl ring-1 transition-all duration-200 ease-out cursor-text",
                 inputFocused
                   ? isDark ? "ring-white/25 shadow-lg shadow-black/20" : "ring-black/20 shadow-lg shadow-black/5"
                   : isDark ? "ring-white/10 shadow-sm" : "ring-gray-200/70 shadow-sm",
@@ -1543,7 +1546,7 @@ export function MedOneXChat() {
                     onClick={handleSend}
                     disabled={!input.trim() && files.length === 0}
                     className={cn(
-                      "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                      "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ease-out active:scale-90",
                       input.trim() || files.length > 0
                         ? isDark ? "bg-white text-black hover:bg-gray-200 shadow-md" : "bg-[#141414] text-white hover:bg-gray-800 shadow-md"
                         : isDark ? "bg-white/5 text-gray-500" : "bg-black/5 text-gray-300"
@@ -1565,7 +1568,7 @@ export function MedOneXChat() {
 
       {/* Solid fill below mobile capsule */}
       <div className={cn(
-        "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none transition-colors duration-200",
+        "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none transition-colors duration-200 ease-out",
         isDark ? "bg-black" : "bg-white"
       )} style={{ height: "calc(16px + env(safe-area-inset-bottom, 0px))" }} />
 
@@ -1578,7 +1581,7 @@ export function MedOneXChat() {
           if (m) { m.scrollTo({ top: m.scrollHeight, behavior: 'smooth' }); }
         }}
         className={cn(
-          "md:hidden fixed left-1/2 -translate-x-1/2 z-[10004] w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200",
+          "md:hidden fixed left-1/2 -translate-x-1/2 z-[10004] w-11 h-11 rounded-full flex items-center justify-center shadow-2xl border-2 backdrop-blur-md active:scale-90 transition-all duration-200 ease-out",
           showScrollBtn && !showSidebar ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-75 pointer-events-none",
           isDark
             ? "border-white/30 bg-white/25 text-white hover:bg-white/40"
@@ -1601,12 +1604,12 @@ export function MedOneXChat() {
         className="md:hidden fixed bottom-[calc(16px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-[10003] pointer-events-none"
       >
         {/* Gradient backdrop */}
-        <div className={cn(
-          "absolute inset-0 rounded-t-2xl pointer-events-none",
-          isDark
-            ? "bg-gradient-to-t from-black via-black/80 to-transparent"
-            : "bg-gradient-to-t from-white via-white/80 to-transparent"
-        )} />
+        <div className="absolute inset-0 rounded-t-2xl pointer-events-none">
+          <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-t from-black via-black/80 to-transparent transition-opacity duration-150 ease-out"
+               style={{ opacity: isDark ? 1 : 0 }} />
+          <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-t from-white via-white/80 to-transparent transition-opacity duration-150 ease-out"
+               style={{ opacity: isDark ? 0 : 1 }} />
+        </div>
         {/* Reply Context Bar (Mobile) */}
         {replyContext && (
           <div className="px-4 pb-1 pointer-events-auto relative">
@@ -1615,7 +1618,7 @@ export function MedOneXChat() {
               isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"
             )}>
               <ArrowBendUpLeft size={14} weight="bold" className="flex-shrink-0" />
-              <span className="truncate flex-1">Replying to: "{replyContext.text}"</span>
+              <span className="truncate flex-1">Replying to: &ldquo;{replyContext.text}&rdquo;</span>
               <button
                 onClick={() => setReplyContext(null)}
                 className={cn("p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0", isDark ? "hover:text-white" : "hover:text-gray-800")}
@@ -1629,7 +1632,7 @@ export function MedOneXChat() {
           <div
             onClick={() => { if (!mobileFocused) mobileInputRef.current?.focus(); }}
             className={cn(
-              "flex flex-col mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 shadow-sm cursor-text overflow-hidden",
+              "flex flex-col mx-2 mb-1 rounded-[20px] ring-1 transition-all duration-200 ease-out shadow-sm cursor-text overflow-hidden",
               mobileFocused && "rounded-[22px]",
               isDark ? "ring-white/10" : "ring-gray-200/80",
               isDark ? "bg-[#141414]/90 backdrop-blur-xl text-white" : "bg-white text-[#050505]"
@@ -1657,7 +1660,7 @@ export function MedOneXChat() {
                           </svg>
                         </div>
                       ) : f.mimeType.startsWith("image/") ? (
-                        <img src={f.data} alt={f.name} className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                        <Image src={f.data} alt={f.name} width={20} height={20} className="w-5 h-5 rounded object-cover flex-shrink-0" unoptimized />
                       ) : (
                         <span className="text-[10px] flex-shrink-0">
                           {f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}
@@ -1795,7 +1798,7 @@ export function MedOneXChat() {
                   onClick={handleSend}
                   disabled={!input.trim() && files.length === 0}
                   className={cn(
-                    "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                    "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-out active:scale-90",
                     input.trim()
                       ? isDark
                         ? "bg-white text-[#141414] hover:bg-gray-200 shadow-md"
@@ -1846,7 +1849,7 @@ export function MedOneXChat() {
                   <button
                     onClick={() => { mobileInputRef.current?.focus(); }}
                     className={cn(
-                      "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200",
+                      "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-out",
                       isDark
                         ? "bg-white/10 text-gray-400 hover:bg-white/20"
                         : "bg-[#050505]/10 text-[#050505]/40 hover:bg-[#050505]/20"
@@ -1860,7 +1863,7 @@ export function MedOneXChat() {
                   <button
                     onClick={handleSend}
                     className={cn(
-                      "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90",
+                      "w-9 h-9 min-w-9 min-h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-out active:scale-90",
                       isDark
                         ? "bg-white text-[#141414] hover:bg-gray-200 shadow-md"
                         : "bg-[#050505] text-white hover:bg-gray-800 shadow-md"
@@ -1918,6 +1921,43 @@ export function MedOneXChat() {
       />
 
       <PWAInstallModal isDark={isDark} />
+
+      {/* ─── Settings / Saved / Library / Agent overlays ─── */}
+      <DrQConfigPanel
+        isOpen={showConfig}
+        onClose={() => setShowConfig(false)}
+        settings={settings}
+        onUpdate={updateSettings}
+      />
+      <SavedPage
+        isOpen={showSaved}
+        onClose={() => setShowSaved(false)}
+        isDark={isDark}
+      />
+      <LibraryPage
+        isOpen={showLibrary}
+        onClose={() => setShowLibrary(false)}
+        isDark={isDark}
+        onOpenQuiz={(quiz) => setShowLibraryQuiz(quiz)}
+      />
+      <CustomAgentGallery
+        isOpen={showAgentGallery}
+        onClose={() => setShowAgentGallery(false)}
+        isDark={isDark}
+        onSelectAgent={(agent) => {
+          setActiveAgent(agent);
+          setShowAgentGallery(false);
+        }}
+      />
+      <AnimatePresence>
+        {activeAgent && (
+          <CustomAgentChat
+            agent={activeAgent}
+            onClose={() => setActiveAgent(null)}
+            isDark={isDark}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -2037,7 +2077,7 @@ async function testProviderKey(pid: AIProvider, key: string): Promise<{ ok: bool
         signal: AbortSignal.timeout(8000),
       });
       if (res.ok) return { ok: true };
-      const body = await res.json().catch(() => ({}));
+      const body: any = await res.json().catch(() => ({}));
       return { ok: false, error: body?.error?.message || `HTTP ${res.status}` };
     }
     if (pid === "mistral") {
@@ -2046,7 +2086,7 @@ async function testProviderKey(pid: AIProvider, key: string): Promise<{ ok: bool
         signal: AbortSignal.timeout(8000),
       });
       if (res.ok) return { ok: true };
-      const body = await res.json().catch(() => ({}));
+      const body: any = await res.json().catch(() => ({}));
       return { ok: false, error: body?.error?.message || `HTTP ${res.status}` };
     }
     const baseURL = config.baseURL || "https://api.openai.com/v1";
@@ -2056,7 +2096,7 @@ async function testProviderKey(pid: AIProvider, key: string): Promise<{ ok: bool
       signal: AbortSignal.timeout(8000),
     });
     if (res.ok) return { ok: true };
-    const body = await res.json().catch(() => ({}));
+    const body: any = await res.json().catch(() => ({}));
     return { ok: false, error: body?.error?.message || body?.error || `HTTP ${res.status}` };
   } catch (e: any) {
     return { ok: false, error: e.name === "TimeoutError" ? "Timeout (8s)" : e.message || "Unknown error" };

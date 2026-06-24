@@ -21,8 +21,6 @@ const THREAD_TABS = [
   { id: "all", label: "All Chats", icon: List },
 ];
 
-type Thread = { id: string; title: string | null };
-
 type Props = {
   showSidebar: boolean;
   onClose: () => void;
@@ -30,7 +28,7 @@ type Props = {
   isDark: boolean;
   siteName: string;
   logoUrl: string | null;
-  filteredThreads: Thread[];
+  filteredThreads: { id: string; title: string | null }[];
   activeThreadId: string | null;
   onSwitchThread: (id: string) => void;
   onNewThread: () => void;
@@ -69,7 +67,7 @@ function MobileSidebarInner({
   const content = (
     <>
       {/* Sidebar Header */}
-      <div className={cn("flex items-center justify-between px-4 py-3 border-b", isDark ? "border-white/10" : "border-gray-200")}>
+      <div className={cn("flex items-center justify-between px-4 py-3 border-b transition-colors duration-200 ease-out", isDark ? "border-white/10" : "border-gray-200")}>
         <div className="flex items-center">
           {logoUrl ? (
             <img src={logoUrl} alt={siteName} className={cn("h-7 w-7 object-contain", isDark ? "brightness-0 invert opacity-60" : "brightness-0 opacity-40")} />
@@ -107,7 +105,7 @@ function MobileSidebarInner({
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                     isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
                   )}
                 >
@@ -119,7 +117,7 @@ function MobileSidebarInner({
                   key={item.label}
                   onClick={() => { onClose(); item.action?.(); }}
                   className={cn(
-                    "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                    "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                     isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
                   )}
                 >
@@ -135,18 +133,18 @@ function MobileSidebarInner({
           </div>
         </div>
 
-        <div className={cn("mx-4 my-1 h-px", isDark ? "bg-white/10" : "bg-gray-200")} />
+        <div className={cn("mx-4 my-1 h-px transition-colors duration-200 ease-out", isDark ? "bg-white/10" : "bg-gray-200")} />
 
         {/* ─── Chats Section ─── */}
         <div className="p-3">
           <p className={cn("text-[10px] font-bold uppercase tracking-widest px-3 mb-2", isDark ? "text-gray-500" : "text-gray-400")}>Chats</p>
-          <div className={cn("flex items-center gap-0.5 p-0.5 rounded-xl mb-3", isDark ? "bg-white/5" : "bg-gray-100")}>
+          <div className={cn("flex items-center gap-0.5 p-0.5 rounded-xl mb-3 transition-colors duration-200 ease-out", isDark ? "bg-white/5" : "bg-gray-100")}>
             {THREAD_TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all flex-1",
+                  "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all duration-200 flex-1",
                   activeTab === tab.id
                     ? isDark ? "bg-white/10 text-white shadow-sm" : "bg-white text-gray-900 shadow-sm"
                     : isDark ? "text-white/40 hover:text-white/70" : "text-gray-400 hover:text-gray-700"
@@ -164,7 +162,7 @@ function MobileSidebarInner({
               onChange={e => onSearchChange(e.target.value)}
               placeholder="Search conversations..."
               className={cn(
-                "w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition-colors",
+                "w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition-colors duration-200 ease-out",
                 isDark ? "bg-white/5 text-white placeholder-gray-500 border border-white/10" : "bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-200"
               )}
             />
@@ -178,7 +176,7 @@ function MobileSidebarInner({
                   key={t.id}
                   onClick={() => { onSwitchThread(t.id); if (!desktop) onClose(); }}
                   className={cn(
-                    "w-full text-start px-3 py-2.5 rounded-xl text-sm transition-all",
+                    "w-full text-start px-3 py-2.5 rounded-xl text-sm transition-all duration-200",
                     t.id === activeThreadId
                       ? isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600"
                       : isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-700 hover:bg-gray-50"
@@ -195,7 +193,7 @@ function MobileSidebarInner({
           <button
             onClick={() => { onNewThread(); if (!desktop) onClose(); }}
             className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mt-2 transition-all",
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mt-2 transition-all duration-200",
               isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
             )}
           >
@@ -206,11 +204,11 @@ function MobileSidebarInner({
       </div>
 
       {/* ─── Settings at Bottom ─── */}
-      <div className={cn("border-t p-3 space-y-1", isDark ? "border-white/10" : "border-gray-200")}>
+      <div className={cn("border-t p-3 space-y-1 transition-colors duration-200 ease-out", isDark ? "border-white/10" : "border-gray-200")}>
         <button
           onClick={onThemeToggle}
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all",
+            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all duration-200",
             isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
           )}
         >
@@ -220,7 +218,7 @@ function MobileSidebarInner({
         <button
           onClick={() => { onOpenConfig(); if (!desktop) onClose(); }}
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all",
+            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all duration-200",
             isDark ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
           )}
         >
@@ -235,7 +233,7 @@ function MobileSidebarInner({
   if (desktop) {
     return (
       <div className={cn(
-        "w-[260px] min-w-[260px] h-full min-h-0 flex flex-col overflow-hidden",
+        "w-[260px] min-w-[260px] h-full min-h-0 flex flex-col overflow-hidden transition-colors duration-200 ease-out",
         isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-[#F9F9F9] border-r border-gray-200/60"
       )}>
         {content}
@@ -260,7 +258,7 @@ function MobileSidebarInner({
             transition={{ duration: 0.18, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "absolute left-0 top-0 bottom-0 w-[85vw] max-w-[85vw] flex flex-col shadow-[4px_0_32px_rgba(0,0,0,0.4)]",
+              "absolute left-0 top-0 bottom-0 w-[85vw] max-w-[85vw] flex flex-col shadow-[4px_0_32px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-out",
               isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-[#F9F9F9] border-r border-gray-200/60"
             )}
             style={{ willChange: "transform" }}
