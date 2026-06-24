@@ -175,13 +175,18 @@ const DrQMessageInner: React.FC<MessageProps> = ({
     const handleSelection = () => {
       const selection = window.getSelection();
       if (selection && selection.toString().trim().length > 0 && isAI) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        setSelectionRange({
-          text: selection.toString().trim(),
-          top: rect.top + window.scrollY - 48, // slightly higher
-          left: rect.left + rect.width / 2
-        });
+        const node = selection.anchorNode;
+        if (contentRef.current && contentRef.current.contains(node)) {
+          const range = selection.getRangeAt(0);
+          const rect = range.getBoundingClientRect();
+          setSelectionRange({
+            text: selection.toString().trim(),
+            top: rect.top + window.scrollY - 48,
+            left: rect.left + rect.width / 2
+          });
+        } else {
+          setSelectionRange(null);
+        }
       } else {
         setSelectionRange(null);
       }

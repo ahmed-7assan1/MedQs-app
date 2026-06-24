@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, startTransition, useCallback } from "react";
+import Link from "next/link";
 
 import { useDrQChat, PROVIDER_CONFIGS, FileAttachment, AIProvider, DrQSettings } from "@/hooks/useDrQChat";
 import {
@@ -10,7 +11,9 @@ import {
   ShieldCheck, ClockCountdown, ChartBar, Lightning,
   ArrowUpRight, Eye, EyeSlash, Spinner, TextIndent,
   Quotes, NoteBlank, Sparkle, Microphone,
-  SpeakerHigh, SpeakerSlash,
+  SpeakerHigh, SpeakerSlash, SidebarSimple,
+  House, UsersThree, ClipboardText, BookmarkSimple,
+  Books, Robot, Gear, Sun, Moon,
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -302,7 +305,9 @@ export function MedOneXChat() {
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
-    el.style.overflow = showSidebar ? "hidden" : "";
+    if (window.innerWidth < 768) {
+      el.style.overflow = showSidebar ? "hidden" : "";
+    }
   }, [showSidebar]);
 
   // Reset initial-scroll flag when switching threads so it scrolls to the last message
@@ -703,7 +708,7 @@ export function MedOneXChat() {
       {/* ─── Swipe Zone (left edge) ─── */}
       {!showSidebar && (
         <div
-          className="fixed left-0 top-0 bottom-0 w-6 z-[10008] touch-none"
+          className="fixed left-0 top-0 bottom-0 w-6 z-[10008] touch-none md:hidden"
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
           onTouchMove={(e) => {
             const diff = e.touches[0].clientX - touchStartX.current;
@@ -714,15 +719,15 @@ export function MedOneXChat() {
 
       {/* ─── Top Bar (hamburger + questions/flashcards/resources) ─── */}
       <div className={cn(
-        "fixed top-0 left-0 right-0 z-50 h-14 md:h-12 flex items-start md:items-center justify-between md:border-b",
+        "fixed top-0 left-0 right-0 z-50 h-14 md:h-12 flex items-start md:items-center justify-between md:justify-end md:border-b transition-colors duration-200",
         isDark
           ? "bg-black md:bg-black/80 md:backdrop-blur-xl md:border-white/[0.06]"
           : "bg-white md:bg-white/80 md:backdrop-blur-xl md:border-gray-100"
       )}>
         <button
-          onClick={() => setShowSidebar(true)}
+          onClick={() => setShowSidebar(prev => !prev)}
           className={cn(
-            "mt-1.5 md:mt-0 ml-3 w-11 h-11 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all",
+            "mt-1.5 md:mt-0 ml-3 w-11 h-11 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all md:hidden",
             isDark ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-gray-100"
           )}
         >
@@ -785,6 +790,119 @@ export function MedOneXChat() {
         onOpenLibrary={() => setShowLibrary(true)}
         onOpenAgentGallery={() => setShowAgentGallery(true)}
       />
+
+      {/* ─── Desktop Sidebar — always rendered, collapsible (ChatGPT-style) ─── */}
+      <div className="hidden md:block fixed left-0 top-0 bottom-0 z-[10001]">
+        <div className={cn(
+          "h-full transition-all duration-300 ease-in-out overflow-hidden flex flex-col",
+          showSidebar ? "w-[260px]" : "w-[52px]",
+          isDark ? "bg-[#0a0a0a] border-r border-white/[0.06]" : "bg-[#F9F9F9] border-r border-gray-200/60"
+        )}>
+          {showSidebar ? (
+            <MobileChatSidebar
+              desktop
+              showSidebar={true}
+              onClose={() => setShowSidebar(false)}
+              isDark={isDark}
+              siteName={siteName}
+              logoUrl={logoUrl}
+              filteredThreads={filteredThreads}
+              activeThreadId={activeThreadId}
+              onSwitchThread={switchThread}
+              onNewThread={newThread}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onThemeToggle={() => setTheme(isDark ? "light" : "dark")}
+              onOpenConfig={() => setShowConfig(true)}
+              onOpenSaved={() => setShowSaved(true)}
+              onOpenLibrary={() => setShowLibrary(true)}
+              onOpenAgentGallery={() => setShowAgentGallery(true)}
+            />
+          ) : (
+            <div className="flex flex-col items-center h-full">
+              {/* Logo — click to expand sidebar */}
+              <div className="pt-3 pb-2">
+                <button
+                  onClick={() => setShowSidebar(true)}
+                  className={cn(
+                    "w-9 h-9 rounded-xl flex items-center justify-center transition-all group relative",
+                    isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
+                  )}
+                  title="Open sidebar"
+                >
+                  <div className="relative w-6 h-6 flex items-center justify-center">
+                    {logoUrl ? (
+                      <img
+                        src={logoUrl}
+                        alt={siteName}
+                        className={cn(
+                          "w-6 h-6 object-contain transition-all duration-200 group-hover:opacity-0 group-hover:scale-75",
+                          isDark ? "brightness-0 invert opacity-60" : "brightness-0 opacity-40"
+                        )}
+                      />
+                    ) : (
+                      <span className={cn(
+                        "text-sm font-bold transition-all duration-200 group-hover:opacity-0",
+                        isDark ? "text-white" : "text-gray-900"
+                      )}>
+                        {siteName?.charAt(0) || "M"}
+                      </span>
+                    )}
+                    <SidebarSimple
+                      size={22}
+                      weight="regular"
+                      className={cn(
+                        "absolute inset-0 m-auto transition-all duration-200 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100",
+                        isDark ? "text-white" : "text-gray-900"
+                      )}
+                    />
+                  </div>
+                </button>
+              </div>
+
+              <div className={cn("w-6 h-px", isDark ? "bg-white/10" : "bg-gray-200")} />
+
+              {/* Navigation Icons */}
+              <div className="flex flex-col items-center gap-1 flex-1 overflow-y-auto no-scrollbar pt-3">
+                <Link href="/dashboard-app" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Home">
+                  <House size={20} weight="regular" />
+                </Link>
+                <Link href="/modules" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Modules">
+                  <BookOpen size={20} weight="regular" />
+                </Link>
+                <Link href="/social" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Social">
+                  <UsersThree size={20} weight="regular" />
+                </Link>
+                <Link href="/quiz" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Quizzes">
+                  <ClipboardText size={20} weight="regular" />
+                </Link>
+                <button onClick={() => setShowSaved(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Saved">
+                  <BookmarkSimple size={20} weight="regular" />
+                </button>
+                <button onClick={() => setShowLibrary(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Library">
+                  <Books size={20} weight="regular" />
+                </button>
+                <button onClick={() => setShowAgentGallery(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Custom MedOneX">
+                  <Robot size={20} weight="regular" />
+                </button>
+              </div>
+
+              {/* Settings Icons */}
+              <div className="flex flex-col items-center gap-1 pb-3">
+                <div className={cn("w-6 h-px mb-1", isDark ? "bg-white/10" : "bg-gray-200")} />
+                <button onClick={() => setTheme(isDark ? "light" : "dark")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title={isDark ? "Light Mode" : "Dark Mode"}>
+                  {isDark ? <Sun size={20} weight="regular" /> : <Moon size={20} weight="regular" />}
+                </button>
+                <button onClick={() => setShowConfig(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Settings">
+                  <Gear size={20} weight="regular" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ─── Threads Container — bottom sheet on mobile ─── */}
       <AnimatePresence>
@@ -977,17 +1095,18 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       <div
-        className="flex flex-col flex-1 min-h-0 pb-24"
+        className={cn(
+          "flex flex-col flex-1 min-h-0 pb-24",
+          "transition-all duration-300 ease-in-out",
+          showSidebar && "translate-x-[85vw]",
+          "md:translate-x-0",
+          showSidebar ? "md:ml-[260px]" : "md:ml-[52px]"
+        )}
         ref={mainRef}
-        style={{
-          transform: showSidebar ? "translateX(85vw)" : "translateX(0)",
-          transition: "transform 0.18s ease-out",
-          willChange: "transform",
-        }}
       >
 
       {/* ─── Messages Area ─── */}
-      <main className={cn("flex flex-col flex-1 min-h-0 relative", isDark ? "bg-[#050505]" : "bg-white")}
+      <main className={cn("flex flex-col flex-1 min-h-0 relative transition-colors duration-200", isDark ? "bg-[#050505]" : "bg-white")}
         style={{
           ...(settings.bgImage ? {
             backgroundImage: `url(${settings.bgImage})`,
@@ -1094,7 +1213,7 @@ export function MedOneXChat() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: idx < 5 ? idx * 0.03 : 0 }}
-                  className={cn("flex", m.role === "user" ? "justify-end md:max-w-none" : "justify-start md:ml-[15%]", m.role === "user" ? "" : "md:max-w-[85%]")}
+                   className={cn("flex", m.role === "user" ? "justify-end md:max-w-none" : "justify-start", m.role === "user" ? "" : "md:max-w-none")}
                 >
                   {m.role === "assistant" ? (
                     <div className={cn("w-full", m.isStreaming && "stream-cursor")}>
@@ -1168,27 +1287,6 @@ export function MedOneXChat() {
             </div>
           )}
         </div>
-
-        {/* Reply Context Bar */}
-        {replyContext && (
-          <div className={cn("flex-shrink-0 flex justify-center relative z-10", isDark ? "bg-[#050505]" : "bg-white")}>
-            <div className="w-full max-w-3xl mx-auto px-3 md:px-4 pb-1">
-              <div className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs",
-                isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"
-              )}>
-                <ArrowBendUpLeft size={14} weight="bold" className="flex-shrink-0" />
-                <span className="truncate flex-1">Replying to: "{replyContext.text}"</span>
-                <button
-                  onClick={() => setReplyContext(null)}
-                  className={cn("p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0", isDark ? "hover:text-white" : "hover:text-gray-800")}
-                >
-                  <X size={12} weight="bold" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ─── Super Expert Progress Panel ─── */}
         {superExpertStatus && superExpertStatus.phase !== "idle" && superExpertStatus.phase !== "done" && (
@@ -1268,7 +1366,10 @@ export function MedOneXChat() {
     {/* ^ mainRef closes here */}
 
       {/* Desktop fixed input */}
-      <div className="hidden md:block fixed bottom-0 left-0 right-0 z-[10002]">
+      <div className={cn(
+        "hidden md:block fixed bottom-0 z-[10002] transition-colors duration-200",
+        showSidebar ? "left-[260px] right-0" : "left-[52px] right-0"
+      )}>
         <div className="flex justify-center relative">
           {/* Desktop scroll-to-bottom button */}
           <button
@@ -1290,6 +1391,24 @@ export function MedOneXChat() {
               <path d="M12 5v14M5 12l7 7 7-7" />
             </svg>
           </button>
+          {/* Reply Context Bar (Desktop) */}
+          {replyContext && (
+            <div className="w-full md:max-w-[48rem] mx-auto px-4 pb-2">
+              <div className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs",
+                isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"
+              )}>
+                <ArrowBendUpLeft size={14} weight="bold" className="flex-shrink-0" />
+                <span className="truncate flex-1">Replying to: "{replyContext.text}"</span>
+                <button
+                  onClick={() => setReplyContext(null)}
+                  className={cn("p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0", isDark ? "hover:text-white" : "hover:text-gray-800")}
+                >
+                  <X size={12} weight="bold" />
+                </button>
+              </div>
+            </div>
+          )}
           <div className="w-full md:max-w-[48rem] mx-auto px-4 pb-4 pt-2">
             {files.length > 0 && (
               <div className={cn(
@@ -1446,7 +1565,7 @@ export function MedOneXChat() {
 
       {/* Solid fill below mobile capsule */}
       <div className={cn(
-        "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none",
+        "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none transition-colors duration-200",
         isDark ? "bg-black" : "bg-white"
       )} style={{ height: "calc(16px + env(safe-area-inset-bottom, 0px))" }} />
 
@@ -1488,6 +1607,24 @@ export function MedOneXChat() {
             ? "bg-gradient-to-t from-black via-black/80 to-transparent"
             : "bg-gradient-to-t from-white via-white/80 to-transparent"
         )} />
+        {/* Reply Context Bar (Mobile) */}
+        {replyContext && (
+          <div className="px-4 pb-1 pointer-events-auto relative">
+            <div className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs",
+              isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"
+            )}>
+              <ArrowBendUpLeft size={14} weight="bold" className="flex-shrink-0" />
+              <span className="truncate flex-1">Replying to: "{replyContext.text}"</span>
+              <button
+                onClick={() => setReplyContext(null)}
+                className={cn("p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0", isDark ? "hover:text-white" : "hover:text-gray-800")}
+              >
+                <X size={12} weight="bold" />
+              </button>
+            </div>
+          </div>
+        )}
         <div className="px-2 pb-1 pointer-events-auto relative">
           <div
             onClick={() => { if (!mobileFocused) mobileInputRef.current?.focus(); }}
