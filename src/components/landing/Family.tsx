@@ -109,9 +109,13 @@ function MemberCard({ member, index }: { member: MemberData; index: number }) {
           </div>
         </div>
         <h3 className="mt-5 text-lg font-semibold">{member.name}</h3>
-        <span className="mt-1 inline-block rounded-full bg-primary/10 px-3 py-0.5 text-xs font-medium text-primary">
-          {member.role}
-        </span>
+        <div className="mt-2 flex flex-col items-center gap-1">
+          {member.role.split(",").map((r, i) => (
+            <span key={i} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-0.5 text-xs font-medium text-primary">
+              {r.trim()}
+            </span>
+          ))}
+        </div>
         {member.description && (
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             {member.description}

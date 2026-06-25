@@ -2,6 +2,7 @@ import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
+import { StorySection } from "@/components/landing/StorySection";
 import { LogosStrip } from "@/components/landing/LogosStrip";
 import { Features } from "@/components/landing/Features";
 import { Showcase } from "@/components/landing/Showcase";
@@ -28,6 +29,7 @@ export default async function HomePage() {
       <div className="min-h-screen overflow-x-hidden landing-dot-grid pt-[88px]">
         <Navbar />
         <Hero />
+        <StorySection />
         <LogosStrip />
         <Features />
         <Showcase />
