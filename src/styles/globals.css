@@ -8,6 +8,16 @@
   background-size: 22px 22px;
 }
 
+/* ── Marquee animation (brands strip) ── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
 .dark .landing-dot-grid {
   background-image: none;
 }

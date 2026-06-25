@@ -26,65 +26,10 @@ const floatIn = (x: number, y: number, rot: number): Variants => ({
   },
 });
 
-
-
-function TasksCard() {
-  const tasks = [
-    { name: "Review Cardiology", date: "Today", pct: 60, color: "bg-primary" },
-    { name: "MCQ Practice #4", date: "Today", pct: 112, color: "bg-orange-400" },
-  ];
-  return (
-    <motion.div
-      variants={floatIn(-100, 80, -4)}
-      initial="hidden"
-      animate="show"
-      whileHover={{ y: -6, rotate: -1 }}
-      transition={{ duration: 0.3, ease: EASE }}
-      className="absolute -bottom-6 left-0 z-20 hidden rotate-[-4deg] sm:block md:left-6"
-    >
-      <div className="w-72 rounded-2xl bg-card p-4 shadow-[0_22px_50px_-12px_rgba(0,0,0,0.22)] ring-1 ring-border">
-        <div className="text-sm font-semibold">Today&apos;s study plan</div>
-        <div className="mt-3 space-y-2">
-          {tasks.map((t, i) => (
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 + i * 0.1, duration: 0.4, ease: EASE }}
-              className="flex items-center gap-3 rounded-xl bg-secondary/60 p-2.5"
-            >
-              <span className={`h-7 w-1.5 rounded-full ${t.color}`} />
-              <div className="flex-1">
-                <div className="text-xs font-semibold">{t.name}</div>
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="h-1 flex-1 overflow-hidden rounded-full bg-border">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(t.pct, 100)}%` }}
-                      transition={{ delay: 0.8 + i * 0.1, duration: 0.7, ease: EASE }}
-                      className={`h-full ${t.color}`}
-                    />
-                  </div>
-                  <span className="text-[10px] text-muted-foreground">{t.pct}%</span>
-                </div>
-                <div className="mt-0.5 text-[9px] text-muted-foreground">{t.date}</div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-
-
 export function Hero() {
   return (
-    <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-10 md:pt-16">
-      <TasksCard />
-
-      <div className="relative z-10 mx-auto max-w-3xl pt-28 text-center md:pt-36">
+    <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-4 md:pt-8">
+      <div className="relative z-10 mx-auto max-w-3xl pt-4 text-center md:pt-8">
         <motion.div
           variants={fadeUp}
           initial="hidden"
@@ -103,10 +48,14 @@ export function Hero() {
           custom={2}
           className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95]"
         >
-          {HERO.title}{" "}
-          <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            {HERO.titleAccent}
-          </span>
+          {HERO.title}{HERO.titleAccent && (
+            <>
+              {" "}
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {HERO.titleAccent}
+              </span>
+            </>
+          )}
         </motion.h1>
 
         <motion.p
