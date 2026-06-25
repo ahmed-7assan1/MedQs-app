@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { ImageUploadWithCrop } from "@/components/ui/ImageUploadWithCrop";
 
-const ROLE_OPTIONS = ["Founder", "Co-Founder", "Lead Developer", "Medical Advisor", "Content Manager", "UI/UX Designer", "Other"];
 const ICON_OPTIONS = ["Sparkles", "Code", "Stethoscope", "Star", "GraduationCap"];
 
 interface Founder {
@@ -31,6 +30,8 @@ export default function FoundersClient() {
   const [form, setForm] = useState({
     name: "", role: "Founder", description: "", imageUrl: "", socialUrl: "", linkedinUrl: "", facebookUrl: "", twitterUrl: "", instagramUrl: "", order: 0
   });
+  const [rolesList, setRolesList] = useState<string[]>(["Founder"]);
+  const [roleInput, setRoleInput] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function load() {
@@ -51,14 +52,17 @@ export default function FoundersClient() {
   function openCreate() {
     setEditing(null);
     setForm({ name: "", role: "Founder", description: "", imageUrl: "", socialUrl: "", linkedinUrl: "", facebookUrl: "", twitterUrl: "", instagramUrl: "", order: founders.length });
+    setRolesList(["Founder"]);
+    setRoleInput("");
     setShowForm(true);
   }
 
   function openEdit(f: Founder) {
+    const roles = f.role ? f.role.split(",").map((r) => r.trim()).filter(Boolean) : ["Founder"];
     setEditing(f);
     setForm({
       name: f.name,
-      role: f.role,
+      role: roles.join(", "),
       description: f.description || "",
       imageUrl: f.imageUrl || "",
       socialUrl: f.socialUrl || "",
@@ -68,20 +72,24 @@ export default function FoundersClient() {
       instagramUrl: f.instagramUrl || "",
       order: f.order ?? 0
     });
+    setRolesList(roles);
+    setRoleInput("");
     setShowForm(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim()) return toast.error("Name is required");
+    if (rolesList.length === 0) return toast.error("At least one role is required");
     setSaving(true);
+    const payload = { ...form, role: rolesList.join(", ") };
     try {
       const url = editing ? `/api/v1/platform-members/${editing.id}` : "/api/v1/platform-members";
       const method = editing ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Save failed");
       toast.success(editing ? "Founder updated!" : "Founder added!");
@@ -153,14 +161,37 @@ export default function FoundersClient() {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Role *</label>
-                <select
-                  value={form.role}
-                  onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Roles *</label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {rolesList.map((r, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                      {r}
+                      <button
+                        type="button"
+                        onClick={() => setRolesList((prev) => prev.filter((_, j) => j !== i))}
+                        className="hover:text-destructive transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  value={roleInput}
+                  onChange={(e) => setRoleInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const val = roleInput.trim();
+                      if (val && !rolesList.includes(val)) {
+                        setRolesList((prev) => [...prev, val]);
+                      }
+                      setRoleInput("");
+                    }
+                  }}
+                  placeholder="Type a role and press Enter"
                   className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                  {ROLE_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
+                />
               </div>
 
               <div className="md:col-span-2">
@@ -279,9 +310,13 @@ export default function FoundersClient() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-base truncate">{member.name}</h3>
-                  <span className="inline-flex rounded-lg bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary mt-1">
-                    {member.role}
-                  </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {member.role.split(",").map((r, i) => (
+                      <span key={i} className="inline-flex rounded-lg bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                        {r.trim()}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
