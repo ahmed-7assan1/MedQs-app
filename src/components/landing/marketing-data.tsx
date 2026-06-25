@@ -1,12 +1,12 @@
 import { Brain, BookOpen, Layers, Target, MessageSquare, Clock, BarChart3, TrendingUp, GraduationCap, Sparkles, Zap, Users, Calendar, Bell, Check } from "lucide-react";
 
-export const NAV_LINKS = ["Features", "How It Works", "Our Story", "Testimonials", "Pricing"];
+export const NAV_LINKS = ["Features", "Our Story", "Testimonials", "Family"];
 
 export const HERO = {
   badge: "Trusted by 10,000+ medical students",
   title: "Master Medicine",
   titleAccent: "Faster. Smarter.",
-  subtitle: "The AI-powered platform that adapts to your curriculum. Personalized learning paths, real-time analytics, and your personal AI tutor—all in one place.",
+  subtitle: "Your complete medical study companion—curated curriculum, smart analytics, and a community of future doctors, all designed around your goals.",
   cta: "Start for Free",
   ctaLink: "/register",
   secondaryCta: "Watch Demo",
@@ -22,16 +22,7 @@ export const FEATURES = [
   { icon: Clock, title: "Spaced Repetition", desc: "Built-in flashcard system using proven memory techniques for long-term clinical retention.", color: "#10B981" },
 ];
 
-export const HOW_IT_WORKS = {
-  eyebrow: "How it works",
-  title: <>From enrollment to <span className="text-muted-foreground/70">exam mastery</span></>,
-  subtitle: "Three simple steps. No learning curve required.",
-  steps: [
-    { n: "01", title: "Study", desc: "Access curated lectures, AI-generated notes, and interactive flashcards tailored to your curriculum." },
-    { n: "02", title: "Practice", desc: "Test yourself with thousands of past exam questions. AI pinpoints your weak spots automatically." },
-    { n: "03", title: "Master", desc: "Track your progress with detailed analytics. Know exactly when you're ready for the real exam." },
-  ],
-};
+
 
 export const SHOWCASE = {
   badge: "Built for med students",
@@ -55,17 +46,6 @@ export const TESTIMONIALS = {
   ],
 };
 
-export const PRICING = {
-  eyebrow: "Pricing",
-  title: "Free for everyone",
-  subtitle: "No paywalls. No hidden fees. Medical education should be accessible to all.",
-  plans: [
-    { name: "Starter", price: "Free", period: "", desc: "Perfect for exploring what MedOneX offers.", features: ["Basic MCQ access", "Community forums", "Progress tracking", "Limited AI queries"], cta: "Get Started Free", featured: false },
-    { name: "Pro", price: "Free", period: "", desc: "For serious students committed to excellence.", features: ["Unlimited MCQ access", "Full AI assistant", "Spaced repetition", "Analytics dashboard", "Offline access", "Priority support"], cta: "Start Pro Trial", featured: true },
-    { name: "Enterprise", price: "Free", period: "", desc: "For institutions and study groups.", features: ["Everything in Pro", "Team management", "Custom curriculum", "API access", "Dedicated support", "Bulk enrollment"], cta: "Contact Sales", featured: false },
-  ],
-};
-
 export const CTA = {
   title: "Start mastering medicine today",
   subtitle: "Join thousands of medical students already using MedOneX to study smarter, not harder.",
@@ -73,11 +53,30 @@ export const CTA = {
   secondaryCta: "Get a Demo",
 };
 
+export const FAMILY = {
+  eyebrow: "Our Family",
+  title: "Meet the MedOneX family",
+  subtitle: "The people behind the platform, dedicated to transforming medical education.",
+  members: [
+    {
+      name: "Dr. Ahmed Mohamed Hassan",
+      role: "Founder & Lead Developer",
+      description: "Medical student and software engineer who built MedOneX to revolutionize medical education.",
+      social: {
+        linkedin: "https://linkedin.com/in/ahmedhassan",
+        facebook: "https://facebook.com/ahmedhassan",
+        twitter: "https://x.com/ahmedhassan",
+        instagram: "https://instagram.com/ahmedhassan",
+      },
+    },
+  ],
+};
+
 export const FOOTER = {
   brand: "MedOneX",
   tagline: "AI-powered medical education platform. Study smarter, not harder.",
   columns: [
-    { title: "Product", links: [{ label: "Features", href: "#features" }, { label: "Pricing", href: "#pricing" }, { label: "AI Chat", href: "/ai-chat" }, { label: "Download", href: "/download" }] },
+    { title: "Product", links: [{ label: "Features", href: "#features" }, { label: "AI Chat", href: "/ai-chat" }, { label: "Download", href: "/download" }] },
     { title: "Company", links: [{ label: "About", href: "/about" }, { label: "Our Story", href: "/story" }, { label: "Founders", href: "/founders" }, { label: "Community", href: "/community" }, { label: "Leaderboard", href: "/leaderboard" }] },
     { title: "Support", links: [{ label: "Privacy", href: "/privacy" }, { label: "Terms", href: "/terms" }, { label: "Contact", href: "mailto:support@medonex.com" }, { label: "FAQ", href: "/#faq" }] },
   ],

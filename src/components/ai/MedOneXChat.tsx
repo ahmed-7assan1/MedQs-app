@@ -13,8 +13,8 @@ import {
   ArrowUpRight, Eye, EyeSlash, Spinner, TextIndent,
   Quotes, NoteBlank, Sparkle, Microphone,
   SpeakerHigh, SpeakerSlash, SidebarSimple,
-  House, UsersThree, ClipboardText, BookmarkSimple,
-  Books, Robot, Gear, Sun, Moon,
+  House, BookmarkSimple,
+  Books, MagicWand, Gear, Sun, Moon,
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -827,14 +827,14 @@ export function MedOneXChat() {
                   )}
                   title="Open sidebar"
                 >
-                  <div className="relative w-6 h-6 flex items-center justify-center">
+                  <div className="relative w-7 h-7 flex items-center justify-center">
                     {logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={logoUrl}
                         alt={siteName}
                         className={cn(
-                          "w-6 h-6 object-contain transition-all duration-200 group-hover:opacity-0 group-hover:scale-75",
+                          "w-7 h-7 object-contain transition-all duration-200 group-hover:opacity-0 group-hover:scale-75",
                           isDark ? "brightness-0 invert opacity-60" : "brightness-0 opacity-40"
                         )}
                       />
@@ -848,7 +848,7 @@ export function MedOneXChat() {
                     )}
                     <SidebarSimple
                       size={22}
-                      weight="regular"
+                      weight="fill"
                       className={cn(
                         "absolute inset-0 m-auto transition-all duration-200 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100",
                         isDark ? "text-white" : "text-gray-900"
@@ -863,25 +863,16 @@ export function MedOneXChat() {
               {/* Navigation Icons */}
               <div className="flex flex-col items-center gap-1 flex-1 overflow-y-auto no-scrollbar pt-3">
                 <Link href="/dashboard-app" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Home">
-                  <House size={20} weight="regular" />
-                </Link>
-                <Link href="/modules" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Modules">
-                  <BookOpen size={20} weight="regular" />
-                </Link>
-                <Link href="/social" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Social">
-                  <UsersThree size={20} weight="regular" />
-                </Link>
-                <Link href="/quiz" className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Quizzes">
-                  <ClipboardText size={20} weight="regular" />
+                  <House size={20} weight="fill" />
                 </Link>
                 <button onClick={() => setShowSaved(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Saved">
-                  <BookmarkSimple size={20} weight="regular" />
+                  <BookmarkSimple size={20} weight="fill" />
                 </button>
                 <button onClick={() => setShowLibrary(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Library">
-                  <Books size={20} weight="regular" />
+                  <Books size={20} weight="fill" />
                 </button>
                 <button onClick={() => setShowAgentGallery(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Custom MedOneX">
-                  <Robot size={20} weight="regular" />
+                  <MagicWand size={20} weight="fill" />
                 </button>
               </div>
 
@@ -889,10 +880,10 @@ export function MedOneXChat() {
               <div className="flex flex-col items-center gap-1 pb-3">
                 <div className={cn("w-6 h-px mb-1 transition-colors duration-200 ease-out", isDark ? "bg-white/10" : "bg-gray-200")} />
                 <button onClick={() => setTheme(isDark ? "light" : "dark")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title={isDark ? "Light Mode" : "Dark Mode"}>
-                  {isDark ? <Sun size={20} weight="regular" /> : <Moon size={20} weight="regular" />}
+                  {isDark ? <Sun size={20} weight="fill" /> : <Moon size={20} weight="fill" />}
                 </button>
                 <button onClick={() => setShowConfig(true)} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200", isDark ? "text-gray-400 hover:bg-white/10 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900")} title="Settings">
-                  <Gear size={20} weight="regular" />
+                  <Gear size={20} weight="fill" />
                 </button>
               </div>
             </div>
@@ -1396,7 +1387,7 @@ export function MedOneXChat() {
           </button>
           {/* Reply Context Bar (Desktop) */}
           {replyContext && (
-            <div className="w-full md:max-w-[48rem] mx-auto px-4 pb-2">
+            <div className="relative z-10 w-full md:max-w-[48rem] mx-auto px-4 pb-2">
               <div className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs",
                 isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"

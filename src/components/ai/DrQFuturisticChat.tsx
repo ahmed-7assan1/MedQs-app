@@ -476,26 +476,27 @@ export function DrQFuturisticChat() {
         {/* ── Input Area ── */}
         <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#07080f] via-[#07080f]/95 to-transparent pt-20 pb-5 md:pb-6 px-4 md:px-8 pointer-events-none">
           <div className="max-w-4xl mx-auto pointer-events-auto">
+            {/* Reply Context — مثبتة فوق الكبسولة */}
+            <AnimatePresence>
+              {replyContext && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0, y: 10 }}
+                  animate={{ height: "auto", opacity: 1, y: 0 }}
+                  exit={{ height: 0, opacity: 0, y: 10 }}
+                  className="relative z-10 px-5 py-3 bg-indigo-500/5 border border-b-0 border-white/10 rounded-t-2xl rounded-b-none flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Quotes size={12} className="text-indigo-400/60" />
+                    <p className="text-xs text-white/60 truncate font-medium">"{replyContext.text}"</p>
+                  </div>
+                  <button onClick={() => setReplyContext(null)} className="p-1 hover:bg-white/10 rounded-full text-white/30 hover:text-white transition-colors">
+                    <X size={12} weight="bold" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Main Input */}
-            <div className="relative rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl shadow-[0_0_60px_rgba(99,102,241,0.03)] overflow-hidden transition-all duration-300 focus-within:border-indigo-500/30 focus-within:shadow-[0_0_50px_rgba(99,102,241,0.08)]">
-              {/* Reply Context */}
-              <AnimatePresence>
-                {replyContext && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="px-5 py-3 bg-indigo-500/5 border-b border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Quotes size={12} className="text-indigo-400/60" />
-                      <p className="text-xs text-white/60 truncate font-medium">"{replyContext.text}"</p>
-                    </div>
-                    <button onClick={() => setReplyContext(null)} className="p-1 hover:bg-white/10 rounded-full text-white/30 hover:text-white transition-colors">
-                      <X size={12} weight="bold" />
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="relative rounded-b-2xl rounded-t-none border border-t-0 border-white/[0.06] bg-white/[0.02] backdrop-blur-xl shadow-[0_0_60px_rgba(99,102,241,0.03)] overflow-hidden transition-all duration-300 focus-within:border-indigo-500/30 focus-within:shadow-[0_0_50px_rgba(99,102,241,0.08)]">
 
               {/* Files Preview */}
               <AnimatePresence>

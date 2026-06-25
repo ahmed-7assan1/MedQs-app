@@ -6,13 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { InstallPWA } from "./InstallPWA";
 import {
-  HomeIcon, BookOpenIcon, UserGroupIcon,
-  ClipboardDocumentListIcon, Cog6ToothIcon, ChevronDoubleRightIcon,
+  HomeIcon, Cog6ToothIcon, Bars3Icon,
   BookmarkIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/24/solid";
 import {
   Plus, MagnifyingGlass, Sun, Moon, ChatCircle, List, Clock, ChatDots,
-  Book, Robot,
+  Books, MagicWand,
 } from "@phosphor-icons/react";
 
 const THREAD_TABS = [
@@ -67,7 +66,7 @@ function MobileSidebarInner({
   const content = (
     <>
       {/* Sidebar Header */}
-      <div className={cn("flex items-center justify-between px-4 py-3 border-b transition-colors duration-200 ease-out", isDark ? "border-white/10" : "border-gray-200")}>
+      <div className={cn("flex items-center justify-between px-4 py-3")}>
         <div className="flex items-center">
           {logoUrl ? (
             <img src={logoUrl} alt={siteName} className={cn("h-7 w-7 object-contain", isDark ? "brightness-0 invert opacity-60" : "brightness-0 opacity-40")} />
@@ -81,23 +80,19 @@ function MobileSidebarInner({
           onClick={onClose}
           className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100")}
         >
-          <ChevronDoubleRightIcon className="w-5 h-5" />
+          <Bars3Icon className="w-5 h-5" />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {/* ─── Navigation Section ─── */}
         <div className="p-3">
-          <p className={cn("text-[10px] font-bold uppercase tracking-widest px-3 mb-2", isDark ? "text-gray-500" : "text-gray-400")}>Navigation</p>
           <div className="space-y-0.5">
             {[
               { icon: HomeIcon, label: "Home", href: "/dashboard-app" },
-              { icon: BookOpenIcon, label: "Modules", href: "/modules" },
-              { icon: UserGroupIcon, label: "Social", href: "/social" },
-              { icon: ClipboardDocumentListIcon, label: "Quizzes", href: "/quiz" },
               { icon: BookmarkIcon, label: "Saved", href: null, action: onOpenSaved },
-              { icon: null, label: "Library", href: null, action: onOpenLibrary, customIcon: Book },
-              { icon: null, label: "Custom MedOneX", href: null, action: onOpenAgentGallery, customIcon: Robot },
+              { icon: null, label: "Library", href: null, action: onOpenLibrary, customIcon: Books },
+              { icon: null, label: "Custom MedOneX", href: null, action: onOpenAgentGallery, customIcon: MagicWand },
             ].map((item: any) => (
               item.href ? (
                 <Link
@@ -122,7 +117,7 @@ function MobileSidebarInner({
                   )}
                 >
                   {item.customIcon ? (
-                    <item.customIcon size={20} weight="regular" className={cn("flex-shrink-0", isDark ? "text-gray-400" : "text-gray-500")} />
+                    <item.customIcon size={20} weight="fill" className={cn("flex-shrink-0", isDark ? "text-gray-400" : "text-gray-500")} />
                   ) : (
                     <item.icon className={cn("w-5 h-5", isDark ? "text-gray-400" : "text-gray-500")} />
                   )}

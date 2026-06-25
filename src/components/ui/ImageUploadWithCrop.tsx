@@ -49,21 +49,25 @@ export function ImageUploadWithCrop({
     e.target.value = "";
   }
 
-  // 2. Handle crop confirmation -> Local Preview Only
+  // 2. Handle crop confirmation -> Upload to UploadThing
   async function handleCropConfirm(blob: Blob, name: string) {
     setCropSrc(null);
-    
+    setUploading(true);
+
     try {
-      // Convert Blob to File
       const file = new File([blob], name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
-      const localUrl = URL.createObjectURL(file);
-      
+      const uploaded = await uploadFiles("avatar", { files: [file] });
+      const url = uploaded?.[0]?.url;
+      if (!url) throw new Error("Upload returned no URL");
+
       setImageError(false);
-      onChange(localUrl, file);
-      toast.success("Image cropped successfully! Don't forget to save.");
+      onChange(url);
+      toast.success("Image uploaded successfully!");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to crop image");
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
     }
   }
 

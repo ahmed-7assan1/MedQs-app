@@ -8,6 +8,10 @@
   background-size: 22px 22px;
 }
 
+.dark .landing-dot-grid {
+  background-image: none;
+}
+
 /* ── Landing sticky-note color ── */
 .bg-note { background-color: hsl(48, 100%, 80%); }
 .text-note-foreground { color: hsl(35, 20%, 25%); }

@@ -16,6 +16,10 @@ interface Founder {
   description?: string;
   imageUrl?: string;
   socialUrl?: string;
+  linkedinUrl?: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
+  instagramUrl?: string;
   order?: number;
 }
 
@@ -25,7 +29,7 @@ export default function FoundersClient() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Founder | null>(null);
   const [form, setForm] = useState({
-    name: "", role: "Founder", description: "", imageUrl: "", socialUrl: "", order: 0
+    name: "", role: "Founder", description: "", imageUrl: "", socialUrl: "", linkedinUrl: "", facebookUrl: "", twitterUrl: "", instagramUrl: "", order: 0
   });
   const [saving, setSaving] = useState(false);
 
@@ -46,7 +50,7 @@ export default function FoundersClient() {
 
   function openCreate() {
     setEditing(null);
-    setForm({ name: "", role: "Founder", description: "", imageUrl: "", socialUrl: "", order: founders.length });
+    setForm({ name: "", role: "Founder", description: "", imageUrl: "", socialUrl: "", linkedinUrl: "", facebookUrl: "", twitterUrl: "", instagramUrl: "", order: founders.length });
     setShowForm(true);
   }
 
@@ -58,6 +62,10 @@ export default function FoundersClient() {
       description: f.description || "",
       imageUrl: f.imageUrl || "",
       socialUrl: f.socialUrl || "",
+      linkedinUrl: f.linkedinUrl || "",
+      facebookUrl: f.facebookUrl || "",
+      twitterUrl: f.twitterUrl || "",
+      instagramUrl: f.instagramUrl || "",
       order: f.order ?? 0
     });
     setShowForm(true);
@@ -166,11 +174,41 @@ export default function FoundersClient() {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Social / LinkedIn URL</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">LinkedIn URL</label>
                 <input
-                  value={form.socialUrl}
-                  onChange={e => setForm(f => ({ ...f, socialUrl: e.target.value }))}
+                  value={form.linkedinUrl}
+                  onChange={e => setForm(f => ({ ...f, linkedinUrl: e.target.value }))}
                   placeholder="https://linkedin.com/in/username"
+                  className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Facebook URL</label>
+                <input
+                  value={form.facebookUrl}
+                  onChange={e => setForm(f => ({ ...f, facebookUrl: e.target.value }))}
+                  placeholder="https://facebook.com/username"
+                  className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">X (Twitter) URL</label>
+                <input
+                  value={form.twitterUrl}
+                  onChange={e => setForm(f => ({ ...f, twitterUrl: e.target.value }))}
+                  placeholder="https://x.com/username"
+                  className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Instagram URL</label>
+                <input
+                  value={form.instagramUrl}
+                  onChange={e => setForm(f => ({ ...f, instagramUrl: e.target.value }))}
+                  placeholder="https://instagram.com/username"
                   className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
@@ -251,16 +289,12 @@ export default function FoundersClient() {
                 <p className="text-xs text-muted-foreground line-clamp-3 mt-2">{member.description}</p>
               )}
 
-              {member.socialUrl && (
-                <a
-                  href={member.socialUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs text-primary font-bold hover:underline mt-auto pt-2 block"
-                >
-                  LinkedIn Profile →
-                </a>
-              )}
+              <div className="flex items-center gap-2 pt-2 mt-auto">
+                {member.linkedinUrl && <a href={member.linkedinUrl} target="_blank" rel="noreferrer" className="text-xs text-primary font-bold hover:underline">LinkedIn</a>}
+                {member.facebookUrl && <a href={member.facebookUrl} target="_blank" rel="noreferrer" className="text-xs text-primary font-bold hover:underline">Facebook</a>}
+                {member.twitterUrl && <a href={member.twitterUrl} target="_blank" rel="noreferrer" className="text-xs text-primary font-bold hover:underline">X</a>}
+                {member.instagramUrl && <a href={member.instagramUrl} target="_blank" rel="noreferrer" className="text-xs text-primary font-bold hover:underline">Instagram</a>}
+              </div>
 
               <div className="flex gap-2 pt-3 border-t border-border mt-auto">
                 <button

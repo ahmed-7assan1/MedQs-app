@@ -168,28 +168,28 @@ export function DrQComposer({
         )}
       </div>
 
+      {/* Reply Context — مثبتة فوق الكبسولة */}
+      <AnimatePresence>
+        {replyContext && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0, y: 10 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: 10 }}
+            className="relative z-10 px-6 py-3 bg-cyan-500/5 border border-b-0 border-white/10 rounded-t-[28px] rounded-b-none flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-cyan-400/60 text-[9px] font-bold uppercase tracking-wider">Replying to:</span>
+              <p className="text-xs text-white/80 truncate font-medium italic">"{replyContext.text}"</p>
+            </div>
+            <button onClick={onClearReply} aria-label="Clear reply" className="p-1 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-colors">
+              <X size={14} weight="bold" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Main Input Capsule ── */}
-      <div className="relative bg-[#0d0d12]/50 backdrop-blur-3xl border border-white/10 rounded-[28px] shadow-[0_0_50px_rgba(6,182,212,0.02)] overflow-hidden transition-all focus-within:border-cyan-500/40 focus-within:shadow-[0_0_40px_rgba(6,182,212,0.1)] focus-within:bg-[#0d0d12]/80">
-        
-        {/* Reply Context */}
-        <AnimatePresence>
-          {replyContext && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="px-6 py-3 bg-cyan-500/5 border-b border-white/10 flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-cyan-400/60 text-[9px] font-bold uppercase tracking-wider">Replying to:</span>
-                <p className="text-xs text-white/80 truncate font-medium italic">"{replyContext.text}"</p>
-              </div>
-              <button onClick={onClearReply} aria-label="Clear reply" className="p-1 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-colors">
-                <X size={14} weight="bold" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="relative bg-[#0d0d12]/50 backdrop-blur-3xl border border-white/10 rounded-b-[28px] rounded-t-none shadow-[0_0_50px_rgba(6,182,212,0.02)] overflow-hidden transition-all focus-within:border-cyan-500/40 focus-within:shadow-[0_0_40px_rgba(6,182,212,0.1)] focus-within:bg-[#0d0d12]/80">
 
         {/* Files Preview */}
         <AnimatePresence>
