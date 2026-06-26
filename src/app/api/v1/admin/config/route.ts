@@ -26,6 +26,8 @@ const BRANDING_KEYS = new Set([
   "instagramUrl",
   "telegramUrl",
   "whatsappUrl",
+  "linkedinUrl",
+  "tiktokUrl",
   "hulkLogoUrl",
 ]);
 
@@ -80,6 +82,8 @@ export async function PUT(req: NextRequest) {
         instagramUrl: merged.instagramUrl === null || typeof merged.instagramUrl === "string" ? merged.instagramUrl : existing.instagramUrl,
         telegramUrl: merged.telegramUrl === null || typeof merged.telegramUrl === "string" ? merged.telegramUrl : existing.telegramUrl,
         whatsappUrl: merged.whatsappUrl === null || typeof merged.whatsappUrl === "string" ? merged.whatsappUrl : existing.whatsappUrl,
+        linkedinUrl: merged.linkedinUrl === null || typeof merged.linkedinUrl === "string" ? merged.linkedinUrl : existing.linkedinUrl,
+        tiktokUrl: merged.tiktokUrl === null || typeof merged.tiktokUrl === "string" ? merged.tiktokUrl : existing.tiktokUrl,
         hulkLogoUrl: merged.hulkLogoUrl === null || typeof merged.hulkLogoUrl === "string" ? merged.hulkLogoUrl : existing.hulkLogoUrl,
       },
     });

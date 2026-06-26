@@ -12,6 +12,8 @@ interface PublicSiteConfig {
   instagramUrl?: string | null;
   telegramUrl?: string | null;
   whatsappUrl?: string | null;
+  linkedinUrl?: string | null;
+  tiktokUrl?: string | null;
   hulkLogoUrl?: string | null;
 }
 
@@ -40,6 +42,8 @@ export function SiteConfigProvider({ children, initial }: { children: ReactNode;
             instagramUrl: d.instagramUrl ?? prev.instagramUrl,
             telegramUrl: d.telegramUrl ?? prev.telegramUrl,
             whatsappUrl: d.whatsappUrl ?? prev.whatsappUrl,
+            linkedinUrl: d.linkedinUrl ?? prev.linkedinUrl,
+            tiktokUrl: d.tiktokUrl ?? prev.tiktokUrl,
             hulkLogoUrl: d.hulkLogoUrl ?? prev.hulkLogoUrl,
           }));
         }

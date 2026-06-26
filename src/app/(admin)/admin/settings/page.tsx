@@ -448,7 +448,8 @@ export default function AdminSettingsPage() {
                 {[
                   { key: "facebookUrl", label: "Facebook" }, { key: "whatsappUrl", label: "WhatsApp" },
                   { key: "instagramUrl", label: "Instagram" }, { key: "telegramUrl", label: "Telegram" },
-                  { key: "twitterUrl", label: "X / Twitter" }, { key: "youtubeUrl", label: "YouTube" }
+                  { key: "twitterUrl", label: "X / Twitter" }, { key: "youtubeUrl", label: "YouTube" },
+                  { key: "linkedinUrl", label: "LinkedIn" }, { key: "tiktokUrl", label: "TikTok" }
                 ].map(social => (
                   <div key={social.key} className="space-y-1.5">
                      <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">{social.label}</label>
