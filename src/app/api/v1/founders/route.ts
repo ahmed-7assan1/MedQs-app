@@ -7,7 +7,9 @@ export async function GET() {
       orderBy: { sortOrder: "asc" },
       take: 50,
     });
-    return NextResponse.json(members);
+    return NextResponse.json(members, {
+      headers: { "Cache-Control": "no-store, max-age=0" },
+    });
   } catch (error) {
     console.error("GET /api/v1/founders error:", error);
     return NextResponse.json({ error: "Failed to fetch founders" }, { status: 500 });

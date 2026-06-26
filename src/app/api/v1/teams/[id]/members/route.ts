@@ -14,7 +14,9 @@ export async function GET(
       },
       orderBy: { role: 'asc' }
     });
-    return NextResponse.json(members);
+    return NextResponse.json(members, {
+      headers: { "Cache-Control": "no-store, max-age=0" },
+    });
   } catch (error) {
     console.error("GET /api/v1/teams/[id]/members error:", error);
     return NextResponse.json({ error: "Failed to fetch members" }, { status: 500 });

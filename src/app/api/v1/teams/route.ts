@@ -18,7 +18,9 @@ export async function GET() {
       },
       orderBy: { createdAt: 'desc' }
     });
-    return NextResponse.json(teams);
+    return NextResponse.json(teams, {
+      headers: { "Cache-Control": "no-store, max-age=0" },
+    });
   } catch (error) {
     console.error("GET /api/v1/teams error:", error);
     return NextResponse.json({ error: "Failed to fetch teams" }, { status: 500 });
