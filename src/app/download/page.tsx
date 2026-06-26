@@ -1,13 +1,19 @@
+"use client";
+
 import Link from "next/link";
-import Image from "next/image";
+import { motion } from "framer-motion";
 import {
   Smartphone, Download, Sparkles, CheckCircle2,
-  Monitor, Tablet, Star, Shield, Zap, ArrowLeft,
+  Monitor, Tablet, Star, Shield, Zap,
   ChevronRight
 } from "lucide-react";
-import { LandingNavbar } from "@/components/landing/LandingNavbar";
-import { CinematicBackground } from "@/components/landing/CinematicBackground";
+import { Navbar } from "@/components/landing/Navbar";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
+import { SectionHeader } from "@/components/landing/SectionHeader";
+import { Footer } from "@/components/landing/Footer";
+import { EASE, VIEWPORT } from "@/components/landing/marketing-data";
+import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
+import { LandingPageWrapper } from "@/components/landing/LandingPageWrapper";
 
 const APP_VERSION = "1.0.0";
 const APK_URL = "/downloads/medonex-v1.0.0.apk";
@@ -21,251 +27,305 @@ const FEATURES = [
   { icon: Smartphone, title: "Push Notifications", desc: "Never miss an update with smart study reminders" },
 ];
 
+const FADE_UP = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+};
+
+const STAGGER = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
+
 export default function DownloadPage() {
   return (
-    <div className="relative min-h-screen selection:bg-primary/30 selection:text-white transition-colors duration-500">
-      <CinematicBackground />
-      <LandingNavbar />
+    <SiteConfigProvider>
+      <LandingPageWrapper>
+        <div className="min-h-screen overflow-x-hidden pt-[88px]">
+      <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <div className="mx-auto max-w-7xl text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary uppercase tracking-widest animate-fade-in mb-8">
-            <Sparkles className="h-3 w-3" />
+      <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-4 md:pt-8 overflow-hidden">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT}
+          variants={STAGGER}
+          className="mx-auto max-w-3xl pt-4 text-center md:pt-8"
+        >
+          <motion.div
+            variants={FADE_UP}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-8"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
             Version {APP_VERSION}
-          </div>
+          </motion.div>
 
-          <h1 className="text-5xl sm:text-7xl font-black tracking-tighter text-slate-900 dark:text-white mb-6 leading-[0.95]">
+          <motion.h1
+            variants={FADE_UP}
+            className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95]"
+          >
             Get the{" "}
             <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
               MedOneX
             </span>{" "}
             App
-          </h1>
+          </motion.h1>
 
-          <p className="mx-auto max-w-2xl text-lg text-slate-600 dark:text-white/60 leading-relaxed mb-12">
+          <motion.p
+            variants={FADE_UP}
+            className="mx-auto mt-6 max-w-lg text-base text-muted-foreground sm:text-lg leading-relaxed"
+          >
             Take your medical studies anywhere. The full MedOneX experience optimized for your phone and tablet.
-          </p>
+          </motion.p>
 
-          {/* Download Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <motion.div
+            variants={FADE_UP}
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
             <a
               href={APK_URL}
               download
-              className="group h-16 w-full sm:w-auto flex items-center justify-center px-10 rounded-2xl bg-gradient-to-r from-primary to-blue-600 text-lg font-bold text-white shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.6)] hover:opacity-90 transition-all"
             >
-              <Download className="mr-3 h-6 w-6 group-hover:-translate-y-1 transition-transform" />
+              <Download className="h-4 w-4" />
               Download for Android
             </a>
-            <div className="h-16 w-full sm:w-auto flex items-center justify-center px-10 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-lg font-bold text-slate-400 dark:text-white/30 cursor-not-allowed">
-              <Smartphone className="mr-3 h-6 w-6" />
-              iOS — Coming Soon
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium text-muted-foreground cursor-not-allowed">
+              <Smartphone className="h-4 w-4" />
+              iOS &mdash; Coming Soon
             </div>
-          </div>
+          </motion.div>
 
-          <p className="text-sm text-slate-400 dark:text-white/40 mb-16">
-            APK · {APP_VERSION} · ~25 MB · Android 8.0+
-          </p>
+          <motion.p
+            variants={FADE_UP}
+            className="mt-4 text-sm text-muted-foreground"
+          >
+            APK &middot; {APP_VERSION} &middot; ~25 MB &middot; Android 8.0+
+          </motion.p>
 
-          {/* Phone Mockups */}
-          <div className="relative mx-auto max-w-5xl">
+          <motion.div
+            variants={FADE_UP}
+            className="relative mx-auto mt-16 max-w-5xl"
+          >
             <div className="absolute inset-0 bg-primary/10 blur-[100px] -z-10" />
             <div className="flex justify-center gap-6">
-              <div className="w-64 rounded-[40px] border-4 border-slate-700 dark:border-white/20 bg-slate-900 dark:bg-black shadow-2xl overflow-hidden">
-                <div className="h-6 bg-slate-800 dark:bg-white/10 flex items-center justify-center">
-                  <div className="w-20 h-1.5 rounded-full bg-slate-600 dark:bg-white/30" />
+              <div className="w-64 rounded-[40px] border-4 border-border bg-card shadow-2xl overflow-hidden">
+                <div className="h-6 bg-muted flex items-center justify-center">
+                  <div className="w-20 h-1.5 rounded-full bg-muted-foreground/30" />
                 </div>
-                <div className="aspect-[9/19] bg-gradient-to-b from-slate-800 to-slate-900 dark:from-gray-900 dark:to-black flex items-center justify-center p-4">
+                <div className="aspect-[9/19] bg-gradient-to-b from-card to-background flex items-center justify-center p-4">
                   <div className="text-center">
                     <MedOneXLogoMark className="h-12 w-12 mx-auto mb-4 text-primary" />
-                    <p className="text-white font-black text-lg">MedOneX</p>
-                    <p className="text-white/40 text-xs mt-1">v{APP_VERSION}</p>
+                    <p className="text-foreground font-black text-lg">MedOneX</p>
+                    <p className="text-muted-foreground text-xs mt-1">v{APP_VERSION}</p>
                   </div>
                 </div>
               </div>
-              <div className="hidden md:block w-64 rounded-[40px] border-4 border-slate-700 dark:border-white/20 bg-slate-900 dark:bg-black shadow-2xl overflow-hidden translate-y-8">
-                <div className="h-6 bg-slate-800 dark:bg-white/10 flex items-center justify-center">
-                  <div className="w-20 h-1.5 rounded-full bg-slate-600 dark:bg-white/30" />
+              <div className="hidden md:block w-64 rounded-[40px] border-4 border-border bg-card shadow-2xl overflow-hidden translate-y-8">
+                <div className="h-6 bg-muted flex items-center justify-center">
+                  <div className="w-20 h-1.5 rounded-full bg-muted-foreground/30" />
                 </div>
-                <div className="aspect-[9/19] bg-gradient-to-b from-slate-800 to-slate-900 dark:from-gray-900 dark:to-black flex items-center justify-center p-4">
+                <div className="aspect-[9/19] bg-gradient-to-b from-card to-background flex items-center justify-center p-4">
                   <div className="w-full space-y-3">
                     <div className="h-4 w-3/4 rounded-full bg-primary/30" />
                     <div className="h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center px-4">
                       <div className="w-8 h-8 rounded-lg bg-primary/30 mr-3" />
                       <div className="flex-1">
-                        <div className="h-2.5 w-20 rounded-full bg-white/20 mb-1" />
-                        <div className="h-2 w-12 rounded-full bg-white/10" />
+                        <div className="h-2.5 w-20 rounded-full bg-foreground/20 mb-1" />
+                        <div className="h-2 w-12 rounded-full bg-foreground/10" />
                       </div>
                     </div>
-                    <div className="h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center px-4">
+                    <div className="h-16 rounded-2xl bg-card border border-border flex items-center px-4">
                       <div className="w-8 h-8 rounded-lg bg-emerald-500/30 mr-3" />
                       <div className="flex-1">
-                        <div className="h-2.5 w-16 rounded-full bg-white/20 mb-1" />
-                        <div className="h-2 w-10 rounded-full bg-white/10" />
+                        <div className="h-2.5 w-16 rounded-full bg-foreground/20 mb-1" />
+                        <div className="h-2 w-10 rounded-full bg-foreground/10" />
                       </div>
                     </div>
-                    <div className="h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center px-4">
+                    <div className="h-16 rounded-2xl bg-card border border-border flex items-center px-4">
                       <div className="w-8 h-8 rounded-lg bg-purple-500/30 mr-3" />
                       <div className="flex-1">
-                        <div className="h-2.5 w-24 rounded-full bg-white/20 mb-1" />
-                        <div className="h-2 w-14 rounded-full bg-white/10" />
+                        <div className="h-2.5 w-24 rounded-full bg-foreground/20 mb-1" />
+                        <div className="h-2 w-14 rounded-full bg-foreground/10" />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ── Stats ── */}
-      <section className="py-16 px-6 border-y border-slate-200 dark:border-white/5 bg-slate-100/50 dark:bg-white/[0.02]">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <section className="border-y border-border bg-card/40 py-12">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT}
+            variants={STAGGER}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+          >
             {[
               { value: "5K+", label: "Downloads" },
               { value: "4.8", label: "App Rating", sub: "⭐" },
               { value: "25MB", label: "App Size" },
               { value: "99.9%", label: "Uptime" },
             ].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-2">{stat.value}</p>
-                <p className="text-sm font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest">{stat.label}</p>
+              <motion.div key={stat.label} variants={FADE_UP}>
+                <p className="text-3xl sm:text-4xl font-black text-foreground mb-2">{stat.value}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">{stat.label}</p>
                 {stat.sub && <p className="text-lg mt-1">{stat.sub}</p>}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ── Features ── */}
-      <section className="py-24 px-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white mb-4">
-              Everything in Your Pocket
-            </h2>
-            <p className="text-lg text-slate-500 dark:text-white/50 max-w-xl mx-auto">
-              The same powerful platform, now mobile-native.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((feature, i) => (
-              <div
-                key={i}
-                className="group p-8 rounded-3xl bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 hover:border-primary/50 hover:bg-white dark:hover:bg-white/[0.06] transition-all duration-500 shadow-sm hover:shadow-xl"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center mb-6 shadow-sm text-primary">
-                  <feature.icon size={24} />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
-                <p className="text-slate-500 dark:text-white/50 leading-relaxed text-sm">{feature.desc}</p>
+      <section className="mx-auto max-w-7xl px-6 py-24">
+        <SectionHeader
+          eyebrow="App Features"
+          title="Everything in Your Pocket"
+          subtitle="The same powerful platform, now mobile-native."
+        />
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT}
+          variants={STAGGER}
+          className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {FEATURES.map((feature, i) => (
+            <motion.div
+              key={i}
+              variants={FADE_UP}
+              className="group relative h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary">
+                <feature.icon className="h-5 w-5" />
               </div>
-            ))}
-          </div>
-        </div>
+              <h3 className="mt-4 text-base font-semibold text-foreground">{feature.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
+            </motion.div>
+          ))}
+        </motion.div>
       </section>
 
       {/* ── How to Install ── */}
-      <section className="py-24 px-6 bg-slate-100/50 dark:bg-white/[0.02] border-y border-slate-200 dark:border-white/5">
-        <div className="mx-auto max-w-4xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white mb-4">
-              How to Install
-            </h2>
-            <p className="text-lg text-slate-500 dark:text-white/50">Just 3 simple steps</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section className="border-y border-border bg-card/40 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeader
+            eyebrow="Quick Setup"
+            title="How to Install"
+            subtitle="Just 3 simple steps"
+          />
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT}
+            variants={STAGGER}
+            className="mt-14 grid gap-5 sm:grid-cols-3"
+          >
             {[
               { step: "01", title: "Download APK", desc: "Tap the download button above to get the APK file" },
-              { step: "02", title: "Allow Installation", desc: "Go to Settings > Security > enable 'Unknown Sources'" },
+              { step: "02", title: "Allow Installation", desc: "Go to Settings > Security > enable \"Unknown Sources\"" },
               { step: "03", title: "Install & Go", desc: "Open the APK and install. Sign in with your account" },
             ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-2xl mx-auto mb-6 shadow-sm">
+              <motion.div
+                key={item.step}
+                variants={FADE_UP}
+                className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm"
+              >
+                <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary font-black text-lg">
                   {item.step}
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">{item.title}</h3>
-                <p className="text-sm text-slate-500 dark:text-white/50">{item.desc}</p>
-              </div>
+                <h3 className="mt-4 text-base font-semibold text-foreground">{item.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ── Auto-Update Section ── */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-4xl p-8 sm:p-12 rounded-[48px] bg-gradient-to-br from-primary/5 to-blue-500/5 border border-primary/20 text-center">
-          <Zap className="h-12 w-12 text-primary mx-auto mb-6" />
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-4">
+      <section className="mx-auto max-w-7xl px-6 py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT}
+          transition={{ duration: 0.6, ease: EASE }}
+          className="relative overflow-hidden rounded-2xl border border-border bg-card p-10 text-center shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] md:p-16"
+        >
+          <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-amber-500/20 blur-3xl" />
+          <Zap className="relative h-8 w-8 text-primary mx-auto mb-6" />
+          <h2 className="relative text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Automatic Updates
           </h2>
-          <p className="text-lg text-slate-500 dark:text-white/60 max-w-lg mx-auto mb-8 leading-relaxed">
-            No more manual downloads. The app updates itself automatically — just like Telegram or WhatsApp. Any UI improvements reach you instantly.
+          <p className="relative mx-auto mt-4 max-w-md text-sm text-muted-foreground sm:text-base">
+            No more manual downloads. The app updates itself automatically &mdash; just like Telegram or WhatsApp. Any UI improvements reach you instantly.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="relative mt-8 flex flex-wrap justify-center gap-3">
             {["OTA Enabled", "No App Store", "Instant Delivery", "Zero Effort"].map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
-                <CheckCircle2 className="h-3 w-3" />
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground"
+              >
+                <CheckCircle2 className="h-3 w-3 text-primary" />
                 {tag}
               </span>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-6 text-center">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white mb-6">
-            Start on Web, Continue on Mobile
-          </h2>
-          <p className="text-lg text-slate-500 dark:text-white/60 mb-10 max-w-lg mx-auto">
-            All your progress syncs automatically. Study anywhere, anytime.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/register"
-              className="group h-14 w-full sm:w-auto flex items-center justify-center px-8 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:scale-105 transition-all"
-            >
-              Get Started Free
-              <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <a
-              href={APK_URL}
-              download
-              className="h-14 w-full sm:w-auto flex items-center justify-center px-8 rounded-2xl bg-primary/10 border border-primary/20 text-primary font-bold hover:bg-primary/20 hover:scale-105 transition-all"
-            >
-              <Download className="mr-2 h-5 w-5" />
-              Download APK
-            </a>
-          </div>
+      <section className="border-y border-border bg-card/40 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={VIEWPORT}
+            transition={{ duration: 0.5, ease: EASE }}
+            className="mx-auto max-w-3xl text-center"
+          >
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+              <Sparkles className="h-3 w-3 text-primary" />
+              Seamless Sync
+            </div>
+            <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              Start on Web, Continue on Mobile
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
+              All your progress syncs automatically. Study anywhere, anytime.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.6)]"
+              >
+                Get Started Free
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+              <a
+                href={APK_URL}
+                download
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium shadow-sm"
+              >
+                <Download className="h-4 w-4" />
+                Download APK
+              </a>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="py-16 px-6 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-transparent">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <Link href="/" className="flex items-center gap-2">
-              <MedOneXLogoMark className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">MedOneX</span>
-            </Link>
-            <div className="flex flex-wrap justify-center gap-6 text-sm font-bold text-slate-400 dark:text-white/40">
-              <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-              <Link href="/#features" className="hover:text-primary transition-colors">Features</Link>
-              <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-              <span className="text-slate-300 dark:text-white/20">v{APP_VERSION}</span>
-            </div>
-          </div>
-          <div className="mt-10 pt-8 border-t border-slate-200 dark:border-white/5 text-center text-sm text-slate-400 dark:text-white/20">
-            © 2026 MedOneX. All rights reserved.
-          </div>
+      <Footer />
         </div>
-      </footer>
-    </div>
+      </LandingPageWrapper>
+    </SiteConfigProvider>
   );
 }
