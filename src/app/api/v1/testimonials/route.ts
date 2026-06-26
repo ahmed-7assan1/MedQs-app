@@ -7,6 +7,14 @@ export async function GET() {
     const testimonials = await (prisma as any).testimonial.findMany({
       where: { status: "APPROVED" },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        content: true,
+        rating: true,
+        authorName: true,
+        universityName: true,
+        createdAt: true,
+      },
     });
     return NextResponse.json(testimonials);
   } catch (error) {
@@ -32,7 +40,7 @@ export async function POST(req: Request) {
       data: {
         content,
         rating,
-        authorName: user?.name ?? session.user.email ?? "User",
+        authorName: user?.name?.trim() || user?.nickname || session.user.email || "User",
         universityName: user?.university?.name ?? null,
         userId: session.user.id,
         status: "PENDING",
