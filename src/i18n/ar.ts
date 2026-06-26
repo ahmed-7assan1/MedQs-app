@@ -2,7 +2,7 @@ export const ar = {
   nav: {
     links: [
       { label: "المميزات", href: "#features" },
-      { label: "قصتنا", href: "/story" },
+
       { label: "التقييمات", href: "#testimonials" },
       { label: "العائلة", href: "#family" },
     ],
@@ -26,7 +26,7 @@ export const ar = {
   story: {
     eyebrow: "قصتنا",
     title: "رحلة <span>MedOneX</span>",
-    cta: "اقرأ القصة كاملة",
+    cta: "كن جزءاً من القصة",
     brandValuesTitle: "Brand Values — قيم العلامة",
     showMore: "المزيد",
     showLess: "عرض أقل",

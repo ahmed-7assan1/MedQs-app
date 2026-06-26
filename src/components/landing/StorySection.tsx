@@ -207,7 +207,7 @@ export function StorySection() {
           className="mt-12 text-center"
         >
           <Link
-            href="/story"
+            href="/register"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium shadow-sm transition-all hover:shadow-md"
           >
             {t("story.cta")}
