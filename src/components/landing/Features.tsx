@@ -34,16 +34,24 @@ export function Features() {
             key={idx}
             variants={cardVariants}
             whileHover={{ y: -4 }}
-            className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
+            className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
           >
             <div
-              className="grid h-11 w-11 place-items-center rounded-xl transition-colors group-hover:text-primary-foreground"
-              style={{ background: `${it.color}20`, color: it.color }}
-            >
-              <it.icon className="h-5 w-5" />
+              className="pointer-events-none absolute inset-0 transition-opacity duration-500 group-hover:opacity-80"
+              style={{
+                background: `linear-gradient(180deg, transparent 25%, ${it.color}10 60%, ${it.color}18 100%)`,
+              }}
+            />
+            <div className="relative">
+              <div
+                className="grid h-11 w-11 place-items-center rounded-xl transition-colors group-hover:text-primary-foreground"
+                style={{ background: `${it.color}20`, color: it.color }}
+              >
+                <it.icon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 text-base font-semibold">{items[idx]?.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{items[idx]?.desc}</p>
             </div>
-            <h3 className="mt-4 text-base font-semibold">{items[idx]?.title}</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{items[idx]?.desc}</p>
           </motion.div>
         ))}
       </motion.div>
