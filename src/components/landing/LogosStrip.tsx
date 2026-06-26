@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { EASE, VIEWPORT } from "./marketing-data";
@@ -14,8 +14,6 @@ interface University {
 export function LogosStrip() {
   const { t } = useLocale();
   const [universities, setUniversities] = useState<University[]>([]);
-  const stripRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
 
   useEffect(() => {
     fetch("/api/v1/universities")
@@ -25,15 +23,6 @@ export function LogosStrip() {
       })
       .catch((err) => console.error("Failed to fetch universities:", err));
   }, []);
-
-  useAnimationFrame((_, delta) => {
-    const el = stripRef.current;
-    if (!el) return;
-    const half = el.scrollWidth / 2;
-    const speed = 30;
-    const next = x.get() - (speed * delta) / 1000;
-    x.set(next <= -half ? next + half : next);
-  });
 
   if (universities.length === 0) return null;
 
@@ -50,11 +39,7 @@ export function LogosStrip() {
           {t("logosStrip.heading")}
         </motion.p>
         <div className="relative mt-6 overflow-hidden">
-          <motion.div
-            ref={stripRef}
-            className="flex w-max gap-6 md:gap-16"
-            style={{ x }}
-          >
+          <div className="flex w-max animate-marquee gap-6 md:gap-16">
             {[...universities, ...universities].map((u, i) => (
               <div
                 key={i}
@@ -64,7 +49,7 @@ export function LogosStrip() {
                 {u.name}
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
