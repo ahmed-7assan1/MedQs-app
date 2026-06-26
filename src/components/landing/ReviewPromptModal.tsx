@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/contexts/LocaleContext";
 import { createClient } from "@/lib/supabase/client";
 
 export function ReviewPromptModal() {
+  const { t, locale } = useLocale();
   const [show, setShow] = useState(false);
   const router = useRouter();
 
@@ -57,9 +59,9 @@ export function ReviewPromptModal() {
               <Star className="h-7 w-7 text-primary" />
             </div>
 
-            <h3 className="mt-5 text-lg font-bold">Love MedOneX?</h3>
+            <h3 className="mt-5 text-lg font-bold">{t("reviewPrompt.title")}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              You&apos;ve been using MedOneX for a while now. We&apos;d love to hear your feedback!
+              {t("reviewPrompt.description")}
             </p>
 
             <div className="mt-6 flex flex-col gap-2">
@@ -69,13 +71,13 @@ export function ReviewPromptModal() {
                   router.push("/#testimonials");
                   setTimeout(() => {
                     document.getElementById("testimonials")?.scrollIntoView({ behavior: "smooth" });
-                    const btn = document.querySelector('[aria-label="Share Your Experience"]');
+                    const btn = document.querySelector('[data-review-trigger="true"]');
                     (btn as HTMLButtonElement)?.click();
                   }, 500);
                 }}
                 className="rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:opacity-90"
               >
-                Rate Now
+                {t("reviewPrompt.rateNow")}
               </button>
               <button
                 onClick={() => {
@@ -84,7 +86,7 @@ export function ReviewPromptModal() {
                 }}
                 className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
-                Maybe later
+                {t("reviewPrompt.maybeLater")}
               </button>
             </div>
           </motion.div>

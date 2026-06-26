@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, X } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface ReviewModalProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface ReviewModalProps {
 }
 
 export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
+  const { t, locale } = useLocale();
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [content, setContent] = useState("");
@@ -66,13 +68,13 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
             {done ? (
               <div className="py-8 text-center">
                 <div className="text-4xl mb-4">🎉</div>
-                <h3 className="text-lg font-bold">Thank you!</h3>
-                <p className="mt-2 text-sm text-muted-foreground">Your review has been submitted and is pending approval.</p>
+                <h3 className="text-lg font-bold">{t("reviewModal.thankYou")}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{t("reviewModal.pendingMessage")}</p>
               </div>
             ) : (
               <>
-                <h3 className="text-lg font-bold">Rate your experience</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Tap a star to rate</p>
+                <h3 className="text-lg font-bold">{t("reviewModal.title")}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{t("reviewModal.subtitle")}</p>
 
                 <div className="mt-6 flex justify-center gap-2">
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -95,7 +97,7 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
                 </div>
 
                 <textarea
-                  placeholder="Tell us about your experience..."
+                  placeholder={t("reviewModal.placeholder")}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={4}
@@ -107,14 +109,14 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
                     onClick={onClose}
                     className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
                   >
-                    Cancel
+                    {t("reviewModal.cancel")}
                   </button>
                   <button
                     onClick={handleSubmit}
                     disabled={rating === 0 || !content.trim() || submitting}
                     className="rounded-full bg-primary px-6 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90 disabled:opacity-40"
                   >
-                    {submitting ? "Submitting..." : "Submit Review"}
+                    {submitting ? t("reviewModal.submitting") : t("reviewModal.submit")}
                   </button>
                 </div>
               </>

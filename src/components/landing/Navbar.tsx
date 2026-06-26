@@ -8,13 +8,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { useThemeStore } from "@/lib/store";
-import { NAV_LINKS, EASE } from "./marketing-data";
+import { useLocale } from "@/contexts/LocaleContext";
+import { EASE } from "./marketing-data";
 
 const EXCLUDED_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/complete-profile", "/auth"];
 
 export function Navbar() {
   const { theme, setTheme } = useThemeStore();
   const { siteName } = useSiteConfig();
+  const { locale, setLocale, t } = useLocale();
   const [mounted, setMounted] = useState(false);
   const [showResume, setShowResume] = useState(false);
   const [resumePath, setResumePath] = useState("");
@@ -62,24 +64,31 @@ export function Navbar() {
             </div>
           </div>
           <nav className="hidden items-center justify-center gap-9 text-sm text-muted-foreground md:flex">
-            {NAV_LINKS.map((l) =>
-              l === "Our Story" ? (
-                <Link key={l} href="/story" className="transition-colors hover:text-foreground">{l}</Link>
+            {(t("nav.links") as { label: string; href: string }[]).map((l) =>
+              l.href.startsWith("/") ? (
+                <Link key={l.label} href={l.href} className="transition-colors hover:text-foreground">{l.label}</Link>
               ) : (
-                <a key={l} href={`#${l.toLowerCase().replace(/\s+/g, "-")}`} className="transition-colors hover:text-foreground">{l}</a>
+                <a key={l.label} href={l.href} className="transition-colors hover:text-foreground">{l.label}</a>
               )
             )}
           </nav>
           <div className="flex items-center justify-end gap-2">
             <Link href="/auth" className="hidden px-3 py-2 text-sm text-muted-foreground/80 hover:text-foreground md:inline">
-              Sign in
+              {t("nav.signIn")}
             </Link>
             <Link
               href="/register"
               className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium shadow-sm transition-all hover:shadow-md md:inline-flex"
             >
-              Get started <ChevronRight className="h-4 w-4" />
+              {t("nav.getStarted")} <ChevronRight className="h-4 w-4" />
             </Link>
+            <button
+              onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
+              aria-label="Toggle language"
+              className="grid h-9 w-9 shrink-0 place-items-center text-xs font-bold tracking-wider text-muted-foreground transition-all hover:text-foreground md:rounded-full md:border md:border-border md:bg-card md:hover:shadow-sm"
+            >
+              {locale === "ar" ? "EN" : "ع"}
+            </button>
             {mounted && (
               <button
                 onClick={toggle}
@@ -109,24 +118,24 @@ export function Navbar() {
               className="overflow-hidden md:hidden"
             >
               <div className="border-t border-border/40 px-5 py-4 space-y-2">
-                {NAV_LINKS.map((l) =>
-                  l === "Our Story" ? (
+                {(t("nav.links") as { label: string; href: string }[]).map((l) =>
+                  l.href.startsWith("/") ? (
                     <Link
-                      key={l}
-                      href="/story"
+                      key={l.label}
+                      href={l.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className="block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
-                      {l}
+                      {l.label}
                     </Link>
                   ) : (
                     <a
-                      key={l}
-                      href={`#${l.toLowerCase().replace(/\s+/g, "-")}`}
+                      key={l.label}
+                      href={l.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className="block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
-                      {l}
+                      {l.label}
                     </a>
                   )
                 )}
@@ -136,7 +145,7 @@ export function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="block rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
-                  Sign in
+                  {t("nav.signIn")}
                 </Link>
               </div>
             </motion.div>
@@ -155,14 +164,14 @@ export function Navbar() {
               <div className="flex items-center justify-between gap-4 border-t border-border/40 px-5 py-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <Play className="h-4 w-4 text-primary shrink-0" />
-                  <p className="text-sm font-medium truncate">Resume your session?</p>
+                  <p className="text-sm font-medium truncate">{t("nav.resumeSession")}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => setShowResume(false)}
                     className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Dismiss
+                    {t("nav.dismiss")}
                   </button>
                   <button
                     onClick={() => {
@@ -172,7 +181,7 @@ export function Navbar() {
                     className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground transition-all hover:opacity-90"
                   >
                     <Play className="h-3.5 w-3.5" />
-                    Resume
+                    {t("nav.resume")}
                   </button>
                 </div>
               </div>

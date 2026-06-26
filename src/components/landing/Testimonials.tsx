@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Star, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/contexts/LocaleContext";
 import { SectionHeader } from "./SectionHeader";
 import { ReviewModal } from "./ReviewModal";
 import { ReviewPromptModal } from "./ReviewPromptModal";
@@ -41,6 +42,7 @@ function TestimonialCard({ content, rating, authorName, universityName }: Testim
 }
 
 export function Testimonials() {
+  const { t } = useLocale();
   const [testimonials, setTestimonials] = useState<TestimonialData[]>([]);
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
@@ -69,7 +71,7 @@ export function Testimonials() {
   return (
     <section id="testimonials" className="bg-card/40 py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <SectionHeader eyebrow="Loved by students" title="Words from future doctors" />
+        <SectionHeader eyebrow={t("testimonials.eyebrow")} title={t("testimonials.title")} />
       </div>
       {testimonials.length > 0 && (
         <div className="relative mt-14 space-y-6 overflow-hidden px-6 md:px-0">
@@ -88,10 +90,11 @@ export function Testimonials() {
       <div className="mt-10 text-center">
         <button
           onClick={handleRateClick}
+          data-review-trigger="true"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium shadow-sm transition-all hover:shadow-md"
         >
           <MessageSquare className="h-4 w-4" />
-          Share Your Experience
+          {t("testimonials.shareExperience")}
         </button>
       </div>
       <ReviewModal open={showModal} onClose={() => setShowModal(false)} onSubmitted={() => setShowModal(false)} />

@@ -2,9 +2,11 @@
 
 import { motion } from "framer-motion";
 import { Sparkles, Check } from "lucide-react";
-import { SHOWCASE, EASE, VIEWPORT } from "./marketing-data";
+import { useLocale } from "@/contexts/LocaleContext";
+import { EASE, VIEWPORT } from "./marketing-data";
 
 export function Showcase() {
+  const { t, locale } = useLocale();
   return (
     <section className="mx-auto max-w-7xl px-6 py-24">
       <div className="grid items-center gap-12 md:grid-cols-2">
@@ -16,14 +18,15 @@ export function Showcase() {
         >
           <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3 w-3 text-primary" />
-            {SHOWCASE.badge}
+            {t("showcase.badge")}
           </div>
-          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            {SHOWCASE.title}
-          </h2>
-          <p className="mt-4 text-muted-foreground">{SHOWCASE.subtitle}</p>
+          <h2
+            className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
+            dangerouslySetInnerHTML={{ __html: t("showcase.title") }}
+          />
+          <p className="mt-4 text-muted-foreground">{t("showcase.subtitle")}</p>
           <ul className="mt-6 space-y-3">
-            {SHOWCASE.bullets.map((b, i) => (
+            {(t("showcase.bullets") as string[]).map((b, i) => (
               <motion.li
                 key={b}
                 initial={{ opacity: 0, x: -10 }}
@@ -56,7 +59,7 @@ export function Showcase() {
               <span className="h-2.5 w-2.5 rounded-full bg-primary/70" />
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3">
-              {["Anatomy", "Pharmacology", "Pathology"].map((d, i) => (
+              {(t("showcase.subjects") as string[]).map((d, i) => (
                 <div key={d} className="rounded-xl bg-secondary/60 p-3">
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{d}</div>
                   <div className="mt-2 space-y-1.5">
@@ -75,7 +78,7 @@ export function Showcase() {
               ))}
             </div>
             <div className="mt-4 rounded-xl border border-border bg-background p-4">
-              <div className="text-xs font-semibold">Weekly progress</div>
+              <div className="text-xs font-semibold">{t("showcase.weeklyProgress")}</div>
               <div className="mt-3 flex items-end gap-2">
                 {[40, 70, 55, 90, 65, 80, 50].map((h, i) => (
                   <motion.div

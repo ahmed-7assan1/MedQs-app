@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
 import { EASE, VIEWPORT } from "./marketing-data";
 
 interface University {
@@ -11,6 +12,7 @@ interface University {
 }
 
 export function LogosStrip() {
+  const { t, locale } = useLocale();
   const [universities, setUniversities] = useState<University[]>([]);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export function LogosStrip() {
           transition={{ duration: 0.4, ease: EASE }}
           className="text-center text-xs uppercase tracking-widest text-muted-foreground"
         >
-          Trusted by students at
+          {t("logosStrip.heading")}
         </motion.p>
         <div className="relative mt-6 overflow-hidden">
           <div className="flex w-max animate-marquee gap-16">

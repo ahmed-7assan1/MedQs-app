@@ -3,7 +3,8 @@
 import { motion, type Variants } from "framer-motion";
 import { ChevronRight, Sparkles, Play, Star } from "lucide-react";
 import Link from "next/link";
-import { HERO, EASE } from "./marketing-data";
+import { useLocale } from "@/contexts/LocaleContext";
+import { EASE } from "./marketing-data";
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -27,6 +28,7 @@ const floatIn = (x: number, y: number, rot: number): Variants => ({
 });
 
 export function Hero() {
+  const { t } = useLocale();
   return (
     <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-4 md:pt-8">
       <div className="relative z-10 mx-auto max-w-3xl pt-4 text-center md:pt-8">
@@ -38,7 +40,7 @@ export function Hero() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-8"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          {HERO.badge}
+          {t("hero.badge")}
         </motion.div>
 
         <motion.h1
@@ -48,14 +50,7 @@ export function Hero() {
           custom={2}
           className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95]"
         >
-          {HERO.title}{HERO.titleAccent && (
-            <>
-              {" "}
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                {HERO.titleAccent}
-              </span>
-            </>
-          )}
+          {t("hero.title")}
         </motion.h1>
 
         <motion.p
@@ -65,7 +60,7 @@ export function Hero() {
           custom={3}
           className="mx-auto mt-6 max-w-lg text-base text-muted-foreground sm:text-lg leading-relaxed"
         >
-          {HERO.subtitle}
+          {t("hero.subtitle")}
         </motion.p>
 
         <motion.div
@@ -79,13 +74,13 @@ export function Hero() {
             href="/register"
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-black px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md dark:bg-white dark:text-black"
           >
-            {HERO.cta} <ChevronRight className="h-4 w-4" />
+            {t("hero.cta")} <ChevronRight className="h-4 w-4" />
           </Link>
           <Link
             href="/auth"
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium shadow-sm transition-all hover:shadow-md"
           >
-            <Play className="h-4 w-4" /> {HERO.secondaryCta}
+            <Play className="h-4 w-4" /> {t("hero.secondaryCta")}
           </Link>
         </motion.div>
 
@@ -107,7 +102,7 @@ export function Hero() {
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((s) => <Star key={s} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
             </div>
-            <p className="text-xs text-muted-foreground">Loved by 10K+ students</p>
+            <p className="text-xs text-muted-foreground">{t("hero.lovedBy")}</p>
           </div>
         </motion.div>
       </div>

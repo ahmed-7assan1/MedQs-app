@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react";
 export function ApplyLocale() {
   const apply = useCallback(() => {
     try {
-      const lang = localStorage.getItem("medqs-lang") || "en";
+      const lang = localStorage.getItem("medqs-lang") || "ar";
       document.documentElement.setAttribute("lang", lang);
       if (lang === "ar") {
         document.documentElement.setAttribute("dir", "rtl");

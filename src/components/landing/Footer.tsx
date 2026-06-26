@@ -3,11 +3,13 @@
 import { Twitter, Github, Linkedin } from "lucide-react";
 import Link from "next/link";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
+import { useLocale } from "@/contexts/LocaleContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
-import { FOOTER } from "./marketing-data";
 
 export function Footer() {
   const { siteName } = useSiteConfig();
+  const { t, locale } = useLocale();
+  const footerColumns = t("footer.columns") as { title: string; links: { label: string; href: string }[] }[];
   return (
     <footer className="border-t border-border bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-5">
@@ -18,7 +20,7 @@ export function Footer() {
             </div>
             <span className="text-lg font-semibold tracking-tight">{siteName}</span>
           </div>
-          <p className="mt-3 max-w-xs text-sm text-muted-foreground">{FOOTER.tagline}</p>
+          <p className="mt-3 max-w-xs text-sm text-muted-foreground">{t("footer.tagline")}</p>
           <div className="mt-5 flex gap-2">
             {[Twitter, Github, Linkedin].map((Icon, i) => (
               <a
@@ -31,7 +33,7 @@ export function Footer() {
             ))}
           </div>
         </div>
-        {FOOTER.columns.map((c) => (
+        {footerColumns.map((c) => (
           <div key={c.title}>
             <div className="text-sm font-semibold">{c.title}</div>
             <ul className="mt-3 space-y-2">
@@ -51,10 +53,10 @@ export function Footer() {
       </div>
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-6 py-5 text-xs text-muted-foreground sm:flex-row">
-          <div>© {new Date().getFullYear()} {FOOTER.copyright}</div>
+          <div>© {new Date().getFullYear()} {t("footer.copyright")}</div>
           <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground">Terms</Link>
+            <Link href="/privacy" className="hover:text-foreground">{t("footer.privacy")}</Link>
+            <Link href="/terms" className="hover:text-foreground">{t("footer.terms")}</Link>
           </div>
         </div>
       </div>

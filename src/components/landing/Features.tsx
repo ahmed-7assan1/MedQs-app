@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLocale } from "@/contexts/LocaleContext";
 import { SectionHeader } from "./SectionHeader";
 import { FEATURES, EASE, VIEWPORT } from "./marketing-data";
 
@@ -10,12 +11,14 @@ const cardVariants = {
 };
 
 export function Features() {
+  const { t } = useLocale();
+  const items = t("features.items") as { title: string; desc: string }[];
   return (
     <section id="features" className="mx-auto max-w-7xl px-6 py-24">
       <SectionHeader
-        eyebrow="Features"
-        title={<>Everything you need, <span className="text-muted-foreground/70">nothing you don&apos;t</span></>}
-        subtitle="A focused toolkit for mastering medicine — from AI tutoring to past papers."
+        eyebrow={t("features.eyebrow")}
+        title={t("features.title")}
+        subtitle={t("features.subtitle")}
       />
       <motion.div
         className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
@@ -26,9 +29,9 @@ export function Features() {
           visible: { transition: { staggerChildren: 0.05 } },
         }}
       >
-        {FEATURES.map((it) => (
+        {FEATURES.map((it, idx) => (
           <motion.div
-            key={it.title}
+            key={idx}
             variants={cardVariants}
             whileHover={{ y: -4 }}
             className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
@@ -39,8 +42,8 @@ export function Features() {
             >
               <it.icon className="h-5 w-5" />
             </div>
-            <h3 className="mt-4 text-base font-semibold">{it.title}</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{it.desc}</p>
+            <h3 className="mt-4 text-base font-semibold">{items[idx]?.title}</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{items[idx]?.desc}</p>
           </motion.div>
         ))}
       </motion.div>

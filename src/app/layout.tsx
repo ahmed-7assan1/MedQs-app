@@ -12,6 +12,7 @@ import { PageTransitionProvider } from "@/components/providers/PageTransitionPro
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { SessionPersistence } from "@/components/system/SessionPersistence";
 import { ApplyLocale } from "@/components/system/ApplyLocale";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import { MotionProvider } from "@/components/providers/MotionProvider";
 import "../styles/globals.css";
 
@@ -221,7 +222,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   `.trim();
 
   return (
-    <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning lang="en" dir="ltr">
+    <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning lang="ar" dir="rtl">
       <head>
         {/* No-flicker theme + lang script — runs before first paint */}
         <script
@@ -250,7 +251,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   } catch (_) {}
                 }
                 try {
-                  var lang = localStorage.getItem('medqs-lang') || 'en';
+                  var lang = localStorage.getItem('medqs-lang') || 'ar';
                   document.documentElement.setAttribute('lang', lang);
                   if (lang === 'ar') {
                     document.documentElement.setAttribute('dir', 'rtl');
@@ -330,7 +331,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SupabaseAuthProvider>
             <SessionPersistence />
             <ApplyLocale />
-            <main><MotionProvider>{children}</MotionProvider></main>
+            <LocaleProvider><main><MotionProvider>{children}</MotionProvider></main></LocaleProvider>
           </SupabaseAuthProvider>
         </ConfirmProvider>
         <Toaster

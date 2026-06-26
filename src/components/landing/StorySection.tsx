@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Lightbulb, Heart, Shield, Users, Star } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
 import { BRAND_VALUES } from "./story-data";
 import { EASE, VIEWPORT } from "./marketing-data";
 
@@ -16,45 +17,18 @@ interface Milestone {
   color: string;
 }
 
-const MILESTONES: Milestone[] = [
-  {
-    year: "2024",
-    label: "البداية",
-    title: "مشكلة حقيقية في حياة طالب حقيقي",
-    body: "تخيل طالب طب في السنة الثانية. أمامه ٤٠٠ سؤال للمذاكرة. الامتحان بعد أسبوعين. المصادر مبعثرة — فيديو هنا، PDF هناك، وأسئلة من سنة فاتت في مجموعة واتساب مش مرتبة.",
-    quote: "ليه مفيش مكان واحد فيه كل حاجة؟ الأسئلة، الفيديوهات، الملفات — في نفس المكان؟",
-    color: "#1A6BFF",
-  },
-  {
-    year: "2025",
-    label: "الأزمة الأولى",
-    title: "لما الموقع وقع في أول ليلة",
-    body: "تم رفع الموقع على الإنترنت. تم مشاركة الرابط. جاء أول مستخدمين. وبعدين... الموقع وقف. قاعدة البيانات رفضت الاتصال. الأكواد بدأت تبعت رسائل خطأ بالعربي ما بفهمهاش حد. الساعة ٢ الصبح.",
-    quote: "كل حاجة بتشتغل لوحدها، مش معناه هتشتغل مع بعض.",
-    color: "#FF6B6B",
-  },
-  {
-    year: "2026",
-    label: "ثورة الذكاء الاصطناعي",
-    title: "لما الذكاء الاصطناعي دخل الصورة",
-    body: "في مرحلة معينة، جاءت فكرة: إيه لو في مساعد ذكاء اصطناعي بيفهم في الطب ويقدر يشرح الأسئلة؟ وُلد Dr. Q — دكتور رقمي بيشرح، بيسأل، بيتدرب معاك على أسئلة الكلينيك.",
-    quote: "نربط بـ ٦ شركات ذكاء اصطناعي مختلفة. لو واحدة وقفت، التانية تشتغل. لو التانية وقفت، التالتة تشتغل.",
-    color: "#8B5CF6",
-  },
-  {
-    year: "2026",
-    label: "لحظة التحول الكبير",
-    title: "MedQs مات. MedOneX وُلد.",
-    body: "بعد شهور من الشغل، حدث شيء غريب. الموقع لم يعد مجرد موقع أسئلة. أصبح فيه ٦+ محركات ذكاء اصطناعي، ١٥+ ميزة مختلفة، ٣٠٠+ تحديث وإصلاح.",
-    quote: "مش بس غيرنا الاسم. غيرنا الهوية كلها. الشعار، الألوان، الرسالة. كأننا عمدنا الموقع من جديد.",
-    color: "#FBBF24",
-  },
+const MILESTONES_DATA: Omit<Milestone, "label" | "title" | "body" | "quote">[] = [
+  { year: "2024", color: "#1A6BFF" },
+  { year: "2025", color: "#FF6B6B" },
+  { year: "2026", color: "#8B5CF6" },
+  { year: "2026", color: "#FBBF24" },
 ];
 
 const BRAND_ICONS = [Lightbulb, Heart, Shield, Users, Star];
 
-function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
+function MilestoneCard({ m, index, mt }: { m: Milestone; index: number; mt: { label: string; title: string; body: string; quote: string } }) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useLocale();
 
   return (
     <motion.div
@@ -91,13 +65,13 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
         />
 
         <span className="text-[10px] font-bold uppercase tracking-[2px]" style={{ color: m.color }}>
-          {m.label}
+          {mt.label}
         </span>
 
-        <h3 className="mt-1 text-base font-bold md:text-lg">{m.title}</h3>
+        <h3 className="mt-1 text-base font-bold md:text-lg">{mt.title}</h3>
 
         <p className={`mt-2 text-sm leading-relaxed text-muted-foreground transition-opacity ${expanded ? "" : "line-clamp-2"}`}>
-          {m.body}
+          {mt.body}
         </p>
 
         <div
@@ -114,7 +88,7 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
               borderInlineStart: `3px solid ${m.color}`,
             }}
           >
-            ❝ {m.quote} ❞
+            ❝ {mt.quote} ❞
           </div>
         </div>
 
@@ -122,7 +96,7 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
           className="mt-2 inline-block cursor-pointer text-xs font-semibold transition-all hover:opacity-80"
           style={{ color: m.color }}
         >
-          {expanded ? "عرض أقل" : "المزيد"}
+          {expanded ? t("story.showLess") : t("story.showMore")}
         </span>
       </div>
     </motion.div>
@@ -130,6 +104,7 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
 }
 
 function BrandValues() {
+  const { locale } = useLocale();
   return (
     <div className="mx-auto mt-20 max-w-5xl">
       <motion.p
@@ -139,7 +114,7 @@ function BrandValues() {
         transition={{ duration: 0.4, ease: EASE }}
         className="mb-8 text-center text-[10px] font-bold uppercase tracking-[3px] text-muted-foreground"
       >
-        Brand Values — قيم العلامة
+        {locale === "ar" ? "Brand Values — قيم العلامة" : "Brand Values — Our Values"}
       </motion.p>
 
       <motion.div
@@ -168,9 +143,9 @@ function BrandValues() {
               >
                 <Icon className="h-4 w-4" style={{ color: bv.color }} />
               </div>
-              <h4 className="mt-3 text-xs font-bold">{bv.titleAr}</h4>
+              <h4 className="mt-3 text-xs font-bold">{locale === "ar" ? bv.titleAr : bv.title}</h4>
               <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
-                {bv.descAr}
+                {locale === "ar" ? bv.descAr : bv.desc}
               </p>
             </motion.div>
           );
@@ -181,8 +156,12 @@ function BrandValues() {
 }
 
 export function StorySection() {
+  const { t, locale } = useLocale();
+  const milestones = t("story.milestones") as { label: string; title: string; body: string; quote: string }[];
+  const isRtl = locale === "ar";
+
   return (
-    <section dir="rtl" className="bg-card/40 py-24 font-arabic">
+    <section dir={isRtl ? "rtl" : "ltr"} className={`bg-card/40 py-24 ${isRtl ? "font-arabic" : ""}`}>
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <motion.div
@@ -193,7 +172,7 @@ export function StorySection() {
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground"
           >
             <Star className="h-3 w-3 text-primary" />
-            Our Story
+            {t("story.eyebrow")}
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
@@ -201,20 +180,19 @@ export function StorySection() {
             viewport={VIEWPORT}
             transition={{ duration: 0.5, ease: EASE, delay: 0.05 }}
             className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
-          >
-            رحلة <span className="text-primary">MedOneX</span>
-          </motion.h2>
+            dangerouslySetInnerHTML={{ __html: t("story.title") }}
+          />
         </div>
 
         <div className="relative mx-auto mt-16 max-w-3xl">
           <div
             className="absolute inset-y-0 w-px bg-gradient-to-b from-primary/30 via-border to-transparent"
-            style={{ insetInlineStart: "20px" }}
+            style={{ insetInlineStart: isRtl ? "20px" : "20px" }}
           />
 
           <div className="space-y-10 md:space-y-12">
-            {MILESTONES.map((m, i) => (
-              <MilestoneCard key={i} m={m} index={i} />
+            {MILESTONES_DATA.map((m, i) => (
+              <MilestoneCard key={i} m={{ ...m, label: "", title: "", body: "", quote: "" }} index={i} mt={milestones[i] || { label: "", title: "", body: "", quote: "" }} />
             ))}
           </div>
         </div>
@@ -232,7 +210,7 @@ export function StorySection() {
             href="/story"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium shadow-sm transition-all hover:shadow-md"
           >
-            اقرأ القصة كاملة
+            {t("story.cta")}
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </motion.div>

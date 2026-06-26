@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useLocale } from "@/contexts/LocaleContext";
 import { SectionHeader } from "./SectionHeader";
-import { FAMILY, EASE, VIEWPORT } from "./marketing-data";
+import { EASE, VIEWPORT } from "./marketing-data";
 
 interface MemberData {
   id: string;
@@ -134,6 +135,7 @@ function MemberCard({ member }: { member: MemberData }) {
 }
 
 export function Family() {
+  const { t } = useLocale();
   const [members, setMembers] = useState<MemberData[]>([]);
 
   useEffect(() => {
@@ -149,9 +151,9 @@ export function Family() {
     <section id="family" className="bg-card/40 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={FAMILY.eyebrow}
-          title={FAMILY.title}
-          subtitle={FAMILY.subtitle}
+          eyebrow={t("family.eyebrow")}
+          title={t("family.title")}
+          subtitle={t("family.subtitle")}
         />
         <motion.div
           className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3"
