@@ -1,5 +1,6 @@
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
+import { LandingPageWrapper } from "@/components/landing/LandingPageWrapper";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { StorySection } from "@/components/landing/StorySection";
@@ -26,18 +27,20 @@ export default async function HomePage() {
         logoUrlDark: siteConfig?.logoUrlDark ?? null,
       }}
     >
-      <div className="min-h-screen overflow-x-hidden landing-dot-grid pt-[88px]">
-        <Navbar />
-        <Hero />
-        <StorySection />
-        <LogosStrip />
-        <Features />
-        <Showcase />
-        <Testimonials />
-        <Family />
-        <CTA />
-        <Footer />
-      </div>
+      <LandingPageWrapper>
+        <div className="min-h-screen overflow-x-hidden landing-dot-grid pt-[88px]">
+          <Navbar />
+          <Hero />
+          <StorySection />
+          <LogosStrip />
+          <Features />
+          <Showcase />
+          <Testimonials />
+          <Family />
+          <CTA />
+          <Footer />
+        </div>
+      </LandingPageWrapper>
     </SiteConfigProvider>
   );
 }

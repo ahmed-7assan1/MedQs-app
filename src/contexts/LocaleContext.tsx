@@ -41,14 +41,6 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
     localStorage.setItem("medqs-lang", l);
-    document.documentElement.setAttribute("lang", l);
-    if (l === "ar") {
-      document.documentElement.setAttribute("dir", "rtl");
-      document.documentElement.style.setProperty("--font-geist-sans", "var(--font-cairo)");
-    } else {
-      document.documentElement.setAttribute("dir", "ltr");
-      document.documentElement.style.setProperty("--font-geist-sans", "var(--font-nunito)");
-    }
   }, []);
 
   const translations: Translations = locale === "ar" ? ar : en;
