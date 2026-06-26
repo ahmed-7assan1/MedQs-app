@@ -103,6 +103,24 @@ function MilestoneCard({ m, index, mt }: { m: Milestone; index: number; mt: { la
   );
 }
 
+function BrandValueCard({ bv, i, locale }: { bv: typeof BRAND_VALUES[number]; i: number; locale: string }) {
+  const Icon = BRAND_ICONS[i] || Star;
+  return (
+    <div className="group flex h-full flex-col items-center rounded-xl border border-border bg-card/30 p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg">
+      <div
+        className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg"
+        style={{ backgroundColor: `${bv.color}20` }}
+      >
+        <Icon className="h-4 w-4" style={{ color: bv.color }} />
+      </div>
+      <h4 className="mt-3 text-xs font-bold">{locale === "ar" ? bv.titleAr : bv.title}</h4>
+      <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+        {locale === "ar" ? bv.descAr : bv.desc}
+      </p>
+    </div>
+  );
+}
+
 function BrandValues() {
   const { locale } = useLocale();
   return (
@@ -117,8 +135,28 @@ function BrandValues() {
         {locale === "ar" ? "Brand Values — قيم العلامة" : "Brand Values — Our Values"}
       </motion.p>
 
+      {/* Mobile: horizontal scroll */}
+      <div
+        className="-mx-6 flex gap-4 overflow-x-auto px-6 pb-4 md:hidden snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden"
+        dir="ltr"
+      >
+        {BRAND_VALUES.map((bv, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4, ease: EASE, delay: i * 0.05 }}
+            className="snap-start shrink-0 w-[75%] sm:w-[45%]"
+          >
+            <BrandValueCard bv={bv} i={i} locale={locale} />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Desktop: grid */}
       <motion.div
-        className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4"
+        className="hidden md:grid md:grid-cols-5 md:gap-4"
         initial="hidden"
         whileInView="visible"
         viewport={VIEWPORT}
@@ -126,30 +164,17 @@ function BrandValues() {
           visible: { transition: { staggerChildren: 0.06 } },
         }}
       >
-        {BRAND_VALUES.map((bv, i) => {
-          const Icon = BRAND_ICONS[i] || Star;
-          return (
-            <motion.div
-              key={i}
-              variants={{
-                hidden: { opacity: 0, y: 16 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
-              }}
-              className="group rounded-xl border border-border bg-card/30 p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg"
-            >
-              <div
-                className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${bv.color}20` }}
-              >
-                <Icon className="h-4 w-4" style={{ color: bv.color }} />
-              </div>
-              <h4 className="mt-3 text-xs font-bold">{locale === "ar" ? bv.titleAr : bv.title}</h4>
-              <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
-                {locale === "ar" ? bv.descAr : bv.desc}
-              </p>
-            </motion.div>
-          );
-        })}
+        {BRAND_VALUES.map((bv, i) => (
+          <motion.div
+            key={i}
+            variants={{
+              hidden: { opacity: 0, y: 16 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
+            }}
+          >
+            <BrandValueCard bv={bv} i={i} locale={locale} />
+          </motion.div>
+        ))}
       </motion.div>
     </div>
   );
