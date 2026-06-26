@@ -63,14 +63,15 @@ export function Showcase() {
                 <div key={d} className="rounded-xl bg-secondary/60 p-3">
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{d}</div>
                   <div className="mt-2 space-y-1.5">
-                    {[60, 80, 40].map((w, j) => (
+                      {[60, 80, 40].map((w, j) => (
                       <motion.div
                         key={j}
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${w}%` }}
+                        initial={{ scaleX: 0 }}
+                        whileInView={{ scaleX: 1 }}
                         viewport={VIEWPORT}
                         transition={{ duration: 0.6, ease: EASE, delay: 0.2 + i * 0.1 + j * 0.08 }}
-                        className={`h-2 rounded-full ${j === 0 ? "bg-primary" : j === 1 ? "bg-orange-400" : "bg-foreground/70"}`}
+                        className={`h-2 origin-left rounded-full ${j === 0 ? "bg-primary" : j === 1 ? "bg-orange-400" : "bg-foreground/70"}`}
+                        style={{ width: `${w}%` }}
                       />
                     ))}
                   </div>
@@ -83,12 +84,12 @@ export function Showcase() {
                 {[40, 70, 55, 90, 65, 80, 50].map((h, i) => (
                   <motion.div
                     key={i}
-                    initial={{ height: 0 }}
-                    whileInView={{ height: `${h}%` }}
+                    initial={{ scaleY: 0 }}
+                    whileInView={{ scaleY: 1 }}
                     viewport={VIEWPORT}
                     transition={{ duration: 0.5, ease: EASE, delay: i * 0.05 }}
-                    className="w-full rounded-md bg-primary/80"
-                    style={{ minHeight: 6 }}
+                    className="w-full origin-bottom rounded-md bg-primary/80"
+                    style={{ height: `${h}%`, minHeight: 6 }}
                   />
                 ))}
               </div>

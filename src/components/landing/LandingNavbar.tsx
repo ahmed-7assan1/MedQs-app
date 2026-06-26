@@ -15,8 +15,17 @@ export function LandingNavbar() {
 
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -36,7 +45,7 @@ export function LandingNavbar() {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+    <nav className={`fixed top-0 left-0 right-0 z-[100] transition-[background-color,backdrop-filter] duration-300 ${
       scrolled 
         ? "py-3 bg-[#05070f]/70 backdrop-blur-xl border-b border-white/5" 
         : "py-6 bg-transparent"

@@ -133,9 +133,9 @@ export function Navbar() {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ maxHeight: 0, opacity: 0 }}
+              animate={{ maxHeight: 500, opacity: 1 }}
+              exit={{ maxHeight: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: EASE }}
               className="overflow-hidden md:hidden"
             >
@@ -177,9 +177,9 @@ export function Navbar() {
         <AnimatePresence>
           {showResume && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ maxHeight: 0, opacity: 0 }}
+              animate={{ maxHeight: 100, opacity: 1 }}
+              exit={{ maxHeight: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: EASE }}
               className="overflow-hidden"
             >
