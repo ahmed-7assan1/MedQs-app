@@ -1,10 +1,29 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap } from "lucide-react";
-import { BRANDS, EASE, VIEWPORT } from "./marketing-data";
+import { EASE, VIEWPORT } from "./marketing-data";
+
+interface University {
+  id: string;
+  name: string;
+}
 
 export function LogosStrip() {
+  const [universities, setUniversities] = useState<University[]>([]);
+
+  useEffect(() => {
+    fetch("/api/v1/universities")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setUniversities(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  if (universities.length === 0) return null;
+
   return (
     <section className="border-y border-border/60 bg-card/40 py-10">
       <div className="mx-auto max-w-6xl px-6">
@@ -19,13 +38,13 @@ export function LogosStrip() {
         </motion.p>
         <div className="relative mt-6 overflow-hidden">
           <div className="flex w-max animate-marquee gap-16">
-            {[...BRANDS, ...BRANDS].map((b, i) => (
+            {[...universities, ...universities].map((u, i) => (
               <div
                 key={i}
                 className="flex shrink-0 items-center gap-2 text-sm font-bold tracking-tight text-muted-foreground"
               >
                 <GraduationCap className="h-4 w-4 shrink-0" />
-                {b}
+                {u.name}
               </div>
             ))}
           </div>

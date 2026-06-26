@@ -83,8 +83,6 @@ export const FOOTER = {
   copyright: "MedOneX. All rights reserved.",
 };
 
-export const BRANDS = ["Cairo University", "Ain Shams", "Alexandria", "Mansoura", "Assiut", "Zagazig"];
-
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
 export const VIEWPORT = { once: true, amount: 0.25 } as const;
