@@ -16,7 +16,7 @@ interface TestimonialData {
   createdAt: string;
 }
 
-const CARD_CLASS = "flex w-80 shrink-0 flex-col rounded-2xl border border-border bg-background p-6 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03] dark:shadow-[0_0_25px_rgba(255,255,255,0.02)] dark:backdrop-blur-sm";
+const CARD_CLASS = "flex w-80 shrink-0 flex-col rounded-2xl border border-border bg-background p-6 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03] dark:shadow-[0_0_25px_rgba(255,255,255,0.02)]";
 
 function TestimonialCard({ content, rating, authorName }: TestimonialData) {
   return (

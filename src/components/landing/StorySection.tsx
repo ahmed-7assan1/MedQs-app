@@ -77,13 +77,12 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
         </span>
       </div>
 
-      <motion.div
-        layout
+      <div
         onClick={() => setExpanded((p) => !p)}
-        className="relative flex-1 cursor-pointer rounded-2xl border border-border bg-card/40 p-4 backdrop-blur-sm transition-shadow duration-300 hover:shadow-lg md:p-5"
+        className="relative flex-1 cursor-pointer rounded-2xl border border-border bg-card/40 p-4 transition-shadow duration-300 hover:shadow-lg md:p-5"
       >
         <div
-          className="absolute top-2 w-[3px] rounded-full opacity-60 transition-opacity group-hover:opacity-100"
+          className="absolute top-2 w-[3px] rounded-full opacity-60"
           style={{
             backgroundColor: m.color,
             insetInlineStart: 0,
@@ -91,27 +90,22 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
           }}
         />
 
-        <span
-          className="text-[10px] font-bold uppercase tracking-[2px]"
-          style={{ color: m.color }}
-        >
+        <span className="text-[10px] font-bold uppercase tracking-[2px]" style={{ color: m.color }}>
           {m.label}
         </span>
 
         <h3 className="mt-1 text-base font-bold md:text-lg">{m.title}</h3>
 
-        <p
-          className={`mt-2 text-sm leading-relaxed text-muted-foreground transition-all ${
-            expanded ? "" : "line-clamp-2"
-          }`}
-        >
+        <p className={`mt-2 text-sm leading-relaxed text-muted-foreground transition-opacity ${expanded ? "" : "line-clamp-2"}`}>
           {m.body}
         </p>
 
-        <motion.div
-          animate={{ height: expanded ? "auto" : 0, opacity: expanded ? 1 : 0 }}
-          transition={{ duration: 0.3, ease: EASE }}
-          className="overflow-hidden"
+        <div
+          className="overflow-hidden transition-all duration-300 ease-out"
+          style={{
+            maxHeight: expanded ? 300 : 0,
+            opacity: expanded ? 1 : 0,
+          }}
         >
           <div
             className="mt-3 rounded-lg p-3 text-sm font-semibold leading-relaxed"
@@ -122,7 +116,7 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
           >
             ❝ {m.quote} ❞
           </div>
-        </motion.div>
+        </div>
 
         <span
           className="mt-2 inline-block cursor-pointer text-xs font-semibold transition-all hover:opacity-80"
@@ -130,8 +124,59 @@ function MilestoneCard({ m, index }: { m: Milestone; index: number }) {
         >
           {expanded ? "عرض أقل" : "المزيد"}
         </span>
-      </motion.div>
+      </div>
     </motion.div>
+  );
+}
+
+function BrandValues() {
+  return (
+    <div className="mx-auto mt-20 max-w-5xl">
+      <motion.p
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={VIEWPORT}
+        transition={{ duration: 0.4, ease: EASE }}
+        className="mb-8 text-center text-[10px] font-bold uppercase tracking-[3px] text-muted-foreground"
+      >
+        Brand Values — قيم العلامة
+      </motion.p>
+
+      <motion.div
+        className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={VIEWPORT}
+        variants={{
+          visible: { transition: { staggerChildren: 0.06 } },
+        }}
+      >
+        {BRAND_VALUES.map((bv, i) => {
+          const Icon = BRAND_ICONS[i] || Star;
+          return (
+            <motion.div
+              key={i}
+              variants={{
+                hidden: { opacity: 0, y: 16 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
+              }}
+              className="group rounded-xl border border-border bg-card/30 p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg"
+            >
+              <div
+                className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg"
+                style={{ backgroundColor: `${bv.color}20` }}
+              >
+                <Icon className="h-4 w-4" style={{ color: bv.color }} />
+              </div>
+              <h4 className="mt-3 text-xs font-bold">{bv.titleAr}</h4>
+              <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+                {bv.descAr}
+              </p>
+            </motion.div>
+          );
+        })}
+      </motion.div>
+    </div>
   );
 }
 
@@ -174,44 +219,7 @@ export function StorySection() {
           </div>
         </div>
 
-        <div className="mx-auto mt-20 max-w-5xl">
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={VIEWPORT}
-            transition={{ duration: 0.4, ease: EASE }}
-            className="mb-8 text-center text-[10px] font-bold uppercase tracking-[3px] text-muted-foreground"
-          >
-            Brand Values — قيم العلامة
-          </motion.p>
-
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
-            {BRAND_VALUES.map((bv, i) => {
-              const Icon = BRAND_ICONS[i] || Star;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={VIEWPORT}
-                  transition={{ duration: 0.4, ease: EASE, delay: i * 0.06 }}
-                  className="group rounded-xl border border-border bg-card/30 p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg"
-                >
-                  <div
-                    className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: `${bv.color}20` }}
-                  >
-                    <Icon className="h-4 w-4" style={{ color: bv.color }} />
-                  </div>
-                  <h4 className="mt-3 text-xs font-bold">{bv.titleAr}</h4>
-                  <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
-                    {bv.descAr}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
+        <BrandValues />
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}

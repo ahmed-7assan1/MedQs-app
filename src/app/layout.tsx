@@ -12,6 +12,7 @@ import { PageTransitionProvider } from "@/components/providers/PageTransitionPro
 import { SupabaseAuthProvider } from "@/components/providers/SupabaseAuthProvider";
 import { SessionPersistence } from "@/components/system/SessionPersistence";
 import { ApplyLocale } from "@/components/system/ApplyLocale";
+import { MotionProvider } from "@/components/providers/MotionProvider";
 import "../styles/globals.css";
 
 import { unstable_cache } from "next/cache";
@@ -329,7 +330,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SupabaseAuthProvider>
             <SessionPersistence />
             <ApplyLocale />
-            <main>{children}</main>
+            <main><MotionProvider>{children}</MotionProvider></main>
           </SupabaseAuthProvider>
         </ConfirmProvider>
         <Toaster

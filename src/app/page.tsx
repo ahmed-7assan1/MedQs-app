@@ -5,9 +5,9 @@ import { Hero } from "@/components/landing/Hero";
 import { StorySection } from "@/components/landing/StorySection";
 import { LogosStrip } from "@/components/landing/LogosStrip";
 import { Features } from "@/components/landing/Features";
-import { Showcase } from "@/components/landing/Showcase";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { Family } from "@/components/landing/Family";
+import { Showcase } from "@/components/landing/Showcase";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
 

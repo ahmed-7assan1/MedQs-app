@@ -85,17 +85,17 @@ function SocialIcon({
   );
 }
 
-function MemberCard({ member, index }: { member: MemberData; index: number }) {
+function MemberCard({ member }: { member: MemberData }) {
   const socialLinks = memberSocialLinks(member);
 
   return (
     <div className="relative group">
       <AmbientGlow />
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={VIEWPORT}
-        transition={{ duration: 0.5, ease: EASE, delay: index * 0.07 }}
+        variants={{
+          hidden: { opacity: 0, y: 24 },
+          visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+        }}
         className="relative flex flex-col items-center rounded-2xl border border-border bg-background p-8 text-center shadow-sm transition-all duration-400 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:border-primary/20"
       >
         <div className="relative h-24 w-24">
@@ -153,11 +153,19 @@ export function Family() {
           title={FAMILY.title}
           subtitle={FAMILY.subtitle}
         />
-        <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {members.map((m, i) => (
-            <MemberCard key={m.id} member={m} index={i} />
+        <motion.div
+          className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT}
+          variants={{
+            visible: { transition: { staggerChildren: 0.07 } },
+          }}
+        >
+          {members.map((m) => (
+            <MemberCard key={m.id} member={m} />
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

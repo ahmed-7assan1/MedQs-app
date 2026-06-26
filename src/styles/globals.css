@@ -16,6 +16,7 @@
 
 .animate-marquee {
   animation: marquee 40s linear infinite;
+  will-change: transform;
 }
 
 @keyframes marquee-reverse {
@@ -25,6 +26,7 @@
 
 .animate-marquee-reverse {
   animation: marquee-reverse 40s linear infinite;
+  will-change: transform;
 }
 
 .dark .landing-dot-grid {
