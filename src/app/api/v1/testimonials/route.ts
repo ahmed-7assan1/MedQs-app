@@ -20,15 +20,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const { content, rating, authorName } = await req.json();
-    if (!content || !rating || !authorName) {
+    const { content, rating } = await req.json();
+    if (!content || !rating) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+    const user = await (prisma as any).user.findUnique({
+      where: { id: session.user.id },
+      include: { university: true },
+    });
     const testimonial = await (prisma as any).testimonial.create({
       data: {
         content,
         rating,
-        authorName,
+        authorName: user?.name ?? session.user.email ?? "User",
+        universityName: user?.university?.name ?? null,
         userId: session.user.id,
         status: "PENDING",
       },

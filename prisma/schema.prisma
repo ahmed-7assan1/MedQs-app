@@ -2371,8 +2371,9 @@ model Testimonial {
   id         String            @id @default(uuid())
   content    String
   rating     Int
-  authorName String
-  userId     String?
+  authorName      String
+  universityName  String?
+  userId          String?
   status     TestimonialStatus @default(PENDING)
   reviewedBy String?
   reviewedAt DateTime?

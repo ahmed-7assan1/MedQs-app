@@ -24,7 +24,7 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
       const res = await fetch("/api/v1/testimonials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating, content: content.trim(), authorName: "You" }),
+        body: JSON.stringify({ rating, content: content.trim() }),
       });
       if (res.ok) {
         localStorage.setItem("medqs-reviewed", "true");
