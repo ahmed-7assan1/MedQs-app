@@ -18,7 +18,7 @@ export const en = {
     subtitle: "Your complete medical study companion—curated curriculum, smart analytics, and a community of future doctors, all designed around your goals.",
     cta: "Start for Free",
     secondaryCta: "Watch Demo",
-    lovedBy: "Loved by 10K+ students",
+    lovedBy: "Loved by students from top universities",
   },
   logosStrip: {
     heading: "Trusted by students at",

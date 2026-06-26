@@ -1,10 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { ChevronRight, Sparkles, Play, Star } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "@/contexts/LocaleContext";
 import { EASE } from "./marketing-data";
+
+interface RandomUser {
+  id: string;
+  name: string;
+  image: string;
+}
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -29,6 +36,16 @@ const floatIn = (x: number, y: number, rot: number): Variants => ({
 
 export function Hero() {
   const { t } = useLocale();
+  const [avatars, setAvatars] = useState<RandomUser[]>([]);
+
+  useEffect(() => {
+    fetch("/api/v1/users/random-avatars")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setAvatars(data);
+      })
+      .catch(() => {});
+  }, []);
   return (
     <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-4 md:pt-8">
       <div className="relative z-10 mx-auto max-w-3xl pt-4 text-center md:pt-8">
@@ -91,12 +108,21 @@ export function Hero() {
           custom={5}
           className="mt-8 flex items-center justify-center gap-4"
         >
-          <div className="flex -space-x-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-gradient-to-br from-primary/60 to-primary/30 flex items-center justify-center text-xs font-bold text-primary-foreground">
-                {String.fromCharCode(64 + i)}
-              </div>
-            ))}
+          <div className="flex -space-x-3 rtl:space-x-reverse">
+            {avatars.length === 4
+              ? avatars.map((user) => (
+                  <img
+                    key={user.id}
+                    src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
+                    alt={user.name}
+                    className="w-10 h-10 rounded-full border-2 border-background object-cover"
+                  />
+                ))
+              : [1, 2, 3, 4].map((i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-gradient-to-br from-primary/60 to-primary/30 flex items-center justify-center text-xs font-bold text-primary-foreground">
+                    {String.fromCharCode(64 + i)}
+                  </div>
+                ))}
           </div>
           <div className="text-left">
             <div className="flex items-center gap-1">
