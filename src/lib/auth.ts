@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { cacheGet, cacheSet } from "@/lib/redis";
 
 export type AuthSession = {
   user: {
@@ -17,16 +18,24 @@ export type AuthSession = {
   expires: string;
 };
 
+const AUTH_CACHE_TTL = 30;
+
 export const auth = async (): Promise<AuthSession | null> => {
   const supabase = createClient();
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const isSuperAdmin = user.user_metadata?.role === "SUPER_ADMIN" || user.email === "ahmedhassan0business@gmail.com";
+    const cached = await cacheGet(`auth:${user.id}`).catch(() => null);
+    if (cached) {
+      return JSON.parse(cached) as AuthSession;
+    }
+
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || "";
+    const isSuperAdmin = user.user_metadata?.role === "SUPER_ADMIN" || user.email === superAdminEmail;
     const userRole = isSuperAdmin ? "SUPER_ADMIN" : (user.user_metadata?.role || "STUDENT");
 
-    return {
+    const session: AuthSession = {
       user: {
         id: user.id,
         email: user.email,
@@ -42,6 +51,10 @@ export const auth = async (): Promise<AuthSession | null> => {
       },
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     };
+
+    cacheSet(`auth:${user.id}`, JSON.stringify(session), AUTH_CACHE_TTL).catch(() => {});
+
+    return session;
   } catch (e) {
     return null;
   }

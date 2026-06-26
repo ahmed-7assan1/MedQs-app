@@ -11,7 +11,7 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, email, name, universityId, facultyId, semesterId, nickname, role, image } = session.user as any;
+    const { id, email, name, universityId, facultyId, semesterId, nickname, role, image } = session.user;
     const validatedRole = (role === "ADMIN" || role === "SUPER_ADMIN" || role === "TEACHER") ? role : "STUDENT";
 
     // 1. Check if user already exists by ID
@@ -24,8 +24,8 @@ export async function POST() {
       // Always sync all available fields from Supabase -> Prisma
       await prisma.user.update({
         where: { id },
-        data: { 
-          role: validatedRole as any, 
+        data: {
+          role: validatedRole,
           image: image || existingById.image,
           name: name || existingById.name,
           ...(semesterId ? { semesterId } : {}),
@@ -47,9 +47,9 @@ export async function POST() {
         // Update Prisma ID to match Supabase ID and sync profile
         await prisma.user.update({
           where: { id: existingByEmail.id },
-          data: { 
+          data: {
             id,
-            role: validatedRole as any,
+            role: validatedRole,
             image: image || undefined,
             name: name || undefined
           }
@@ -72,7 +72,7 @@ export async function POST() {
         universityId: universityId || null,
         facultyId: facultyId || null,
         semesterId: semesterId || null,
-        role: validatedRole as any,
+        role: validatedRole,
         studentCode: defaultStudentCode,
       }
     });

@@ -21,7 +21,7 @@ export function LogosStrip() {
       .then((data) => {
         if (Array.isArray(data)) setUniversities(data);
       })
-      .catch(() => {});
+      .catch((err) => console.error("Failed to fetch universities:", err));
   }, []);
 
   if (universities.length === 0) return null;

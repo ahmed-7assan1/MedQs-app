@@ -10,7 +10,7 @@ interface TeamMember {
   id: string;
   userId: string;
   role: string;
-  user: { id: string; name: string; image: string | null; email: string };
+  user: { id: string; name: string; image: string | null };
 }
 
 interface Team {
@@ -225,7 +225,6 @@ export default function TeamsPage() {
                       </div>
                       <div className="team-member-info">
                         <span className="team-member-name">{m.user.name}</span>
-                        <span className="team-member-email">{m.user.email}</span>
                       </div>
                       <span className={`team-member-role role-${m.role}`}>
                         {m.role === "LEADER" ? (isAr ? "قائد" : "Leader") : m.role === "ADMIN" ? (isAr ? "مشرف" : "Admin") : isAr ? "عضو" : "Member"}

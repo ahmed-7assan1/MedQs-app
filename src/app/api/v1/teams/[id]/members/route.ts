@@ -10,12 +10,13 @@ export async function GET(
     const members = await prisma.teamMember.findMany({
       where: { teamId: params.id },
       include: {
-        user: { select: { id: true, name: true, image: true, email: true } }
+        user: { select: { id: true, name: true, image: true } }
       },
       orderBy: { role: 'asc' }
     });
     return NextResponse.json(members);
   } catch (error) {
+    console.error("GET /api/v1/teams/[id]/members error:", error);
     return NextResponse.json({ error: "Failed to fetch members" }, { status: 500 });
   }
 }
@@ -33,7 +34,7 @@ export async function POST(
       where: { teamId_userId: { teamId: params.id, userId } }
     });
 
-    const isGlobalAdmin = (session?.user as any)?.role === "ADMIN";
+    const isGlobalAdmin = session?.user?.role === "ADMIN";
     if (!isGlobalAdmin && leaderCheck?.role !== "LEADER" && leaderCheck?.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -49,12 +50,13 @@ export async function POST(
         role: role || "MEMBER"
       },
       include: {
-        user: { select: { id: true, name: true, image: true, email: true } }
+        user: { select: { id: true, name: true, image: true } }
       }
     });
 
     return NextResponse.json(newMember);
   } catch (error) {
+    console.error("POST /api/v1/teams/[id]/members error:", error);
     return NextResponse.json({ error: "Failed to add member" }, { status: 500 });
   }
 }

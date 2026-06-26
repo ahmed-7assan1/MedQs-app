@@ -53,7 +53,7 @@ export function Testimonials() {
       .then((data) => {
         if (Array.isArray(data)) setTestimonials(data);
       })
-      .catch(() => {});
+      .catch((err) => console.error("Failed to fetch testimonials:", err));
   }, []);
 
   const handleRateClick = async () => {

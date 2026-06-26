@@ -13,7 +13,7 @@ export const en = {
     resume: "Resume",
   },
   hero: {
-    badge: "Trusted by 10,000+ medical students",
+    badge: "Trusted by medical students everywhere",
     title: "Everything a medical student needs",
     subtitle: "Your complete medical study companion—curated curriculum, smart analytics, and a community of future doctors, all designed around your goals.",
     cta: "Start for Free",

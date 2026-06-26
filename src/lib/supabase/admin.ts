@@ -1,11 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-/**
- * Supabase Admin Client
- * WARNING: This uses the service role key and bypasses all RLS policies.
- * Only use this on the server side.
- */
-export const createAdminClient = () => {
+const globalForSupabaseAdmin = globalThis as unknown as {
+  supabaseAdmin: SupabaseClient | undefined;
+};
+
+function createAdminClientInstance() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -19,4 +18,12 @@ export const createAdminClient = () => {
       persistSession: false
     }
   });
+}
+
+export const createAdminClient = () => {
+  const client = globalForSupabaseAdmin.supabaseAdmin ?? createAdminClientInstance();
+  if (process.env.NODE_ENV !== 'production') {
+    globalForSupabaseAdmin.supabaseAdmin = client;
+  }
+  return client;
 };

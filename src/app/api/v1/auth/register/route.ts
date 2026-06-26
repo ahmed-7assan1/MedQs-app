@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { redisIncrWithExpire } from "@/lib/redis";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { getFacultyPrefix, getUniqueUniAbbr } from "@/lib/telegram-auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { verifyTurnstileToken } from "@/lib/captcha";
 
 const RegisterSchema = z.object({
   name:             z.string().min(2).max(80).trim(),
@@ -15,6 +18,7 @@ const RegisterSchema = z.object({
   semesterId:       z.string().optional(),
   telegramPhone:    z.string().min(10, "Telegram phone is required"),
   verificationCode: z.string().length(6, "6-digit code required"),
+  captchaToken:     z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -32,13 +36,28 @@ export async function POST(req: NextRequest) {
     const {
       name, email, password, nickname, studentId,
       universityId, facultyId, semesterId,
-      telegramPhone, verificationCode
+      telegramPhone, verificationCode, captchaToken
     } = parsed.data;
 
     const cleanPhone = telegramPhone.replace(/[^0-9]/g, "");
 
+    // Verify Turnstile CAPTCHA
+    if (captchaToken) {
+      const valid = await verifyTurnstileToken(captchaToken);
+      if (!valid) {
+        return NextResponse.json({ error: "CAPTCHA verification failed. Please try again." }, { status: 400 });
+      }
+    }
+
+    // Rate limit: 5 registrations per IP per hour
+    const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+    const regCount = await redisIncrWithExpire(`register:${ip}`, 3600);
+    if (regCount > 5) {
+      return NextResponse.json({ error: "Too many registration attempts. Try again later." }, { status: 429 });
+    }
+
     // 1. Verify Telegram Code (single query with botUser include)
-    const botUser = await (prisma as any).botUser.findFirst({
+    const botUser = await prisma.botUser.findFirst({
       where: { phoneNumber: cleanPhone }
     });
 
@@ -46,7 +65,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Telegram phone not found in bot database. Link it first." }, { status: 400 });
     }
 
-    const authEntry = await (prisma as any).botAuth.findUnique({
+    const authEntry = await prisma.botAuth.findUnique({
       where: { telegramId: botUser.telegramId }
     });
 
@@ -55,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Check Uniqueness — single query with OR
-    const existingUser = await (prisma.user as any).findFirst({
+    const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
           { email },
@@ -75,16 +94,16 @@ export async function POST(req: NextRequest) {
     // 3. Fetch university + faculty in parallel
     const [university, faculty] = await Promise.all([
       prisma.university.findUnique({ where: { id: universityId } }),
-      (prisma.faculty as any).findUnique({ where: { id: facultyId } }),
+      prisma.faculty.findUnique({ where: { id: facultyId } }),
     ]);
     if (!university) return NextResponse.json({ error: "University not found" }, { status: 404 });
     if (!faculty) return NextResponse.json({ error: "Faculty not found" }, { status: 404 });
 
     // Get University Abbreviation
-    let uniAbbr = (university as any).abbr;
+    let uniAbbr = university.abbr;
     if (!uniAbbr) {
       uniAbbr = await getUniqueUniAbbr(university.name);
-      await (prisma.university as any).update({ where: { id: universityId }, data: { abbr: uniAbbr } });
+      await prisma.university.update({ where: { id: universityId }, data: { abbr: uniAbbr } });
     }
 
     const facultyPrefix = getFacultyPrefix(faculty.category);
@@ -93,11 +112,7 @@ export async function POST(req: NextRequest) {
     // Format: mnum26-24010511-201093510425
     const studentCode = `${uniAbbr}${facultyPrefix}${yearSuffix}-${studentId}-${cleanPhone}`;
 
-    const existingCode = await (prisma.user as any).findUnique({ where: { studentCode } });
-    if (existingCode) return NextResponse.json({ error: "Student Registration Code already exists" }, { status: 409 });
-
     // 4. Create Supabase user + hash password in parallel
-    const { createAdminClient } = await import("@/lib/supabase/admin");
     const supabase = createAdminClient();
 
     const [sbResult, hashed] = await Promise.all([
@@ -123,30 +138,31 @@ export async function POST(req: NextRequest) {
 
     const supabaseUserId = sbResult.data.user.id;
 
-    // 5. Create User in Prisma
-    const user = await (prisma.user as any).create({
-      data: {
-        id: supabaseUserId,
-        name,
-        nickname,
-        email,
-        password: hashed,
-        studentId,
-        studentCode,
-        telegramPhone: cleanPhone,
-        telegramId: botUser.telegramId,
-        telegramVerified: true,
-        universityId,
-        facultyId,
-        semesterId: semesterId || null,
-        rankId: "newbie",
-      },
+    // 5. Create User + cleanup verification code atomically
+    const user = await prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          id: supabaseUserId,
+          name,
+          nickname,
+          email,
+          password: hashed,
+          studentId,
+          studentCode,
+          telegramPhone: cleanPhone,
+          telegramId: botUser.telegramId,
+          telegramVerified: true,
+          universityId,
+          facultyId,
+          semesterId: semesterId || null,
+          rankId: "newbie",
+        },
+      });
+      await tx.botAuth.delete({ where: { telegramId: botUser.telegramId } });
+      return newUser;
     });
 
-    // 6. Clean up verification code (fire-and-forget)
-    (prisma as any).botAuth.delete({ where: { telegramId: botUser.telegramId } }).catch(() => {});
-
-    // 7. Send confirmation email (fire-and-forget, after response)
+    // 6. Send confirmation email (fire-and-forget, after response)
     (async () => {
       try {
         const { data: linkData } = await supabase.auth.admin.generateLink({
@@ -168,9 +184,12 @@ export async function POST(req: NextRequest) {
       name: user.name,
       studentCode,
       message: "Registration successful!"
-    }, { status: 201 });
+    }, { status: 201, headers: { "Cache-Control": "no-store" } });
 
   } catch (error: any) {
+    if (error?.code === "P2002" && error?.meta?.target?.includes?.("studentCode")) {
+      return NextResponse.json({ error: "Student Registration Code already exists" }, { status: 409 });
+    }
     console.error("[REGISTER] Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

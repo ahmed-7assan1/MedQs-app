@@ -44,7 +44,7 @@ export function Hero() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) setAvatars(data);
       })
-      .catch(() => {});
+      .catch((err) => console.error("Failed to fetch avatars:", err));
   }, []);
   return (
     <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-4 md:pt-8">

@@ -10,9 +10,10 @@ export async function middleware(request: NextRequest) {
 
   // SUPER_ADMIN BYPASS
   const userRole = user?.user_metadata?.role
+  const superAdminEmail = process.env.SUPER_ADMIN_EMAIL ?? ''
   const isSuperAdmin =
     userRole === 'SUPER_ADMIN' ||
-    user?.email === 'ahmedhassan0business@gmail.com'
+    user?.email === superAdminEmail
 
   if (isSuperAdmin) return response
 

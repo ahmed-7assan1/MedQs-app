@@ -2,34 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
-import { getSessionScope, isAdminRole, isSuperAdmin } from "@/lib/tenant";
 
-export const dynamic = "force-dynamic";
-
-// GET /api/v1/universities
 export async function GET() {
-  const session = await auth();
-  const scope = session ? await getSessionScope(session) : null;
-  if (scope && isAdminRole(scope.role) && !isSuperAdmin(scope.role)) {
-    if (!scope.universityId) return NextResponse.json([]);
+  try {
     const unis = await prisma.university.findMany({
-      where: { id: scope.universityId },
       orderBy: { name: "asc" },
+      select: { id: true, name: true, logoUrl: true },
     });
-    return NextResponse.json(unis);
+    return NextResponse.json(unis, {
+      headers: { "Cache-Control": "public, max-age=3600, stale-while-revalidate=7200" },
+    });
+  } catch (error) {
+    console.error("GET /api/v1/universities error:", error);
+    return NextResponse.json({ error: "Failed to fetch universities" }, { status: 500 });
   }
-  const unis = await prisma.university.findMany({ orderBy: { name: "asc" } });
-  return NextResponse.json(unis);
 }
 
-// POST /api/v1/universities
 export async function POST(req: NextRequest) {
   const session = await auth();
   const w = await requireAdminWriter(session);
   if (!w.ok) return w.response;
   if (!w.isSuper) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { name, logoUrl } = await req.json();
-  const uni = await prisma.university.create({ data: { name, logoUrl } });
-  return NextResponse.json(uni, { status: 201 });
+  try {
+    const { name, logoUrl } = await req.json();
+    const uni = await prisma.university.create({ data: { name, logoUrl } });
+    return NextResponse.json(uni, { status: 201 });
+  } catch (error) {
+    console.error("POST /api/v1/universities error:", error);
+    return NextResponse.json({ error: "Failed to create university" }, { status: 500 });
+  }
 }

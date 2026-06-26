@@ -604,6 +604,8 @@ model User {
   reportActions            ReportAction[]
   blocks                   BlockedUser[]             @relation("UserBlocks")
   blockedBy                BlockedUser[]             @relation("UserBlocked")
+  testimonials             Testimonial[]
+  sharedQuizAttempts       SharedQuizAttempt[]
 }
 
 model TelegramConfig {
@@ -1433,6 +1435,7 @@ enum MediaSource {
 
 enum Role {
   STUDENT
+  TEACHER
   ADMIN
   SUPER_ADMIN
 }
@@ -2257,7 +2260,8 @@ model SavedQuiz {
 model SharedQuizAttempt {
   id          String   @id @default(uuid())
   quizId      String
-  userId      String?
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   guestName   String?
   score       Int?
   total       Int?
@@ -2376,6 +2380,7 @@ model Testimonial {
   authorName      String
   universityName  String?
   userId          String?
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   status     TestimonialStatus @default(PENDING)
   reviewedBy String?
   reviewedAt DateTime?
@@ -2383,4 +2388,5 @@ model Testimonial {
   updatedAt  DateTime          @updatedAt
 
   @@index([status])
+  @@index([userId])
 }

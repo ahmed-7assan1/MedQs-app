@@ -144,7 +144,7 @@ export function Family() {
       .then((data) => {
         if (Array.isArray(data)) setMembers(data);
       })
-      .catch(() => {});
+      .catch((err) => console.error("Failed to fetch founders:", err));
   }, []);
 
   return (

@@ -9,7 +9,7 @@ export async function GET() {
         faculty: { select: { name: true } },
         members: {
           where: { role: "LEADER" },
-          include: { user: { select: { email: true } } },
+          include: { user: { select: { id: true, name: true, image: true } } },
           take: 1
         },
         _count: {
@@ -20,13 +20,14 @@ export async function GET() {
     });
     return NextResponse.json(teams);
   } catch (error) {
+    console.error("GET /api/v1/teams error:", error);
     return NextResponse.json({ error: "Failed to fetch teams" }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   const session = await auth();
-  if ((session?.user as any)?.role !== "ADMIN" && (session?.user as any)?.role !== "SUPER_ADMIN") {
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const team = await (prisma.medicalTeam as any).create({
+    const team = await prisma.medicalTeam.create({
       data: {
         name,
         description,
