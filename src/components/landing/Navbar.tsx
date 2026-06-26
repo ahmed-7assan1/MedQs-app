@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Sun, Moon, Play, Menu, X } from "lucide-react";
+import { ChevronRight, Sun, Moon, Play, Menu, X, Maximize, Minimize } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ export function Navbar() {
   const [showResume, setShowResume] = useState(false);
   const [resumePath, setResumePath] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -46,6 +47,20 @@ export function Navbar() {
   }, [showResume]);
 
   const toggle = () => setTheme(theme === "dark" ? "light" : "dark");
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
@@ -88,6 +103,13 @@ export function Navbar() {
               className="grid h-9 w-9 shrink-0 place-items-center text-xs font-bold tracking-wider text-muted-foreground transition-all hover:text-foreground md:rounded-full md:border md:border-border md:bg-card md:hover:shadow-sm"
             >
               {locale === "ar" ? "EN" : "ع"}
+            </button>
+            <button
+              onClick={toggleFullscreen}
+              aria-label="Toggle fullscreen"
+              className="grid h-9 w-9 shrink-0 place-items-center text-muted-foreground transition-all hover:text-foreground md:rounded-full md:border md:border-border md:bg-card md:hover:shadow-sm"
+            >
+              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </button>
             {mounted && (
               <button
