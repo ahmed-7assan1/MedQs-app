@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sun, Moon, LogIn, Menu, X } from "lucide-react";
+import { Sun, Moon, Menu, X } from "lucide-react";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { useThemeStore } from "@/lib/store";
 import { useEffect, useState } from "react";

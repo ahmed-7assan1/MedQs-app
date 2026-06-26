@@ -22,18 +22,6 @@ const fadeUp: Variants = {
   }),
 };
 
-const floatIn = (x: number, y: number, rot: number): Variants => ({
-  hidden: { opacity: 0, x, y, rotate: rot * 1.6, scale: 0.9 },
-  show: {
-    opacity: 1,
-    x: 0,
-    y: 0,
-    rotate: rot,
-    scale: 1,
-    transition: { duration: 0.7, ease: EASE, delay: 0.15 },
-  },
-});
-
 export function Hero() {
   const { t } = useLocale();
   const [avatars, setAvatars] = useState<RandomUser[]>([]);
