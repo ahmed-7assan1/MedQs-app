@@ -112,13 +112,7 @@ export const ar = {
       },
       {
         title: "الشركة",
-        links: [
-          { label: "عن المنصة", href: "/about" },
-          { label: "قصتنا", href: "/story" },
-          { label: "المؤسسون", href: "/founders" },
-          { label: "المجتمع", href: "/community" },
-          { label: "المتصدرون", href: "/leaderboard" },
-        ],
+        links: [],
       },
       {
         title: "الدعم",

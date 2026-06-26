@@ -112,13 +112,7 @@ export const en = {
       },
       {
         title: "Company",
-        links: [
-          { label: "About", href: "/about" },
-          { label: "Our Story", href: "/story" },
-          { label: "Founders", href: "/founders" },
-          { label: "Community", href: "/community" },
-          { label: "Leaderboard", href: "/leaderboard" },
-        ],
+        links: [],
       },
       {
         title: "Support",

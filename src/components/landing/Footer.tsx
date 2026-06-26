@@ -33,7 +33,7 @@ export function Footer() {
             ))}
           </div>
         </div>
-        {footerColumns.map((c) => (
+        {footerColumns.filter((c) => c.links.length > 0).map((c) => (
           <div key={c.title}>
             <div className="text-sm font-semibold">{c.title}</div>
             <ul className="mt-3 space-y-2">
