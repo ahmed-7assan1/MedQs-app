@@ -18,7 +18,7 @@ interface Milestone {
 }
 
 const MILESTONES_DATA: Omit<Milestone, "label" | "title" | "body" | "quote">[] = [
-  { year: "2024", color: "#1A6BFF" },
+  { year: "2025", color: "#1A6BFF" },
   { year: "2025", color: "#FF6B6B" },
   { year: "2026", color: "#8B5CF6" },
   { year: "2026", color: "#FBBF24" },
