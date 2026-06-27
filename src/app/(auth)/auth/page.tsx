@@ -7,6 +7,7 @@ import { Loader2, CheckCircle, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { NewAuthShell } from "@/components/auth/NewAuthShell";
 import { NewAuthForm, type AuthField } from "@/components/auth/NewAuthForm";
+import { DesktopAuthLayout } from "@/components/auth/DesktopAuthLayout";
 
 function AuthContent() {
   const sp = useSearchParams();
@@ -74,113 +75,153 @@ function AuthContent() {
     setForgotSent(true);
   };
 
-  if (mode === "forgot-password") {
-    return (
-      <NewAuthShell
-        eyebrow="Password Reset"
-        title={forgotSent ? "Email Sent" : "Reset Password"}
-        subtitle={forgotSent ? "Check your inbox for the reset link." : ""}
-        footer={
-          <button onClick={() => { setMode("login"); setForgotSent(false); }} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mx-auto">
-            <ArrowLeft size={14} /> Back to Sign In
-          </button>
-        }
-      >
-        {!forgotSent ? (
-          <form onSubmit={handleForgot} className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-foreground/80">Email</label>
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Registered email"
-                className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm shadow-sm transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10" />
-            </div>
-            <button type="submit" disabled={loading}
-              className="group mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-foreground px-5 text-sm font-semibold text-background shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-all hover:bg-foreground/90 disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Reset Link"}
-            </button>
-          </form>
-        ) : (
-          <div className="text-center py-8 space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500 border border-green-500/20">
-              <CheckCircle size={32} />
-            </div>
-            <p className="text-sm text-muted-foreground">Check your inbox for the reset link.</p>
-          </div>
-        )}
-      </NewAuthShell>
-    );
-  }
+  // ── Shared form elements ──────────────────────────────────
 
   const loginFields: AuthField[] = [
     { name: "email", label: "Email", type: "email", placeholder: "Email address", icon: "mail", autoComplete: "email", value: email, onChange: setEmail },
     { name: "password", label: "Password", type: "password", placeholder: "Password", icon: "lock", autoComplete: "current-password", value: password, onChange: setPassword },
   ];
 
-  return (
-    <NewAuthShell
-      eyebrow={mode === "login" ? "Welcome Back" : "New Student"}
-      title={mode === "login" ? "Sign In" : "Create Account"}
-      subtitle={mode === "login" ? "Sign in to your medical workspace" : "Start your medical journey with MedOneX"}
-      footer={
-        mode === "login" ? (
-          <span>
-            New here?{" "}
-            <button onClick={() => setMode("register")} className="text-primary hover:underline">Create an account</button>
-          </span>
-        ) : (
-          <span>
-            Already registered?{" "}
-            <button onClick={() => setMode("login")} className="text-primary hover:underline">Sign In</button>
-          </span>
-        )
+  const tabs = (
+    <div className="flex mb-6 p-0.5 rounded-xl bg-secondary border border-border">
+      <button onClick={() => setMode("login")}
+        className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${mode === "login" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+        Sign In
+      </button>
+      <button onClick={() => setMode("register")}
+        className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${mode === "register" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+        Sign Up
+      </button>
+    </div>
+  );
+
+  const formContent = mode === "login" ? (
+    <NewAuthForm
+      fields={loginFields}
+      submitLabel="Sign In"
+      loading={loading}
+      onSubmit={handleSubmit}
+      onGoogle={() => socialLogin("google")}
+      extra={
+        <>
+          <div className="flex justify-between items-center">
+            <button type="button" onClick={() => setMode("forgot-password")} className="text-xs font-semibold text-muted-foreground hover:text-primary transition-colors">
+              Forgot password?
+            </button>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-3.5 h-3.5 rounded border-border bg-background accent-primary" />
+            <span className="text-xs font-medium text-muted-foreground">Remember me</span>
+          </label>
+        </>
       }
-    >
-      {/* Tabs */}
-      <div className="flex mb-6 p-0.5 rounded-xl bg-secondary border border-border">
-        <button onClick={() => setMode("login")}
-          className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${mode === "login" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-          Sign In
+    />
+  ) : (
+    <div className="space-y-4">
+      <NewAuthForm
+        fields={[]}
+        submitLabel=""
+        loading={loading}
+        onSubmit={() => {}}
+        onGoogle={() => socialLogin("google")}
+      />
+      <p className="text-center text-xs text-muted-foreground">By continuing, you agree to our Terms and Privacy Policy.</p>
+    </div>
+  );
+
+  const authFooter = mode === "login" ? (
+    <span>
+      New here?{" "}
+      <button onClick={() => setMode("register")} className="text-primary hover:underline">Create an account</button>
+    </span>
+  ) : (
+    <span>
+      Already registered?{" "}
+      <button onClick={() => setMode("login")} className="text-primary hover:underline">Sign In</button>
+    </span>
+  );
+
+  // ── Forgot-password mode ──────────────────────────────────
+
+  if (mode === "forgot-password") {
+    const forgotContent = !forgotSent ? (
+      <form onSubmit={handleForgot} className="space-y-4">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium text-foreground/80">Email</label>
+          <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Registered email"
+            className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm shadow-sm transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10" />
+        </div>
+        <button type="submit" disabled={loading}
+          className="group mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-foreground px-5 text-sm font-semibold text-background shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-all hover:bg-foreground/90 disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Reset Link"}
         </button>
-        <button onClick={() => setMode("register")}
-          className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${mode === "register" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-          Sign Up
-        </button>
+      </form>
+    ) : (
+      <div className="text-center py-8 space-y-4">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-green-500/20 bg-green-500/10 text-green-500">
+          <CheckCircle size={32} />
+        </div>
+        <p className="text-sm text-muted-foreground">Check your inbox for the reset link.</p>
+      </div>
+    );
+
+    const forgotFooter = (
+      <button onClick={() => { setMode("login"); setForgotSent(false); }} className="mx-auto flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
+        <ArrowLeft size={14} /> Back to Sign In
+      </button>
+    );
+
+    return (
+      <>
+        {/* Desktop — simplified centered form */}
+        <div className="hidden min-h-dvh items-center justify-center min-[1440px]:flex">
+          <div className="w-full max-w-md">
+            {forgotContent}
+            <p className="mt-6 text-center text-sm text-muted-foreground">{forgotFooter}</p>
+          </div>
+        </div>
+        {/* Mobile */}
+        <div className="min-[1440px]:hidden">
+          <NewAuthShell
+            eyebrow="Password Reset"
+            title={forgotSent ? "Email Sent" : "Reset Password"}
+            subtitle={forgotSent ? "Check your inbox for the reset link." : ""}
+            footer={forgotFooter}
+          >
+            {forgotContent}
+          </NewAuthShell>
+        </div>
+      </>
+    );
+  }
+
+  // ── Login / Register modes ────────────────────────────────
+
+  return (
+    <>
+      {/* Desktop layout (≥1440px) */}
+      <div className="hidden min-[1440px]:block">
+        <DesktopAuthLayout showProgress={mode === "register"}>
+          {tabs}
+          {formContent}
+          <p className="mt-6 text-center text-sm text-muted-foreground">{authFooter}</p>
+        </DesktopAuthLayout>
       </div>
 
-      {mode === "login" ? (
-        <NewAuthForm
-          fields={loginFields}
-          submitLabel="Sign In"
-          loading={loading}
-          onSubmit={handleSubmit}
-          onGoogle={() => socialLogin("google")}
-          extra={
-            <>
-              <div className="flex justify-between items-center">
-                <button type="button" onClick={() => setMode("forgot-password")} className="text-xs font-semibold text-muted-foreground hover:text-primary transition-colors">
-                  Forgot password?
-                </button>
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-3.5 h-3.5 rounded border-border bg-background accent-primary" />
-                <span className="text-xs font-medium text-muted-foreground">Remember me</span>
-              </label>
-            </>
-          }
-        />
-      ) : (
-        <div className="space-y-4">
-          <NewAuthForm
-            fields={[]}
-            submitLabel=""
-            loading={loading}
-            onSubmit={() => {}}
-            onGoogle={() => socialLogin("google")}
-          />
-          <p className="text-center text-xs text-muted-foreground">By continuing, you agree to our Terms and Privacy Policy.</p>
-        </div>
-      )}
-    </NewAuthShell>
+      {/* Mobile layout (<1440px) */}
+      <div className="min-[1440px]:hidden">
+        <NewAuthShell
+          eyebrow={mode === "login" ? "Welcome Back" : "New Student"}
+          title={mode === "login" ? "Sign In" : "Create Account"}
+          subtitle={mode === "login" ? "Sign in to your medical workspace" : "Start your medical journey with MedOneX"}
+          footer={authFooter}
+        >
+          {tabs}
+          {formContent}
+        </NewAuthShell>
+      </div>
+    </>
   );
 }
 

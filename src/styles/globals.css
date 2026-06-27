@@ -592,7 +592,6 @@ html[data-theme="dark"] body,
   }
 
   /* Explicit Arabic / RTL: Tajawal first */
-  :lang(ar),
   [dir="rtl"],
   .text-arabic {
     font-family: var(--font-arabic);
@@ -610,12 +609,6 @@ html[data-theme="dark"] body,
   }
 
   /* Arabic / RTL headings: Tajawal first */
-  :lang(ar) h1,
-  :lang(ar) h2,
-  :lang(ar) h3,
-  :lang(ar) h4,
-  :lang(ar) h5,
-  :lang(ar) h6,
   [dir="rtl"] h1,
   [dir="rtl"] h2,
   [dir="rtl"] h3,

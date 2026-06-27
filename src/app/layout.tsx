@@ -222,7 +222,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   `.trim();
 
   return (
-    <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning lang="ar" dir="rtl">
+    <html className={appFontVariableClassName} data-theme="dark" suppressHydrationWarning lang="ar" dir="ltr">
       <head>
         {/* No-flicker theme + lang script — runs before first paint */}
         <script
@@ -253,13 +253,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 try {
                   var lang = localStorage.getItem('medqs-lang') || 'ar';
                   document.documentElement.setAttribute('lang', lang);
-                  if (lang === 'ar') {
-                    document.documentElement.setAttribute('dir', 'rtl');
-                    document.documentElement.style.setProperty('--font-geist-sans', 'var(--font-cairo)');
-                  } else {
-                    document.documentElement.setAttribute('dir', 'ltr');
-                    document.documentElement.style.setProperty('--font-geist-sans', 'var(--font-nunito)');
-                  }
+                  document.documentElement.style.setProperty('--font-geist-sans', lang === 'ar' ? 'var(--font-cairo)' : 'var(--font-nunito)');
                 } catch(e) {}
               })();
             `,
