@@ -8,7 +8,7 @@ export async function GET() {
       take: 50,
     });
     return NextResponse.json(members, {
-      headers: { "Cache-Control": "no-store, max-age=0" },
+      headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" },
     });
   } catch (error) {
     console.error("GET /api/v1/founders error:", error);

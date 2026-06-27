@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Star, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -8,6 +8,7 @@ import { SectionHeader } from "./SectionHeader";
 import { ReviewModal } from "./ReviewModal";
 import { ReviewPromptModal } from "./ReviewPromptModal";
 import { createClient } from "@/lib/supabase/client";
+import { useLazyFetch } from "@/hooks/useLazyFetch";
 
 interface TestimonialData {
   id: string;
@@ -47,14 +48,10 @@ export function Testimonials() {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    fetch("/api/v1/testimonials")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) setTestimonials(data);
-      })
-      .catch((err) => console.error("Failed to fetch testimonials:", err));
-  }, []);
+  const { ref } = useLazyFetch<TestimonialData[]>("/api/v1/testimonials", {
+    rootMargin: "100px",
+    onData: (data) => { if (Array.isArray(data)) setTestimonials(data); },
+  });
 
   const handleRateClick = async () => {
     const supabase = createClient();
@@ -69,7 +66,7 @@ export function Testimonials() {
   const doubled = [...testimonials, ...testimonials];
 
   return (
-    <section id="testimonials" className="bg-card/40 py-24">
+    <section ref={ref} id="testimonials" className="bg-card/40 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader eyebrow={t("testimonials.eyebrow")} title={t("testimonials.title")} />
       </div>

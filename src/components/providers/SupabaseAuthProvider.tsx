@@ -23,7 +23,10 @@ export const SupabaseAuthProvider = ({ children }: { children: React.ReactNode }
   const supabase = createClient();
 
   useEffect(() => {
+    const isLanding = typeof window !== "undefined" && (window.location.pathname === "/" || window.location.pathname.startsWith("/#"));
+
     const getSession = async () => {
+      if (isLanding) { setLoading(false); return; }
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setUser(session?.user ?? null);
@@ -37,18 +40,20 @@ export const SupabaseAuthProvider = ({ children }: { children: React.ReactNode }
       setLoading(false);
     });
 
-    // Periodically refresh the session to prevent expiry
-    const refreshInterval = setInterval(async () => {
-      const { data: { session } } = await supabase.auth.refreshSession();
-      if (session) {
-        setSession(session);
-        setUser(session.user ?? null);
-      }
-    }, SESSION_REFRESH_INTERVAL);
+    let refreshInterval: NodeJS.Timeout | undefined;
+    if (!isLanding) {
+      refreshInterval = setInterval(async () => {
+        const { data: { session } } = await supabase.auth.refreshSession();
+        if (session) {
+          setSession(session);
+          setUser(session.user ?? null);
+        }
+      }, SESSION_REFRESH_INTERVAL);
+    }
 
     return () => {
       subscription.unsubscribe();
-      clearInterval(refreshInterval);
+      if (refreshInterval) clearInterval(refreshInterval);
     };
   }, []);
 

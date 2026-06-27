@@ -25,7 +25,8 @@ export function SiteConfigProvider({ children, initial }: { children: ReactNode;
   const [cfg, setCfg] = useState<PublicSiteConfig>({ ...DEFAULT, ...initial });
 
   useEffect(() => {
-    // Re-fetch on the client so any admin changes propagate without a full reload
+    // Skip client re-fetch if SSR already provided the data
+    if (initial?.siteName) return;
     fetch("/api/v1/admin/config")
       .then((r) => r.json())
       .then((d) => {

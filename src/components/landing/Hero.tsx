@@ -6,6 +6,7 @@ import { ChevronRight, Sparkles, Play, Star } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "@/contexts/LocaleContext";
 import { EASE } from "./marketing-data";
+import { useLazyFetch } from "@/hooks/useLazyFetch";
 
 interface RandomUser {
   id: string;
@@ -25,17 +26,14 @@ const fadeUp: Variants = {
 export function Hero() {
   const { t } = useLocale();
   const [avatars, setAvatars] = useState<RandomUser[]>([]);
+  const { ref: avatarRef, data: avatarData } = useLazyFetch<RandomUser[]>("/api/v1/users/random-avatars", { rootMargin: "0px" });
 
   useEffect(() => {
-    fetch("/api/v1/users/random-avatars")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setAvatars(data);
-      })
-      .catch((err) => console.error("Failed to fetch avatars:", err));
-  }, []);
+    if (Array.isArray(avatarData) && avatarData.length > 0) setAvatars(avatarData);
+  }, [avatarData]);
+
   return (
-    <section className="relative mx-auto max-w-7xl px-6 pb-24 pt-4 md:pt-8">
+    <section ref={avatarRef} className="relative mx-auto max-w-7xl px-6 pb-24 pt-4 md:pt-8">
       <div className="relative z-10 mx-auto max-w-3xl pt-4 text-center md:pt-8">
         <motion.div
           variants={fadeUp}

@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BookOpen, HelpCircle, Layers, Zap,
   MessageSquare, Users, Settings, Megaphone, Video, Youtube,
-  FileText, GraduationCap, Copy, Library, ArrowRightLeft, Sparkles, Wand2, Flag, Star
+  FileText, GraduationCap, Copy, Library, ArrowRightLeft, Sparkles, Wand2, Flag, Star,
+  Shield, AlertTriangle, Activity, BarChart3, Eye, Award, Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,18 @@ const NAV_GROUPS: {
       { href: "/admin/telegram",   label: "Telegram Bot", icon: MessageSquare },
     ],
   },
+  {
+    label: "Platform",
+    items: [
+      { href: "/admin/warnings",       label: "Warnings",     icon: AlertTriangle },
+      { href: "/admin/admin-monitoring", label: "Admin Monitor", icon: Activity },
+      { href: "/admin/security",       label: "Security",     icon: Shield },
+      { href: "/admin/video-analytics", label: "Video Analytics", icon: Eye },
+      { href: "/admin/quiz-analytics",  label: "Quiz Analytics", icon: BarChart3 },
+      { href: "/admin/leaderboard",    label: "Leaderboard",  icon: Award },
+      { href: "/admin/content-browser", label: "Content Browser", icon: Search },
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -68,7 +81,8 @@ export function AdminSidebarNav({ isSuperAdmin = false }: { isSuperAdmin?: boole
   return (
     <div className="space-y-4">
       {NAV_GROUPS.map((group) => {
-        // If the group has no visible items for ordinary admins, skip rendering the group header
+        // PLATFORM group and certain items only visible to SUPER_ADMIN
+        if (group.label === "Platform" && !isSuperAdmin) return null;
         const visibleItems = group.items.filter(
           (item) => isSuperAdmin || (item.href !== "/admin/teams" && item.href !== "/admin/founders")
         );

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocale } from "@/contexts/LocaleContext";
 import { SectionHeader } from "./SectionHeader";
 import { EASE, VIEWPORT } from "./marketing-data";
+import { useLazyFetch } from "@/hooks/useLazyFetch";
 
 interface MemberData {
   id: string;
@@ -136,38 +136,32 @@ function MemberCard({ member }: { member: MemberData }) {
 
 export function Family() {
   const { t } = useLocale();
-  const [members, setMembers] = useState<MemberData[]>([]);
-
-  useEffect(() => {
-    fetch("/api/v1/founders")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) setMembers(data);
-      })
-      .catch((err) => console.error("Failed to fetch founders:", err));
-  }, []);
+  const { ref, data: membersData } = useLazyFetch<MemberData[]>("/api/v1/founders", { rootMargin: "100px" });
+  const members = Array.isArray(membersData) ? membersData : [];
 
   return (
-    <section id="family" className="bg-card/40 py-24">
+    <section ref={ref} id="family" className="bg-card/40 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
           eyebrow={t("family.eyebrow")}
           title={t("family.title")}
           subtitle={t("family.subtitle")}
         />
-        <motion.div
-          className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3"
-          initial="hidden"
-          whileInView="visible"
-          viewport={VIEWPORT}
-          variants={{
-            visible: { transition: { staggerChildren: 0.07 } },
-          }}
-        >
-          {members.map((m) => (
-            <MemberCard key={m.id} member={m} />
-          ))}
-        </motion.div>
+        {members.length > 0 && (
+          <motion.div
+            className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT}
+            variants={{
+              visible: { transition: { staggerChildren: 0.07 } },
+            }}
+          >
+            {members.map((m) => (
+              <MemberCard key={m.id} member={m} />
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );

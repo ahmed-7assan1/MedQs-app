@@ -4,18 +4,21 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   Users, BookOpen, HelpCircle, FileText, MessageSquare,
-  TrendingUp, Megaphone, Zap, Video, ArrowUpRight,
+  TrendingUp, Zap, Video, ArrowUpRight,
   LayoutDashboard, GraduationCap, Star, Activity, Bone,
+  Shield, Server, BarChart3,
 } from "lucide-react";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
   const role = (session?.user as any)?.role;
+  const isPlatform = role === "SUPER_ADMIN";
   // Security is handled by AdminLayout. No redundant redirect here.
 
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   const [
     userCount, questionCount, lectureCount, postCount,
@@ -30,6 +33,32 @@ export default async function AdminDashboardPage() {
     prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
     prisma.user.count({ where: { createdAt: { gte: monthAgo, lt: weekAgo } } }),
   ]);
+
+  let securityAlertCount = 0;
+  let uniRanking: { id: string; name: string; abbr: string | null; userCount: number }[] = [];
+  let platformStats: { activeToday: number; newToday: number; bannedCount: number } | null = null;
+  let contentNewThisWeek: { questions: number; lectures: number; papers: number } | null = null;
+
+  if (isPlatform) {
+    [securityAlertCount, uniRanking, platformStats, contentNewThisWeek] = await Promise.all([
+      prisma.securityEvent.count({ where: { status: { in: ["NEW", "INVESTIGATING"] } } }),
+      prisma.university.findMany({
+        select: { id: true, name: true, abbr: true, _count: { select: { users: true } } },
+        orderBy: { users: { _count: "desc" } },
+        take: 10,
+      }).then((u) => u.map((x) => ({ id: x.id, name: x.name, abbr: x.abbr, userCount: x._count.users }))),
+      Promise.all([
+        prisma.user.count({ where: { lastActivityAt: { gte: todayStart } } }),
+        prisma.user.count({ where: { createdAt: { gte: todayStart } } }),
+        prisma.user.count({ where: { isBanned: true } }),
+      ]).then(([activeToday, newToday, bannedCount]) => ({ activeToday, newToday, bannedCount })),
+      Promise.all([
+        prisma.question.count({ where: { createdAt: { gte: weekAgo } } }),
+        Promise.resolve(0),
+        prisma.pastPaper.count({ where: { createdAt: { gte: weekAgo } } }),
+      ]).then(([questions, lectures, papers]) => ({ questions, lectures, papers })),
+    ]);
+  }
 
   const recentUsers = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
@@ -146,6 +175,47 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* ── PLATFORM: Security Alert Banner ──────────────────────── */}
+      {isPlatform && securityAlertCount > 0 && (
+        <div className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
+          <Shield className="h-5 w-5 shrink-0 text-red-500" />
+          <div className="flex-1 text-sm">
+            <span className="font-semibold text-red-500">{securityAlertCount} open security {securityAlertCount === 1 ? "event" : "events"}</span>
+            <span className="text-muted-foreground"> — requires investigation</span>
+          </div>
+          <Link href="/admin/security"
+            className="flex items-center gap-1 rounded-lg bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/20">
+            View Security Dashboard <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
+      )}
+
+      {/* ── PLATFORM: System Health Bar ──────────────────────────── */}
+      {isPlatform && (
+        <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-white/[0.02] bg-card p-4">
+          <div className="flex items-center gap-2">
+            <Server className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-semibold text-muted-foreground">System</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-xs text-muted-foreground">DB</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-xs text-muted-foreground">API</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-xs text-muted-foreground">Cache</span>
+          </div>
+          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span>{userCount.toLocaleString()} users · {platformStats?.activeToday ?? 0} active today</span>
+          </div>
+        </div>
+      )}
+
       {/* ── Stats grid ───────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map(({ label, value, icon: Icon, color, bg, border, trend }) => (
@@ -160,6 +230,34 @@ export default async function AdminDashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* ── PLATFORM: Extra Stats Row ────────────────────────────── */}
+      {isPlatform && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border border-white/[0.02] bg-card p-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Active Today</p>
+            <p className="font-display text-2xl font-bold text-emerald-500">{platformStats?.activeToday ?? 0}</p>
+            <p className="text-[10px] text-muted-foreground">users with activity</p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.02] bg-card p-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">New Today</p>
+            <p className="font-display text-2xl font-bold text-blue-500">{platformStats?.newToday ?? 0}</p>
+            <p className="text-[10px] text-muted-foreground">new registrations</p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.02] bg-card p-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Banned</p>
+            <p className="font-display text-2xl font-bold text-red-500">{platformStats?.bannedCount ?? 0}</p>
+            <p className="text-[10px] text-muted-foreground">users currently banned</p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.02] bg-card p-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Content (7d)</p>
+            <p className="font-display text-2xl font-bold text-violet-500">
+              {((contentNewThisWeek?.questions ?? 0) + (contentNewThisWeek?.lectures ?? 0) + (contentNewThisWeek?.papers ?? 0))}
+            </p>
+            <p className="text-[10px] text-muted-foreground">Q:{contentNewThisWeek?.questions ?? 0} L:{contentNewThisWeek?.lectures ?? 0} P:{contentNewThisWeek?.papers ?? 0}</p>
+          </div>
+        </div>
+      )}
 
       {/* ── Middle row: chart + quick actions ────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-3">
@@ -197,8 +295,31 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Top Universities (PLATFORM only) */}
+        {isPlatform && (
+          <div className="rounded-2xl border border-white/[0.02] bg-card p-5 lg:col-span-1">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Top Universities</p>
+              <GraduationCap className="h-4 w-4 text-muted-foreground/40" />
+            </div>
+            <div className="space-y-2">
+              {uniRanking.map((uni, i) => (
+                <div key={uni.id} className="flex items-center gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium">{uni.abbr ?? uni.name}</p>
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">{uni.userCount}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Quick actions */}
-        <div className="rounded-2xl border border-white/[0.02] bg-card p-5 lg:col-span-2">
+        <div className={`rounded-2xl border border-white/[0.02] bg-card p-5 ${isPlatform ? "lg:col-span-1" : "lg:col-span-2"}`}>
           <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Quick Actions</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {quickActions.map(({ href, icon: Icon, label, desc, color, bg }) => (

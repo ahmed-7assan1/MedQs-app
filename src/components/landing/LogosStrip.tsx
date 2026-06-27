@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { EASE, VIEWPORT } from "./marketing-data";
+import { useLazyFetch } from "@/hooks/useLazyFetch";
 
 interface University {
   id: string;
@@ -13,21 +13,12 @@ interface University {
 
 export function LogosStrip() {
   const { t } = useLocale();
-  const [universities, setUniversities] = useState<University[]>([]);
+  const { ref, data: universities } = useLazyFetch<University[]>("/api/v1/universities", { rootMargin: "100px" });
 
-  useEffect(() => {
-    fetch("/api/v1/universities")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) setUniversities(data);
-      })
-      .catch((err) => console.error("Failed to fetch universities:", err));
-  }, []);
-
-  if (universities.length === 0) return null;
+  if (!Array.isArray(universities) || universities.length === 0) return null;
 
   return (
-    <section className="border-y border-border/60 bg-card/40 py-10">
+    <section ref={ref} className="border-y border-border/60 bg-card/40 py-10">
       <div className="mx-auto max-w-6xl px-6">
         <motion.p
           initial={{ opacity: 0 }}

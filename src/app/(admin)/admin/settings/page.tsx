@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload, Settings, Globe, Layers, Plus, Cpu } from "lucide-react";
+import { Save, Loader2, Megaphone, Palette, ToggleRight, Upload, Settings, Globe, Layers, Plus, Cpu, Shield } from "lucide-react";
 import { ExportPanel } from "@/components/admin/ExportPanel";
 import { PersonalAIKeyCard } from "@/components/admin/PersonalAIKeyCard";
 import { ExternalAPIKeysCard } from "@/components/admin/ExternalAPIKeysCard";
@@ -50,7 +50,7 @@ const DEFAULTS: SiteConfig = {
 };
 
 export default function AdminSettingsPage() {
-  const [tab, setTab] = useState<"branding"|"social"|"features"|"export"|"developer"|"ai_agents">("branding");
+  const [tab, setTab] = useState<string>("branding");
   const [config, setConfig] = useState<SiteConfig>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -281,13 +281,14 @@ export default function AdminSettingsPage() {
   const isSuperAdmin = userRole === "SUPER_ADMIN";
   const canManageBranding = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
 
-  const TABS: { id: typeof tab; label: string; icon: typeof Settings }[] = [
+  const TABS: { id: string; label: string; icon: typeof Settings; platformOnly?: boolean }[] = [
     { id: "branding",  label: "Branding",     icon: Palette },
     { id: "social",   label: "Social",        icon: Globe },
     { id: "features", label: "Features",      icon: ToggleRight },
     { id: "export",   label: "Export & Notif", icon: Megaphone },
     { id: "developer",label: "Developer",     icon: Cpu },
     { id: "ai_agents",label: "AI Agents",     icon: Cpu },
+    ...(userRole === "SUPER_ADMIN" ? [{ id: "platform" as const, label: "Platform", icon: Settings, platformOnly: true }] : []),
   ];
 
   const toggles: { key: keyof SiteConfig; label: string; desc: string; superAdminOnly?: boolean }[] = [
@@ -544,6 +545,11 @@ export default function AdminSettingsPage() {
             </div>
         )}
 
+        {/* ── Platform Tab (SUPER_ADMIN only) ── */}
+        {tab === "platform" && (
+          <PlatformSettingsTab />
+        )}
+
         {/* ── Export Tab ── */}
         {tab === "export" && (
            <div className="space-y-6">
@@ -599,8 +605,87 @@ export default function AdminSettingsPage() {
                className="flex h-12 min-w-[160px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 text-sm font-bold text-white shadow-xl shadow-blue-500/30 hover:opacity-90 disabled:opacity-60 transition-all font-display"
              >
                {saving ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Save className="h-4 w-4 text-white" />}
-               {saving ? "Deploying…" : "Save Settings"}
-             </button>
+                {saving ? "Deploying…" : "Save Settings"}
+              </button>
+           </div>
+         </div>
+       </div>
+    </div>
+  );
+}
+
+function PlatformSettingsTab() {
+  const [flags, setFlags] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/v1/admin/platform/settings")
+      .then((r) => r.json())
+      .then((d) => setFlags(d.data?.featureFlags ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function toggleFlag(flag: any) {
+    await fetch("/api/v1/admin/platform/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        section: "featureFlags",
+        data: { key: flag.key, enabled: !flag.enabled, universityId: flag.universityId ?? "" },
+      }),
+    });
+    setFlags((prev) => prev.map((f) => f.id === flag.id ? { ...f, enabled: !f.enabled } : f));
+    toast.success(`Feature "${flag.key}" ${!flag.enabled ? "enabled" : "disabled"}`);
+  }
+
+  if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-white/[0.02] bg-card p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <ToggleRight className="h-5 w-5 text-blue-500" />
+          <p className="font-semibold">Feature Flags</p>
+        </div>
+        <div className="space-y-2">
+          {flags.map((flag) => (
+            <div key={flag.id} className="flex items-center justify-between rounded-lg bg-muted/30 p-3">
+              <div>
+                <p className="text-sm font-medium">{flag.key}</p>
+                {flag.universityId && <p className="text-[10px] text-muted-foreground">University-specific</p>}
+              </div>
+              <button onClick={() => toggleFlag(flag)}
+                className={`relative h-6 w-11 rounded-full transition-colors ${flag.enabled ? "bg-blue-500" : "bg-muted"}`}>
+                <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${flag.enabled ? "translate-x-5" : ""}`} />
+              </button>
+            </div>
+          ))}
+          {flags.length === 0 && <p className="text-sm text-muted-foreground">No feature flags configured</p>}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-white/[0.02] bg-card p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Globe className="h-5 w-5 text-emerald-500" />
+          <p className="font-semibold">System Information</p>
+        </div>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Node Version</p>
+            <p className="font-medium">{typeof process !== "undefined" ? process.version : "—"}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Environment</p>
+            <p className="font-medium">{typeof process !== "undefined" ? (process.env.NODE_ENV ?? "production") : "—"}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Platform API</p>
+            <p className="font-medium">v1</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Database</p>
+            <p className="font-medium">PostgreSQL (Supabase)</p>
           </div>
         </div>
       </div>

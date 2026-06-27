@@ -294,9 +294,11 @@ model LectureVideo {
   startTime         Int?
   endTime           Int?
   isReel            Boolean               @default(false)
+  viewCount         Int                   @default(0)
   lecture           Lecture               @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   comments          LectureVideoComment[]
   likes             LectureVideoLike[]
+  videoViews        VideoViewTracking[]
 
   @@index([lectureId, sortOrder])
 }
@@ -606,6 +608,22 @@ model User {
   blockedBy                BlockedUser[]             @relation("UserBlocked")
   testimonials             Testimonial[]
   sharedQuizAttempts       SharedQuizAttempt[]
+  lastLoginAt              DateTime?
+  lastActivityAt           DateTime?
+  totalSessionSeconds      Int                       @default(0)
+  warningCount             Int                       @default(0)
+  isBanned                 Boolean                   @default(false)
+  bannedAt                 DateTime?
+  banReason                String?
+  warnings                 Warning[]                 @relation("UserWarnings")
+  issuedWarnings           Warning[]                 @relation("IssuedWarnings")
+  revokedWarnings          Warning[]                 @relation("RevokedWarnings")
+  adminActionLogs          AdminActionLog[]
+  securityEvents           SecurityEvent[]
+  securityResolutions      SecurityEvent[]           @relation("SecurityResolution")
+  sessionLogs              UserSessionLog[]
+  pageViews                PageView[]
+  videoViews               VideoViewTracking[]
 }
 
 model TelegramConfig {
@@ -1533,6 +1551,54 @@ enum QuizAttemptState {
   REVIEWED
 }
 
+enum WarningSeverity {
+  MILD
+  MODERATE
+  SEVERE
+  CRITICAL
+}
+
+enum WarningStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  SERVED
+}
+
+enum SecurityEventType {
+  LOGIN_FAILURE
+  LOGIN_SUCCESS_UNUSUAL_LOCATION
+  BRUTE_FORCE_ATTEMPT
+  SPAM_DETECTED
+  SQL_INJECTION_ATTEMPT
+  XSS_ATTEMPT
+  RATE_LIMIT_EXCEEDED
+  SUSPICIOUS_ACTIVITY
+  API_ABUSE
+  INVALID_TOKEN_USAGE
+  UNAUTHORIZED_ACCESS
+  DATA_SCRAPING_ATTEMPT
+  FILE_UPLOAD_ABUSE
+  AI_ABUSE_ATTEMPT
+  ACCOUNT_TAKEOVER_ATTEMPT
+}
+
+enum SecurityEventSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SecurityEventStatus {
+  NEW
+  INVESTIGATING
+  RESOLVED
+  FALSE_POSITIVE
+  IGNORED
+}
+
 model Tenant {
   id            String               @id @default(uuid())
   key           String               @unique
@@ -2389,4 +2455,145 @@ model Testimonial {
 
   @@index([status])
   @@index([userId])
+}
+
+model Warning {
+  id           String          @id @default(uuid())
+  userId       String
+  issuedById   String
+  severity     WarningSeverity @default(MODERATE)
+  status       WarningStatus   @default(ACTIVE)
+  reason       String
+  description  String?
+  notes        String?
+  expiresAt    DateTime?
+  revokedAt    DateTime?
+  revokedById  String?
+  revokeReason String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  user       User  @relation("UserWarnings", fields: [userId], references: [id], onDelete: Cascade)
+  issuedBy   User  @relation("IssuedWarnings", fields: [issuedById], references: [id])
+  revokedBy  User? @relation("RevokedWarnings", fields: [revokedById], references: [id])
+
+  @@index([userId, status])
+  @@index([issuedById])
+  @@index([createdAt])
+  @@index([severity])
+}
+
+model AdminActionLog {
+  id            String   @id @default(uuid())
+  adminId       String
+  action        String
+  entityType    String
+  entityId      String?
+  previousState Json?
+  newState      Json?
+  description   String?
+  ipAddress     String?
+  userAgent     String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model SecurityEvent {
+  id             String               @id @default(uuid())
+  type           SecurityEventType
+  severity       SecurityEventSeverity
+  status         SecurityEventStatus  @default(NEW)
+  userId         String?
+  ipAddress      String?
+  userAgent      String?
+  endpoint       String?
+  requestMethod  String?
+  requestPayload Json?
+  headers        Json?
+  location       Json?
+  description    String?
+  resolvedById   String?
+  resolvedAt     DateTime?
+  resolution     String?
+  createdAt      DateTime             @default(now())
+
+  user       User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  resolvedBy User? @relation("SecurityResolution", fields: [resolvedById], references: [id])
+
+  @@index([type, status])
+  @@index([severity])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([ipAddress])
+  @@index([status, severity, createdAt])
+}
+
+model UserSessionLog {
+  id              String    @id @default(uuid())
+  userId          String
+  startedAt       DateTime  @default(now())
+  endedAt         DateTime?
+  lastHeartbeatAt DateTime?
+  durationSeconds Int?
+  ipAddress       String?
+  userAgent       String?
+  deviceType      String?
+  platform        String?
+  country         String?
+  city            String?
+  isActive        Boolean   @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+  @@index([isActive])
+  @@index([startedAt])
+  @@index([deviceType])
+}
+
+model PageView {
+  id         String   @id @default(uuid())
+  userId     String?
+  path       String
+  title      String?
+  referrer   String?
+  durationMs Int?
+  deviceType String?
+  platform   String?
+  ipAddress  String?
+  sessionId  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([path, createdAt])
+  @@index([createdAt])
+  @@index([sessionId])
+}
+
+model VideoViewTracking {
+  id                  String   @id @default(uuid())
+  videoId             String
+  userId              String?
+  lectureId           String?
+  watchDurationSeconds Int?
+  watchPercentage     Float?
+  completed           Boolean  @default(false)
+  ipAddress           String?
+  createdAt           DateTime @default(now())
+
+  lectureVideo LectureVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([videoId, createdAt])
+  @@index([userId])
+  @@index([lectureId])
 }
